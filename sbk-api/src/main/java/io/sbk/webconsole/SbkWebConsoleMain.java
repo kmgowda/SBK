@@ -7,25 +7,25 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.dashboard;
+package io.sbk.webconsole;
 
 import io.perl.config.PerlConfig;
 
 import java.io.IOException;
 
 /**
- * Standalone entry point for the reusable local SBK dashboard server.
+ * Standalone entry point for the reusable SBK Local Web Console server.
  */
-public abstract class SbkDashboardServerMain {
+public abstract class SbkWebConsoleMain {
 
     /**
-     * Creates a dashboard server entry point.
+     * Creates a Local Web Console server entry point.
      */
-    public SbkDashboardServerMain() {
+    public SbkWebConsoleMain() {
     }
 
     /**
-     * Starts the dashboard server and waits until the process is terminated.
+     * Starts the Local Web Console server and waits until the process is terminated.
      *
      * @param args {@code -host}, {@code -port}, and {@code -minutes} options
      * @throws IOException if the server cannot start
@@ -38,23 +38,23 @@ public abstract class SbkDashboardServerMain {
         int minutes = 180;
         for (int index = 0; index < args.length; index += 2) {
             if (index + 1 >= args.length) {
-                throw new IllegalArgumentException("Missing dashboard option value for " + args[index]);
+                throw new IllegalArgumentException("Missing Local Web Console option value for " + args[index]);
             }
             switch (args[index]) {
                 case "-host" -> host = args[index + 1];
                 case "-port" -> port = Integer.parseInt(args[index + 1]);
                 case "-minutes" -> minutes = Integer.parseInt(args[index + 1]);
-                default -> throw new IllegalArgumentException("Unknown dashboard option " + args[index]);
+                default -> throw new IllegalArgumentException("Unknown Local Web Console option " + args[index]);
             }
         }
-        final DashboardServer dashboardServer = new DashboardServer(host, port, retentionSnapshots(minutes));
-        Runtime.getRuntime().addShutdownHook(new Thread(dashboardServer::close));
-        dashboardServer.start();
-        dashboardServer.awaitTermination();
+        final WebConsoleServer webConsoleServer = new WebConsoleServer(host, port, retentionSnapshots(minutes));
+        Runtime.getRuntime().addShutdownHook(new Thread(webConsoleServer::close));
+        webConsoleServer.start();
+        webConsoleServer.awaitTermination();
     }
 
     /**
-     * Converts a dashboard history duration to the bounded number of periodic snapshots stored in memory.
+     * Converts a web console history duration to the bounded number of periodic snapshots stored in memory.
      *
      * @param minutes history duration in minutes
      * @return snapshot capacity at SBK's default reporting interval
@@ -62,12 +62,12 @@ public abstract class SbkDashboardServerMain {
      */
     static int retentionSnapshots(int minutes) {
         if (minutes < 1) {
-            throw new IllegalArgumentException("Dashboard history minutes must be greater than zero");
+            throw new IllegalArgumentException("Local Web Console history minutes must be greater than zero");
         }
         final long retention = Math.ceilDiv(Math.multiplyExact((long) minutes, 60L),
                 PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS);
         if (retention > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("Dashboard history minutes are too large: " + minutes);
+            throw new IllegalArgumentException("Local Web Console history minutes are too large: " + minutes);
         }
         return (int) retention;
     }

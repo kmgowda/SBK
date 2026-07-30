@@ -7,7 +7,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.dashboard;
+package io.sbk.webconsole;
 
 import io.sbk.action.Action;
 import io.sbk.logger.impl.WebLogger;
@@ -32,50 +32,50 @@ import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Integration tests for the local dashboard HTTP API and reusable client connection.
+ * Integration tests for the Local Web Console HTTP API and reusable client connection.
  */
-final class DashboardServerTest {
+final class WebConsoleServerTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
 
     @Test
     void reusesRunningServerAndRetainsOnlyConfiguredHistory() throws Exception {
-        try (DashboardServer server = new DashboardServer("127.0.0.1", 0, 2)) {
+        try (WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2)) {
             server.start();
             final int port = server.getAddress().getPort();
-            final DashboardConfig config = config(port);
-            final DashboardRun firstRun = run("run-one");
-            final DashboardRun secondRun = run("run-two");
+            final WebConsoleConfig config = config(port);
+            final WebConsoleRun firstRun = run("run-one");
+            final WebConsoleRun secondRun = run("run-two");
             final URI baseUri = URI.create("http://127.0.0.1:" + port);
 
-            try (DashboardClient first = DashboardClient.connect(config, firstRun)) {
+            try (WebConsoleClient first = WebConsoleClient.connect(config, firstRun)) {
                 first.publish(snapshot("run-one", 1));
                 waitForHistory(baseUri, "run-one", 1);
                 first.publish(snapshot("run-one", 2));
                 waitForHistory(baseUri, "run-one", 2);
                 first.publish(snapshot("run-one", 3));
             }
-            try (DashboardClient second = DashboardClient.connect(config, secondRun)) {
+            try (WebConsoleClient second = WebConsoleClient.connect(config, secondRun)) {
                 second.publish(snapshot("run-two", 4));
             }
 
-            final DashboardSnapshot[] firstHistory = waitForHistory(baseUri, "run-one", 2);
-            final DashboardSnapshot[] secondHistory = waitForHistory(baseUri, "run-two", 1);
+            final WebConsoleSnapshot[] firstHistory = waitForHistory(baseUri, "run-one", 2);
+            final WebConsoleSnapshot[] secondHistory = waitForHistory(baseUri, "run-two", 1);
             assertEquals(2, firstHistory.length);
             assertEquals(1, secondHistory.length);
             assertEquals(3, firstHistory[1].performance().records());
-            assertTrue(get(baseUri.resolve("/api/v1/health")).body().contains("sbk-dashboard"));
-            assertTrue(get(baseUri.resolve("/")).body().contains("SBK Live Dashboard"));
+            assertTrue(get(baseUri.resolve("/api/v1/health")).body().contains("sbk-web-console"));
+            assertTrue(get(baseUri.resolve("/")).body().contains("SBK Local Web Console"));
         }
     }
 
     @Test
     void connectsOverPlainHttpWhenServerListensOnAllInterfaces() throws Exception {
-        try (DashboardServer server = new DashboardServer("0.0.0.0", 0, 2)) {
+        try (WebConsoleServer server = new WebConsoleServer("0.0.0.0", 0, 2)) {
             server.start();
-            final DashboardConfig config = config(server.getAddress().getPort());
+            final WebConsoleConfig config = config(server.getAddress().getPort());
             config.host = "0.0.0.0";
-            try (DashboardClient client = DashboardClient.connect(config, run("plain-http-run"))) {
+            try (WebConsoleClient client = WebConsoleClient.connect(config, run("plain-http-run"))) {
                 assertEquals("http", client.getRunUri().getScheme());
                 assertEquals("127.0.0.1", client.getRunUri().getHost());
                 assertTrue(client.getRunLinks().stream().anyMatch(link -> "Hostname".equals(link.label())));
@@ -87,7 +87,7 @@ final class DashboardServerTest {
 
     @Test
     void createsCopyPasteLinksForHostnameAndHostAddresses() throws Exception {
-        final var links = DashboardClient.dashboardLinks("0.0.0.0", 9720, "test-run", "benchmark-host",
+        final var links = WebConsoleClient.webConsoleLinks("0.0.0.0", 9720, "test-run", "benchmark-host",
                 java.util.List.of(InetAddress.getByName("127.0.0.1"), InetAddress.getByName("10.2.3.4"),
                         InetAddress.getByName("8.8.8.8")));
 
@@ -102,7 +102,7 @@ final class DashboardServerTest {
 
     @Test
     void doesNotAdvertiseRemoteLinksForLoopbackBinding() throws Exception {
-        final var links = DashboardClient.dashboardLinks("127.0.0.1", 9720, "test-run", "benchmark-host",
+        final var links = WebConsoleClient.webConsoleLinks("127.0.0.1", 9720, "test-run", "benchmark-host",
                 java.util.List.of(InetAddress.getByName("10.2.3.4")));
 
         assertEquals(1, links.size());
@@ -112,33 +112,33 @@ final class DashboardServerTest {
 
     @Test
     void rejectsASecondActiveBenchmarkWithOwnershipDetails() throws Exception {
-        try (DashboardServer server = new DashboardServer("127.0.0.1", 0, 2)) {
+        try (WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2)) {
             server.start();
-            final DashboardConfig config = config(server.getAddress().getPort());
-            try (DashboardClient ignored = DashboardClient.connect(config, run("active-run"))) {
-                final DashboardClient.DashboardBusyException exception = assertThrows(
-                        DashboardClient.DashboardBusyException.class,
-                        () -> DashboardClient.connect(config, run("competing-run")));
-                assertTrue(exception.getMessage().contains("dashboard port " + server.getAddress().getPort()));
+            final WebConsoleConfig config = config(server.getAddress().getPort());
+            try (WebConsoleClient ignored = WebConsoleClient.connect(config, run("active-run"))) {
+                final WebConsoleClient.WebConsoleBusyException exception = assertThrows(
+                        WebConsoleClient.WebConsoleBusyException.class,
+                        () -> WebConsoleClient.connect(config, run("competing-run")));
+                assertTrue(exception.getMessage().contains("Web Console port " + server.getAddress().getPort()));
                 assertTrue(exception.getMessage().contains("already serving active SBK run active-run"));
                 assertTrue(exception.getMessage().contains("only one SBK, SBM, or SBK-GEM"));
                 assertTrue(exception.getMessage().contains("-dashboardport <different-port>"));
-                assertTrue(exception.getMessage().contains("SbkDashboardServerMain"));
+                assertTrue(exception.getMessage().contains("SbkWebConsoleMain"));
             }
         }
     }
 
     @Test
-    void allowsActiveBenchmarksOnDifferentDashboardPorts() throws Exception {
-        try (DashboardServer firstServer = new DashboardServer("127.0.0.1", 0, 2);
-             DashboardServer secondServer = new DashboardServer("127.0.0.1", 0, 2)) {
+    void allowsActiveBenchmarksOnDifferentWebConsolePorts() throws Exception {
+        try (WebConsoleServer firstServer = new WebConsoleServer("127.0.0.1", 0, 2);
+             WebConsoleServer secondServer = new WebConsoleServer("127.0.0.1", 0, 2)) {
             firstServer.start();
             secondServer.start();
             final URI firstBaseUri = URI.create("http://127.0.0.1:" + firstServer.getAddress().getPort());
             final URI secondBaseUri = URI.create("http://127.0.0.1:" + secondServer.getAddress().getPort());
-            try (DashboardClient first = DashboardClient.connect(config(firstServer.getAddress().getPort()),
+            try (WebConsoleClient first = WebConsoleClient.connect(config(firstServer.getAddress().getPort()),
                     run("first-port-run"));
-                 DashboardClient second = DashboardClient.connect(config(secondServer.getAddress().getPort()),
+                 WebConsoleClient second = WebConsoleClient.connect(config(secondServer.getAddress().getPort()),
                          run("second-port-run"))) {
                 first.publish(snapshot("first-port-run", 1));
                 second.publish(snapshot("second-port-run", 2));
@@ -151,11 +151,11 @@ final class DashboardServerTest {
     @Test
     void retainsCompletedLogsForBrowserThenStopsAfterBrowserDisconnects() throws Exception {
         final Duration idleTimeout = Duration.ofMillis(500);
-        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
+        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
         final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
-        final DashboardClient client = DashboardClient.connect(config(server.getAddress().getPort()),
+        final WebConsoleClient client = WebConsoleClient.connect(config(server.getAddress().getPort()),
                 run("retained-run"));
         post(baseUri.resolve("/api/v1/browser/connect"), "{\"browserId\":\"test-browser\"}");
         final HttpResponse<java.io.InputStream> events = HttpClient.newHttpClient().send(
@@ -178,7 +178,7 @@ final class DashboardServerTest {
     @Test
     void browserConnectingDuringIdleGraceCancelsOriginalShutdown() throws Exception {
         final Duration idleTimeout = Duration.ofSeconds(2);
-        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
+        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
         final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
@@ -202,17 +202,17 @@ final class DashboardServerTest {
     @Test
     void benchmarkConnectingDuringIdleGraceCancelsOriginalShutdown() throws Exception {
         final Duration idleTimeout = Duration.ofSeconds(2);
-        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
+        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
         final int port = server.getAddress().getPort();
         final URI baseUri = URI.create("http://127.0.0.1:" + port);
-        try (DashboardClient first = DashboardClient.connect(config(port), run("first-grace-run"))) {
+        try (WebConsoleClient first = WebConsoleClient.connect(config(port), run("first-grace-run"))) {
             first.publish(snapshot("first-grace-run", 1));
         }
 
         Thread.sleep(1000);
-        try (DashboardClient second = DashboardClient.connect(config(port), run("second-grace-run"))) {
+        try (WebConsoleClient second = WebConsoleClient.connect(config(port), run("second-grace-run"))) {
             Thread.sleep(1500);
             assertEquals(200, get(baseUri.resolve("/api/v1/health")).statusCode());
             second.publish(snapshot("second-grace-run", 2));
@@ -225,10 +225,10 @@ final class DashboardServerTest {
 
     @Test
     void closesPromptlyWhileBrowserEventStreamIsConnected() throws Exception {
-        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2);
+        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2);
         server.start();
         final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
-        try (DashboardClient client = DashboardClient.connect(config(server.getAddress().getPort()),
+        try (WebConsoleClient client = WebConsoleClient.connect(config(server.getAddress().getPort()),
                 run("stream-run"))) {
             final HttpResponse<java.io.InputStream> events = HttpClient.newHttpClient().send(
                     HttpRequest.newBuilder(baseUri.resolve("/api/v1/runs/stream-run/events")).GET().build(),
@@ -240,9 +240,9 @@ final class DashboardServerTest {
     }
 
     @Test
-    void abandonedRunWithoutBrowserStopsDashboard() throws Exception {
+    void abandonedRunWithoutBrowserStopsWebConsole() throws Exception {
         final Duration idleTimeout = Duration.ofMillis(300);
-        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
+        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
         final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
@@ -256,7 +256,7 @@ final class DashboardServerTest {
     @Test
     void abandonedRunRemainsForAttachedBrowserAndReleasesOwnership() throws Exception {
         final Duration idleTimeout = Duration.ofMillis(300);
-        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
+        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
         final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
@@ -281,12 +281,12 @@ final class DashboardServerTest {
     @Test
     void clientHeartbeatRenewsActiveRunLease() throws Exception {
         final Duration idleTimeout = Duration.ofMillis(300);
-        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
+        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
         final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
 
-        try (DashboardClient ignored = DashboardClient.connect(config(server.getAddress().getPort()),
+        try (WebConsoleClient ignored = WebConsoleClient.connect(config(server.getAddress().getPort()),
                 run("heartbeat-run"), Duration.ofMillis(75))) {
             Thread.sleep(800);
             assertEquals(200, get(baseUri.resolve("/api/v1/health")).statusCode());
@@ -299,7 +299,7 @@ final class DashboardServerTest {
     @Test
     void snapshotsRenewActiveRunLease() throws Exception {
         final Duration idleTimeout = Duration.ofMillis(300);
-        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2, idleTimeout,
+        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
         final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
@@ -318,8 +318,8 @@ final class DashboardServerTest {
     }
 
     @Test
-    void dashboardWithoutBenchmarkOrBrowserStopsAfterIdleTimeout() throws Exception {
-        final DashboardServer server = new DashboardServer("127.0.0.1", 0, 2,
+    void webConsoleWithoutBenchmarkOrBrowserStopsAfterIdleTimeout() throws Exception {
+        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2,
                 Duration.ofMillis(200), Duration.ofMillis(20));
         server.start();
 
@@ -327,19 +327,19 @@ final class DashboardServerTest {
     }
 
     @Test
-    void convertsDashboardMinutesToFiveSecondSnapshots() {
-        assertEquals(2160, SbkDashboardServerMain.retentionSnapshots(180));
-        assertEquals(12, SbkDashboardServerMain.retentionSnapshots(1));
-        assertThrows(IllegalArgumentException.class, () -> SbkDashboardServerMain.retentionSnapshots(0));
+    void convertsWebConsoleMinutesToFiveSecondSnapshots() {
+        assertEquals(2160, SbkWebConsoleMain.retentionSnapshots(180));
+        assertEquals(12, SbkWebConsoleMain.retentionSnapshots(1));
+        assertThrows(IllegalArgumentException.class, () -> SbkWebConsoleMain.retentionSnapshots(0));
     }
 
     @Test
     void webLoggerPublishesOnlyRegularIntervalResults() throws Exception {
-        try (DashboardServer server = new DashboardServer("127.0.0.1", 0, 4)) {
+        try (WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 4)) {
             server.start();
             final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
             final WebLogger logger = new WebLogger();
-            final SbkParameters parameters = new SbkParameters("dashboard-test");
+            final SbkParameters parameters = new SbkParameters("web-console-test");
             logger.addArgs(parameters);
             parameters.parseArgs(new String[]{"-writers", "1", "-size", "100",
                     "-dashboardhost", "127.0.0.1", "-dashboardport",
@@ -360,20 +360,20 @@ final class DashboardServerTest {
 
             final String historyJson =
                     get(baseUri.resolve("/api/v1/runs/" + runId + "/history")).body();
-            final DashboardSnapshot[] history =
-                    MAPPER.readValue(historyJson, DashboardSnapshot[].class);
+            final WebConsoleSnapshot[] history =
+                    MAPPER.readValue(historyJson, WebConsoleSnapshot[].class);
             assertEquals(1, history.length);
             assertEquals(10, history[0].performance().records());
             assertFalse(historyJson.contains("\"total\""));
         }
     }
 
-    private static DashboardSnapshot[] waitForHistory(URI baseUri, String runId, int expected) throws Exception {
+    private static WebConsoleSnapshot[] waitForHistory(URI baseUri, String runId, int expected) throws Exception {
         final long deadline = System.nanoTime() + Duration.ofSeconds(3).toNanos();
-        DashboardSnapshot[] snapshots = new DashboardSnapshot[0];
+        WebConsoleSnapshot[] snapshots = new WebConsoleSnapshot[0];
         while (snapshots.length < expected && System.nanoTime() < deadline) {
             snapshots = MAPPER.readValue(get(baseUri.resolve("/api/v1/runs/" + runId + "/history")).body(),
-                    DashboardSnapshot[].class);
+                    WebConsoleSnapshot[].class);
             if (snapshots.length < expected) {
                 Thread.sleep(25);
             }
@@ -393,8 +393,8 @@ final class DashboardServerTest {
                 HttpResponse.BodyHandlers.ofString());
     }
 
-    private static DashboardConfig config(int port) {
-        final DashboardConfig config = new DashboardConfig();
+    private static WebConsoleConfig config(int port) {
+        final WebConsoleConfig config = new WebConsoleConfig();
         config.host = "127.0.0.1";
         config.port = port;
         config.start = false;
@@ -404,17 +404,17 @@ final class DashboardServerTest {
         return config;
     }
 
-    private static DashboardRun run(String runId) {
-        return new DashboardRun(runId, "test", "SBK", "File", "Writing", "ns", "test", "25", 1);
+    private static WebConsoleRun run(String runId) {
+        return new WebConsoleRun(runId, "test", "SBK", "File", "Writing", "ns", "test", "25", 1);
     }
 
-    private static DashboardSnapshot snapshot(String runId, long records) {
-        return new DashboardSnapshot(runId, records,
-                new DashboardSnapshot.WorkerMetrics(1, 1, 0, 0, 0, 0),
-                new DashboardSnapshot.RequestMetrics(100, records, 1, 1, 0, 0, 0, 0,
+    private static WebConsoleSnapshot snapshot(String runId, long records) {
+        return new WebConsoleSnapshot(runId, records,
+                new WebConsoleSnapshot.WorkerMetrics(1, 1, 0, 0, 0, 0),
+                new WebConsoleSnapshot.RequestMetrics(100, records, 1, 1, 0, 0, 0, 0,
                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                new DashboardSnapshot.PerformanceMetrics(records, records * 100, records, records, 1),
-                new DashboardSnapshot.LatencyMetrics(10, 1, 20, 0, 0, 0, 0, 0,
+                new WebConsoleSnapshot.PerformanceMetrics(records, records * 100, records, records, 1),
+                new WebConsoleSnapshot.LatencyMetrics(10, 1, 20, 0, 0, 0, 0, 0,
                         new double[]{50, 99}, new long[]{10, 20}, new long[]{1, 1}));
     }
 

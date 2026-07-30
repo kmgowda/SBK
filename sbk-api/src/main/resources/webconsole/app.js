@@ -15,8 +15,8 @@ const elements = Object.fromEntries([...document.querySelectorAll('[id]')].map(i
 const generatedBrowserId = globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function'
     ? globalThis.crypto.randomUUID()
     : `sbk-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-const browserId = sessionStorage.getItem('sbkDashboardBrowserId') || generatedBrowserId;
-sessionStorage.setItem('sbkDashboardBrowserId', browserId);
+const browserId = sessionStorage.getItem('sbkWebConsoleBrowserId') || generatedBrowserId;
+sessionStorage.setItem('sbkWebConsoleBrowserId', browserId);
 
 function updateBrowserLease() {
     fetch('/api/v1/browser/connect', {
@@ -193,7 +193,7 @@ async function selectRun(runView) {
     await refreshHistory(runId);
     state.historyTimer = setInterval(() => {
         refreshHistory(runId).catch(error => {
-            elements.subtitle.textContent = `Dashboard refresh error: ${error.message}`;
+            elements.subtitle.textContent = `Web Console refresh error: ${error.message}`;
         });
     }, 2000);
     state.events = new EventSource(`/api/v1/runs/${runId}/events`);
@@ -229,4 +229,4 @@ async function loadRuns() {
 }
 
 window.addEventListener('resize', drawAll);
-loadRuns().catch(error => { elements.subtitle.textContent = `Dashboard error: ${error.message}`; });
+loadRuns().catch(error => { elements.subtitle.textContent = `Web Console error: ${error.message}`; });

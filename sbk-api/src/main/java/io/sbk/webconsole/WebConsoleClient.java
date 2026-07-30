@@ -7,7 +7,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.dashboard;
+package io.sbk.webconsole;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import tools.jackson.databind.ObjectMapper;
@@ -39,9 +39,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Non-blocking dashboard publisher used by SBK loggers.
+ * Non-blocking Local Web Console publisher used by SBK loggers.
  */
-public final class DashboardClient implements AutoCloseable {
+public final class WebConsoleClient implements AutoCloseable {
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(1);
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(2);
     private static final Duration START_TIMEOUT = Duration.ofSeconds(10);
@@ -51,13 +51,13 @@ public final class DashboardClient implements AutoCloseable {
     private final HttpClient httpClient;
     private final URI baseUri;
     private final String runId;
-    private final ArrayBlockingQueue<DashboardSnapshot> pending;
+    private final ArrayBlockingQueue<WebConsoleSnapshot> pending;
     private final AtomicBoolean closing;
     private final Thread publisherThread;
     private final Duration leaseHeartbeatInterval;
-    private final List<DashboardLink> runLinks;
+    private final List<WebConsoleLink> runLinks;
 
-    private DashboardClient(HttpClient httpClient, URI baseUri, DashboardConfig config, DashboardRun run,
+    private WebConsoleClient(HttpClient httpClient, URI baseUri, WebConsoleConfig config, WebConsoleRun run,
             Duration leaseHeartbeatInterval) throws IOException, InterruptedException {
         this.httpClient = httpClient;
         this.baseUri = baseUri;
@@ -65,44 +65,45 @@ public final class DashboardClient implements AutoCloseable {
         this.pending = new ArrayBlockingQueue<>(1);
         this.closing = new AtomicBoolean(false);
         this.leaseHeartbeatInterval = leaseHeartbeatInterval;
-        this.runLinks = dashboardLinks(config.host, config.port, runId, localHostname(), localAddresses());
+        this.runLinks = webConsoleLinks(config.host, config.port, runId, localHostname(), localAddresses());
         postJson("/api/v1/runs", run, 201);
-        this.publisherThread = Thread.ofVirtual().name("sbk-dashboard-publisher-" + runId).start(this::publishLoop);
+        this.publisherThread = Thread.ofVirtual().name("sbk-web-console-publisher-" + runId)
+                .start(this::publishLoop);
     }
 
     /**
-     * Connects to a compatible dashboard server, starting one when configured and necessary.
+     * Connects to a compatible Local Web Console, starting one when configured and necessary.
      *
-     * @param config dashboard configuration
+     * @param config web console configuration
      * @param run    benchmark run metadata
      * @return connected asynchronous client
-     * @throws IOException if no compatible dashboard can be reached
+     * @throws IOException if no compatible web console can be reached
      * @throws InterruptedException if server startup is interrupted
      */
-    public static DashboardClient connect(DashboardConfig config, DashboardRun run)
+    public static WebConsoleClient connect(WebConsoleConfig config, WebConsoleRun run)
             throws IOException, InterruptedException {
         return connect(config, run, LEASE_HEARTBEAT_INTERVAL);
     }
 
-    static DashboardClient connect(DashboardConfig config, DashboardRun run, Duration leaseHeartbeatInterval)
+    static WebConsoleClient connect(WebConsoleConfig config, WebConsoleRun run, Duration leaseHeartbeatInterval)
             throws IOException, InterruptedException {
         if (leaseHeartbeatInterval.isZero() || leaseHeartbeatInterval.isNegative()) {
-            throw new IllegalArgumentException("Dashboard lease heartbeat interval must be greater than zero");
+            throw new IllegalArgumentException("Local Web Console lease heartbeat interval must be greater than zero");
         }
         final URI baseUri = URI.create("http://" + connectionHost(config.host) + ":" + config.port);
         final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).build();
         final Health health = health(httpClient, baseUri);
         if (health == Health.INCOMPATIBLE) {
-            throw new IOException("Port " + config.port + " is not a compatible SBK dashboard server");
+            throw new IOException("Port " + config.port + " is not a compatible SBK Local Web Console");
         }
         if (health == Health.UNAVAILABLE) {
             if (!config.start) {
-                throw new IOException("SBK dashboard is unavailable and automatic startup is disabled");
+                throw new IOException("SBK Local Web Console is unavailable and automatic startup is disabled");
             }
             startServer(config);
             waitUntilHealthy(httpClient, baseUri);
         }
-        final DashboardClient client = new DashboardClient(httpClient, baseUri, config, run,
+        final WebConsoleClient client = new WebConsoleClient(httpClient, baseUri, config, run,
                 leaseHeartbeatInterval);
         if (config.open) {
             client.openBrowser();
@@ -112,10 +113,10 @@ public final class DashboardClient implements AutoCloseable {
 
     /**
      * Selects a reachable local address when the server is configured to listen on every network interface.
-     * Wildcard addresses are valid bind addresses but are not suitable dashboard destinations for HTTP clients.
+     * Wildcard addresses are valid bind addresses but are not suitable web console destinations for HTTP clients.
      *
-     * @param host configured dashboard host or bind address
-     * @return host used by the local dashboard publisher and browser URL
+     * @param host configured web console host or bind address
+     * @return host used by the Local Web Console publisher and browser URL
      */
     static String connectionHost(String host) {
         return "0.0.0.0".equals(host) ? "127.0.0.1" : host;
@@ -124,22 +125,22 @@ public final class DashboardClient implements AutoCloseable {
     /**
      * Returns the browser URL for this benchmark run.
      *
-     * @return dashboard URL
+     * @return Local Web Console URL
      */
     public URI getRunUri() {
         return URI.create(baseUri + "/?run=" + runId);
     }
 
     /**
-     * Returns copy-paste dashboard links reachable through the configured bind address.
+     * Returns copy-paste Local Web Console links reachable through the configured bind address.
      *
      * @return local link followed by hostname and available host-address links
      */
-    public List<DashboardLink> getRunLinks() {
+    public List<WebConsoleLink> getRunLinks() {
         return new ArrayList<>(runLinks);
     }
 
-    static List<DashboardLink> dashboardLinks(String bindHost, int port, String runId, String hostname,
+    static List<WebConsoleLink> webConsoleLinks(String bindHost, int port, String runId, String hostname,
             List<InetAddress> addresses) {
         final boolean wildcard = "0.0.0.0".equals(bindHost);
         final Map<String, String> hosts = new LinkedHashMap<>();
@@ -157,8 +158,8 @@ public final class DashboardClient implements AutoCloseable {
                     .forEach(address -> hosts.putIfAbsent(address.getHostAddress(),
                             address.isSiteLocalAddress() ? "Private IP" : "Public IP"));
         }
-        final List<DashboardLink> links = new ArrayList<>(hosts.size());
-        hosts.forEach((host, label) -> links.add(new DashboardLink(label, runUri(host, port, runId))));
+        final List<WebConsoleLink> links = new ArrayList<>(hosts.size());
+        hosts.forEach((host, label) -> links.add(new WebConsoleLink(label, runUri(host, port, runId))));
         return List.copyOf(links);
     }
 
@@ -168,7 +169,7 @@ public final class DashboardClient implements AutoCloseable {
      *
      * @param snapshot latest benchmark summary
      */
-    public void publish(DashboardSnapshot snapshot) {
+    public void publish(WebConsoleSnapshot snapshot) {
         if (closing.get() || pending.offer(snapshot)) {
             return;
         }
@@ -187,7 +188,7 @@ public final class DashboardClient implements AutoCloseable {
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         } catch (IOException ex) {
-            Printer.log.warn("SBK dashboard completion notification failed: {}",
+            Printer.log.warn("SBK Local Web Console completion notification failed: {}",
                     Objects.toString(ex.getMessage(), ex.getClass().getSimpleName()));
         }
     }
@@ -198,7 +199,7 @@ public final class DashboardClient implements AutoCloseable {
             try {
                 final long heartbeatWait = Math.max(1,
                         TimeUnit.NANOSECONDS.toMillis(nextHeartbeat - System.nanoTime()));
-                final DashboardSnapshot snapshot = pending.poll(Math.min(250, heartbeatWait), TimeUnit.MILLISECONDS);
+                final WebConsoleSnapshot snapshot = pending.poll(Math.min(250, heartbeatWait), TimeUnit.MILLISECONDS);
                 if (snapshot != null) {
                     postJson("/api/v1/runs/" + runId + "/snapshots", snapshot, 204);
                     nextHeartbeat = System.nanoTime() + leaseHeartbeatInterval.toNanos();
@@ -210,7 +211,7 @@ public final class DashboardClient implements AutoCloseable {
                 Thread.currentThread().interrupt();
                 return;
             } catch (IOException ex) {
-                Printer.log.warn("SBK dashboard publication failed: {}",
+                Printer.log.warn("SBK Local Web Console publication failed: {}",
                         Objects.toString(ex.getMessage(), ex.getClass().getSimpleName()));
                 nextHeartbeat = System.nanoTime() + leaseHeartbeatInterval.toNanos();
             }
@@ -225,10 +226,11 @@ public final class DashboardClient implements AutoCloseable {
                 .build();
         final HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 409) {
-            throw new DashboardBusyException(response.body());
+            throw new WebConsoleBusyException(response.body());
         }
         if (response.statusCode() != expectedStatus) {
-            throw new IOException("Dashboard returned HTTP " + response.statusCode() + ": " + response.body());
+            throw new IOException("Local Web Console returned HTTP " + response.statusCode() + ": "
+                    + response.body());
         }
     }
 
@@ -241,7 +243,7 @@ public final class DashboardClient implements AutoCloseable {
             try {
                 Desktop.getDesktop().browse(getRunUri());
             } catch (IOException | UnsupportedOperationException ex) {
-                Printer.log.info("Open the SBK dashboard at {}", getRunUri());
+                Printer.log.info("Open the SBK Local Web Console at {}", getRunUri());
             }
         });
     }
@@ -255,8 +257,8 @@ public final class DashboardClient implements AutoCloseable {
                 return Health.INCOMPATIBLE;
             }
             final Map<?, ?> values = MAPPER.readValue(response.body(), Map.class);
-            return "sbk-dashboard".equals(values.get("service"))
-                    && Objects.equals(DashboardServer.API_VERSION, values.get("apiVersion"))
+            return "sbk-web-console".equals(values.get("service"))
+                    && Objects.equals(WebConsoleServer.API_VERSION, values.get("apiVersion"))
                     ? Health.AVAILABLE : Health.INCOMPATIBLE;
         } catch (IOException ex) {
             return Health.UNAVAILABLE;
@@ -274,21 +276,22 @@ public final class DashboardClient implements AutoCloseable {
                 return;
             }
             if (health == Health.INCOMPATIBLE) {
-                throw new IOException("Another application is using the configured dashboard port");
+                throw new IOException("Another application is using the configured Local Web Console port");
             }
             Thread.sleep(100);
         }
-        throw new IOException("SBK dashboard did not become ready within " + START_TIMEOUT.toSeconds() + " seconds");
+        throw new IOException("SBK Local Web Console did not become ready within "
+                + START_TIMEOUT.toSeconds() + " seconds");
     }
 
-    private static void startServer(DashboardConfig config) throws IOException {
+    private static void startServer(WebConsoleConfig config) throws IOException {
         final String javaExecutable = resolveJavaExecutable();
         final List<String> command = new ArrayList<>();
         command.add(javaExecutable);
         command.addAll(runtimeJvmArgs());
         command.add("-cp");
         command.add(System.getProperty("java.class.path"));
-        command.add(SbkDashboardServerMain.class.getName());
+        command.add(SbkWebConsoleMain.class.getName());
         command.add("-host");
         command.add(config.host);
         command.add("-port");
@@ -357,7 +360,7 @@ public final class DashboardClient implements AutoCloseable {
         try {
             return new URI("http", null, host, port, "/", "run=" + runId, null);
         } catch (URISyntaxException ex) {
-            throw new IllegalArgumentException("Invalid dashboard address: " + host, ex);
+            throw new IllegalArgumentException("Invalid Local Web Console address: " + host, ex);
         }
     }
 
@@ -383,22 +386,22 @@ public final class DashboardClient implements AutoCloseable {
     }
 
     /**
-     * A labeled, copy-paste URL for one dashboard network address.
+     * A labeled, copy-paste URL for one Local Web Console network address.
      *
      * @param label address type, such as hostname or public IP
-     * @param uri   complete dashboard run URL
+     * @param uri   complete Local Web Console run URL
      */
-    public record DashboardLink(String label, URI uri) {
+    public record WebConsoleLink(String label, URI uri) {
     }
 
-    /** Indicates that another benchmark owns the dashboard's single active-run lease. */
-    public static final class DashboardBusyException extends IOException {
+    /** Indicates that another benchmark owns the Local Web Console's single active-run lease. */
+    public static final class WebConsoleBusyException extends IOException {
         /**
-         * Creates a dashboard ownership exception.
+         * Creates a Local Web Console ownership exception.
          *
-         * @param message ownership conflict details returned by the dashboard server
+         * @param message ownership conflict details returned by the web console server
          */
-        private DashboardBusyException(String message) {
+        private WebConsoleBusyException(String message) {
             super(message);
         }
     }

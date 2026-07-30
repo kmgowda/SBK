@@ -10,7 +10,7 @@
 package io.sbm.logger.impl;
 
 import io.sbk.action.Action;
-import io.sbk.dashboard.DashboardLoggerSupport;
+import io.sbk.webconsole.WebConsoleLoggerSupport;
 import io.sbk.params.InputOptions;
 import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
@@ -19,69 +19,69 @@ import io.time.Time;
 import java.io.IOException;
 
 /**
- * SBM logger that publishes aggregated distributed benchmark summaries to the local browser dashboard.
+ * SBM logger that publishes aggregated distributed benchmark summaries to the Local Web Console.
  */
 public class SbmWebLogger extends AbstractRamLogger {
-    private final DashboardLoggerSupport dashboard;
+    private final WebConsoleLoggerSupport webConsole;
 
     /**
-     * Creates an SBM web logger without starting the dashboard.
+     * Creates an SBM web logger without starting the Local Web Console.
      */
     public SbmWebLogger() {
-        dashboard = new DashboardLoggerSupport();
+        webConsole = new WebConsoleLoggerSupport();
     }
 
     @Override
     public void addArgs(InputOptions params) throws IllegalArgumentException {
         super.addArgs(params);
-        dashboard.addArgs(params);
+        webConsole.addArgs(params);
     }
 
     @Override
     public void parseArgs(ParsedOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
-        dashboard.parseArgs(params);
+        webConsole.parseArgs(params);
     }
 
     @Override
     public void open(ParsedOptions params, String storageName, Action action, Time time) throws IOException {
         super.open(params, storageName, action, time);
-        dashboard.open(getDashboardSource(), storageName, action, getTimeUnit(), getPercentiles());
+        webConsole.open(getWebConsoleSource(), storageName, action, getTimeUnit(), getPercentiles());
         Printer.log.info("SBM WebLogger Started");
     }
 
     @Override
     public void close(ParsedOptions params) throws IOException {
-        dashboard.close();
+        webConsole.close();
         super.close(params);
         Printer.log.info("SBM WebLogger Shutdown");
     }
 
     /**
-     * Returns the application label included in dashboard run metadata.
+     * Returns the application label included in Local Web Console run metadata.
      *
      * @return source application label
      */
-    protected String getDashboardSource() {
+    protected String getWebConsoleSource() {
         return "SBM";
     }
 
     /**
-     * Returns dashboard option names for GEM argument segregation.
+     * Returns Local Web Console option names for GEM argument segregation.
      *
-     * @return dashboard option names
+     * @return Local Web Console option names
      */
-    protected final String[] getDashboardOptionsArgs() {
-        return dashboard.getOptionsArgs();
+    protected final String[] getWebConsoleOptionsArgs() {
+        return webConsole.getOptionsArgs();
     }
 
     /**
-     * Returns parsed dashboard arguments for forwarding to local SBM.
+     * Returns parsed Local Web Console arguments for forwarding to local SBM.
      *
-     * @return dashboard option/value pairs
+     * @return Local Web Console option/value pairs
      */
-    protected final String[] getDashboardParsedArgs() {
-        return dashboard.getParsedArgs();
+    protected final String[] getWebConsoleParsedArgs() {
+        return webConsole.getParsedArgs();
     }
 
     @Override
@@ -156,7 +156,7 @@ public class SbmWebLogger extends AbstractRamLogger {
                          double recsPerSec, double mbPerSec, double avgLatency, long minLatency, long maxLatency,
                          long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2,
                          long[] percentileLatencies, long[] percentileLatencyCounts) {
-        dashboard.publish(connections, maxConnections, writers, maxWriters, readers, maxReaders,
+        webConsole.publish(connections, maxConnections, writers, maxWriters, readers, maxReaders,
                 writeRequestBytes, writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec,
                 readRequestBytes, readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec,
                 writeResponsePendingRecords, writeResponsePendingBytes, readResponsePendingRecords,

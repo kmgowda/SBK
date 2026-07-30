@@ -7,19 +7,19 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.dashboard;
+package io.sbk.webconsole;
 
 /**
- * Configuration for the local SBK browser dashboard.
+ * Configuration for the SBK Local Web Console.
  */
-public final class DashboardConfig {
-    /** Address on which the dashboard server listens. */
+public final class WebConsoleConfig {
+    /** Address on which the web console server listens. */
     public String host;
-    /** TCP port used by the dashboard server. */
+    /** TCP port used by the web console server. */
     public int port;
-    /** Whether SBK may start the dashboard server when it is unavailable. */
+    /** Whether SBK may start the web console server when it is unavailable. */
     public boolean start;
-    /** Whether SBK should open the dashboard in the default browser. */
+    /** Whether SBK should open the web console in the default browser. */
     public boolean open;
     /** Number of minutes of snapshots retained for each benchmark run. */
     public int minutes;
@@ -27,8 +27,8 @@ public final class DashboardConfig {
     public String name;
 
     /**
-     * Creates an empty dashboard configuration for property binding.
+     * Creates an empty web console configuration for property binding.
      */
-    public DashboardConfig() {
+    public WebConsoleConfig() {
     }
 }

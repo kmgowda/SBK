@@ -1324,7 +1324,7 @@ Six shipping implementations:
 | `Sl4jLogger` | SLF4J facade | Integrating SBK into another Java app |
 | `CSVLogger` | CSV file | Post-run analysis with pandas / Excel |
 | `PrometheusLogger` | Prometheus scrape endpoint (port 9718) | Real-time Grafana dashboards |
-| `WebLogger` | Embedded HTTP server and browser dashboard (port 9720) | Dependency-free local live graphs |
+| `WebLogger` | SBK Local Web Console over HTTP (port 9720) | Dependency-free local live graphs |
 | `GrpcLogger` | gRPC to SBM | Distributed benchmarks (§6) |
 
 Selected at runtime by `-out <ClassName>`. The driver discovery and
@@ -2469,7 +2469,7 @@ flowchart LR
         SLF["<b>Sl4jLogger</b><br/>SLF4J facade"]
         CSV["<b>CSVLogger</b><br/>file output"]
         PRM["<b>PrometheusLogger</b><br/>:9718 scrape"]
-        WEB["<b>WebLogger</b><br/>:9720 local dashboard"]
+        WEB["<b>WebLogger</b><br/>:9720 Local Web Console"]
         GRP["<b>GrpcLogger</b><br/>to SBM (gRPC)"]
     end
     USE1["Local interactive"] --> SYS
@@ -2485,18 +2485,20 @@ flowchart LR
 
 The selection is made via the `-out` flag (default `SystemLogger`). Select
 `-out PrometheusLogger` explicitly when an HTTP metrics endpoint is required.
-Select `-out WebLogger` when a self-contained browser dashboard is preferred.
+Select `-out WebLogger` when the self-contained SBK Local Web Console is preferred.
 The same class-name discovery used for drivers is
 used for loggers, so adding a new one is purely additive.
 
 ### 10.3 How WebLogger stays alive after a benchmark
 
-`WebLogger`, `SbmWebLogger`, and `GemWebLogger` use the same dashboard client
+`WebLogger`, `SbmWebLogger`, and `GemWebLogger` use the same Local Web Console client
 and server protocol. The logger publishes the already-computed periodic and
 total summaries; it does not sample storage operations or insert HTTP work into
 the writer/reader hot path. The server keeps a bounded history--180 minutes by
 default, configurable with `-dashboardminutes`--and streams new summaries to
-browsers with server-sent events (SSE).
+browsers with server-sent events (SSE). The implementation lives in
+`io.sbk.webconsole`; the `-dashboard...` option names remain unchanged for
+command-line and YML compatibility.
 
 ```mermaid
 flowchart LR
@@ -2504,7 +2506,7 @@ flowchart LR
     PERL --> SUMMARY["Periodic and total summaries"]
     SUMMARY --> LOGGER["WebLogger family"]
     LOGGER -->|Snapshot or 15-second heartbeat| LEASE["Active-run lease"]
-    LEASE --> SERVER["Reusable dashboard server"]
+    LEASE --> SERVER["Reusable Local Web Console server"]
     SERVER --> HISTORY["Bounded run history"]
     SERVER -->|SSE| BROWSER["Browser graphs"]
     BROWSER -->|15-second heartbeat| BLEASE["Browser lease"]
@@ -2518,7 +2520,7 @@ flowchart LR
     class BROWSER,BLEASE view
 ```
 
-Only one benchmark owns a dashboard server at a time. Registration starts an
+Only one benchmark owns a Local Web Console server at a time. Registration starts an
 active-run lease. Each snapshot renews it, and a 15-second client heartbeat
 renews it during quiet reporting intervals. If neither arrives for one minute,
 the server marks the run abandoned and releases `activeRunId`; this prevents a
