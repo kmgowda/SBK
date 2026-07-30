@@ -65,7 +65,7 @@ disable automatic browser opening and connect through an appropriate secure tunn
 ./build/install/sbk/bin/sbk \
   -class file -file /tmp/sbk-weblogger.dat \
   -readers 1 -size 1024 -seconds 60 \
-  -out WebLogger -dashboardopen false
+  -out WebLogger -webopen false
 ```
 
 The graphs show completed record rate and throughput, write/read request rates, worker and connection counts,
@@ -77,9 +77,8 @@ the benchmark finishes.
 
 ## Local Web Console options
 
-Logger options appear only after selecting the WebLogger class. Treat generated help as authoritative:
-The existing `-dashboard...` names are retained for command-line and YML compatibility even though the built-in
-implementation is now called the Local Web Console.
+Logger options appear only after selecting the WebLogger class. Treat generated help as authoritative. The
+`-web...` names identify Local Web Console behavior without implying use of the separately deployable SBK Dashboard.
 
 ```bash
 ./build/install/sbk/bin/sbk -out WebLogger -help
@@ -89,14 +88,14 @@ implementation is now called the Local Web Console.
 
 | Option | Default | Meaning |
 |---|---:|---|
-| `-dashboardhost HOST` | `0.0.0.0` | Address on which the plain HTTP server listens |
-| `-dashboardport PORT` | `9720` | Local Web Console HTTP port |
-| `-dashboardstart true\|false` | `true` | Start a compatible server when none is reachable |
-| `-dashboardopen true\|false` | `true` | Ask the local desktop to open the run URL |
-| `-dashboardminutes N` | `180` | Minutes of snapshots retained for each run (three hours by default) |
-| `-dashboardname NAME` | empty | Human-readable name shown for the run |
+| `-webhost HOST` | `0.0.0.0` | Address on which the plain HTTP Local Web Console server listens |
+| `-webport PORT` | `9720` | Local Web Console HTTP port |
+| `-webstart true\|false` | `true` | Start a compatible Local Web Console server when none is reachable |
+| `-webopen true\|false` | `true` | Ask the local desktop to open the Local Web Console run URL |
+| `-webminutes N` | `180` | Minutes of interval snapshots retained for each run (three hours by default) |
+| `-boardname NAME` | empty | Optional display name that identifies the benchmark board in the Local Web Console |
 
-`-dashboardstart false` is useful when an operator manages the web console process separately. If no compatible
+`-webstart false` is useful when an operator manages the web console process separately. If no compatible
 server is available, SBK continues without live graphs and reports the reason. A different service or an older,
 incompatible web console on the configured port is never treated as the SBK web console.
 
@@ -105,7 +104,7 @@ incompatible web console on the configured port is never treated as the SBK web 
 One web console server accepts one active `WebLogger`, `SbmWebLogger`, or `GemWebLogger` benchmark at a time. This
 prevents unrelated runs from being presented as one active experiment. A second active benchmark exits with an
 ownership error identifying the current run and occupied port, and recommends
-`-dashboardport <different-port>`. Selecting another port starts an independent `SbkWebConsoleMain`, allowing
+`-webport <different-port>`. Selecting another port starts an independent `SbkWebConsoleMain`, allowing
 multiple web consoles to run in parallel without mixing their benchmark streams.
 
 The server lifecycle is:
@@ -173,7 +172,7 @@ http://<benchmark-host>:9720
 
 The web console has no authentication or encryption. Use the default only on an isolated, trusted benchmark network
 protected by host and network firewall rules. To restrict access to the benchmark host, set
-`-dashboardhost 127.0.0.1`.
+`-webhost 127.0.0.1`.
 
 An SSH tunnel remains an optional security measure when the web console is bound to loopback:
 
@@ -187,9 +186,9 @@ Then open <http://127.0.0.1:9720> locally.
 
 | Symptom | Resolution |
 |---|---|
-| Browser does not open | Copy the printed URL manually, or use `-dashboardopen false` on headless systems |
-| Local Web Console unavailable | Check `-dashboardhost`, `-dashboardport`, local firewall rules, and whether startup is disabled |
-| Port is incompatible | Stop the unrelated/older service or select another `-dashboardport` |
+| Browser does not open | Copy the printed URL manually, or use `-webopen false` on headless systems |
+| Local Web Console unavailable | Check `-webhost`, `-webport`, local firewall rules, and whether startup is disabled |
+| Port is incompatible | Stop the unrelated/older service or select another `-webport` |
 | Local Web Console remains on an older UI after upgrading SBK | Close every web console browser tab, wait one idle minute for the old server to exit, and retry |
 | Local Web Console already in use | Wait for the named active benchmark to finish; do not combine independent experiments |
 | Local Web Console reports an abandoned run | The logger stopped publishing snapshots and heartbeats for one minute, usually because its SBK, SBM, or SBK-GEM process was killed or lost connectivity; correct the failure and start a new benchmark |

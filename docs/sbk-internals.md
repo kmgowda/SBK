@@ -2492,13 +2492,13 @@ used for loggers, so adding a new one is purely additive.
 ### 10.3 How WebLogger stays alive after a benchmark
 
 `WebLogger`, `SbmWebLogger`, and `GemWebLogger` use the same Local Web Console client
-and server protocol. The logger publishes the already-computed periodic and
-total summaries; it does not sample storage operations or insert HTTP work into
+and server protocol. The logger publishes the already-computed periodic interval
+summaries and excludes cumulative totals; it does not sample storage operations or insert HTTP work into
 the writer/reader hot path. The server keeps a bounded history--180 minutes by
-default, configurable with `-dashboardminutes`--and streams new summaries to
+default, configurable with `-webminutes`--and streams new summaries to
 browsers with server-sent events (SSE). The implementation lives in
-`io.sbk.webconsole`; the `-dashboard...` option names remain unchanged for
-command-line and YML compatibility.
+`io.sbk.webconsole`; its command-line and YML controls use the `-web...`
+option prefix, with `-boardname` supplying the benchmark board's display name.
 
 ```mermaid
 flowchart LR

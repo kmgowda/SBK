@@ -27,18 +27,18 @@ import java.util.UUID;
  * Shared Local Web Console configuration, lifecycle, and snapshot construction for SBK, SBM, and GEM loggers.
  */
 public final class WebConsoleLoggerSupport implements AutoCloseable {
-    /** Backward-compatible web console host CLI option. */
-    public static final String HOST_OPTION = "dashboardhost";
-    /** Backward-compatible web console port CLI option. */
-    public static final String PORT_OPTION = "dashboardport";
-    /** Backward-compatible web console automatic-start CLI option. */
-    public static final String START_OPTION = "dashboardstart";
-    /** Backward-compatible web console browser-open CLI option. */
-    public static final String OPEN_OPTION = "dashboardopen";
-    /** Backward-compatible web console history duration CLI option. */
-    public static final String MINUTES_OPTION = "dashboardminutes";
-    /** Backward-compatible web console run-name CLI option. */
-    public static final String NAME_OPTION = "dashboardname";
+    /** Web console host CLI option. */
+    public static final String HOST_OPTION = "webhost";
+    /** Web console port CLI option. */
+    public static final String PORT_OPTION = "webport";
+    /** Web console automatic-start CLI option. */
+    public static final String START_OPTION = "webstart";
+    /** Web console browser-open CLI option. */
+    public static final String OPEN_OPTION = "webopen";
+    /** Web console history duration CLI option. */
+    public static final String MINUTES_OPTION = "webminutes";
+    /** Web console benchmark-board name CLI option. */
+    public static final String BOARD_NAME_OPTION = "boardname";
     private static final String CONFIG_FILE = "webconsole.properties";
     private WebConsoleConfig config;
     private WebConsoleClient client;
@@ -52,7 +52,7 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
     }
 
     /**
-     * Adds the backward-compatible {@code -dashboard...} command-line options.
+     * Adds the Local Web Console command-line options.
      *
      * @param params input option registry
      */
@@ -63,7 +63,8 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
         params.addOption(START_OPTION, true, "Start Local Web Console when unavailable; default: " + config.start);
         params.addOption(OPEN_OPTION, true, "Open Local Web Console in the local browser; default: " + config.open);
         params.addOption(MINUTES_OPTION, true, "Minutes of snapshots retained per run; default: " + config.minutes);
-        params.addOption(NAME_OPTION, true, "Optional Local Web Console run name; default: empty");
+        params.addOption(BOARD_NAME_OPTION, true,
+                "Optional display name for the benchmark board in Local Web Console; default: empty");
     }
 
     /**
@@ -80,7 +81,7 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
         config.open = Boolean.parseBoolean(params.getOptionValue(OPEN_OPTION, Boolean.toString(config.open)));
         config.minutes = Integer.parseInt(params.getOptionValue(MINUTES_OPTION,
                 Integer.toString(config.minutes)));
-        config.name = params.getOptionValue(NAME_OPTION, Objects.requireNonNullElse(config.name, ""));
+        config.name = params.getOptionValue(BOARD_NAME_OPTION, Objects.requireNonNullElse(config.name, ""));
         if (config.port < 1 || config.port > 65535) {
             throw new IllegalArgumentException("Local Web Console port must be between 1 and 65535");
         }
@@ -209,7 +210,7 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
      */
     public String[] getOptionsArgs() {
         return new String[]{"-" + HOST_OPTION, "-" + PORT_OPTION, "-" + START_OPTION, "-" + OPEN_OPTION,
-                "-" + MINUTES_OPTION, "-" + NAME_OPTION};
+                "-" + MINUTES_OPTION, "-" + BOARD_NAME_OPTION};
     }
 
     /**
@@ -222,7 +223,7 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
         return new String[]{"-" + HOST_OPTION, config.host, "-" + PORT_OPTION, Integer.toString(config.port),
                 "-" + START_OPTION, Boolean.toString(config.start), "-" + OPEN_OPTION,
                 Boolean.toString(config.open), "-" + MINUTES_OPTION, Integer.toString(config.minutes),
-                "-" + NAME_OPTION, Objects.requireNonNullElse(config.name, "")};
+                "-" + BOARD_NAME_OPTION, Objects.requireNonNullElse(config.name, "")};
     }
 
     @Override

@@ -352,7 +352,7 @@ public final class WebConsoleServer implements AutoCloseable {
                 return "SBK Local Web Console port " + server.getAddress().getPort()
                         + " is already serving active " + owner
                         + "; only one SBK, SBM, or SBK-GEM WebLogger benchmark may use a web console port at a time. "
-                        + "Use '-dashboardport <different-port>' to start another SbkWebConsoleMain";
+                        + "Use '-webport <different-port>' to start another SbkWebConsoleMain";
             }
             if (runs.putIfAbsent(run.runId(), new RunState(run, retention)) != null) {
                 return "Local Web Console runId already exists: " + run.runId();

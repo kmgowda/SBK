@@ -288,7 +288,7 @@ match between preparation and reading:
 
 SBK opens `http://127.0.0.1:9720` in the default browser. By default, the lightweight Local Web Console accepts plain HTTP
 on all network interfaces at port 9720, retains the latest 180 minutes of snapshots in
-memory and streams new summaries with server-sent events. Change that duration with `-dashboardminutes N`.
+memory and streams new summaries with server-sent events. Change that duration with `-webminutes N`.
 A later SBK process reuses a compatible server already on
 that port. Startup prints copy-paste web console links for loopback, hostname, and available public/private host IPv4
 addresses. The server accepts one active SBK, SBM, or SBK-GEM benchmark at a time and reports an error if another
@@ -297,8 +297,9 @@ benchmark has finished and no browser has been connected for one minute, the ser
 and 15-second logger heartbeats renew the active-run lease. If a benchmark is killed without completing, one minute
 without either signal marks that run abandoned and releases web console ownership; an attached browser may continue
 viewing its graphs without preventing a new run. Use
-`-dashboardopen false` on headless hosts, `-dashboardstart false` to require a pre-existing server, and
-`-dashboardport PORT` to select another port. No SSH tunnel, TLS certificate, or HTTPS setup is enabled or required
+`-webopen false` on headless hosts, `-webstart false` to require a pre-existing server, and
+`-webport PORT` to select another port. Use `-boardname NAME` to give the benchmark board a recognizable display
+name. No SSH tunnel, TLS certificate, or HTTPS setup is enabled or required
 by default. From another system, open `http://<benchmark-host>:9720`; use this only on a trusted benchmark network.
 Run `sbk -out WebLogger -help` for the complete option set.
 See the [WebLogger guide](docs/WEB_LOGGER.md) for every option, Local Web Console lifecycle, distributed usage, security,
@@ -315,7 +316,7 @@ sbk-gem -out GemWebLogger -class file -nodes host1,host2 -writers 2 -size 4096 -
 ```
 
 The Local Web Console listener defaults to `0.0.0.0` for direct HTTP access. Restrict it with
-`-dashboardhost 127.0.0.1` when remote browser access is not required.
+`-webhost 127.0.0.1` when remote browser access is not required.
 
 ## Distributed execution
 

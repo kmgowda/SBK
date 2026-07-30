@@ -23,7 +23,7 @@ public final class WebConsoleConfig {
     public boolean open;
     /** Number of minutes of snapshots retained for each benchmark run. */
     public int minutes;
-    /** Optional human-readable benchmark name. */
+    /** Optional display name for the benchmark board. */
     public String name;
 
     /**

@@ -122,7 +122,7 @@ final class WebConsoleServerTest {
                 assertTrue(exception.getMessage().contains("Web Console port " + server.getAddress().getPort()));
                 assertTrue(exception.getMessage().contains("already serving active SBK run active-run"));
                 assertTrue(exception.getMessage().contains("only one SBK, SBM, or SBK-GEM"));
-                assertTrue(exception.getMessage().contains("-dashboardport <different-port>"));
+                assertTrue(exception.getMessage().contains("-webport <different-port>"));
                 assertTrue(exception.getMessage().contains("SbkWebConsoleMain"));
             }
         }
@@ -342,9 +342,9 @@ final class WebConsoleServerTest {
             final SbkParameters parameters = new SbkParameters("web-console-test");
             logger.addArgs(parameters);
             parameters.parseArgs(new String[]{"-writers", "1", "-size", "100",
-                    "-dashboardhost", "127.0.0.1", "-dashboardport",
+                    "-webhost", "127.0.0.1", "-webport",
                     Integer.toString(server.getAddress().getPort()),
-                    "-dashboardstart", "false", "-dashboardopen", "false"});
+                    "-webstart", "false", "-webopen", "false"});
             logger.parseArgs(parameters);
 
             logger.open(parameters, "File", Action.Writing, new NanoSeconds());
