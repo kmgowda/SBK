@@ -16,8 +16,7 @@ import org.eclipse.collections.impl.map.mutable.primitive.LongLongHashMap;
  * Accumulates exact latency frequencies without boxing keys or values.
  *
  * <p>The protobuf builder is populated only when a batch is ready for
- * transport. This keeps protobuf map allocation and boxed {@link Long}
- * instances out of the per-measurement path.
+ * transport. This keeps protobuf allocation out of the per-measurement path.
  */
 final class GrpcLatencyAccumulator {
     static final int PACKED_ENTRY_MAX_BYTES = 20;
@@ -71,17 +70,6 @@ final class GrpcLatencyAccumulator {
             builder.addLatencyValues(latency);
             builder.addLatencyCounts(count);
         });
-    }
-
-    /**
-     * Copies frequencies to the legacy protobuf map.
-     *
-     * <p>This method is used only when communicating with an SBP 3.0 server.
-     *
-     * @param builder destination message builder
-     */
-    void writeLegacy(MessageLatenciesRecord.Builder builder) {
-        latencies.forEachKeyValue(builder::putLatency);
     }
 
     /**

@@ -1551,7 +1551,7 @@ flowchart TB
 
 **SBP** — **Storage Benchmark Protocol** — is the wire protocol clients
 use to talk to SBM. It is a gRPC service defined in
-[`sbp.proto`](../sbk-api/src/main/proto/sbp.proto), with seven RPCs:
+[`sbp.proto`](../sbk-api/src/main/proto/sbp.proto), with six RPCs:
 
 | RPC | Request | Response | Purpose |
 |---|---|---|---|
@@ -1559,8 +1559,7 @@ use to talk to SBM. It is a gRPC service defined in
 | `isVersionSupported` | `Version` | `BoolValue` | Explicit version negotiation |
 | `getConfig` | Empty | `Config` | Client fetches SBM's run config |
 | `registerClient` | `Config` | `ClientID` | Returns a unique long ID |
-| `addLatenciesRecord` | `MessageLatenciesRecord` | Empty | SBP 3.0-compatible unary batch submission |
-| `streamLatencies` | stream of `MessageLatenciesRecord` | Empty | **SBP 3.1 hot path** — ordered, flow-controlled batches |
+| `streamLatencies` | stream of `MessageLatenciesRecord` | Empty | **SBP 4.0 hot path** — ordered, flow-controlled batches |
 | `closeClient` | `ClientID` | Empty | Graceful disconnect |
 
 The critical message is `MessageLatenciesRecord`:
@@ -1578,17 +1577,17 @@ message MessageLatenciesRecord {
   int64 totalLatency     = 19;
   int64 minLatency       = 20;
   int64 maxLatency       = 21;
-  map<int64, int64> latency = 22;   // SBP 3.0 compatibility
+  reserved 22;                      // retired pre-SBP-4 map field
   repeated uint64 latencyValues = 23 [packed = true];
   repeated uint64 latencyCounts = 24 [packed = true];
 }
 ```
 
 The differentiating design choice is still one exact count per **distinct
-recorded latency value**. SBP 3.1 represents those keys and counts as two
+recorded latency value**. SBP 4.0 represents those keys and counts as two
 same-length packed primitive arrays. This avoids the boxed `Long` keys,
 boxed values, per-entry map objects, and embedded protobuf map-entry messages
-required by field 22. It also sends totals, valid/invalid/discard counts,
+used by earlier protocol versions. It also sends totals, valid/invalid/discard counts,
 bytes, active/max reader and writer counts, and request/timeout counters. SBM
 therefore receives enough information to recompute a global percentile
 distribution; it does not attempt the mathematically invalid operation of
@@ -1617,10 +1616,10 @@ smaller than a million raw samples. If nearly every operation has a distinct
 nanosecond value, the benefit is smaller and the size threshold creates more
 batches.
 
-SBP 3.1 retains the unary RPC and map field so an updated client can
-interoperate with an SBP 3.0 server. `GrpcLogger` checks the server minor
-version: 3.1 or later uses streaming and packed arrays; 3.0 uses unary RPCs
-and populates the legacy map only while flushing.
+SBP 4.0 is an intentional wire-protocol break. The unary latency RPC and
+protobuf map field from SBP 3.x are removed; SBK and SBM must both use the
+same SBP major version. Field number 22 remains reserved so it cannot be
+accidentally reused with a different meaning.
 
 #### Client-side allocation and flow-control boundary
 
@@ -1690,14 +1689,13 @@ sequenceDiagram
 
 The major SBP version is enforced by `GrpcLogger`. Storage name, action, and
 time unit must match the server configuration; latency-range and request-log
-differences currently produce warnings. Every SBP 3.1 stream has one client
+differences currently produce warnings. Every SBP 4.0 stream has one client
 ID and strictly increasing sequence numbers beginning at one. SBM rejects a
 client-ID change or sequence gap before the record reaches the aggregation
 queue. The stream preserves order and returns its final acknowledgment only
 after all submitted messages have reached the service. SBP does not retry a
 failed stream, so treat transport failures, client exits,
 invalid/discard counts, and connection logs as part of result validation.
-The retained SBP 3.0 unary endpoint does not promise cross-RPC ordering.
 
 ### 6.3 SBM's internal architecture
 
@@ -1716,7 +1714,7 @@ flowchart TB
     end
 
     subgraph SRV["SbmGrpcService"]
-        ENQ["addLatenciesRecord(record)<br/>then registry.enQueue(record)"]
+        ENQ["streamLatencies.onNext(record)<br/>then registry.enQueue(record)"]
     end
 
     subgraph QUEUES["SbmLatencyBenchmark queue array"]
@@ -1752,14 +1750,13 @@ The important details are:
 
 - **Multiple inbound producers** deposit into the queue array. The queue index
   is `clientID % maxQueues`, so all records from one client use the same queue
-  and different clients are spread over the configured queues. The SBP 3.1
+  and different clients are spread over the configured queues. The SBP 4.0
   stream validates client ID and sequence before enqueueing.
 - **A single background thread** drains all queues round-robin and
   feeds them into a `LatencyRecordWindow`, reusing PerL's latency-window
-  machinery. It drains up to 64 records per queue visit, amortizing clock
-  reads and queue scans without allowing one queue to monopolize the
-  consumer. Single ownership means the non-thread-safe window does not need
-  concurrent updates.
+  machinery. It consumes one record per queue visit so that a busy client
+  cannot monopolize the consumer. Single ownership means the non-thread-safe
+  window does not need concurrent updates.
 - **Window rotation** — every 5 s by default — produces a combined
   periodic line on stdout and ticks the Prometheus gauges.
 - **Empty-queue behavior differs from client PerL.** `SbmLatencyBenchmark`

@@ -39,7 +39,6 @@ import java.util.concurrent.atomic.AtomicLong;
 final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<MessageLatenciesRecord> implements Benchmark,
         SbmRegistry {
     static final String CONSUMER_THREAD_NAME = "sbm-latency-consumer";
-    static final int MAXIMUM_DRAIN_BATCH = 64;
     private final int maxQs;
     private final int idleMS;
     private final Time time;
@@ -97,15 +96,13 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
         while (doWork) {
             notFound = true;
             for (int qIndex = 0; qIndex < maxQs; qIndex++) {
-                int drained = 0;
-                while (drained < MAXIMUM_DRAIN_BATCH && (record = poll(qIndex)) != null) {
+                record = poll(qIndex);
+                if (record != null) {
                     notFound = false;
-                    drained++;
                     if (record.getSequenceNumber() > 0) {
                         window.record(currentTime, record);
                     } else {
                         doWork = false;
-                        break;
                     }
                 }
             }

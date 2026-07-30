@@ -57,7 +57,7 @@ def grpcLoggerPerformanceReport = layout.buildDirectory.file(
 
 tasks.register('runGrpcLoggerPerformanceBenchmark', JavaExec) {
     group = 'verification'
-    description = 'Benchmarks primitive gRPC latency batching against the protobuf map path.'
+    description = 'Benchmarks primitive gRPC latency batching against a boxed-map baseline.'
     dependsOn tasks.named('jmhJar')
     classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
     mainClass = 'org.openjdk.jmh.Main'
@@ -101,19 +101,17 @@ tasks.register('grpcLoggerPerformanceTest') {
                     allocation(result))
         }
         def primitive = byName.recordPrimitive
-        def protobufMap = byName.recordProtobufMap
+        def boxedMap = byName.recordBoxedMap
         def packed = byName.encodePacked
-        def legacy = byName.encodeLegacyMap
         println String.format(
-                "Hot-path observed mean   : primitive accumulation is %.2f%% faster and removes %.3f B/op",
-                (protobufMap.primaryMetric.score - primitive.primaryMetric.score)
-                        * 100.0d / protobufMap.primaryMetric.score,
-                allocation(protobufMap) - allocation(primitive))
+                "Hot-path observed mean   : primitive accumulation is %.2f%% faster and removes %.3f B/op"
+                        + " versus the boxed map",
+                (boxedMap.primaryMetric.score - primitive.primaryMetric.score)
+                        * 100.0d / boxedMap.primaryMetric.score,
+                allocation(boxedMap) - allocation(primitive))
         println String.format(
-                "Batch observed mean      : packed primitive fields are %.2f%% faster and use %.2f%% less allocation",
-                (legacy.primaryMetric.score - packed.primaryMetric.score)
-                        * 100.0d / legacy.primaryMetric.score,
-                (allocation(legacy) - allocation(packed)) * 100.0d / allocation(legacy))
+                "SBP 4 packed encoding    : %,.3f %s; %,.3f B/op",
+                packed.primaryMetric.score, packed.primaryMetric.scoreUnit, allocation(packed))
     }
 }
 

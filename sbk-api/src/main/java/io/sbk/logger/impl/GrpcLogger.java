@@ -16,7 +16,6 @@ import com.google.protobuf.Empty;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
-import io.grpc.stub.StreamObserver;
 import io.perl.data.Bytes;
 import io.perl.config.LatencyConfig;
 import io.perl.api.LatencyRecorder;
@@ -44,12 +43,10 @@ import java.util.concurrent.TimeUnit;
 public class GrpcLogger extends SystemLogger {
     private final static String CONFIG_FILE = "sbmhost.properties";
     private final static String NO_HOST_STRING = "none";
-    private final static int STREAMING_SBP_MINOR_VERSION = 1;
     private final static int MAXIMUM_PENDING_BATCHES = 8;
 
     private SbmHostConfig sbmHostConfig;
     private boolean enable;
-    private boolean streaming;
     private long clientID;
     private long seqNum;
     private long maxMessageBytes;
@@ -59,7 +56,6 @@ public class GrpcLogger extends SystemLogger {
     private ServiceGrpc.ServiceStub stub;
     private ServiceGrpc.ServiceBlockingStub blockingStub;
     private MessageLatenciesRecord.Builder builder;
-    private StreamObserver<com.google.protobuf.Empty> observer;
     private GrpcStreamSender streamSender;
     private ExceptionHandler exceptionHandler;
 
@@ -203,16 +199,8 @@ public class GrpcLogger extends SystemLogger {
         latencyAccumulator = new GrpcLatencyAccumulator(maxMessageBytes);
         builder = MessageLatenciesRecord.newBuilder();
         stub = ServiceGrpc.newStub(channel);
-        streaming = sbmSbpVersion.getMinor() >= STREAMING_SBP_MINOR_VERSION;
-        if (streaming) {
-            observer = null;
-            streamSender = new GrpcStreamSender(stub, MAXIMUM_PENDING_BATCHES, this::reportTransportFailure);
-            Printer.log.info("SBK GRPC Logger transport: SBP client stream with packed primitive latencies");
-        } else {
-            observer = new ResponseObserver<>();
-            streamSender = null;
-            Printer.log.info("SBK GRPC Logger transport: SBP unary compatibility mode");
-        }
+        streamSender = new GrpcStreamSender(stub, MAXIMUM_PENDING_BATCHES, this::reportTransportFailure);
+        Printer.log.info("SBK GRPC Logger transport: SBP client stream with packed primitive latencies");
         Printer.log.info("SBK GRPC Logger Started");
     }
 
@@ -300,22 +288,14 @@ public class GrpcLogger extends SystemLogger {
         builder.setLowerLatencyDiscardRecords(recorder.getLowerLatencyDiscardRecords());
         builder.setValidLatencyRecords(recorder.getValidLatencyRecords());
 
-        if (streaming) {
-            latencyAccumulator.writePacked(builder);
-        } else {
-            latencyAccumulator.writeLegacy(builder);
-        }
+        latencyAccumulator.writePacked(builder);
         final MessageLatenciesRecord record = builder.build();
         if (record.getSerializedSize() > maxMessageBytes) {
             reportTransportFailure(new IOException("SBK gRPC latency record size " + record.getSerializedSize()
                     + " exceeds configured maximum " + maxMessageBytes + " bytes"));
         } else {
             try {
-                if (streamSender != null) {
-                    streamSender.send(record);
-                } else {
-                    stub.addLatenciesRecord(record, observer);
-                }
+                streamSender.send(record);
             } catch (IOException exception) {
                 reportTransportFailure(exception);
             }
@@ -374,24 +354,6 @@ public class GrpcLogger extends SystemLogger {
             exceptionHandler.throwException(throwable);
         } else {
             Printer.log.error("SBK gRPC logger transport failure", throwable);
-        }
-    }
-
-    private final class ResponseObserver<T> implements StreamObserver<T> {
-
-        @Override
-        public void onNext(Object value) {
-
-        }
-
-        @Override
-        public void onError(Throwable ex) {
-            reportTransportFailure(ex);
-        }
-
-        @Override
-        public void onCompleted() {
-
         }
     }
 

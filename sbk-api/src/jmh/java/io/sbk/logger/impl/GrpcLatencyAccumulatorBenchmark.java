@@ -24,11 +24,13 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Timeout;
 import org.openjdk.jmh.annotations.Warmup;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Compares primitive latency accumulation and packed encoding with the legacy
- * protobuf map implementation.
+ * Compares primitive latency accumulation with a boxed map baseline and
+ * measures packed SBP encoding.
  */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -45,14 +47,14 @@ public class GrpcLatencyAccumulatorBenchmark {
     @State(Scope.Thread)
     public static class RecordState {
         private GrpcLatencyAccumulator primitive;
-        private MessageLatenciesRecord.Builder protobufMap;
+        private Map<Long, Long> boxedMap;
         private long sequence;
 
         /** Initializes both exact-frequency implementations. */
         @Setup(Level.Trial)
         public void setup() {
             primitive = new GrpcLatencyAccumulator(4L * Bytes.BYTES_PER_MB);
-            protobufMap = MessageLatenciesRecord.newBuilder();
+            boxedMap = new HashMap<>();
             sequence = 0;
         }
 
@@ -93,17 +95,17 @@ public class GrpcLatencyAccumulatorBenchmark {
     }
 
     /**
-     * Records one measurement through the legacy boxed protobuf map.
+     * Records one measurement through a boxed map baseline.
      *
      * @param state benchmark state
      * @return number of distinct latency values
      */
     @Benchmark
-    public int recordProtobufMap(RecordState state) {
+    public int recordBoxedMap(RecordState state) {
         final long latency = state.nextLatency();
-        final long count = state.protobufMap.getLatencyMap().getOrDefault(latency, 0L);
-        state.protobufMap.putLatency(latency, count + 1);
-        return state.protobufMap.getLatencyCount();
+        final long count = state.boxedMap.getOrDefault(latency, 0L);
+        state.boxedMap.put(latency, count + 1);
+        return state.boxedMap.size();
     }
 
     /**
@@ -118,15 +120,4 @@ public class GrpcLatencyAccumulatorBenchmark {
         return state.builder.build();
     }
 
-    /**
-     * Encodes a complete exact distribution into the legacy protobuf map.
-     *
-     * @param state benchmark state
-     * @return immutable protobuf message
-     */
-    @Benchmark
-    public MessageLatenciesRecord encodeLegacyMap(EncodeState state) {
-        state.accumulator.writeLegacy(state.builder);
-        return state.builder.build();
-    }
 }

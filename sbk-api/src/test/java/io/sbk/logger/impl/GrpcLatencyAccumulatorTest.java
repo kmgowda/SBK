@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 final class GrpcLatencyAccumulatorTest {
     @Test
-    void preservesExactCountsInPackedAndLegacyRepresentations() {
+    void preservesExactCountsInPackedRepresentation() {
         final GrpcLatencyAccumulator accumulator =
                 new GrpcLatencyAccumulator(4L * Bytes.BYTES_PER_MB);
         accumulator.record(100, 2);
@@ -41,12 +41,7 @@ final class GrpcLatencyAccumulatorTest {
             packedValues.put(packed.getLatencyValues(index), packed.getLatencyCounts(index));
         }
 
-        final MessageLatenciesRecord.Builder legacyBuilder =
-                MessageLatenciesRecord.newBuilder();
-        accumulator.writeLegacy(legacyBuilder);
-
         assertEquals(Map.of(100L, 7L, 200L, 3L), packedValues);
-        assertEquals(packedValues, legacyBuilder.getLatencyMap());
         assertEquals(2, accumulator.size());
     }
 

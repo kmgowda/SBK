@@ -18,12 +18,12 @@ limitations under the License.
 
 SBM is SBK's distributed measurement aggregator. SBK clients using `GrpcLogger` send SBP/gRPC latency records to SBM, which merges them into cluster-wide periodic and total statistics.
 
-SBP 3.1 uses one ordered client-streaming RPC per SBK process and packed
+SBP 4.0 uses one ordered client-streaming RPC per SBK process and packed
 primitive latency/count fields. `GrpcLogger` accumulates exact frequencies in
 a primitive map, submits immutable batches through a bounded sender queue,
 obeys gRPC flow control, and waits for the final stream acknowledgment during
-shutdown. The SBP 3.0 unary RPC and protobuf map remain available for
-backward compatibility.
+shutdown. SBP 4.0 intentionally removes the earlier unary latency RPC and
+protobuf map field, so SBK and SBM must use the same SBP major version.
 SBM explicitly configures and advertises its inbound record limit
 (`maxRecordSizeMB`, 4 MiB by default); SBK sends no more than the smaller
 client/server limit.

@@ -193,34 +193,6 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     }
 
 
-    @Override
-    public void addLatenciesRecord(io.sbp.grpc.MessageLatenciesRecord request,
-                                   io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
-        // Queue a latency record for aggregation; respond with Empty on success
-        try {
-            validateLatencyFields(request);
-            registry.enQueue(request);
-            if (responseObserver != null) {
-                responseObserver.onNext(Empty.getDefaultInstance());
-                responseObserver.onCompleted();
-            }
-        } catch (IllegalArgumentException ex) {
-            if (responseObserver != null) {
-                responseObserver.onError(Status.INVALID_ARGUMENT
-                        .withDescription(ex.getMessage())
-                        .withCause(ex)
-                        .asRuntimeException());
-            }
-        } catch (IllegalStateException ex) {
-            if (responseObserver != null) {
-                responseObserver.onError(Status.RESOURCE_EXHAUSTED
-                        .withDescription("SBM latency queue rejected a record")
-                        .withCause(ex)
-                        .asRuntimeException());
-            }
-        }
-    }
-
     /**
      * Opens a persistent ordered latency stream for an SBK client.
      *

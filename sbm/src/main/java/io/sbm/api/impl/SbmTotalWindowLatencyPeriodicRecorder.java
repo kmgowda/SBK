@@ -124,13 +124,9 @@ final public class SbmTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
                 record.getHigherLatencyDiscardRecords(), record.getValidLatencyRecords(),
                 record.getMinLatency(), record.getMaxLatency());
 
-        if (record.getLatencyValuesCount() > 0) {
-            final int latencyCount = record.getLatencyValuesCount();
-            for (int index = 0; index < latencyCount; index++) {
-                window.reportLatency(record.getLatencyValues(index), record.getLatencyCounts(index));
-            }
-        } else {
-            record.getLatencyMap().forEach(window::reportLatency);
+        final int latencyCount = record.getLatencyValuesCount();
+        for (int index = 0; index < latencyCount; index++) {
+            window.reportLatency(record.getLatencyValues(index), record.getLatencyCounts(index));
         }
     }
 

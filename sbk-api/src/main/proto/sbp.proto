@@ -28,7 +28,6 @@ service Service {
   rpc isVersionSupported (Version) returns (google.protobuf.BoolValue) {}
   rpc getConfig (google.protobuf.Empty) returns (Config) {}
   rpc registerClient (Config) returns (ClientID) {}
-  rpc addLatenciesRecord (MessageLatenciesRecord) returns (google.protobuf.Empty) {}
   rpc streamLatencies (stream MessageLatenciesRecord) returns (google.protobuf.Empty) {}
   rpc closeClient (ClientID) returns (google.protobuf.Empty) {}
 }
@@ -91,7 +90,7 @@ message MessageLatenciesRecord {
   int64 totalLatency = 19;
   int64 minLatency = 20;
   int64 maxLatency = 21;
-  map<int64, int64 > latency = 22;
+  reserved 22;
   repeated uint64 latencyValues = 23 [packed = true];
   repeated uint64 latencyCounts = 24 [packed = true];
 }
