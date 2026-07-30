@@ -281,6 +281,10 @@ final public class Sbk {
             Printer.log.error(ex.toString());
             params.printHelp();
             throw ex;
+        } catch (ParseException | IllegalArgumentException ex) {
+            Printer.log.error(ex.getMessage());
+            params.printHelp();
+            throw ex;
         } catch (HelpException ex) {
             System.out.println("\n" + ex.getHelpText());
             throw ex;

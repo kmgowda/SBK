@@ -42,11 +42,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class GrpcLogger extends SystemLogger {
     private final static String CONFIG_FILE = "sbmhost.properties";
-    private final static String NO_HOST_STRING = "none";
     private final static int MAXIMUM_PENDING_BATCHES = 8;
+    private final static int MINIMUM_PORT = 1;
+    private final static int MAXIMUM_PORT = 65535;
 
     private SbmHostConfig sbmHostConfig;
-    private boolean enable;
     private long clientID;
     private long seqNum;
     private long maxMessageBytes;
@@ -88,26 +88,45 @@ public class GrpcLogger extends SystemLogger {
             throw new IllegalArgumentException(ex);
         }
         maxMessageBytes = (long) sbmHostConfig.maxRecordSizeMB * Bytes.BYTES_PER_MB;
-        sbmHostConfig.host = NO_HOST_STRING;
-        params.addOption("sbm", true, "SBM host" +
-                "; '" + NO_HOST_STRING + "' disables this option, default: " + sbmHostConfig.host);
+        params.addOption("sbm", true, "Required SBM hostname or IP address");
         params.addOption("sbmport", true, "SBM Port" +
                 "; default: " + sbmHostConfig.port);
         //params.addOption("blocking", true, "blocking calls to SBM; default: false");
     }
 
     /**
-     * Parse SBM options and decide if gRPC export is enabled.
+     * Parse and validate the required SBM endpoint options.
+     *
+     * @throws IllegalArgumentException if the SBM host is absent or the port is invalid
      */
     @Override
     public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
-        sbmHostConfig.host = params.getOptionValue("sbm", sbmHostConfig.host);
-        enable = !sbmHostConfig.host.equalsIgnoreCase(NO_HOST_STRING);
-        if (!enable) {
-            return;
+        if (!params.hasOptionValue("sbm")) {
+            throw new IllegalArgumentException(
+                    "GrpcLogger requires '-sbm <hostname-or-IP>'");
         }
-        sbmHostConfig.port = Integer.parseInt(params.getOptionValue("sbmport", Integer.toString(sbmHostConfig.port)));
+        sbmHostConfig.host = params.getOptionValue("sbm").trim();
+        if (sbmHostConfig.host.isEmpty() || sbmHostConfig.host.equalsIgnoreCase("none")) {
+            throw new IllegalArgumentException(
+                    "Invalid SBM host: '-sbm' must specify a hostname or IP address");
+        }
+
+        final String portValue = params.getOptionValue(
+                "sbmport", Integer.toString(sbmHostConfig.port));
+        try {
+            sbmHostConfig.port = Integer.parseInt(portValue);
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException(
+                    "Invalid SBM port '" + portValue + "': expected an integer from "
+                            + MINIMUM_PORT + " through " + MAXIMUM_PORT,
+                    exception);
+        }
+        if (sbmHostConfig.port < MINIMUM_PORT || sbmHostConfig.port > MAXIMUM_PORT) {
+            throw new IllegalArgumentException(
+                    "Invalid SBM port '" + portValue + "': expected an integer from "
+                            + MINIMUM_PORT + " through " + MAXIMUM_PORT);
+        }
     }
 
     /**
@@ -116,9 +135,6 @@ public class GrpcLogger extends SystemLogger {
     @Override
     public void open(final ParsedOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
         super.open(params, storageName, action, time);
-        if (!enable) {
-            return;
-        }
         channel = ManagedChannelBuilder.forTarget(sbmHostConfig.host + ":" + sbmHostConfig.port).usePlaintext().build();
         blockingStub = ServiceGrpc.newBlockingStub(channel);
         Version sbmSbpVersion;
@@ -210,9 +226,6 @@ public class GrpcLogger extends SystemLogger {
     @Override
     public void close(final ParsedOptions params) throws IllegalArgumentException, IOException {
         super.close(params);
-        if (!enable) {
-            return;
-        }
         IOException failure = null;
         try {
             if (streamSender != null) {
@@ -310,10 +323,6 @@ public class GrpcLogger extends SystemLogger {
      */
     @Override
     public void recordLatency(long startTime, int events, int bytes, long latency) {
-        if (!enable) {
-            return;
-        }
-
         final boolean validLatency = latency >= 0
                 && latency >= getMinLatency() && latency <= getMaxLatency();
         if (validLatency && !latencyAccumulator.recordIfFits(latency, events)) {
@@ -349,10 +358,8 @@ public class GrpcLogger extends SystemLogger {
                 readTimeoutEventsPerSec, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency,
                 minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies,
                 percentileLatencyCounts);
-        if (enable) {
-            sendLatenciesRecord(writeRequestBytes, writeRequestRecords,
-                    readRequestBytes, readRequestRecords, writeTimeoutEvents, readTimeoutEvents);
-        }
+        sendLatenciesRecord(writeRequestBytes, writeRequestRecords,
+                readRequestBytes, readRequestRecords, writeTimeoutEvents, readTimeoutEvents);
     }
 
     private void reportTransportFailure(Throwable throwable) {
