@@ -16,7 +16,6 @@ import com.google.protobuf.Empty;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
-import io.grpc.stub.StreamObserver;
 import io.perl.data.Bytes;
 import io.perl.config.LatencyConfig;
 import io.perl.api.LatencyRecorder;
@@ -37,58 +36,52 @@ import io.time.Time;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLongArray;
 
 /**
- * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
+ * Streams exact SBK latency frequencies and request counters to an SBM aggregator.
  */
 public class GrpcLogger extends SystemLogger {
     private final static String CONFIG_FILE = "sbmhost.properties";
-    private final static int LATENCY_MAP_BYTES = 16;
-    private final static String NO_HOST_STRING = "none";
+    private final static int MAXIMUM_PENDING_BATCHES = 8;
+    private final static int MINIMUM_PORT = 1;
+    private final static int MAXIMUM_PORT = 65535;
 
     private SbmHostConfig sbmHostConfig;
-    private boolean enable;
     private long clientID;
     private long seqNum;
-    private int latencyBytes;
-    private int maxLatencyBytes;
-    private boolean blocking;
+    private long maxMessageBytes;
     private LatencyRecorder recorder;
-
-    private AtomicLongArray ramWriteBytesArray;
-    private AtomicLongArray ramWriteRequestRecordsArray;
-    private AtomicLongArray ramWriteTimeoutEventsArray;
-    private AtomicLongArray ramReadBytesArray;
-    private AtomicLongArray ramReadRequestRecordsArray;
-    private AtomicLongArray ramReadTimeoutEventsArray;
+    private GrpcLatencyAccumulator latencyAccumulator;
     private ManagedChannel channel;
     private ServiceGrpc.ServiceStub stub;
     private ServiceGrpc.ServiceBlockingStub blockingStub;
     private MessageLatenciesRecord.Builder builder;
-    private StreamObserver<com.google.protobuf.Empty> observer;
-    // Removed unused exceptionHandler field. If you need custom exception handling, implement setExceptionHandler logic here.
+    private GrpcStreamSender streamSender;
+    private ExceptionHandler exceptionHandler;
 
     /**
      * Construct a gRPC logger. Calls super to initialize base logging and metrics behavior.
      */
     public GrpcLogger() {
         super();
-        this.ramWriteBytesArray = null;
-        this.ramWriteRequestRecordsArray = null;
-        this.ramReadBytesArray = null;
-        this.ramReadRequestRecordsArray = null;
-        this.ramWriteTimeoutEventsArray = null;
-        this.ramReadTimeoutEventsArray = null;
+        this.exceptionHandler = null;
     }
 
+    /**
+     * Sets the benchmark exception handler notified when the gRPC transport fails.
+     *
+     * @param handler exception handler invoked on transport failure
+     */
     @Override
     public void setExceptionHandler(ExceptionHandler handler) {
-        // No-op as per edit hint.
+        this.exceptionHandler = handler;
     }
 
     /**
      * Add SBM host/port options and load defaults from {@code sbmhost.properties}.
+     *
+     * @param params command-line option registry
+     * @throws IllegalArgumentException if the bundled SBM configuration cannot be loaded
      */
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
@@ -102,51 +95,67 @@ public class GrpcLogger extends SystemLogger {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
         }
-        maxLatencyBytes = sbmHostConfig.maxRecordSizeMB * Bytes.BYTES_PER_MB;
-        sbmHostConfig.host = NO_HOST_STRING;
-        params.addOption("sbm", true, "SBM host" +
-                "; '" + NO_HOST_STRING + "' disables this option, default: " + sbmHostConfig.host);
+        maxMessageBytes = (long) sbmHostConfig.maxRecordSizeMB * Bytes.BYTES_PER_MB;
+        params.addOption("sbm", true, "Required SBM hostname or IP address");
         params.addOption("sbmport", true, "SBM Port" +
                 "; default: " + sbmHostConfig.port);
         //params.addOption("blocking", true, "blocking calls to SBM; default: false");
     }
 
     /**
-     * Parse SBM options and decide if gRPC export is enabled.
+     * Parse and validate the required SBM endpoint options.
+     *
+     * @param params parsed command-line options
+     * @throws IllegalArgumentException if the SBM host is absent or the port is invalid
      */
     @Override
     public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
-        sbmHostConfig.host = params.getOptionValue("sbm", sbmHostConfig.host);
-        enable = !sbmHostConfig.host.equalsIgnoreCase(NO_HOST_STRING);
-        if (!enable) {
-            return;
+        if (!params.hasOptionValue("sbm")) {
+            throw new IllegalArgumentException(
+                    "GrpcLogger requires '-sbm <hostname-or-IP>'");
         }
-        sbmHostConfig.port = Integer.parseInt(params.getOptionValue("sbmport", Integer.toString(sbmHostConfig.port)));
-        //        blocking = Boolean.parseBoolean(params.getOptionValue("blocking", "false"));
-        blocking = false;
-        // exceptionHandler = null; // This line is removed as per edit hint.
+        sbmHostConfig.host = params.getOptionValue("sbm").trim();
+        if (sbmHostConfig.host.isEmpty() || sbmHostConfig.host.equalsIgnoreCase("none")) {
+            throw new IllegalArgumentException(
+                    "Invalid SBM host: '-sbm' must specify a hostname or IP address");
+        }
+
+        final String portValue = params.getOptionValue(
+                "sbmport", Integer.toString(sbmHostConfig.port));
+        try {
+            sbmHostConfig.port = Integer.parseInt(portValue);
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException(
+                    "Invalid SBM port '" + portValue + "': expected an integer from "
+                            + MINIMUM_PORT + " through " + MAXIMUM_PORT,
+                    exception);
+        }
+        if (sbmHostConfig.port < MINIMUM_PORT || sbmHostConfig.port > MAXIMUM_PORT) {
+            throw new IllegalArgumentException(
+                    "Invalid SBM port '" + portValue + "': expected an integer from "
+                            + MINIMUM_PORT + " through " + MAXIMUM_PORT);
+        }
     }
 
     /**
      * Open the logger, establish a gRPC channel, validate configuration with SBM, and prepare buffers.
+     *
+     * @param params parsed command-line options
+     * @param storageName storage driver name expected by SBM
+     * @param action benchmark action expected by SBM
+     * @param time benchmark time implementation
+     * @throws IllegalArgumentException if SBK and SBM configurations are incompatible
+     * @throws IOException if the gRPC channel, registration, or stream cannot be initialized
      */
     @Override
     public void open(final ParsedOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
         super.open(params, storageName, action, time);
-        if (!enable) {
-            return;
-        }
-        this.ramWriteBytesArray = new AtomicLongArray(getMaxWriterIDs());
-        this.ramWriteRequestRecordsArray = new AtomicLongArray(getMaxWriterIDs());
-        this.ramReadBytesArray = new AtomicLongArray(getMaxReaderIDs());
-        this.ramReadRequestRecordsArray = new AtomicLongArray(getMaxReaderIDs());
-        this.ramWriteTimeoutEventsArray = new AtomicLongArray(getMaxWriterIDs());
-        this.ramReadTimeoutEventsArray = new AtomicLongArray(getMaxReaderIDs());
         channel = ManagedChannelBuilder.forTarget(sbmHostConfig.host + ":" + sbmHostConfig.port).usePlaintext().build();
         blockingStub = ServiceGrpc.newBlockingStub(channel);
+        Version sbmSbpVersion;
         try {
-            Version sbmSbpVersion = blockingStub.getVersion(Empty.newBuilder().build());
+            sbmSbpVersion = blockingStub.getVersion(Empty.getDefaultInstance());
             SbpVersion version = Sbp.getVersion();
             if (version.major != sbmSbpVersion.getMajor()) {
                 throw new IllegalArgumentException("SBM SBP Major Version: " + sbmSbpVersion.getMajor() +
@@ -163,7 +172,7 @@ public class GrpcLogger extends SystemLogger {
 
         Config config;
         try {
-            config = blockingStub.getConfig(Empty.newBuilder().build());
+            config = blockingStub.getConfig(Empty.getDefaultInstance());
         } catch (StatusRuntimeException ex) {
             ex.printStackTrace();
             throw new IOException("GRPC GetConfig failed");
@@ -198,6 +207,10 @@ public class GrpcLogger extends SystemLogger {
                     + ", local write request: " + isWriteRequestsEnabled() + " are not same!" +
                     ", set the option -wq to "+config.getIsWriteRequests());
         }
+        if (config.getMaxRecordSizeBytes() > 0) {
+            maxMessageBytes = Math.min(maxMessageBytes, config.getMaxRecordSizeBytes());
+        }
+        Printer.log.info("SBK GRPC Logger maximum latency-record size: " + maxMessageBytes + " bytes");
 
         try {
             clientID = blockingStub.registerClient(config).getId();
@@ -213,71 +226,93 @@ public class GrpcLogger extends SystemLogger {
         }
 
         seqNum = 0;
-        latencyBytes = 0;
         recorder = new LatencyRecorder(getMinLatency(), getMaxLatency(), LatencyConfig.LONG_MAX,
                 LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX);
+        latencyAccumulator = new GrpcLatencyAccumulator(maxMessageBytes);
         builder = MessageLatenciesRecord.newBuilder();
-        if (blocking) {
-            stub = null;
-            observer = null;
-        } else {
-            stub = ServiceGrpc.newStub(channel);
-            observer = new ResponseObserver<>();
-        }
+        stub = ServiceGrpc.newStub(channel);
+        streamSender = new GrpcStreamSender(stub, MAXIMUM_PENDING_BATCHES, this::reportTransportFailure);
+        Printer.log.info("SBK GRPC Logger transport: SBP client stream with packed primitive latencies");
         Printer.log.info("SBK GRPC Logger Started");
     }
 
     /**
      * Close the logger, unregister the client, and shutdown the gRPC channel.
+     *
+     * @param params parsed command-line options
+     * @throws IllegalArgumentException if inherited logger shutdown validation fails
+     * @throws IOException if the stream cannot drain or the channel cannot close cleanly
      */
     @Override
     public void close(final ParsedOptions params) throws IllegalArgumentException, IOException {
         super.close(params);
-        if (!enable) {
-            return;
+        IOException failure = null;
+        try {
+            if (streamSender != null) {
+                streamSender.close();
+            }
+        } catch (IOException exception) {
+            failure = exception;
         }
         try {
-            builder.clear();
             blockingStub.closeClient(ClientID.newBuilder().setId(clientID).build());
-            channel.shutdownNow().awaitTermination(1, TimeUnit.SECONDS);
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
+        } catch (StatusRuntimeException exception) {
+            if (failure == null) {
+                failure = new IOException("GRPC closeClient failed", exception);
+            } else {
+                failure.addSuppressed(exception);
+            }
         }
+        channel.shutdown();
+        try {
+            if (!channel.awaitTermination(5, TimeUnit.SECONDS)) {
+                channel.shutdownNow();
+                channel.awaitTermination(1, TimeUnit.SECONDS);
+            }
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            channel.shutdownNow();
+            if (failure == null) {
+                failure = new IOException("Interrupted while closing the gRPC channel", exception);
+            } else {
+                failure.addSuppressed(exception);
+            }
+        }
+        builder.clear();
+        latencyAccumulator.clear();
         Printer.log.info("SBK GRPC Logger Shutdown");
+        if (failure != null) {
+            throw failure;
+        }
     }
 
     /**
      * Send the accumulated request/latency counters to SBM and reset local accumulators.
+     *
+     * @param writeRequestBytes write-request bytes represented by this batch
+     * @param writeRequestRecords write-request records represented by this batch
+     * @param readRequestBytes read-request bytes represented by this batch
+     * @param readRequestRecords read-request records represented by this batch
+     * @param writeTimeoutEvents write timeout events represented by this batch
+     * @param readTimeoutEvents read timeout events represented by this batch
      */
-    public void sendLatenciesRecord() {
-        long writeRequestsSum = 0;
-        long writeBytesSum = 0;
-        long readRequestsSum = 0;
-        long readBytesSum = 0;
-        long writeTimeoutEventsSum = 0;
-        long readTimeoutEventsSum = 0;
-        for (int i = 0; i < getMaxWriterIDs(); i++) {
-            writeRequestsSum += ramWriteRequestRecordsArray.getAndSet(i, 0);
-            writeBytesSum += ramWriteBytesArray.getAndSet(i, 0);
-            writeTimeoutEventsSum += ramWriteTimeoutEventsArray.getAndSet(i, 0);
-        }
-        for (int i = 0; i < getMaxReaderIDs(); i++) {
-            readRequestsSum += ramReadRequestRecordsArray.getAndSet(i, 0);
-            readBytesSum += ramReadBytesArray.getAndSet(i, 0);
-            readTimeoutEventsSum += ramReadTimeoutEventsArray.getAndSet(i, 0);
-        }
-        builder.setWriteRequestBytes(writeBytesSum);
-        builder.setWriteRequestRecords(writeRequestsSum);
-        builder.setReadRequestBytes(readBytesSum);
-        builder.setReadRequestRecords(readRequestsSum);
-        builder.setWriteTimeoutEvents(writeTimeoutEventsSum);
-        builder.setReadTimeoutEvents(readTimeoutEventsSum);
+    private void sendLatenciesRecord(long writeRequestBytes, long writeRequestRecords,
+                                     long readRequestBytes, long readRequestRecords,
+                                     long writeTimeoutEvents, long readTimeoutEvents) {
+        builder.setWriteRequestBytes(writeRequestBytes);
+        builder.setWriteRequestRecords(writeRequestRecords);
+        builder.setReadRequestBytes(readRequestBytes);
+        builder.setReadRequestRecords(readRequestRecords);
+        builder.setWriteTimeoutEvents(writeTimeoutEvents);
+        builder.setReadTimeoutEvents(readTimeoutEvents);
         builder.setClientID(clientID);
-        builder.setSequenceNumber(++seqNum);
+        final long candidateSequenceNumber = seqNum + 1;
+        builder.setSequenceNumber(candidateSequenceNumber);
         builder.setMaxReaders(getMaxReadersCount());
         builder.setReaders(getReadersCount());
         builder.setWriters(getWritersCount());
         builder.setMaxWriters(getMaxWritersCount());
+        builder.setMinLatency(recorder.getMinLatency());
         builder.setMaxLatency(recorder.getMaxLatency());
         builder.setTotalLatency(recorder.getTotalLatency());
         builder.setInvalidLatencyRecords(recorder.getInvalidLatencyRecords());
@@ -287,83 +322,90 @@ public class GrpcLogger extends SystemLogger {
         builder.setLowerLatencyDiscardRecords(recorder.getLowerLatencyDiscardRecords());
         builder.setValidLatencyRecords(recorder.getValidLatencyRecords());
 
-        if (stub != null) {
-            stub.addLatenciesRecord(builder.build(), observer);
+        latencyAccumulator.writePacked(builder);
+        final MessageLatenciesRecord record = builder.build();
+        if (record.getSerializedSize() > maxMessageBytes) {
+            reportTransportFailure(new IOException("SBK gRPC latency record size " + record.getSerializedSize()
+                    + " exceeds configured maximum " + maxMessageBytes + " bytes"));
         } else {
-            blockingStub.addLatenciesRecord(builder.build());
+            try {
+                streamSender.send(record);
+                seqNum = candidateSequenceNumber;
+            } catch (IOException exception) {
+                reportTransportFailure(exception);
+            }
         }
         recorder.reset();
         builder.clear();
-        latencyBytes = 0;
-    }
-
-    /**
-     * Record write requests locally and mirror them into RAM buffers for gRPC export when enabled.
-     */
-    @Override
-    public void recordWriteRequests(int writerId, long startTime, long bytes, long events) {
-        super.recordWriteRequests(writerId, startTime, bytes, events);
-        if (enable) {
-            ramWriteRequestRecordsArray.addAndGet(writerId, events);
-            ramWriteBytesArray.addAndGet(writerId, bytes);
-        }
-    }
-
-    /**
-     * Record read requests locally and mirror them into RAM buffers for gRPC export when enabled.
-     */
-    @Override
-    public void recordReadRequests(int readerId, long startTime, long bytes, long events) {
-        super.recordReadRequests(readerId, startTime, bytes, events);
-        if (enable) {
-            ramReadRequestRecordsArray.addAndGet(readerId, events);
-            ramReadBytesArray.addAndGet(readerId, bytes);
-        }
-    }
-    
-    /**
-     * Record write timeout events and mirror them into RAM buffers for gRPC export when enabled.
-     */
-    @Override
-    public void recordWriteTimeoutEvents(int readerId, long startTime, long events) {
-        super.recordWriteTimeoutEvents(readerId, startTime, events);
-        if (enable) {
-            ramWriteTimeoutEventsArray.addAndGet(readerId, events);
-        }
-    }
-
-    /**
-     * Record read timeout events and mirror them into RAM buffers for gRPC export when enabled.
-     */
-    @Override
-    public void recordReadTimeoutEvents(int writerId, long startTime, long events) {
-        super.recordReadTimeoutEvents(writerId, startTime, events);
-        if (enable) {
-            ramReadTimeoutEventsArray.addAndGet(writerId, events);
-        }
+        latencyAccumulator.clear();
     }
 
     /**
      * Record individual latency values into the local {@code LatencyRecorder} and stage them for gRPC export.
+     *
+     * @param startTime operation start time
+     * @param events number of operations represented by this measurement
+     * @param bytes number of bytes represented by this measurement
+     * @param latency measured operation latency
      */
     @Override
     public void recordLatency(long startTime, int events, int bytes, long latency) {
-        if (!enable) {
-            return;
-        }
-
-        if (latencyBytes >= maxLatencyBytes) {
-            sendLatenciesRecord();
-        }
-        if (recorder.record(events, bytes, latency)) {
-            final Long cnt = builder.getLatencyMap().getOrDefault(latency, 0L);
-            builder.putLatency(latency, cnt + events);
-            if (cnt == 0) {
-                latencyBytes += LATENCY_MAP_BYTES;
+        final boolean validLatency = latency >= 0
+                && latency >= getMinLatency() && latency <= getMaxLatency();
+        if (validLatency && !latencyAccumulator.recordIfFits(latency, events)) {
+            if (latencyAccumulator.size() > 0) {
+                sendLatenciesRecord(0, 0, 0, 0, 0, 0);
+            }
+            if (!latencyAccumulator.recordIfFits(latency, events)) {
+                reportTransportFailure(new IOException("SBK gRPC latency value cannot fit within configured maximum "
+                        + maxMessageBytes + " bytes"));
             }
         }
+        recorder.record(events, bytes, latency);
     }
 
+    /**
+     * Print periodic results locally and enqueue the corresponding exact latency batch for SBM.
+     *
+     * @param reportTime report time in milliseconds
+     * @param writers active writers
+     * @param maxWriters maximum writers
+     * @param readers active readers
+     * @param maxReaders maximum readers
+     * @param writeRequestBytes write request bytes
+     * @param writeRequestMbPerSec write request throughput in MB/sec
+     * @param writeRequestRecords write request records
+     * @param writeRequestRecordsPerSec write requests per second
+     * @param readRequestBytes read request bytes
+     * @param readRequestMbPerSec read request throughput in MB/sec
+     * @param readRequestRecords read request records
+     * @param readRequestRecordsPerSec read requests per second
+     * @param writeResponsePendingRecords pending write response records
+     * @param writeResponsePendingBytes pending write response bytes
+     * @param readResponsePendingRecords pending read response records
+     * @param readResponsePendingBytes pending read response bytes
+     * @param writeReadRequestPendingRecords write-read pending records
+     * @param writeReadRequestPendingBytes write-read pending bytes
+     * @param writeTimeoutEvents write timeout events
+     * @param writeTimeoutEventsPerSec write timeout events per second
+     * @param readTimeoutEvents read timeout events
+     * @param readTimeoutEventsPerSec read timeout events per second
+     * @param seconds reporting interval seconds
+     * @param bytes bytes processed
+     * @param records records processed
+     * @param recsPerSec records per second
+     * @param mbPerSec throughput in MB/sec
+     * @param avgLatency average latency
+     * @param minLatency minimum latency
+     * @param maxLatency maximum latency
+     * @param invalid invalid latency count
+     * @param lowerDiscard latencies discarded below the configured minimum
+     * @param higherDiscard latencies discarded above the configured maximum
+     * @param slc1 sliding latency coverage count 1
+     * @param slc2 sliding latency coverage count 2
+     * @param percentileLatencies percentile latency values
+     * @param percentileLatencyCounts percentile latency bucket counts
+     */
     @Override
     public void print(long reportTime, int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
@@ -385,27 +427,15 @@ public class GrpcLogger extends SystemLogger {
                 readTimeoutEventsPerSec, seconds, bytes, records, recsPerSec, mbPerSec, avgLatency,
                 minLatency, maxLatency, invalid, lowerDiscard, higherDiscard, slc1, slc2, percentileLatencies,
                 percentileLatencyCounts);
-        if (enable) {
-            sendLatenciesRecord();
-        }
+        sendLatenciesRecord(writeRequestBytes, writeRequestRecords,
+                readRequestBytes, readRequestRecords, writeTimeoutEvents, readTimeoutEvents);
     }
 
-    private static class ResponseObserver<T> implements StreamObserver<T> {
-
-        @Override
-        public void onNext(Object value) {
-
-        }
-
-        @Override
-        public void onError(Throwable ex) {
-            // graceful exit may not work GRPC
-            Runtime.getRuntime().exit(1);
-        }
-
-        @Override
-        public void onCompleted() {
-
+    private void reportTransportFailure(Throwable throwable) {
+        if (exceptionHandler != null) {
+            exceptionHandler.throwException(throwable);
+        } else {
+            Printer.log.error("SBK gRPC logger transport failure", throwable);
         }
     }
 

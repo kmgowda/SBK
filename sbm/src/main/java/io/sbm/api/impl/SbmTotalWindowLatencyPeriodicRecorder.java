@@ -23,8 +23,6 @@ import io.sbk.logger.SetRW;
 import io.sbk.logger.WriteRequestsLogger;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-
 import static io.sbm.api.SbmRegistry.BASE_CLIENT_ID_VALUE;
 
 /**
@@ -37,7 +35,13 @@ final public class SbmTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
 
     final private WriteRequestsLogger wRequestLogger;
     final private ReadRequestsLogger rRequestLogger;
-    final private HashMap<Long, RW> table;
+    private final int[] readersByClient;
+    private final int[] writersByClient;
+    private final int[] maxReadersByClient;
+    private final int[] maxWritersByClient;
+    private final boolean[] activeClients;
+    private final int[] activeClientIds;
+    private int activeClientCount;
 
     /**
      * Constructor RamTotalWindowLatencyPeriodicRecorder initialize all values and pass all values to its upper class.
@@ -50,6 +54,7 @@ final public class SbmTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
      * @param setRW                 SetRW
      * @param wLogger               Write Requests Logger
      * @param rLogger               Read Requests Logger
+     * @param maximumClients        maximum number of concurrently registered clients
      */
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     public SbmTotalWindowLatencyPeriodicRecorder(LatencyRecordWindow window, LatencyRecordWindow totalWindow,
@@ -57,13 +62,20 @@ final public class SbmTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
                                                  ReportLatencies reportLatencies,
                                                  SetRW setRW,
                                                  WriteRequestsLogger wLogger,
-                                                 ReadRequestsLogger rLogger) {
+                                                 ReadRequestsLogger rLogger,
+                                                 int maximumClients) {
         super(window, totalWindow, windowLogger, totalLogger);
         this.reportLatencies = reportLatencies;
         this.setRW = setRW;
         this.wRequestLogger = wLogger;
         this.rRequestLogger = rLogger;
-        this.table = new HashMap<>();
+        this.readersByClient = new int[maximumClients];
+        this.writersByClient = new int[maximumClients];
+        this.maxReadersByClient = new int[maximumClients];
+        this.maxWritersByClient = new int[maximumClients];
+        this.activeClients = new boolean[maximumClients];
+        this.activeClientIds = new int[maximumClients];
+        this.activeClientCount = 0;
     }
 
     @Override
@@ -94,6 +106,7 @@ final public class SbmTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
      * adds latencies record.
      *
      * @param record NotNull LatenciesRecord
+     * @throws IllegalArgumentException if the client ID is outside the configured range
      */
     public void addLatenciesRecord(@NotNull MessageLatenciesRecord record) {
         final int id = (int) (record.getClientID() - BASE_CLIENT_ID_VALUE);
@@ -112,7 +125,10 @@ final public class SbmTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
                 record.getHigherLatencyDiscardRecords(), record.getValidLatencyRecords(),
                 record.getMinLatency(), record.getMaxLatency());
 
-        record.getLatencyMap().forEach(window::reportLatency);
+        final int latencyCount = record.getLatencyValuesCount();
+        for (int index = 0; index < latencyCount; index++) {
+            window.reportLatency(record.getLatencyValues(index), record.getLatencyCounts(index));
+        }
     }
 
     /**
@@ -121,12 +137,7 @@ final public class SbmTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
      * @param currentTime   long
      */
     public void flush(long currentTime) {
-        final RW rwStore = new RW();
-        sumRW(rwStore);
-        setRW.setReaders(rwStore.readers);
-        setRW.setWriters(rwStore.writers);
-        setRW.setMaxReaders(rwStore.maxReaders);
-        setRW.setMaxWriters(rwStore.maxWriters);
+        sumRW();
         window.print(currentTime, windowLogger, this);
     }
 
@@ -141,44 +152,42 @@ final public class SbmTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
     }
 
     private void addRW(long key, int readers, int writers, int maxReaders, int maxWriters) {
-        RW cur = table.get(key);
-        if (cur == null) {
-            cur = new RW();
-            table.put(key, cur);
+        final int clientIndex = Math.toIntExact(key - BASE_CLIENT_ID_VALUE);
+        if (clientIndex < 0 || clientIndex >= activeClients.length) {
+            throw new IllegalArgumentException("SBM client ID is outside the configured range: " + key);
         }
-        cur.update(readers, writers, maxReaders, maxWriters);
+        if (!activeClients[clientIndex]) {
+            activeClients[clientIndex] = true;
+            activeClientIds[activeClientCount++] = clientIndex;
+        }
+        readersByClient[clientIndex] = Math.max(readersByClient[clientIndex], readers);
+        writersByClient[clientIndex] = Math.max(writersByClient[clientIndex], writers);
+        maxReadersByClient[clientIndex] = Math.max(maxReadersByClient[clientIndex], maxReaders);
+        maxWritersByClient[clientIndex] = Math.max(maxWritersByClient[clientIndex], maxWriters);
     }
 
-    private void sumRW(RW ret) {
-        table.forEach((k, data) -> {
-            ret.readers += data.readers;
-            ret.writers += data.writers;
-            ret.maxReaders += data.maxReaders;
-            ret.maxWriters += data.maxWriters;
-        });
-        table.clear();
-    }
-
-    private static class RW {
-        public int readers;
-        public int writers;
-        public int maxReaders;
-        public int maxWriters;
-
-        public RW() {
-            reset();
+    private void sumRW() {
+        int readers = 0;
+        int writers = 0;
+        int maxReaders = 0;
+        int maxWriters = 0;
+        for (int activeIndex = 0; activeIndex < activeClientCount; activeIndex++) {
+            final int clientIndex = activeClientIds[activeIndex];
+            readers += readersByClient[clientIndex];
+            writers += writersByClient[clientIndex];
+            maxReaders += maxReadersByClient[clientIndex];
+            maxWriters += maxWritersByClient[clientIndex];
+            readersByClient[clientIndex] = 0;
+            writersByClient[clientIndex] = 0;
+            maxReadersByClient[clientIndex] = 0;
+            maxWritersByClient[clientIndex] = 0;
+            activeClients[clientIndex] = false;
         }
-
-        public void reset() {
-            readers = writers = maxWriters = maxReaders = 0;
-        }
-
-        public void update(int readers, int writers, int maxReaders, int maxWriters) {
-            this.readers = Math.max(this.readers, readers);
-            this.writers = Math.max(this.writers, writers);
-            this.maxReaders = Math.max(this.maxReaders, maxReaders);
-            this.maxWriters = Math.max(this.maxWriters, maxWriters);
-        }
+        activeClientCount = 0;
+        setRW.setReaders(readers);
+        setRW.setWriters(writers);
+        setRW.setMaxReaders(maxReaders);
+        setRW.setMaxWriters(maxWriters);
     }
 
 }

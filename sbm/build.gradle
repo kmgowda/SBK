@@ -63,6 +63,7 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     implementation "org.jetbrains:annotations:$jetbrainVersion"
     api project(":sbk-api")
+    testImplementation "io.grpc:grpc-inprocess:$grpcVersion"
 }
 
 

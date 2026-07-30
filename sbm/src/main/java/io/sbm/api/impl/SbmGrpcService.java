@@ -13,10 +13,12 @@ package io.sbm.api.impl;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import io.grpc.Status;
+import io.grpc.stub.StreamObserver;
 import io.sbp.api.Sbp;
 import io.sbp.config.SbpVersion;
 import io.sbp.grpc.ClientID;
 import io.sbp.grpc.Config;
+import io.sbp.grpc.MessageLatenciesRecord;
 import io.sbp.grpc.ServiceGrpc;
 import io.sbm.logger.CountConnections;
 import io.sbm.params.RamParameters;
@@ -26,7 +28,6 @@ import io.time.Time;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -65,7 +66,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
      */
     public SbmGrpcService(RamParameters params, Time time, long minLatency, long maxLatency,
                           CountConnections countConnections, SbmRegistry registry) {
-        this(params, time, minLatency, maxLatency, countConnections, registry, false);
+        this(params, time, minLatency, maxLatency, countConnections, registry, false, 0);
     }
 
     /**
@@ -81,6 +82,24 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
      */
     public SbmGrpcService(RamParameters params, Time time, long minLatency, long maxLatency,
                           CountConnections countConnections, SbmRegistry registry, boolean coordinatedStart) {
+        this(params, time, minLatency, maxLatency, countConnections, registry, coordinatedStart, 0);
+    }
+
+    /**
+     * Create the SBP service with registration-barrier and transport-size configuration.
+     *
+     * @param params SBM parameters
+     * @param time latency time implementation
+     * @param minLatency minimum accepted latency
+     * @param maxLatency maximum accepted latency
+     * @param countConnections connection metrics
+     * @param registry latency-record registry
+     * @param coordinatedStart whether all expected clients must register before any registration completes
+     * @param maxRecordSizeBytes maximum accepted serialized latency-record size
+     */
+    public SbmGrpcService(RamParameters params, Time time, long minLatency, long maxLatency,
+                          CountConnections countConnections, SbmRegistry registry, boolean coordinatedStart,
+                          long maxRecordSizeBytes) {
         super();
         connections = new AtomicInteger(0);
         Config.Builder builder = Config.newBuilder();
@@ -89,6 +108,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
         builder.setTimeUnitValue(time.getTimeUnit().ordinal());
         builder.setMaxLatency(maxLatency);
         builder.setMinLatency(minLatency);
+        builder.setMaxRecordSizeBytes(maxRecordSizeBytes);
         config = builder.build();
         this.params = params;
         this.countConnections = countConnections;
@@ -173,21 +193,79 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     }
 
 
+    /**
+     * Opens a persistent ordered latency stream for an SBK client.
+     *
+     * @param responseObserver final stream acknowledgement observer
+     * @return observer accepting ordered latency records
+     */
     @Override
-    public void addLatenciesRecord(io.sbp.grpc.MessageLatenciesRecord request,
-                                   io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
-        // Queue a latency record for aggregation; respond with Empty on success
-        try {
-            registry.enQueue(request);
-            if (responseObserver != null) {
-                responseObserver.onNext(Empty.newBuilder().build());
-                responseObserver.onCompleted();
+    public StreamObserver<MessageLatenciesRecord> streamLatencies(
+            StreamObserver<Empty> responseObserver) {
+        return new StreamObserver<>() {
+            private long clientId = -1;
+            private long expectedSequence = 1;
+            private boolean terminated;
+
+            @Override
+            public void onNext(MessageLatenciesRecord record) {
+                if (terminated) {
+                    return;
+                }
+                if (clientId < 0) {
+                    clientId = record.getClientID();
+                }
+                if (record.getClientID() != clientId) {
+                    fail(Status.INVALID_ARGUMENT.withDescription(
+                            "SBM latency stream changed client ID from " + clientId
+                                    + " to " + record.getClientID()));
+                } else if (record.getSequenceNumber() != expectedSequence) {
+                    fail(Status.DATA_LOSS.withDescription(
+                            "SBM latency stream sequence mismatch for client " + clientId
+                                    + ": expected " + expectedSequence + " but received "
+                                    + record.getSequenceNumber()));
+                } else {
+                    try {
+                        validateLatencyFields(record);
+                        registry.enQueue(record);
+                        expectedSequence++;
+                    } catch (IllegalArgumentException exception) {
+                        fail(Status.INVALID_ARGUMENT
+                                .withDescription(exception.getMessage())
+                                .withCause(exception));
+                    } catch (IllegalStateException exception) {
+                        fail(Status.RESOURCE_EXHAUSTED
+                                .withDescription("SBM latency queue rejected a streamed record")
+                                .withCause(exception));
+                    }
+                }
             }
-        } catch (IllegalStateException ex) {
-            ex.printStackTrace();
-            if (responseObserver != null) {
-                responseObserver.onError(new InvalidKeyException());
+
+            @Override
+            public void onError(Throwable throwable) {
+                terminated = true;
             }
+
+            @Override
+            public void onCompleted() {
+                if (!terminated) {
+                    terminated = true;
+                    responseObserver.onNext(Empty.getDefaultInstance());
+                    responseObserver.onCompleted();
+                }
+            }
+
+            private void fail(Status status) {
+                terminated = true;
+                responseObserver.onError(status.asRuntimeException());
+            }
+        };
+    }
+
+    private static void validateLatencyFields(MessageLatenciesRecord record) {
+        if (record.getLatencyValuesCount() != record.getLatencyCountsCount()) {
+            throw new IllegalArgumentException("SBM packed latency values/counts have different lengths: "
+                    + record.getLatencyValuesCount() + " and " + record.getLatencyCountsCount());
         }
     }
 
@@ -198,7 +276,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
         countConnections.decrementConnections();
         connections.decrementAndGet();
         if (responseObserver != null) {
-            responseObserver.onNext(Empty.newBuilder().build());
+            responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
         }
     }
