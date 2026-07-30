@@ -2492,9 +2492,11 @@ used for loggers, so adding a new one is purely additive.
 ### 10.3 How WebLogger stays alive after a benchmark
 
 `WebLogger`, `SbmWebLogger`, and `GemWebLogger` use the same Local Web Console client
-and server protocol. The logger publishes the already-computed periodic interval
-summaries and excludes cumulative totals; it does not sample storage operations or insert HTTP work into
-the writer/reader hot path. The server keeps a bounded history--180 minutes by
+and server protocol. Their `print(...)` methods publish the already-computed
+periodic interval snapshots. Their `printTotal(...)` methods print cumulative
+totals to the console but do not publish those totals to the Local Web Console.
+The logger does not sample storage operations or insert HTTP work into the
+writer/reader hot path. The server keeps a bounded history--180 minutes by
 default, configurable with `-webminutes`--and streams new summaries to
 browsers with server-sent events (SSE). The implementation lives in
 `io.sbk.webconsole`; its command-line and YML controls use the `-web...`
@@ -2503,8 +2505,10 @@ option prefix, with `-boardname` supplying the benchmark board's display name.
 ```mermaid
 flowchart LR
     HOT["Writer and reader hot paths"] --> PERL["PerL measurement pipeline"]
-    PERL --> SUMMARY["Periodic and total summaries"]
-    SUMMARY --> LOGGER["WebLogger family"]
+    PERL --> PERIODIC["Periodic interval summary from print(...)"]
+    PERL --> TOTAL["Cumulative total from printTotal(...)"]
+    PERIODIC --> LOGGER["WebLogger family"]
+    TOTAL --> CONSOLE["Console output only"]
     LOGGER -->|Snapshot or 15-second heartbeat| LEASE["Active-run lease"]
     LEASE --> SERVER["Reusable Local Web Console server"]
     SERVER --> HISTORY["Bounded run history"]
@@ -2516,7 +2520,7 @@ flowchart LR
     classDef control fill:#e0f2fe,stroke:#0369a1,color:#000
     classDef view fill:#dcfce7,stroke:#15803d,color:#000
     class HOT,PERL hot
-    class SUMMARY,LOGGER,LEASE,SERVER,HISTORY control
+    class PERIODIC,TOTAL,CONSOLE,LOGGER,LEASE,SERVER,HISTORY control
     class BROWSER,BLEASE view
 ```
 

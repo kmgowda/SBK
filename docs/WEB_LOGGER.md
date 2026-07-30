@@ -18,8 +18,9 @@ limitations under the License.
 
 WebLogger displays SBK measurements in the **SBK Local Web Console** without Docker, Prometheus, or Grafana. The
 local component is intentionally named differently from the separately deployable **SBK Dashboard** project. It uses the same
-periodic interval measurements printed by SBK, while intentionally excluding cumulative final totals, so enabling it does not add measurement sampling or storage-driver
-work. The web console server runs as the `SbkWebConsoleMain` process, is implemented with the JDK HTTP server,
+periodic interval measurements delivered through `print(...)`, while `printTotal(...)` writes cumulative final totals
+only to the console. Enabling WebLogger therefore does not add measurement sampling or storage-driver work. The web
+console server runs as the `SbkWebConsoleMain` process, is implemented with the JDK HTTP server,
 retains a bounded in-memory history, and sends
 new summaries to browsers with server-sent events (SSE).
 The browser also synchronizes bounded history every two seconds, so graphs recover automatically if an SSE stream
