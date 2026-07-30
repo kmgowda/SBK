@@ -67,6 +67,11 @@ public class GrpcLogger extends SystemLogger {
         this.exceptionHandler = null;
     }
 
+    /**
+     * Sets the benchmark exception handler notified when the gRPC transport fails.
+     *
+     * @param handler exception handler invoked on transport failure
+     */
     @Override
     public void setExceptionHandler(ExceptionHandler handler) {
         this.exceptionHandler = handler;
@@ -74,6 +79,9 @@ public class GrpcLogger extends SystemLogger {
 
     /**
      * Add SBM host/port options and load defaults from {@code sbmhost.properties}.
+     *
+     * @param params command-line option registry
+     * @throws IllegalArgumentException if the bundled SBM configuration cannot be loaded
      */
     @Override
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
@@ -97,6 +105,7 @@ public class GrpcLogger extends SystemLogger {
     /**
      * Parse and validate the required SBM endpoint options.
      *
+     * @param params parsed command-line options
      * @throws IllegalArgumentException if the SBM host is absent or the port is invalid
      */
     @Override
@@ -131,6 +140,13 @@ public class GrpcLogger extends SystemLogger {
 
     /**
      * Open the logger, establish a gRPC channel, validate configuration with SBM, and prepare buffers.
+     *
+     * @param params parsed command-line options
+     * @param storageName storage driver name expected by SBM
+     * @param action benchmark action expected by SBM
+     * @param time benchmark time implementation
+     * @throws IllegalArgumentException if SBK and SBM configurations are incompatible
+     * @throws IOException if the gRPC channel, registration, or stream cannot be initialized
      */
     @Override
     public void open(final ParsedOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
@@ -222,6 +238,10 @@ public class GrpcLogger extends SystemLogger {
 
     /**
      * Close the logger, unregister the client, and shutdown the gRPC channel.
+     *
+     * @param params parsed command-line options
+     * @throws IllegalArgumentException if inherited logger shutdown validation fails
+     * @throws IOException if the stream cannot drain or the channel cannot close cleanly
      */
     @Override
     public void close(final ParsedOptions params) throws IllegalArgumentException, IOException {
@@ -286,7 +306,8 @@ public class GrpcLogger extends SystemLogger {
         builder.setWriteTimeoutEvents(writeTimeoutEvents);
         builder.setReadTimeoutEvents(readTimeoutEvents);
         builder.setClientID(clientID);
-        builder.setSequenceNumber(++seqNum);
+        final long candidateSequenceNumber = seqNum + 1;
+        builder.setSequenceNumber(candidateSequenceNumber);
         builder.setMaxReaders(getMaxReadersCount());
         builder.setReaders(getReadersCount());
         builder.setWriters(getWritersCount());
@@ -309,6 +330,7 @@ public class GrpcLogger extends SystemLogger {
         } else {
             try {
                 streamSender.send(record);
+                seqNum = candidateSequenceNumber;
             } catch (IOException exception) {
                 reportTransportFailure(exception);
             }
@@ -320,6 +342,11 @@ public class GrpcLogger extends SystemLogger {
 
     /**
      * Record individual latency values into the local {@code LatencyRecorder} and stage them for gRPC export.
+     *
+     * @param startTime operation start time
+     * @param events number of operations represented by this measurement
+     * @param bytes number of bytes represented by this measurement
+     * @param latency measured operation latency
      */
     @Override
     public void recordLatency(long startTime, int events, int bytes, long latency) {
@@ -337,6 +364,48 @@ public class GrpcLogger extends SystemLogger {
         recorder.record(events, bytes, latency);
     }
 
+    /**
+     * Print periodic results locally and enqueue the corresponding exact latency batch for SBM.
+     *
+     * @param reportTime report time in milliseconds
+     * @param writers active writers
+     * @param maxWriters maximum writers
+     * @param readers active readers
+     * @param maxReaders maximum readers
+     * @param writeRequestBytes write request bytes
+     * @param writeRequestMbPerSec write request throughput in MB/sec
+     * @param writeRequestRecords write request records
+     * @param writeRequestRecordsPerSec write requests per second
+     * @param readRequestBytes read request bytes
+     * @param readRequestMbPerSec read request throughput in MB/sec
+     * @param readRequestRecords read request records
+     * @param readRequestRecordsPerSec read requests per second
+     * @param writeResponsePendingRecords pending write response records
+     * @param writeResponsePendingBytes pending write response bytes
+     * @param readResponsePendingRecords pending read response records
+     * @param readResponsePendingBytes pending read response bytes
+     * @param writeReadRequestPendingRecords write-read pending records
+     * @param writeReadRequestPendingBytes write-read pending bytes
+     * @param writeTimeoutEvents write timeout events
+     * @param writeTimeoutEventsPerSec write timeout events per second
+     * @param readTimeoutEvents read timeout events
+     * @param readTimeoutEventsPerSec read timeout events per second
+     * @param seconds reporting interval seconds
+     * @param bytes bytes processed
+     * @param records records processed
+     * @param recsPerSec records per second
+     * @param mbPerSec throughput in MB/sec
+     * @param avgLatency average latency
+     * @param minLatency minimum latency
+     * @param maxLatency maximum latency
+     * @param invalid invalid latency count
+     * @param lowerDiscard latencies discarded below the configured minimum
+     * @param higherDiscard latencies discarded above the configured maximum
+     * @param slc1 sliding latency coverage count 1
+     * @param slc2 sliding latency coverage count 2
+     * @param percentileLatencies percentile latency values
+     * @param percentileLatencyCounts percentile latency bucket counts
+     */
     @Override
     public void print(long reportTime, int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,

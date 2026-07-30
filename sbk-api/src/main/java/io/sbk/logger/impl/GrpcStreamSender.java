@@ -176,7 +176,9 @@ final class GrpcStreamSender implements AutoCloseable {
             if (senderThread.isAlive()) {
                 throw new IOException("Timed out while draining the gRPC latency stream");
             }
+            checkFailure();
             if (!responseCompleted.await(5, TimeUnit.SECONDS)) {
+                checkFailure();
                 throw new IOException("Timed out waiting for the SBM gRPC stream acknowledgement");
             }
             checkFailure();

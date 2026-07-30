@@ -142,6 +142,29 @@ final class SbmGrpcServiceTest {
         assertEquals(Status.Code.INVALID_ARGUMENT, Status.fromThrowable(response.failure).getCode());
     }
 
+    @Test
+    void rejectsAClientIdChangeWithinOneStream() throws Exception {
+        final SbmParameters params = new SbmParameters("test", 0, 1, 0, null);
+        params.parseArgs(new String[]{"-class", "file", "-action", "r"});
+        final SbmRegistry registry = mock(SbmRegistry.class);
+        final SbmGrpcService service = new SbmGrpcService(params, new MilliSeconds(), 0, 1000,
+                mock(CountConnections.class), registry);
+        final CapturingEmptyObserver response = new CapturingEmptyObserver();
+        final StreamObserver<MessageLatenciesRecord> stream = service.streamLatencies(response);
+
+        stream.onNext(MessageLatenciesRecord.newBuilder()
+                .setClientID(1)
+                .setSequenceNumber(1)
+                .build());
+        stream.onNext(MessageLatenciesRecord.newBuilder()
+                .setClientID(2)
+                .setSequenceNumber(2)
+                .build());
+
+        assertEquals(Status.Code.INVALID_ARGUMENT,
+                Status.fromThrowable(response.failure).getCode());
+    }
+
     private static final class CapturingObserver implements StreamObserver<ClientID> {
         private final List<Long> values = new ArrayList<>();
         private boolean completed;

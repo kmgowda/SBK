@@ -106,6 +106,7 @@ final public class SbmTotalWindowLatencyPeriodicRecorder extends TotalLatencyRec
      * adds latencies record.
      *
      * @param record NotNull LatenciesRecord
+     * @throws IllegalArgumentException if the client ID is outside the configured range
      */
     public void addLatenciesRecord(@NotNull MessageLatenciesRecord record) {
         final int id = (int) (record.getClientID() - BASE_CLIENT_ID_VALUE);
