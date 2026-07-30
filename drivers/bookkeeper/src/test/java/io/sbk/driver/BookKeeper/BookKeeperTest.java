@@ -20,8 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 //create the test Class for Bookkeeper Benchmarking
 public class BookKeeperTest {
     /**
-     * .
-     * * Initializing variable
+     * BookKeeper configuration file name.
      */
     private final static String CONFIGFILE = "BookKeeper.properties";
     final String[] drivers = {"BookKeeper"};

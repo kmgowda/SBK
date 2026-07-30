@@ -9,6 +9,7 @@
  */
 package io.sbk.api;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.perl.api.PerlChannel;
 import io.sbk.data.impl.ByteArray;
 import io.time.NanoSeconds;
@@ -56,6 +57,8 @@ final class AsyncOperationTimingTest {
         CompletableFuture<byte[]> completion = new CompletableFuture<>();
         AsyncReader<byte[]> reader = new AsyncReader<>() {
             @Override
+            @SuppressFBWarnings(value = "EI_EXPOSE_REP",
+                    justification = "The shared future is the callback-completion signal under test")
             public CompletableFuture<byte[]> readAsync(int size) {
                 return completion;
             }

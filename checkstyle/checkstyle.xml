@@ -110,12 +110,7 @@
             <property name="allowMultipleEmptyLinesInsideClassMembers" value="false"/>
         </module>
         <module name="AvoidNestedBlocks"/>
-        <module name="JavadocStyle">
-            <property name="scope" value="protected"/>
-            <property name="checkFirstSentence" value="true"/>
-            <property name="checkEmptyJavadoc" value="true"/>
-            <property name="checkHtml" value="true"/>
-        </module>
+        <module name="SummaryJavadoc"/>
         <module name="MissingOverride"/>
         <module name="MissingDeprecated"/>
         <module name="AnnotationLocation">
