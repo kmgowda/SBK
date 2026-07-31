@@ -142,8 +142,11 @@ labels the distributed run `FAILED` or `INCOMPLETE`, logs that its performance
 results are invalid for comparison, aborts any clients waiting at the
 coordinated-start barrier, and exits non-zero. One failed future cannot hide the
 outcomes of the other nodes: GEM waits for and reports every configured host.
-The registration barrier also has a deadline, so a remote process that never
-reaches SBM cannot leave the other clients waiting indefinitely.
+The registration barrier also has a separate deadline, so a remote process that
+never reaches SBM cannot leave the other clients waiting indefinitely. Configure
+`sbmRegistrationTimeoutSeconds` in `gem.properties` for slow JVM or storage-driver
+startup; its default is 120 seconds. The independent `remoteTimeoutSeconds`
+setting remains the timeout for individual SSH control operations.
 
 For diagnostics, GEM retains only the most recent 256 KiB of each remote
 process's stdout and stderr. Failed hosts include these bounded tails in the

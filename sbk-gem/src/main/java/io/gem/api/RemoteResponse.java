@@ -57,7 +57,7 @@ public final class RemoteResponse {
     public RemoteResponse(int returnCode, String stdOutput, String errOutput, String host) {
         this(returnCode, stdOutput, errOutput, host,
                 returnCode == 0 ? RemoteExecutionStatus.SUCCESS : RemoteExecutionStatus.EXIT_FAILURE,
-                returnCode == 0 ? "" : "Remote process returned exit code " + returnCode);
+                returnCode == 0 ? "" : "Host '" + host + "' remote process returned exit code " + returnCode);
     }
 
     /**

@@ -62,6 +62,8 @@ final public class SbmBenchmark implements Benchmark {
 
     @GuardedBy("this")
     private State state;
+    @GuardedBy("this")
+    private boolean serverStarted;
 
     /**
      * Create SBK Server Benchmark.
@@ -110,6 +112,7 @@ final public class SbmBenchmark implements Benchmark {
                 .addService(service).directExecutor().build();
         retFuture = new CompletableFuture<>();
         state = State.BEGIN;
+        serverStarted = false;
     }
 
     @Contract(" -> new")
@@ -180,12 +183,29 @@ final public class SbmBenchmark implements Benchmark {
         state = State.RUN;
         Printer.log.info("SBM Started");
         logger.open(params, params.getStorageName(), params.getAction(), time);
-        benchmark.start().whenComplete((ignored, failure) -> {
+        final CompletableFuture<Void> latencyFuture = benchmark.start();
+        latencyFuture.whenComplete((ignored, failure) -> {
             if (failure != null) {
                 shutdown(failure);
             }
         });
-        server.start();
+        if (latencyFuture.isCompletedExceptionally()) {
+            try {
+                latencyFuture.get();
+            } catch (ExecutionException exception) {
+                shutdown(exception.getCause());
+                throw exception;
+            }
+        }
+        if (state == State.RUN) {
+            try {
+                server.start();
+                serverStarted = true;
+            } catch (IOException exception) {
+                shutdown(exception);
+                throw exception;
+            }
+        }
         return retFuture.toCompletableFuture();
     }
 
@@ -202,7 +222,10 @@ final public class SbmBenchmark implements Benchmark {
         if (state != State.END) {
             state = State.END;
             try {
-                server.shutdown();
+                if (serverStarted) {
+                    server.shutdown();
+                    serverStarted = false;
+                }
                 benchmark.stop();
                 logger.close(params);
             } catch (IOException e) {

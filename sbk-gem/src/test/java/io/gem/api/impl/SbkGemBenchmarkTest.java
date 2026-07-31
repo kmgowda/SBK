@@ -48,6 +48,13 @@ final class SbkGemBenchmarkTest {
     }
 
     @Test
+    void includesHostInDerivedExitFailureMessage() {
+        final RemoteResponse response = new RemoteResponse(2, "", "bad option", "node-a");
+
+        assertEquals("Host 'node-a' remote process returned exit code 2", response.failureMessage);
+    }
+
+    @Test
     void classifiesTransportFailureWithHostAndBoundedDiagnostics() throws IOException {
         final SshResponse partial = new SshResponse(true, 32);
         partial.stdOutputStream.write("startup output".getBytes(StandardCharsets.UTF_8));

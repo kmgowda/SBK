@@ -53,6 +53,7 @@ final class SbkGemJavaOptionsTest {
         assertFalse(config.deleteafter);
         assertTrue(config.hostkeycheck);
         assertTrue(config.knownhosts == null || config.knownhosts.isEmpty());
+        assertEquals(120, config.sbmRegistrationTimeoutSeconds);
     }
 
     @Test

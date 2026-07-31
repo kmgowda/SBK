@@ -228,7 +228,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 nodes.length);
         CompletableFuture.runAsync(() -> {
             try {
-                final long timeoutNanos = TimeUnit.SECONDS.toNanos(config.remoteTimeoutSeconds);
+                final long timeoutNanos = TimeUnit.SECONDS.toNanos(config.sbmRegistrationTimeoutSeconds);
                 final long progressIntervalNanos = TimeUnit.SECONDS.toNanos(
                         PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS);
                 final long startNanos = System.nanoTime();
@@ -254,7 +254,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                             PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS);
                 } else if (sbmBenchmark.getRegistrationFailure() == null) {
                     final String failure = "SBK-GEM: SBM coordinated start timed out after " +
-                            config.remoteTimeoutSeconds + " seconds; registered " +
+                            config.sbmRegistrationTimeoutSeconds + " seconds; registered " +
                             sbmBenchmark.getMaximumRegisteredClients() + " of " + nodes.length + " remote clients";
                     Printer.log.error(failure);
                     sbmBenchmark.abortPendingRegistrations(failure);

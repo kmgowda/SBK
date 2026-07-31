@@ -60,17 +60,33 @@ final class SshResponseTest {
 
             assertTimeoutPreemptively(Duration.ofSeconds(5), () -> {
                 try (var executor = Executors.newFixedThreadPool(2)) {
-                    executor.submit(() -> writeRepeatedly(output, stdout, start));
-                    executor.submit(() -> writeRepeatedly(output, stderr, start));
+                    final var stdoutWriter = executor.submit(() -> writeRepeatedly(output, stdout, start));
+                    final var stderrWriter = executor.submit(() -> writeRepeatedly(output, stderr, start));
                     start.countDown();
                     executor.shutdown();
                     assertTrue(executor.awaitTermination(4, TimeUnit.SECONDS));
+                    stdoutWriter.get();
+                    stderrWriter.get();
                 }
             });
 
             final byte[] retained = output.toByteArray();
             assertEquals(capacity, retained.length);
             assertTrue(output.toString().contains("stdout") || output.toString().contains("stderr"));
+        }
+    }
+
+    @Test
+    void growsPartialBufferBeforeConsecutiveBulkCopies() throws IOException {
+        final byte[] first = "0123456789abcdefghijklmnopqrstuv".getBytes(StandardCharsets.UTF_8);
+        final byte[] second = "wxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01".getBytes(StandardCharsets.UTF_8);
+        try (BoundedTailOutputStream output = new BoundedTailOutputStream(64)) {
+            output.write(first);
+            output.write(second);
+
+            assertEquals(64, output.toByteArray().length);
+            assertEquals(new String(first, StandardCharsets.UTF_8) + new String(second, StandardCharsets.UTF_8),
+                    output.toString());
         }
     }
 

@@ -113,16 +113,20 @@ final class SbmLatencyBenchmarkTest {
                 PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS * Time.MS_PER_SEC);
         final CompletableFuture<Void> completion = benchmark.start();
 
-        assertTrue(window.started.await(2, TimeUnit.SECONDS));
-        benchmark.enQueue(MessageLatenciesRecord.newBuilder()
-                .setClientID(10)
-                .setSequenceNumber(1)
-                .build());
+        try {
+            assertTrue(window.started.await(2, TimeUnit.SECONDS));
+            benchmark.enQueue(MessageLatenciesRecord.newBuilder()
+                    .setClientID(10)
+                    .setSequenceNumber(1)
+                    .build());
 
-        final ExecutionException failure = assertThrows(ExecutionException.class,
-                () -> completion.get(2, TimeUnit.SECONDS));
-        assertTrue(failure.getCause().getMessage().contains("client 10 at sequence 1"));
-        assertEquals("test recorder failure", failure.getCause().getCause().getMessage());
+            final ExecutionException failure = assertThrows(ExecutionException.class,
+                    () -> completion.get(2, TimeUnit.SECONDS));
+            assertTrue(failure.getCause().getMessage().contains("client 10 at sequence 1"));
+            assertEquals("test recorder failure", failure.getCause().getCause().getMessage());
+        } finally {
+            assertTimeoutPreemptively(Duration.ofSeconds(2), benchmark::stop);
+        }
     }
 
     private void awaitThreadExit(Thread thread) throws InterruptedException {
@@ -224,29 +228,62 @@ final class SbmLatencyBenchmarkTest {
     private static final class FailingWindow implements SbmPeriodicRecorder {
         private final CountDownLatch started = new CountDownLatch(1);
 
+        /**
+         * Rejects every latency batch to exercise consumer failure propagation.
+         *
+         * @param currentTime current time supplied by the consumer
+         * @param record latency record being aggregated
+         * @throws IllegalArgumentException for every supplied record
+         */
         @Override
         public void record(long currentTime, MessageLatenciesRecord record) {
             throw new IllegalArgumentException("test recorder failure");
         }
 
+        /**
+         * Starts the failing recorder's reporting window.
+         *
+         * @param startTime reporting-window start time
+         */
         @Override
         public void startWindow(long startTime) {
         }
 
+        /**
+         * Returns the elapsed reporting-window duration.
+         *
+         * @param currentTime current time supplied by the consumer
+         * @return zero because this test fails before window rotation
+         */
         @Override
         public long elapsedMilliSecondsWindow(long currentTime) {
             return 0;
         }
 
+        /**
+         * Stops the failing recorder's reporting window.
+         *
+         * @param stopTime reporting-window stop time
+         */
         @Override
         public void stopWindow(long stopTime) {
         }
 
+        /**
+         * Signals that benchmark-wide aggregation has started.
+         *
+         * @param startTime benchmark start time
+         */
         @Override
         public void start(long startTime) {
             started.countDown();
         }
 
+        /**
+         * Stops benchmark-wide aggregation.
+         *
+         * @param endTime benchmark end time
+         */
         @Override
         public void stop(long endTime) {
         }

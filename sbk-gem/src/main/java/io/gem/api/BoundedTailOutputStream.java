@@ -44,6 +44,11 @@ final class BoundedTailOutputStream extends OutputStream {
         buffer = EMPTY;
     }
 
+    /**
+     * Retain one byte, discarding the oldest byte when the stream is full.
+     *
+     * @param value byte value whose low eight bits are retained
+     */
     @Override
     public synchronized void write(int value) {
         ensureCapacity(Math.min(capacity, size + 1));
@@ -56,6 +61,14 @@ final class BoundedTailOutputStream extends OutputStream {
         }
     }
 
+    /**
+     * Retain a range of bytes, discarding the oldest bytes when the stream is full.
+     *
+     * @param values source byte array
+     * @param offset first source-array index to retain
+     * @param length number of bytes to retain
+     * @throws IndexOutOfBoundsException if the requested source range is invalid
+     */
     @Override
     public synchronized void write(byte @NotNull [] values, int offset, int length) {
         if (offset < 0 || length < 0 || offset > values.length - length) {

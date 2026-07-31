@@ -38,7 +38,7 @@ failures.
 | Some nodes return no records | per-host stdout/stderr and return code, backend reachability |
 | Backend errors only at scale | throttling, connection limits, namespace collision, network saturation |
 | Invalid/discarded latencies | latency bounds/unit, overload, clock/measurement errors |
-| Local Web Console unavailable/busy | port 9720 ownership; choose another `-webport` |
+| Local Web Console unavailable/busy | configured `-webport` ownership (`9720` by default); choose another port |
 
 Do not report an SSH host-key failure as a password failure. Preserve the root
 cause and the complete causal exception.
