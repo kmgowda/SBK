@@ -18,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,6 +63,37 @@ final class SbmLatencyBenchmarkTest {
         assertFalse(consumer.isAlive());
     }
 
+    /**
+     * Verifies that SBM does not print timer-created empty windows before a
+     * remote SBK batch arrives, while still printing a received batch whose
+     * counters may legitimately be zero.
+     *
+     * @throws Exception if startup, batch processing, or shutdown times out
+     */
+    @Test
+    void printsOnlyWindowsContainingARemoteSbkBatch() throws Exception {
+        final CapturingWindow window = new CapturingWindow(true);
+        final SbmLatencyBenchmark benchmark = new SbmLatencyBenchmark(
+                1, 1, new MilliSeconds(), window, 0);
+        final CompletableFuture<Void> completion = benchmark.start();
+
+        try {
+            assertTrue(window.emptyIntervalRotated.await(2, TimeUnit.SECONDS));
+            assertEquals(0, window.stoppedWindows.get());
+
+            benchmark.enQueue(MessageLatenciesRecord.newBuilder()
+                    .setSequenceNumber(1)
+                    .build());
+
+            assertTrue(window.batchRecorded.await(2, TimeUnit.SECONDS));
+            assertTrue(window.batchWindowPrinted.await(2, TimeUnit.SECONDS));
+            assertEquals(1, window.stoppedWindows.get());
+        } finally {
+            assertTimeoutPreemptively(Duration.ofSeconds(2), benchmark::stop);
+        }
+        completion.get(2, TimeUnit.SECONDS);
+    }
+
     private void awaitThreadExit(Thread thread) throws InterruptedException {
         final long deadline = System.nanoTime()
                 + TimeUnit.SECONDS.toNanos(2);
@@ -73,8 +105,24 @@ final class SbmLatencyBenchmarkTest {
     private static final class CapturingWindow
             implements SbmPeriodicRecorder {
         private final CountDownLatch started = new CountDownLatch(1);
+        private final CountDownLatch emptyIntervalRotated =
+                new CountDownLatch(1);
+        private final CountDownLatch batchRecorded = new CountDownLatch(1);
+        private final CountDownLatch batchWindowPrinted =
+                new CountDownLatch(1);
         private final AtomicReference<Thread> consumer =
                 new AtomicReference<>();
+        private final AtomicInteger startedWindows = new AtomicInteger();
+        private final AtomicInteger stoppedWindows = new AtomicInteger();
+        private final boolean expireImmediately;
+
+        private CapturingWindow() {
+            this(false);
+        }
+
+        private CapturingWindow(boolean expireImmediately) {
+            this.expireImmediately = expireImmediately;
+        }
 
         /**
          * Accepts a latency record for the current reporting window.
@@ -84,6 +132,7 @@ final class SbmLatencyBenchmarkTest {
          */
         @Override
         public void record(long currentTime, MessageLatenciesRecord record) {
+            batchRecorded.countDown();
         }
 
         /**
@@ -93,6 +142,9 @@ final class SbmLatencyBenchmarkTest {
          */
         @Override
         public void startWindow(long startTime) {
+            if (startedWindows.incrementAndGet() >= 2) {
+                emptyIntervalRotated.countDown();
+            }
         }
 
         /**
@@ -103,7 +155,7 @@ final class SbmLatencyBenchmarkTest {
          */
         @Override
         public long elapsedMilliSecondsWindow(long currentTime) {
-            return 0;
+            return expireImmediately ? 1 : 0;
         }
 
         /**
@@ -113,6 +165,8 @@ final class SbmLatencyBenchmarkTest {
          */
         @Override
         public void stopWindow(long stopTime) {
+            stoppedWindows.incrementAndGet();
+            batchWindowPrinted.countDown();
         }
 
         /**

@@ -89,6 +89,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
         MessageLatenciesRecord record;
         boolean doWork = true;
         boolean notFound;
+        boolean receivedBatchInWindow = false;
         Printer.log.info("SbmLatencyBenchmark Started : {} milliseconds idle sleep", this.idleMS);
         long currentTime = time.getCurrentTime();
         window.start(currentTime);
@@ -101,6 +102,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
                     notFound = false;
                     if (record.getSequenceNumber() > 0) {
                         window.record(currentTime, record);
+                        receivedBatchInWindow = true;
                     } else {
                         doWork = false;
                     }
@@ -112,8 +114,17 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
 
             currentTime = time.getCurrentTime();
             if (window.elapsedMilliSecondsWindow(currentTime) > reportingIntervalMS) {
-                window.stopWindow(currentTime);
+                /*
+                 * SBM starts before remote SBK processes and can remain alive after
+                 * they finish. Do not manufacture empty aggregate windows when no
+                 * client supplied a regular SBK reporting batch. A received batch
+                 * is still printed even when it legitimately contains zero records.
+                 */
+                if (receivedBatchInWindow) {
+                    window.stopWindow(currentTime);
+                }
                 window.startWindow(currentTime);
+                receivedBatchInWindow = false;
             }
         }
         window.stop(currentTime);
