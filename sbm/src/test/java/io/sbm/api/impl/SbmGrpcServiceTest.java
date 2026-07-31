@@ -23,12 +23,14 @@ import io.sbp.grpc.MessageLatenciesRecord;
 import io.time.MilliSeconds;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -73,6 +75,35 @@ final class SbmGrpcServiceTest {
         assertEquals(List.of(11L), second.values);
         assertTrue(first.completed);
         assertTrue(second.completed);
+    }
+
+    @Test
+    void atomicallyRejectsRegistrationsBeyondTheConnectionCap() throws Exception {
+        final SbmParameters params = new SbmParameters("test", 0, 2, 0, null);
+        params.parseArgs(new String[]{"-class", "file", "-action", "r", "-max", "2"});
+        final CountConnections connections = mock(CountConnections.class);
+        final SbmRegistry registry = mock(SbmRegistry.class);
+        when(registry.getID()).thenReturn(10L, 11L);
+        final SbmGrpcService service = new SbmGrpcService(params, new MilliSeconds(), 0, 1000,
+                connections, registry);
+
+        service.getConfig(Empty.getDefaultInstance(), new CapturingConfigObserver());
+        service.getConfig(Empty.getDefaultInstance(), new CapturingConfigObserver());
+        service.getConfig(Empty.getDefaultInstance(), new CapturingConfigObserver());
+        final CapturingObserver first = new CapturingObserver();
+        final CapturingObserver second = new CapturingObserver();
+        final CapturingObserver excess = new CapturingObserver();
+
+        service.registerClient(Config.getDefaultInstance(), first);
+        service.registerClient(Config.getDefaultInstance(), second);
+        service.registerClient(Config.getDefaultInstance(), excess);
+
+        assertEquals(List.of(10L), first.values);
+        assertEquals(List.of(11L), second.values);
+        assertEquals(Status.Code.RESOURCE_EXHAUSTED, Status.fromThrowable(excess.failure).getCode());
+        assertEquals(2, service.getMaximumRegisteredClients());
+        verify(registry, times(2)).getID();
+        verify(connections, times(2)).incrementConnections();
     }
 
     @Test
@@ -130,6 +161,19 @@ final class SbmGrpcServiceTest {
         assertFalse(service.awaitCoordinatedStart(1, TimeUnit.MILLISECONDS));
         service.abortPendingRegistrations("registration deadline expired");
         assertTrue(service.getRegistrationFailure().contains("deadline"));
+    }
+
+    @Test
+    void abortBeforeAwaitCannotLoseTheCoordinatedStartNotification() throws Exception {
+        final SbmParameters params = new SbmParameters("test", 0, 2, 0, null);
+        params.parseArgs(new String[]{"-class", "file", "-action", "r", "-max", "2"});
+        final SbmGrpcService service = new SbmGrpcService(params, new MilliSeconds(), 0, 1000,
+                mock(CountConnections.class), mock(SbmRegistry.class), true);
+
+        service.abortPendingRegistrations("remote startup failed before wait");
+
+        assertTimeoutPreemptively(Duration.ofMillis(500),
+                () -> assertFalse(service.awaitCoordinatedStart(5, TimeUnit.SECONDS)));
     }
 
     @Test

@@ -183,7 +183,16 @@ public final class WebConsoleClient implements AutoCloseable {
             return;
         }
         try {
-            publisherThread.join(REQUEST_TIMEOUT.toMillis() * 2);
+            publisherThread.join(REQUEST_TIMEOUT.toMillis() * 3);
+            if (publisherThread.isAlive()) {
+                publisherThread.interrupt();
+                publisherThread.join(REQUEST_TIMEOUT.toMillis());
+            }
+            if (publisherThread.isAlive()) {
+                Printer.log.warn("SBK Local Web Console publisher did not stop; skipping completion notification "
+                        + "to avoid racing an in-flight snapshot (the run lease will expire)");
+                return;
+            }
             postJson("/api/v1/runs/" + runId + "/complete", Map.of(), 204);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();

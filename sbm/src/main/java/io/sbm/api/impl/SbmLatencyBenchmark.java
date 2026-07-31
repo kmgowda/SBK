@@ -84,6 +84,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
      * sequenceNumber <= 0 is observed.
      *
      * @throws InterruptedException if the thread sleep or processing is interrupted
+     * @throws IllegalStateException if a latency batch cannot be aggregated
      */
     void run() throws InterruptedException {
         MessageLatenciesRecord record;
@@ -101,7 +102,12 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
                 if (record != null) {
                     notFound = false;
                     if (record.getSequenceNumber() > 0) {
-                        window.record(currentTime, record);
+                        try {
+                            window.record(currentTime, record);
+                        } catch (RuntimeException exception) {
+                            throw new IllegalStateException("SBM failed to aggregate latency batch for client "
+                                    + record.getClientID() + " at sequence " + record.getSequenceNumber(), exception);
+                        }
                         receivedBatchInWindow = true;
                     } else {
                         doWork = false;

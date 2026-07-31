@@ -171,7 +171,8 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
             responseObserver.onNext(config);
             responseObserver.onCompleted();
         } else {
-            Status retError = Status.RESOURCE_EXHAUSTED.withDescription("SBM, Maximum clients Exceeded");
+            Status retError = Status.RESOURCE_EXHAUSTED.withDescription(
+                    "SBM maximum client connections reached: " + params.getMaxConnections());
             responseObserver.onError(retError.asRuntimeException());
         }
     }
@@ -184,9 +185,16 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
             responseObserver.onError(Status.ABORTED.withDescription(registrationFailure).asRuntimeException());
             return;
         }
+        final int registered = connections.incrementAndGet();
+        if (registered > params.getMaxConnections()) {
+            connections.decrementAndGet();
+            responseObserver.onError(Status.RESOURCE_EXHAUSTED
+                    .withDescription("SBM maximum client connections reached: " + params.getMaxConnections())
+                    .asRuntimeException());
+            return;
+        }
         final ClientID clientID = ClientID.newBuilder().setId(registry.getID()).build();
         countConnections.incrementConnections();
-        final int registered = connections.incrementAndGet();
         maximumRegisteredClients = Math.max(maximumRegisteredClients, registered);
         if (startReleased) {
             completeRegistration(responseObserver, clientID);

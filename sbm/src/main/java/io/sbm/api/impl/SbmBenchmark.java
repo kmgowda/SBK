@@ -180,7 +180,11 @@ final public class SbmBenchmark implements Benchmark {
         state = State.RUN;
         Printer.log.info("SBM Started");
         logger.open(params, params.getStorageName(), params.getAction(), time);
-        benchmark.start();
+        benchmark.start().whenComplete((ignored, failure) -> {
+            if (failure != null) {
+                shutdown(failure);
+            }
+        });
         server.start();
         return retFuture.toCompletableFuture();
     }
@@ -190,6 +194,11 @@ final public class SbmBenchmark implements Benchmark {
      */
     @Synchronized
     private void shutdown() {
+        shutdown(null);
+    }
+
+    @Synchronized
+    private void shutdown(Throwable failure) {
         if (state != State.END) {
             state = State.END;
             try {
@@ -200,7 +209,12 @@ final public class SbmBenchmark implements Benchmark {
                 e.printStackTrace();
             }
             Printer.log.info("SBM Shutdown");
-            retFuture.complete(null);
+            if (failure == null) {
+                retFuture.complete(null);
+            } else {
+                Printer.log.error("SBM latency aggregation failed", failure);
+                retFuture.completeExceptionally(failure);
+            }
         }
     }
 

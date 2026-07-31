@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,6 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -95,6 +97,32 @@ final class SbmLatencyBenchmarkTest {
             assertTimeoutPreemptively(Duration.ofSeconds(2), benchmark::stop);
         }
         completion.get(2, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Verifies that an aggregation failure terminates the consumer with a
+     * diagnostic future instead of allowing SBM to report a clean shutdown.
+     *
+     * @throws Exception if consumer startup or failure propagation times out
+     */
+    @Test
+    void propagatesLatencyWindowFailures() throws Exception {
+        final FailingWindow window = new FailingWindow();
+        final SbmLatencyBenchmark benchmark = new SbmLatencyBenchmark(
+                1, 1, new MilliSeconds(), window,
+                PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS * Time.MS_PER_SEC);
+        final CompletableFuture<Void> completion = benchmark.start();
+
+        assertTrue(window.started.await(2, TimeUnit.SECONDS));
+        benchmark.enQueue(MessageLatenciesRecord.newBuilder()
+                .setClientID(10)
+                .setSequenceNumber(1)
+                .build());
+
+        final ExecutionException failure = assertThrows(ExecutionException.class,
+                () -> completion.get(2, TimeUnit.SECONDS));
+        assertTrue(failure.getCause().getMessage().contains("client 10 at sequence 1"));
+        assertEquals("test recorder failure", failure.getCause().getCause().getMessage());
     }
 
     private void awaitThreadExit(Thread thread) throws InterruptedException {
@@ -188,6 +216,37 @@ final class SbmLatencyBenchmarkTest {
          *
          * @param endTime benchmark end time
          */
+        @Override
+        public void stop(long endTime) {
+        }
+    }
+
+    private static final class FailingWindow implements SbmPeriodicRecorder {
+        private final CountDownLatch started = new CountDownLatch(1);
+
+        @Override
+        public void record(long currentTime, MessageLatenciesRecord record) {
+            throw new IllegalArgumentException("test recorder failure");
+        }
+
+        @Override
+        public void startWindow(long startTime) {
+        }
+
+        @Override
+        public long elapsedMilliSecondsWindow(long currentTime) {
+            return 0;
+        }
+
+        @Override
+        public void stopWindow(long stopTime) {
+        }
+
+        @Override
+        public void start(long startTime) {
+            started.countDown();
+        }
+
         @Override
         public void stop(long endTime) {
         }

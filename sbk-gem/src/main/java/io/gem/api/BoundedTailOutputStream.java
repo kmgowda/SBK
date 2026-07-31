@@ -45,7 +45,7 @@ final class BoundedTailOutputStream extends OutputStream {
     }
 
     @Override
-    public void write(int value) {
+    public synchronized void write(int value) {
         ensureCapacity(Math.min(capacity, size + 1));
         if (size < capacity) {
             buffer[(start + size) % buffer.length] = (byte) value;
@@ -57,7 +57,7 @@ final class BoundedTailOutputStream extends OutputStream {
     }
 
     @Override
-    public void write(byte @NotNull [] values, int offset, int length) {
+    public synchronized void write(byte @NotNull [] values, int offset, int length) {
         if (offset < 0 || length < 0 || offset > values.length - length) {
             throw new IndexOutOfBoundsException();
         }
@@ -88,7 +88,7 @@ final class BoundedTailOutputStream extends OutputStream {
      *
      * @return copy of the retained output tail
      */
-    byte[] toByteArray() {
+    synchronized byte[] toByteArray() {
         if (size == 0) {
             return new byte[0];
         }

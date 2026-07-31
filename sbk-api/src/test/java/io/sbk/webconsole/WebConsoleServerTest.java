@@ -318,6 +318,23 @@ final class WebConsoleServerTest {
     }
 
     @Test
+    void rejectsSnapshotsAfterRunCompletionWithoutChangingHistory() throws Exception {
+        try (WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2)) {
+            server.start();
+            final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
+            assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
+                    MAPPER.writeValueAsString(run("completed-run"))).statusCode());
+            assertEquals(204, post(baseUri.resolve("/api/v1/runs/completed-run/snapshots"),
+                    MAPPER.writeValueAsString(snapshot("completed-run", 1))).statusCode());
+            assertEquals(204, post(baseUri.resolve("/api/v1/runs/completed-run/complete"), "{}").statusCode());
+
+            assertEquals(409, post(baseUri.resolve("/api/v1/runs/completed-run/snapshots"),
+                    MAPPER.writeValueAsString(snapshot("completed-run", 2))).statusCode());
+            assertEquals(1, waitForHistory(baseUri, "completed-run", 1).length);
+        }
+    }
+
+    @Test
     void webConsoleWithoutBenchmarkOrBrowserStopsAfterIdleTimeout() throws Exception {
         final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2,
                 Duration.ofMillis(200), Duration.ofMillis(20));

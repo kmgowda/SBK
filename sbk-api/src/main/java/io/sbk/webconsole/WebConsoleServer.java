@@ -244,7 +244,11 @@ public final class WebConsoleServer implements AutoCloseable {
                             "text/plain; charset=utf-8");
                     return;
                 }
-                state.add(snapshot);
+                if (!state.add(snapshot)) {
+                    sendText(exchange, 409, "Local Web Console run has completed",
+                            "text/plain; charset=utf-8");
+                    return;
+                }
                 exchange.sendResponseHeaders(204, -1);
             }
             case "heartbeat" -> {
@@ -494,26 +498,36 @@ public final class WebConsoleServer implements AutoCloseable {
             this.lastActivity = System.currentTimeMillis();
         }
 
-        private synchronized void add(WebConsoleSnapshot snapshot) throws IOException {
+        private synchronized boolean add(WebConsoleSnapshot snapshot) throws IOException {
+            if (completed || abandoned) {
+                return false;
+            }
             if (history.size() == retention) {
                 history.removeFirst();
             }
             history.addLast(snapshot);
             final String event = "event: snapshot\ndata: " + MAPPER.writeValueAsString(snapshot) + "\n\n";
             clients.forEach(client -> client.offer(event));
+            return true;
         }
 
         private synchronized List<WebConsoleSnapshot> history() {
             return new ArrayList<>(history);
         }
 
-        private void complete() {
+        private synchronized void complete() {
+            if (completed) {
+                return;
+            }
             completed = true;
             clients.forEach(client -> client.offer("event: complete\ndata: {\"abandoned\":" + abandoned
                     + "}\n\n"));
         }
 
-        private void abandon() {
+        private synchronized void abandon() {
+            if (completed) {
+                return;
+            }
             completed = true;
             abandoned = true;
             clients.forEach(client -> client.offer("event: complete\ndata: {\"abandoned\":true}\n\n"));
