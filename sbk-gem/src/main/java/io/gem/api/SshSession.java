@@ -18,6 +18,7 @@ import org.apache.sshd.client.session.ClientSession;
 import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
@@ -150,10 +151,22 @@ final public class SshSession {
             try {
                 SshUtils.runCommand(sshSession, cmd, timeoutSeconds, response);
             } catch (IOException e) {
-                throw new CompletionException(e);
+                throw new CompletionException(new SshCommandException(connection.getHost(), response,
+                        hasTimeoutCause(e), e));
             }
             return response;
         }, executor);
+    }
+
+    private static boolean hasTimeoutCause(Throwable failure) {
+        Throwable cause = failure;
+        while (cause != null) {
+            if (cause instanceof SocketTimeoutException) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 
     /**

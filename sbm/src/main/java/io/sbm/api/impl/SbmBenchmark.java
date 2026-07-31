@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -61,6 +62,8 @@ final public class SbmBenchmark implements Benchmark {
 
     @GuardedBy("this")
     private State state;
+    @GuardedBy("this")
+    private boolean serverStarted;
 
     /**
      * Create SBK Server Benchmark.
@@ -109,6 +112,7 @@ final public class SbmBenchmark implements Benchmark {
                 .addService(service).directExecutor().build();
         retFuture = new CompletableFuture<>();
         state = State.BEGIN;
+        serverStarted = false;
     }
 
     @Contract(" -> new")
@@ -179,8 +183,29 @@ final public class SbmBenchmark implements Benchmark {
         state = State.RUN;
         Printer.log.info("SBM Started");
         logger.open(params, params.getStorageName(), params.getAction(), time);
-        benchmark.start();
-        server.start();
+        final CompletableFuture<Void> latencyFuture = benchmark.start();
+        latencyFuture.whenComplete((ignored, failure) -> {
+            if (failure != null) {
+                shutdown(failure);
+            }
+        });
+        if (latencyFuture.isCompletedExceptionally()) {
+            try {
+                latencyFuture.get();
+            } catch (ExecutionException exception) {
+                shutdown(exception.getCause());
+                throw exception;
+            }
+        }
+        if (state == State.RUN) {
+            try {
+                server.start();
+                serverStarted = true;
+            } catch (IOException exception) {
+                shutdown(exception);
+                throw exception;
+            }
+        }
         return retFuture.toCompletableFuture();
     }
 
@@ -189,17 +214,30 @@ final public class SbmBenchmark implements Benchmark {
      */
     @Synchronized
     private void shutdown() {
+        shutdown(null);
+    }
+
+    @Synchronized
+    private void shutdown(Throwable failure) {
         if (state != State.END) {
             state = State.END;
             try {
-                server.shutdown();
+                if (serverStarted) {
+                    server.shutdown();
+                    serverStarted = false;
+                }
                 benchmark.stop();
                 logger.close(params);
             } catch (IOException e) {
                 e.printStackTrace();
             }
             Printer.log.info("SBM Shutdown");
-            retFuture.complete(null);
+            if (failure == null) {
+                retFuture.complete(null);
+            } else {
+                Printer.log.error("SBM latency aggregation failed", failure);
+                retFuture.completeExceptionally(failure);
+            }
         }
     }
 
@@ -213,5 +251,45 @@ final public class SbmBenchmark implements Benchmark {
     @Override
     public void stop() {
         shutdown();
+    }
+
+    /**
+     * Fail clients waiting for a coordinated distributed start.
+     *
+     * @param reason host-tagged remote execution failure
+     * @return number of pending clients released with an error
+     */
+    public int abortPendingRegistrations(String reason) {
+        return service.abortPendingRegistrations(reason);
+    }
+
+    /**
+     * Return the maximum number of remote SBK clients registered with SBM.
+     *
+     * @return maximum registered client count
+     */
+    public int getMaximumRegisteredClients() {
+        return service.getMaximumRegisteredClients();
+    }
+
+    /**
+     * Return the coordinated-start failure reported by the controller.
+     *
+     * @return failure description, or {@code null} when no failure was reported
+     */
+    public String getRegistrationFailure() {
+        return service.getRegistrationFailure();
+    }
+
+    /**
+     * Wait for the distributed coordinated-start barrier.
+     *
+     * @param timeout maximum wait duration
+     * @param unit timeout unit
+     * @return true when all expected remote clients registered
+     * @throws InterruptedException if the controller thread is interrupted
+     */
+    public boolean awaitCoordinatedStart(long timeout, TimeUnit unit) throws InterruptedException {
+        return service.awaitCoordinatedStart(timeout, unit);
     }
 }

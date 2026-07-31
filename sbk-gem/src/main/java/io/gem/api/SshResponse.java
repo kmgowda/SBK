@@ -11,7 +11,6 @@
 package io.gem.api;
 
 
-import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
 /**
@@ -21,6 +20,8 @@ import java.io.OutputStream;
  * to channel stdout/stderr and record the return code.
  */
 public final class SshResponse {
+    /** Maximum stdout or stderr bytes retained for one remote command. */
+    public static final int DEFAULT_DIAGNOSTIC_BYTES = 256 * 1024;
     /**
      * <code>OutputStream errOutputStream</code>.
      */
@@ -41,10 +42,20 @@ public final class SshResponse {
      * @param stdout if true, allocate a buffer for stdout; otherwise discard to a null stream
      */
     public SshResponse(boolean stdout) {
+        this(stdout, DEFAULT_DIAGNOSTIC_BYTES);
+    }
+
+    /**
+     * Create response streams with an explicit diagnostic limit.
+     *
+     * @param stdout if true, retain bounded stdout; otherwise discard stdout
+     * @param diagnosticBytes maximum bytes retained independently for stdout and stderr
+     */
+    public SshResponse(boolean stdout, int diagnosticBytes) {
         this.returnCode = 0;
-        this.errOutputStream = new ByteArrayOutputStream();
+        this.errOutputStream = new BoundedTailOutputStream(diagnosticBytes);
         if (stdout) {
-            this.stdOutputStream = new ByteArrayOutputStream();
+            this.stdOutputStream = new BoundedTailOutputStream(diagnosticBytes);
         } else {
             this.stdOutputStream = OutputStream.nullOutputStream();
         }

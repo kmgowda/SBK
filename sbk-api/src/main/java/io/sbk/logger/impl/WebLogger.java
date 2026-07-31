@@ -10,7 +10,7 @@
 package io.sbk.logger.impl;
 
 import io.sbk.action.Action;
-import io.sbk.dashboard.DashboardLoggerSupport;
+import io.sbk.webconsole.WebConsoleLoggerSupport;
 import io.sbk.params.InputOptions;
 import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
@@ -19,40 +19,40 @@ import io.time.Time;
 import java.io.IOException;
 
 /**
- * SBK logger that preserves console/CSV reporting and publishes live summaries to the local browser dashboard.
+ * SBK logger that preserves console/CSV reporting and publishes live summaries to the Local Web Console.
  */
 public class WebLogger extends CSVLogger {
-    private final DashboardLoggerSupport dashboard;
+    private final WebConsoleLoggerSupport webConsole;
 
     /**
-     * Creates a web logger with no dashboard process started.
+     * Creates a web logger with no Local Web Console process started.
      */
     public WebLogger() {
-        dashboard = new DashboardLoggerSupport();
+        webConsole = new WebConsoleLoggerSupport();
     }
 
     @Override
     public void addArgs(InputOptions params) throws IllegalArgumentException {
         super.addArgs(params);
-        dashboard.addArgs(params);
+        webConsole.addArgs(params);
     }
 
     @Override
     public void parseArgs(ParsedOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
-        dashboard.parseArgs(params);
+        webConsole.parseArgs(params);
     }
 
     @Override
     public void open(ParsedOptions params, String storageName, Action action, Time time) throws IOException {
         super.open(params, storageName, action, time);
-        dashboard.open("SBK", storageName, action, getTimeUnit(), getPercentiles());
+        webConsole.open("SBK", storageName, action, getTimeUnit(), getPercentiles());
         Printer.log.info("SBK WebLogger Started");
     }
 
     @Override
     public void close(ParsedOptions params) throws IOException {
-        dashboard.close();
+        webConsole.close();
         super.close(params);
         Printer.log.info("SBK WebLogger Shutdown");
     }
@@ -122,7 +122,7 @@ public class WebLogger extends CSVLogger {
                          double recsPerSec, double mbPerSec, double avgLatency, long minLatency, long maxLatency,
                          long invalid, long lowerDiscard, long higherDiscard, long slc1, long slc2,
                          long[] percentileLatencies, long[] percentileLatencyCounts) {
-        dashboard.publish(0, 0, writers, maxWriters, readers, maxReaders, writeRequestBytes,
+        webConsole.publish(0, 0, writers, maxWriters, readers, maxReaders, writeRequestBytes,
                 writeRequestMbPerSec, writeRequestRecords, writeRequestRecordsPerSec, readRequestBytes,
                 readRequestMbPerSec, readRequestRecords, readRequestRecordsPerSec, writeResponsePendingRecords,
                 writeResponsePendingBytes, readResponsePendingRecords, readResponsePendingBytes,

@@ -141,7 +141,7 @@ health.
 | `SystemLogger` | Console periodic windows and final result |
 | `CSVLogger` | Machine-readable result file; generate its help before choosing file options |
 | `PrometheusLogger` | Prometheus endpoint for external Prometheus/Grafana |
-| `WebLogger` | Built-in plain-HTTP live dashboard; no Docker required |
+| `WebLogger` | Built-in plain-HTTP Local Web Console; no Docker required |
 | `GrpcLogger` | Send measurements to standalone SBM; not a normal standalone display logger |
 
 For WebLogger:
@@ -150,9 +150,9 @@ For WebLogger:
 ./build/install/sbk/bin/sbk \
   -class file -file /tmp/sbk-agent-benchmark.dat \
   -writers 1 -size 4096 -seconds 30 \
-  -out WebLogger -dashboardopen false
+  -out WebLogger -webopen false
 ```
 
-Use the dashboard URLs printed by SBK. It listens on `0.0.0.0:9720` by default,
+Use the Local Web Console URLs printed by SBK. It listens on `0.0.0.0:9720` by default,
 uses unencrypted HTTP, and should be exposed only on a trusted benchmark
 network. See `docs/WEB_LOGGER.md`.

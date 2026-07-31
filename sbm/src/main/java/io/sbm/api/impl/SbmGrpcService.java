@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -52,6 +53,8 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     private final RamParameters params;
     private final List<PendingRegistration> pendingRegistrations;
     private boolean startReleased;
+    private String registrationFailure;
+    private int maximumRegisteredClients;
 
 
     /**
@@ -115,6 +118,8 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
         this.registry = registry;
         this.pendingRegistrations = new ArrayList<>();
         this.startReleased = !coordinatedStart;
+        this.registrationFailure = null;
+        this.maximumRegisteredClients = 0;
     }
 
     @Override
@@ -166,7 +171,8 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
             responseObserver.onNext(config);
             responseObserver.onCompleted();
         } else {
-            Status retError = Status.RESOURCE_EXHAUSTED.withDescription("SBM, Maximum clients Exceeded");
+            Status retError = Status.RESOURCE_EXHAUSTED.withDescription(
+                    "SBM maximum client connections reached: " + params.getMaxConnections());
             responseObserver.onError(retError.asRuntimeException());
         }
     }
@@ -175,9 +181,21 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     public synchronized void registerClient(io.sbp.grpc.Config request,
                                             @NotNull io.grpc.stub.StreamObserver<io.sbp.grpc.ClientID>
                                                     responseObserver) {
+        if (registrationFailure != null) {
+            responseObserver.onError(Status.ABORTED.withDescription(registrationFailure).asRuntimeException());
+            return;
+        }
+        final int registered = connections.incrementAndGet();
+        if (registered > params.getMaxConnections()) {
+            connections.decrementAndGet();
+            responseObserver.onError(Status.RESOURCE_EXHAUSTED
+                    .withDescription("SBM maximum client connections reached: " + params.getMaxConnections())
+                    .asRuntimeException());
+            return;
+        }
         final ClientID clientID = ClientID.newBuilder().setId(registry.getID()).build();
         countConnections.incrementConnections();
-        final int registered = connections.incrementAndGet();
+        maximumRegisteredClients = Math.max(maximumRegisteredClients, registered);
         if (startReleased) {
             completeRegistration(responseObserver, clientID);
             return;
@@ -189,7 +207,71 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
                 completeRegistration(registration.observer(), registration.clientID());
             }
             pendingRegistrations.clear();
+            notifyAll();
         }
+    }
+
+    /**
+     * Abort clients waiting at the coordinated-start barrier.
+     *
+     * <p>This is a control-plane operation used by SBK-GEM when a remote SBK
+     * process fails before all expected clients have registered.
+     *
+     * @param reason host-tagged distributed-run failure
+     * @return number of pending registrations failed
+     */
+    public synchronized int abortPendingRegistrations(String reason) {
+        if (startReleased || registrationFailure != null) {
+            return 0;
+        }
+        registrationFailure = reason;
+        final Status status = Status.ABORTED.withDescription(reason);
+        final int aborted = pendingRegistrations.size();
+        for (PendingRegistration registration : pendingRegistrations) {
+            registration.observer().onError(status.asRuntimeException());
+            countConnections.decrementConnections();
+        }
+        connections.addAndGet(-aborted);
+        pendingRegistrations.clear();
+        notifyAll();
+        return aborted;
+    }
+
+    /**
+     * Wait for all coordinated clients to register or for startup to fail.
+     *
+     * @param timeout maximum wait duration
+     * @param unit timeout unit
+     * @return true when the coordinated-start barrier was released normally
+     * @throws InterruptedException if the waiting controller thread is interrupted
+     */
+    public synchronized boolean awaitCoordinatedStart(long timeout, TimeUnit unit) throws InterruptedException {
+        final long timeoutNanos = unit.toNanos(timeout);
+        final long started = System.nanoTime();
+        long remaining = timeoutNanos;
+        while (!startReleased && registrationFailure == null && remaining > 0) {
+            TimeUnit.NANOSECONDS.timedWait(this, remaining);
+            remaining = timeoutNanos - (System.nanoTime() - started);
+        }
+        return startReleased;
+    }
+
+    /**
+     * Return the largest number of clients registered concurrently.
+     *
+     * @return maximum registered clients observed by this SBM service
+     */
+    public synchronized int getMaximumRegisteredClients() {
+        return maximumRegisteredClients;
+    }
+
+    /**
+     * Return a coordinated-start failure, if one was recorded.
+     *
+     * @return failure description, or {@code null} when startup has not failed
+     */
+    public synchronized String getRegistrationFailure() {
+        return registrationFailure;
     }
 
 

@@ -7,7 +7,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.dashboard;
+package io.sbk.webconsole;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -36,17 +36,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Lightweight local HTTP server that stores bounded SBK histories and serves the browser dashboard.
+ * Lightweight local HTTP server that stores bounded SBK histories and serves the Local Web Console.
  */
-public final class DashboardServer implements AutoCloseable {
-    /** Dashboard HTTP API version. */
+public final class WebConsoleServer implements AutoCloseable {
+    /** Local Web Console HTTP API version. */
     public static final int API_VERSION = 5;
-    /** Time an unused dashboard remains available after its benchmark exits. */
+    /** Time an unused web console remains available after its benchmark exits. */
     public static final Duration DEFAULT_IDLE_TIMEOUT = Duration.ofMinutes(1);
     private static final Duration DEFAULT_HEARTBEAT_INTERVAL = Duration.ofSeconds(5);
     private static final String API_PREFIX = "/api/v1/";
-    private static final String RESOURCE_PREFIX = "/dashboard/";
-    private static final String SSE_OWNED_ATTRIBUTE = "sbk.dashboard.sseOwned";
+    private static final String RESOURCE_PREFIX = "/webconsole/";
+    private static final String SSE_OWNED_ATTRIBUTE = "sbk.webconsole.sseOwned";
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private final HttpServer server;
     private final ExecutorService executor;
@@ -64,7 +64,7 @@ public final class DashboardServer implements AutoCloseable {
     private boolean shuttingDown;
 
     /**
-     * Creates a dashboard server bound to the supplied address.
+     * Creates a Local Web Console server bound to the supplied address.
      *
      * @param host      local address on which to listen
      * @param port      TCP port
@@ -72,31 +72,31 @@ public final class DashboardServer implements AutoCloseable {
      * @throws IOException if the server cannot bind
      * @throws IllegalArgumentException if retention is not positive
      */
-    public DashboardServer(String host, int port, int retention) throws IOException {
+    public WebConsoleServer(String host, int port, int retention) throws IOException {
         this(host, port, retention, DEFAULT_IDLE_TIMEOUT, DEFAULT_HEARTBEAT_INTERVAL);
     }
 
     /**
-     * Creates a dashboard server with configurable lifecycle timings.
+     * Creates a Local Web Console server with configurable lifecycle timings.
      *
      * @param host              local address on which to listen
      * @param port              TCP port
      * @param retention         maximum snapshots retained per run
-     * @param idleTimeout       delay before an inactive dashboard without browsers stops
+     * @param idleTimeout       delay before an inactive web console without browsers stops
      * @param heartbeatInterval interval used to detect disconnected browser event streams
      * @throws IOException if the server cannot bind
      * @throws IllegalArgumentException if a size or duration is not positive
      */
-    DashboardServer(String host, int port, int retention, Duration idleTimeout, Duration heartbeatInterval)
+    WebConsoleServer(String host, int port, int retention, Duration idleTimeout, Duration heartbeatInterval)
             throws IOException {
         if (retention < 1) {
-            throw new IllegalArgumentException("Dashboard retention must be greater than zero");
+            throw new IllegalArgumentException("Local Web Console retention must be greater than zero");
         }
         if (idleTimeout.isZero() || idleTimeout.isNegative()) {
-            throw new IllegalArgumentException("Dashboard idle timeout must be greater than zero");
+            throw new IllegalArgumentException("Local Web Console idle timeout must be greater than zero");
         }
         if (heartbeatInterval.isZero() || heartbeatInterval.isNegative()) {
-            throw new IllegalArgumentException("Dashboard heartbeat interval must be greater than zero");
+            throw new IllegalArgumentException("Local Web Console heartbeat interval must be greater than zero");
         }
         this.retention = retention;
         this.idleTimeout = idleTimeout;
@@ -109,14 +109,14 @@ public final class DashboardServer implements AutoCloseable {
         this.server = HttpServer.create(new InetSocketAddress(host, port), 32);
         this.executor = Executors.newVirtualThreadPerTaskExecutor();
         this.scheduler = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
-                .name("sbk-dashboard-idle-monitor").daemon().factory());
+                .name("sbk-web-console-idle-monitor").daemon().factory());
         server.setExecutor(executor);
         server.createContext(API_PREFIX, this::handleApi);
         server.createContext("/", this::handleResource);
     }
 
     /**
-     * Starts accepting dashboard connections.
+     * Starts accepting Local Web Console connections.
      */
     public void start() {
         server.start();
@@ -164,7 +164,7 @@ public final class DashboardServer implements AutoCloseable {
             final String path = exchange.getRequestURI().getPath();
             if ((API_PREFIX + "health").equals(path)) {
                 requireMethod(exchange, "GET");
-                sendJson(exchange, 200, Map.of("service", "sbk-dashboard", "apiVersion", API_VERSION,
+                sendJson(exchange, 200, Map.of("service", "sbk-web-console", "apiVersion", API_VERSION,
                         "status", "ready"));
                 return;
             }
@@ -173,7 +173,7 @@ public final class DashboardServer implements AutoCloseable {
                     sendJson(exchange, 200, runs.values().stream().map(RunState::view).toList());
                 } else {
                     requireMethod(exchange, "POST");
-                    final DashboardRun run = MAPPER.readValue(exchange.getRequestBody(), DashboardRun.class);
+                    final WebConsoleRun run = MAPPER.readValue(exchange.getRequestBody(), WebConsoleRun.class);
                     if (run.runId() == null || run.runId().isBlank()) {
                         sendText(exchange, 400, "runId is required", "text/plain; charset=utf-8");
                         return;
@@ -228,28 +228,34 @@ public final class DashboardServer implements AutoCloseable {
         }
         final RunState state = runs.get(elements[1]);
         if (state == null) {
-            sendText(exchange, 404, "Unknown dashboard run", "text/plain; charset=utf-8");
+            sendText(exchange, 404, "Unknown Local Web Console run", "text/plain; charset=utf-8");
             return;
         }
         switch (elements[2]) {
             case "snapshots" -> {
                 requireMethod(exchange, "POST");
-                final DashboardSnapshot snapshot = MAPPER.readValue(exchange.getRequestBody(),
-                        DashboardSnapshot.class);
+                final WebConsoleSnapshot snapshot = MAPPER.readValue(exchange.getRequestBody(),
+                        WebConsoleSnapshot.class);
                 if (!state.run.runId().equals(snapshot.runId())) {
                     throw new IllegalArgumentException("Snapshot runId does not match URL");
                 }
                 if (!benchmarkSeen(state.run.runId())) {
-                    sendText(exchange, 409, "Dashboard run lease has expired", "text/plain; charset=utf-8");
+                    sendText(exchange, 409, "Local Web Console run lease has expired",
+                            "text/plain; charset=utf-8");
                     return;
                 }
-                state.add(snapshot);
+                if (!state.add(snapshot)) {
+                    sendText(exchange, 409, "Local Web Console run has completed",
+                            "text/plain; charset=utf-8");
+                    return;
+                }
                 exchange.sendResponseHeaders(204, -1);
             }
             case "heartbeat" -> {
                 requireMethod(exchange, "POST");
                 if (!benchmarkSeen(state.run.runId())) {
-                    sendText(exchange, 409, "Dashboard run lease has expired", "text/plain; charset=utf-8");
+                    sendText(exchange, 409, "Local Web Console run lease has expired",
+                            "text/plain; charset=utf-8");
                     return;
                 }
                 exchange.sendResponseHeaders(204, -1);
@@ -291,9 +297,10 @@ public final class DashboardServer implements AutoCloseable {
                 sendText(exchange, 404, "Not found", "text/plain; charset=utf-8");
                 return;
             }
-            try (InputStream input = DashboardServer.class.getResourceAsStream(resource)) {
+            try (InputStream input = WebConsoleServer.class.getResourceAsStream(resource)) {
                 if (input == null) {
-                    sendText(exchange, 404, "Dashboard resource not found", "text/plain; charset=utf-8");
+                    sendText(exchange, 404, "Local Web Console resource not found",
+                            "text/plain; charset=utf-8");
                     return;
                 }
                 final byte[] body = input.readAllBytes();
@@ -337,21 +344,22 @@ public final class DashboardServer implements AutoCloseable {
         }
     }
 
-    private String register(DashboardRun run) {
+    private String register(WebConsoleRun run) {
         synchronized (lifecycleLock) {
             if (shuttingDown) {
-                return "SBK dashboard is shutting down; retry the benchmark";
+                return "SBK Local Web Console is shutting down; retry the benchmark";
             }
             if (activeRunId != null) {
                 final RunState active = runs.get(activeRunId);
                 final String owner = active == null ? activeRunId
                         : active.run.source() + " run " + active.run.runId();
-                return "SBK dashboard port " + server.getAddress().getPort() + " is already serving active " + owner
-                        + "; only one SBK, SBM, or SBK-GEM WebLogger benchmark may use a dashboard port at a time. "
-                        + "Use '-dashboardport <different-port>' to start another SbkDashboardServerMain";
+                return "SBK Local Web Console port " + server.getAddress().getPort()
+                        + " is already serving active " + owner
+                        + "; only one SBK, SBM, or SBK-GEM WebLogger benchmark may use a web console port at a time. "
+                        + "Use '-webport <different-port>' to start another SbkWebConsoleMain";
             }
             if (runs.putIfAbsent(run.runId(), new RunState(run, retention)) != null) {
-                return "Dashboard runId already exists: " + run.runId();
+                return "Local Web Console runId already exists: " + run.runId();
             }
             cancelIdleShutdown();
             activeRunId = run.runId();
@@ -474,15 +482,15 @@ public final class DashboardServer implements AutoCloseable {
     }
 
     private final class RunState {
-        private final DashboardRun run;
+        private final WebConsoleRun run;
         private final int retention;
-        private final ArrayDeque<DashboardSnapshot> history;
+        private final ArrayDeque<WebConsoleSnapshot> history;
         private final CopyOnWriteArrayList<SseClient> clients;
         private volatile boolean completed;
         private volatile boolean abandoned;
         private volatile long lastActivity;
 
-        private RunState(DashboardRun run, int retention) {
+        private RunState(WebConsoleRun run, int retention) {
             this.run = run;
             this.retention = retention;
             this.history = new ArrayDeque<>(retention);
@@ -490,26 +498,36 @@ public final class DashboardServer implements AutoCloseable {
             this.lastActivity = System.currentTimeMillis();
         }
 
-        private synchronized void add(DashboardSnapshot snapshot) throws IOException {
+        private synchronized boolean add(WebConsoleSnapshot snapshot) throws IOException {
+            if (completed || abandoned) {
+                return false;
+            }
             if (history.size() == retention) {
                 history.removeFirst();
             }
             history.addLast(snapshot);
             final String event = "event: snapshot\ndata: " + MAPPER.writeValueAsString(snapshot) + "\n\n";
             clients.forEach(client -> client.offer(event));
+            return true;
         }
 
-        private synchronized List<DashboardSnapshot> history() {
+        private synchronized List<WebConsoleSnapshot> history() {
             return new ArrayList<>(history);
         }
 
-        private void complete() {
+        private synchronized void complete() {
+            if (completed) {
+                return;
+            }
             completed = true;
             clients.forEach(client -> client.offer("event: complete\ndata: {\"abandoned\":" + abandoned
                     + "}\n\n"));
         }
 
-        private void abandon() {
+        private synchronized void abandon() {
+            if (completed) {
+                return;
+            }
             completed = true;
             abandoned = true;
             clients.forEach(client -> client.offer("event: complete\ndata: {\"abandoned\":true}\n\n"));
@@ -519,8 +537,8 @@ public final class DashboardServer implements AutoCloseable {
             lastActivity = System.currentTimeMillis();
         }
 
-        private DashboardRunView view() {
-            return new DashboardRunView(run, completed, abandoned);
+        private WebConsoleRunView view() {
+            return new WebConsoleRunView(run, completed, abandoned);
         }
 
         private void events(HttpExchange exchange) throws IOException {
@@ -546,7 +564,7 @@ public final class DashboardServer implements AutoCloseable {
         }
     }
 
-    private record DashboardRunView(DashboardRun run, boolean completed, boolean abandoned) {
+    private record WebConsoleRunView(WebConsoleRun run, boolean completed, boolean abandoned) {
     }
 
     private static final class SseClient implements AutoCloseable {

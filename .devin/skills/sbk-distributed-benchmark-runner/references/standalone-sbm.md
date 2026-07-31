@@ -19,12 +19,12 @@ Start a console/Prometheus aggregate:
   -class file -action w -port 9717 -max 2
 ```
 
-Or use the built-in dashboard:
+Or use the built-in Local Web Console:
 
 ```bash
 ./sbm/build/install/sbm/bin/sbm \
   -class file -action w -port 9717 -max 2 \
-  -out SbmWebLogger -dashboardopen false
+  -out SbmWebLogger -webopen false
 ```
 
 `SBM` performs no storage operations. Keep it running while clients connect.

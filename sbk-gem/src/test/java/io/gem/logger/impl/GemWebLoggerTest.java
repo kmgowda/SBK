@@ -19,28 +19,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Tests GEM dashboard logger discovery and local-SBM argument forwarding.
+ * Tests GEM web-console logger discovery and local-SBM argument forwarding.
  */
 final class GemWebLoggerTest {
 
     @Test
-    void discoversWebLoggerAndForwardsDashboardOptions() throws Exception {
+    void discoversWebLoggerAndForwardsWebConsoleOptions() throws Exception {
         final GemWebLogger logger = new GemWebLogger();
         final SbmParameters parameters = new SbmParameters("test", 9717, 1, 0,
                 new String[]{GemWebLogger.class.getSimpleName()});
         logger.addArgs(parameters);
-        parameters.parseArgs(new String[]{"-class", "file", "-action", "r", "-dashboardhost", "127.0.0.1",
-                "-dashboardport", "9876", "-dashboardstart", "false", "-dashboardopen", "false",
-                "-dashboardminutes", "42", "-dashboardname", "gem-test", "-time", "ns"});
+        parameters.parseArgs(new String[]{"-class", "file", "-action", "r", "-webhost", "127.0.0.1",
+                "-webport", "9876", "-webstart", "false", "-webopen", "false",
+                "-webminutes", "42", "-boardname", "gem-test", "-time", "ns"});
         logger.parseArgs(parameters);
 
         final String[] options = logger.getOptionsArgs();
         final String[] parsed = logger.getParsedArgs();
-        assertTrue(Arrays.asList(options).contains("-dashboardport"));
-        assertEquals("9876", valueOf(parsed, "-dashboardport"));
-        assertEquals("false", valueOf(parsed, "-dashboardstart"));
-        assertEquals("42", valueOf(parsed, "-dashboardminutes"));
-        assertEquals("gem-test", valueOf(parsed, "-dashboardname"));
+        assertTrue(Arrays.asList(options).contains("-webport"));
+        assertEquals("9876", valueOf(parsed, "-webport"));
+        assertEquals("false", valueOf(parsed, "-webstart"));
+        assertEquals("42", valueOf(parsed, "-webminutes"));
+        assertEquals("gem-test", valueOf(parsed, "-boardname"));
         assertTrue(Arrays.asList(new GemLoggerPackage("io.gem.logger").getClassNames())
                 .contains(GemWebLogger.class.getSimpleName()));
     }

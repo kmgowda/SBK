@@ -7,10 +7,10 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.dashboard;
+package io.sbk.webconsole;
 
 /**
- * Immutable benchmark summary sent from an SBK logger to the dashboard.
+ * Immutable benchmark summary sent from an SBK logger to the Local Web Console.
  *
  * @param runId       benchmark run identifier
  * @param timestamp   snapshot time in epoch milliseconds
@@ -19,7 +19,7 @@ package io.sbk.dashboard;
  * @param performance completed data and throughput statistics
  * @param latency     latency distribution summary
  */
-public record DashboardSnapshot(String runId, long timestamp, WorkerMetrics workers,
+public record WebConsoleSnapshot(String runId, long timestamp, WorkerMetrics workers,
                                 RequestMetrics requests, PerformanceMetrics performance,
                                 LatencyMetrics latency) {
 

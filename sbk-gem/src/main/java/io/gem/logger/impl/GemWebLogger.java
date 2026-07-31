@@ -17,18 +17,18 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * GEM adapter for {@link SbmWebLogger}; dashboard rendering and publication remain in the SBM logger.
+ * GEM adapter for {@link SbmWebLogger}; Local Web Console rendering and publication remain in the SBM logger.
  */
 public final class GemWebLogger extends SbmWebLogger implements GemLogger {
 
     /**
-     * Creates a GEM web logger without starting the dashboard.
+     * Creates a GEM web logger without starting the Local Web Console.
      */
     public GemWebLogger() {
     }
 
     @Override
-    protected String getDashboardSource() {
+    protected String getWebConsoleSource() {
         return "SBK-GEM";
     }
 
@@ -36,7 +36,7 @@ public final class GemWebLogger extends SbmWebLogger implements GemLogger {
     public String[] getOptionsArgs() {
         final List<String> options = new ArrayList<>();
         Collections.addAll(options, "-time", "-minlatency", "-maxlatency", "-csvfile");
-        Collections.addAll(options, getDashboardOptionsArgs());
+        Collections.addAll(options, getWebConsoleOptionsArgs());
         return options.toArray(String[]::new);
     }
 
@@ -48,7 +48,7 @@ public final class GemWebLogger extends SbmWebLogger implements GemLogger {
         }
         Collections.addAll(arguments, "-time", getTimeUnit().name(), "-minlatency",
                 Long.toString(getMinLatency()), "-maxlatency", Long.toString(getMaxLatency()));
-        Collections.addAll(arguments, getDashboardParsedArgs());
+        Collections.addAll(arguments, getWebConsoleParsedArgs());
         return arguments.toArray(String[]::new);
     }
 }

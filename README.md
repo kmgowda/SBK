@@ -51,7 +51,7 @@ flowchart LR
     WORKERS --> DRIVER
     WORKERS --> CHANNEL[PerL channels]
     CHANNEL --> RECORDER[Latency recorder]
-    RECORDER --> OUTPUT[Console / CSV / Web dashboard / Prometheus / gRPC]
+    RECORDER --> OUTPUT[Console / CSV / Local Web Console / Prometheus / gRPC]
     OUTPUT -->|gRPC mode| SBM[SBM aggregator]
     GEM[SBK-GEM] -->|SSH orchestration| CLI
     GEM --> SBM
@@ -112,7 +112,7 @@ Every generated SBK launcher uses one consolidated JDK 25 runtime profile from
   publishing misleading results.
 
 The same options are applied to `sbk`, `sbk-yal`, `sbm`, `sbk-gem`,
-`sbk-gem-yal`, module launchers, and the WebLogger dashboard process.
+`sbk-gem-yal`, module launchers, and the `SbkWebConsoleMain` process.
 
 ZGC reserves address space using many memory mappings. On large-memory Linux
 hosts, check `sysctl vm.max_map_count`; if it is too small, JDK 25 prints the
@@ -257,11 +257,11 @@ SBK currently ships these logger implementations:
 - `SystemLogger`: human-readable periodic and final output.
 - `Sl4jLogger`: SLF4J-backed output.
 - `CSVLogger`: results written in CSV form.
-- `WebLogger`: console/CSV output plus an embedded, dependency-free live browser dashboard.
+- `WebLogger`: console/CSV output plus the dependency-free SBK Local Web Console.
 - `PrometheusLogger`: CSV behavior plus Prometheus metrics exposure.
 - `GrpcLogger`: forwards measurements to SBM for distributed aggregation.
 
-### Local live dashboard
+### SBK Local Web Console
 
 Use `WebLogger` when you want live graphs without Docker, Prometheus, or Grafana:
 
@@ -286,36 +286,37 @@ match between preparation and reading:
   -out WebLogger
 ```
 
-SBK opens `http://127.0.0.1:9720` in the default browser. By default, the lightweight Java server accepts plain HTTP
+SBK opens `http://127.0.0.1:9720` in the default browser. By default, the lightweight Local Web Console accepts plain HTTP
 on all network interfaces at port 9720, retains the latest 180 minutes of snapshots in
-memory and streams new summaries with server-sent events. Change that duration with `-dashboardminutes N`.
+memory and streams new summaries with server-sent events. Change that duration with `-webminutes N`.
 A later SBK process reuses a compatible server already on
-that port. Startup prints copy-paste dashboard links for loopback, hostname, and available public/private host IPv4
+that port. Startup prints copy-paste web console links for loopback, hostname, and available public/private host IPv4
 addresses. The server accepts one active SBK, SBM, or SBK-GEM benchmark at a time and reports an error if another
 WebLogger benchmark already owns it. Completed graphs remain available while a browser is connected; after the
 benchmark has finished and no browser has been connected for one minute, the server exits automatically. Snapshots
 and 15-second logger heartbeats renew the active-run lease. If a benchmark is killed without completing, one minute
-without either signal marks that run abandoned and releases dashboard ownership; an attached browser may continue
+without either signal marks that run abandoned and releases web console ownership; an attached browser may continue
 viewing its graphs without preventing a new run. Use
-`-dashboardopen false` on headless hosts, `-dashboardstart false` to require a pre-existing server, and
-`-dashboardport PORT` to select another port. No SSH tunnel, TLS certificate, or HTTPS setup is enabled or required
+`-webopen false` on headless hosts, `-webstart false` to require a pre-existing server, and
+`-webport PORT` to select another port. Use `-boardname NAME` to give the benchmark board a recognizable display
+name. No SSH tunnel, TLS certificate, or HTTPS setup is enabled or required
 by default. From another system, open `http://<benchmark-host>:9720`; use this only on a trusted benchmark network.
 Run `sbk -out WebLogger -help` for the complete option set.
-See the [WebLogger guide](docs/WEB_LOGGER.md) for every option, dashboard lifecycle, distributed usage, security,
+See the [WebLogger guide](docs/WEB_LOGGER.md) for every option, Local Web Console lifecycle, distributed usage, security,
 and troubleshooting.
 
-Distributed monitoring uses the same dashboard and data model:
+Distributed monitoring uses the same Local Web Console and data model:
 
 ```bash
-# Standalone SBM aggregate dashboard
+# Standalone SBM aggregate Local Web Console
 sbm -out SbmWebLogger -class file -action r
 
-# SBK-GEM aggregate dashboard; remote nodes continue sending results through GrpcLogger
+# SBK-GEM aggregate Local Web Console; remote nodes continue sending results through GrpcLogger
 sbk-gem -out GemWebLogger -class file -nodes host1,host2 -writers 2 -size 4096 -seconds 60
 ```
 
-The dashboard listener defaults to `0.0.0.0` for direct HTTP access. Restrict it with
-`-dashboardhost 127.0.0.1` when remote browser access is not required.
+The Local Web Console listener defaults to `0.0.0.0` for direct HTTP access. Restrict it with
+`-webhost 127.0.0.1` when remote browser access is not required.
 
 ## Distributed execution
 

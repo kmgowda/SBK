@@ -38,7 +38,7 @@ flowchart LR
     B[SBK client B / GrpcLogger] --> G
     G --> Q[Concurrent ingestion queues]
     Q --> R[Aggregate recorder]
-    R --> O[Prometheus, local web dashboard, or result output]
+    R --> O[Prometheus, Local Web Console, or result output]
 ```
 
 The default gRPC port is `9717`. Container configuration also exposes the configured metrics port. Keep the gRPC service on a trusted benchmark network unless an external security layer is provided.
@@ -66,20 +66,21 @@ Start with defaults:
 ./sbm/build/install/sbm/bin/sbm
 ```
 
-Start a dependency-free local live dashboard instead of Prometheus:
+Start the dependency-free SBK Local Web Console instead of Prometheus:
 
 ```bash
 ./sbm/build/install/sbm/bin/sbm -out SbmWebLogger -class file -action r
 ```
 
-The browser dashboard uses plain HTTP and listens on all interfaces at port 9720 by default. Open
+The Local Web Console uses plain HTTP and listens on all interfaces at port 9720 by default. Open
 `http://127.0.0.1:9720` locally or `http://<sbm-host>:9720` remotely. It displays aggregate SBM connection,
 workload, throughput, request-pressure, timeout, and latency-percentile data. It permits one active WebLogger benchmark,
-keeps completed graphs while a browser remains connected, and exits after one minute without a connected browser.
-An existing idle dashboard is reused; an active SBK, SBM, or SBK-GEM dashboard owner causes SBM to exit with an
-ownership error. The dashboard does not start SSH or enable TLS; expose it only on a trusted benchmark network.
+keeps completed graphs while a browser remains connected, and exits after one minute with neither an active publisher
+nor browser activity.
+An existing idle web console is reused; an active SBK, SBM, or SBK-GEM web console owner causes SBM to exit with an
+ownership error. The web console does not start SSH or enable TLS; expose it only on a trusted benchmark network.
 
-See the [WebLogger guide](../docs/WEB_LOGGER.md) for dashboard options, lifecycle, browser leases, security, and a
+See the [WebLogger guide](../docs/WEB_LOGGER.md) for web console options, lifecycle, browser leases, security, and a
 complete distributed example.
 
 Then point one or more installed SBK clients at it:
@@ -104,7 +105,7 @@ Use a hostname or address reachable from every SBK client. Firewalls, containers
 | `SbmLatencyBenchmark` | Concurrent queue ingestion and window dispatch |
 | `SbmTotalWindowLatencyPeriodicRecorder` | Periodic and total aggregate windows |
 | `SbmPrometheusLogger` | Aggregated output and metrics |
-| `SbmWebLogger` | Aggregated output and local live dashboard publication |
+| `SbmWebLogger` | Aggregated output and local live web console publication |
 
 Protocol sources are under `sbk-api/src/main/proto`; generated Java/gRPC sources are build products.
 

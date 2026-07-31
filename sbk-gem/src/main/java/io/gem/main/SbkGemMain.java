@@ -13,7 +13,7 @@ package io.gem.main;
 import io.gem.api.impl.SbkGem;
 import io.gem.config.GemConfig;
 import io.gem.exception.SbkGemParameterException;
-import io.sbk.dashboard.DashboardClient.DashboardBusyException;
+import io.sbk.webconsole.WebConsoleClient.WebConsoleBusyException;
 import io.sbk.utils.SbkUtils;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
@@ -47,7 +47,7 @@ public abstract class SbkGemMain {
         }
         try {
             SbkGem.run(args, null, null, null);
-        } catch (DashboardBusyException ex) {
+        } catch (WebConsoleBusyException ex) {
             System.exit(1);
         } catch (UnrecognizedOptionException ex) {
             System.exit(2);

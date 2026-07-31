@@ -84,11 +84,13 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
      * sequenceNumber <= 0 is observed.
      *
      * @throws InterruptedException if the thread sleep or processing is interrupted
+     * @throws IllegalStateException if a latency batch cannot be aggregated
      */
     void run() throws InterruptedException {
         MessageLatenciesRecord record;
         boolean doWork = true;
         boolean notFound;
+        boolean receivedBatchInWindow = false;
         Printer.log.info("SbmLatencyBenchmark Started : {} milliseconds idle sleep", this.idleMS);
         long currentTime = time.getCurrentTime();
         window.start(currentTime);
@@ -100,7 +102,13 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
                 if (record != null) {
                     notFound = false;
                     if (record.getSequenceNumber() > 0) {
-                        window.record(currentTime, record);
+                        try {
+                            window.record(currentTime, record);
+                        } catch (RuntimeException exception) {
+                            throw new IllegalStateException("SBM failed to aggregate latency batch for client "
+                                    + record.getClientID() + " at sequence " + record.getSequenceNumber(), exception);
+                        }
+                        receivedBatchInWindow = true;
                     } else {
                         doWork = false;
                     }
@@ -112,8 +120,17 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
 
             currentTime = time.getCurrentTime();
             if (window.elapsedMilliSecondsWindow(currentTime) > reportingIntervalMS) {
-                window.stopWindow(currentTime);
+                /*
+                 * SBM starts before remote SBK processes and can remain alive after
+                 * they finish. Do not manufacture empty aggregate windows when no
+                 * client supplied a regular SBK reporting batch. A received batch
+                 * is still printed even when it legitimately contains zero records.
+                 */
+                if (receivedBatchInWindow) {
+                    window.stopWindow(currentTime);
+                }
                 window.startWindow(currentTime);
+                receivedBatchInWindow = false;
             }
         }
         window.stop(currentTime);

@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Exporter-neutral base logger for SBM.
  *
  * <p>Adds SBM connection counts and request aggregation to SBK's console/CSV logger. Concrete implementations decide
- * whether summaries are exported to Prometheus, the local web dashboard, or another destination.
+ * whether summaries are exported to Prometheus, the Local Web Console, or another destination.
  */
 public abstract class AbstractRamLogger extends CSVLogger implements RamLogger {
     final static String SBM_PREFIX = "SBM";

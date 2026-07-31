@@ -10,6 +10,7 @@
 package io.sbk.logger.impl;
 
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.perl.data.Bytes;
@@ -129,6 +130,8 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
     }
 
     @Override
+    @SuppressFBWarnings(value = "NP_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD",
+            justification = "Jackson populates LoggerConfig public fields from logger.properties")
     public void addArgs(final InputOptions params) throws IllegalArgumentException {
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
         try {
@@ -161,6 +164,8 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
     }
 
     @Override
+    @SuppressFBWarnings(value = "NP_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD",
+            justification = "Jackson populates LoggerConfig public fields from logger.properties")
     public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
         try {
             setTimeUnit(TimeUnit.valueOf(params.getOptionValue("time", loggerConfig.timeUnit.name())));

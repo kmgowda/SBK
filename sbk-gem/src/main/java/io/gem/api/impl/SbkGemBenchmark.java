@@ -12,15 +12,18 @@ package io.gem.api.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.gem.api.SshResponse;
+import io.gem.api.SshCommandException;
 import io.gem.api.SshSession;
 import io.gem.config.GemConfig;
 import io.gem.api.GemBenchmark;
+import io.gem.api.RemoteExecutionStatus;
 import io.gem.api.RemoteResponse;
 import io.gem.api.ConnectionConfig;
 import io.gem.params.GemParameters;
-import io.sbk.api.Benchmark;
+import io.perl.config.PerlConfig;
 import io.sbk.system.Printer;
 import io.sbk.utils.SbkUtils;
+import io.sbm.api.impl.SbmBenchmark;
 import io.state.State;
 import lombok.Synchronized;
 import org.jetbrains.annotations.NotNull;
@@ -39,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -57,7 +61,7 @@ import java.util.concurrent.TimeoutException;
  * - Aggregate remote outputs into {@link io.gem.api.RemoteResponse}[] and shutdown cleanly.
  */
 final public class SbkGemBenchmark implements GemBenchmark {
-    private final Benchmark sbmBenchmark;
+    private final SbmBenchmark sbmBenchmark;
     private final GemConfig config;
     private final GemParameters params;
     private final List<String> sbkArgs;
@@ -73,15 +77,17 @@ final public class SbkGemBenchmark implements GemBenchmark {
     @GuardedBy("this")
     private boolean sbmStarted;
 
+    private volatile boolean remoteCommandsCompleted;
+
     /**
      * Constructor SbkGemBenchmark is responsible for initializing all values.
      *
-     * @param sbmBenchmark  Benchmark
+     * @param sbmBenchmark  embedded SBM benchmark
      * @param config        NotNull GemConfig
      * @param params        NotNull GemParameters
      * @param sbkArgs       normalized remote SBK argument tokens
      */
-    public SbkGemBenchmark(Benchmark sbmBenchmark, @NotNull GemConfig config, @NotNull GemParameters params,
+    public SbkGemBenchmark(SbmBenchmark sbmBenchmark, @NotNull GemConfig config, @NotNull GemParameters params,
                            List<String> sbkArgs) {
         this.sbmBenchmark = sbmBenchmark;
         this.config = config;
@@ -90,6 +96,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         this.retFuture = new CompletableFuture<>();
         this.state = State.BEGIN;
         this.sbmStarted = false;
+        this.remoteCommandsCompleted = false;
         final ConnectionConfig[] connections = params.getConnections();
         if (config.fork) {
             executor = new ForkJoinPool(connections.length + 10);
@@ -162,7 +169,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
         Printer.log.info("SBK-GEM: Ssh session establishment Success..");
 
-        final CompletableFuture<SshResponse>[] cfResults = new CompletableFuture[nodes.length];
+        final CompletableFuture<RemoteResponse>[] cfResults = new CompletableFuture[nodes.length];
         final String[] absoluteConnectionDirs = resolveRemoteConnectionDirectories();
         final String[] javaHomes = prepareRemoteJava(absoluteConnectionDirs);
         final String remoteDir = Paths.get(params.getSbkDir()).getFileName().toString();
@@ -182,7 +189,6 @@ final public class SbkGemBenchmark implements GemBenchmark {
         sbmBenchmark.start();
 
         // Start remote SBK instances
-        final SshResponse[] sbkResults = new SshResponse[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
             final List<String> commandTokens = new ArrayList<>(sbkArgs.size() + 1);
             commandTokens.add(absoluteSbkCommands[i]);
@@ -195,22 +201,87 @@ final public class SbkGemBenchmark implements GemBenchmark {
                                     commandTokens.toArray(String[]::new)))));
             Printer.log.info("SBK-GEM: Host '" + nodes[i].connection.getHost() +
                     "' remote SBK command: " + redactedCommand);
-            cfResults[i] = nodes[i].runCommandAsync(command, false, benchmarkTimeoutSeconds());
+            final String host = nodes[i].connection.getHost();
+            final CompletableFuture<SshResponse> commandFuture;
+            try {
+                commandFuture = nodes[i].runCommandAsync(command, true, benchmarkTimeoutSeconds());
+            } catch (ConnectException ex) {
+                cfResults[i] = CompletableFuture.completedFuture(remoteCommandResult(host, null, ex));
+                final RemoteResponse result = cfResults[i].join();
+                sbmBenchmark.abortPendingRegistrations(result.failureMessage);
+                continue;
+            }
+            cfResults[i] = commandFuture.handle((response, failure) ->
+                    remoteCommandResult(host, response, failure));
+            cfResults[i].thenAccept(result -> {
+                if (result.status != RemoteExecutionStatus.SUCCESS) {
+                    final int aborted = sbmBenchmark.abortPendingRegistrations(result.failureMessage);
+                    if (aborted > 0) {
+                        Printer.log.error("SBK-GEM: Aborted {} remote SBK client(s) waiting at the SBM " +
+                                "coordinated-start barrier after host '{}' failed", aborted, result.host);
+                    }
+                }
+            });
         }
+        Printer.log.info("SBK-GEM: Remote SBK commands launched on {} host(s); waiting for SBM client " +
+                        "registration ({}/{})", nodes.length, sbmBenchmark.getMaximumRegisteredClients(),
+                nodes.length);
+        CompletableFuture.runAsync(() -> {
+            try {
+                final long timeoutNanos = TimeUnit.SECONDS.toNanos(config.sbmRegistrationTimeoutSeconds);
+                final long progressIntervalNanos = TimeUnit.SECONDS.toNanos(
+                        PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS);
+                final long startNanos = System.nanoTime();
+                boolean coordinatedStart = false;
+                long elapsedNanos = 0;
+                while (!coordinatedStart && sbmBenchmark.getRegistrationFailure() == null &&
+                        elapsedNanos < timeoutNanos) {
+                    coordinatedStart = sbmBenchmark.awaitCoordinatedStart(
+                            Math.min(progressIntervalNanos, timeoutNanos - elapsedNanos),
+                            TimeUnit.NANOSECONDS);
+                    elapsedNanos = System.nanoTime() - startNanos;
+                    if (!coordinatedStart && sbmBenchmark.getRegistrationFailure() == null &&
+                            elapsedNanos < timeoutNanos) {
+                        Printer.log.info("SBK-GEM: Waiting for remote SBK clients to register with SBM " +
+                                        "({}/{}); elapsed {} seconds", sbmBenchmark.getMaximumRegisteredClients(),
+                                nodes.length, TimeUnit.NANOSECONDS.toSeconds(elapsedNanos));
+                    }
+                }
+                if (coordinatedStart) {
+                    Printer.log.info("SBK-GEM: All remote SBK clients registered with SBM ({}/{}); benchmark " +
+                                    "is running. First performance results are expected after the {}-second " +
+                                    "reporting interval", sbmBenchmark.getMaximumRegisteredClients(), nodes.length,
+                            PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS);
+                } else if (sbmBenchmark.getRegistrationFailure() == null) {
+                    final String failure = "SBK-GEM: SBM coordinated start timed out after " +
+                            config.sbmRegistrationTimeoutSeconds + " seconds; registered " +
+                            sbmBenchmark.getMaximumRegisteredClients() + " of " + nodes.length + " remote clients";
+                    Printer.log.error(failure);
+                    sbmBenchmark.abortPendingRegistrations(failure);
+                }
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                final String failure = "SBK-GEM: Interrupted while waiting for remote clients to register with SBM";
+                Printer.log.error(failure, ex);
+                sbmBenchmark.abortPendingRegistrations(failure);
+            }
+        }, executor);
         final CompletableFuture<Void> sbkFuture = CompletableFuture.allOf(cfResults);
         sbkFuture.whenComplete((ignored, failure) -> {
-            if (failure != null) {
-                shutdown(unwrapCompletionFailure(failure));
-                return;
-            }
             for (int i = 0; i < cfResults.length; i++) {
-                sbkResults[i] = cfResults[i].join();
+                if (cfResults[i].isCompletedExceptionally()) {
+                    remoteResults[i] = remoteCommandResult(nodes[i].connection.getHost(), null,
+                            completionFailure(cfResults[i]));
+                } else {
+                    remoteResults[i] = cfResults[i].join();
+                }
             }
-            fillSshResults(sbkResults);
+            remoteCommandsCompleted = true;
             final IOException remoteFailure = remoteCommandFailure(remoteResults);
             if (remoteFailure != null) {
-                SbkGem.printRemoteResults(remoteResults, false);
                 shutdown(remoteFailure);
+            } else if (failure != null) {
+                shutdown(unwrapCompletionFailure(failure));
             } else {
                 shutdown(null);
             }
@@ -689,14 +760,61 @@ final public class SbkGemBenchmark implements GemBenchmark {
         return cause;
     }
 
+    private static Throwable completionFailure(CompletableFuture<?> future) {
+        try {
+            future.join();
+            return new IllegalStateException("Remote command completed without a result");
+        } catch (CompletionException | CancellationException ex) {
+            return unwrapCompletionFailure(ex);
+        }
+    }
+
+    static RemoteResponse remoteCommandResult(String host, SshResponse response, Throwable failure) {
+        if (failure == null && response != null) {
+            final RemoteExecutionStatus status = response.returnCode == 0
+                    ? RemoteExecutionStatus.SUCCESS : RemoteExecutionStatus.EXIT_FAILURE;
+            final String message = status == RemoteExecutionStatus.SUCCESS ? ""
+                    : "SBK-GEM: Remote SBK on host '" + host + "' returned exit code " + response.returnCode;
+            return new RemoteResponse(response.returnCode, response.stdOutputStream.toString(),
+                    response.errOutputStream.toString(), host, status, message);
+        }
+
+        final Throwable cause = unwrapCompletionFailure(failure == null
+                ? new IllegalStateException("Remote command did not provide a result") : failure);
+        final SshResponse partialResponse;
+        final RemoteExecutionStatus status;
+        if (cause instanceof SshCommandException commandFailure) {
+            partialResponse = commandFailure.getResponse();
+            status = commandFailure.isTimeout() ? RemoteExecutionStatus.TIMEOUT : RemoteExecutionStatus.SSH_ERROR;
+        } else {
+            partialResponse = response;
+            status = cause instanceof CancellationException
+                    ? RemoteExecutionStatus.CANCELLED : RemoteExecutionStatus.SSH_ERROR;
+        }
+        final String detail = cause.getMessage() == null ? cause.getClass().getSimpleName() : cause.getMessage();
+        final String message = detail.contains(host) ? detail
+                : "SBK-GEM: Remote SBK command failed on host '" + host + "': " + detail;
+        return new RemoteResponse(RemoteResponse.UNKNOWN_RETURN_CODE,
+                partialResponse == null ? "" : partialResponse.stdOutputStream.toString(),
+                partialResponse == null ? "" : partialResponse.errOutputStream.toString(),
+                host, status, message);
+    }
+
     static IOException remoteCommandFailure(RemoteResponse[] results) {
         final StringBuilder failures = new StringBuilder();
         for (RemoteResponse result : results) {
-            if (result.returnCode != 0) {
+            if (result == null || result.status != RemoteExecutionStatus.SUCCESS) {
                 if (!failures.isEmpty()) {
                     failures.append(", ");
                 }
-                failures.append(result.host).append(" returned ").append(result.returnCode);
+                if (result == null) {
+                    failures.append("unknown host did not complete");
+                } else {
+                    failures.append(result.host).append(" status ").append(result.status);
+                    if (result.returnCode != RemoteResponse.UNKNOWN_RETURN_CODE) {
+                        failures.append(" returned ").append(result.returnCode);
+                    }
+                }
             }
         }
         return failures.isEmpty() ? null : new IOException("SBK-GEM: Remote SBK execution failed: " + failures);
@@ -727,16 +845,6 @@ final public class SbkGemBenchmark implements GemBenchmark {
         return true;
     }
 
-    @Synchronized
-    @SuppressWarnings("unchecked")
-    private void fillSshResults(SshResponse[] responseStreams) {
-        final ConnectionConfig[] connections = params.getConnections();
-        for (int i = 0; i < remoteResults.length; i++) {
-            remoteResults[i] = new RemoteResponse(responseStreams[i].returnCode, responseStreams[i].stdOutputStream.toString(),
-                    responseStreams[i].errOutputStream.toString(), connections[i].getHost());
-        }
-    }
-
     /**
      * Shutdown SBK Benchmark.
      *
@@ -749,6 +857,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     private void shutdown(Throwable ex) {
         if (state != State.END) {
             state = State.END;
+            int maximumRegisteredClients = -1;
             if (params.isDeleteAfter()) {
                 try {
                     final boolean[] deleteTargets = new boolean[nodes.length];
@@ -762,8 +871,19 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 node.stop();
             }
             if (sbmStarted) {
+                maximumRegisteredClients = sbmBenchmark.getMaximumRegisteredClients();
+                sbmBenchmark.abortPendingRegistrations("SBK-GEM: Distributed benchmark is shutting down");
                 sbmBenchmark.stop();
                 sbmStarted = false;
+            }
+            /*
+             * SbmBenchmark.stop() synchronously closes the total latency
+             * window and prints "Total : SBM". Keep the distributed outcome
+             * after that authoritative aggregate so the final host status is
+             * the last benchmark result block presented to the operator.
+             */
+            if (remoteCommandsCompleted) {
+                SbkGem.printRemoteResults(remoteResults, false, maximumRegisteredClients);
             }
             executor.shutdown();
             if (ex != null) {

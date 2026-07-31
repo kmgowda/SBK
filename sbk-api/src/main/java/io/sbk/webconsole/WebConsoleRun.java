@@ -7,10 +7,10 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.sbk.dashboard;
+package io.sbk.webconsole;
 
 /**
- * Describes one SBK benchmark displayed by the dashboard.
+ * Describes one SBK benchmark displayed by the Local Web Console.
  *
  * @param runId       unique run identifier
  * @param name        optional user-provided run name
@@ -22,6 +22,6 @@ package io.sbk.dashboard;
  * @param javaVersion Java runtime version
  * @param startedAt   run start time in epoch milliseconds
  */
-public record DashboardRun(String runId, String name, String source, String storage, String action,
+public record WebConsoleRun(String runId, String name, String source, String storage, String action,
                            String timeUnit, String sbkVersion, String javaVersion, long startedAt) {
 }

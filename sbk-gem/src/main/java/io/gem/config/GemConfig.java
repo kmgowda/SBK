@@ -123,6 +123,10 @@ final public class GemConfig {
      */
     public long remoteTimeoutSeconds;
     /**
+     * Maximum time to wait for all remote SBK clients to register with SBM (seconds).
+     */
+    public long sbmRegistrationTimeoutSeconds;
+    /**
      * Per-iteration wait timeout used during async joins (seconds).
      */
     public int timeoutSeconds;
