@@ -17,6 +17,7 @@ import io.gem.config.GemConfig;
 import io.gem.exception.SbkGemParameterException;
 import io.gem.api.GemBenchmark;
 import io.gem.api.GemLoggerPackage;
+import io.gem.api.RemoteExecutionStatus;
 import io.gem.api.RemoteResponse;
 import io.gem.logger.GemLogger;
 import io.gem.logger.impl.GemPrometheusLogger;
@@ -126,7 +127,6 @@ final public class SbkGem {
         final Thread shutdownHook = ApplicationShutdownHook.register("SBK-GEM", benchmark::stop);
         try {
             final CompletableFuture<RemoteResponse[]> ret = benchmark.start();
-            ret.thenAccept(results -> printRemoteResults(results, false));
             return ret.get();
         } finally {
             ApplicationShutdownHook.remove(shutdownHook);
@@ -471,20 +471,88 @@ final public class SbkGem {
      * @param all     boolean
      */
     public static void printRemoteResults(@NotNull RemoteResponse[] results, boolean all) {
+        printRemoteResults(results, all, -1);
+    }
+
+    /**
+     * Print and log host-tagged distributed SBK results at the SBM host.
+     *
+     * @param results remote execution outcomes
+     * @param all whether successful command output should also be logged
+     * @param maximumRegisteredClients maximum clients observed by SBM, or a negative value when unavailable
+     */
+    public static void printRemoteResults(@NotNull RemoteResponse[] results, boolean all,
+                                          int maximumRegisteredClients) {
         final String separatorText = "-".repeat(80);
-        System.out.println();
-        System.out.println("SBK-GEM Remote Results");
-        for (int i = 0; i < results.length; i++) {
-            System.out.println(separatorText);
-            System.out.println("Host " + (i + 1) + ": " + results[i].host + ", return code: " + results[i].returnCode);
-            if (all || results[i].returnCode != 0) {
-                System.out.println();
-                System.out.println(" : stdout : \n");
-                System.out.println(results[i].stdOutput);
-                System.out.println(" : stderr : ");
-                System.out.println(results[i].errOutput);
+        int successful = 0;
+        int failed = 0;
+        for (RemoteResponse result : results) {
+            if (result != null && result.status == RemoteExecutionStatus.SUCCESS) {
+                successful++;
+            } else {
+                failed++;
             }
         }
-        System.out.println(separatorText);
+        final String runStatus = distributedRunStatus(results, maximumRegisteredClients);
+
+        Printer.log.info(separatorText);
+        final String registrationText = maximumRegisteredClients < 0 ? "unavailable"
+                : maximumRegisteredClients + "/" + results.length;
+        final String summary = "SBK-GEM Distributed Benchmark Status: " + runStatus +
+                "; expected nodes: " + results.length + "; successful nodes: " + successful +
+                "; failed nodes: " + failed + "; maximum SBM registrations: " + registrationText;
+        if ("SUCCESS".equals(runStatus)) {
+            Printer.log.info(summary);
+        } else {
+            Printer.log.error(summary);
+            Printer.log.error("SBK-GEM: Distributed results are incomplete and must not be used as a valid " +
+                    "performance comparison");
+        }
+        Printer.log.info("SBK-GEM Remote Results");
+        for (int i = 0; i < results.length; i++) {
+            final RemoteResponse result = results[i];
+            Printer.log.info(separatorText);
+            if (result == null) {
+                Printer.log.error("Host {}: unknown, status: NOT_COMPLETED, return code: unavailable", i + 1);
+                continue;
+            }
+            final String returnCode = result.returnCode == RemoteResponse.UNKNOWN_RETURN_CODE
+                    ? "unavailable" : Integer.toString(result.returnCode);
+            final String hostSummary = "Host " + (i + 1) + ": " + result.host + ", status: " + result.status +
+                    ", return code: " + returnCode;
+            if (result.status == RemoteExecutionStatus.SUCCESS) {
+                Printer.log.info(hostSummary);
+            } else {
+                Printer.log.error(hostSummary);
+                Printer.log.error(result.failureMessage);
+            }
+            if (all || result.status != RemoteExecutionStatus.SUCCESS) {
+                if (!result.stdOutput.isBlank()) {
+                    Printer.log.error("Host '{}' bounded stdout tail:\n{}", result.host, result.stdOutput);
+                }
+                if (!result.errOutput.isBlank()) {
+                    Printer.log.error("Host '{}' bounded stderr tail:\n{}", result.host, result.errOutput);
+                }
+            }
+        }
+        Printer.log.info(separatorText);
+    }
+
+    static String distributedRunStatus(RemoteResponse[] results, int maximumRegisteredClients) {
+        int successful = 0;
+        for (RemoteResponse result : results) {
+            if (result != null && result.status == RemoteExecutionStatus.SUCCESS) {
+                successful++;
+            }
+        }
+        final boolean registrationIncomplete = maximumRegisteredClients >= 0 &&
+                maximumRegisteredClients < results.length;
+        if (successful == results.length && !registrationIncomplete) {
+            return "SUCCESS";
+        }
+        if (successful > 0 || maximumRegisteredClients > 0) {
+            return "INCOMPLETE";
+        }
+        return "FAILED";
     }
 }

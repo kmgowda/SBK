@@ -123,6 +123,33 @@ Before a multi-host run:
 7. Measurements return to embedded SBM and are reported as aggregate windows and totals.
 8. GEM collects remote responses and shuts down sessions and SBM.
 
+## Distributed failure reporting
+
+SBK-GEM treats remote execution and SBM client registration as one distributed
+result. The final summary on the GEM/SBM host reports the expected node count,
+successful and failed node counts, the maximum number of SBK clients registered
+with SBM, and one terminal status for every configured host:
+
+- `SUCCESS` -- the remote SBK process completed with exit code zero.
+- `EXIT_FAILURE` -- remote SBK started but returned a non-zero exit code.
+- `SSH_ERROR` -- SSH connection, authentication, command startup, or transport failed.
+- `TIMEOUT` -- remote execution exceeded its configured deadline.
+- `CANCELLED` -- the asynchronous remote operation was cancelled.
+- `NOT_COMPLETED` -- no terminal result was available for the configured host.
+
+If any host fails, or fewer SBK clients register with SBM than expected, GEM
+labels the distributed run `FAILED` or `INCOMPLETE`, logs that its performance
+results are invalid for comparison, aborts any clients waiting at the
+coordinated-start barrier, and exits non-zero. One failed future cannot hide the
+outcomes of the other nodes: GEM waits for and reports every configured host.
+The registration barrier also has a deadline, so a remote process that never
+reaches SBM cannot leave the other clients waiting indefinitely.
+
+For diagnostics, GEM retains only the most recent 256 KiB of each remote
+process's stdout and stderr. Failed hosts include these bounded tails in the
+SBM-host log. This preserves the relevant exception and shutdown messages
+without allowing a noisy remote process to consume unbounded GEM heap.
+
 ## Code map
 
 | Class | Responsibility |

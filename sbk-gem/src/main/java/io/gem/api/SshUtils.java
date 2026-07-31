@@ -29,6 +29,7 @@ import org.apache.sshd.scp.client.ScpClientCreator;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -158,6 +159,7 @@ public final class SshUtils {
      * @param timeoutSeconds execution timeout in seconds
      * @param response       non-null holder to capture stdout/stderr and exit status
      * @throws IOException on timeout or channel errors
+     * @throws SocketTimeoutException when the remote command exceeds its deadline
      */
     public static void runCommand(final @NotNull ClientSession session, String cmd, long timeoutSeconds,
                                   @NotNull SshResponse response) throws IOException {
@@ -168,11 +170,11 @@ public final class SshUtils {
             execChannel.open().verify(timeoutMillis);
             final Set<?> events = execChannel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), timeoutMillis);
             if (events.contains(ClientChannelEvent.TIMEOUT)) {
-                throw new IOException("The cmd: " + cmd + " timeout !");
+                throw new SocketTimeoutException("Remote command timed out after " + timeoutSeconds + " seconds");
             }
             final Integer exitStatus = execChannel.getExitStatus();
             if (exitStatus == null) {
-                throw new IOException("The cmd: " + cmd + " closed without an SSH exit status");
+                throw new IOException("Remote command closed without an SSH exit status");
             }
             response.returnCode = exitStatus;
         }

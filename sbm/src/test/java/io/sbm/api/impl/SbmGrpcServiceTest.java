@@ -25,11 +25,14 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 /**
@@ -70,6 +73,63 @@ final class SbmGrpcServiceTest {
         assertEquals(List.of(11L), second.values);
         assertTrue(first.completed);
         assertTrue(second.completed);
+    }
+
+    @Test
+    void abortsPendingAndFutureRegistrationsAfterRemoteStartupFailure() throws Exception {
+        final SbmParameters params = new SbmParameters("test", 0, 2, 0, null);
+        params.parseArgs(new String[]{"-class", "file", "-action", "r", "-max", "2"});
+        final CountConnections connections = mock(CountConnections.class);
+        final SbmRegistry registry = mock(SbmRegistry.class);
+        when(registry.getID()).thenReturn(10L);
+        final SbmGrpcService service = new SbmGrpcService(params, new MilliSeconds(), 0, 1000,
+                connections, registry, true);
+        final CapturingObserver waiting = new CapturingObserver();
+        final CapturingObserver late = new CapturingObserver();
+
+        service.registerClient(Config.getDefaultInstance(), waiting);
+        final int aborted = service.abortPendingRegistrations("node-b exited before distributed start");
+        service.registerClient(Config.getDefaultInstance(), late);
+
+        assertEquals(1, aborted);
+        assertEquals(Status.Code.ABORTED, Status.fromThrowable(waiting.failure).getCode());
+        assertEquals(Status.Code.ABORTED, Status.fromThrowable(late.failure).getCode());
+        assertTrue(Status.fromThrowable(waiting.failure).getDescription().contains("node-b"));
+        assertEquals(1, service.getMaximumRegisteredClients());
+        verify(connections).incrementConnections();
+        verify(connections).decrementConnections();
+    }
+
+    @Test
+    void doesNotAbortRegistrationsAfterCoordinatedStartWasReleased() throws Exception {
+        final SbmParameters params = new SbmParameters("test", 0, 1, 0, null);
+        params.parseArgs(new String[]{"-class", "file", "-action", "r", "-max", "1"});
+        final CountConnections connections = mock(CountConnections.class);
+        final SbmRegistry registry = mock(SbmRegistry.class);
+        when(registry.getID()).thenReturn(10L);
+        final SbmGrpcService service = new SbmGrpcService(params, new MilliSeconds(), 0, 1000,
+                connections, registry, true);
+        final CapturingObserver observer = new CapturingObserver();
+
+        service.registerClient(Config.getDefaultInstance(), observer);
+
+        assertEquals(0, service.abortPendingRegistrations("late failure"));
+        assertTrue(observer.completed);
+        assertEquals(List.of(10L), observer.values);
+        assertTrue(service.awaitCoordinatedStart(1, TimeUnit.MILLISECONDS));
+        verify(connections, times(1)).incrementConnections();
+    }
+
+    @Test
+    void coordinatedStartDeadlineReportsMissingClients() throws Exception {
+        final SbmParameters params = new SbmParameters("test", 0, 2, 0, null);
+        params.parseArgs(new String[]{"-class", "file", "-action", "r", "-max", "2"});
+        final SbmGrpcService service = new SbmGrpcService(params, new MilliSeconds(), 0, 1000,
+                mock(CountConnections.class), mock(SbmRegistry.class), true);
+
+        assertFalse(service.awaitCoordinatedStart(1, TimeUnit.MILLISECONDS));
+        service.abortPendingRegistrations("registration deadline expired");
+        assertTrue(service.getRegistrationFailure().contains("deadline"));
     }
 
     @Test
@@ -168,6 +228,7 @@ final class SbmGrpcServiceTest {
     private static final class CapturingObserver implements StreamObserver<ClientID> {
         private final List<Long> values = new ArrayList<>();
         private boolean completed;
+        private Throwable failure;
 
         @Override
         public void onNext(ClientID value) {
@@ -175,8 +236,10 @@ final class SbmGrpcServiceTest {
         }
 
         @Override
+        @SuppressFBWarnings(value = "EI_EXPOSE_REP2",
+                justification = "The throwable is retained only for the test assertion")
         public void onError(Throwable throwable) {
-            throw new AssertionError(throwable);
+            failure = throwable;
         }
 
         @Override
