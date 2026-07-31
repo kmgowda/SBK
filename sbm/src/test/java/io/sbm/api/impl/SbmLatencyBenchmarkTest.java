@@ -8,9 +8,11 @@
  */
 package io.sbm.api.impl;
 
+import io.perl.config.PerlConfig;
 import io.sbm.api.SbmPeriodicRecorder;
 import io.sbp.grpc.MessageLatenciesRecord;
 import io.time.MilliSeconds;
+import io.time.Time;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -42,7 +44,8 @@ final class SbmLatencyBenchmarkTest {
     void usesDedicatedPlatformThreadAndStopsIt() throws Exception {
         final CapturingWindow window = new CapturingWindow();
         final SbmLatencyBenchmark benchmark = new SbmLatencyBenchmark(
-                1, 1, new MilliSeconds(), window, 5_000);
+                1, 1, new MilliSeconds(), window,
+                PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS * Time.MS_PER_SEC);
 
         final CompletableFuture<Void> completion = benchmark.start();
         Thread consumer = null;
