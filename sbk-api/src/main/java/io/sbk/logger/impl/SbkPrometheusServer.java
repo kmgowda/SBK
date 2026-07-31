@@ -31,12 +31,15 @@ import java.util.concurrent.atomic.AtomicLong;
  * records/bytes, timeout events, as well as statistical latency metrics (avg/min/max/discards and
  * percentiles).
  *
- * <p>Metrics are tagged with the SBK storage class name (tag key: {@code class}) and the action
- * (tag key: {@code action}). Metric names are prefixed using an upper-cased header (for example,
- * {@code SBK_READ}) and follow a stable schema, such as
+ * <p>Metrics are tagged with the exporting component ({@code component="sbk"} for direct SBK or
+ * {@code component="sbm"} for SBM, including GEM-managed runs), the resolved storage driver class
+ * (tag key: {@code class}), and the benchmark action (tag key: {@code action}). Metric names are
+ * prefixed using an upper-cased header (for example, {@code SBK_READ}) and follow a stable schema, such as
  * {@code <prefix>_Write_Request_Bytes}, {@code <prefix>_Read_Request_RecordsPerSec}, etc.
  */
 public class SbkPrometheusServer extends PrometheusMetricsServer implements RWPrint {
+    /** Common metric tag identifying the process that exports the metrics. */
+    public static final String COMPONENT_TAG = "component";
     final private static String ACTION_TEXT = "action";
     /** Metric name prefix derived from the header (upper-cased and '_' separated). */
     final protected String rwMetricPrefix;
@@ -89,9 +92,26 @@ public class SbkPrometheusServer extends PrometheusMetricsServer implements RWPr
      */
     public SbkPrometheusServer(String header, String action, String className, double[] percentiles, Time time,
                                MetricsConfig config) throws IOException {
+        this(header, action, className, percentiles, time, config, Config.NAME);
+    }
+
+    /**
+     * Construct an SBK-compatible Prometheus server for a specific exporting component.
+     *
+     * @param header       metric name prefix
+     * @param action       benchmark action
+     * @param className    resolved storage driver class name
+     * @param percentiles  percentile configuration to publish
+     * @param time         time provider for latency measurements
+     * @param config       metrics endpoint configuration
+     * @param component    metrics exporter component, such as {@code sbk} or {@code sbm}
+     * @throws IOException if the underlying server cannot be initialized
+     */
+    protected SbkPrometheusServer(String header, String action, String className, double[] percentiles, Time time,
+                                  MetricsConfig config, String component) throws IOException {
         super(header.toUpperCase()+" "+action, percentiles, time,
                 config.latencyTimeUnit, config.port, config.context,
-                Tags.of(Config.CLASS_OPTION, className, ACTION_TEXT, action));
+                Tags.of(COMPONENT_TAG, component, Config.CLASS_OPTION, className, ACTION_TEXT, action));
         rwMetricPrefix =   header.toUpperCase().replace(" ", "_");
         final String writersName = rwMetricPrefix + "_Writers";
         final String readersName = rwMetricPrefix + "_Readers";

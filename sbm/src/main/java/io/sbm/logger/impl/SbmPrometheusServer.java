@@ -11,6 +11,7 @@
 package io.sbm.logger.impl;
 
 import io.sbm.logger.CountConnections;
+import io.sbm.config.SbmConfig;
 import io.sbk.logger.MetricsConfig;
 import io.sbk.logger.impl.SbkPrometheusServer;
 import io.time.Time;
@@ -39,7 +40,7 @@ public final class SbmPrometheusServer extends SbkPrometheusServer implements Co
      */
     public SbmPrometheusServer(String header, String action, String storageName,
                                double[] percentiles, Time time, MetricsConfig config) throws IOException {
-        super(header, action, storageName, percentiles, time, config);
+        super(header, action, storageName, percentiles, time, config, SbmConfig.NAME);
         final String name = rwMetricPrefix + "_Connections";
         final String maxName = rwMetricPrefix + "_Max_Connections";
         this.connections = this.registry.gauge(name, new AtomicInteger());

@@ -291,6 +291,8 @@ final public class SbkGem {
         }
 
         storageDrivers = storageDevice == null ? packageStore.getClassNames() : null;
+        final String resolvedClassName = storageDevice == null
+                ? className : storageDevice.getClass().getSimpleName();
 
         params = new SbkGemParameters(usageLine, storageDrivers, loggerNames, gemConfig, sbmConfig.port, sbmConfig.idleMS);
         logger.addArgs(params);
@@ -395,7 +397,7 @@ final public class SbkGem {
                 SbkUtils.removeOptionArgsAndValues(nextArgs, params.getOptionsArgs()), logger.getOptionsArgs());
         final List<String> sbkCommandArgs = new ArrayList<>();
         sbkCommandArgs.add(Config.CLASS_OPTION_ARG);
-        sbkCommandArgs.add(className);
+        sbkCommandArgs.add(resolvedClassName);
         Collections.addAll(sbkCommandArgs, sbkArgsList);
         sbkCommandArgs.add("-out");
         sbkCommandArgs.add(GrpcLogger.class.getSimpleName());
@@ -418,7 +420,7 @@ final public class SbkGem {
         sbmConfig.maxConnections = params.getConnections().length;
         final List<String> ramArgsList = new ArrayList<>();
         ramArgsList.add(Config.CLASS_OPTION_ARG);
-        ramArgsList.add(className);
+        ramArgsList.add(resolvedClassName);
         ramArgsList.add("-action");
         ramArgsList.add(actionString);
         /* Add the parsed args such as time, min and max latency and CSV file */

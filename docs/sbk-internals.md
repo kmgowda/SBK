@@ -1330,6 +1330,12 @@ Six shipping implementations:
 Selected at runtime by `-out <ClassName>`. The driver discovery and
 logger discovery use the same package-scan helper.
 
+Micrometer applies three low-cardinality common tags to every Prometheus
+meter: `component` identifies the exporting process (`sbk` or `sbm`), `class`
+identifies the resolved storage driver, and `action` identifies the workload.
+SBK-GEM launches and coordinates distributed work, but SBM owns the aggregated
+metrics endpoint; consequently GEM-managed metrics use `component="sbm"`.
+
 ### 4.5 Wiring a single benchmark — the bootstrap
 
 This is the control flow when a user runs

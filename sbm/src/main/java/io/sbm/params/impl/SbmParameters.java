@@ -19,7 +19,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 
@@ -100,7 +99,7 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
         if (name == null) {
             throw new UnrecognizedOptionException("storage 'class' name is NOT supplied! ");
         }
-        storageName = StringUtils.capitalize(name);
+        storageName = name;
 
         String actionString = getOptionValue("action", "r");
         action = switch (actionString.toLowerCase()) {
