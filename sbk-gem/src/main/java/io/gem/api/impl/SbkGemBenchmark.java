@@ -20,6 +20,7 @@ import io.gem.api.RemoteExecutionStatus;
 import io.gem.api.RemoteResponse;
 import io.gem.api.ConnectionConfig;
 import io.gem.params.GemParameters;
+import io.perl.config.PerlConfig;
 import io.sbk.system.Printer;
 import io.sbk.utils.SbkUtils;
 import io.sbm.api.impl.SbmBenchmark;
@@ -222,16 +223,41 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 }
             });
         }
+        Printer.log.info("SBK-GEM: Remote SBK commands launched on {} host(s); waiting for SBM client " +
+                        "registration ({}/{})", nodes.length, sbmBenchmark.getMaximumRegisteredClients(),
+                nodes.length);
         CompletableFuture.runAsync(() -> {
             try {
-                if (!sbmBenchmark.awaitCoordinatedStart(config.remoteTimeoutSeconds, TimeUnit.SECONDS)) {
-                    if (sbmBenchmark.getRegistrationFailure() == null) {
-                        final String failure = "SBK-GEM: SBM coordinated start timed out after " +
-                                config.remoteTimeoutSeconds + " seconds; registered " +
-                                sbmBenchmark.getMaximumRegisteredClients() + " of " + nodes.length + " remote clients";
-                        Printer.log.error(failure);
-                        sbmBenchmark.abortPendingRegistrations(failure);
+                final long timeoutNanos = TimeUnit.SECONDS.toNanos(config.remoteTimeoutSeconds);
+                final long progressIntervalNanos = TimeUnit.SECONDS.toNanos(
+                        PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS);
+                final long startNanos = System.nanoTime();
+                boolean coordinatedStart = false;
+                long elapsedNanos = 0;
+                while (!coordinatedStart && sbmBenchmark.getRegistrationFailure() == null &&
+                        elapsedNanos < timeoutNanos) {
+                    coordinatedStart = sbmBenchmark.awaitCoordinatedStart(
+                            Math.min(progressIntervalNanos, timeoutNanos - elapsedNanos),
+                            TimeUnit.NANOSECONDS);
+                    elapsedNanos = System.nanoTime() - startNanos;
+                    if (!coordinatedStart && sbmBenchmark.getRegistrationFailure() == null &&
+                            elapsedNanos < timeoutNanos) {
+                        Printer.log.info("SBK-GEM: Waiting for remote SBK clients to register with SBM " +
+                                        "({}/{}); elapsed {} seconds", sbmBenchmark.getMaximumRegisteredClients(),
+                                nodes.length, TimeUnit.NANOSECONDS.toSeconds(elapsedNanos));
                     }
+                }
+                if (coordinatedStart) {
+                    Printer.log.info("SBK-GEM: All remote SBK clients registered with SBM ({}/{}); benchmark " +
+                                    "is running. First performance results are expected after the {}-second " +
+                                    "reporting interval", sbmBenchmark.getMaximumRegisteredClients(), nodes.length,
+                            PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS);
+                } else if (sbmBenchmark.getRegistrationFailure() == null) {
+                    final String failure = "SBK-GEM: SBM coordinated start timed out after " +
+                            config.remoteTimeoutSeconds + " seconds; registered " +
+                            sbmBenchmark.getMaximumRegisteredClients() + " of " + nodes.length + " remote clients";
+                    Printer.log.error(failure);
+                    sbmBenchmark.abortPendingRegistrations(failure);
                 }
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
