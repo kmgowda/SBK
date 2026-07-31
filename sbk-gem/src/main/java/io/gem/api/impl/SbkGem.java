@@ -483,7 +483,6 @@ final public class SbkGem {
      */
     public static void printRemoteResults(@NotNull RemoteResponse[] results, boolean all,
                                           int maximumRegisteredClients) {
-        final String separatorText = "-".repeat(80);
         int successful = 0;
         int failed = 0;
         for (RemoteResponse result : results) {
@@ -495,12 +494,21 @@ final public class SbkGem {
         }
         final String runStatus = distributedRunStatus(results, maximumRegisteredClients);
 
-        Printer.log.info(separatorText);
         final String registrationText = maximumRegisteredClients < 0 ? "unavailable"
                 : maximumRegisteredClients + "/" + results.length;
         final String summary = "SBK-GEM Distributed Benchmark Status: " + runStatus +
                 "; expected nodes: " + results.length + "; successful nodes: " + successful +
                 "; failed nodes: " + failed + "; maximum SBM registrations: " + registrationText;
+        final String title = "SBK-GEM Distributed Benchmark Final Results";
+        int separatorWidth = Math.max(80, Math.max(title.length(), summary.length()));
+        for (int i = 0; i < results.length; i++) {
+            separatorWidth = Math.max(separatorWidth, remoteHostSummary(results[i], i).length());
+        }
+        final String separatorText = "-".repeat(separatorWidth);
+
+        Printer.log.info(separatorText);
+        Printer.log.info(title);
+        Printer.log.info(separatorText);
         if ("SUCCESS".equals(runStatus)) {
             Printer.log.info(summary);
         } else {
@@ -508,18 +516,13 @@ final public class SbkGem {
             Printer.log.error("SBK-GEM: Distributed results are incomplete and must not be used as a valid " +
                     "performance comparison");
         }
-        Printer.log.info("SBK-GEM Remote Results");
         for (int i = 0; i < results.length; i++) {
             final RemoteResponse result = results[i];
-            Printer.log.info(separatorText);
             if (result == null) {
-                Printer.log.error("Host {}: unknown, status: NOT_COMPLETED, return code: unavailable", i + 1);
+                Printer.log.error(remoteHostSummary(null, i));
                 continue;
             }
-            final String returnCode = result.returnCode == RemoteResponse.UNKNOWN_RETURN_CODE
-                    ? "unavailable" : Integer.toString(result.returnCode);
-            final String hostSummary = "Host " + (i + 1) + ": " + result.host + ", status: " + result.status +
-                    ", return code: " + returnCode;
+            final String hostSummary = remoteHostSummary(result, i);
             if (result.status == RemoteExecutionStatus.SUCCESS) {
                 Printer.log.info(hostSummary);
             } else {
@@ -536,6 +539,16 @@ final public class SbkGem {
             }
         }
         Printer.log.info(separatorText);
+    }
+
+    private static String remoteHostSummary(RemoteResponse result, int index) {
+        if (result == null) {
+            return "Host " + (index + 1) + ": unknown, status: NOT_COMPLETED, return code: unavailable";
+        }
+        final String returnCode = result.returnCode == RemoteResponse.UNKNOWN_RETURN_CODE
+                ? "unavailable" : Integer.toString(result.returnCode);
+        return "Host " + (index + 1) + ": " + result.host + ", status: " + result.status +
+                ", return code: " + returnCode;
     }
 
     static String distributedRunStatus(RemoteResponse[] results, int maximumRegisteredClients) {

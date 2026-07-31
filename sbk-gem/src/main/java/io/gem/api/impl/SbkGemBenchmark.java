@@ -76,6 +76,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
     @GuardedBy("this")
     private boolean sbmStarted;
 
+    private volatile boolean remoteCommandsCompleted;
+
     /**
      * Constructor SbkGemBenchmark is responsible for initializing all values.
      *
@@ -93,6 +95,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         this.retFuture = new CompletableFuture<>();
         this.state = State.BEGIN;
         this.sbmStarted = false;
+        this.remoteCommandsCompleted = false;
         final ConnectionConfig[] connections = params.getConnections();
         if (config.fork) {
             executor = new ForkJoinPool(connections.length + 10);
@@ -247,7 +250,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                     remoteResults[i] = cfResults[i].join();
                 }
             }
-            SbkGem.printRemoteResults(remoteResults, false, sbmBenchmark.getMaximumRegisteredClients());
+            remoteCommandsCompleted = true;
             final IOException remoteFailure = remoteCommandFailure(remoteResults);
             if (remoteFailure != null) {
                 shutdown(remoteFailure);
@@ -828,6 +831,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     private void shutdown(Throwable ex) {
         if (state != State.END) {
             state = State.END;
+            int maximumRegisteredClients = -1;
             if (params.isDeleteAfter()) {
                 try {
                     final boolean[] deleteTargets = new boolean[nodes.length];
@@ -841,9 +845,19 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 node.stop();
             }
             if (sbmStarted) {
+                maximumRegisteredClients = sbmBenchmark.getMaximumRegisteredClients();
                 sbmBenchmark.abortPendingRegistrations("SBK-GEM: Distributed benchmark is shutting down");
                 sbmBenchmark.stop();
                 sbmStarted = false;
+            }
+            /*
+             * SbmBenchmark.stop() synchronously closes the total latency
+             * window and prints "Total : SBM". Keep the distributed outcome
+             * after that authoritative aggregate so the final host status is
+             * the last benchmark result block presented to the operator.
+             */
+            if (remoteCommandsCompleted) {
+                SbkGem.printRemoteResults(remoteResults, false, maximumRegisteredClients);
             }
             executor.shutdown();
             if (ex != null) {
