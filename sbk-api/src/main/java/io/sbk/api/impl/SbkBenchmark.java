@@ -29,7 +29,6 @@ import io.sbk.thread.ThreadType;
 import io.state.State;
 import io.time.Time;
 import lombok.Synchronized;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.GuardedBy;
@@ -202,8 +201,7 @@ final public class SbkBenchmark implements Benchmark {
         }
         state = State.RUN;
         Printer.log.info("SBK Benchmark Started");
-        rwLogger.open(params, StringUtils.capitalize(storage.getClass().getSimpleName().toLowerCase()),
-                params.getAction(), time);
+        rwLogger.open(params, storage.getClass().getSimpleName(), params.getAction(), time);
         storage.openStorage(params);
         final WriteRequestsLogger writeRequestsLogger = rwLogger.getMaxWriterIDs() > 0 ? rwLogger : null;
         final ReadRequestsLogger readRequestsLogger = rwLogger.getMaxReaderIDs() > 0 ? rwLogger : null;
