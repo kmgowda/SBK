@@ -261,6 +261,12 @@ SBK currently ships these logger implementations:
 - `PrometheusLogger`: CSV behavior plus Prometheus metrics exposure.
 - `GrpcLogger`: forwards measurements to SBM for distributed aggregation.
 
+Prometheus metrics include stable `component`, `class`, and `action` labels.
+`component="sbk"` identifies a direct SBK exporter, while `component="sbm"`
+identifies SBM aggregation, including benchmarks orchestrated by SBK-GEM.
+SBK-GEM is not a separate metrics component because SBM owns its metrics
+endpoint and aggregated measurements.
+
 ### SBK Local Web Console
 
 Use `WebLogger` when you want live graphs without Docker, Prometheus, or Grafana:
