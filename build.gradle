@@ -605,6 +605,8 @@ application {
             include "REPOSITORY_MAP.md"
             include "DRIVER_GUIDE.md"
             include "DOCUMENTATION_GUIDE.md"
+            include "PROMETHEUS_LOGGER.md"
+            include "WEB_LOGGER.md"
         }
     }
 

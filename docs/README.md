@@ -24,8 +24,9 @@ This directory contains the authoritative engineering documentation for Storage 
 
 1. [Project README](../README.md): requirements, build, first benchmark, and module overview.
 2. [WebLogger guide](WEB_LOGGER.md): the dependency-free SBK Local Web Console for SBK, SBM, and SBK-GEM.
-3. The README under the selected `drivers/<name>/` directory: backend prerequisites and examples.
-4. [Architecture and code flow](ARCHITECTURE.md): what happens after the command starts.
+3. [PrometheusLogger and SBK Dashboard guide](PROMETHEUS_LOGGER.md): persistent Prometheus metrics and Grafana dashboards for direct and distributed runs.
+4. The README under the selected `drivers/<name>/` directory: backend prerequisites and examples.
+5. [Architecture and code flow](ARCHITECTURE.md): what happens after the command starts.
 
 ### New contributor
 
@@ -64,6 +65,7 @@ This directory contains the authoritative engineering documentation for Storage 
 | [AGENT_RECIPES.md](AGENT_RECIPES.md) | Exact task procedures |
 | [DRIVER_SPECIFICATION.md](DRIVER_SPECIFICATION.md) | Fillable design template for new drivers |
 | [WEB_LOGGER.md](WEB_LOGGER.md) | SBK Local Web Console usage, lifecycle, options, security, and troubleshooting |
+| [PROMETHEUS_LOGGER.md](PROMETHEUS_LOGGER.md) | PrometheusLogger, SBM/GEM aggregate exporters, and standalone SBK Dashboard deployment and operation |
 | [sbk-internals.md](sbk-internals.md) | Detailed design rationale and research-oriented treatment |
 | [TIMESTAMP_MPSC_QUEUE.md](TIMESTAMP_MPSC_QUEUE.md) | Intrusive timestamp queue architecture, JDK comparison, correctness evidence, and research methodology |
 | [LATENCY_RECORDERS.md](LATENCY_RECORDERS.md) | Exact array and sparse-map latency storage, complexity, memory accounting, correctness, and reproducible JMH results |

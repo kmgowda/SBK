@@ -45,6 +45,8 @@ plugins.withId('maven-publish') {
             include 'REPOSITORY_MAP.md'
             include 'DRIVER_GUIDE.md'
             include 'DOCUMENTATION_GUIDE.md'
+            include 'PROMETHEUS_LOGGER.md'
+            include 'WEB_LOGGER.md'
             into 'docs'
         }
         from(rootProject.file('.devin/skills')) {

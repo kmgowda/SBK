@@ -66,6 +66,19 @@ Start with defaults:
 ./sbm/build/install/sbm/bin/sbm
 ```
 
+Start the aggregate Prometheus exporter explicitly:
+
+```bash
+./sbm/build/install/sbm/bin/sbm \
+  -out SbmPrometheusLogger -class file -action r
+```
+
+SBM prints ready-to-copy scrape URLs and exposes aggregate metrics at `http://<sbm-host>:9719/metrics` by default.
+Register that endpoint—not each gRPC client—in the separately deployed
+[SBK Dashboard](https://github.com/kmgowda/sbk-dashboard). Use `-context PORT/PATH` to change the endpoint. The
+[PrometheusLogger and SBK Dashboard guide](../docs/PROMETHEUS_LOGGER.md) covers dashboard deployment, endpoint
+registration, metrics tags, retention, networking, and troubleshooting.
+
 Start the dependency-free SBK Local Web Console instead of Prometheus:
 
 ```bash
@@ -120,7 +133,10 @@ Protocol sources are under `sbk-api/src/main/proto`; generated Java/gRPC sources
 
 ## Containers and dashboards
 
-The module's Jib configuration builds an `sbm` image and declares its service/metrics ports. Repository monitoring assets are under [`grafana/`](../grafana/) and container guidance under [`dockers/`](../dockers/).
+The module's Jib configuration builds an `sbm` image and declares its service/metrics ports. Repository monitoring
+assets are under [`grafana/`](../grafana/) and container guidance under [`dockers/`](../dockers/). For persistent
+multi-endpoint visualization, deploy [SBK Dashboard](https://github.com/kmgowda/sbk-dashboard) and register the SBM
+metrics endpoint on port 9719. For a lightweight in-memory view, use `SbmWebLogger` instead.
 
 ## Further reading
 
