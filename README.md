@@ -18,6 +18,7 @@ limitations under the License.
 
 [![Version](https://img.shields.io/github/v/release/kmgowda/sbk)](https://github.com/kmgowda/SBK/releases)
 [![Build](https://github.com/kmgowda/SBK/actions/workflows/gradle.yml/badge.svg)](https://github.com/kmgowda/SBK/actions/workflows/gradle.yml)
+[![API](https://img.shields.io/badge/SBK-API-brightgreen)](https://kmgowda.github.io/SBK/sbk-api/javadoc/index.html)
 [![License](https://img.shields.io/github/license/kmgowda/SBK)](LICENSE)
 
 SBK is a Java framework for measuring the throughput and latency of storage systems with one common workload engine. Its drivers cover object stores, message systems, databases, file systems, caches, and local queues. The harness controls concurrency, duration, rate, payloads, timestamps, and reporting; each driver only adapts those operations to a backend.
