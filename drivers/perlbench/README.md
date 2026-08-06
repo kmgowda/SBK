@@ -279,7 +279,7 @@ The allocation difference is structural: the intrusive
 `TimeStamp` plus a private queue node. Throughput remains dependent on
 contention, scheduling, and consumer service rate. The canonical exact values,
 confidence intervals, environment, and interpretation are maintained in
-[the queue research guide](../../docs/TIMESTAMP_MPSC_QUEUE.md#102-recorded-environment-and-results);
+[the queue research guide](../../docs/TIMESTAMP_MPSC_QUEUE.md#102-reproducible-run-on-2026-07-27);
 this summary must not be interpreted as a universal throughput ranking.
 
 ### PerlBench end-to-end observations

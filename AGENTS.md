@@ -14,15 +14,15 @@ Licensed under the Apache License, Version 2.0.
 >
 > **Agent-specific configurations:**
 > - Devin: See `.devin/skills/` for executable skills
-> - Cursor: See `.cursorrules` for Cursor-specific rules
+> - Cursor: See `.cursor/rules/sbk.mdc`; `.cursorrules` is the legacy pointer
 > - Aider: See `.aider.conf.yml` for Aider configuration
+> - Codex and Windsurf: consume this root `AGENTS.md` directly
 > - Benchmark execution: any agent may use the portable
 >   `.devin/skills/sbk-benchmark-runner/` and
 >   `.devin/skills/sbk-distributed-benchmark-runner/` knowledge packs
 >
-> **Humans:** see <ref_file file="/root/projects/SBK/README.md" /> for the
-> end-user manual, and <ref_file file="/root/projects/SBK/docs/sbk-internals.md" />
-> for the internal design.
+> **Humans:** see [README.md](README.md) for the end-user manual and
+> [docs/sbk-internals.md](docs/sbk-internals.md) for the internal design.
 
 ---
 
@@ -53,10 +53,10 @@ driver SPI.
 | `sbk-gem-yal/` | YML-driven SBK-GEM. | Rarely. |
 | `drivers/<name>/` | One subdirectory per storage backend. **53 are enabled in the aggregate build**; disabled drivers and a template also remain in tree. | When adding or fixing a driver. **This is the most common change.** |
 
-**For new drivers, see <ref_file file="/root/projects/SBK/docs/DRIVER_SPECIFICATION.md" />
+**For new drivers, see [docs/DRIVER_SPECIFICATION.md](docs/DRIVER_SPECIFICATION.md)
 (spec template + worked example) and
-<ref_file file="/root/projects/SBK/docs/AGENT_RECIPES.md" /> ("Add a storage
-driver" recipe).**
+[docs/AGENT_RECIPES.md](docs/AGENT_RECIPES.md) ("Add a storage driver"
+recipe).**
 
 ---
 
@@ -92,16 +92,21 @@ driver" recipe).**
 
 ### Verification — what counts as "done"
 
-A change is **done** only after all of these succeed:
+Verification is proportional to the affected surface:
 
-1. `./gradlew :drivers:<your-driver>:check` — module-level
-2. `./gradlew check` — full project
-3. `./gradlew installDist` — produces a working `sbk` script
-4. The end-to-end smoke test above runs without errors
+1. Run the narrowest affected module check, such as
+   `./gradlew :drivers:<name>:check`, `:sbk-api:check`, or `:perl:check`.
+2. Run `./gradlew check` for source, dependency, or build-logic changes.
+3. Run `./gradlew installDist` when runtime packaging, discovery, launchers,
+   drivers, or loggers are affected.
+4. For driver behavior, run the installed CLI against a controlled real or
+   mock backend (or `play.min.io` for S3). Compile-clean is not sufficient.
+5. For documentation-only work, validate local links and references, render
+   changed Mermaid diagrams when tooling is available, and run
+   `git diff --check`; do not claim unrelated backend testing.
 
-> **Driver changes:** also run the driver's CLI against a real backend
-> (or `play.min.io` for S3) before declaring success. Compile-clean is
-> necessary but not sufficient.
+Report exact commands and distinguish a pass from a check that was not run or
+could not run.
 
 ---
 
@@ -116,7 +121,7 @@ A change is **done** only after all of these succeed:
 | `drivers/<name>/src/main/java/io/sbk/driver/<Name>/<Name>Writer.java` | The `Writer<T>` impl. |
 | `drivers/<name>/src/main/java/io/sbk/driver/<Name>/<Name>Reader.java` | The `Reader<T>` impl. |
 | `drivers/<name>/src/main/java/io/sbk/driver/<Name>/<Name>Config.java` | POJO holding driver-specific config. Bound from the properties file by Jackson. |
-| `drivers/<name>/src/main/resources/<name>.properties` | Default values for every config field. |
+| `drivers/<name>/src/main/resources/<config-file>.properties` | Default values for config fields. The filename must exactly match the storage class's resource lookup; existing drivers use both lowercase and class-case names. |
 
 **Driver discovery is by simple class name, case-insensitive**:
 `-class minio` resolves to `io.sbk.driver.MinIO.MinIO`. The class name
@@ -125,14 +130,14 @@ must match the file/directory name (modulo case).
 ### Code conventions
 
 - **Lombok** is available (`@Synchronized`, `@SuppressFBWarnings`, etc.).
-  See <ref_file file="/root/projects/SBK/lombok.config" />.
+  See [`lombok.config`](lombok.config).
 - **Checkstyle is strict.** The most common violations a new driver
   triggers:
   - Single-statement `if` blocks **must** have braces.
   - All public methods need Javadoc with `@param`, `@return`, `@throws`.
   - No unused imports.
   - Imports of new packages must be explicitly allowed in
-    <ref_file file="/root/projects/SBK/checkstyle/import-control.xml" />.
+    [`checkstyle/import-control.xml`](checkstyle/import-control.xml).
     *If a new dependency brings in a new top-level package, add it there.*
 - **No `synchronized` blocks or `Lock` use in the driver hot path.**
   The harness's lock-free property depends on the driver also not
@@ -161,8 +166,8 @@ exceeds its bandwidth quota. The build will fail with a 405 / 403 from
 `maven.pkg.github.com` unless valid credentials are in
 `~/.gradle/gradle.properties`. **For agent work, `halodb` is currently
 commented out** in
-<ref_file file="/root/projects/SBK/settings-drivers.gradle" /> and
-<ref_file file="/root/projects/SBK/build-drivers.gradle" />.
+[`settings-drivers.gradle`](settings-drivers.gradle) and
+[`build-drivers.gradle`](build-drivers.gradle).
 Do not re-enable it without confirming the user wants to deal with the
 GitHub Packages credentials.
 
@@ -172,9 +177,9 @@ When introducing a new driver subdirectory, you must edit:
 
 1. `settings.gradle` — *no, you don't.* The driver projects are
    listed in `settings-drivers.gradle`.
-2. <ref_file file="/root/projects/SBK/settings-drivers.gradle" /> — add
+2. [`settings-drivers.gradle`](settings-drivers.gradle) — add
    `include 'drivers:<name>'`.
-3. <ref_file file="/root/projects/SBK/build-drivers.gradle" /> — add
+3. [`build-drivers.gradle`](build-drivers.gradle) — add
    `api project(':drivers:<name>')` so the driver is bundled into the
    `installDist` distribution.
 
@@ -183,7 +188,7 @@ but `-class <name>` doesn't find it" issues.**
 
 ### 4.3 MinIO SDK is pinned to 8.5.17 (not the latest)
 
-<ref_file file="/root/projects/SBK/drivers/minio/build.gradle" /> uses
+[`drivers/minio/build.gradle`](drivers/minio/build.gradle) uses
 `io.minio:minio:8.5.17`. **Do not upgrade to 9.x** without testing — the
 9.x SDK sends an `x-amz-sdk-checksum-algorithm` header on every
 `PutObject` that older S3 backends (Dell ECS / ObjectScale, older Ceph
@@ -200,7 +205,7 @@ Gradle's incremental build can leave a stale pathing manifest.
 
 **Fix:**
 ```bash
-rm -rf build && ./gradlew clean :pathingJar installDist --rerun-tasks
+./gradlew clean :pathingJar installDist --rerun-tasks
 ```
 
 Symptom you'd hit otherwise: `NoClassDefFoundError` on a class that is
@@ -214,12 +219,12 @@ packages. If your new driver pulls in a vendor SDK at a new
 top-level package (e.g. `software.amazon`, `org.apache.solr`,
 `okhttp3`), you must add
 `<allow pkg="package.name" />` to
-<ref_file file="/root/projects/SBK/checkstyle/import-control.xml" />
+[`checkstyle/import-control.xml`](checkstyle/import-control.xml)
 or `checkstyleMain` will fail.
 
 ### 4.6 Mermaid diagrams in `docs/`
 
-If you edit mermaid diagrams in <ref_file file="/root/projects/SBK/docs/sbk-internals.md" />,
+If you edit Mermaid diagrams in [docs/sbk-internals.md](docs/sbk-internals.md),
 test them with `mmdc` (mermaid-cli v11+ on Node 18+). Common pitfalls:
 
 - HTML entities like `&#91;` / `&lt;` are rendered **literally** in some
@@ -237,7 +242,7 @@ When the benchmark duration expires, the SBK framework tears down the
 SDK's HTTP dispatcher mid-call. Your driver should treat
 `InterruptedIOException` and `RejectedExecutionException` as **clean
 shutdowns**, not errors. The MinIO driver
-(<ref_file file="/root/projects/SBK/drivers/minio/src/main/java/io/sbk/driver/MinIO/MinIOWriter.java" />)
+([`MinIOWriter.java`](drivers/minio/src/main/java/io/sbk/driver/MinIO/MinIOWriter.java))
 shows the pattern.
 
 ### 4.8 The harness already times your call — don't time it again
@@ -255,10 +260,10 @@ do, document it in the driver's README.
 
 | Topic | Read |
 |---|---|
-| End-user manual | <ref_file file="/root/projects/SBK/README.md" /> |
-| Internal design / why is SBK fast / mermaid diagrams | <ref_file file="/root/projects/SBK/docs/sbk-internals.md" /> |
-| Step-by-step recipes (add a driver, add a logger, debug failures) | <ref_file file="/root/projects/SBK/docs/AGENT_RECIPES.md" /> |
-| Driver spec template for spec-driven development | <ref_file file="/root/projects/SBK/docs/DRIVER_SPECIFICATION.md" /> |
+| End-user manual | [README.md](README.md) |
+| Internal design / why SBK is fast / Mermaid diagrams | [docs/sbk-internals.md](docs/sbk-internals.md) |
+| Step-by-step recipes (add a driver, add a logger, debug failures) | [docs/AGENT_RECIPES.md](docs/AGENT_RECIPES.md) |
+| Driver spec template for spec-driven development | [docs/DRIVER_SPECIFICATION.md](docs/DRIVER_SPECIFICATION.md) |
 | Original design papers | `docs/sbk.pdf`, `docs/sbp.pdf`, `docs/sbk-slc.pdf` |
 
 ---
@@ -287,7 +292,7 @@ For larger work (a new driver, a new feature in `sbk-api`, a new logger
 backend):
 
 1. Human (or AI assistant) writes a spec by filling in
-   <ref_file file="/root/projects/SBK/docs/DRIVER_SPECIFICATION.md" />
+   [docs/DRIVER_SPECIFICATION.md](docs/DRIVER_SPECIFICATION.md)
    (for drivers) or a similar markdown template.
 2. Spec is reviewed / refined by the human.
 3. Agent reads the spec + `AGENTS.md` + `AGENT_RECIPES.md`.
@@ -312,7 +317,7 @@ specific action** (not blanket approval):
   remote.
 - Modifying the Apache 2.0 license headers or `LICENSE` file.
 - Changing the SBK version in
-  <ref_file file="/root/projects/SBK/gradle.properties" /> or in the
+  [`gradle.properties`](gradle.properties) or in the
   root `build.gradle`.
 - Adding a new top-level Gradle subproject (i.e., something parallel to
   `perl/`, `sbm/`, etc.). New *drivers* under `drivers/` are fine.
@@ -340,7 +345,7 @@ should re-read this file and the relevant linked docs.
 5. For a driver change: have I updated **both**
    `settings-drivers.gradle` **and** `build-drivers.gradle`?
 6. Are there any architecture invariants from
-   <ref_file file="/root/projects/SBK/docs/sbk-internals.md" /> §8 my
+   [docs/sbk-internals.md](docs/sbk-internals.md) §8 my
    change must preserve (lock-free hot path, no sampling, no
    `synchronized` blocks, etc.)?
 

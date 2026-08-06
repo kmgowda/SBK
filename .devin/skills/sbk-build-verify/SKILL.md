@@ -26,10 +26,12 @@ Invoke this skill when:
 - How to fix the pathing JAR staleness issue
 - How to interpret build errors
 
-### Permissions granted
-- Exec permissions: `./gradlew`, `java` (for running SBK binaries)
-- Read access to: `build/`, `gradle/`, all source directories
-- Write access to: `build/` (for clean operations)
+### Required capabilities
+
+This skill does not grant permissions. The agent still follows `AGENTS.md`
+and its host tool's approval model. Normal verification needs permission to
+run `./gradlew` and local SBK launchers and to write generated files under
+module `build/` directories.
 
 ## Build and verify workflow
 
@@ -59,7 +61,7 @@ Run a clean rebuild when:
 - Pathing JAR appears stale (manifest doesn't include new dependencies)
 
 ```bash
-rm -rf build && ./gradlew clean :pathingJar installDist --rerun-tasks
+./gradlew clean :pathingJar installDist --rerun-tasks
 ```
 
 ### JDK requirement
@@ -95,7 +97,7 @@ ERROR: SBK requires JDK 25, but found JDK 11
 
 **Fix**:
 ```bash
-rm -rf build && ./gradlew clean :pathingJar installDist --rerun-tasks
+./gradlew clean :pathingJar installDist --rerun-tasks
 ```
 
 ### Checkstyle import control failure
@@ -174,7 +176,7 @@ public String doSomething(String param) throws IOException {
 ./gradlew clean
 
 # Clean rebuild with pathing JAR refresh
-rm -rf build && ./gradlew clean :pathingJar installDist --rerun-tasks
+./gradlew clean :pathingJar installDist --rerun-tasks
 ```
 
 ### Driver-specific commands
@@ -207,6 +209,5 @@ A change is **complete** only when:
 
 ## Related documentation
 
-- <ref_file file="/root/projects/SBK/AGENTS.md" /> - §2: Build, run, and verify
-- <ref_file file="/root/projects/SBK/AGENTS.md" /> - §4: Known gotchas (especially §4.4 pathing JAR)
-- <ref_file file="/root/projects/SBK/docs/AGENT_RECIPES.md" /> - Recipe 7: Bump a driver's vendor SDK version
+- [`AGENTS.md`](../../../AGENTS.md) - build, verification, and known gotchas
+- [`docs/AGENT_RECIPES.md`](../../../docs/AGENT_RECIPES.md) - SDK upgrade recipe

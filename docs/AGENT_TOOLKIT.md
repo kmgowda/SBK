@@ -48,9 +48,21 @@ Each skill keeps detailed operational knowledge and sanitized examples in its
 process to a remote storage service is still a single-load-generator benchmark;
 SBK-GEM is for distributing load generation across hosts.
 
-## Tool-specific files
+## Tool-specific discovery
 
-The repository may include configuration for individual coding tools, such as `.devin/skills/`, `.cursorrules`, or `.aider.conf.yml`. These files should:
+The universal `AGENTS.md` keeps the project usable across tools. Thin adapters
+exist only where a tool benefits from its own discovery format:
+
+| Tool | Repository entry point |
+|---|---|
+| OpenAI Codex and other `AGENTS.md` readers | Root `AGENTS.md` |
+| Windsurf / Cascade | Root `AGENTS.md`, which its rule engine discovers directly |
+| Cursor | `.cursor/rules/sbk.mdc`; `.cursorrules` remains a legacy pointer |
+| Devin | Root `AGENTS.md` plus task skills under `.devin/skills/` |
+| Aider | `.aider.conf.yml` loads `AGENTS.md` as read-only context |
+| Other agents | Start with `INSTRUCTIONS.md`, then read `AGENTS.md` |
+
+These files should:
 
 - Point back to `AGENTS.md` rather than copying all rules.
 - Add only syntax, permissions, or workflows unique to that tool.
@@ -58,7 +70,9 @@ The repository may include configuration for individual coding tools, such as `.
 - Avoid absolute checkout paths.
 - Remain optional for contributors using other tools.
 
-Availability of a tool-specific file does not mean that every installation of that tool automatically loads it; consult that tool's current documentation.
+Availability of a tool-specific file does not mean that every installation or
+version automatically loads it. If automatic discovery is uncertain, include
+`AGENTS.md` explicitly in the agent's context.
 
 ## Recommended agent workflow
 
@@ -97,13 +111,17 @@ Agents should prefer read-only discovery, scoped edits, Gradle wrapper commands,
 ## Verification baseline
 
 ```bash
-./gradlew :<affected-module>:check
-./gradlew check
-./gradlew installDist
+./gradlew :<affected-module>:check  # source changes
+./gradlew check                     # cross-module source/build changes
+./gradlew installDist               # runtime packaging/discovery changes
 git diff --check
 ```
 
-Driver work adds installed-distribution discovery and a real-backend smoke test. Dependency changes add a clean pathing-JAR rebuild. Documentation-only changes still require link/reference review, Mermaid validation where available, and `git diff --check`.
+Choose commands according to the affected surface; placeholders are not
+literal commands. Driver work adds installed-distribution discovery and a
+real-backend smoke test. Dependency changes add a clean pathing-JAR rebuild.
+Documentation-only changes require link/reference review, Mermaid validation
+for changed diagrams where available, and `git diff --check`.
 
 ## Maintaining the toolkit
 

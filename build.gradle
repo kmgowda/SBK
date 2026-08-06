@@ -624,6 +624,11 @@ application {
     }
     applicationDistribution.from(".cursorrules")
     applicationDistribution.from(".aider.conf.yml")
+    applicationDistribution.into(".cursor/rules") {
+        from(".cursor/rules") {
+            include "*.mdc"
+        }
+    }
 }
 
 

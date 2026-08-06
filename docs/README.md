@@ -48,9 +48,13 @@ This directory contains the authoritative engineering documentation for Storage 
 ### Coding agent
 
 1. [AGENTS.md](../AGENTS.md): repository constraints and required verification.
-2. [INSTRUCTIONS.md](../INSTRUCTIONS.md): compact compatibility entry point.
+2. [Coding-agent toolkit](AGENT_TOOLKIT.md): tool discovery, task routing, and
+   the shared workflow for Codex, Windsurf, Devin, Cursor, Aider, and others.
 3. [Engineering recipes](AGENT_RECIPES.md): deterministic task playbooks.
 4. [Driver specification template](DRIVER_SPECIFICATION.md): spec-driven driver work.
+
+`INSTRUCTIONS.md` is a compact compatibility pointer for tools that do not
+discover `AGENTS.md` directly; it does not replace the full guide.
 
 ## Document ownership
 
@@ -63,7 +67,10 @@ This directory contains the authoritative engineering documentation for Storage 
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | Human contribution workflow and definition of done |
 | [AGENTS.md](../AGENTS.md) | Agent rules and repository-specific constraints |
 | [AGENT_RECIPES.md](AGENT_RECIPES.md) | Exact task procedures |
+| [AGENT_TOOLKIT.md](AGENT_TOOLKIT.md) | Cross-tool agent discovery, context routing, permissions, and verification |
+| [AGENT_DOCUMENTATION_DISTRIBUTION.md](AGENT_DOCUMENTATION_DISTRIBUTION.md) | Agent-documentation release and artifact packaging |
 | [DRIVER_SPECIFICATION.md](DRIVER_SPECIFICATION.md) | Fillable design template for new drivers |
+| [DOCUMENTATION_GUIDE.md](DOCUMENTATION_GUIDE.md) | Documentation ownership, required content, and validation |
 | [WEB_LOGGER.md](WEB_LOGGER.md) | SBK Local Web Console usage, lifecycle, options, security, and troubleshooting |
 | [PROMETHEUS_LOGGER.md](PROMETHEUS_LOGGER.md) | PrometheusLogger, SBM/GEM aggregate exporters, and standalone SBK Dashboard deployment and operation |
 | [sbk-internals.md](sbk-internals.md) | Detailed design rationale and research-oriented treatment |

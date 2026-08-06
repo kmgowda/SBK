@@ -58,6 +58,10 @@ plugins.withId('maven-publish') {
         from(rootProject.file('.aider.conf.yml')) {
             into 'agent-configs'
         }
+        from(rootProject.file('.cursor/rules')) {
+            include '*.mdc'
+            into 'agent-configs/cursor/rules'
+        }
     }
 
     /*

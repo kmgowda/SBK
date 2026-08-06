@@ -10,8 +10,8 @@ Licensed under the Apache License, Version 2.0.
 > repository. Each recipe lists the **exact files to touch**, the
 > **exact commands to run**, and **what success looks like**.
 >
-> Read <ref_file file="/root/projects/SBK/AGENTS.md" /> first for
-> repo-wide conventions and gotchas. This document assumes you have.
+> Read [AGENTS.md](../AGENTS.md) first for repository-wide conventions and
+> gotchas. This document assumes you have.
 
 ---
 
@@ -40,8 +40,8 @@ Before you start, confirm:
   HTTP/TCP protocol). SBK is Java-only.
 - The library is on **Maven Central** (or another public repo) — adding
   a vendor SDK from a private repo requires extra build-file changes.
-- You have read <ref_file file="/root/projects/SBK/drivers/sbktemplate/" />
-  — it is the official starting scaffold.
+- You have read [`drivers/sbktemplate`](../drivers/sbktemplate/) — it is the
+  official starting scaffold.
 
 ### 1.2 Files to create
 
@@ -50,9 +50,9 @@ Pick a driver name, e.g. `acmekv`. The convention is:
 - Directory name: lowercase (`acmekv`)
 - Java class/package name: PascalCase, matches the directory case
   (`AcmeKv` → `io.sbk.driver.AcmeKv`)
-- Properties file: matches the class name in title case
-  (`AcmeKv.properties`) — see how MinIO does it
-  (`minio.properties` because the class is `MinIO`).
+- Properties file: keep the scaffold name (`AcmeKv.properties`) or choose a
+  stable name and make the storage class's `CONFIGFILE` constant match it
+  exactly. Existing drivers use both class-case and lowercase filenames.
 
 ```
 drivers/acmekv/
@@ -85,14 +85,9 @@ Use exact replacement of the case-sensitive strings:
 | `SbkTemplate` (class names, package, properties filename) | `AcmeKv` |
 | The `SbkTemplate.properties` file → `AcmeKv.properties` |
 
-```bash
-cd drivers/acmekv
-find src -name 'SbkTemplate*' -exec rename 's/SbkTemplate/AcmeKv/' {} \;
-# (or mv each file by hand if `rename` isn't installed)
-find . -type f \( -name '*.java' -o -name '*.properties' \) \
-    -exec sed -i 's/SbkTemplate/AcmeKv/g' {} \;
-mv src/main/java/io/sbk/driver/SbkTemplate src/main/java/io/sbk/driver/AcmeKv
-```
+Rename the four Java files, the Java package directory, and the properties
+file, then replace `SbkTemplate` in their contents. Review the resulting diff;
+do not apply an unrestricted repository-wide replacement.
 
 **Step C — Edit `drivers/acmekv/build.gradle`** to add the vendor SDK
 dependency:
@@ -112,11 +107,11 @@ dependencies {
 
 **Step D — Register the driver in the build system.** Edit:
 
-- <ref_file file="/root/projects/SBK/settings-drivers.gradle" /> — add:
+- [`settings-drivers.gradle`](../settings-drivers.gradle) — add:
   ```groovy
   include 'drivers:acmekv'
   ```
-- <ref_file file="/root/projects/SBK/build-drivers.gradle" /> — add:
+- [`build-drivers.gradle`](../build-drivers.gradle) — add:
   ```groovy
   api project(':drivers:acmekv')
   ```
@@ -124,88 +119,26 @@ dependencies {
 **Step E — Update `checkstyle/import-control.xml`** if the SDK pulls in
 a new top-level package. Look at the SDK's `pom.xml` to find its package
 prefix (e.g., `com.acme`), then add to
-<ref_file file="/root/projects/SBK/checkstyle/import-control.xml" />:
+[`checkstyle/import-control.xml`](../checkstyle/import-control.xml):
 
 ```xml
 <allow pkg="com.acme" />
 ```
 
 **Step F — Implement the four classes.** The contract is in
-<ref_file file="/root/projects/SBK/sbk-api/src/main/java/io/sbk/api/Storage.java" />.
-See <ref_file file="/root/projects/SBK/docs/DRIVER_SPECIFICATION.md" />
-for a fillable spec and a worked example.
+[`Storage.java`](../sbk-api/src/main/java/io/sbk/api/Storage.java). Preserve
+the scaffold's imports, overrides, checked exceptions, Javadocs, and braces;
+replace only its placeholder behavior. Use
+[DRIVER_SPECIFICATION.md](DRIVER_SPECIFICATION.md) for a fillable design and
+worked example.
 
-Minimal implementation sketch (replace with real SDK calls):
-
-```java
-// AcmeKv.java
-public class AcmeKv implements Storage<byte[]> {
-    private static final String CONFIGFILE = "AcmeKv.properties";
-    private AcmeKvConfig config;
-    private AcmeClient client;
-
-    public void addArgs(InputOptions params) {
-        config = loadConfigFromProperties(CONFIGFILE);
-        params.addOption("host", true, "AcmeKV host (default: " + config.host + ")");
-        params.addOption("port", true, "AcmeKV port (default: " + config.port + ")");
-    }
-
-    public void parseArgs(ParameterOptions params) {
-        config.host = params.getOptionValue("host", config.host);
-        config.port = Integer.parseInt(params.getOptionValue("port", String.valueOf(config.port)));
-    }
-
-    public void openStorage(ParameterOptions params) throws IOException {
-        client = AcmeClient.connect(config.host, config.port);
-    }
-
-    public void closeStorage(ParameterOptions params) throws IOException {
-        if (client != null) client.close();
-    }
-
-    public DataWriter<byte[]> createWriter(int id, ParameterOptions params) {
-        return new AcmeKvWriter(id, client, config);
-    }
-
-    public DataReader<byte[]> createReader(int id, ParameterOptions params) {
-        return new AcmeKvReader(id, client, config);
-    }
-}
-```
-
-The writer's minimum surface is `writeAsync(byte[] data)` — return
-`null` for sync completion or a `CompletableFuture` for async. The
-harness handles timing.
-
-```java
-// AcmeKvWriter.java
-public class AcmeKvWriter implements Writer<byte[]> {
-    private final AcmeClient client;
-    private final AcmeKvConfig config;
-    private final int id;
-
-    public AcmeKvWriter(int id, AcmeClient client, AcmeKvConfig config) {
-        this.id = id;
-        this.client = client;
-        this.config = config;
-    }
-
-    @Override
-    public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
-        client.put(generateKey(), data);   // your vendor call
-        return null;                       // synchronous; harness times the call
-    }
-
-    @Override
-    public void close() throws IOException { /* no per-writer resources */ }
-}
-```
-
-The reader's minimum surface is `read()` — return one record per call.
-See <ref_file file="/root/projects/SBK/drivers/file/" /> for a complete
-simple example, or
-<ref_file file="/root/projects/SBK/drivers/minio/" /> for an example
-with rich configuration.
+The writer's minimum surface is `writeAsync(byte[] data)`: return `null` after
+synchronous completion or a `CompletableFuture` whose completion point has
+documented semantics. The reader's minimum surface is `read()`, returning one
+record per call unless the driver deliberately implements a batching override.
+The harness handles timing. See [`drivers/file`](../drivers/file/) for a simple
+implementation or [`drivers/minio`](../drivers/minio/) for SDK configuration
+and shutdown handling.
 
 **Step G — Add the README.** Every driver has its own `README.md` with:
 
@@ -213,8 +146,10 @@ with rich configuration.
 - The CLI command(s) for write and read benchmarks.
 - Any vendor-specific configuration (auth, ports, etc.).
 
-Use <ref_file file="/root/projects/SBK/drivers/minio/README.md" /> as the
-gold-standard template.
+Use the minimum structure in
+[DOCUMENTATION_GUIDE.md](DOCUMENTATION_GUIDE.md#driver-readme-minimum-structure)
+and adapt the closest driver's README. Do not copy backend-specific MinIO
+options into an unrelated driver.
 
 ### 1.4 Verify
 
@@ -366,7 +301,7 @@ public class InfluxLogger extends AbstractRWLogger {
 
 `AbstractRWLogger` already supplies sensible defaults for everything
 else. Look at
-<ref_file file="/root/projects/SBK/sbk-api/src/main/java/io/sbk/logger/impl/CSVLogger.java" />
+[`CSVLogger.java`](../sbk-api/src/main/java/io/sbk/logger/impl/CSVLogger.java)
 for a concrete reference of how much you need to override.
 
 ### 3.3 Verify
@@ -389,7 +324,7 @@ for a concrete reference of how much you need to override.
   Otherwise the package scanner won't find it.
 - If you add a new vendor SDK dependency to `sbk-api/build.gradle`,
   remember to add the package to
-  <ref_file file="/root/projects/SBK/checkstyle/import-control.xml" />.
+  [`checkstyle/import-control.xml`](../checkstyle/import-control.xml).
 
 ---
 
@@ -399,9 +334,9 @@ for a concrete reference of how much you need to override.
 
 ### 4.1 Files to touch
 
-- <ref_file file="/root/projects/SBK/sbk-api/src/main/java/io/sbk/params/impl/SbkParameters.java" />
+- [`SbkParameters.java`](../sbk-api/src/main/java/io/sbk/params/impl/SbkParameters.java)
   — declare the option and parse it.
-- <ref_file file="/root/projects/SBK/sbk-api/src/main/java/io/sbk/params/ParameterOptions.java" />
+- [`ParameterOptions.java`](../sbk-api/src/main/java/io/sbk/params/ParameterOptions.java)
   — add the getter to the public interface so drivers can read it.
 
 ### 4.2 Pattern
@@ -446,11 +381,11 @@ through them top-to-bottom.
 ```
 
 - **No.** The driver is not in the distribution. Check:
-  - Was it included in <ref_file file="/root/projects/SBK/settings-drivers.gradle" /> and
-    <ref_file file="/root/projects/SBK/build-drivers.gradle" />?
+  - Was it included in [`settings-drivers.gradle`](../settings-drivers.gradle)
+    and [`build-drivers.gradle`](../build-drivers.gradle)?
   - Did you actually run `./gradlew installDist` after the change?
   - Did the pathing JAR get rebuilt? Run
-    `rm -rf build && ./gradlew clean :pathingJar installDist --rerun-tasks`.
+    `./gradlew clean :pathingJar installDist --rerun-tasks`.
 
 ### 5.2 Does the JVM find all classes?
 
@@ -461,11 +396,11 @@ ls build/install/sbk/lib/ | grep <expected-jar>
 ```
 
 If the jar is in `lib/` but not in the pathing manifest, it's the
-stale-pathing-jar bug (see <ref_file file="/root/projects/SBK/AGENTS.md" />
-§4.4). Fix with:
+stale-pathing-JAR bug (see [AGENTS.md](../AGENTS.md#44-the-pathing-jar-can-get-stale-after-dependency-changes)).
+Fix with:
 
 ```bash
-rm -rf build && ./gradlew clean :pathingJar installDist --rerun-tasks
+./gradlew clean :pathingJar installDist --rerun-tasks
 ```
 
 ### 5.3 Is the endpoint actually the storage protocol?
@@ -482,7 +417,7 @@ curl -sk -X GET "https://<host>:<port>/" | head -c 300
 - **HTML body** or JSON like `{"detail":"Method Not Allowed"}` → wrong
   port (e.g., management UI instead of S3 data plane). Try the
   vendor's default S3 port — see
-  <ref_file file="/root/projects/SBK/drivers/minio/README.md" />
+  [`drivers/minio/README.md`](../drivers/minio/README.md)
   "Default S3 ports" table.
 
 ### 5.4 Is it auth, or is it the request?
@@ -491,7 +426,7 @@ Look at the **HTTP status + response body** the SDK reports:
 
 | Status | Likely cause | Action |
 |---|---|---|
-| `400 InvalidRequest` with `x-amz-sdk-checksum-algorithm` | MinIO SDK 9.x vs older S3 backend | Pin to SDK 8.5.17 (see <ref_file file="/root/projects/SBK/AGENTS.md" /> §4.3) |
+| `400 InvalidRequest` with `x-amz-sdk-checksum-algorithm` | MinIO SDK 9.x vs older S3 backend | Keep SDK 8.5.17 (see [AGENTS.md](../AGENTS.md#43-minio-sdk-is-pinned-to-8517-not-the-latest)) |
 | `403 AccessDenied` | Permissions on the bucket, or missing namespace header (Dell ECS) | Check `-extra-headers x-emc-namespace=...` for ECS; for AWS, check IAM policy |
 | `403 SignatureDoesNotMatch` | Clock skew, wrong secret key, wrong region | Verify `-region`; check NTP; re-generate secret key |
 | `404 NoSuchBucket` | Bucket doesn't exist or wrong endpoint | `-recreate true` to create it, or pre-create via vendor UI |
@@ -500,8 +435,8 @@ Look at the **HTTP status + response body** the SDK reports:
 ### 5.5 Use the driver's error explainer
 
 The MinIO driver has a helper
-(<ref_file file="/root/projects/SBK/drivers/minio/src/main/java/io/sbk/driver/MinIO/MinIO.java" />
-`explain(Exception)`) that pretty-prints HTTP status, content-type, and
+([`MinIO.java`](../drivers/minio/src/main/java/io/sbk/driver/MinIO/MinIO.java)
+`explain(Exception)`) that formats HTTP status, content-type, and
 body for SDK exceptions. If a similar driver lacks this, add it — it
 turns multi-page stack traces into one diagnostic line. Pattern:
 
@@ -521,8 +456,7 @@ private static String explain(Exception e) {
 ## 6. Update or extend the architecture documentation
 
 **Goal:** Edit
-<ref_file file="/root/projects/SBK/docs/sbk-internals.md" /> with new
-mermaid diagrams or sections.
+[sbk-internals.md](sbk-internals.md) with new Mermaid diagrams or sections.
 
 ### 6.1 Verify mermaid syntax before committing
 
@@ -599,14 +533,15 @@ Common breakage modes:
 A compile-clean upgrade can still break at runtime. Always:
 
 ```bash
-rm -rf build && ./gradlew clean installDist --rerun-tasks
+./gradlew clean :pathingJar installDist --rerun-tasks
 ./build/install/sbk/bin/sbk -class <name> ... -writers 1 -seconds 30
 ```
 
 ### 7.4 Beware: MinIO SDK is intentionally pinned
 
-If you are bumping `drivers/minio`, read <ref_file file="/root/projects/SBK/AGENTS.md" />
-§4.3 first. The 8.5.17 pin is deliberate — do not undo it without
+If you are bumping `drivers/minio`, read
+[AGENTS.md §4.3](../AGENTS.md#43-minio-sdk-is-pinned-to-8517-not-the-latest)
+first. The 8.5.17 pin is deliberate — do not undo it without
 confirming the user wants the consequences for older S3 backends.
 
 ---
@@ -690,7 +625,7 @@ A red flag run has any of:
 ./gradlew installDist
 
 # Clean rebuild (use after pathing-jar staleness, classpath changes)
-rm -rf build && ./gradlew clean installDist --rerun-tasks
+./gradlew clean :pathingJar installDist --rerun-tasks
 
 # List drivers visible to the launcher
 ./build/install/sbk/bin/sbk -help 2>&1 | head -25

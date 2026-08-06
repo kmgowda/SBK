@@ -59,10 +59,12 @@ jobs:
         cp README.md docs-archive/
         cp .cursorrules docs-archive/
         cp .aider.conf.yml docs-archive/
+        cp -r .cursor docs-archive/
         cp -r docs docs-archive/
-        cp -r .devin/skills docs-archive/
+        mkdir -p docs-archive/.devin
+        cp -r .devin/skills docs-archive/.devin/
         cd docs-archive
-        tar -czf ../sbk-agent-docs.tar.gz *
+        tar -czf ../sbk-agent-docs.tar.gz .
     - name: Upload release assets
       uses: softprops/action-gh-release@v1
       with:
