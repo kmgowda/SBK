@@ -83,7 +83,7 @@ public non-sealed class PrometheusMetricsServer extends PrintMetrics {
         } catch (RuntimeException | Error ex) {
             if (failure == null) {
                 failure = ex;
-            } else {
+            } else if (failure != ex) {
                 failure.addSuppressed(ex);
             }
         }

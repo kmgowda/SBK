@@ -87,6 +87,15 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
         }
     }
 
+    /**
+     * Opens the logger and starts the Prometheus HTTP server when metrics are enabled.
+     *
+     * @param params parsed command-line options
+     * @param storageName resolved storage driver name
+     * @param action benchmark action
+     * @param time benchmark time source
+     * @throws IOException if the logger or Prometheus server cannot be opened
+     */
     @Override
     public void open(ParsedOptions params, String storageName, Action action, Time time) throws IOException {
         super.open(params, storageName, action, time);
@@ -103,6 +112,12 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
         Printer.log.info("SBM PrometheusLogger Started");
     }
 
+    /**
+     * Stops the Prometheus HTTP server and closes the logger.
+     *
+     * @param params parsed command-line options
+     * @throws IOException if a logger resource cannot be closed
+     */
     @Override
     public void close(ParsedOptions params) throws IOException {
         Throwable failure = null;
@@ -141,12 +156,12 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
         try {
             stopPrometheusServer();
         } catch (IOException | RuntimeException | Error ex) {
-            failure.addSuppressed(ex);
+            recordFailure(failure, ex);
         }
         try {
             super.close(params);
         } catch (IOException | RuntimeException | Error ex) {
-            failure.addSuppressed(ex);
+            recordFailure(failure, ex);
         }
     }
 
@@ -162,7 +177,9 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
         if (failure == null) {
             return additionalFailure;
         }
-        failure.addSuppressed(additionalFailure);
+        if (failure != additionalFailure) {
+            failure.addSuppressed(additionalFailure);
+        }
         return failure;
     }
 

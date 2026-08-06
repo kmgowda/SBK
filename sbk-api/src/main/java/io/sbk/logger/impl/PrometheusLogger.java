@@ -147,12 +147,12 @@ public class PrometheusLogger extends CSVLogger {
         try {
             stopPrometheusServer();
         } catch (IOException | RuntimeException | Error ex) {
-            failure.addSuppressed(ex);
+            recordFailure(failure, ex);
         }
         try {
             super.close(params);
         } catch (IOException | RuntimeException | Error ex) {
-            failure.addSuppressed(ex);
+            recordFailure(failure, ex);
         }
     }
 
@@ -168,7 +168,9 @@ public class PrometheusLogger extends CSVLogger {
         if (failure == null) {
             return additionalFailure;
         }
-        failure.addSuppressed(additionalFailure);
+        if (failure != additionalFailure) {
+            failure.addSuppressed(additionalFailure);
+        }
         return failure;
     }
 

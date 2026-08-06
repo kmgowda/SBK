@@ -77,7 +77,15 @@ public final class PrometheusLinks {
                         address.isSiteLocalAddress() ? "Private IP" : "Public IP"));
 
         final List<Link> links = new ArrayList<>(hosts.size());
-        hosts.forEach((host, label) -> links.add(new Link(label, endpointUri(host, port, context))));
+        hosts.forEach((host, label) -> {
+            try {
+                links.add(new Link(label, endpointUri(host, port, context)));
+            } catch (IllegalArgumentException ex) {
+                if (LOCALHOST.equals(host) || IPV4_LOOPBACK.equals(host)) {
+                    throw ex;
+                }
+            }
+        });
         return List.copyOf(links);
     }
 

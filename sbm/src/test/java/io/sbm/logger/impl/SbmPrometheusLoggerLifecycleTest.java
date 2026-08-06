@@ -18,12 +18,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -51,7 +50,7 @@ final class SbmPrometheusLoggerLifecycleTest {
         assertSame(startFailure, thrown);
         assertSame(stopFailure, thrown.getSuppressed()[0]);
         verify(server).stop();
-        assertFalse(Files.readString(csvFile).isEmpty());
+        assertTrue(logger.isCsvClosed());
     }
 
     @Test
@@ -67,7 +66,24 @@ final class SbmPrometheusLoggerLifecycleTest {
         final IOException thrown = assertThrows(IOException.class, () -> logger.close(options));
 
         assertSame(stopFailure, thrown);
-        assertFalse(Files.readString(csvFile).isEmpty());
+        assertTrue(logger.isCsvClosed());
+    }
+
+    @Test
+    void identicalStartAndStopFailureDoesNotInterruptRollback() throws Exception {
+        final SbmPrometheusServer server = mock(SbmPrometheusServer.class);
+        final IOException failure = new IOException("shared failure");
+        doThrow(failure).when(server).start();
+        doThrow(failure).when(server).stop();
+        final TestSbmPrometheusLogger logger = new TestSbmPrometheusLogger(server);
+        final Path csvFile = temporaryDirectory.resolve("shared-failure.csv");
+        final ParseInputOptions options = configure(logger, csvFile);
+
+        final IOException thrown = assertThrows(IOException.class,
+                () -> logger.open(options, "File", Action.Reading, new MilliSeconds()));
+
+        assertSame(failure, thrown);
+        assertTrue(logger.isCsvClosed());
     }
 
     private static ParseInputOptions configure(SbmPrometheusLogger logger, Path csvFile) throws Exception {
@@ -88,6 +104,10 @@ final class SbmPrometheusLoggerLifecycleTest {
         @Override
         protected SbmPrometheusServer createPrometheusServer(String storageName, Action action, Time time) {
             return server;
+        }
+
+        private boolean isCsvClosed() {
+            return isCsvWriterClosed();
         }
     }
 }

@@ -34,6 +34,16 @@ final class PrometheusLinksTest {
                 new PrometheusLinks.Link("Public IP", uri("8.8.8.8"))), links);
     }
 
+    @Test
+    void skipsInvalidHostnameWithoutDiscardingValidLinks() {
+        final List<PrometheusLinks.Link> links = PrometheusLinks.links(9718, "/metrics", "invalid_host",
+                List.of());
+
+        assertEquals(List.of(
+                new PrometheusLinks.Link("Localhost", uri("localhost")),
+                new PrometheusLinks.Link("IPv4 Loopback", uri("127.0.0.1"))), links);
+    }
+
     private static URI uri(String host) {
         return URI.create("http://" + host + ":9718/metrics");
     }
