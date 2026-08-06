@@ -14,6 +14,7 @@ import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.logger.MetricsConfig;
+import io.sbk.logger.impl.PrometheusLinks;
 import io.sbk.params.InputOptions;
 import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
@@ -93,6 +94,7 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
             if (!contextDisabled) {
                 prometheusServer = createPrometheusServer(storageName, action, time);
                 prometheusServer.start();
+                PrometheusLinks.log("SBM", metricsConfig);
             }
         } catch (IOException | RuntimeException | Error failure) {
             rollbackOpen(params, failure);

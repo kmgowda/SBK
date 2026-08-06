@@ -112,6 +112,7 @@ public class PrometheusLogger extends CSVLogger {
             } else {
                 prometheusServer = getPrometheusRWMetricsServer();
                 prometheusServer.start();
+                PrometheusLinks.log("SBK", metricsConfig);
             }
         } catch (IOException | RuntimeException | Error failure) {
             rollbackOpen(params, failure);
