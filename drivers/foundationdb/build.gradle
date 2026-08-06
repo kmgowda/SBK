@@ -10,5 +10,5 @@ repositories {
 dependencies {
     api project(":sbk-api")
     // https://mvnrepository.com/artifact/org.foundationdb/fdb-java
-    api group: 'org.foundationdb', name: 'fdb-java', version: '6.2.22'
+    api 'org.foundationdb:fdb-java:6.2.22'
 }

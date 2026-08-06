@@ -29,6 +29,11 @@ The distribution root contains:
 - `INSTRUCTIONS.md`
 - Agent-specific configuration files that exist in the repository
 
+Current tool-specific entries include the Cursor project rule and legacy
+pointer, the Aider configuration, and the portable skills under
+`.devin/skills/`. Windsurf and Codex consume the root `AGENTS.md` directly and
+do not need duplicate repository rules.
+
 The `docs/` directory contains the engineering index, architecture, repository map, driver guide, maintenance guide, recipes, specification template, toolkit, distribution guide, and detailed internals.
 
 Verify locally:
@@ -59,8 +64,10 @@ Artifact names use the version from `gradle.properties`; documentation must not 
 The release workflow:
 
 1. Builds installed, ZIP, and TAR distributions.
-2. Creates `sbk-agent-docs.tar.gz` from root entry points, the complete `docs/` directory, and agent configurations.
-3. Attaches distributions, the documentation archive, and selected standalone entry-point documents to a GitHub release.
+2. Creates `sbk-agent-docs.tar.gz` from root entry points, the complete `docs/`
+   directory, and agent configurations while preserving discovery paths such
+   as `.cursor/rules/` and `.devin/skills/`.
+3. Attaches distributions, the documentation archive, and selected standalone entry-point documents to a GitHub release. The archive command includes hidden paths such as `.cursor/` and `.aider.conf.yml`.
 
 The workflow runs only under its configured tag/release conditions. Editing this document does not publish anything.
 

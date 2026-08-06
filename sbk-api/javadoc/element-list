@@ -13,6 +13,6 @@ io.sbk.params.impl
 io.sbk.system
 io.sbk.thread
 io.sbk.utils
+io.sbk.webconsole
 io.sbp.api
 io.sbp.config
-io.sbp.grpc

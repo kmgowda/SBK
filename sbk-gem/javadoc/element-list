@@ -1,6 +1,7 @@
 io.gem.api
 io.gem.api.impl
 io.gem.config
+io.gem.exception
 io.gem.logger
 io.gem.logger.impl
 io.gem.main

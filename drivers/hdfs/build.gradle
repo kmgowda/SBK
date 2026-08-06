@@ -10,5 +10,5 @@ repositories {
 dependencies {
     api project(":sbk-api")
     // https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-client
-    api group: 'org.apache.hadoop', name: 'hadoop-client', version: '3.2.1'
+    api 'org.apache.hadoop:hadoop-client:3.2.1'
 }

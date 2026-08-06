@@ -24,10 +24,12 @@ Invoke this skill when:
 - Verification checklist specific to driver changes
 - Error handling patterns for driver shutdown
 
-### Permissions granted
-- Read access to: `drivers/`, `settings-drivers.gradle`, `build-drivers.gradle`, `checkstyle/import-control.xml`
-- Write access to: `drivers/<name>/`, `settings-drivers.gradle`, `build-drivers.gradle`, `checkstyle/import-control.xml`
-- Exec permissions: `./gradlew` (for :drivers:<name>:check, installDist)
+### Required capabilities
+
+This skill does not grant permissions. The agent still follows `AGENTS.md`
+and its host tool's approval model. Driver work normally needs scoped edits
+under `drivers/<name>/`, both driver-registration files, and sometimes
+`checkstyle/import-control.xml`, plus permission to run the Gradle wrapper.
 
 ## Workflow
 
@@ -95,7 +97,7 @@ Before considering a driver change complete:
 
 ## Related documentation
 
-- <ref_file file="/root/projects/SBK/AGENTS.md" /> - Repository conventions and gotchas
-- <ref_file file="/root/projects/SBK/docs/AGENT_RECIPES.md" /> - Recipe 1: Add a new storage driver
-- <ref_file file="/root/projects/SBK/docs/DRIVER_SPECIFICATION.md" /> - Spec template for drivers
-- <ref_file file="/root/projects/SBK/drivers/sbktemplate/" /> - Starting scaffold
+- [`AGENTS.md`](../../../AGENTS.md) - repository conventions and gotchas
+- [`docs/AGENT_RECIPES.md`](../../../docs/AGENT_RECIPES.md) - add-driver recipe
+- [`docs/DRIVER_SPECIFICATION.md`](../../../docs/DRIVER_SPECIFICATION.md) - driver specification template
+- [`drivers/sbktemplate`](../../../drivers/sbktemplate/) - starting scaffold

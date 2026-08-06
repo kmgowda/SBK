@@ -14,6 +14,7 @@ import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbk.logger.MetricsConfig;
+import io.sbk.logger.impl.PrometheusLinks;
 import io.sbk.params.InputOptions;
 import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
@@ -86,25 +87,113 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
         }
     }
 
+    /**
+     * Opens the logger and starts the Prometheus HTTP server when metrics are enabled.
+     *
+     * @param params parsed command-line options
+     * @param storageName resolved storage driver name
+     * @param action benchmark action
+     * @param time benchmark time source
+     * @throws IOException if the logger or Prometheus server cannot be opened
+     */
     @Override
     public void open(ParsedOptions params, String storageName, Action action, Time time) throws IOException {
         super.open(params, storageName, action, time);
-        if (!contextDisabled) {
-            prometheusServer = new SbmPrometheusServer(Config.NAME, action.name(), storageName,
-                    getPercentiles(), time, metricsConfig);
-            prometheusServer.start();
+        try {
+            if (!contextDisabled) {
+                prometheusServer = createPrometheusServer(storageName, action, time);
+                prometheusServer.start();
+                PrometheusLinks.log("SBM", metricsConfig);
+            }
+        } catch (IOException | RuntimeException | Error failure) {
+            rollbackOpen(params, failure);
+            throw propagate(failure);
         }
         Printer.log.info("SBM PrometheusLogger Started");
     }
 
+    /**
+     * Stops the Prometheus HTTP server and closes the logger.
+     *
+     * @param params parsed command-line options
+     * @throws IOException if a logger resource cannot be closed
+     */
     @Override
     public void close(ParsedOptions params) throws IOException {
-        if (prometheusServer != null) {
-            prometheusServer.stop();
-            prometheusServer = null;
+        Throwable failure = null;
+        try {
+            stopPrometheusServer();
+        } catch (IOException | RuntimeException | Error ex) {
+            failure = ex;
         }
-        super.close(params);
+        try {
+            super.close(params);
+        } catch (IOException | RuntimeException | Error ex) {
+            failure = recordFailure(failure, ex);
+        }
+        if (failure != null) {
+            throw propagate(failure);
+        }
         Printer.log.info("SBM PrometheusLogger Shutdown");
+    }
+
+    /**
+     * Creates the Prometheus server for this logger.
+     *
+     * @param storageName resolved storage driver name
+     * @param action benchmark action
+     * @param time benchmark time source
+     * @return configured SBM Prometheus server
+     * @throws IOException if the server cannot be created
+     */
+    protected SbmPrometheusServer createPrometheusServer(String storageName, Action action, Time time)
+            throws IOException {
+        return new SbmPrometheusServer(Config.NAME, action.name(), storageName,
+                getPercentiles(), time, metricsConfig);
+    }
+
+    private void rollbackOpen(ParsedOptions params, Throwable failure) {
+        try {
+            stopPrometheusServer();
+        } catch (IOException | RuntimeException | Error ex) {
+            recordFailure(failure, ex);
+        }
+        try {
+            super.close(params);
+        } catch (IOException | RuntimeException | Error ex) {
+            recordFailure(failure, ex);
+        }
+    }
+
+    private void stopPrometheusServer() throws IOException {
+        final SbmPrometheusServer server = prometheusServer;
+        prometheusServer = null;
+        if (server != null) {
+            server.stop();
+        }
+    }
+
+    private static Throwable recordFailure(Throwable failure, Throwable additionalFailure) {
+        if (failure == null) {
+            return additionalFailure;
+        }
+        if (failure != additionalFailure) {
+            failure.addSuppressed(additionalFailure);
+        }
+        return failure;
+    }
+
+    private static IOException propagate(Throwable failure) {
+        if (failure instanceof IOException ioException) {
+            return ioException;
+        }
+        if (failure instanceof RuntimeException runtimeException) {
+            throw runtimeException;
+        }
+        if (failure instanceof Error error) {
+            throw error;
+        }
+        return new IOException("SBM Prometheus logger lifecycle failed", failure);
     }
 
     @Override

@@ -10,5 +10,5 @@ repositories {
 dependencies {
     api project(":sbk-api")
     // https://mvnrepository.com/artifact/redis.clients/jedis
-    implementation group: 'redis.clients', name: 'jedis', version: '3.5.1'
+    implementation 'redis.clients:jedis:3.5.1'
 }

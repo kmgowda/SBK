@@ -9,5 +9,5 @@ repositories {
 
 dependencies {
     api project(":sbk-api")
-    api group: 'com.github.brainlag', name: 'nsq-client', version: '1.0.0.RC4'
+    api 'com.github.brainlag:nsq-client:1.0.0.RC4'
 }

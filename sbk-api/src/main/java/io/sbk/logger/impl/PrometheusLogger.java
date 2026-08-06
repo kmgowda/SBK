@@ -106,11 +106,17 @@ public class PrometheusLogger extends CSVLogger {
     @Override
     public void open(final ParsedOptions params, final String storageName, Action action, Time time) throws IllegalArgumentException, IOException {
         super.open(params, storageName, action, time);
-        if (contextDisabled) {
-            prometheusServer = null;
-        } else {
-            prometheusServer = getPrometheusRWMetricsServer();
-            prometheusServer.start();
+        try {
+            if (contextDisabled) {
+                prometheusServer = null;
+            } else {
+                prometheusServer = getPrometheusRWMetricsServer();
+                prometheusServer.start();
+                PrometheusLinks.log("SBK", metricsConfig);
+            }
+        } catch (IOException | RuntimeException | Error failure) {
+            rollbackOpen(params, failure);
+            throw propagate(failure);
         }
         Printer.log.info("SBK PrometheusLogger Started");
     }
@@ -120,11 +126,65 @@ public class PrometheusLogger extends CSVLogger {
      */
     @Override
     public void close(final ParsedOptions params) throws IllegalArgumentException, IOException {
-        if (prometheusServer != null) {
-            prometheusServer.stop();
+        Throwable failure = null;
+        try {
+            stopPrometheusServer();
+        } catch (IOException | RuntimeException | Error ex) {
+            failure = ex;
         }
-        super.close(params);
+        try {
+            super.close(params);
+        } catch (IOException | RuntimeException | Error ex) {
+            failure = recordFailure(failure, ex);
+        }
+        if (failure != null) {
+            throw propagate(failure);
+        }
         Printer.log.info("SBK PrometheusLogger Shutdown");
+    }
+
+    private void rollbackOpen(ParsedOptions params, Throwable failure) {
+        try {
+            stopPrometheusServer();
+        } catch (IOException | RuntimeException | Error ex) {
+            recordFailure(failure, ex);
+        }
+        try {
+            super.close(params);
+        } catch (IOException | RuntimeException | Error ex) {
+            recordFailure(failure, ex);
+        }
+    }
+
+    private void stopPrometheusServer() throws IOException {
+        final SbkPrometheusServer server = prometheusServer;
+        prometheusServer = null;
+        if (server != null) {
+            server.stop();
+        }
+    }
+
+    private static Throwable recordFailure(Throwable failure, Throwable additionalFailure) {
+        if (failure == null) {
+            return additionalFailure;
+        }
+        if (failure != additionalFailure) {
+            failure.addSuppressed(additionalFailure);
+        }
+        return failure;
+    }
+
+    private static IOException propagate(Throwable failure) {
+        if (failure instanceof IOException ioException) {
+            return ioException;
+        }
+        if (failure instanceof RuntimeException runtimeException) {
+            throw runtimeException;
+        }
+        if (failure instanceof Error error) {
+            throw error;
+        }
+        return new IOException("Prometheus logger lifecycle failed", failure);
     }
 
     @Override

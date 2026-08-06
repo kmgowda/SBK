@@ -34,6 +34,7 @@ Choose the guide that matches your task:
 | Understand modules and runtime flow | [Architecture and code flow](docs/ARCHITECTURE.md) |
 | Browse all documentation | [Documentation index](docs/README.md) |
 | View live graphs without Docker | [WebLogger guide](docs/WEB_LOGGER.md) |
+| Retain live metrics with Prometheus and Grafana | [PrometheusLogger and SBK Dashboard guide](docs/PROMETHEUS_LOGGER.md) |
 | Add or modify a storage driver | [Driver guide](docs/DRIVER_GUIDE.md) |
 | Make a code contribution | [Contributing guide](CONTRIBUTING.md) |
 | Follow a task-specific procedure | [Engineering recipes](docs/AGENT_RECIPES.md) |
@@ -266,6 +267,29 @@ Prometheus metrics include stable `component`, `class`, and `action` labels.
 identifies SBM aggregation, including benchmarks orchestrated by SBK-GEM.
 SBK-GEM is not a separate metrics component because SBM owns its metrics
 endpoint and aggregated measurements.
+
+### PrometheusLogger and SBK Dashboard
+
+Use `PrometheusLogger` when Prometheus should retain periodic results and Grafana should display a full historical
+dashboard:
+
+```bash
+./build/install/sbk/bin/sbk \
+  -class file -file /tmp/sbk-prometheus.dat \
+  -writers 1 -size 4096 -seconds 60 \
+  -out PrometheusLogger
+```
+
+Direct SBK metrics use `http://<sbk-host>:9718/metrics` by default. SBM and SBK-GEM aggregate metrics use
+`http://<coordinator-host>:9719/metrics`. Startup prints copy-paste scrape URLs for localhost, loopback, hostname,
+and usable host IPv4 addresses. Change the exporter with `-context PORT/PATH`, for example
+`-context 19718/sbk-metrics`.
+
+The separately deployed [SBK Dashboard](https://github.com/kmgowda/sbk-dashboard) manages official Prometheus and
+Grafana processes, persistent time-series history, and one endpoint-scoped dashboard per registered `host:port`.
+Its management UI defaults to port 9721 and Grafana to port 3000. See the
+[PrometheusLogger and SBK Dashboard guide](docs/PROMETHEUS_LOGGER.md) for direct and distributed commands, Docker
+Compose and native installation, endpoint registration, metrics semantics, retention, security, and troubleshooting.
 
 ### SBK Local Web Console
 

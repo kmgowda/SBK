@@ -605,6 +605,8 @@ application {
             include "REPOSITORY_MAP.md"
             include "DRIVER_GUIDE.md"
             include "DOCUMENTATION_GUIDE.md"
+            include "PROMETHEUS_LOGGER.md"
+            include "WEB_LOGGER.md"
         }
     }
 
@@ -622,6 +624,11 @@ application {
     }
     applicationDistribution.from(".cursorrules")
     applicationDistribution.from(".aider.conf.yml")
+    applicationDistribution.into(".cursor/rules") {
+        from(".cursor/rules") {
+            include "*.mdc"
+        }
+    }
 }
 
 

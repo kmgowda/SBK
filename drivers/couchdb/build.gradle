@@ -10,5 +10,5 @@ repositories {
 dependencies {
     api project(":sbk-api")
     // https://mvnrepository.com/artifact/org.ektorp/org.ektorp
-    api group: 'org.ektorp', name: 'org.ektorp', version: '1.5.0'
+    api 'org.ektorp:org.ektorp:1.5.0'
 }

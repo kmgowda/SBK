@@ -166,6 +166,13 @@ without allowing a noisy remote process to consume unbounded GEM heap.
 | `GemPrometheusLogger` | GEM/SBM aggregate metrics output |
 | `GemWebLogger` | GEM adapter for the embedded SBM local live web console |
 
+Select `-out GemPrometheusLogger` to publish the embedded SBM aggregate at
+`http://<sbk-gem-host>:9719/metrics`. Remote SBK processes continue using `GrpcLogger`; register only the coordinator
+endpoint in the separately deployed [SBK Dashboard](https://github.com/kmgowda/sbk-dashboard). The endpoint uses
+`component="sbm"` because the embedded SBM owns aggregation and metrics. See the
+[PrometheusLogger and SBK Dashboard guide](../docs/PROMETHEUS_LOGGER.md) for dashboard setup, Compose networking,
+registration, tags, retention, and troubleshooting.
+
 Select `-out GemWebLogger` for dependency-free aggregate graphs. The web console uses plain HTTP and listens on all
 interfaces at port 9720 by default; open `http://127.0.0.1:9720` locally or
 `http://<sbk-gem-host>:9720` remotely. Remote SBK processes still use `GrpcLogger`; the embedded SBM publishes the

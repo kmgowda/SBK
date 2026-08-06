@@ -16,8 +16,11 @@ import java.io.IOException;
  * Host-tagged SSH command failure retaining bounded command diagnostics.
  */
 public final class SshCommandException extends IOException {
+    /** Remote host on which command execution failed. */
     private final String host;
+    /** Bounded command output retained before the failure. */
     private final SshResponse response;
+    /** Whether command execution exceeded its deadline. */
     private final boolean timeout;
 
     /**

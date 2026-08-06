@@ -54,6 +54,10 @@ public class CSVLogger extends SystemLogger {
      */
     private PrintWriter csvWriter;
     /**
+     * <code>csvWriterClosed = true</code>.
+     */
+    private boolean csvWriterClosed;
+    /**
      * <code>csvRowCounter = 0</code>.
      */
     private long csvRowCounter;
@@ -65,6 +69,7 @@ public class CSVLogger extends SystemLogger {
         super();
         csvEnable = false;
         csvFile = null;
+        csvWriterClosed = true;
     }
 
 
@@ -132,7 +137,17 @@ public class CSVLogger extends SystemLogger {
             headerBuilder.append(percentileName);
         }
         csvWriter = new PrintWriter(Files.newBufferedWriter(Paths.get(csvFile)));
+        csvWriterClosed = false;
         csvWriter.println(headerBuilder);
+    }
+
+    /**
+     * Reports whether the CSV writer is closed or has not been opened.
+     *
+     * @return {@code true} when no open CSV writer remains
+     */
+    protected final boolean isCsvWriterClosed() {
+        return csvWriterClosed;
     }
 
 
@@ -322,6 +337,7 @@ public class CSVLogger extends SystemLogger {
         super.close(params);
         if (csvEnable) {
             csvWriter.close();
+            csvWriterClosed = true;
             Printer.log.info("SBK CSV Logger Shutdown; Results flushed to file: "+csvFile);
         }
     }

@@ -9,15 +9,15 @@ Licensed under the Apache License, Version 2.0.
 > agent driven by a human) a **fillable template** to specify a new SBK
 > driver before any code is written. Once the spec is complete, the
 > agent can turn it into working code by following
-> <ref_file file="/root/projects/SBK/docs/AGENT_RECIPES.md" />
-> §1 ("Add a new storage driver").
+> [AGENT_RECIPES.md](AGENT_RECIPES.md#1-add-a-new-storage-driver)
+> ("Add a new storage driver").
 >
 > **The spec is the contract.** Anything the spec says, the code must
 > implement. Anything the spec is silent on, the code uses sensible
 > defaults from the existing driver patterns.
 >
 > Before reading further, agents should have read
-> <ref_file file="/root/projects/SBK/AGENTS.md" /> and the
+> [AGENTS.md](../AGENTS.md) and the
 > "Add a new storage driver" recipe.
 
 ---
@@ -26,7 +26,7 @@ Licensed under the Apache License, Version 2.0.
 
 1. [How to use this template](#1-how-to-use-this-template)
 2. [The spec template (fillable)](#2-the-spec-template-fillable)
-3. [Worked example — the MinIO/S3 driver spec](#3-worked-example--the-miniosthree-driver-spec)
+3. [Worked example — the MinIO/S3 driver spec](#3-worked-example--the-minios3-driver-spec)
 4. [Acceptance checklist](#4-acceptance-checklist)
 
 ---
@@ -100,17 +100,15 @@ The driver MUST:
 
 - [ ] Implement the seven `Storage<T>` SPI methods (see
       `sbk-api/src/main/java/io/sbk/api/Storage.java`).
-- [ ] Support **single-threaded writes** correctly (no race in
-      `createWriter`).
-- [ ] Support **single-threaded reads** correctly (no race in
-      `createReader`).
-- [ ] Support **N concurrent writers** with `-writers N` (>= 1).
-- [ ] Support **N concurrent readers** with `-readers N` (>= 1).
+- [ ] Correctly support each direction the driver declares: writes, reads, or
+      both. An unsupported direction is documented and rejected clearly.
+- [ ] For each supported direction, handle one worker and `N` concurrent
+      workers without sharing unsafe per-worker state.
 - [ ] Pass `./gradlew :drivers:<name>:check` (compile + checkstyle).
 - [ ] Pass `./gradlew installDist` and show up under
       `sbk -help`.
-- [ ] Run a 60-second smoke benchmark against a live target and emit
-      records/sec, MB/sec, and 17+ latency percentiles.
+- [ ] Run a bounded smoke benchmark against a controlled target and emit the
+      normal SBK throughput and latency summary for each supported direction.
 
 The driver SHOULD (if applicable to the storage type):
 
@@ -122,9 +120,10 @@ The driver SHOULD (if applicable to the storage type):
       (HTTP status + body for HTTP-based; error code + message for
       others). See the `explain()` helper pattern in
       `drivers/minio/src/main/java/io/sbk/driver/MinIO/MinIO.java`.
-- [ ] Survive shutdown: catch `InterruptedIOException` and
-      `RejectedExecutionException` and treat them as clean stop, not
-      errors.
+- [ ] When the SDK can raise `InterruptedIOException` or
+      `RejectedExecutionException` because SBK is tearing it down, classify
+      those shutdown-only cases as a clean stop without hiding failures during
+      normal operation.
 
 The driver MUST NOT:
 
@@ -139,8 +138,9 @@ The driver MUST NOT:
 
 ## 3. Configuration parameters
 
-> Define every CLI flag the driver will accept. Each row corresponds
-> to one row in `addArgs(...)` and one field in `<Name>Config.java`.
+> Define every CLI flag the driver will accept. Each row corresponds to one
+> row in `addArgs(...)` and one field in `<Name>Config.java`. The rows below
+> are examples; delete every option that does not apply to the backend.
 
 | CLI flag (`-flag`) | Java field name | Type | Default | Help text | Required? |
 |---|---|---|---|---|---|
@@ -153,8 +153,8 @@ The driver MUST NOT:
 | `insecure` | `insecure` | boolean | `false` | `Skip TLS validation` | No |
 | `<more>` | `<…>` | `<…>` | `<…>` | `<…>` | `<…>` |
 
-> Same table as a properties file (`<Name>.properties`) — the agent
-> will generate this verbatim:
+> Translate the retained rows into the exact properties filename loaded by the
+> storage class. The following is illustrative, not a required schema:
 
 ```properties
 host=<default>
@@ -262,8 +262,8 @@ docker run -d --name acme1 -p 1234:1234 acme/acme-kv:latest
 | # | Command | Expected outcome |
 |---|---|---|
 | 1 | `sbk -class <name> -host localhost -writers 1 -size 1024 -seconds 15` | 15s clean run; non-zero records/sec; latency percentiles printed |
-| 2 | `sbk -class <name> -host localhost -readers 1 -size 1024 -seconds 15` | Same, for reads |
-| 3 | `sbk -class <name> -host localhost -writers 4 -readers 4 -size 1024 -seconds 15` | Both writer and reader stats printed |
+| 2 | `sbk -class <name> -host localhost -readers 1 -size 1024 -seconds 15` | Same, for reads; delete if reads are unsupported |
+| 3 | `sbk -class <name> -host localhost -writers 4 -readers 4 -size 1024 -seconds 15` | Both stats printed; include only when mixed operation is supported |
 | 4 | <add more if the driver has special modes> | <…> |
 
 ### 5.3 Failure-mode tests (manual, not CI)
@@ -284,10 +284,9 @@ docker run -d --name acme1 -p 1234:1234 acme/acme-kv:latest
 - [ ] `./gradlew check` exits 0 (no other module regresses).
 - [ ] `./gradlew installDist` produces a working `sbk` script.
 - [ ] `sbk -class <name> -help` lists every flag in §3.
-- [ ] All §5.2 smoke tests pass against a live target.
+- [ ] All applicable §5.2 smoke tests pass against a controlled target.
 - [ ] `drivers/<name>/README.md` exists, contains:
-      - one write example command,
-      - one read example command,
+      - one example for each supported direction,
       - a list of all CLI flags from §3.
 - [ ] If new top-level dep packages were introduced, they are
       whitelisted in `checkstyle/import-control.xml`.
@@ -314,10 +313,10 @@ docker run -d --name acme1 -p 1234:1234 acme/acme-kv:latest
 
 ## 3. Worked example — the MinIO/S3 driver spec
 
-> This is what a completed spec looks like. The agent that processes
-> a spec in this form should be able to generate the `drivers/minio/`
-> code that exists today, plus its tests and README, from the spec
-> alone.
+> This abbreviated example demonstrates the expected level of design detail;
+> it is not the current MinIO driver's exhaustive specification. For existing
+> behavior and defaults, the source, generated `-help`, properties file, and
+> [`drivers/minio/README.md`](../drivers/minio/README.md) are authoritative.
 
 ```markdown
 # Driver spec — MinIO / S3-compatible object store
@@ -372,13 +371,13 @@ Driver-specific additions:
 
 | CLI flag | Java field | Type | Default | Help text |
 |---|---|---|---|---|
-| `url` | `url` | String | `https://play.min.io` | S3 endpoint URL |
+| `url` | `url` | String | `http://play.min.io` | S3 endpoint URL |
 | `bucket` | `bucketName` | String | `sbk` | Bucket name |
 | `key` | `accessKey` | String | (play.min.io sandbox) | Access key |
 | `secret` | `secretKey` | String | (play.min.io sandbox) | Secret key |
 | `region` | `region` | String | `""` (driver defaults to `us-east-1` to skip GetBucketLocation) | AWS region for SigV4 |
 | `recreate` | `reCreate` | boolean | `false` | Recreate bucket if present |
-| `insecure` | `insecure` | boolean | `true` | Skip TLS validation |
+| `insecure` | `insecure` | boolean | `false` | Skip TLS validation for HTTPS endpoints |
 | `part-size` | `partSize` | long | `0` | Multipart part size in bytes (0=disabled, min 5 MiB) |
 | `checksum` | `checksumAlgorithm` | String | `""` | Algorithm for `x-amz-checksum-*` |
 | `tagging-enabled` | `taggingEnabled` | boolean | `false` | Enable object tagging |
@@ -402,7 +401,6 @@ Per row of §3, plus:
 
 - If `partSize > 0`, validate it's in `[5 MiB, 5 GiB]`.
 - If `checksumAlgorithm` is non-empty, call `S3ChecksumUtil.Algorithm.fromString(...)` to validate.
-- If both writers > 0 and readers > 0, force `reCreate = true`.
 
 ### 4.3 `openStorage`
 
@@ -429,17 +427,18 @@ Per row of §3, plus:
 - If `checksumAlgorithm` set, compute Base64 digest via
   `S3ChecksumUtil` and attach `x-amz-checksum-*` header.
 - Call `client.putObject(PutObjectArgs.builder()...)`.
-- If `taggingEnabled`, follow with `client.setObjectTags(...)`.
+- If `taggingEnabled`, include tags in the native `PutObjectArgs` request.
 - Object key: `S3ObjectKey.next()` (prefix + optional fsAccess hash
   tree + bucket name + UUID).
 
 ### 4.6 `createReader` / reader's `recordRead`
 
-- `client.listObjects(...)` with `recursive(true)` and
-  `includeVersions(versioningEnabled)`.
-- For each item: `client.statObject(...)` then `client.getObject(...)`.
-- Use the worker's `t.endTime` reuse pattern; do not call the clock
-  inside the loop.
+- Prepare a bounded object catalog during reader creation.
+- Execute the selected read operation (`get`, `range-get`, `stat`, `tag-get`,
+  `list`, `bucket-stat`, or `bucket-list`) and report its documented completion
+  semantics.
+- Let the reader/harness timing path record the operation; do not add a second
+  timer around it.
 
 ### 4.7 Error handling
 
