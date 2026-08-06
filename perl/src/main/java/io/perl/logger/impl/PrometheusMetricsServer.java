@@ -72,7 +72,29 @@ public non-sealed class PrometheusMetricsServer extends PrintMetrics {
      * @throws IOException If it occurs
      */
     public void stop() throws IOException {
-        super.close();
-        server.stop();
+        Throwable failure = null;
+        try {
+            server.stop();
+        } catch (IOException | RuntimeException | Error ex) {
+            failure = ex;
+        }
+        try {
+            super.close();
+        } catch (RuntimeException | Error ex) {
+            if (failure == null) {
+                failure = ex;
+            } else {
+                failure.addSuppressed(ex);
+            }
+        }
+        if (failure instanceof IOException ioException) {
+            throw ioException;
+        }
+        if (failure instanceof RuntimeException runtimeException) {
+            throw runtimeException;
+        }
+        if (failure instanceof Error error) {
+            throw error;
+        }
     }
 }

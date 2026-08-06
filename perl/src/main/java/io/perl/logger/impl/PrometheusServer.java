@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -37,6 +38,7 @@ public final class PrometheusServer extends CompositeMeterRegistry {
     final private int port;
     final private String context;
     final private PrometheusMeterRegistry prometheusRegistry;
+    final private ExecutorService executor;
     final private HttpServer server;
 
 
@@ -65,9 +67,15 @@ public final class PrometheusServer extends CompositeMeterRegistry {
         /*
         JMX Meter Registry is disabled
         this.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
-         */
+        */
         this.add(prometheusRegistry);
-        this.server = createHttpServer();
+        this.executor = createExecutor();
+        try {
+            this.server = createHttpServer();
+        } catch (IOException | RuntimeException | Error ex) {
+            executor.shutdownNow();
+            throw ex;
+        }
     }
 
     /**
@@ -88,7 +96,20 @@ public final class PrometheusServer extends CompositeMeterRegistry {
      * @throws IOException If it occurs
      */
     public void stop() throws IOException {
-        server.stop(0);
+        try {
+            server.stop(0);
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    /**
+     * Reports whether the HTTP request executor has begun shutting down.
+     *
+     * @return {@code true} after {@link #stop()} shuts down the executor
+     */
+    boolean isExecutorShutdown() {
+        return executor.isShutdown();
     }
 
     private @NotNull HttpServer createHttpServer() throws IOException {
@@ -100,11 +121,14 @@ public final class PrometheusServer extends CompositeMeterRegistry {
                 os.write(response.getBytes());
             }
         });
-        if (this.virtualThreadPool) {
-            server.setExecutor(Executors.newSingleThreadExecutor(Thread.ofVirtual().factory()));
-        } else {
-            server.setExecutor(Executors.newSingleThreadExecutor());
-        }
+        server.setExecutor(executor);
         return server;
+    }
+
+    private ExecutorService createExecutor() {
+        if (this.virtualThreadPool) {
+            return Executors.newSingleThreadExecutor(Thread.ofVirtual().factory());
+        }
+        return Executors.newSingleThreadExecutor();
     }
 }
