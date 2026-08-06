@@ -6,5 +6,5 @@ plugins {
 dependencies {
     api project(":drivers:jdbc")
     // https://mvnrepository.com/artifact/com.ibm.db2.jcc/db2jcc
-    implementation group: 'com.ibm.db2.jcc', name: 'db2jcc', version: 'db2jcc4'
+    implementation 'com.ibm.db2.jcc:db2jcc:db2jcc4'
 }

@@ -9,5 +9,5 @@ repositories {
 dependencies {
     api project(":drivers:jdbc")
     // https://mvnrepository.com/artifact/org.apache.hive/hive-jdbc
-    api group: 'org.apache.hive', name: 'hive-jdbc', version: '1.1.0'
+    api 'org.apache.hive:hive-jdbc:1.1.0'
 }
