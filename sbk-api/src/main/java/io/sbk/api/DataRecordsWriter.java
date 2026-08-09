@@ -164,11 +164,13 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
     default void RecordsWriter(Worker writer, long recordsCount, DataType<T> dType, T data, int size, Time time) throws IOException {
         final Status status = new Status();
         long i = 0;
-        while (i < recordsCount) {
+        while (i < recordsCount && !writer.isStopped()) {
             recordWrite(dType, data, size, time, status, writer.perlChannel);
             i += status.records;
         }
-        sync();
+        if (!writer.isStopped()) {
+            sync();
+        }
     }
 
     /**
@@ -189,11 +191,13 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
                                WriteRequestsLogger logger) throws IOException {
         final Status status = new Status();
         long i = 0;
-        while (i < recordsCount) {
+        while (i < recordsCount && !writer.isStopped()) {
             recordWrite(dType, data, size, time, status, writer.perlChannel, writer.id, logger);
             i += status.records;
         }
-        sync();
+        if (!writer.isStopped()) {
+            sync();
+        }
     }
 
     /**
@@ -216,16 +220,18 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         final long loopStartTime = time.getCurrentTime();
         long cnt = 0;
         rController.start(writer.params.getRecordsPerSec());
-        while (cnt < recordsCount) {
+        while (cnt < recordsCount && !writer.isStopped()) {
             long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
             long i = 0;
-            while (i < loopMax) {
+            while (i < loopMax && !writer.isStopped()) {
                 recordWrite(dType, data, size, time, status, writer.perlChannel);
                 i += status.records;
                 cnt += status.records;
                 rController.control(cnt, time.elapsedSeconds(status.startTime, loopStartTime));
             }
-            sync();
+            if (!writer.isStopped()) {
+                sync();
+            }
         }
     }
 
@@ -251,16 +257,18 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         final long loopStartTime = time.getCurrentTime();
         long cnt = 0;
         rController.start(writer.params.getRecordsPerSec());
-        while (cnt < recordsCount) {
+        while (cnt < recordsCount && !writer.isStopped()) {
             long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
             long i = 0;
-            while (i < loopMax) {
+            while (i < loopMax && !writer.isStopped()) {
                 recordWrite(dType, data, size, time, status, writer.perlChannel, writer.id, logger);
                 i += status.records;
                 cnt += status.records;
                 rController.control(cnt, time.elapsedSeconds(status.startTime, loopStartTime));
             }
-            sync();
+            if (!writer.isStopped()) {
+                sync();
+            }
         }
     }
 
@@ -284,11 +292,13 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         long startTime = time.getCurrentTime();
         status.startTime = startTime;
         long msElapsed = 0;
-        while (msElapsed < msToRun) {
+        while (msElapsed < msToRun && !writer.isStopped()) {
             recordWrite(dType, data, size, time, status, writer.perlChannel);
             msElapsed = (long) time.elapsedMilliSeconds(status.startTime, startTime);
         }
-        sync();
+        if (!writer.isStopped()) {
+            sync();
+        }
     }
 
 
@@ -313,11 +323,13 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         long startTime = time.getCurrentTime();
         status.startTime = startTime;
         long msElapsed = 0;
-        while (msElapsed < msToRun) {
+        while (msElapsed < msToRun && !writer.isStopped()) {
             recordWrite(dType, data, size, time, status, writer.perlChannel, writer.id, logger);
             msElapsed = (long) time.elapsedMilliSeconds(status.startTime, startTime);
         }
-        sync();
+        if (!writer.isStopped()) {
+            sync();
+        }
     }
 
 
@@ -343,16 +355,18 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         long secondsElapsed = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
-        while (secondsElapsed < secondsToRun) {
+        while (secondsElapsed < secondsToRun && !writer.isStopped()) {
             int i = 0;
-            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
+            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync()) && !writer.isStopped()) {
                 recordWrite(dType, data, size, time, status, writer.perlChannel);
                 i += status.records;
                 cnt += status.records;
                 secondsElapsed = (long) time.elapsedSeconds(status.startTime, loopStartTime);
                 rController.control(cnt, secondsElapsed);
             }
-            sync();
+            if (!writer.isStopped()) {
+                sync();
+            }
         }
     }
 
@@ -380,16 +394,18 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         long secondsElapsed = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
-        while (secondsElapsed < secondsToRun) {
+        while (secondsElapsed < secondsToRun && !writer.isStopped()) {
             int i = 0;
-            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
+            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync()) && !writer.isStopped()) {
                 recordWrite(dType, data, size, time, status, writer.perlChannel, writer.id, logger);
                 i += status.records;
                 cnt += status.records;
                 secondsElapsed = (long) time.elapsedSeconds(status.startTime, loopStartTime);
                 rController.control(cnt, secondsElapsed);
             }
-            sync();
+            if (!writer.isStopped()) {
+                sync();
+            }
         }
     }
 
@@ -413,16 +429,18 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         final long loopStartTime = time.getCurrentTime();
         long cnt = 0;
         rController.start(writer.params.getRecordsPerSec());
-        while (cnt < recordsCount) {
+        while (cnt < recordsCount && !writer.isStopped()) {
             long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
             long i = 0;
-            while (i < loopMax) {
+            while (i < loopMax && !writer.isStopped()) {
                 writeSetTime(dType, data, size, time, status);
                 i += status.records;
                 cnt += status.records;
                 rController.control(cnt, time.elapsedSeconds(status.startTime, loopStartTime));
             }
-            sync();
+            if (!writer.isStopped()) {
+                sync();
+            }
         }
     }
 
@@ -447,16 +465,18 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         final long loopStartTime = time.getCurrentTime();
         long cnt = 0;
         rController.start(writer.params.getRecordsPerSec());
-        while (cnt < recordsCount) {
+        while (cnt < recordsCount && !writer.isStopped()) {
             long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
             long i = 0;
-            while (i < loopMax) {
+            while (i < loopMax && !writer.isStopped()) {
                 writeSetTime(dType, data, size, time, status, writer.id, logger);
                 i += status.records;
                 cnt += status.records;
                 rController.control(cnt, time.elapsedSeconds(status.startTime, loopStartTime));
             }
-            sync();
+            if (!writer.isStopped()) {
+                sync();
+            }
         }
     }
 
@@ -482,16 +502,18 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         long secondsElapsed = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
-        while (secondsElapsed < secondsToRun) {
+        while (secondsElapsed < secondsToRun && !writer.isStopped()) {
             long i = 0;
-            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
+            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync()) && !writer.isStopped()) {
                 writeSetTime(dType, data, size, time, status);
                 i += status.records;
                 cnt += status.records;
                 secondsElapsed = (long) time.elapsedSeconds(status.startTime, loopStartTime);
                 rController.control(cnt, secondsElapsed);
             }
-            sync();
+            if (!writer.isStopped()) {
+                sync();
+            }
         }
     }
 
@@ -518,16 +540,18 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         long secondsElapsed = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
-        while (secondsElapsed < secondsToRun) {
+        while (secondsElapsed < secondsToRun && !writer.isStopped()) {
             long i = 0;
-            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
+            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync()) && !writer.isStopped()) {
                 writeSetTime(dType, data, size, time, status, writer.id, logger);
                 i += status.records;
                 cnt += status.records;
                 secondsElapsed = (long) time.elapsedSeconds(status.startTime, loopStartTime);
                 rController.control(cnt, secondsElapsed);
             }
-            sync();
+            if (!writer.isStopped()) {
+                sync();
+            }
         }
     }
 
@@ -552,16 +576,18 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         final long loopStartTime = time.getCurrentTime();
         long cnt = 0;
         rController.start(writer.params.getRecordsPerSec());
-        while (cnt < recordsCount) {
+        while (cnt < recordsCount && !writer.isStopped()) {
             long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
             long i = 0;
-            while (i < loopMax) {
+            while (i < loopMax && !writer.isStopped()) {
                 write(dType, data, size, time, status);
                 i += status.records;
                 cnt += status.records;
                 rController.control(cnt, time.elapsedSeconds(status.startTime, loopStartTime));
             }
-            sync();
+            if (!writer.isStopped()) {
+                sync();
+            }
         }
     }
 
@@ -586,16 +612,18 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         final long loopStartTime = time.getCurrentTime();
         long cnt = 0;
         rController.start(writer.params.getRecordsPerSec());
-        while (cnt < recordsCount) {
+        while (cnt < recordsCount && !writer.isStopped()) {
             long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - cnt);
             long i = 0;
-            while (i < loopMax) {
+            while (i < loopMax && !writer.isStopped()) {
                 write(dType, data, size, time, status, writer.id, logger);
                 i += status.records;
                 cnt += status.records;
                 rController.control(cnt, time.elapsedSeconds(status.startTime, loopStartTime));
             }
-            sync();
+            if (!writer.isStopped()) {
+                sync();
+            }
         }
     }
 
@@ -621,16 +649,18 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         long secondsElapsed = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
-        while (secondsElapsed < secondsToRun) {
+        while (secondsElapsed < secondsToRun && !writer.isStopped()) {
             long i = 0;
-            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
+            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync()) && !writer.isStopped()) {
                 write(dType, data, size, time, status);
                 i += status.records;
                 cnt += status.records;
                 secondsElapsed = (long) time.elapsedSeconds(status.startTime, loopStartTime);
                 rController.control(cnt, secondsElapsed);
             }
-            sync();
+            if (!writer.isStopped()) {
+                sync();
+            }
         }
     }
 
@@ -658,16 +688,18 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         long secondsElapsed = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
-        while (secondsElapsed < secondsToRun) {
+        while (secondsElapsed < secondsToRun && !writer.isStopped()) {
             long i = 0;
-            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
+            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync()) && !writer.isStopped()) {
                 write(dType, data, size, time, status, writer.id, logger);
                 i += status.records;
                 cnt += status.records;
                 secondsElapsed = (long) time.elapsedSeconds(status.startTime, loopStartTime);
                 rController.control(cnt, secondsElapsed);
             }
-            sync();
+            if (!writer.isStopped()) {
+                sync();
+            }
         }
     }
 }

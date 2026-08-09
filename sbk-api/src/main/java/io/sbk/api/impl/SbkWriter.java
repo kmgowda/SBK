@@ -103,15 +103,21 @@ final public class SbkWriter extends Worker implements RunBenchmark {
                     Printer.log.info("Writer " + id + " started , records: " + recordsCount);
                 }
                 perf.apply(secondsToRun, recordsCount);
-                Printer.log.info("Writer " + id + " exited");
+                if (isStopped()) {
+                    Printer.log.warn("Writer " + id + " exited after storage error: "
+                            + getTerminalFailureDescription());
+                } else {
+                    Printer.log.info("Writer " + id + " exited");
+                }
             } catch (IOException ex) {
                 if (Thread.currentThread().isInterrupted()) {
                     Printer.log.info("Writer " + id + " interrupted during shutdown");
                 } else {
-                    ex.printStackTrace();
+                    Printer.log.warn("Writer " + id + " exited after storage error: " + ex);
                 }
+            } finally {
+                wCount.decrementWriters();
             }
-            wCount.decrementWriters();
         }, executor);
     }
 

@@ -107,7 +107,14 @@ final public class SbkReader extends Worker implements RunBenchmark {
                     Printer.log.info("Reader " + id + " started , records: " + recordsCount);
                 }
                 perf.apply(secondsToRun, recordsCount);
-                Printer.log.info("Reader " + id + " exited");
+                if (isEof()) {
+                    Printer.log.info("Reader " + id + " exited with EOF");
+                } else if (isStopped()) {
+                    Printer.log.warn("Reader " + id + " exited after storage error: "
+                            + getTerminalFailureDescription());
+                } else {
+                    Printer.log.info("Reader " + id + " exited");
+                }
             } catch (EOFException ex) {
                 Printer.log.info("Reader " + id + " exited with EOF");
             } catch (IOException ex) {
@@ -116,8 +123,9 @@ final public class SbkReader extends Worker implements RunBenchmark {
                 } else {
                     ex.printStackTrace();
                 }
+            } finally {
+                rCount.decrementReaders();
             }
-            rCount.decrementReaders();
         }, executor);
     }
 

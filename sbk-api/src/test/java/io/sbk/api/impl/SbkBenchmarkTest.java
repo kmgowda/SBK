@@ -12,7 +12,6 @@ package io.sbk.api.impl;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -54,20 +53,15 @@ final class SbkBenchmarkTest {
     }
 
     @Test
-    void stopsAndDrainsRecordersWhenWorkersFinishEarly() {
-        final CompletableFuture<Void> workers = new CompletableFuture<>();
-        final CompletableFuture<Void> readerRecorder = new CompletableFuture<>();
-        final AtomicInteger stopCalls = new AtomicInteger();
+    void completesOnlyAfterAllWriterAndReaderWorkersExit() {
+        final CompletableFuture<Void> writers = new CompletableFuture<>();
+        final CompletableFuture<Void> readers = new CompletableFuture<>();
+        final CompletableFuture<Void> allWorkers = SbkBenchmark.allWorkers(writers, readers);
 
-        final CompletableFuture<Void> completion = SbkBenchmark.drainRecordersAfterWorkers(
-                workers, null, readerRecorder, stopCalls::incrementAndGet);
+        writers.complete(null);
+        assertFalse(allWorkers.isDone());
 
-        assertFalse(completion.isDone());
-        workers.complete(null);
-        assertEquals(1, stopCalls.get());
-        assertFalse(completion.isDone());
-
-        readerRecorder.complete(null);
-        assertTrue(completion.isDone());
+        readers.complete(null);
+        assertTrue(allWorkers.isDone());
     }
 }

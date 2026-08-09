@@ -29,6 +29,7 @@ public class NullReader implements Reader<byte[]> {
         try {
             Thread.sleep(timeoutMS);
         } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
             throw new IOException(ex);
         }
         return null;

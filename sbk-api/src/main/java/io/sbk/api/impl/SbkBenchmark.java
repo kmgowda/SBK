@@ -378,13 +378,7 @@ final public class SbkBenchmark implements Benchmark {
             readFutures = null;
         }
 
-        if (writersCB != null && readersCB != null) {
-            chainFuture = CompletableFuture.allOf(writersCB, readersCB);
-        } else if (readFutures != null) {
-            chainFuture = readersCB;
-        } else {
-            chainFuture = writersCB;
-        }
+        chainFuture = allWorkers(writersCB, readersCB);
 
         if (params.getTotalSecondsToRun() > 0) {
             timeoutExecutor.schedule(this::requestTimedShutdown,
@@ -408,46 +402,31 @@ final public class SbkBenchmark implements Benchmark {
         }
         rwLogger.setExceptionHandler(this::requestShutdown);
         assert chainFuture != null;
-        drainRecordersAfterWorkers(chainFuture, wStatFuture, rStatFuture, this::stopPerformanceRecorders)
-                .whenComplete((ignored, ex) -> requestShutdown(ex));
+        chainFuture.whenComplete((ignored, ex) -> requestShutdown(ex));
 
         return retFuture.toCompletableFuture();
     }
 
     /**
-     * Stops the performance recorders after all workers finish and waits for
-     * their final measurements to drain.
+     * Completes after every configured writer and reader worker has exited.
      *
-     * <p>A reader that reaches EOF completes its worker normally. Stopping the
-     * recorders at that point releases their duration-based futures, allowing
-     * the benchmark to shut down without waiting for the configured deadline.
-     * Readers for live systems continue running when they temporarily return
-     * no data, so they do not trigger this completion path.</p>
-     *
-     * @param workerFuture completion of all benchmark workers
-     * @param writeRecorderFuture writer recorder completion, or {@code null}
-     * @param readRecorderFuture reader recorder completion, or {@code null}
-     * @param stopRecorders action that stops and drains active recorders
-     * @return completion after workers and active recorders have finished
+     * @param writerWorkers completion of all writers, or {@code null}
+     * @param readerWorkers completion of all readers, or {@code null}
+     * @return completion of every configured worker group
+     * @throws IllegalArgumentException when neither worker group exists
      */
-    static CompletableFuture<Void> drainRecordersAfterWorkers(
-            CompletableFuture<Void> workerFuture,
-            CompletableFuture<Void> writeRecorderFuture,
-            CompletableFuture<Void> readRecorderFuture,
-            Runnable stopRecorders) {
-        final List<CompletableFuture<?>> recorderFutures = new ArrayList<>();
-        if (writeRecorderFuture != null) {
-            recorderFutures.add(writeRecorderFuture);
+    static CompletableFuture<Void> allWorkers(CompletableFuture<Void> writerWorkers,
+                                              CompletableFuture<Void> readerWorkers) {
+        if (writerWorkers != null && readerWorkers != null) {
+            return CompletableFuture.allOf(writerWorkers, readerWorkers);
         }
-        if (readRecorderFuture != null) {
-            recorderFutures.add(readRecorderFuture);
+        if (readerWorkers != null) {
+            return readerWorkers;
         }
-        final CompletableFuture<Void> recordersFuture = CompletableFuture.allOf(
-                recorderFutures.toArray(CompletableFuture[]::new));
-        return workerFuture.thenCompose(ignored -> {
-            stopRecorders.run();
-            return recordersFuture;
-        });
+        if (writerWorkers != null) {
+            return writerWorkers;
+        }
+        throw new IllegalArgumentException("No writer or reader workers");
     }
 
     /**
