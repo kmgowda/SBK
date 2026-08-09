@@ -147,6 +147,57 @@ must match the file/directory name (modulo case).
   hot path is one `TimeStamp` per record; your driver should not
   allocate big arrays or maps per `writeAsync()` call.
 
+### Hot-path latency policy (mandatory for every software agent)
+
+This policy applies to **all** software agents and integrations working in
+this repository, including Codex, Devin, Windsurf, Cursor, GitHub Copilot,
+Claude Code, Continue, Aider, and future tools. Agent-specific configuration
+may add guidance, but it must not weaken or bypass this policy.
+
+The following are latency-critical hot paths:
+
+- `sbk-api` per-record writer and reader loops, driver-call adapters, and
+  benchmark measurement submission;
+- PerL measurement recording, producer enqueue, consumer dequeue, queue
+  traversal, and latency-window update paths; and
+- SBM measurement ingestion, latency/count aggregation, and forwarding paths
+  executed for each record or measurement batch.
+
+**Do not add any new per-operation conditional or synchronization work to
+these hot paths.** In particular, do not add:
+
+- `if`, `switch`, ternary, short-circuit, state-polling, or other conditional
+  branches, including extra conditions in an existing hot loop;
+- atomic variables, atomic reads/writes, compare-and-set operations, or new
+  `volatile` coordination fields;
+- mutexes, monitors, `synchronized`, `Lock`, semaphore, or other contended
+  coordination; or
+- blocking or conditional waits such as `wait`, `await`, `sleep`, `park`, or
+  blocking-queue operations.
+
+Keep EOF, disk-full, error handling, shutdown, lifecycle coordination, logging,
+and configuration decisions outside the per-record measurement and queue
+paths. Prefer existing exception propagation and worker/future lifecycle
+boundaries. Moving a check into a helper does not make it acceptable if the
+helper is still invoked for every record, enqueue, dequeue, or measurement.
+
+An exception to this rule requires **explicit confirmation from a human
+developer before editing the hot path**. Before requesting confirmation, the
+agent must:
+
+1. identify the exact hot-path method and proposed branch, atomic operation,
+   mutex, or wait;
+2. warn that the change can increase latency, jitter, contention, or reduce
+   throughput;
+3. explain why the behavior cannot be implemented outside the hot path; and
+4. propose a before/after microbenchmark or representative benchmark that
+   measures the performance impact.
+
+A general request to implement a feature is not confirmation for hot-path
+overhead. After explicit approval, keep the addition minimal, document the
+reason in code, run the agreed performance comparison, and report the measured
+delta. Passing functional tests alone is not sufficient verification.
+
 ### Style
 
 - Tabs vs spaces: **4 spaces**, no tabs (enforced by `FileTabCharacter`).
@@ -323,6 +374,9 @@ specific action** (not blanket approval):
   `perl/`, `sbm/`, etc.). New *drivers* under `drivers/` are fine.
 - Re-enabling `halodb` (see §4.1).
 - Upgrading the MinIO SDK from 8.5.17 (see §4.3).
+- Adding a branch, atomic operation, mutex, or wait to an `sbk-api`, PerL, SBM,
+  or driver hot path. The agent must first give the latency warning and obtain
+  the specific developer confirmation required by §3.
 - Force-pushing, rewriting history, or deleting branches.
 
 For everything else inside `drivers/`, `sbk-api/`, `perl/`, `sbm/`,
@@ -348,6 +402,9 @@ should re-read this file and the relevant linked docs.
    [docs/sbk-internals.md](docs/sbk-internals.md) §8 my
    change must preserve (lock-free hot path, no sampling, no
    `synchronized` blocks, etc.)?
+7. Does the change add any branch, atomic operation, mutex, or wait to a
+   writer, reader, measurement, enqueue, dequeue, PerL, or SBM hot path? If so,
+   stop, warn the developer, and obtain explicit confirmation before editing.
 
 When in doubt, **prefer reading existing code over making assumptions**.
 This codebase has more than 50 driver implementations; any specific pattern you need has almost
