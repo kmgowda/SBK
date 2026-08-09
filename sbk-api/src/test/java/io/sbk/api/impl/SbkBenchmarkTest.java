@@ -11,11 +11,15 @@ package io.sbk.api.impl;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests benchmark lifecycle calculations that must be independent of a storage driver.
@@ -47,5 +51,23 @@ final class SbkBenchmarkTest {
     void rejectsInvalidWorkerIndex() {
         assertThrows(IllegalArgumentException.class,
                 () -> SbkBenchmark.recordsForWorker(1, 1, 1));
+    }
+
+    @Test
+    void stopsAndDrainsRecordersWhenWorkersFinishEarly() {
+        final CompletableFuture<Void> workers = new CompletableFuture<>();
+        final CompletableFuture<Void> readerRecorder = new CompletableFuture<>();
+        final AtomicInteger stopCalls = new AtomicInteger();
+
+        final CompletableFuture<Void> completion = SbkBenchmark.drainRecordersAfterWorkers(
+                workers, null, readerRecorder, stopCalls::incrementAndGet);
+
+        assertFalse(completion.isDone());
+        workers.complete(null);
+        assertEquals(1, stopCalls.get());
+        assertFalse(completion.isDone());
+
+        readerRecorder.complete(null);
+        assertTrue(completion.isDone());
     }
 }
