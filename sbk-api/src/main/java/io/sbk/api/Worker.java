@@ -13,9 +13,6 @@ package io.sbk.api;
 import io.perl.api.PerlChannel;
 import io.sbk.params.Parameters;
 
-import java.io.EOFException;
-import java.util.concurrent.atomic.AtomicReference;
-
 /**
  * Abstract class for Writers and Readers.
  *
@@ -33,8 +30,9 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * <p>Implementation notes and guidelines:
  * <ul>
- *   <li>The worker identity and context are immutable. A single atomic terminal
- *       failure is recorded when an asynchronous driver operation fails.</li>
+ *   <li>The fields are intentionally final to make the Worker instance
+ *       immutable after construction; driver code may safely read these
+ *       values concurrently without additional synchronization.</li>
  *   <li>Do not add driver-specific mutable state to this class; instead
  *       keep per-worker state inside the driver implementation to avoid
  *       accidental sharing between workers.</li>
@@ -49,7 +47,6 @@ public abstract class Worker {
     public final Parameters params;
     /** Performance channel used to publish measurements. */
     public final PerlChannel perlChannel;
-    private final AtomicReference<TerminalFailure> terminalFailure;
 
     /**
      * Creates a benchmark worker.
@@ -61,61 +58,6 @@ public abstract class Worker {
     public Worker(int workerID, Parameters params, PerlChannel perlChannel) {
         this.id = workerID;
         this.params = params;
-        this.terminalFailure = new AtomicReference<>();
-        this.perlChannel = new PerlChannel() {
-            @Override
-            public void send(long startTime, long endTime, int records, int bytes) {
-                if (perlChannel != null) {
-                    perlChannel.send(startTime, endTime, records, bytes);
-                }
-            }
-
-            @Override
-            public void throwException(Throwable ex) {
-                terminalFailure.compareAndSet(null, new TerminalFailure(hasEofCause(ex), ex.toString()));
-            }
-        };
+        this.perlChannel = perlChannel;
     }
-
-    /**
-     * Returns whether the driver has reported a terminal asynchronous failure.
-     *
-     * @return {@code true} when this worker should stop submitting operations
-     */
-    public final boolean isStopped() {
-        return terminalFailure.get() != null;
-    }
-
-    /**
-     * Returns the terminal asynchronous failure reported by the driver.
-     *
-     * @return terminal failure, or {@code null} while the worker is active
-     */
-    public final String getTerminalFailureDescription() {
-        final TerminalFailure failure = terminalFailure.get();
-        return failure == null ? null : failure.description();
-    }
-
-    /**
-     * Returns whether the terminal asynchronous failure represents EOF.
-     *
-     * @return {@code true} when a reader driver reported EOF
-     */
-    public final boolean isEof() {
-        final TerminalFailure failure = terminalFailure.get();
-        return failure != null && failure.eof();
-    }
-
-    private static boolean hasEofCause(Throwable ex) {
-        Throwable cause = ex;
-        while (cause != null) {
-            if (cause instanceof EOFException) {
-                return true;
-            }
-            cause = cause.getCause();
-        }
-        return false;
-    }
-
-    private record TerminalFailure(boolean eof, String description) { }
 }

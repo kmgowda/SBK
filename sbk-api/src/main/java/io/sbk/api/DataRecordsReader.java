@@ -136,7 +136,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         final Status status = new Status();
         final int size = reader.params.getRecordSize();
         long i = 0;
-        while (i < recordsCount && !reader.isStopped()) {
+        while (i < recordsCount) {
             recordTime.recordRead(dType, size, time, status, reader.perlChannel);
             i += status.records;
         }
@@ -160,7 +160,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         final Status status = new Status();
         final int size = reader.params.getRecordSize();
         long i = 0;
-        while (i < recordsCount && !reader.isStopped()) {
+        while (i < recordsCount) {
             recordTime.recordRead(dType, size, time, status, reader.perlChannel, reader.id, logger);
             i += status.records;
         }
@@ -252,7 +252,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         final int size = reader.params.getRecordSize();
         final Status status = new Status();
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
-        while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun && !reader.isStopped()) {
+        while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
             recordTime.recordRead(dType, size, time, status, reader.perlChannel);
         }
     }
@@ -277,7 +277,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         final int size = reader.params.getRecordSize();
         final Status status = new Status();
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
-        while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun && !reader.isStopped()) {
+        while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
             recordTime.recordRead(dType, size, time, status, reader.perlChannel, reader.id, logger);
         }
     }
@@ -369,7 +369,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         double secondsElapsed = 0;
         final long loopStartTime = time.getCurrentTime();
         rController.start(reader.params.getRecordsPerSec());
-        while (i < recordsCount && !reader.isStopped()) {
+        while (i < recordsCount) {
             recordTime.recordRead(dType, size, time, status, reader.perlChannel);
             i += status.records;
             secondsElapsed = time.elapsedSeconds(status.endTime, loopStartTime);
@@ -400,7 +400,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         double secondsElapsed = 0;
         final long loopStartTime = time.getCurrentTime();
         rController.start(reader.params.getRecordsPerSec());
-        while (i < recordsCount && !reader.isStopped()) {
+        while (i < recordsCount) {
             recordTime.recordRead(dType, size, time, status, reader.perlChannel, reader.id, logger);
             i += status.records;
             secondsElapsed = time.elapsedSeconds(status.endTime, loopStartTime);
@@ -501,7 +501,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         double secondsElapsed = 0;
         long cnt = 0;
         rController.start(reader.params.getRecordsPerSec());
-        while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun && !reader.isStopped()) {
+        while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
             recordTime.recordRead(dType, size, time, status, reader.perlChannel);
             cnt += status.records;
             secondsElapsed = time.elapsedSeconds(status.endTime, loopStartTime);
@@ -534,7 +534,7 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         double secondsElapsed = 0;
         long cnt = 0;
         rController.start(reader.params.getRecordsPerSec());
-        while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun && !reader.isStopped()) {
+        while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
             recordTime.recordRead(dType, size, time, status, reader.perlChannel, reader.id, logger);
             cnt += status.records;
             secondsElapsed = time.elapsedSeconds(status.endTime, loopStartTime);

@@ -12,12 +12,9 @@ package io.sbk.api.impl;
 import io.perl.api.PerlChannel;
 import io.sbk.api.DataReader;
 import io.sbk.api.Reader;
-import io.sbk.api.Status;
-import io.sbk.data.DataType;
 import io.sbk.logger.impl.SystemLogger;
 import io.sbk.params.impl.SbkParameters;
 import io.time.NanoSeconds;
-import io.time.Time;
 import org.junit.jupiter.api.Test;
 
 import java.io.EOFException;
@@ -27,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -59,22 +55,6 @@ final class SbkReaderTest {
     }
 
     @Test
-    void exitsWhenAsyncDriverReportsEof() throws Exception {
-        final AtomicInteger readCalls = new AtomicInteger();
-        final DataReader<Object> reader = readerThatReportsEof(readCalls);
-        final ExecutorService executor = Executors.newSingleThreadExecutor();
-
-        try {
-            createReader(reader, executor)
-                    .run(60, 0).get(2, TimeUnit.SECONDS);
-
-            assertEquals(1, readCalls.get());
-        } finally {
-            executor.shutdownNow();
-        }
-    }
-
-    @Test
     void treatsNoDataAsNonTerminal() throws Exception {
         final AtomicInteger readCalls = new AtomicInteger();
         final DataReader<Object> reader = readerThatReturnsNoData(readCalls);
@@ -96,26 +76,6 @@ final class SbkReaderTest {
         final SystemLogger logger = new SystemLogger();
         return new SbkReader(0, params, CHANNEL, null, new NanoSeconds(), reader,
                 logger, null, executor);
-    }
-
-    private static Reader<Object> readerThatReportsEof(AtomicInteger readCalls) {
-        return new Reader<>() {
-            @Override
-            public void recordRead(DataType<Object> dType, int size, Time time,
-                                   Status status, PerlChannel perlChannel) {
-                readCalls.incrementAndGet();
-                perlChannel.throwException(new EOFException("end of asynchronous input"));
-            }
-
-            @Override
-            public Object read() {
-                return null;
-            }
-
-            @Override
-            public void close() {
-            }
-        };
     }
 
     private static Reader<Object> readerThatThrowsEof() {

@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests terminal storage failures reported by writer drivers.
@@ -41,26 +40,6 @@ final class SbkWriterTest {
             throw new AssertionError("Worker failures must remain worker-local", ex);
         }
     };
-
-    @Test
-    void exitsAfterAsyncDiskFailure() throws Exception {
-        final AtomicInteger writeCalls = new AtomicInteger();
-        final AtomicInteger syncCalls = new AtomicInteger();
-        final Writer<Object> driver = failingAsyncWriter(writeCalls, syncCalls);
-        final ExecutorService executor = Executors.newSingleThreadExecutor();
-        final SbkWriter writer = createWriter(driver, executor);
-
-        try {
-            writer.run(0, 100).get(2, TimeUnit.SECONDS);
-
-            assertEquals(1, writeCalls.get());
-            assertEquals(0, syncCalls.get());
-            assertTrue(writer.isStopped());
-            assertTrue(writer.getTerminalFailureDescription().contains("No space left on device"));
-        } finally {
-            executor.shutdownNow();
-        }
-    }
 
     @Test
     void exitsAfterSynchronousDiskFailure() throws Exception {
@@ -82,25 +61,6 @@ final class SbkWriterTest {
         params.parseArgs(new String[]{"-writers", "1", "-size", "10", "-records", "100"});
         return new SbkWriter(0, params, CHANNEL, new ObjectDataType(), new NanoSeconds(), writer,
                 new SystemLogger(), null, executor);
-    }
-
-    private static Writer<Object> failingAsyncWriter(AtomicInteger writeCalls, AtomicInteger syncCalls) {
-        return new Writer<>() {
-            @Override
-            public CompletableFuture<?> writeAsync(Object data) {
-                writeCalls.incrementAndGet();
-                return CompletableFuture.failedFuture(new IOException("No space left on device"));
-            }
-
-            @Override
-            public void sync() {
-                syncCalls.incrementAndGet();
-            }
-
-            @Override
-            public void close() {
-            }
-        };
     }
 
     private static Writer<Object> synchronousFailingWriter(AtomicInteger writeCalls) {
