@@ -62,6 +62,30 @@ final class SbkGemBenchmarkTest {
     }
 
     @Test
+    void preservesRemoteExceptionHeadAndRootCauseTailWithinTheDiagnosticLimit() {
+        final String exceptionHead = "java.util.concurrent.ExecutionException: MinIO PUT failed ";
+        final String rootCauseTail = "Caused by: HTTP 503 Service Unavailable";
+        final String stderr = exceptionHead + "stack-frame ".repeat(100) + rootCauseTail;
+
+        final String summary = SbkGemBenchmark.diagnosticSummary(stderr);
+
+        assertEquals(512, summary.length());
+        assertTrue(summary.startsWith(exceptionHead));
+        assertTrue(summary.contains(" ... [truncated] ... "));
+        assertTrue(summary.endsWith(rootCauseTail));
+    }
+
+    @Test
+    void retainsNormalizedRemoteDiagnosticAtTheExactBoundary() {
+        final String stderr = "x".repeat(512);
+
+        final String summary = SbkGemBenchmark.diagnosticSummary(stderr);
+
+        assertEquals(512, summary.length());
+        assertEquals(stderr, summary);
+    }
+
+    @Test
     void includesHostInDerivedExitFailureMessage() {
         final RemoteResponse response = new RemoteResponse(2, "", "bad option", "node-a");
 
