@@ -45,6 +45,44 @@ final class SbkGemBenchmarkTest {
         final IOException failure = SbkGemBenchmark.remoteCommandFailure(results);
         assertTrue(failure.getMessage().contains("node-a status EXIT_FAILURE returned 2"));
         assertTrue(failure.getMessage().contains("node-c status EXIT_FAILURE returned 17"));
+        assertTrue(failure.getMessage().contains("bad option"));
+        assertTrue(failure.getMessage().contains("failure"));
+    }
+
+    @Test
+    void includesRemoteSbkExceptionInAggregateFailure() {
+        final RemoteResponse[] results = {new RemoteResponse(1, "",
+                "java.util.concurrent.ExecutionException: java.io.IOException: HTTP 503 Service Unavailable\n"
+                        + "\tat io.sbk.Sbk.run(Sbk.java:117)", "node-a")};
+
+        final IOException failure = SbkGemBenchmark.remoteCommandFailure(results);
+
+        assertTrue(failure.getMessage().contains("HTTP 503 Service Unavailable"));
+        assertTrue(failure.getMessage().contains("node-a status EXIT_FAILURE returned 1"));
+    }
+
+    @Test
+    void preservesRemoteExceptionHeadAndRootCauseTailWithinTheDiagnosticLimit() {
+        final String exceptionHead = "java.util.concurrent.ExecutionException: MinIO PUT failed ";
+        final String rootCauseTail = "Caused by: HTTP 503 Service Unavailable";
+        final String stderr = exceptionHead + "stack-frame ".repeat(100) + rootCauseTail;
+
+        final String summary = SbkGemBenchmark.diagnosticSummary(stderr);
+
+        assertEquals(512, summary.length());
+        assertTrue(summary.startsWith(exceptionHead));
+        assertTrue(summary.contains(" ... [truncated] ... "));
+        assertTrue(summary.endsWith(rootCauseTail));
+    }
+
+    @Test
+    void retainsNormalizedRemoteDiagnosticAtTheExactBoundary() {
+        final String stderr = "x".repeat(512);
+
+        final String summary = SbkGemBenchmark.diagnosticSummary(stderr);
+
+        assertEquals(512, summary.length());
+        assertEquals(stderr, summary);
     }
 
     @Test

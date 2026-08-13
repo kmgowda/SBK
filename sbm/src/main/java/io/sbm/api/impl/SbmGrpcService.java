@@ -17,6 +17,7 @@ import io.grpc.stub.StreamObserver;
 import io.sbp.api.Sbp;
 import io.sbp.config.SbpVersion;
 import io.sbp.grpc.ClientID;
+import io.sbp.grpc.ClientFailure;
 import io.sbp.grpc.Config;
 import io.sbp.grpc.MessageLatenciesRecord;
 import io.sbp.grpc.ServiceGrpc;
@@ -25,6 +26,7 @@ import io.sbm.params.RamParameters;
 import io.sbm.api.SbmRegistry;
 import io.sbp.grpc.Version;
 import io.time.Time;
+import io.sbk.system.Printer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -52,6 +54,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     private final SbmRegistry registry;
     private final RamParameters params;
     private final List<PendingRegistration> pendingRegistrations;
+    private final List<ClientFailure> clientFailures;
     private boolean startReleased;
     private String registrationFailure;
     private int maximumRegisteredClients;
@@ -117,6 +120,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
         this.countConnections = countConnections;
         this.registry = registry;
         this.pendingRegistrations = new ArrayList<>();
+        this.clientFailures = new ArrayList<>();
         this.startReleased = !coordinatedStart;
         this.registrationFailure = null;
         this.maximumRegisteredClients = 0;
@@ -272,6 +276,31 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
      */
     public synchronized String getRegistrationFailure() {
         return registrationFailure;
+    }
+
+    /**
+     * Records and acknowledges a terminal failure reported by an SBK client.
+     *
+     * @param request client-tagged terminal failure
+     * @param responseObserver acknowledgement observer
+     */
+    @Override
+    public synchronized void reportClientFailure(ClientFailure request,
+                                                  StreamObserver<Empty> responseObserver) {
+        clientFailures.add(request);
+        Printer.log.error("SBM received terminal failure from " + request.getComponent()
+                + " client " + request.getClientID() + ": " + request.getMessage());
+        responseObserver.onNext(Empty.getDefaultInstance());
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Returns a stable snapshot of terminal client failures received by SBM.
+     *
+     * @return terminal client-failure reports
+     */
+    public synchronized List<ClientFailure> getClientFailures() {
+        return List.copyOf(clientFailures);
     }
 
 

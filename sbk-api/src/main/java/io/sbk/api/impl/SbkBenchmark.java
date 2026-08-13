@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -286,9 +287,14 @@ final public class SbkBenchmark implements Benchmark {
                             CompletableFuture<Void> ret = sbkWriters.get(i + j).run(secondsToRun,
                                     recordsForWorker(params.getTotalRecords(),
                                             params.getWritersCount(), i + j));
+                            ret.whenComplete((ignored, failure) -> {
+                                if (failure != null) {
+                                    requestShutdown(failure);
+                                }
+                            });
                             writeFutures.add(ret);
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            throw new CompletionException(e);
                         }
                     }
                     i += params.getWritersStep();
@@ -308,16 +314,8 @@ final public class SbkBenchmark implements Benchmark {
                         }
                     }
                 }
-            }, executor).thenAccept(d -> {
-                try {
-                    CompletableFuture.allOf(writeFutures.toArray(new CompletableFuture[0])).get();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    Printer.log.info("Writer coordination interrupted during shutdown");
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                }
-            });
+            }, executor).thenCompose(d ->
+                    CompletableFuture.allOf(writeFutures.toArray(new CompletableFuture[0])));
             Printer.log.info("SBK Benchmark initiated Writers");
 
         } else {
@@ -339,9 +337,14 @@ final public class SbkBenchmark implements Benchmark {
                             CompletableFuture<Void> ret = sbkReaders.get(i + j).run(secondsToRun,
                                     recordsForWorker(params.getTotalRecords(),
                                             params.getReadersCount(), i + j));
+                            ret.whenComplete((ignored, failure) -> {
+                                if (failure != null) {
+                                    requestShutdown(failure);
+                                }
+                            });
                             readFutures.add(ret);
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            throw new CompletionException(e);
                         }
                     }
                     i += params.getReadersStep();
@@ -361,17 +364,8 @@ final public class SbkBenchmark implements Benchmark {
                         }
                     }
                 }
-            }, executor).thenAccept(d -> {
-                        try {
-                            CompletableFuture.allOf(readFutures.toArray(new CompletableFuture[0])).get();
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            Printer.log.info("Reader coordination interrupted during shutdown");
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
-                        }
-                    }
-            );
+            }, executor).thenCompose(d ->
+                    CompletableFuture.allOf(readFutures.toArray(new CompletableFuture[0])));
             Printer.log.info("SBK Benchmark initiated Readers");
         } else {
             readersCB = null;
@@ -484,6 +478,13 @@ final public class SbkBenchmark implements Benchmark {
             return;
         }
         state = State.END;
+        if (ex != null) {
+            try {
+                rwLogger.reportFailure(ex);
+            } catch (RuntimeException reportFailure) {
+                Printer.log.warn("Unable to report terminal SBK failure", reportFailure);
+            }
+        }
         executor.shutdownNow();
         if (params.getTotalSecondsToRun() > 0) {
             stopPerformanceRecorders();

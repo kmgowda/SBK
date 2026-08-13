@@ -18,6 +18,7 @@ import io.sbm.api.SbmRegistry;
 import io.sbm.logger.CountConnections;
 import io.sbm.params.impl.SbmParameters;
 import io.sbp.grpc.ClientID;
+import io.sbp.grpc.ClientFailure;
 import io.sbp.grpc.Config;
 import io.sbp.grpc.MessageLatenciesRecord;
 import io.time.MilliSeconds;
@@ -205,6 +206,26 @@ final class SbmGrpcServiceTest {
 
         verify(registry).enQueue(first);
         verify(registry).enQueue(second);
+        assertEquals(1, response.values);
+        assertTrue(response.completed);
+    }
+
+    @Test
+    void recordsAndAcknowledgesTerminalClientFailure() throws Exception {
+        final SbmParameters params = new SbmParameters("test", 0, 1, 0, null);
+        params.parseArgs(new String[]{"-class", "file", "-action", "r"});
+        final SbmGrpcService service = new SbmGrpcService(params, new MilliSeconds(), 0, 1000,
+                mock(CountConnections.class), mock(SbmRegistry.class));
+        final CapturingEmptyObserver response = new CapturingEmptyObserver();
+        final ClientFailure report = ClientFailure.newBuilder()
+                .setClientID(7)
+                .setComponent("SBK")
+                .setMessage("IOException: HTTP 503 Service Unavailable")
+                .build();
+
+        service.reportClientFailure(report, response);
+
+        assertEquals(List.of(report), service.getClientFailures());
         assertEquals(1, response.values);
         assertTrue(response.completed);
     }

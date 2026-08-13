@@ -61,6 +61,9 @@ import java.util.concurrent.TimeoutException;
  * - Aggregate remote outputs into {@link io.gem.api.RemoteResponse}[] and shutdown cleanly.
  */
 final public class SbkGemBenchmark implements GemBenchmark {
+    private static final int MAXIMUM_DIAGNOSTIC_CHARACTERS = 512;
+    private static final int DIAGNOSTIC_PREFIX_CHARACTERS = 320;
+    private static final String DIAGNOSTIC_TRUNCATION_MARKER = " ... [truncated] ... ";
     private final SbmBenchmark sbmBenchmark;
     private final GemConfig config;
     private final GemParameters params;
@@ -814,10 +817,29 @@ final public class SbkGemBenchmark implements GemBenchmark {
                     if (result.returnCode != RemoteResponse.UNKNOWN_RETURN_CODE) {
                         failures.append(" returned ").append(result.returnCode);
                     }
+                    final String diagnostic = diagnosticSummary(result.errOutput);
+                    if (!diagnostic.isEmpty()) {
+                        failures.append(": ").append(diagnostic);
+                    }
                 }
             }
         }
         return failures.isEmpty() ? null : new IOException("SBK-GEM: Remote SBK execution failed: " + failures);
+    }
+
+    static String diagnosticSummary(String errorOutput) {
+        if (errorOutput == null || errorOutput.isBlank()) {
+            return "";
+        }
+        final String normalized = errorOutput.replaceAll("\\s+", " ").trim();
+        if (normalized.length() <= MAXIMUM_DIAGNOSTIC_CHARACTERS) {
+            return normalized;
+        }
+        final int suffixCharacters = MAXIMUM_DIAGNOSTIC_CHARACTERS
+                - DIAGNOSTIC_PREFIX_CHARACTERS - DIAGNOSTIC_TRUNCATION_MARKER.length();
+        return normalized.substring(0, DIAGNOSTIC_PREFIX_CHARACTERS)
+                + DIAGNOSTIC_TRUNCATION_MARKER
+                + normalized.substring(normalized.length() - suffixCharacters);
     }
 
     @SuppressWarnings("unchecked")
