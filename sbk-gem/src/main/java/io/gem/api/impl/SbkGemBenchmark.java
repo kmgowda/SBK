@@ -80,6 +80,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     @GuardedBy("this")
     private boolean sbmStarted;
 
+    private CompletableFuture<Void> sbmCompletion;
     private volatile boolean remoteCommandsCompleted;
 
     /**
@@ -99,6 +100,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         this.retFuture = new CompletableFuture<>();
         this.state = State.BEGIN;
         this.sbmStarted = false;
+        this.sbmCompletion = null;
         this.remoteCommandsCompleted = false;
         final ConnectionConfig[] connections = params.getConnections();
         if (config.fork) {
@@ -189,7 +191,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         synchronized (this) {
             sbmStarted = true;
         }
-        sbmBenchmark.start();
+        sbmCompletion = sbmBenchmark.start();
 
         // Start remote SBK instances
         for (int i = 0; i < nodes.length; i++) {
@@ -772,6 +774,28 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
     }
 
+    private static Throwable completedFutureFailure(CompletableFuture<?> future) {
+        if (future == null) {
+            return null;
+        }
+        try {
+            future.join();
+            return null;
+        } catch (CompletionException | CancellationException exception) {
+            return unwrapCompletionFailure(exception);
+        }
+    }
+
+    static Throwable combineTerminalFailures(Throwable primary, Throwable additional) {
+        if (primary == null) {
+            return additional;
+        }
+        if (additional != null && additional != primary) {
+            primary.addSuppressed(additional);
+        }
+        return primary;
+    }
+
     static RemoteResponse remoteCommandResult(String host, SshResponse response, Throwable failure) {
         if (failure == null && response != null) {
             final RemoteExecutionStatus status = response.returnCode == 0
@@ -879,6 +903,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     private void shutdown(Throwable ex) {
         if (state != State.END) {
             state = State.END;
+            Throwable terminalFailure = ex;
             int maximumRegisteredClients = -1;
             if (params.isDeleteAfter()) {
                 try {
@@ -896,6 +921,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 maximumRegisteredClients = sbmBenchmark.getMaximumRegisteredClients();
                 sbmBenchmark.abortPendingRegistrations("SBK-GEM: Distributed benchmark is shutting down");
                 sbmBenchmark.stop();
+                terminalFailure = combineTerminalFailures(terminalFailure,
+                        completedFutureFailure(sbmCompletion));
                 sbmStarted = false;
             }
             /*
@@ -908,9 +935,9 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 SbkGem.printRemoteResults(remoteResults, false, maximumRegisteredClients);
             }
             executor.shutdown();
-            if (ex != null) {
-                Printer.log.warn("SBK GEM Benchmark Shutdown with Exception " + ex);
-                retFuture.completeExceptionally(ex);
+            if (terminalFailure != null) {
+                Printer.log.warn("SBK GEM Benchmark Shutdown with Exception " + terminalFailure);
+                retFuture.completeExceptionally(terminalFailure);
             } else {
                 Printer.log.info("SBK GEM Benchmark Shutdown");
                 retFuture.complete(remoteResults);

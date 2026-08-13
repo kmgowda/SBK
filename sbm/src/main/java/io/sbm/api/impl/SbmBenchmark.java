@@ -26,6 +26,7 @@ import io.sbm.logger.RamLogger;
 import io.sbm.api.SbmPeriodicRecorder;
 import io.sbm.params.RamParameterOptions;
 import io.sbk.system.Printer;
+import io.sbp.grpc.ClientFailure;
 import io.state.State;
 import io.time.Time;
 import lombok.Synchronized;
@@ -33,6 +34,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -231,14 +233,40 @@ final public class SbmBenchmark implements Benchmark {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            final Throwable terminalFailure = terminalFailure(failure, service.getClientFailures());
             Printer.log.info("SBM Shutdown");
-            if (failure == null) {
+            if (terminalFailure == null) {
                 retFuture.complete(null);
             } else {
-                Printer.log.error("SBM latency aggregation failed", failure);
-                retFuture.completeExceptionally(failure);
+                Printer.log.error("SBM benchmark failed", terminalFailure);
+                retFuture.completeExceptionally(terminalFailure);
             }
         }
+    }
+
+    /**
+     * Combines local aggregation failure with terminal failures reported by SBK clients.
+     *
+     * <p>This runs after latency ingestion has stopped and the aggregate has drained. A local
+     * SBM failure remains authoritative. Otherwise, the first client report is primary and
+     * subsequent reports are attached in report order.
+     *
+     * @param localFailure local SBM aggregation failure, or {@code null}
+     * @param clientFailures terminal client reports in receipt order
+     * @return combined terminal failure, or {@code null} when the run succeeded
+     */
+    static Throwable terminalFailure(Throwable localFailure, List<ClientFailure> clientFailures) {
+        Throwable result = localFailure;
+        for (ClientFailure report : clientFailures) {
+            final IOException clientFailure = new IOException("SBM client " + report.getClientID()
+                    + " (" + report.getComponent() + ") reported terminal failure: " + report.getMessage());
+            if (result == null) {
+                result = clientFailure;
+            } else {
+                result.addSuppressed(clientFailure);
+            }
+        }
+        return result;
     }
 
 

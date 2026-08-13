@@ -23,6 +23,7 @@ import java.util.concurrent.CancellationException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -155,5 +156,24 @@ final class SbkGemBenchmarkTest {
         assertEquals("INCOMPLETE", SbkGem.distributedRunStatus(mixed, 2));
         assertEquals("INCOMPLETE", SbkGem.distributedRunStatus(successful, 1));
         assertEquals("SUCCESS", SbkGem.distributedRunStatus(successful, 2));
+    }
+
+    @Test
+    void failsDistributedRunWhenOnlySbmReportsFailure() {
+        final IOException sbmFailure = new IOException("SBM client reported terminal failure");
+
+        assertSame(sbmFailure, SbkGemBenchmark.combineTerminalFailures(null, sbmFailure));
+    }
+
+    @Test
+    void keepsRemoteFailurePrimaryAndAttachesSbmFailure() {
+        final IOException remoteFailure = new IOException("remote command failed");
+        final IOException sbmFailure = new IOException("SBM client reported terminal failure");
+
+        final Throwable failure = SbkGemBenchmark.combineTerminalFailures(remoteFailure, sbmFailure);
+
+        assertSame(remoteFailure, failure);
+        assertEquals(1, failure.getSuppressed().length);
+        assertSame(sbmFailure, failure.getSuppressed()[0]);
     }
 }
