@@ -79,4 +79,17 @@ public interface Logger extends PerformanceLogger {
 
     }
 
+    /**
+     * Reports a terminal benchmark failure before the logger transport is closed.
+     *
+     * <p>Implementations that do not provide a control-plane transport may retain
+     * this no-op. Reporting must be best effort and must not replace the original
+     * benchmark exception.
+     *
+     * @param failure terminal benchmark failure
+     */
+    default void reportFailure(Throwable failure) {
+
+    }
+
 }

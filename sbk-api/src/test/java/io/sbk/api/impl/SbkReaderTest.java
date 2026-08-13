@@ -18,13 +18,18 @@ import io.time.NanoSeconds;
 import org.junit.jupiter.api.Test;
 
 import java.io.EOFException;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests driver-specific reader completion signals.
@@ -70,10 +75,31 @@ final class SbkReaderTest {
         }
     }
 
+    @Test
+    void propagatesStorageFailure() throws Exception {
+        final DataReader<Object> reader = readerThatFails();
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final TestSystemLogger logger = new TestSystemLogger();
+
+        try {
+            final ExecutionException failure = assertThrows(ExecutionException.class,
+                    () -> createReader(reader, logger, executor).run(1, 0).get(2, TimeUnit.SECONDS));
+
+            assertInstanceOf(IOException.class, failure.getCause());
+            assertEquals(0, logger.readersCount());
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
     private static SbkReader createReader(DataReader<Object> reader, ExecutorService executor) throws Exception {
+        return createReader(reader, new SystemLogger(), executor);
+    }
+
+    private static SbkReader createReader(DataReader<Object> reader, SystemLogger logger,
+                                          ExecutorService executor) throws Exception {
         final SbkParameters params = new SbkParameters("reader-completion-test");
         params.parseArgs(new String[]{"-readers", "1", "-size", "10", "-seconds", "1"});
-        final SystemLogger logger = new SystemLogger();
         return new SbkReader(0, params, CHANNEL, null, new NanoSeconds(), reader,
                 logger, null, executor);
     }
@@ -104,5 +130,24 @@ final class SbkReaderTest {
             public void close() {
             }
         };
+    }
+
+    private static Reader<Object> readerThatFails() {
+        return new Reader<>() {
+            @Override
+            public Object read() throws IOException {
+                throw new IOException("Disk I/O error");
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+    }
+
+    private static final class TestSystemLogger extends SystemLogger {
+        private int readersCount() {
+            return getReadersCount();
+        }
     }
 }

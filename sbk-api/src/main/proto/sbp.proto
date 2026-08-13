@@ -29,6 +29,7 @@ service Service {
   rpc getConfig (google.protobuf.Empty) returns (Config) {}
   rpc registerClient (Config) returns (ClientID) {}
   rpc streamLatencies (stream MessageLatenciesRecord) returns (google.protobuf.Empty) {}
+  rpc reportClientFailure (ClientFailure) returns (google.protobuf.Empty) {}
   rpc closeClient (ClientID) returns (google.protobuf.Empty) {}
 }
 
@@ -65,6 +66,12 @@ message Config {
 
 message ClientID {
   int64 id = 1;
+}
+
+message ClientFailure {
+  int64 clientID = 1;
+  string component = 2;
+  string message = 3;
 }
 
 

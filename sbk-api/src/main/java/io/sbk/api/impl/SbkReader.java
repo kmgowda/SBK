@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -114,7 +115,8 @@ final public class SbkReader extends Worker implements RunBenchmark {
                 if (Thread.currentThread().isInterrupted()) {
                     Printer.log.info("Reader " + id + " interrupted during shutdown");
                 } else {
-                    ex.printStackTrace();
+                    Printer.log.error("Reader " + id + " failed", ex);
+                    throw new CompletionException(ex);
                 }
             } finally {
                 rCount.decrementReaders();

@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -108,7 +109,8 @@ final public class SbkWriter extends Worker implements RunBenchmark {
                 if (Thread.currentThread().isInterrupted()) {
                     Printer.log.info("Writer " + id + " interrupted during shutdown");
                 } else {
-                    Printer.log.warn("Writer " + id + " exited after storage error: " + ex);
+                    Printer.log.error("Writer " + id + " failed", ex);
+                    throw new CompletionException(ex);
                 }
             } finally {
                 wCount.decrementWriters();

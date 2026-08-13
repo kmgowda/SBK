@@ -19,12 +19,15 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests terminal storage failures reported by writer drivers.
@@ -46,21 +49,26 @@ final class SbkWriterTest {
         final AtomicInteger writeCalls = new AtomicInteger();
         final Writer<Object> driver = synchronousFailingWriter(writeCalls);
         final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final TestSystemLogger logger = new TestSystemLogger();
 
         try {
-            createWriter(driver, executor).run(0, 100).get(2, TimeUnit.SECONDS);
+            final ExecutionException failure = assertThrows(ExecutionException.class,
+                    () -> createWriter(driver, logger, executor).run(0, 100).get(2, TimeUnit.SECONDS));
 
+            assertInstanceOf(IOException.class, failure.getCause());
             assertEquals(1, writeCalls.get());
+            assertEquals(0, logger.writersCount());
         } finally {
             executor.shutdownNow();
         }
     }
 
-    private static SbkWriter createWriter(Writer<Object> writer, ExecutorService executor) throws Exception {
+    private static SbkWriter createWriter(Writer<Object> writer, SystemLogger logger,
+                                          ExecutorService executor) throws Exception {
         final SbkParameters params = new SbkParameters("writer-completion-test");
         params.parseArgs(new String[]{"-writers", "1", "-size", "10", "-records", "100"});
         return new SbkWriter(0, params, CHANNEL, new ObjectDataType(), new NanoSeconds(), writer,
-                new SystemLogger(), null, executor);
+                logger, null, executor);
     }
 
     private static Writer<Object> synchronousFailingWriter(AtomicInteger writeCalls) {
@@ -106,6 +114,12 @@ final class SbkWriterTest {
         @Override
         public int getWriteReadMinSize() {
             return 1;
+        }
+    }
+
+    private static final class TestSystemLogger extends SystemLogger {
+        private int writersCount() {
+            return getWritersCount();
         }
     }
 }

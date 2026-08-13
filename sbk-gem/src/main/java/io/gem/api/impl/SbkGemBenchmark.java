@@ -814,10 +814,24 @@ final public class SbkGemBenchmark implements GemBenchmark {
                     if (result.returnCode != RemoteResponse.UNKNOWN_RETURN_CODE) {
                         failures.append(" returned ").append(result.returnCode);
                     }
+                    final String diagnostic = diagnosticSummary(result.errOutput);
+                    if (!diagnostic.isEmpty()) {
+                        failures.append(": ").append(diagnostic);
+                    }
                 }
             }
         }
         return failures.isEmpty() ? null : new IOException("SBK-GEM: Remote SBK execution failed: " + failures);
+    }
+
+    private static String diagnosticSummary(String errorOutput) {
+        if (errorOutput == null || errorOutput.isBlank()) {
+            return "";
+        }
+        final String normalized = errorOutput.replaceAll("\\s+", " ").trim();
+        final int maximumLength = 512;
+        return normalized.length() <= maximumLength ? normalized
+                : "..." + normalized.substring(normalized.length() - maximumLength);
     }
 
     @SuppressWarnings("unchecked")

@@ -45,6 +45,20 @@ final class SbkGemBenchmarkTest {
         final IOException failure = SbkGemBenchmark.remoteCommandFailure(results);
         assertTrue(failure.getMessage().contains("node-a status EXIT_FAILURE returned 2"));
         assertTrue(failure.getMessage().contains("node-c status EXIT_FAILURE returned 17"));
+        assertTrue(failure.getMessage().contains("bad option"));
+        assertTrue(failure.getMessage().contains("failure"));
+    }
+
+    @Test
+    void includesRemoteSbkExceptionInAggregateFailure() {
+        final RemoteResponse[] results = {new RemoteResponse(1, "",
+                "java.util.concurrent.ExecutionException: java.io.IOException: HTTP 503 Service Unavailable\n"
+                        + "\tat io.sbk.Sbk.run(Sbk.java:117)", "node-a")};
+
+        final IOException failure = SbkGemBenchmark.remoteCommandFailure(results);
+
+        assertTrue(failure.getMessage().contains("HTTP 503 Service Unavailable"));
+        assertTrue(failure.getMessage().contains("node-a status EXIT_FAILURE returned 1"));
     }
 
     @Test

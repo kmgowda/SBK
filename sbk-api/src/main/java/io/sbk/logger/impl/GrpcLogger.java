@@ -24,6 +24,7 @@ import io.perl.exception.ExceptionHandler;
 import io.sbp.api.Sbp;
 import io.sbp.config.SbpVersion;
 import io.sbp.grpc.ClientID;
+import io.sbp.grpc.ClientFailure;
 import io.sbp.grpc.Config;
 import io.sbp.grpc.MessageLatenciesRecord;
 import io.sbp.grpc.ServiceGrpc;
@@ -35,6 +36,11 @@ import io.sbp.grpc.Version;
 import io.time.Time;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -45,6 +51,10 @@ public class GrpcLogger extends SystemLogger {
     private final static int MAXIMUM_PENDING_BATCHES = 8;
     private final static int MINIMUM_PORT = 1;
     private final static int MAXIMUM_PORT = 65535;
+    private final static int MAXIMUM_FAILURE_MESSAGE_CHARACTERS = 4096;
+    private final static int FAILURE_MESSAGE_PREFIX_CHARACTERS = 3072;
+    private final static String FAILURE_MESSAGE_TRUNCATION_MARKER = " ... [truncated] ... ";
+    private final static int FAILURE_REPORT_TIMEOUT_SECONDS = 3;
 
     private SbmHostConfig sbmHostConfig;
     private long clientID;
@@ -75,6 +85,63 @@ public class GrpcLogger extends SystemLogger {
     @Override
     public void setExceptionHandler(ExceptionHandler handler) {
         this.exceptionHandler = handler;
+    }
+
+    /**
+     * Sends a terminal SBK failure to SBM before closing the client channel.
+     *
+     * <p>The RPC is deliberately outside the latency stream. Failure reporting is
+     * best effort so an older SBM that does not implement this RPC cannot mask the
+     * original storage or worker exception.
+     *
+     * @param failure terminal benchmark failure
+     */
+    @Override
+    public void reportFailure(Throwable failure) {
+        if (blockingStub == null || failure == null) {
+            return;
+        }
+        final ClientFailure report = ClientFailure.newBuilder()
+                .setClientID(clientID)
+                .setComponent("SBK")
+                .setMessage(failureSummary(failure))
+                .build();
+        try {
+            blockingStub.withDeadlineAfter(FAILURE_REPORT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                    .reportClientFailure(report);
+        } catch (StatusRuntimeException exception) {
+            Printer.log.warn("Unable to report terminal SBK failure to SBM: "
+                    + exception.getStatus());
+        }
+    }
+
+    static String failureSummary(Throwable failure) {
+        Throwable cause = failure;
+        while ((cause instanceof CompletionException || cause instanceof ExecutionException)
+                && cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        final StringBuilder detail = new StringBuilder();
+        final Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        while (cause != null && visited.add(cause)) {
+            if (!detail.isEmpty()) {
+                detail.append(" -> caused by ");
+            }
+            detail.append(cause.getClass().getSimpleName());
+            if (cause.getMessage() != null && !cause.getMessage().isBlank()) {
+                detail.append(": ").append(cause.getMessage());
+            }
+            cause = cause.getCause();
+        }
+        final String normalized = detail.toString().replaceAll("\\s+", " ").trim();
+        if (normalized.length() <= MAXIMUM_FAILURE_MESSAGE_CHARACTERS) {
+            return normalized;
+        }
+        final int suffixCharacters = MAXIMUM_FAILURE_MESSAGE_CHARACTERS
+                - FAILURE_MESSAGE_PREFIX_CHARACTERS - FAILURE_MESSAGE_TRUNCATION_MARKER.length();
+        return normalized.substring(0, FAILURE_MESSAGE_PREFIX_CHARACTERS)
+                + FAILURE_MESSAGE_TRUNCATION_MARKER
+                + normalized.substring(normalized.length() - suffixCharacters);
     }
 
     /**

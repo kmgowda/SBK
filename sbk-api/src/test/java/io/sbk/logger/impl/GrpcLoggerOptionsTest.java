@@ -12,9 +12,13 @@ package io.sbk.logger.impl;
 import io.sbk.params.impl.SbkParameters;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.util.concurrent.CompletionException;
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Verifies fail-fast validation of the SBM endpoint used by {@link GrpcLogger}.
@@ -99,6 +103,40 @@ public final class GrpcLoggerOptionsTest {
                 "-sbm", "127.0.0.1", "-sbmport", "9717");
 
         assertDoesNotThrow(() -> logger.parseArgs(parameters));
+    }
+
+    @Test
+    public void unwrapsAndNormalizesTerminalFailureForSbm() {
+        final String summary = GrpcLogger.failureSummary(
+                new CompletionException(new IOException("HTTP 503\nService Unavailable")));
+
+        assertEquals("IOException: HTTP 503 Service Unavailable", summary);
+    }
+
+    @Test
+    public void includesTheTerminalFailureCauseChain() {
+        final IOException failure = new IOException("MinIO write failed",
+                new IllegalStateException("HTTP 503 Service Unavailable"));
+
+        final String summary = GrpcLogger.failureSummary(new CompletionException(failure));
+
+        assertEquals("IOException: MinIO write failed -> caused by "
+                + "IllegalStateException: HTTP 503 Service Unavailable", summary);
+    }
+
+    @Test
+    public void retainsFailurePrefixAndRootCauseTailWithinTheCharacterLimit() {
+        final String prefix = "MinIO request context ";
+        final String rootCause = "ROOT CAUSE: HTTP 503 Service Unavailable";
+        final IOException failure = new IOException(prefix + "x".repeat(5000),
+                new IllegalStateException(rootCause));
+
+        final String summary = GrpcLogger.failureSummary(failure);
+
+        assertEquals(4096, summary.length());
+        assertTrue(summary.startsWith("IOException: " + prefix));
+        assertTrue(summary.contains(" ... [truncated] ... "));
+        assertTrue(summary.endsWith("IllegalStateException: " + rootCause));
     }
 
     private static SbkParameters parameters(GrpcLogger logger, String... arguments)
