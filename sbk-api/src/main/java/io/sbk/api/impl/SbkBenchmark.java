@@ -478,6 +478,13 @@ final public class SbkBenchmark implements Benchmark {
             return;
         }
         state = State.END;
+        if (ex != null) {
+            try {
+                rwLogger.reportFailure(ex);
+            } catch (RuntimeException reportFailure) {
+                Printer.log.warn("Unable to report terminal SBK failure", reportFailure);
+            }
+        }
         executor.shutdownNow();
         if (params.getTotalSecondsToRun() > 0) {
             stopPerformanceRecorders();
@@ -498,13 +505,6 @@ final public class SbkBenchmark implements Benchmark {
         });
         if (params.getTotalSecondsToRun() <= 0) {
             stopPerformanceRecorders();
-        }
-        if (ex != null) {
-            try {
-                rwLogger.reportFailure(ex);
-            } catch (RuntimeException reportFailure) {
-                Printer.log.warn("Unable to report terminal SBK failure", reportFailure);
-            }
         }
         try {
             storage.closeStorage(params);
