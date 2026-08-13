@@ -11,7 +11,9 @@ package io.sbk.api.impl;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -63,5 +65,19 @@ final class SbkBenchmarkTest {
 
         readers.complete(null);
         assertTrue(allWorkers.isDone());
+    }
+
+    @Test
+    void requestsShutdownBeforePropagatingWorkerStartFailure() {
+        final IOException failure = new IOException("worker start failed");
+        final Throwable[] shutdownFailure = new Throwable[1];
+
+        final CompletionException exception = assertThrows(CompletionException.class,
+                () -> SbkBenchmark.startWorker(() -> {
+                    throw failure;
+                }, shutdown -> shutdownFailure[0] = shutdown));
+
+        assertEquals(failure, shutdownFailure[0]);
+        assertEquals(failure, exception.getCause());
     }
 }

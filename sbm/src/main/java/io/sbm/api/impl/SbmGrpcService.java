@@ -31,7 +31,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -48,13 +52,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * records to an {@link SbmRegistry} for queueing/processing.
  */
 final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
+    private static final int MAXIMUM_FAILURE_COMPONENT_CHARACTERS = 64;
+    private static final int MAXIMUM_FAILURE_MESSAGE_CHARACTERS = 4096;
     private final AtomicInteger connections;
     private final Config config;
     private final CountConnections countConnections;
     private final SbmRegistry registry;
     private final RamParameters params;
     private final List<PendingRegistration> pendingRegistrations;
-    private final List<ClientFailure> clientFailures;
+    private final Set<Long> registeredClientIDs;
+    private final Map<Long, ClientFailure> clientFailures;
     private boolean startReleased;
     private String registrationFailure;
     private int maximumRegisteredClients;
@@ -120,7 +127,8 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
         this.countConnections = countConnections;
         this.registry = registry;
         this.pendingRegistrations = new ArrayList<>();
-        this.clientFailures = new ArrayList<>();
+        this.registeredClientIDs = new HashSet<>();
+        this.clientFailures = new LinkedHashMap<>();
         this.startReleased = !coordinatedStart;
         this.registrationFailure = null;
         this.maximumRegisteredClients = 0;
@@ -198,6 +206,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
             return;
         }
         final ClientID clientID = ClientID.newBuilder().setId(registry.getID()).build();
+        registeredClientIDs.add(clientID.getId());
         countConnections.incrementConnections();
         maximumRegisteredClients = Math.max(maximumRegisteredClients, registered);
         if (startReleased) {
@@ -233,6 +242,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
         final int aborted = pendingRegistrations.size();
         for (PendingRegistration registration : pendingRegistrations) {
             registration.observer().onError(status.asRuntimeException());
+            registeredClientIDs.remove(registration.clientID().getId());
             countConnections.decrementConnections();
         }
         connections.addAndGet(-aborted);
@@ -287,11 +297,34 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     @Override
     public synchronized void reportClientFailure(ClientFailure request,
                                                   StreamObserver<Empty> responseObserver) {
-        clientFailures.add(request);
+        final long clientID = request.getClientID();
+        if (!registeredClientIDs.contains(clientID)) {
+            responseObserver.onError(Status.FAILED_PRECONDITION
+                    .withDescription("SBM terminal failure has an unregistered client ID")
+                    .asRuntimeException());
+            return;
+        }
+        if (!isValidFailureText(request.getComponent(), MAXIMUM_FAILURE_COMPONENT_CHARACTERS)
+                || !isValidFailureText(request.getMessage(), MAXIMUM_FAILURE_MESSAGE_CHARACTERS)) {
+            responseObserver.onError(Status.INVALID_ARGUMENT
+                    .withDescription("SBM terminal failure contains invalid or oversized text")
+                    .asRuntimeException());
+            return;
+        }
+        if (clientFailures.containsKey(clientID)) {
+            acknowledge(responseObserver);
+            return;
+        }
+        if (clientFailures.size() >= params.getMaxConnections()) {
+            responseObserver.onError(Status.RESOURCE_EXHAUSTED
+                    .withDescription("SBM terminal failure retention limit reached")
+                    .asRuntimeException());
+            return;
+        }
+        clientFailures.put(clientID, request);
         Printer.log.error("SBM received terminal failure from " + request.getComponent()
-                + " client " + request.getClientID() + ": " + request.getMessage());
-        responseObserver.onNext(Empty.getDefaultInstance());
-        responseObserver.onCompleted();
+                + " client " + clientID + ": " + request.getMessage());
+        acknowledge(responseObserver);
     }
 
     /**
@@ -300,7 +333,19 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
      * @return terminal client-failure reports
      */
     public synchronized List<ClientFailure> getClientFailures() {
-        return List.copyOf(clientFailures);
+        return List.copyOf(clientFailures.values());
+    }
+
+    private static boolean isValidFailureText(String value, int maximumCharacters) {
+        if (value.isBlank() || value.length() > maximumCharacters) {
+            return false;
+        }
+        return value.chars().noneMatch(Character::isISOControl);
+    }
+
+    private static void acknowledge(StreamObserver<Empty> responseObserver) {
+        responseObserver.onNext(Empty.getDefaultInstance());
+        responseObserver.onCompleted();
     }
 
 
@@ -381,9 +426,10 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     }
 
     @Override
-    public void closeClient(io.sbp.grpc.ClientID request,
-                            io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+    public synchronized void closeClient(io.sbp.grpc.ClientID request,
+                                         io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         // Decrement counters upon client disconnect and acknowledge
+        registeredClientIDs.remove(request.getId());
         countConnections.decrementConnections();
         connections.decrementAndGet();
         if (responseObserver != null) {

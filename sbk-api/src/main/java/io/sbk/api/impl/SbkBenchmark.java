@@ -43,6 +43,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -283,19 +284,19 @@ final public class SbkBenchmark implements Benchmark {
                 while (i < params.getWritersCount() && doWork) {
                     final int stepCnt = Math.min(params.getWritersStep(), params.getWritersCount() - i);
                     for (int j = 0; j < stepCnt; j++) {
-                        try {
-                            CompletableFuture<Void> ret = sbkWriters.get(i + j).run(secondsToRun,
+                        final int workerIndex = i + j;
+                        final long workerSecondsToRun = secondsToRun;
+                        CompletableFuture<Void> ret = startWorker(
+                                () -> sbkWriters.get(workerIndex).run(workerSecondsToRun,
                                     recordsForWorker(params.getTotalRecords(),
-                                            params.getWritersCount(), i + j));
-                            ret.whenComplete((ignored, failure) -> {
-                                if (failure != null) {
-                                    requestShutdown(failure);
-                                }
-                            });
-                            writeFutures.add(ret);
-                        } catch (IOException e) {
-                            throw new CompletionException(e);
-                        }
+                                            params.getWritersCount(), workerIndex)),
+                                this::requestShutdown);
+                        ret.whenComplete((ignored, failure) -> {
+                            if (failure != null) {
+                                requestShutdown(failure);
+                            }
+                        });
+                        writeFutures.add(ret);
                     }
                     i += params.getWritersStep();
                     if (params.getWritersStepSeconds() > 0 && i < params.getWritersCount()) {
@@ -333,19 +334,19 @@ final public class SbkBenchmark implements Benchmark {
                 while (i < params.getReadersCount() && doWork) {
                     int stepCnt = Math.min(params.getReadersStep(), params.getReadersCount() - i);
                     for (int j = 0; j < stepCnt; j++) {
-                        try {
-                            CompletableFuture<Void> ret = sbkReaders.get(i + j).run(secondsToRun,
+                        final int workerIndex = i + j;
+                        final long workerSecondsToRun = secondsToRun;
+                        CompletableFuture<Void> ret = startWorker(
+                                () -> sbkReaders.get(workerIndex).run(workerSecondsToRun,
                                     recordsForWorker(params.getTotalRecords(),
-                                            params.getReadersCount(), i + j));
-                            ret.whenComplete((ignored, failure) -> {
-                                if (failure != null) {
-                                    requestShutdown(failure);
-                                }
-                            });
-                            readFutures.add(ret);
-                        } catch (IOException e) {
-                            throw new CompletionException(e);
-                        }
+                                            params.getReadersCount(), workerIndex)),
+                                this::requestShutdown);
+                        ret.whenComplete((ignored, failure) -> {
+                            if (failure != null) {
+                                requestShutdown(failure);
+                            }
+                        });
+                        readFutures.add(ret);
                     }
                     i += params.getReadersStep();
                     if (params.getReadersStepSeconds() > 0 && i < params.getReadersCount()) {
@@ -421,6 +422,34 @@ final public class SbkBenchmark implements Benchmark {
             return writerWorkers;
         }
         throw new IllegalArgumentException("No writer or reader workers");
+    }
+
+    /**
+     * Starts one worker and requests benchmark shutdown if admission fails synchronously.
+     *
+     * <p>This is a worker-lifecycle boundary and is not invoked for each record.
+     *
+     * @param starter worker-start operation
+     * @param shutdownRequest shutdown callback
+     * @return asynchronous worker completion
+     * @throws CompletionException when worker admission fails
+     */
+    static CompletableFuture<Void> startWorker(WorkerStarter starter,
+                                               Consumer<Throwable> shutdownRequest) {
+        try {
+            return starter.start();
+        } catch (IOException exception) {
+            shutdownRequest.accept(exception);
+            throw new CompletionException(exception);
+        }
+    }
+
+    /**
+     * Starts a worker whose admission can fail with an I/O exception.
+     */
+    @FunctionalInterface
+    interface WorkerStarter {
+        CompletableFuture<Void> start() throws IOException;
     }
 
     /**

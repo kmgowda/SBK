@@ -214,8 +214,11 @@ final class SbmGrpcServiceTest {
     void recordsAndAcknowledgesTerminalClientFailure() throws Exception {
         final SbmParameters params = new SbmParameters("test", 0, 1, 0, null);
         params.parseArgs(new String[]{"-class", "file", "-action", "r"});
+        final SbmRegistry registry = mock(SbmRegistry.class);
+        when(registry.getID()).thenReturn(7L);
         final SbmGrpcService service = new SbmGrpcService(params, new MilliSeconds(), 0, 1000,
-                mock(CountConnections.class), mock(SbmRegistry.class));
+                mock(CountConnections.class), registry);
+        service.registerClient(Config.getDefaultInstance(), new CapturingObserver());
         final CapturingEmptyObserver response = new CapturingEmptyObserver();
         final ClientFailure report = ClientFailure.newBuilder()
                 .setClientID(7)
@@ -228,6 +231,93 @@ final class SbmGrpcServiceTest {
         assertEquals(List.of(report), service.getClientFailures());
         assertEquals(1, response.values);
         assertTrue(response.completed);
+    }
+
+    @Test
+    void rejectsTerminalFailureFromUnregisteredClient() throws Exception {
+        final SbmParameters params = new SbmParameters("test", 0, 1, 0, null);
+        params.parseArgs(new String[]{"-class", "file", "-action", "r"});
+        final SbmGrpcService service = new SbmGrpcService(params, new MilliSeconds(), 0, 1000,
+                mock(CountConnections.class), mock(SbmRegistry.class));
+        final CapturingEmptyObserver response = new CapturingEmptyObserver();
+
+        service.reportClientFailure(clientFailure(7, "SBK", "storage failure"), response);
+
+        assertEquals(Status.Code.FAILED_PRECONDITION,
+                Status.fromThrowable(response.failure).getCode());
+        assertTrue(service.getClientFailures().isEmpty());
+    }
+
+    @Test
+    void rejectsOversizedOrControlledTerminalFailureText() throws Exception {
+        final SbmParameters params = new SbmParameters("test", 0, 1, 0, null);
+        params.parseArgs(new String[]{"-class", "file", "-action", "r"});
+        final SbmRegistry registry = mock(SbmRegistry.class);
+        when(registry.getID()).thenReturn(7L);
+        final SbmGrpcService service = new SbmGrpcService(params, new MilliSeconds(), 0, 1000,
+                mock(CountConnections.class), registry);
+        service.registerClient(Config.getDefaultInstance(), new CapturingObserver());
+        final CapturingEmptyObserver oversizedComponent = new CapturingEmptyObserver();
+        final CapturingEmptyObserver oversizedMessage = new CapturingEmptyObserver();
+        final CapturingEmptyObserver controlledText = new CapturingEmptyObserver();
+
+        service.reportClientFailure(clientFailure(7, "x".repeat(65), "storage failure"),
+                oversizedComponent);
+        service.reportClientFailure(clientFailure(7, "SBK", "x".repeat(4097)),
+                oversizedMessage);
+        service.reportClientFailure(clientFailure(7, "SBK\nforged-entry", "storage failure"),
+                controlledText);
+
+        assertEquals(Status.Code.INVALID_ARGUMENT,
+                Status.fromThrowable(oversizedComponent.failure).getCode());
+        assertEquals(Status.Code.INVALID_ARGUMENT,
+                Status.fromThrowable(oversizedMessage.failure).getCode());
+        assertEquals(Status.Code.INVALID_ARGUMENT,
+                Status.fromThrowable(controlledText.failure).getCode());
+        assertTrue(service.getClientFailures().isEmpty());
+    }
+
+    @Test
+    void retainsAndLogsOnlyTheFirstTerminalFailurePerClient() throws Exception {
+        final SbmParameters params = new SbmParameters("test", 0, 1, 0, null);
+        params.parseArgs(new String[]{"-class", "file", "-action", "r"});
+        final SbmRegistry registry = mock(SbmRegistry.class);
+        when(registry.getID()).thenReturn(7L);
+        final SbmGrpcService service = new SbmGrpcService(params, new MilliSeconds(), 0, 1000,
+                mock(CountConnections.class), registry);
+        service.registerClient(Config.getDefaultInstance(), new CapturingObserver());
+        final ClientFailure first = clientFailure(7, "SBK", "first failure");
+        final CapturingEmptyObserver firstResponse = new CapturingEmptyObserver();
+        final CapturingEmptyObserver duplicateResponse = new CapturingEmptyObserver();
+
+        service.reportClientFailure(first, firstResponse);
+        service.reportClientFailure(clientFailure(7, "SBK", "duplicate failure"), duplicateResponse);
+
+        assertEquals(List.of(first), service.getClientFailures());
+        assertTrue(firstResponse.completed);
+        assertTrue(duplicateResponse.completed);
+    }
+
+    @Test
+    void boundsTerminalFailureRetentionAcrossSequentialClients() throws Exception {
+        final SbmParameters params = new SbmParameters("test", 0, 1, 0, null);
+        params.parseArgs(new String[]{"-class", "file", "-action", "r", "-max", "1"});
+        final SbmRegistry registry = mock(SbmRegistry.class);
+        when(registry.getID()).thenReturn(7L, 8L);
+        final SbmGrpcService service = new SbmGrpcService(params, new MilliSeconds(), 0, 1000,
+                mock(CountConnections.class), registry);
+        service.registerClient(Config.getDefaultInstance(), new CapturingObserver());
+        final ClientFailure retained = clientFailure(7, "SBK", "first failure");
+        service.reportClientFailure(retained, new CapturingEmptyObserver());
+        service.closeClient(ClientID.newBuilder().setId(7).build(), new CapturingEmptyObserver());
+        service.registerClient(Config.getDefaultInstance(), new CapturingObserver());
+        final CapturingEmptyObserver overflow = new CapturingEmptyObserver();
+
+        service.reportClientFailure(clientFailure(8, "SBK", "second failure"), overflow);
+
+        assertEquals(Status.Code.RESOURCE_EXHAUSTED,
+                Status.fromThrowable(overflow.failure).getCode());
+        assertEquals(List.of(retained), service.getClientFailures());
     }
 
     @Test
@@ -288,6 +378,14 @@ final class SbmGrpcServiceTest {
 
         assertEquals(Status.Code.INVALID_ARGUMENT,
                 Status.fromThrowable(response.failure).getCode());
+    }
+
+    private static ClientFailure clientFailure(long clientID, String component, String message) {
+        return ClientFailure.newBuilder()
+                .setClientID(clientID)
+                .setComponent(component)
+                .setMessage(message)
+                .build();
     }
 
     private static final class CapturingObserver implements StreamObserver<ClientID> {

@@ -105,6 +105,9 @@ public final class GrpcLoggerOptionsTest {
         assertDoesNotThrow(() -> logger.parseArgs(parameters));
     }
 
+    /**
+     * Terminal failure summaries unwrap asynchronous wrappers and normalize whitespace.
+     */
     @Test
     public void unwrapsAndNormalizesTerminalFailureForSbm() {
         final String summary = GrpcLogger.failureSummary(
@@ -113,6 +116,9 @@ public final class GrpcLoggerOptionsTest {
         assertEquals("IOException: HTTP 503 Service Unavailable", summary);
     }
 
+    /**
+     * Terminal failure summaries preserve the complete causal chain.
+     */
     @Test
     public void includesTheTerminalFailureCauseChain() {
         final IOException failure = new IOException("MinIO write failed",
@@ -124,6 +130,9 @@ public final class GrpcLoggerOptionsTest {
                 + "IllegalStateException: HTTP 503 Service Unavailable", summary);
     }
 
+    /**
+     * Long failure summaries retain context and the root cause within the protocol limit.
+     */
     @Test
     public void retainsFailurePrefixAndRootCauseTailWithinTheCharacterLimit() {
         final String prefix = "MinIO request context ";
