@@ -126,9 +126,8 @@ final class WebConsoleServerTest {
                 Duration.ofMillis(75))) {
             assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
                     MAPPER.writeValueAsString(run("abandoned-run"))).statusCode());
-            Thread.sleep(800);
 
-            final String runs = get(baseUri.resolve("/api/v1/runs")).body();
+            final String runs = waitForRunsContaining(baseUri, "\"abandoned\":true");
             assertTrue(runs.contains("\"runId\":\"active-run\",\"name\""));
             assertTrue(runs.contains("\"runId\":\"abandoned-run\",\"name\""));
             assertTrue(runs.contains("\"abandoned\":true"));
@@ -377,6 +376,18 @@ final class WebConsoleServerTest {
             }
         }
         return snapshots;
+    }
+
+    private static String waitForRunsContaining(URI baseUri, String expected) throws Exception {
+        final long deadline = System.nanoTime() + Duration.ofSeconds(3).toNanos();
+        String runs = "";
+        while (!runs.contains(expected) && System.nanoTime() < deadline) {
+            runs = get(baseUri.resolve("/api/v1/runs")).body();
+            if (!runs.contains(expected)) {
+                Thread.sleep(25);
+            }
+        }
+        return runs;
     }
 
     private static HttpResponse<String> get(URI uri) throws Exception {
