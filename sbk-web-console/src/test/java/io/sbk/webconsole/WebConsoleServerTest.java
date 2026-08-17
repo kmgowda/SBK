@@ -380,14 +380,13 @@ final class WebConsoleServerTest {
 
     private static String waitForRunsContaining(URI baseUri, String expected) throws Exception {
         final long deadline = System.nanoTime() + Duration.ofSeconds(3).toNanos();
-        String runs = "";
-        while (!runs.contains(expected) && System.nanoTime() < deadline) {
-            runs = get(baseUri.resolve("/api/v1/runs")).body();
-            if (!runs.contains(expected)) {
-                Thread.sleep(25);
+        while (true) {
+            final String runs = get(baseUri.resolve("/api/v1/runs")).body();
+            if (runs.contains(expected) || System.nanoTime() >= deadline) {
+                return runs;
             }
+            Thread.sleep(25);
         }
-        return runs;
     }
 
     private static HttpResponse<String> get(URI uri) throws Exception {
