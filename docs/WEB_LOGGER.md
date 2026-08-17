@@ -101,6 +101,12 @@ web console on the configured port is never treated as the SBK web console. When
 existing idle timeout remains in effect; changing `-webtimeoutminutes` requires starting a new console process,
 typically on a different `-webport` or after the old process exits.
 
+The application logs whether it is starting a new Web Console or using the compatible process already listening on
+the port. An automatically started background process appends stdout and stderr to
+`$HOME/.sbk/logs/sbk-web-console-<port>.log`. That file records server startup, each WebLogger connection or
+completion, browser/client connection-count changes, abandoned run leases, and the final shutdown reason and counts.
+The port in the filename keeps independent consoles separate.
+
 When `-boardname` is omitted or blank, the logger generates a readable name from the application and storage class,
 such as `SBK File`, `SBM MinIO`, or `SBK-GEM Kafka`. Every run also has an independent UUID used by its direct URL,
 history, heartbeat, and event stream, so display names do not need to be unique.

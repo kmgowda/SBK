@@ -37,6 +37,7 @@ application {
 dependencies {
     implementation "tools.jackson.core:jackson-databind:$jacksonVersion"
     implementation "org.jetbrains:annotations:$jetbrainVersion"
+    runtimeOnly "org.slf4j:slf4j-simple:$slf4jVersion"
 }
 
 tasks.register('updateDocs') {

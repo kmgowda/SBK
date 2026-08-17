@@ -12,6 +12,8 @@ package io.sbk.webconsole;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import tools.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,6 +51,7 @@ public final class WebConsoleServer implements AutoCloseable {
     public static final int API_VERSION = 5;
     /** Time an unused web console remains available after its benchmark exits. */
     public static final Duration DEFAULT_IDLE_TIMEOUT = Duration.ofMinutes(1);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebConsoleServer.class);
     private static final Duration DEFAULT_HEARTBEAT_INTERVAL = Duration.ofSeconds(5);
     private static final String API_PREFIX = "/api/v1/";
     private static final String RESOURCE_PREFIX = "/webconsole/";
@@ -141,6 +144,8 @@ public final class WebConsoleServer implements AutoCloseable {
         synchronized (lifecycleLock) {
             scheduleIdleShutdownIfUnused();
         }
+        LOGGER.info("SBK Web Console started on port {}: retention={}, idle timeout={} minute(s)",
+                server.getAddress().getPort(), retention, idleTimeout.toMinutes());
     }
 
     /**
@@ -163,18 +168,28 @@ public final class WebConsoleServer implements AutoCloseable {
 
     @Override
     public void close() {
+        close("shutdown requested");
+    }
+
+    private void close(String reason) {
         if (!closed.compareAndSet(false, true)) {
             return;
         }
+        final int activeWebLoggers;
+        final int connectedBrowsers;
         synchronized (lifecycleLock) {
             shuttingDown = true;
             cancelIdleShutdown();
             runs.values().forEach(this::cancelRunExpiry);
+            activeWebLoggers = activeRunIds.size();
+            connectedBrowsers = browsers.size();
         }
         runs.values().forEach(RunState::close);
         server.stop(0);
         scheduler.shutdown();
         executor.close();
+        LOGGER.info("SBK Web Console exited: reason={}, active WebLoggers={}, connected browsers={}, retained runs={}",
+                reason, activeWebLoggers, connectedBrowsers, runs.size());
         termination.countDown();
     }
 
@@ -364,6 +379,8 @@ public final class WebConsoleServer implements AutoCloseable {
     }
 
     private String register(WebConsoleRun run) {
+        final int activeWebLoggers;
+        final int connectedBrowsers;
         synchronized (lifecycleLock) {
             if (shuttingDown) {
                 return "SBK Local Web Console is shutting down; retry the benchmark";
@@ -375,8 +392,13 @@ public final class WebConsoleServer implements AutoCloseable {
             cancelIdleShutdown();
             activeRunIds.add(run.runId());
             scheduleRunExpiry(state);
-            return null;
+            activeWebLoggers = activeRunIds.size();
+            connectedBrowsers = browsers.size();
         }
+        LOGGER.info("WebLogger connected: runId={}, board={}, source={}; active WebLoggers={}, "
+                        + "connected browsers={}", run.runId(), run.name(), run.source(), activeWebLoggers,
+                connectedBrowsers);
+        return null;
     }
 
     private boolean benchmarkSeen(String runId) {
@@ -395,29 +417,57 @@ public final class WebConsoleServer implements AutoCloseable {
     }
 
     private void benchmarkCompleted(String runId) {
+        int activeWebLoggers = 0;
+        int connectedBrowsers = 0;
+        boolean disconnected = false;
         synchronized (lifecycleLock) {
             if (activeRunIds.remove(runId)) {
                 cancelRunExpiry(runs.get(runId));
                 scheduleIdleShutdownIfUnused();
+                activeWebLoggers = activeRunIds.size();
+                connectedBrowsers = browsers.size();
+                disconnected = true;
             }
+        }
+        if (disconnected) {
+            LOGGER.info("WebLogger disconnected: runId={}, status=completed; active WebLoggers={}, "
+                    + "connected browsers={}", runId, activeWebLoggers, connectedBrowsers);
         }
     }
 
     private void browserSeen(String browserId) {
+        final boolean connected;
+        final int activeWebLoggers;
+        final int connectedBrowsers;
         synchronized (lifecycleLock) {
-            browsers.put(browserId, System.currentTimeMillis());
+            connected = browsers.put(browserId, System.currentTimeMillis()) == null;
             if (activeRunIds.isEmpty()) {
                 scheduleIdleShutdownIfUnused();
             }
+            activeWebLoggers = activeRunIds.size();
+            connectedBrowsers = browsers.size();
+        }
+        if (connected) {
+            LOGGER.info("Web browser/client connected: browserId={}; active WebLoggers={}, connected browsers={}",
+                    browserId, activeWebLoggers, connectedBrowsers);
         }
     }
 
     private void browserGone(String browserId) {
+        final boolean disconnected;
+        final int activeWebLoggers;
+        final int connectedBrowsers;
         synchronized (lifecycleLock) {
-            browsers.remove(browserId);
+            disconnected = browsers.remove(browserId) != null;
             if (activeRunIds.isEmpty()) {
                 scheduleIdleShutdownIfUnused();
             }
+            activeWebLoggers = activeRunIds.size();
+            connectedBrowsers = browsers.size();
+        }
+        if (disconnected) {
+            LOGGER.info("Web browser/client disconnected: browserId={}; active WebLoggers={}, "
+                    + "connected browsers={}", browserId, activeWebLoggers, connectedBrowsers);
         }
     }
 
@@ -429,6 +479,10 @@ public final class WebConsoleServer implements AutoCloseable {
 
     private void expireRun(String runId) {
         boolean closeNow = false;
+        boolean abandoned = false;
+        int activeWebLoggers = 0;
+        int connectedBrowsers = 0;
+        int expiredBrowsers = 0;
         synchronized (lifecycleLock) {
             final RunState state = runs.get(runId);
             if (state != null) {
@@ -445,9 +499,11 @@ public final class WebConsoleServer implements AutoCloseable {
             if (state != null) {
                 state.abandon();
             }
-            activeRunIds.remove(runId);
+            abandoned = activeRunIds.remove(runId);
             if (activeRunIds.isEmpty()) {
+                final int previousBrowsers = browsers.size();
                 browsers.entrySet().removeIf(entry -> entry.getValue() <= expiry);
+                expiredBrowsers = previousBrowsers - browsers.size();
                 if (browsers.isEmpty()) {
                     shuttingDown = true;
                     closeNow = true;
@@ -455,9 +511,16 @@ public final class WebConsoleServer implements AutoCloseable {
                     scheduleIdleShutdownIfUnused();
                 }
             }
+            activeWebLoggers = activeRunIds.size();
+            connectedBrowsers = browsers.size();
         }
+        if (abandoned) {
+            LOGGER.info("WebLogger disconnected: runId={}, status=abandoned; active WebLoggers={}, "
+                    + "connected browsers={}", runId, activeWebLoggers, connectedBrowsers);
+        }
+        logExpiredBrowsers(expiredBrowsers, activeWebLoggers, connectedBrowsers);
         if (closeNow) {
-            close();
+            close("all WebLoggers disconnected and no browsers remain");
         }
     }
 
@@ -473,20 +536,32 @@ public final class WebConsoleServer implements AutoCloseable {
     }
 
     private void closeIfUnused() {
+        int expiredBrowsers;
         synchronized (lifecycleLock) {
             idleShutdown = null;
             if (!activeRunIds.isEmpty() || shuttingDown) {
                 return;
             }
             final long expiry = System.currentTimeMillis() - idleTimeout.toMillis();
+            final int previousBrowsers = browsers.size();
             browsers.entrySet().removeIf(entry -> entry.getValue() <= expiry);
+            expiredBrowsers = previousBrowsers - browsers.size();
             if (!browsers.isEmpty()) {
                 scheduleIdleShutdownIfUnused();
+                logExpiredBrowsers(expiredBrowsers, activeRunIds.size(), browsers.size());
                 return;
             }
             shuttingDown = true;
         }
-        close();
+        logExpiredBrowsers(expiredBrowsers, 0, 0);
+        close("idle timeout with no active WebLoggers or browsers");
+    }
+
+    private void logExpiredBrowsers(int expiredBrowsers, int activeWebLoggers, int connectedBrowsers) {
+        if (expiredBrowsers > 0) {
+            LOGGER.info("Expired {} inactive web browser/client connection(s); active WebLoggers={}, "
+                    + "connected browsers={}", expiredBrowsers, activeWebLoggers, connectedBrowsers);
+        }
     }
 
     private void cancelIdleShutdown() {

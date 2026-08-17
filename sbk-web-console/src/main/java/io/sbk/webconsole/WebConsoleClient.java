@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -91,8 +92,12 @@ public final class WebConsoleClient implements AutoCloseable {
             throw new IOException("Port " + config.port + " is not a compatible SBK Local Web Console");
         }
         if (health == Health.UNAVAILABLE) {
+            final Path logPath = backgroundLogPath(config.port);
+            LOGGER.info("Starting a new SBK Web Console on port {}. Background log: {}", config.port, logPath);
             startServer(config);
             waitUntilHealthy(httpClient, baseUri);
+        } else {
+            LOGGER.info("Using the existing SBK Web Console on port {}", config.port);
         }
         final WebConsoleClient client = new WebConsoleClient(httpClient, baseUri, config, run,
                 leaseHeartbeatInterval);
@@ -264,11 +269,24 @@ public final class WebConsoleClient implements AutoCloseable {
         command.add(Integer.toString(config.snapshotMinutes));
         command.add("-webtimeoutminutes");
         command.add(Integer.toString(config.timeoutMinutes));
+        final Path logPath = backgroundLogPath(config.port);
+        Files.createDirectories(Objects.requireNonNull(logPath.getParent()));
         final ProcessBuilder builder = new ProcessBuilder(command);
         builder.redirectInput(ProcessBuilder.Redirect.PIPE);
-        builder.redirectOutput(ProcessBuilder.Redirect.DISCARD);
-        builder.redirectError(ProcessBuilder.Redirect.DISCARD);
+        builder.redirectOutput(ProcessBuilder.Redirect.appendTo(logPath.toFile()));
+        builder.redirectError(ProcessBuilder.Redirect.appendTo(logPath.toFile()));
         builder.start();
+    }
+
+    /**
+     * Returns the persistent log used by an automatically started Web Console process.
+     *
+     * @param port Web Console HTTP port
+     * @return normalized background log path
+     */
+    static Path backgroundLogPath(int port) {
+        return Path.of(System.getProperty("user.home"), ".sbk", "logs",
+                "sbk-web-console-" + port + ".log").toAbsolutePath().normalize();
     }
 
     private static List<String> runtimeJvmArgs() {

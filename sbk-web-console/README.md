@@ -41,6 +41,11 @@ URL when routing and firewall rules permit. The service uses plain HTTP without 
 trusted benchmark network or use an SSH tunnel.
 `-webtimeoutminutes` sets the idle shutdown grace period in minutes and defaults to one minute.
 
+When a WebLogger starts the server in the background, stdout and stderr are appended to
+`$HOME/.sbk/logs/sbk-web-console-<port>.log`. The parent application reports whether it started this process or reused
+an existing compatible process. The background log records WebLogger and browser/client connection counts and the
+server's final exit reason.
+
 Run its verification suite with:
 
 ```bash

@@ -16,6 +16,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
 import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -211,7 +212,9 @@ final class WebConsoleServerTest {
 
     @Test
     void benchmarkConnectingDuringIdleGraceCancelsOriginalShutdown() throws Exception {
-        final Duration idleTimeout = Duration.ofSeconds(2);
+        // Leave enough startup grace for the first loopback request while SpotBugs and other Gradle workers
+        // compete for CPU in the full check task.
+        final Duration idleTimeout = Duration.ofSeconds(5);
         final WebConsoleServer server = new WebConsoleServer(0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
@@ -221,9 +224,9 @@ final class WebConsoleServerTest {
             first.publish(snapshot("first-grace-run", 1));
         }
 
-        Thread.sleep(1000);
+        Thread.sleep(2500);
         try (WebConsoleClient second = WebConsoleClient.connect(config(port), run("second-grace-run"))) {
-            Thread.sleep(1500);
+            Thread.sleep(3000);
             assertEquals(200, get(baseUri.resolve("/api/v1/health")).statusCode());
             second.publish(snapshot("second-grace-run", 2));
             assertEquals(1, waitForHistory(baseUri, "second-grace-run", 1).length);
@@ -356,6 +359,15 @@ final class WebConsoleServerTest {
     @Test
     void defaultIdleTimeoutIsOneMinute() {
         assertEquals(Duration.ofMinutes(1), WebConsoleServer.DEFAULT_IDLE_TIMEOUT);
+    }
+
+    @Test
+    void usesAStablePerPortBackgroundLogPath() {
+        final Path logPath = WebConsoleClient.backgroundLogPath(19720);
+
+        assertEquals("sbk-web-console-19720.log", logPath.getFileName().toString());
+        assertTrue(logPath.isAbsolute());
+        assertTrue(logPath.toString().contains(Path.of(".sbk", "logs").toString()));
     }
 
     @Test

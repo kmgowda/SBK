@@ -351,6 +351,9 @@ A later SBK process reuses a compatible server already on that port. Multiple SB
 benchmarks can publish concurrently to the same server; each receives a unique run URL and remains independently
 selectable in the browser. Completed graphs remain available while a browser is connected; after all benchmarks
 have finished and no browser has been connected for one minute by default, the server exits automatically.
+WebLogger reports whether it starts a new console or uses the existing process. Automatically started consoles append
+lifecycle, WebLogger count, browser/client count, and exit diagnostics to
+`$HOME/.sbk/logs/sbk-web-console-<port>.log`.
 Change the idle grace period with `-webtimeoutminutes N`. Snapshots and 15-second logger heartbeats
 renew the active-run lease. If a benchmark is killed without completing, the configured idle timeout
 without either signal marks only that run abandoned; other active runs continue unaffected. Use `-webopen false` on
