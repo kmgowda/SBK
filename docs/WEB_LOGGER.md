@@ -92,7 +92,7 @@ Logger options appear only after selecting the WebLogger class. Treat generated 
 |---|---:|---|
 | `-webhost HOST` | `0.0.0.0` | Address on which the plain HTTP Local Web Console server listens |
 | `-webport PORT` | `9720` | Local Web Console HTTP port |
-| `-webstart true\|false` | `true` | Start a compatible Local Web Console server when none is reachable |
+| `-webstart true\|false` | `true` | Start a compatible Local Web Console server when a local host is configured and none is reachable |
 | `-webopen true\|false` | `true` | Ask the local desktop to open the Local Web Console run URL |
 | `-webminutes N` | `180` | Minutes of interval snapshots retained for each run (three hours by default) |
 | `-boardname NAME` | empty | Optional display name that identifies the benchmark board in the Local Web Console |
@@ -100,6 +100,11 @@ Logger options appear only after selecting the WebLogger class. Treat generated 
 `-webstart false` is useful when an operator manages the web console process separately. If no compatible
 server is available, SBK continues without live graphs and reports the reason. A different service or an older,
 incompatible web console on the configured port is never treated as the SBK web console.
+
+SBK, SBM, and SBK-GEM always probe the configured `-webhost` and reuse a compatible console already listening on
+the configured port. Automatic startup is attempted only when that host resolves to the current machine, including
+wildcard, loopback, hostname, and local-interface addresses. A remote `-webhost` is connection-only: if its console
+is unavailable, the benchmark continues without live graphs and never attempts to bind or start a local server.
 
 ## Server ownership and shutdown
 

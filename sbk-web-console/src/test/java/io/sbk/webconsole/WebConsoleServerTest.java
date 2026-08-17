@@ -12,14 +12,18 @@ package io.sbk.webconsole;
 import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -76,6 +80,28 @@ final class WebConsoleServerTest {
                         + "/api/v1/health")).statusCode());
             }
         }
+    }
+
+    @Test
+    void recognizesOnlyHostsAssignedToTheLocalMachineForAutomaticStartup() throws Exception {
+        assertTrue(WebConsoleClient.isLocalHost("0.0.0.0"));
+        assertTrue(WebConsoleClient.isLocalHost("localhost"));
+        assertTrue(WebConsoleClient.isLocalHost("127.0.0.1"));
+        assertTrue(WebConsoleClient.isLocalHost(InetAddress.getLocalHost().getHostName()));
+        for (NetworkInterface networkInterface : Collections.list(NetworkInterface.getNetworkInterfaces())) {
+            for (InetAddress address : Collections.list(networkInterface.getInetAddresses())) {
+                assertTrue(WebConsoleClient.isLocalHost(address.getHostAddress()), address::getHostAddress);
+            }
+        }
+        assertFalse(WebConsoleClient.isLocalHost("192.0.2.1"));
+
+        final WebConsoleConfig localConfig = config(9720);
+        WebConsoleClient.requireLocalAutomaticStartup(localConfig);
+        final WebConsoleConfig remoteConfig = config(9720);
+        remoteConfig.host = "192.0.2.1";
+        final IOException exception = assertThrows(IOException.class,
+                () -> WebConsoleClient.requireLocalAutomaticStartup(remoteConfig));
+        assertTrue(exception.getMessage().contains("automatic startup is supported only for a host on this machine"));
     }
 
     @Test

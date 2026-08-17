@@ -102,6 +102,7 @@ public final class WebConsoleClient implements AutoCloseable {
             if (!config.start) {
                 throw new IOException("SBK Local Web Console is unavailable and automatic startup is disabled");
             }
+            requireLocalAutomaticStartup(config);
             startServer(config);
             waitUntilHealthy(httpClient, baseUri);
         }
@@ -122,6 +123,26 @@ public final class WebConsoleClient implements AutoCloseable {
      */
     static String connectionHost(String host) {
         return "0.0.0.0".equals(host) ? "127.0.0.1" : host;
+    }
+
+    /**
+     * Determines whether a configured web console host belongs to this machine.
+     *
+     * @param host configured web console host or bind address
+     * @return {@code true} for wildcard, loopback, hostname, or interface addresses local to this machine
+     */
+    static boolean isLocalHost(String host) {
+        try {
+            for (InetAddress address : InetAddress.getAllByName(host)) {
+                if (address.isAnyLocalAddress() || address.isLoopbackAddress()
+                        || NetworkInterface.getByInetAddress(address) != null) {
+                    return true;
+                }
+            }
+        } catch (IOException ex) {
+            return false;
+        }
+        return false;
     }
 
     /**
@@ -293,6 +314,13 @@ public final class WebConsoleClient implements AutoCloseable {
         }
         throw new IOException("SBK Local Web Console did not become ready within "
                 + START_TIMEOUT.toSeconds() + " seconds");
+    }
+
+    static void requireLocalAutomaticStartup(WebConsoleConfig config) throws IOException {
+        if (!isLocalHost(config.host)) {
+            throw new IOException("Remote SBK Local Web Console " + config.host + ":" + config.port
+                    + " is unavailable; automatic startup is supported only for a host on this machine");
+        }
     }
 
     private static void startServer(WebConsoleConfig config) throws IOException {
