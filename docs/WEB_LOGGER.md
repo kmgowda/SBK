@@ -91,12 +91,15 @@ Logger options appear only after selecting the WebLogger class. Treat generated 
 |---|---:|---|
 | `-webport PORT` | `9720` | Local Web Console HTTP port |
 | `-webopen true\|false` | `true` | Ask the local desktop to open the Local Web Console run URL |
-| `-webminutes N` | `180` | Minutes of interval snapshots retained for each run (three hours by default) |
+| `-websnapshotminutes N` | `180` | Minutes of interval snapshots retained for each run (three hours by default) |
+| `-webtimeoutminutes N` | `1` | Idle minutes without an active benchmark or browser before the Local Web Console exits |
 | `-boardname NAME` | empty | Optional display name that identifies the benchmark board in the Local Web Console |
 
 SBK, SBM, and SBK-GEM always probe `127.0.0.1` on the configured port. They reuse a compatible console already
 listening there and otherwise start `SbkWebConsoleMain` automatically. A different service or an older, incompatible
-web console on the configured port is never treated as the SBK web console.
+web console on the configured port is never treated as the SBK web console. When a compatible console is reused, its
+existing idle timeout remains in effect; changing `-webtimeoutminutes` requires starting a new console process,
+typically on a different `-webport` or after the old process exits.
 
 ## Server ownership and shutdown
 
@@ -114,16 +117,18 @@ The server lifecycle is:
    lease, so normal reporting traffic needs no separate heartbeat.
 4. When the benchmark finishes normally, its bounded interval history remains in server memory. Completion is
    tracked as run metadata rather than as a cumulative performance snapshot.
-5. If the benchmark process disappears without completing its run, one minute without a snapshot or logger
-   heartbeat marks the run as abandoned and releases web console ownership. A new benchmark can then register.
+5. If the benchmark process disappears without completing its run, the configured idle timeout without a snapshot
+   or logger heartbeat marks the run as abandoned and releases web console ownership. A new benchmark can then
+   register.
 6. An open browser renews a separate lightweight lease every 15 seconds, keeping completed or abandoned graphs
    available.
-7. If a browser connects during the one-minute idle grace period, the pending shutdown is cancelled while that
+7. If a browser connects during the idle grace period, the pending shutdown is cancelled while that
    browser remains connected.
 8. If SBK, SBM, or SBK-GEM connects during the grace period, it becomes the active run and cancels the pending
    shutdown.
-9. When an abandoned run has no attached browser, the server exits as soon as the one-minute run lease expires.
-   In every other idle state, the server exits after one minute with neither benchmark nor browser activity.
+9. When an abandoned run has no attached browser, the server exits as soon as the configured run lease expires.
+   In every other idle state, the server exits after the configured timeout with neither benchmark nor browser
+   activity. The default is one minute.
 
 Closing a browser releases its lease. If a browser or network disappears without a clean close, the lease expires
 from its last renewal, so a dead TCP connection cannot keep the process alive indefinitely. The logger and browser
@@ -178,11 +183,11 @@ Then open <http://127.0.0.1:9720> locally.
 | Browser does not open | Copy the printed URL manually, or use `-webopen false` on headless systems |
 | Local Web Console unavailable | Check `-webport` and whether another local process is using the port |
 | Port is incompatible | Stop the unrelated/older service or select another `-webport` |
-| Local Web Console remains on an older UI after upgrading SBK | Close every web console browser tab, wait one idle minute for the old server to exit, and retry |
+| Local Web Console remains on an older UI after upgrading SBK | Close every web console browser tab, wait for the configured idle timeout for the old server to exit, and retry |
 | Local Web Console already in use | Wait for the named active benchmark to finish; do not combine independent experiments |
-| Local Web Console reports an abandoned run | The logger stopped publishing snapshots and heartbeats for one minute, usually because its SBK, SBM, or SBK-GEM process was killed or lost connectivity; correct the failure and start a new benchmark |
+| Local Web Console reports an abandoned run | The logger stopped publishing snapshots and heartbeats for the configured idle timeout, usually because its SBK, SBM, or SBK-GEM process was killed or lost connectivity; correct the failure and start a new benchmark |
 | Read benchmark reports no useful data | Create and verify the input file first; use the same record size for preparation and reading |
-| Graph disappears after completion | Keep a browser page connected; otherwise the server intentionally exits after one idle minute |
+| Graph disappears after completion | Keep a browser page connected; otherwise the server intentionally exits after the configured idle timeout |
 | Remote browser cannot connect | Create an SSH tunnel to `127.0.0.1:9720` on the benchmark host, then open the local forwarded port |
 
 The reusable runtime is under `sbk-web-console/src/main/java/io/sbk/webconsole`; the SBK-specific

@@ -27,6 +27,8 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Integration tests for the SBK WebLogger adapter and independent Local Web Console runtime.
@@ -34,6 +36,18 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 final class WebLoggerWebConsoleTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
+
+    @Test
+    void webLoggerRejectsNonPositiveIdleTimeout() throws Exception {
+        final WebLogger logger = new WebLogger();
+        final SbkParameters parameters = new SbkParameters("web-console-timeout-test");
+        logger.addArgs(parameters);
+        parameters.parseArgs(new String[]{"-writers", "1", "-size", "100", "-webtimeoutminutes", "0"});
+
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> logger.parseArgs(parameters));
+        assertEquals("Local Web Console idle timeout minutes must be greater than zero", exception.getMessage());
+    }
 
     @Test
     void webLoggerPublishesOnlyRegularIntervalResults() throws Exception {
@@ -45,8 +59,11 @@ final class WebLoggerWebConsoleTest {
             logger.addArgs(parameters);
             assertFalse(parameters.hasOption("webhost"));
             assertFalse(parameters.hasOption("webstart"));
+            assertFalse(parameters.hasOption("webminutes"));
+            assertTrue(parameters.hasOption("websnapshotminutes"));
             parameters.parseArgs(new String[]{"-writers", "1", "-size", "100",
-                    "-webport", Integer.toString(server.getAddress().getPort()), "-webopen", "false"});
+                    "-webport", Integer.toString(server.getAddress().getPort()), "-webopen", "false",
+                    "-websnapshotminutes", "3", "-webtimeoutminutes", "3"});
             logger.parseArgs(parameters);
 
             logger.open(parameters, "File", Action.Writing, new NanoSeconds());

@@ -30,10 +30,11 @@ Build and run the standalone server:
 ```bash
 ./gradlew :sbk-web-console:installDist
 ./sbk-web-console/build/install/sbk-web-console/bin/sbk-web-console \
-  -port 9720 -minutes 180
+  -port 9720 -websnapshotminutes 180 -webtimeoutminutes 1
 ```
 
 The server always binds to `127.0.0.1`. Remote browsers must use an SSH tunnel or equivalent host-local forwarding.
+`-webtimeoutminutes` sets the idle shutdown grace period in minutes and defaults to one minute.
 
 Run its verification suite with:
 

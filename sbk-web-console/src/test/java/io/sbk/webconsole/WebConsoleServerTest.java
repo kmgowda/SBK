@@ -78,6 +78,20 @@ final class WebConsoleServerTest {
     }
 
     @Test
+    void standaloneEntryPointRejectsTheRemovedMinutesOption() {
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> SbkWebConsoleMain.main(new String[]{"-minutes", "180"}));
+        assertTrue(exception.getMessage().contains("Unknown Local Web Console option -minutes"));
+    }
+
+    @Test
+    void standaloneEntryPointRejectsNonPositiveIdleTimeout() {
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> SbkWebConsoleMain.main(new String[]{"-webtimeoutminutes", "0"}));
+        assertTrue(exception.getMessage().contains("idle timeout must be greater than zero"));
+    }
+
+    @Test
     void rejectsASecondActiveBenchmarkWithOwnershipDetails() throws Exception {
         try (WebConsoleServer server = new WebConsoleServer(0, 2)) {
             server.start();
@@ -311,6 +325,11 @@ final class WebConsoleServerTest {
     }
 
     @Test
+    void defaultIdleTimeoutIsOneMinute() {
+        assertEquals(Duration.ofMinutes(1), WebConsoleServer.DEFAULT_IDLE_TIMEOUT);
+    }
+
+    @Test
     void convertsWebConsoleMinutesToFiveSecondSnapshots() {
         assertEquals(2160, SbkWebConsoleMain.retentionSnapshots(180));
         assertEquals(12, SbkWebConsoleMain.retentionSnapshots(1));
@@ -346,7 +365,8 @@ final class WebConsoleServerTest {
         final WebConsoleConfig config = new WebConsoleConfig();
         config.port = port;
         config.open = false;
-        config.minutes = 1;
+        config.snapshotMinutes = 1;
+        config.timeoutMinutes = 1;
         config.name = "test";
         return config;
     }

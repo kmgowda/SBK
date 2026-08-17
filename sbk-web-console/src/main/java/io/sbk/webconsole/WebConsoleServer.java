@@ -78,6 +78,19 @@ public final class WebConsoleServer implements AutoCloseable {
     }
 
     /**
+     * Creates a Local Web Console server with a configurable idle timeout.
+     *
+     * @param port        TCP port
+     * @param retention   maximum snapshots retained per run
+     * @param idleTimeout delay before an inactive web console without browsers stops
+     * @throws IOException if the server cannot bind
+     * @throws IllegalArgumentException if a size or duration is not positive
+     */
+    public WebConsoleServer(int port, int retention, Duration idleTimeout) throws IOException {
+        this(port, retention, idleTimeout, DEFAULT_HEARTBEAT_INTERVAL);
+    }
+
+    /**
      * Creates a Local Web Console server with configurable lifecycle timings.
      *
      * @param port              TCP port

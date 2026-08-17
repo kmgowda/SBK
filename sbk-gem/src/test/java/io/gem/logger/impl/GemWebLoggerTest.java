@@ -32,7 +32,7 @@ final class GemWebLoggerTest {
         logger.addArgs(parameters);
         parameters.parseArgs(new String[]{"-class", "file", "-action", "r",
                 "-webport", "9876", "-webopen", "false",
-                "-webminutes", "42", "-boardname", "gem-test", "-time", "ns"});
+                "-websnapshotminutes", "42", "-webtimeoutminutes", "3", "-boardname", "gem-test", "-time", "ns"});
         logger.parseArgs(parameters);
 
         final String[] options = logger.getOptionsArgs();
@@ -43,7 +43,8 @@ final class GemWebLoggerTest {
         assertFalse(Arrays.asList(parsed).contains("-webhost"));
         assertFalse(Arrays.asList(parsed).contains("-webstart"));
         assertEquals("9876", valueOf(parsed, "-webport"));
-        assertEquals("42", valueOf(parsed, "-webminutes"));
+        assertEquals("42", valueOf(parsed, "-websnapshotminutes"));
+        assertEquals("3", valueOf(parsed, "-webtimeoutminutes"));
         assertEquals("gem-test", valueOf(parsed, "-boardname"));
         assertTrue(Arrays.asList(new GemLoggerPackage("io.gem.logger").getClassNames())
                 .contains(GemWebLogger.class.getSimpleName()));

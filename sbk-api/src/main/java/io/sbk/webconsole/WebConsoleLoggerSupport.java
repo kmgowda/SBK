@@ -32,7 +32,9 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
     /** Web console browser-open CLI option. */
     public static final String OPEN_OPTION = "webopen";
     /** Web console history duration CLI option. */
-    public static final String MINUTES_OPTION = "webminutes";
+    public static final String SNAPSHOT_MINUTES_OPTION = "websnapshotminutes";
+    /** Web console idle-timeout CLI option. */
+    public static final String TIMEOUT_OPTION = "webtimeoutminutes";
     /** Web console benchmark-board name CLI option. */
     public static final String BOARD_NAME_OPTION = "boardname";
     private static final String CONFIG_FILE = "webconsole.properties";
@@ -56,7 +58,11 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
         config = loadConfig();
         params.addOption(PORT_OPTION, true, "Local Web Console port; default: " + config.port);
         params.addOption(OPEN_OPTION, true, "Open Local Web Console in the local browser; default: " + config.open);
-        params.addOption(MINUTES_OPTION, true, "Minutes of snapshots retained per run; default: " + config.minutes);
+        params.addOption(SNAPSHOT_MINUTES_OPTION, true,
+                "Minutes of snapshots retained per run; default: " + config.snapshotMinutes);
+        params.addOption(TIMEOUT_OPTION, true,
+                "Idle minutes without a benchmark or browser before Local Web Console exits; default: "
+                        + config.timeoutMinutes);
         params.addOption(BOARD_NAME_OPTION, true,
                 "Optional display name for the benchmark board in Local Web Console; default: empty");
     }
@@ -71,14 +77,19 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
         ensureConfig();
         config.port = Integer.parseInt(params.getOptionValue(PORT_OPTION, Integer.toString(config.port)));
         config.open = Boolean.parseBoolean(params.getOptionValue(OPEN_OPTION, Boolean.toString(config.open)));
-        config.minutes = Integer.parseInt(params.getOptionValue(MINUTES_OPTION,
-                Integer.toString(config.minutes)));
+        config.snapshotMinutes = Integer.parseInt(params.getOptionValue(SNAPSHOT_MINUTES_OPTION,
+                Integer.toString(config.snapshotMinutes)));
+        config.timeoutMinutes = Integer.parseInt(params.getOptionValue(TIMEOUT_OPTION,
+                Integer.toString(config.timeoutMinutes)));
         config.name = params.getOptionValue(BOARD_NAME_OPTION, Objects.requireNonNullElse(config.name, ""));
         if (config.port < 1 || config.port > 65535) {
             throw new IllegalArgumentException("Local Web Console port must be between 1 and 65535");
         }
-        if (config.minutes < 1) {
+        if (config.snapshotMinutes < 1) {
             throw new IllegalArgumentException("Local Web Console history minutes must be greater than zero");
+        }
+        if (config.timeoutMinutes < 1) {
+            throw new IllegalArgumentException("Local Web Console idle timeout minutes must be greater than zero");
         }
     }
 
@@ -201,8 +212,8 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
      * @return web console options
      */
     public String[] getOptionsArgs() {
-        return new String[]{"-" + PORT_OPTION, "-" + OPEN_OPTION, "-" + MINUTES_OPTION,
-                "-" + BOARD_NAME_OPTION};
+        return new String[]{"-" + PORT_OPTION, "-" + OPEN_OPTION, "-" + SNAPSHOT_MINUTES_OPTION,
+                "-" + TIMEOUT_OPTION, "-" + BOARD_NAME_OPTION};
     }
 
     /**
@@ -213,7 +224,9 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
     public String[] getParsedArgs() {
         ensureConfig();
         return new String[]{"-" + PORT_OPTION, Integer.toString(config.port), "-" + OPEN_OPTION,
-                Boolean.toString(config.open), "-" + MINUTES_OPTION, Integer.toString(config.minutes),
+                Boolean.toString(config.open), "-" + SNAPSHOT_MINUTES_OPTION,
+                Integer.toString(config.snapshotMinutes),
+                "-" + TIMEOUT_OPTION, Integer.toString(config.timeoutMinutes),
                 "-" + BOARD_NAME_OPTION, Objects.requireNonNullElse(config.name, "")};
     }
 

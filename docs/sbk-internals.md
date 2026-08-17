@@ -2506,12 +2506,15 @@ periodic interval snapshots. Their `printTotal(...)` methods print cumulative
 totals to the console but do not publish those totals to the Local Web Console.
 The logger does not sample storage operations or insert HTTP work into the
 writer/reader hot path. The server keeps a bounded history--180 minutes by
-default, configurable with `-webminutes`--and streams new summaries to
+default, configurable with `-websnapshotminutes`--and streams new summaries to
 browsers with server-sent events (SSE). The reusable implementation lives in
 the independent `sbk-web-console` module under `io.sbk.webconsole`; the
 application-specific logger adapters remain in `sbk-api`, `sbm`, and `sbk-gem`.
 Its command-line and YML controls use the `-web...`
 option prefix, with `-boardname` supplying the benchmark board's display name.
+The server's idle shutdown timeout defaults to one minute and is configurable
+in whole minutes with `-webtimeoutminutes`; a browser lease or active benchmark keeps
+the server alive.
 
 ```mermaid
 flowchart LR
@@ -2537,15 +2540,16 @@ flowchart LR
 
 Only one benchmark owns a Local Web Console server at a time. Registration starts an
 active-run lease. Each snapshot renews it, and a 15-second client heartbeat
-renews it during quiet reporting intervals. If neither arrives for one minute,
-the server marks the run abandoned and releases `activeRunId`; this prevents a
-crashed SBK, SBM, or SBK-GEM process from permanently blocking later runs.
+renews it during quiet reporting intervals. If neither arrives for the
+configured idle timeout, the server marks the run abandoned and releases
+`activeRunId`; this prevents a crashed SBK, SBM, or SBK-GEM process from
+permanently blocking later runs.
 
 The browser has an independent 15-second lease. A fresh browser lease preserves
 the abandoned or completed run's graphs, but does not preserve benchmark
 ownership. If the run lease expires with no browser attached, the server exits
 immediately. Otherwise it remains available until there has been neither an
-active publisher nor a browser lease for one minute.
+active publisher nor a browser lease for the configured idle timeout.
 
 ```mermaid
 stateDiagram-v2
@@ -2553,15 +2557,15 @@ stateDiagram-v2
     Idle --> Active: Logger registers run
     Active --> Active: Snapshot or logger heartbeat
     Active --> Completed: Logger completes normally
-    Active --> Abandoned: No logger activity for one minute
+    Active --> Abandoned: No logger activity for idle timeout
     Abandoned --> Active: New logger registers
     Completed --> Active: New logger registers
     Completed --> Retained: Browser lease is active
     Abandoned --> Retained: Browser lease is active
-    Completed --> Stopped: No browser for one minute
+    Completed --> Stopped: No browser for idle timeout
     Abandoned --> Stopped: No browser at lease expiry
     Retained --> Retained: Browser heartbeat
-    Retained --> Stopped: No publisher or browser for one minute
+    Retained --> Stopped: No publisher or browser for idle timeout
     Stopped --> [*]
 ```
 

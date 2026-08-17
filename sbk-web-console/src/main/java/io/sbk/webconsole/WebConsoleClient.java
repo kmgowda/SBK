@@ -265,8 +265,10 @@ public final class WebConsoleClient implements AutoCloseable {
         command.add(SbkWebConsoleMain.class.getName());
         command.add("-port");
         command.add(Integer.toString(config.port));
-        command.add("-minutes");
-        command.add(Integer.toString(config.minutes));
+        command.add("-websnapshotminutes");
+        command.add(Integer.toString(config.snapshotMinutes));
+        command.add("-webtimeoutminutes");
+        command.add(Integer.toString(config.timeoutMinutes));
         final ProcessBuilder builder = new ProcessBuilder(command);
         builder.redirectInput(ProcessBuilder.Redirect.PIPE);
         builder.redirectOutput(ProcessBuilder.Redirect.DISCARD);
