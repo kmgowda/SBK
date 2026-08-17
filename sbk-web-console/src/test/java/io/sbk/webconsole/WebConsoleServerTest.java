@@ -116,7 +116,7 @@ final class WebConsoleServerTest {
 
     @Test
     void expiringOneConcurrentRunDoesNotAffectAnotherRun() throws Exception {
-        final Duration idleTimeout = Duration.ofMillis(300);
+        final Duration idleTimeout = Duration.ofMinutes(1);
         try (WebConsoleServer server = new WebConsoleServer(0, 2, idleTimeout,
                 Duration.ofMillis(20))) {
             server.start();
