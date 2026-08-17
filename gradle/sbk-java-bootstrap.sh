@@ -26,21 +26,45 @@ sbk_java_error() {
 }
 
 sbk_java_major_version() {
-    "$1" -version 2>&1 | sed -n '1s/.*version "\([0-9][0-9]*\).*/\1/p'
+    "$1" -version 2>&1 |
+        sed -n 's/.*version "\([0-9][0-9]*\).*/\1/p' | sed -n '1p'
+}
+
+sbk_java_normalize_home() {
+    case "$(uname -s)" in
+        CYGWIN*|MINGW*|MSYS*)
+            if command -v cygpath >/dev/null 2>&1; then
+                cygpath --unix "$1"
+            else
+                printf '%s\n' "$1"
+            fi
+            ;;
+        *) printf '%s\n' "$1" ;;
+    esac
 }
 
 sbk_java_valid_home() {
-    [ -x "$1/bin/java" ] &&
-        [ -x "$1/bin/javac" ] &&
-        [ "$(sbk_java_major_version "$1/bin/java")" = "$SBK_JAVA_MAJOR" ]
+    sbk_java_validated_home=$(sbk_java_normalize_home "$1") || return 1
+    if [ -x "$sbk_java_validated_home/bin/java" ]; then
+        sbk_java_validated_java=$sbk_java_validated_home/bin/java
+    elif [ -x "$sbk_java_validated_home/bin/java.exe" ]; then
+        sbk_java_validated_java=$sbk_java_validated_home/bin/java.exe
+    else
+        return 1
+    fi
+    if [ ! -x "$sbk_java_validated_home/bin/javac" ] &&
+        [ ! -x "$sbk_java_validated_home/bin/javac.exe" ]; then
+        return 1
+    fi
+    [ "$(sbk_java_major_version "$sbk_java_validated_java")" = "$SBK_JAVA_MAJOR" ]
 }
 
 sbk_java_select_home() {
     if ! sbk_java_valid_home "$1"; then
         return 1
     fi
-    SBK_JAVA_HOME=$1
-    JAVACMD=$SBK_JAVA_HOME/bin/java
+    SBK_JAVA_HOME=$sbk_java_validated_home
+    JAVACMD=$sbk_java_validated_java
     export SBK_JAVA_HOME
     return 0
 }
@@ -67,9 +91,10 @@ sbk_java_checksum() {
 
 sbk_java_download() {
     if command -v curl >/dev/null 2>&1; then
-        curl --fail --location --retry 3 --output "$2" "$1"
+        curl --fail --location --retry 3 --connect-timeout 30 --max-time 1800 \
+            --output "$2" "$1"
     elif command -v wget >/dev/null 2>&1; then
-        wget --tries=3 --output-document="$2" "$1"
+        wget --tries=3 --timeout=30 --output-document="$2" "$1"
     else
         sbk_java_error "curl or wget is required to download the managed JDK."
     fi
@@ -95,11 +120,125 @@ sbk_java_managed_platform() {
             SBK_JAVA_PLATFORM=macos-aarch64
             SBK_JAVA_SHA256=7581b0d1752cd5acbf39e286c03f07b6cd6c205b562eb2fe753ff0253cf4c1bf
             ;;
+        CYGWIN*:x86_64|MINGW*:x86_64|MSYS*:x86_64)
+            SBK_JAVA_PLATFORM=windows-x64
+            SBK_JAVA_SHA256=74784a0c07258f32d36e9224dd79187c566d831c30d47dc06888d4212087331d
+            ;;
         *)
             sbk_java_error "automatic JDK installation is unsupported on $sbk_java_os/$sbk_java_arch. Set SBK_JAVA_HOME to a JDK 25 installation."
             ;;
     esac
 }
+
+sbk_java_install_archive() (
+    sbk_java_lock=$sbk_java_target.lock
+    sbk_java_lock_owned=false
+    sbk_java_temp=
+
+    sbk_java_install_cleanup() {
+        if [ -n "$sbk_java_temp" ] && [ -d "$sbk_java_temp" ]; then
+            rm -rf "$sbk_java_temp"
+        fi
+        if [ "$sbk_java_lock_owned" = true ]; then
+            rm -rf "$sbk_java_lock"
+        fi
+    }
+    trap 'sbk_java_install_cleanup; exit 130' HUP INT TERM
+
+    sbk_java_attempt=0
+    while ! mkdir "$sbk_java_lock" 2>/dev/null; do
+        if sbk_java_select_home "$sbk_java_home"; then
+            exit 0
+        fi
+        sbk_java_owner=$(sed -n '1p' "$sbk_java_lock/owner" 2>/dev/null)
+        case "$sbk_java_owner" in
+            ''|*[!0-9]*) ;;
+            *)
+                if ! kill -0 "$sbk_java_owner" 2>/dev/null; then
+                    sbk_java_stale_lock=$sbk_java_lock.stale.$$
+                    if mv "$sbk_java_lock" "$sbk_java_stale_lock" 2>/dev/null; then
+                        rm -rf "$sbk_java_stale_lock"
+                        continue
+                    fi
+                fi
+                ;;
+        esac
+        sbk_java_attempt=$((sbk_java_attempt + 1))
+        if [ "$sbk_java_attempt" -ge 120 ]; then
+            sbk_java_error "timed out waiting for another SBK JDK installation: $sbk_java_lock"
+            exit 1
+        fi
+        sleep 1
+    done
+    sbk_java_lock_owned=true
+    printf '%s\n' "$$" > "$sbk_java_lock/owner"
+
+    if sbk_java_select_home "$sbk_java_home"; then
+        sbk_java_install_cleanup
+        exit 0
+    fi
+
+    sbk_java_temp=$(mktemp -d "$sbk_java_cache/.openjdk-$SBK_JAVA_VERSION.XXXXXX") || {
+        sbk_java_install_cleanup
+        exit 1
+    }
+    case "$SBK_JAVA_PLATFORM" in
+        windows-*)
+            sbk_java_archive=$sbk_java_temp/openjdk.zip
+            sbk_java_url=$SBK_JAVA_BASE_URL/openjdk-${SBK_JAVA_VERSION}_${SBK_JAVA_PLATFORM}_bin.zip
+            ;;
+        *)
+            sbk_java_archive=$sbk_java_temp/openjdk.tar.gz
+            sbk_java_url=$SBK_JAVA_BASE_URL/openjdk-${SBK_JAVA_VERSION}_${SBK_JAVA_PLATFORM}_bin.tar.gz
+            ;;
+    esac
+    echo "Downloading OpenJDK $SBK_JAVA_VERSION for $SBK_JAVA_PLATFORM to the SBK user cache..." >&2
+    if ! sbk_java_download "$sbk_java_url" "$sbk_java_archive" ||
+        ! sbk_java_checksum "$sbk_java_archive" "$SBK_JAVA_SHA256"; then
+        sbk_java_install_cleanup
+        sbk_java_error "managed JDK installation failed; check network/proxy access and retry."
+        exit 1
+    fi
+    case "$SBK_JAVA_PLATFORM" in
+        windows-*)
+            if ! command -v unzip >/dev/null 2>&1 || ! unzip -q "$sbk_java_archive" -d "$sbk_java_temp"; then
+                sbk_java_install_cleanup
+                sbk_java_error "unzip is required to install OpenJDK on Cygwin/MSYS."
+                exit 1
+            fi
+            ;;
+        *)
+            if ! tar -xzf "$sbk_java_archive" -C "$sbk_java_temp"; then
+                sbk_java_install_cleanup
+                sbk_java_error "managed JDK archive extraction failed."
+                exit 1
+            fi
+            ;;
+    esac
+
+    case "$SBK_JAVA_PLATFORM" in
+        macos-*) sbk_java_extracted=$sbk_java_temp/jdk-$SBK_JAVA_VERSION.jdk ;;
+        *) sbk_java_extracted=$sbk_java_temp/jdk-$SBK_JAVA_VERSION ;;
+    esac
+    if ! sbk_java_valid_home "$(case "$SBK_JAVA_PLATFORM" in macos-*) printf '%s' "$sbk_java_extracted/Contents/Home" ;; *) printf '%s' "$sbk_java_extracted" ;; esac)"; then
+        sbk_java_install_cleanup
+        sbk_java_error "downloaded archive does not contain a valid JDK $SBK_JAVA_MAJOR."
+        exit 1
+    fi
+
+    if [ -e "$sbk_java_target" ]; then
+        if ! mv "$sbk_java_target" "$sbk_java_target.invalid.$$"; then
+            sbk_java_install_cleanup
+            exit 1
+        fi
+    fi
+    if ! mv "$sbk_java_extracted" "$sbk_java_target"; then
+        sbk_java_install_cleanup
+        exit 1
+    fi
+    sbk_java_install_cleanup
+    exit 0
+)
 
 sbk_java_install_managed() {
     sbk_java_managed_platform || return 1
@@ -124,66 +263,7 @@ sbk_java_install_managed() {
     fi
 
     mkdir -p "$sbk_java_cache" || return 1
-    sbk_java_lock=$sbk_java_target.lock
-    sbk_java_attempt=0
-    while ! mkdir "$sbk_java_lock" 2>/dev/null; do
-        if sbk_java_select_home "$sbk_java_home"; then
-            return 0
-        fi
-        sbk_java_attempt=$((sbk_java_attempt + 1))
-        if [ "$sbk_java_attempt" -ge 120 ]; then
-            sbk_java_error "timed out waiting for another SBK JDK installation: $sbk_java_lock"
-            return 1
-        fi
-        sleep 1
-    done
-
-    if sbk_java_select_home "$sbk_java_home"; then
-        rmdir "$sbk_java_lock"
-        return 0
-    fi
-
-    sbk_java_temp=$(mktemp -d "$sbk_java_cache/.openjdk-$SBK_JAVA_VERSION.XXXXXX") || {
-        rmdir "$sbk_java_lock"
-        return 1
-    }
-    sbk_java_archive=$sbk_java_temp/openjdk.tar.gz
-    sbk_java_url=$SBK_JAVA_BASE_URL/openjdk-${SBK_JAVA_VERSION}_${SBK_JAVA_PLATFORM}_bin.tar.gz
-    echo "Downloading OpenJDK $SBK_JAVA_VERSION for $SBK_JAVA_PLATFORM to the SBK user cache..." >&2
-    if ! sbk_java_download "$sbk_java_url" "$sbk_java_archive" ||
-        ! sbk_java_checksum "$sbk_java_archive" "$SBK_JAVA_SHA256" ||
-        ! tar -xzf "$sbk_java_archive" -C "$sbk_java_temp"; then
-        rm -rf "$sbk_java_temp"
-        rmdir "$sbk_java_lock"
-        sbk_java_error "managed JDK installation failed; check network/proxy access and retry."
-        return 1
-    fi
-
-    case "$SBK_JAVA_PLATFORM" in
-        macos-*) sbk_java_extracted=$sbk_java_temp/jdk-$SBK_JAVA_VERSION.jdk ;;
-        *) sbk_java_extracted=$sbk_java_temp/jdk-$SBK_JAVA_VERSION ;;
-    esac
-    if ! sbk_java_valid_home "$(case "$SBK_JAVA_PLATFORM" in macos-*) printf '%s' "$sbk_java_extracted/Contents/Home" ;; *) printf '%s' "$sbk_java_extracted" ;; esac)"; then
-        rm -rf "$sbk_java_temp"
-        rmdir "$sbk_java_lock"
-        sbk_java_error "downloaded archive does not contain a valid JDK $SBK_JAVA_MAJOR."
-        return 1
-    fi
-
-    if [ -e "$sbk_java_target" ]; then
-        mv "$sbk_java_target" "$sbk_java_target.invalid.$$" || {
-            rm -rf "$sbk_java_temp"
-            rmdir "$sbk_java_lock"
-            return 1
-        }
-    fi
-    mv "$sbk_java_extracted" "$sbk_java_target" || {
-        rm -rf "$sbk_java_temp"
-        rmdir "$sbk_java_lock"
-        return 1
-    }
-    rm -rf "$sbk_java_temp"
-    rmdir "$sbk_java_lock"
+    sbk_java_install_archive || return 1
     sbk_java_select_home "$sbk_java_home"
 }
 

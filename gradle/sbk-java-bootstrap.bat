@@ -15,9 +15,16 @@
 set "SBK_JAVA_INSTALL=%~1"
 if not defined SBK_JAVA_INSTALL set "SBK_JAVA_INSTALL=true"
 set "SBK_JAVA_RESOLVED_HOME="
-for /f "usebackq delims=" %%J in (`powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0sbk-java-bootstrap.ps1" -InstallIfMissing %SBK_JAVA_INSTALL%`) do set "SBK_JAVA_RESOLVED_HOME=%%J"
-if errorlevel 1 exit /b 1
+for /f "usebackq delims=" %%J in (`powershell.exe -NoLogo -NoProfile -File "%~dp0sbk-java-bootstrap.ps1" -InstallIfMissing %SBK_JAVA_INSTALL%`) do set "SBK_JAVA_RESOLVED_HOME=%%J"
 if not defined SBK_JAVA_RESOLVED_HOME exit /b 1
 set "SBK_JAVA_HOME=%SBK_JAVA_RESOLVED_HOME%"
 set "JAVA_EXE=%SBK_JAVA_HOME%\bin\java.exe"
+if not exist "%JAVA_EXE%" (
+    echo ERROR: resolved JDK 25 is incomplete: %SBK_JAVA_HOME% 1>&2
+    exit /b 1
+)
+if not exist "%SBK_JAVA_HOME%\bin\javac.exe" (
+    echo ERROR: resolved JDK 25 has no javac.exe: %SBK_JAVA_HOME% 1>&2
+    exit /b 1
+)
 exit /b 0

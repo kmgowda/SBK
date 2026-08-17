@@ -52,9 +52,10 @@ unset SBK_JAVA_INSTALL'''
             def startIndex = unixScript.text.indexOf(startMarker)
             def endIndex = unixScript.text.indexOf(sectionEndMarker, startIndex)
             
-            if (startIndex != -1 && endIndex != -1) {
-                unixScript.text = unixScript.text.substring(0, startIndex) + unixJavaDetectionLogic + '\n\n' + unixScript.text.substring(endIndex)
+            if (startIndex == -1 || endIndex == -1) {
+                throw new GradleException("${path} could not locate the Unix Java detection markers")
             }
+            unixScript.text = unixScript.text.substring(0, startIndex) + unixJavaDetectionLogic + '\n\n' + unixScript.text.substring(endIndex)
             
             // For Windows scripts - inject SBK_JAVA_HOME runtime check with fallback
             def windowsJavaLogic = '''@rem Resolve a configured, system, or previously managed JDK 25.
@@ -68,9 +69,10 @@ if errorlevel 1 goto fail
             def winStartIndex = windowsScript.text.indexOf(winStartMarker)
             def winEndIndex = windowsScript.text.indexOf(winEndMarker, winStartIndex)
             
-            if (winStartIndex != -1 && winEndIndex != -1) {
-                windowsScript.text = windowsScript.text.substring(0, winStartIndex) + windowsJavaLogic + windowsScript.text.substring(winEndIndex)
+            if (winStartIndex == -1 || winEndIndex == -1) {
+                throw new GradleException("${path} could not locate the Windows Java detection markers")
             }
+            windowsScript.text = windowsScript.text.substring(0, winStartIndex) + windowsJavaLogic + windowsScript.text.substring(winEndIndex)
         }
     }
 
@@ -99,6 +101,9 @@ if errorlevel 1 goto fail
     }
 
     tasks.named('check').configure {
+        dependsOn verifySbkJavaHomeStartScripts
+    }
+    tasks.matching { it.name in ['installDist', 'distZip', 'distTar'] }.configureEach {
         dependsOn verifySbkJavaHomeStartScripts
     }
 

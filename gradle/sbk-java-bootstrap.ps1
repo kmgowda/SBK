@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-param([bool]$InstallIfMissing = $true)
+param(
+    [ValidateSet('true', 'false')]
+    [string]$InstallIfMissing = 'true'
+)
 
 $ErrorActionPreference = 'Stop'
 $jdkVersion = '25.0.2'
@@ -20,13 +23,14 @@ $jdkMajor = '25'
 $baseUrl = 'https://download.java.net/java/GA/jdk25.0.2/b1e0dfa218384cb9959bdcb897162d4e/10/GPL'
 $windowsX64Sha256 = '74784a0c07258f32d36e9224dd79187c566d831c30d47dc06888d4212087331d'
 
-function Test-SbkJdk([string]$Home) {
-    if (-not $Home) { return $false }
-    $java = Join-Path $Home 'bin\java.exe'
-    $javac = Join-Path $Home 'bin\javac.exe'
+function Test-SbkJdk([string]$CandidateHome) {
+    if (-not $CandidateHome) { return $false }
+    $java = Join-Path $CandidateHome 'bin\java.exe'
+    $javac = Join-Path $CandidateHome 'bin\javac.exe'
     if (-not (Test-Path $java -PathType Leaf) -or -not (Test-Path $javac -PathType Leaf)) { return $false }
-    $versionText = (& $java -version 2>&1 | Select-Object -First 1) -join ''
-    return $versionText -match 'version "25(?:\.|"|-)'
+    $versionText = (& $java -version 2>&1 | Out-String)
+    $versionPattern = 'version "' + [Regex]::Escape($jdkMajor) + '(?:\.|"|-)'
+    return $versionText -match $versionPattern
 }
 
 function Stop-SbkJava([string]$Message) {
@@ -76,7 +80,7 @@ if (Test-SbkJdk $target) {
     Write-Output $target
     exit 0
 }
-if (-not $InstallIfMissing) {
+if ($InstallIfMissing -ne 'true') {
     Stop-SbkJava 'no usable JDK 25 was found. Run gradlew once to install the managed JDK, or set SBK_JAVA_HOME.'
 }
 
@@ -101,7 +105,8 @@ try {
     $archive = Join-Path $temp 'openjdk.zip'
     $url = "$baseUrl/openjdk-${jdkVersion}_windows-x64_bin.zip"
     [Console]::Error.WriteLine("Downloading OpenJDK $jdkVersion for windows-x64 to the SBK user cache...")
-    Invoke-WebRequest -Uri $url -OutFile $archive -UseBasicParsing
+    $ProgressPreference = 'SilentlyContinue'
+    Invoke-WebRequest -Uri $url -OutFile $archive -UseBasicParsing -TimeoutSec 1800
     $actualHash = (Get-FileHash -Algorithm SHA256 $archive).Hash.ToLowerInvariant()
     if ($actualHash -ne $windowsX64Sha256) {
         throw "OpenJDK checksum mismatch: expected $windowsX64Sha256, found $actualHash"
