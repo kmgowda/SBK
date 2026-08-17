@@ -30,8 +30,10 @@ Build and run the standalone server:
 ```bash
 ./gradlew :sbk-web-console:installDist
 ./sbk-web-console/build/install/sbk-web-console/bin/sbk-web-console \
-  -host 127.0.0.1 -port 9720 -minutes 180
+  -port 9720 -minutes 180
 ```
+
+The server always binds to `127.0.0.1`. Remote browsers must use an SSH tunnel or equivalent host-local forwarding.
 
 Run its verification suite with:
 

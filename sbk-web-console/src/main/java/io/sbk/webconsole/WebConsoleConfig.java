@@ -15,12 +15,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * Configuration for the SBK Local Web Console.
  */
 public final class WebConsoleConfig {
-    /** Address on which the web console server listens. */
-    public String host;
     /** TCP port used by the web console server. */
     public int port;
-    /** Whether SBK may start the web console server when it is unavailable. */
-    public boolean start;
     /** Whether SBK should open the web console in the default browser. */
     public boolean open;
     /** Number of minutes of snapshots retained for each benchmark run. */

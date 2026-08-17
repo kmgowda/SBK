@@ -27,12 +27,8 @@ import java.util.UUID;
  * Shared Local Web Console configuration, lifecycle, and snapshot construction for SBK, SBM, and GEM loggers.
  */
 public final class WebConsoleLoggerSupport implements AutoCloseable {
-    /** Web console host CLI option. */
-    public static final String HOST_OPTION = "webhost";
     /** Web console port CLI option. */
     public static final String PORT_OPTION = "webport";
-    /** Web console automatic-start CLI option. */
-    public static final String START_OPTION = "webstart";
     /** Web console browser-open CLI option. */
     public static final String OPEN_OPTION = "webopen";
     /** Web console history duration CLI option. */
@@ -58,9 +54,7 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
      */
     public void addArgs(InputOptions params) {
         config = loadConfig();
-        params.addOption(HOST_OPTION, true, "Local Web Console host; default: " + config.host);
         params.addOption(PORT_OPTION, true, "Local Web Console port; default: " + config.port);
-        params.addOption(START_OPTION, true, "Start Local Web Console when unavailable; default: " + config.start);
         params.addOption(OPEN_OPTION, true, "Open Local Web Console in the local browser; default: " + config.open);
         params.addOption(MINUTES_OPTION, true, "Minutes of snapshots retained per run; default: " + config.minutes);
         params.addOption(BOARD_NAME_OPTION, true,
@@ -75,9 +69,7 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
      */
     public void parseArgs(ParsedOptions params) {
         ensureConfig();
-        config.host = params.getOptionValue(HOST_OPTION, config.host);
         config.port = Integer.parseInt(params.getOptionValue(PORT_OPTION, Integer.toString(config.port)));
-        config.start = Boolean.parseBoolean(params.getOptionValue(START_OPTION, Boolean.toString(config.start)));
         config.open = Boolean.parseBoolean(params.getOptionValue(OPEN_OPTION, Boolean.toString(config.open)));
         config.minutes = Integer.parseInt(params.getOptionValue(MINUTES_OPTION,
                 Integer.toString(config.minutes)));
@@ -209,8 +201,8 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
      * @return web console options
      */
     public String[] getOptionsArgs() {
-        return new String[]{"-" + HOST_OPTION, "-" + PORT_OPTION, "-" + START_OPTION, "-" + OPEN_OPTION,
-                "-" + MINUTES_OPTION, "-" + BOARD_NAME_OPTION};
+        return new String[]{"-" + PORT_OPTION, "-" + OPEN_OPTION, "-" + MINUTES_OPTION,
+                "-" + BOARD_NAME_OPTION};
     }
 
     /**
@@ -220,8 +212,7 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
      */
     public String[] getParsedArgs() {
         ensureConfig();
-        return new String[]{"-" + HOST_OPTION, config.host, "-" + PORT_OPTION, Integer.toString(config.port),
-                "-" + START_OPTION, Boolean.toString(config.start), "-" + OPEN_OPTION,
+        return new String[]{"-" + PORT_OPTION, Integer.toString(config.port), "-" + OPEN_OPTION,
                 Boolean.toString(config.open), "-" + MINUTES_OPTION, Integer.toString(config.minutes),
                 "-" + BOARD_NAME_OPTION, Objects.requireNonNullElse(config.name, "")};
     }

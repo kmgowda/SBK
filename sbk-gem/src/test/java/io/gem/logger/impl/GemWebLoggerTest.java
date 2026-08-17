@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -29,16 +30,19 @@ final class GemWebLoggerTest {
         final SbmParameters parameters = new SbmParameters("test", 9717, 1, 0,
                 new String[]{GemWebLogger.class.getSimpleName()});
         logger.addArgs(parameters);
-        parameters.parseArgs(new String[]{"-class", "file", "-action", "r", "-webhost", "127.0.0.1",
-                "-webport", "9876", "-webstart", "false", "-webopen", "false",
+        parameters.parseArgs(new String[]{"-class", "file", "-action", "r",
+                "-webport", "9876", "-webopen", "false",
                 "-webminutes", "42", "-boardname", "gem-test", "-time", "ns"});
         logger.parseArgs(parameters);
 
         final String[] options = logger.getOptionsArgs();
         final String[] parsed = logger.getParsedArgs();
         assertTrue(Arrays.asList(options).contains("-webport"));
+        assertFalse(Arrays.asList(options).contains("-webhost"));
+        assertFalse(Arrays.asList(options).contains("-webstart"));
+        assertFalse(Arrays.asList(parsed).contains("-webhost"));
+        assertFalse(Arrays.asList(parsed).contains("-webstart"));
         assertEquals("9876", valueOf(parsed, "-webport"));
-        assertEquals("false", valueOf(parsed, "-webstart"));
         assertEquals("42", valueOf(parsed, "-webminutes"));
         assertEquals("gem-test", valueOf(parsed, "-boardname"));
         assertTrue(Arrays.asList(new GemLoggerPackage("io.gem.logger").getClassNames())

@@ -39,6 +39,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Lightweight local HTTP server that stores bounded SBK histories and serves the Local Web Console.
  */
 public final class WebConsoleServer implements AutoCloseable {
+    /** Loopback address used by the host-local Web Console. */
+    public static final String LOCAL_HOST = "127.0.0.1";
     /** Local Web Console HTTP API version. */
     public static final int API_VERSION = 5;
     /** Time an unused web console remains available after its benchmark exits. */
@@ -64,22 +66,20 @@ public final class WebConsoleServer implements AutoCloseable {
     private boolean shuttingDown;
 
     /**
-     * Creates a Local Web Console server bound to the supplied address.
+     * Creates a Local Web Console server bound to the IPv4 loopback address.
      *
-     * @param host      local address on which to listen
      * @param port      TCP port
      * @param retention maximum snapshots retained per run
      * @throws IOException if the server cannot bind
      * @throws IllegalArgumentException if retention is not positive
      */
-    public WebConsoleServer(String host, int port, int retention) throws IOException {
-        this(host, port, retention, DEFAULT_IDLE_TIMEOUT, DEFAULT_HEARTBEAT_INTERVAL);
+    public WebConsoleServer(int port, int retention) throws IOException {
+        this(port, retention, DEFAULT_IDLE_TIMEOUT, DEFAULT_HEARTBEAT_INTERVAL);
     }
 
     /**
      * Creates a Local Web Console server with configurable lifecycle timings.
      *
-     * @param host              local address on which to listen
      * @param port              TCP port
      * @param retention         maximum snapshots retained per run
      * @param idleTimeout       delay before an inactive web console without browsers stops
@@ -87,7 +87,7 @@ public final class WebConsoleServer implements AutoCloseable {
      * @throws IOException if the server cannot bind
      * @throws IllegalArgumentException if a size or duration is not positive
      */
-    WebConsoleServer(String host, int port, int retention, Duration idleTimeout, Duration heartbeatInterval)
+    WebConsoleServer(int port, int retention, Duration idleTimeout, Duration heartbeatInterval)
             throws IOException {
         if (retention < 1) {
             throw new IllegalArgumentException("Local Web Console retention must be greater than zero");
@@ -106,7 +106,7 @@ public final class WebConsoleServer implements AutoCloseable {
         this.closed = new AtomicBoolean();
         this.termination = new CountDownLatch(1);
         this.browsers = new ConcurrentHashMap<>();
-        this.server = HttpServer.create(new InetSocketAddress(host, port), 32);
+        this.server = HttpServer.create(new InetSocketAddress(LOCAL_HOST, port), 32);
         this.executor = Executors.newVirtualThreadPerTaskExecutor();
         this.scheduler = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
                 .name("sbk-web-console-idle-monitor").daemon().factory());

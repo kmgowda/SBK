@@ -17,10 +17,6 @@ import org.slf4j.LoggerFactory;
 import java.awt.Desktop;
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -29,9 +25,6 @@ import java.net.http.HttpResponse;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -67,7 +60,7 @@ public final class WebConsoleClient implements AutoCloseable {
         this.pending = new ArrayBlockingQueue<>(1);
         this.closing = new AtomicBoolean(false);
         this.leaseHeartbeatInterval = leaseHeartbeatInterval;
-        this.runLinks = webConsoleLinks(config.host, config.port, runId, localHostname(), localAddresses());
+        this.runLinks = webConsoleLinks(config.port, runId);
         postJson("/api/v1/runs", run, 201);
         this.publisherThread = Thread.ofVirtual().name("sbk-web-console-publisher-" + runId)
                 .start(this::publishLoop);
@@ -92,17 +85,13 @@ public final class WebConsoleClient implements AutoCloseable {
         if (leaseHeartbeatInterval.isZero() || leaseHeartbeatInterval.isNegative()) {
             throw new IllegalArgumentException("Local Web Console lease heartbeat interval must be greater than zero");
         }
-        final URI baseUri = URI.create("http://" + connectionHost(config.host) + ":" + config.port);
+        final URI baseUri = URI.create("http://" + WebConsoleServer.LOCAL_HOST + ":" + config.port);
         final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).build();
         final Health health = health(httpClient, baseUri);
         if (health == Health.INCOMPATIBLE) {
             throw new IOException("Port " + config.port + " is not a compatible SBK Local Web Console");
         }
         if (health == Health.UNAVAILABLE) {
-            if (!config.start) {
-                throw new IOException("SBK Local Web Console is unavailable and automatic startup is disabled");
-            }
-            requireLocalAutomaticStartup(config);
             startServer(config);
             waitUntilHealthy(httpClient, baseUri);
         }
@@ -115,37 +104,6 @@ public final class WebConsoleClient implements AutoCloseable {
     }
 
     /**
-     * Selects a reachable local address when the server is configured to listen on every network interface.
-     * Wildcard addresses are valid bind addresses but are not suitable web console destinations for HTTP clients.
-     *
-     * @param host configured web console host or bind address
-     * @return host used by the Local Web Console publisher and browser URL
-     */
-    static String connectionHost(String host) {
-        return "0.0.0.0".equals(host) ? "127.0.0.1" : host;
-    }
-
-    /**
-     * Determines whether a configured web console host belongs to this machine.
-     *
-     * @param host configured web console host or bind address
-     * @return {@code true} for wildcard, loopback, hostname, or interface addresses local to this machine
-     */
-    static boolean isLocalHost(String host) {
-        try {
-            for (InetAddress address : InetAddress.getAllByName(host)) {
-                if (address.isAnyLocalAddress() || address.isLoopbackAddress()
-                        || NetworkInterface.getByInetAddress(address) != null) {
-                    return true;
-                }
-            }
-        } catch (IOException ex) {
-            return false;
-        }
-        return false;
-    }
-
-    /**
      * Returns the browser URL for this benchmark run.
      *
      * @return Local Web Console URL
@@ -155,35 +113,16 @@ public final class WebConsoleClient implements AutoCloseable {
     }
 
     /**
-     * Returns copy-paste Local Web Console links reachable through the configured bind address.
+     * Returns the host-local Web Console link for this benchmark run.
      *
-     * @return local link followed by hostname and available host-address links
+     * @return local loopback link
      */
     public List<WebConsoleLink> getRunLinks() {
         return new ArrayList<>(runLinks);
     }
 
-    static List<WebConsoleLink> webConsoleLinks(String bindHost, int port, String runId, String hostname,
-            List<InetAddress> addresses) {
-        final boolean wildcard = "0.0.0.0".equals(bindHost);
-        final Map<String, String> hosts = new LinkedHashMap<>();
-        hosts.put(connectionHost(bindHost), wildcard ? "Local" : "Configured");
-        if (wildcard) {
-            if (hostname != null && !hostname.isBlank()) {
-                hosts.putIfAbsent(hostname, "Hostname");
-            }
-            addresses.stream()
-                    .filter(Inet4Address.class::isInstance)
-                    .filter(address -> !address.isAnyLocalAddress() && !address.isLoopbackAddress()
-                            && !address.isLinkLocalAddress() && !address.isMulticastAddress())
-                    .sorted(Comparator.comparing(InetAddress::isSiteLocalAddress)
-                            .thenComparing(InetAddress::getHostAddress))
-                    .forEach(address -> hosts.putIfAbsent(address.getHostAddress(),
-                            address.isSiteLocalAddress() ? "Private IP" : "Public IP"));
-        }
-        final List<WebConsoleLink> links = new ArrayList<>(hosts.size());
-        hosts.forEach((host, label) -> links.add(new WebConsoleLink(label, runUri(host, port, runId))));
-        return List.copyOf(links);
+    static List<WebConsoleLink> webConsoleLinks(int port, String runId) {
+        return List.of(new WebConsoleLink("Local", runUri(WebConsoleServer.LOCAL_HOST, port, runId)));
     }
 
     /**
@@ -316,13 +255,6 @@ public final class WebConsoleClient implements AutoCloseable {
                 + START_TIMEOUT.toSeconds() + " seconds");
     }
 
-    static void requireLocalAutomaticStartup(WebConsoleConfig config) throws IOException {
-        if (!isLocalHost(config.host)) {
-            throw new IOException("Remote SBK Local Web Console " + config.host + ":" + config.port
-                    + " is unavailable; automatic startup is supported only for a host on this machine");
-        }
-    }
-
     private static void startServer(WebConsoleConfig config) throws IOException {
         final String javaExecutable = resolveJavaExecutable();
         final List<String> command = new ArrayList<>();
@@ -331,8 +263,6 @@ public final class WebConsoleClient implements AutoCloseable {
         command.add("-cp");
         command.add(System.getProperty("java.class.path"));
         command.add(SbkWebConsoleMain.class.getName());
-        command.add("-host");
-        command.add(config.host);
         command.add("-port");
         command.add(Integer.toString(config.port));
         command.add("-minutes");
@@ -357,42 +287,6 @@ public final class WebConsoleClient implements AutoCloseable {
             }
         }
         return List.copyOf(arguments);
-    }
-
-    private static String localHostname() {
-        try {
-            return InetAddress.getLocalHost().getHostName();
-        } catch (IOException ex) {
-            return "";
-        }
-    }
-
-    private static List<InetAddress> localAddresses() {
-        final List<InetAddress> addresses = new ArrayList<>();
-        try {
-            final InetAddress primaryAddress = InetAddress.getLocalHost();
-            if (!primaryAddress.isAnyLocalAddress() && !primaryAddress.isLoopbackAddress()
-                    && !primaryAddress.isLinkLocalAddress()) {
-                return List.of(primaryAddress);
-            }
-        } catch (IOException ex) {
-            // Fall back to interface enumeration when the local hostname cannot be resolved.
-        }
-        try {
-            final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            if (interfaces == null) {
-                return addresses;
-            }
-            while (interfaces.hasMoreElements()) {
-                final Enumeration<InetAddress> interfaceAddresses = interfaces.nextElement().getInetAddresses();
-                while (interfaceAddresses.hasMoreElements()) {
-                    addresses.add(interfaceAddresses.nextElement());
-                }
-            }
-        } catch (SocketException ex) {
-            return List.of();
-        }
-        return addresses;
     }
 
     private static URI runUri(String host, int port, String runId) {

@@ -173,15 +173,15 @@ endpoint in the separately deployed [SBK Dashboard](https://github.com/kmgowda/s
 [PrometheusLogger and SBK Dashboard guide](../docs/PROMETHEUS_LOGGER.md) for dashboard setup, Compose networking,
 registration, tags, retention, and troubleshooting.
 
-Select `-out GemWebLogger` for dependency-free aggregate graphs. The web console uses plain HTTP and listens on all
-interfaces at port 9720 by default; open `http://127.0.0.1:9720` locally or
-`http://<sbk-gem-host>:9720` remotely. Remote SBK processes still use `GrpcLogger`; the embedded SBM publishes the
+Select `-out GemWebLogger` for dependency-free aggregate graphs. The web console uses plain HTTP and listens only on
+`127.0.0.1` at port 9720 by default; open it locally or use an SSH tunnel from a remote browser. Remote SBK processes
+still use `GrpcLogger`; the embedded SBM publishes the
 combined cluster result to the Local Web Console. Web console
 options are listed by `sbk-gem -out GemWebLogger -help` and are forwarded only to the local SBM logger. A running
 idle web console is reused, but an active SBK, SBM, or SBK-GEM WebLogger owner causes SBK-GEM to exit with a clear
 ownership error. After a run, graphs remain available while a browser is connected; the unused web console exits
-after one minute. Local Web Console HTTP access does not use SBK-GEM's SSH connections and is not encrypted; expose it only
-on a trusted benchmark network.
+after one minute. Local Web Console browser access does not automatically use SBK-GEM's SSH connections; create a
+separate tunnel when needed.
 
 See the [WebLogger guide](../docs/WEB_LOGGER.md) for web console options, ownership and shutdown behavior, network
 security, and complete SBK, SBM, and SBK-GEM examples.

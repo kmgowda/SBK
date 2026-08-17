@@ -23,13 +23,12 @@ public final class SbkWebConsoleMain {
     /**
      * Starts the Local Web Console server and waits until the process is terminated.
      *
-     * @param args {@code -host}, {@code -port}, and {@code -minutes} options
+     * @param args {@code -port} and {@code -minutes} options
      * @throws IOException if the server cannot start
      * @throws InterruptedException if the process is interrupted
      * @throws IllegalArgumentException if an option or value is invalid
      */
     public static void main(String[] args) throws IOException, InterruptedException {
-        String host = "0.0.0.0";
         int port = 9720;
         int minutes = 180;
         for (int index = 0; index < args.length; index += 2) {
@@ -37,13 +36,12 @@ public final class SbkWebConsoleMain {
                 throw new IllegalArgumentException("Missing Local Web Console option value for " + args[index]);
             }
             switch (args[index]) {
-                case "-host" -> host = args[index + 1];
                 case "-port" -> port = Integer.parseInt(args[index + 1]);
                 case "-minutes" -> minutes = Integer.parseInt(args[index + 1]);
                 default -> throw new IllegalArgumentException("Unknown Local Web Console option " + args[index]);
             }
         }
-        final WebConsoleServer webConsoleServer = new WebConsoleServer(host, port, retentionSnapshots(minutes));
+        final WebConsoleServer webConsoleServer = new WebConsoleServer(port, retentionSnapshots(minutes));
         Runtime.getRuntime().addShutdownHook(new Thread(webConsoleServer::close));
         webConsoleServer.start();
         webConsoleServer.awaitTermination();

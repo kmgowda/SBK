@@ -37,16 +37,16 @@ final class WebLoggerWebConsoleTest {
 
     @Test
     void webLoggerPublishesOnlyRegularIntervalResults() throws Exception {
-        try (WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 4)) {
+        try (WebConsoleServer server = new WebConsoleServer(0, 4)) {
             server.start();
             final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
             final WebLogger logger = new WebLogger();
             final SbkParameters parameters = new SbkParameters("web-console-test");
             logger.addArgs(parameters);
+            assertFalse(parameters.hasOption("webhost"));
+            assertFalse(parameters.hasOption("webstart"));
             parameters.parseArgs(new String[]{"-writers", "1", "-size", "100",
-                    "-webhost", "127.0.0.1", "-webport",
-                    Integer.toString(server.getAddress().getPort()),
-                    "-webstart", "false", "-webopen", "false"});
+                    "-webport", Integer.toString(server.getAddress().getPort()), "-webopen", "false"});
             logger.parseArgs(parameters);
 
             logger.open(parameters, "File", Action.Writing, new NanoSeconds());
