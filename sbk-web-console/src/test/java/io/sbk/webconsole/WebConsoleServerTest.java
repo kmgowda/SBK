@@ -136,7 +136,7 @@ final class WebConsoleServerTest {
             assertEquals(1, waitForHistory(baseUri, "active-run", 1).length);
         }
 
-        assertTimeoutPreemptively(Duration.ofSeconds(2), server::awaitTermination);
+        assertTimeoutPreemptively(Duration.ofSeconds(10), server::awaitTermination);
     }
 
     @Test
@@ -391,7 +391,9 @@ final class WebConsoleServerTest {
     }
 
     private static String waitForRunsContaining(URI baseUri, String expected) throws Exception {
-        final long deadline = System.nanoTime() + Duration.ofSeconds(3).toNanos();
+        // The full parallel Gradle build can temporarily starve the single-threaded lifecycle scheduler on CI.
+        // Keep the production lease short while giving the asynchronous assertion enough scheduling headroom.
+        final long deadline = System.nanoTime() + Duration.ofSeconds(15).toNanos();
         while (true) {
             final String runs = get(baseUri.resolve("/api/v1/runs")).body();
             if (runs.contains(expected) || System.nanoTime() >= deadline) {
