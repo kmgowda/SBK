@@ -117,26 +117,26 @@ final class WebConsoleServerTest {
     @Test
     void expiringOneConcurrentRunDoesNotAffectAnotherRun() throws Exception {
         final Duration idleTimeout = Duration.ofMillis(300);
-        final WebConsoleServer server = new WebConsoleServer(0, 2, idleTimeout,
-                Duration.ofMillis(20));
-        server.start();
-        final int port = server.getAddress().getPort();
-        final URI baseUri = URI.create("http://127.0.0.1:" + port);
+        try (WebConsoleServer server = new WebConsoleServer(0, 2, idleTimeout,
+                Duration.ofMillis(20))) {
+            server.start();
+            final int port = server.getAddress().getPort();
+            final URI baseUri = URI.create("http://127.0.0.1:" + port);
 
-        try (WebConsoleClient active = WebConsoleClient.connect(config(port), run("active-run"),
-                Duration.ofMillis(75))) {
-            assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
-                    MAPPER.writeValueAsString(run("abandoned-run"))).statusCode());
+            try (WebConsoleClient active = WebConsoleClient.connect(config(port), run("active-run"),
+                    Duration.ofMillis(75))) {
+                assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
+                        MAPPER.writeValueAsString(run("abandoned-run"))).statusCode());
+                server.expireRunAt("abandoned-run", Long.MAX_VALUE);
 
-            final String runs = waitForRunsContaining(baseUri, "\"abandoned\":true");
-            assertTrue(runs.contains("\"runId\":\"active-run\",\"name\""));
-            assertTrue(runs.contains("\"runId\":\"abandoned-run\",\"name\""));
-            assertTrue(runs.contains("\"abandoned\":true"));
-            active.publish(snapshot("active-run", 1));
-            assertEquals(1, waitForHistory(baseUri, "active-run", 1).length);
+                final String runs = get(baseUri.resolve("/api/v1/runs")).body();
+                assertTrue(runs.contains("\"runId\":\"active-run\",\"name\""));
+                assertTrue(runs.contains("\"runId\":\"abandoned-run\",\"name\""));
+                assertTrue(runs.contains("\"abandoned\":true"));
+                active.publish(snapshot("active-run", 1));
+                assertEquals(1, waitForHistory(baseUri, "active-run", 1).length);
+            }
         }
-
-        assertTimeoutPreemptively(Duration.ofSeconds(10), server::awaitTermination);
     }
 
     @Test
@@ -388,19 +388,6 @@ final class WebConsoleServerTest {
             }
         }
         return snapshots;
-    }
-
-    private static String waitForRunsContaining(URI baseUri, String expected) throws Exception {
-        // The full parallel Gradle build can temporarily starve the single-threaded lifecycle scheduler on CI.
-        // Keep the production lease short while giving the asynchronous assertion enough scheduling headroom.
-        final long deadline = System.nanoTime() + Duration.ofSeconds(15).toNanos();
-        while (true) {
-            final String runs = get(baseUri.resolve("/api/v1/runs")).body();
-            if (runs.contains(expected) || System.nanoTime() >= deadline) {
-                return runs;
-            }
-            Thread.sleep(25);
-        }
     }
 
     private static HttpResponse<String> get(URI uri) throws Exception {

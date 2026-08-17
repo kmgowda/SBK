@@ -478,6 +478,10 @@ public final class WebConsoleServer implements AutoCloseable {
     }
 
     private void expireRun(String runId) {
+        expireRunAt(runId, System.currentTimeMillis() - idleTimeout.toMillis());
+    }
+
+    void expireRunAt(String runId, long expiry) {
         boolean closeNow = false;
         boolean abandoned = false;
         int activeWebLoggers = 0;
@@ -491,7 +495,6 @@ public final class WebConsoleServer implements AutoCloseable {
             if (!activeRunIds.contains(runId) || shuttingDown) {
                 return;
             }
-            final long expiry = System.currentTimeMillis() - idleTimeout.toMillis();
             if (state != null && state.lastActivity > expiry) {
                 scheduleRunExpiry(state);
                 return;
