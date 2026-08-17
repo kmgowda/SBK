@@ -70,6 +70,7 @@ final class WebLoggerWebConsoleTest {
             final String runId;
             try {
                 runId = activeRunId(baseUri);
+                assertTrue(get(baseUri.resolve("/api/v1/runs")).body().contains("\"name\":\"SBK File\""));
                 emitResult(logger, false, 10);
                 assertEquals(1, waitForHistory(baseUri, runId, 1).length);
                 emitResult(logger, true, 1000);
@@ -85,6 +86,47 @@ final class WebLoggerWebConsoleTest {
             assertEquals(10, history[0].performance().records());
             assertFalse(historyJson.contains("\"total\""));
         }
+    }
+
+    @Test
+    void webLoggersGenerateUniqueRunsOnTheSamePort() throws Exception {
+        try (WebConsoleServer server = new WebConsoleServer(0, 4)) {
+            server.start();
+            final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
+            final WebLogger fileLogger = new WebLogger();
+            final WebLogger minioLogger = new WebLogger();
+            final SbkParameters fileParameters = webParameters("file-web-console-test",
+                    server.getAddress().getPort(), fileLogger);
+            final SbkParameters minioParameters = webParameters("minio-web-console-test",
+                    server.getAddress().getPort(), minioLogger);
+
+            fileLogger.open(fileParameters, "File", Action.Writing, new NanoSeconds());
+            minioLogger.open(minioParameters, "MinIO", Action.Reading, new NanoSeconds());
+            try {
+                final List<?> runs = MAPPER.readValue(get(baseUri.resolve("/api/v1/runs")).body(), List.class);
+                assertEquals(2, runs.size());
+                final String runsJson = MAPPER.writeValueAsString(runs);
+                assertTrue(runsJson.contains("\"name\":\"SBK File\""));
+                assertTrue(runsJson.contains("\"name\":\"SBK MinIO\""));
+                final Map<?, ?> firstView = (Map<?, ?>) runs.get(0);
+                final Map<?, ?> secondView = (Map<?, ?>) runs.get(1);
+                final Map<?, ?> firstRun = (Map<?, ?>) firstView.get("run");
+                final Map<?, ?> secondRun = (Map<?, ?>) secondView.get("run");
+                assertFalse(firstRun.get("runId").equals(secondRun.get("runId")));
+            } finally {
+                fileLogger.close(fileParameters);
+                minioLogger.close(minioParameters);
+            }
+        }
+    }
+
+    private static SbkParameters webParameters(String applicationName, int port, WebLogger logger) throws Exception {
+        final SbkParameters parameters = new SbkParameters(applicationName);
+        logger.addArgs(parameters);
+        parameters.parseArgs(new String[]{"-writers", "1", "-size", "100",
+                "-webport", Integer.toString(port), "-webopen", "false"});
+        logger.parseArgs(parameters);
+        return parameters;
     }
 
     private static WebConsoleSnapshot[] waitForHistory(URI baseUri, String runId, int expected) throws Exception {

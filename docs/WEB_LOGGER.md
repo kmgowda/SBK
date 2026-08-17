@@ -93,7 +93,7 @@ Logger options appear only after selecting the WebLogger class. Treat generated 
 | `-webopen true\|false` | `true` | Ask the local desktop to open the Local Web Console run URL |
 | `-websnapshotminutes N` | `180` | Minutes of interval snapshots retained for each run (three hours by default) |
 | `-webtimeoutminutes N` | `1` | Idle minutes without an active benchmark or browser before the Local Web Console exits |
-| `-boardname NAME` | empty | Optional display name that identifies the benchmark board in the Local Web Console |
+| `-boardname NAME` | `<application> <storage>` | Optional display name that identifies the benchmark board in the Local Web Console |
 
 SBK, SBM, and SBK-GEM always probe `127.0.0.1` on the configured port. They reuse a compatible console already
 listening there and otherwise start `SbkWebConsoleMain` automatically. A different service or an older, incompatible
@@ -101,39 +101,39 @@ web console on the configured port is never treated as the SBK web console. When
 existing idle timeout remains in effect; changing `-webtimeoutminutes` requires starting a new console process,
 typically on a different `-webport` or after the old process exits.
 
-## Server ownership and shutdown
+When `-boardname` is omitted or blank, the logger generates a readable name from the application and storage class,
+such as `SBK File`, `SBM MinIO`, or `SBK-GEM Kafka`. Every run also has an independent UUID used by its direct URL,
+history, heartbeat, and event stream, so display names do not need to be unique.
 
-One web console server accepts one active `WebLogger`, `SbmWebLogger`, or `GemWebLogger` benchmark at a time. This
-prevents unrelated runs from being presented as one active experiment. A second active benchmark exits with an
-ownership error identifying the current run and occupied port, and recommends
-`-webport <different-port>`. Selecting another port starts an independent `SbkWebConsoleMain`, allowing
-multiple web consoles to run in parallel without mixing their benchmark streams.
+## Concurrent runs and shutdown
+
+One web console server accepts multiple active `WebLogger`, `SbmWebLogger`, and `GemWebLogger` benchmarks on the same
+port. Each run is isolated by its UUID and appears separately in the browser's automatically refreshed benchmark
+selector. Its logged `/?run=<uuid>` URL opens that run directly. Selecting another port still starts an independent
+`SbkWebConsoleMain` when a separate console process is desired.
 
 The server lifecycle is:
 
 1. The first WebLogger application starts a server when one is not already reachable.
-2. A compatible idle server is reused; another server process is not started.
-3. The active logger renews its run lease every 15 seconds. Publishing a measurement snapshot also renews the same
-   lease, so normal reporting traffic needs no separate heartbeat.
+2. A compatible server is reused even while other benchmarks are active; another server process is not started.
+3. Every active logger independently renews its run lease every 15 seconds. Publishing a measurement snapshot also
+   renews that run's lease, so normal reporting traffic needs no separate heartbeat.
 4. When the benchmark finishes normally, its bounded interval history remains in server memory. Completion is
    tracked as run metadata rather than as a cumulative performance snapshot.
-5. If the benchmark process disappears without completing its run, the configured idle timeout without a snapshot
-   or logger heartbeat marks the run as abandoned and releases web console ownership. A new benchmark can then
-   register.
+5. If a benchmark process disappears without completing its run, the configured idle timeout without a snapshot
+   or logger heartbeat marks only that run as abandoned. Other active runs continue unaffected.
 6. An open browser renews a separate lightweight lease every 15 seconds, keeping completed or abandoned graphs
    available.
 7. If a browser connects during the idle grace period, the pending shutdown is cancelled while that
    browser remains connected.
-8. If SBK, SBM, or SBK-GEM connects during the grace period, it becomes the active run and cancels the pending
-   shutdown.
-9. When an abandoned run has no attached browser, the server exits as soon as the configured run lease expires.
-   In every other idle state, the server exits after the configured timeout with neither benchmark nor browser
-   activity. The default is one minute.
+8. If SBK, SBM, or SBK-GEM connects during the grace period, its new run cancels the pending shutdown.
+9. The server exits only after every run is completed or abandoned and there has been no browser activity for the
+   configured timeout. If the last active run expires with no attached browser, the server can exit immediately
+   because that run has already been inactive for the timeout. The default is one minute.
 
 Closing a browser releases its lease. If a browser or network disappears without a clean close, the lease expires
 from its last renewal, so a dead TCP connection cannot keep the process alive indefinitely. The logger and browser
-leases are independent: an attached browser preserves old graphs, but it cannot retain ownership for a dead
-benchmark.
+leases are independent: an attached browser preserves old graphs, but it cannot keep a dead benchmark run active.
 
 ## Distributed WebLogger modes
 

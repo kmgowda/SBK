@@ -23,7 +23,9 @@ point. It does not depend on the SBK benchmark harness, PerL, SBM, or SBK-GEM.
 
 The application-specific `WebLogger`, `SbmWebLogger`, and `GemWebLogger`
 adapters remain in their owning modules and publish periodic summaries through
-this module.
+this module. One server accepts multiple simultaneous benchmark runs on the
+same port. Every run has an independent UUID, history, event stream, and lease,
+and the browser run selector keeps their metrics separate.
 
 Build and run the standalone server:
 

@@ -64,7 +64,8 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
                 "Idle minutes without a benchmark or browser before Local Web Console exits; default: "
                         + config.timeoutMinutes);
         params.addOption(BOARD_NAME_OPTION, true,
-                "Optional display name for the benchmark board in Local Web Console; default: empty");
+                "Optional display name for the benchmark board in Local Web Console"
+                        + "; default: <application> <storage>");
     }
 
     /**
@@ -101,7 +102,7 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
      * @param action      benchmark action
      * @param timeUnit    latency time unit
      * @param percentiles configured percentile labels
-     * @throws IOException if another benchmark is already using the web console
+     * @throws IOException if the web console cannot register this benchmark run
      */
     public void open(String source, String storage, Action action, TimeUnit timeUnit, double[] percentiles)
             throws IOException {
@@ -109,7 +110,8 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
         this.percentiles = percentiles.clone();
         this.runId = UUID.randomUUID().toString();
         final String version = Objects.requireNonNullElse(Sbk.class.getPackage().getImplementationVersion(), "dev");
-        final WebConsoleRun run = new WebConsoleRun(runId, config.name, source, storage, action.name(),
+        final String boardName = resolveBoardName(config.name, source, storage);
+        final WebConsoleRun run = new WebConsoleRun(runId, boardName, source, storage, action.name(),
                 timeUnit.name(), version, System.getProperty("java.runtime.version"), System.currentTimeMillis());
         try {
             client = WebConsoleClient.connect(config, run);
@@ -236,6 +238,11 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
             client.close();
             client = null;
         }
+    }
+
+    static String resolveBoardName(String configuredName, String source, String storage) {
+        return configuredName == null || configuredName.isBlank()
+                ? source + " " + storage : configuredName;
     }
 
     private static WebConsoleConfig loadConfig() {

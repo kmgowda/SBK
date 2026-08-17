@@ -329,7 +329,7 @@ public final class WebConsoleClient implements AutoCloseable {
     public record WebConsoleLink(String label, URI uri) {
     }
 
-    /** Indicates that another benchmark owns the Local Web Console's single active-run lease. */
+    /** Indicates that Local Web Console run registration conflicts with an existing run identifier. */
     public static final class WebConsoleBusyException extends IOException {
         /**
          * Creates a Local Web Console ownership exception.

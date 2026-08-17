@@ -2511,7 +2511,8 @@ browsers with server-sent events (SSE). The reusable implementation lives in
 the independent `sbk-web-console` module under `io.sbk.webconsole`; the
 application-specific logger adapters remain in `sbk-api`, `sbm`, and `sbk-gem`.
 Its command-line and YML controls use the `-web...`
-option prefix, with `-boardname` supplying the benchmark board's display name.
+option prefix. The benchmark board name defaults to the application plus storage
+class (for example, `SBK File`); `-boardname` supplies an explicit display name.
 The server's idle shutdown timeout defaults to one minute and is configurable
 in whole minutes with `-webtimeoutminutes`; a browser lease or active benchmark keeps
 the server alive.
@@ -2523,7 +2524,7 @@ flowchart LR
     PERL --> TOTAL["Cumulative total from printTotal(...)"]
     PERIODIC --> LOGGER["WebLogger family"]
     TOTAL --> CONSOLE["Console output only"]
-    LOGGER -->|Snapshot or 15-second heartbeat| LEASE["Active-run lease"]
+    LOGGER -->|Snapshot or 15-second heartbeat| LEASE["Independent run lease by UUID"]
     LEASE --> SERVER["Reusable Local Web Console server"]
     SERVER --> HISTORY["Bounded run history"]
     SERVER -->|SSE| BROWSER["Browser graphs"]
@@ -2538,28 +2539,28 @@ flowchart LR
     class BROWSER,BLEASE view
 ```
 
-Only one benchmark owns a Local Web Console server at a time. Registration starts an
-active-run lease. Each snapshot renews it, and a 15-second client heartbeat
+Multiple benchmarks can share one Local Web Console server and port. Registration creates an
+independent UUID-addressed run lease. Each snapshot renews its own lease, and a 15-second client heartbeat
 renews it during quiet reporting intervals. If neither arrives for the
-configured idle timeout, the server marks the run abandoned and releases
-`activeRunId`; this prevents a crashed SBK, SBM, or SBK-GEM process from
-permanently blocking later runs.
+configured idle timeout, the server marks only that run abandoned; other SBK, SBM, or SBK-GEM runs continue.
 
 The browser has an independent 15-second lease. A fresh browser lease preserves
 the abandoned or completed run's graphs, but does not preserve benchmark
-ownership. If the run lease expires with no browser attached, the server exits
-immediately. Otherwise it remains available until there has been neither an
+activity. When the last run lease expires with no browser attached, the server exits
+immediately. Otherwise it remains available until there has been neither any
 active publisher nor a browser lease for the configured idle timeout.
 
 ```mermaid
 stateDiagram-v2
     [*] --> Idle: Server starts
-    Idle --> Active: Logger registers run
-    Active --> Active: Snapshot or logger heartbeat
-    Active --> Completed: Logger completes normally
-    Active --> Abandoned: No logger activity for idle timeout
-    Abandoned --> Active: New logger registers
-    Completed --> Active: New logger registers
+    Idle --> ActiveRuns: First logger registers
+    ActiveRuns --> ActiveRuns: Another logger registers
+    ActiveRuns --> ActiveRuns: Snapshot or logger heartbeat
+    ActiveRuns --> ActiveRuns: One of multiple runs completes or expires
+    ActiveRuns --> Completed: Last run completes normally
+    ActiveRuns --> Abandoned: Last run expires
+    Abandoned --> ActiveRuns: New logger registers
+    Completed --> ActiveRuns: New logger registers
     Completed --> Retained: Browser lease is active
     Abandoned --> Retained: Browser lease is active
     Completed --> Stopped: No browser for idle timeout

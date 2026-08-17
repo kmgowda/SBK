@@ -345,15 +345,15 @@ match between preparation and reading:
 SBK opens `http://127.0.0.1:9720` in the default browser. The lightweight Local Web Console accepts plain HTTP only
 on the host loopback interface at port 9720, retains the latest 180 minutes of snapshots in memory, and streams new
 summaries with server-sent events. Change that duration with `-websnapshotminutes N`.
-A later SBK process reuses a compatible server already on
-that port. The server accepts one active SBK, SBM, or SBK-GEM benchmark at a time and reports an error if another
-WebLogger benchmark already owns it. Completed graphs remain available while a browser is connected; after the
-benchmark has finished and no browser has been connected for one minute by default, the server exits automatically.
+A later SBK process reuses a compatible server already on that port. Multiple SBK, SBM, and SBK-GEM WebLogger
+benchmarks can publish concurrently to the same server; each receives a unique run URL and remains independently
+selectable in the browser. Completed graphs remain available while a browser is connected; after all benchmarks
+have finished and no browser has been connected for one minute by default, the server exits automatically.
 Change the idle grace period with `-webtimeoutminutes N`. Snapshots and 15-second logger heartbeats
 renew the active-run lease. If a benchmark is killed without completing, the configured idle timeout
-without either signal marks that run abandoned and releases web console ownership; an attached browser may continue
-viewing its graphs without preventing a new run. Use `-webopen false` on headless hosts and `-webport PORT` to select
-another port. Use `-boardname NAME` to give the benchmark board a recognizable display name. The timeout supplied by
+without either signal marks only that run abandoned; other active runs continue unaffected. Use `-webopen false` on
+headless hosts and `-webport PORT` to select another port. Boards default to `<application> <storage>`, such as
+`SBK File`, `SBM MinIO`, or `SBK-GEM Kafka`; use `-boardname NAME` to override that display name. The timeout supplied by
 the process that starts a web console remains in effect when later benchmarks reuse it. From another system, use an
 SSH tunnel to the benchmark host's loopback port.
 Run `sbk -out WebLogger -help` for the complete option set.

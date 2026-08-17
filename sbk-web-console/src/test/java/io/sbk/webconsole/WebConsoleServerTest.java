@@ -92,21 +92,53 @@ final class WebConsoleServerTest {
     }
 
     @Test
-    void rejectsASecondActiveBenchmarkWithOwnershipDetails() throws Exception {
+    void supportsConcurrentBenchmarksOnTheSameWebConsolePort() throws Exception {
         try (WebConsoleServer server = new WebConsoleServer(0, 2)) {
             server.start();
+            final int port = server.getAddress().getPort();
+            final URI baseUri = URI.create("http://127.0.0.1:" + port);
             final WebConsoleConfig config = config(server.getAddress().getPort());
-            try (WebConsoleClient ignored = WebConsoleClient.connect(config, run("active-run"))) {
-                final WebConsoleClient.WebConsoleBusyException exception = assertThrows(
-                        WebConsoleClient.WebConsoleBusyException.class,
-                        () -> WebConsoleClient.connect(config, run("competing-run")));
-                assertTrue(exception.getMessage().contains("Web Console port " + server.getAddress().getPort()));
-                assertTrue(exception.getMessage().contains("already serving active SBK run active-run"));
-                assertTrue(exception.getMessage().contains("only one SBK, SBM, or SBK-GEM"));
-                assertTrue(exception.getMessage().contains("-webport <different-port>"));
-                assertTrue(exception.getMessage().contains("SbkWebConsoleMain"));
+            try (WebConsoleClient file = WebConsoleClient.connect(config, run("file-run"));
+                 WebConsoleClient minio = WebConsoleClient.connect(config, run("minio-run"))) {
+                file.publish(snapshot("file-run", 1));
+                minio.publish(snapshot("minio-run", 2));
+                assertEquals(1, waitForHistory(baseUri, "file-run", 1).length);
+                assertEquals(1, waitForHistory(baseUri, "minio-run", 1).length);
+
+                file.close();
+                minio.publish(snapshot("minio-run", 3));
+                assertEquals(2, waitForHistory(baseUri, "minio-run", 2).length);
+                final String runs = get(baseUri.resolve("/api/v1/runs")).body();
+                assertTrue(runs.contains("\"runId\":\"file-run\""));
+                assertTrue(runs.contains("\"runId\":\"minio-run\""));
             }
         }
+    }
+
+    @Test
+    void expiringOneConcurrentRunDoesNotAffectAnotherRun() throws Exception {
+        final Duration idleTimeout = Duration.ofMillis(300);
+        final WebConsoleServer server = new WebConsoleServer(0, 2, idleTimeout,
+                Duration.ofMillis(20));
+        server.start();
+        final int port = server.getAddress().getPort();
+        final URI baseUri = URI.create("http://127.0.0.1:" + port);
+
+        try (WebConsoleClient active = WebConsoleClient.connect(config(port), run("active-run"),
+                Duration.ofMillis(75))) {
+            assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
+                    MAPPER.writeValueAsString(run("abandoned-run"))).statusCode());
+            Thread.sleep(800);
+
+            final String runs = get(baseUri.resolve("/api/v1/runs")).body();
+            assertTrue(runs.contains("\"runId\":\"active-run\",\"name\""));
+            assertTrue(runs.contains("\"runId\":\"abandoned-run\",\"name\""));
+            assertTrue(runs.contains("\"abandoned\":true"));
+            active.publish(snapshot("active-run", 1));
+            assertEquals(1, waitForHistory(baseUri, "active-run", 1).length);
+        }
+
+        assertTimeoutPreemptively(Duration.ofSeconds(2), server::awaitTermination);
     }
 
     @Test
