@@ -71,7 +71,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for source links, lifecycle det
 
 ## Requirements
 
-- JDK 25
+- JDK 25, either preinstalled or downloaded automatically by the wrapper
 - Git
 - The Gradle wrapper included in the repository; a separate Gradle installation is not required
 - A real backend only when exercising a remote-storage driver
@@ -83,7 +83,30 @@ java -version
 ./gradlew --version
 ```
 
-`SBK_JAVA_HOME` takes precedence over `JAVA_HOME` when the build selects its Java installation.
+The Gradle wrappers resolve a complete JDK 25 in this order:
+
+1. `SBK_JAVA_HOME`;
+2. `JAVA_HOME`;
+3. a JDK 25 available through `PATH`; and
+4. the SBK-managed JDK cache.
+
+If none is available, `gradlew` downloads the pinned OpenJDK 25 release,
+verifies its SHA-256 checksum, and installs it without administrator access in
+`${XDG_CACHE_HOME:-$HOME/.cache}/sbk/jdks` on Unix or
+`%LOCALAPPDATA%\SBK\jdks` on Windows. Later wrapper invocations reuse that
+installation. Set `SBK_JAVA_CACHE_DIR` to select a different cache directory.
+Automatic installation supports Linux x64/AArch64, macOS x64/AArch64, and
+Windows x64. Other platforms can use a manually installed JDK through
+`SBK_JAVA_HOME`.
+An explicitly configured but invalid `SBK_JAVA_HOME` or `JAVA_HOME` is treated
+as an error so a configuration mistake is never hidden by an automatic
+download.
+
+Generated launchers for `sbk`, `sbk-yal`, `sbm`, `sbk-gem`, and `sbk-gem-yal`
+use the same selection order and managed cache. They do not download Java at
+application startup; run the Gradle wrapper once to populate the cache, or set
+`SBK_JAVA_HOME`/`JAVA_HOME`. The standalone `./install-java` command uses the
+same resolver when an explicit installation step is preferred.
 
 ### Runtime JVM and garbage collector defaults
 
