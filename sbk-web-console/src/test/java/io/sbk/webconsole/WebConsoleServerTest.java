@@ -116,7 +116,7 @@ final class WebConsoleServerTest {
                 assertTrue(exception.getMessage().contains("already serving active SBK run active-run"));
                 assertTrue(exception.getMessage().contains("only one SBK, SBM, or SBK-GEM"));
                 assertTrue(exception.getMessage().contains("-webport <different-port>"));
-                assertTrue(exception.getMessage().contains("WebConsoleMain"));
+                assertTrue(exception.getMessage().contains("SbkWebConsoleMain"));
             }
         }
     }
@@ -338,9 +338,9 @@ final class WebConsoleServerTest {
 
     @Test
     void convertsWebConsoleMinutesToFiveSecondSnapshots() {
-        assertEquals(2160, WebConsoleMain.retentionSnapshots(180));
-        assertEquals(12, WebConsoleMain.retentionSnapshots(1));
-        assertThrows(IllegalArgumentException.class, () -> WebConsoleMain.retentionSnapshots(0));
+        assertEquals(2160, SbkWebConsoleMain.retentionSnapshots(180));
+        assertEquals(12, SbkWebConsoleMain.retentionSnapshots(1));
+        assertThrows(IllegalArgumentException.class, () -> SbkWebConsoleMain.retentionSnapshots(0));
     }
 
     private static WebConsoleSnapshot[] waitForHistory(URI baseUri, String runId, int expected) throws Exception {

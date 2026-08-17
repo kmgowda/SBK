@@ -14,10 +14,10 @@ import java.io.IOException;
 /**
  * Standalone entry point for the reusable SBK Local Web Console server.
  */
-public final class WebConsoleMain {
+public final class SbkWebConsoleMain {
     private static final int DEFAULT_REPORTING_INTERVAL_SECONDS = 5;
 
-    private WebConsoleMain() {
+    private SbkWebConsoleMain() {
     }
 
     /**

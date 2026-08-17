@@ -90,7 +90,7 @@ reporting test.
 | `io.sbk.webconsole.WebConsoleServer` | Local HTTP API, active-run ownership, bounded histories, SSE, and idle shutdown |
 | `io.sbk.webconsole.WebConsoleClient` | Asynchronous snapshot publication, leases, browser links, and standalone-server startup |
 | `WebConsoleRun`, `WebConsoleSnapshot`, `WebConsoleConfig` | Transport and configuration model shared by all WebLogger adapters |
-| `io.sbk.webconsole.WebConsoleMain` | Independent server entry point |
+| `io.sbk.webconsole.SbkWebConsoleMain` | Independent server entry point with an SBK-identifiable JVM process name |
 | `src/main/resources/webconsole` | Browser HTML, CSS, and JavaScript |
 
 This module depends only on generic libraries and the JDK. Application-specific

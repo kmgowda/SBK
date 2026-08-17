@@ -20,7 +20,7 @@ WebLogger displays SBK measurements in the **SBK Local Web Console** without Doc
 local component is intentionally named differently from the separately deployable **SBK Dashboard** project. It uses the same
 periodic interval measurements delivered through `print(...)`, while `printTotal(...)` writes cumulative final totals
 only to the console. Enabling WebLogger therefore does not add measurement sampling or storage-driver work. The web
-console server runs as the `WebConsoleMain` process from the independent `sbk-web-console` module and is
+console server runs as the `SbkWebConsoleMain` process from the independent `sbk-web-console` module and is
 implemented with the JDK HTTP server,
 retains a bounded in-memory history, and sends
 new summaries to browsers with server-sent events (SSE).
@@ -106,7 +106,7 @@ incompatible web console on the configured port is never treated as the SBK web 
 One web console server accepts one active `WebLogger`, `SbmWebLogger`, or `GemWebLogger` benchmark at a time. This
 prevents unrelated runs from being presented as one active experiment. A second active benchmark exits with an
 ownership error identifying the current run and occupied port, and recommends
-`-webport <different-port>`. Selecting another port starts an independent `WebConsoleMain`, allowing
+`-webport <different-port>`. Selecting another port starts an independent `SbkWebConsoleMain`, allowing
 multiple web consoles to run in parallel without mixing their benchmark streams.
 
 The server lifecycle is:

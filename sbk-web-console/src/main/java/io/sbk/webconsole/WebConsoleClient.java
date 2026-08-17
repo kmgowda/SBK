@@ -302,7 +302,7 @@ public final class WebConsoleClient implements AutoCloseable {
         command.addAll(runtimeJvmArgs());
         command.add("-cp");
         command.add(System.getProperty("java.class.path"));
-        command.add(WebConsoleMain.class.getName());
+        command.add(SbkWebConsoleMain.class.getName());
         command.add("-host");
         command.add(config.host);
         command.add("-port");

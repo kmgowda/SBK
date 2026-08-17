@@ -137,7 +137,7 @@ Every generated SBK launcher uses one consolidated JDK 25 runtime profile from
   publishing misleading results.
 
 The same options are applied to `sbk`, `sbk-yal`, `sbm`, `sbk-gem`,
-`sbk-gem-yal`, module launchers, and the `WebConsoleMain` process.
+`sbk-gem-yal`, module launchers, and the `SbkWebConsoleMain` process.
 
 ZGC reserves address space using many memory mappings. On large-memory Linux
 hosts, check `sysctl vm.max_map_count`; if it is too small, JDK 25 prints the
