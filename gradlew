@@ -76,77 +76,9 @@ esac
 
 CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
-# Determine the Java command to use to start the JVM.
-# Check SBK_JAVA_HOME first, then fall back to JAVA_HOME
-if [ -n "$SBK_JAVA_HOME" ] ; then
-    if [ -x "$SBK_JAVA_HOME/jre/sh/java" ] ; then
-        # IBM's JDK on AIX uses strange locations for the executables
-        JAVACMD="$SBK_JAVA_HOME/jre/sh/java"
-    else
-        JAVACMD="$SBK_JAVA_HOME/bin/java"
-    fi
-    if [ ! -x "$JAVACMD" ] ; then
-        die "ERROR: SBK_JAVA_HOME is set to an invalid directory: $SBK_JAVA_HOME
-
-Please set the SBK_JAVA_HOME variable in your environment to match the
-location of your Java installation."
-    fi
-elif [ -n "$JAVA_HOME" ] ; then
-    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
-        # IBM's JDK on AIX uses strange locations for the executables
-        JAVACMD="$JAVA_HOME/jre/sh/java"
-    else
-        JAVACMD="$JAVA_HOME/bin/java"
-    fi
-    if [ ! -x "$JAVACMD" ] ; then
-        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
-
-Please set the JAVA_HOME variable in your environment to match the
-location of your Java installation."
-    fi
-else
-    JAVACMD="java"
-    which java >/dev/null 2>&1 || die "ERROR: SBK_JAVA_HOME and JAVA_HOME are not set and no 'java' command could be found in your PATH.
-
-Please set the SBK_JAVA_HOME or JAVA_HOME variable in your environment to match the
-location of your Java installation."
-fi
-
-# Validate Java version for SBK (requires JDK 25)
-JAVA_VERSION=$("$JAVACMD" -version 2>&1 | head -n 1 | cut -d'"' -f2 | cut -d'.' -f1)
-if [ -z "$JAVA_VERSION" ]; then
-    JAVA_VERSION=$("$JAVACMD" -version 2>&1 | head -n 1 | awk -F '"' '{print $2}' | cut -d'.' -f1)
-fi
-
-if [ "$JAVA_VERSION" -lt 25 ] 2>/dev/null; then
-    echo ""
-    echo "================================================================================"
-    echo "ERROR: SBK requires JDK 25, but found JDK $JAVA_VERSION"
-    echo "================================================================================"
-    echo ""
-    echo "Current Java version: $JAVA_VERSION"
-    echo "Required Java version: 25"
-    echo ""
-    echo "To fix this issue, please set one of the following environment variables:"
-    echo ""
-    if [ -z "$SBK_JAVA_HOME" ]; then
-        echo "  Option 1: Set SBK_JAVA_HOME to point to your JDK 25 installation"
-        echo "           export SBK_JAVA_HOME=/path/to/jdk-25"
-        echo ""
-    fi
-    if [ -z "$JAVA_HOME" ]; then
-        echo "  Option 2: Set JAVA_HOME to point to your JDK 25 installation"
-        echo "           export JAVA_HOME=/path/to/jdk-25"
-        echo ""
-    fi
-    echo "  Option 3: Install JDK 25 and set SBK_JAVA_HOME or JAVA_HOME"
-    echo "           You can use the install-java script: ./install-java"
-    echo ""
-    echo "For more information, see: https://github.com/kmgowda/SBK"
-    echo "================================================================================"
-    echo ""
-    die "Java version mismatch! SBK requires JDK 25, but found JDK $JAVA_VERSION."
-fi
+# Resolve a complete JDK 25, installing a checksum-verified user-local JDK
+# when no configured or system JDK is usable.
+. "$APP_HOME/gradle/sbk-java-bootstrap.sh" || die "Unable to resolve JDK 25."
 
 # Increase the maximum file descriptors if we can.
 if [ "$cygwin" = "false" -a "$darwin" = "false" -a "$nonstop" = "false" ] ; then
