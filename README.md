@@ -102,7 +102,7 @@ An explicitly configured but invalid `SBK_JAVA_HOME` or `JAVA_HOME` is treated
 as an error so a configuration mistake is never hidden by an automatic
 download.
 
-Generated launchers for `sbk`, `sbk-yal`, `sbm`, `sbk-gem`, and `sbk-gem-yal`
+Generated launchers for `sbk`, `sbk-yal`, `sbm`, `sbk-gem`, `sbk-gem-yal`, and `sbk-web-console`
 use the same selection order and managed cache. They do not download Java at
 application startup; run the Gradle wrapper once to populate the cache, or set
 `SBK_JAVA_HOME`/`JAVA_HOME`. The standalone `./install-java` command uses the
@@ -137,7 +137,7 @@ Every generated SBK launcher uses one consolidated JDK 25 runtime profile from
   publishing misleading results.
 
 The same options are applied to `sbk`, `sbk-yal`, `sbm`, `sbk-gem`,
-`sbk-gem-yal`, module launchers, and the `SbkWebConsoleMain` process.
+`sbk-gem-yal`, module launchers, and the `WebConsoleMain` process.
 
 ZGC reserves address space using many memory mappings. On large-memory Linux
 hosts, check `sysctl vm.max_map_count`; if it is too small, JDK 25 prints the
@@ -256,6 +256,7 @@ Always treat `-help` as authoritative because drivers and loggers add their own 
 | Path | Responsibility |
 |---|---|
 | `perl/` | Performance Logger library: queues, latency windows, histograms, percentiles, and metrics |
+| `sbk-web-console/` | Independent Local Web Console server/client runtime, protocol DTOs, and browser resources |
 | `sbk-api/` | Storage and logger SPIs, CLI parsing, payload types, workers, and benchmark lifecycle |
 | `drivers/<name>/` | Backend-specific adapters |
 | `sbm/` | gRPC service that aggregates measurements from SBK clients |
@@ -263,7 +264,8 @@ Always treat `-help` as authoritative because drivers and loggers add their own 
 | `sbk-yal/` | YML-to-SBK argument adapter |
 | `sbk-gem-yal/` | YML-to-SBK-GEM argument adapter |
 
-The dependency direction is `perl <- sbk-api <- drivers`. SBM depends on `sbk-api`; SBK-GEM depends on SBM. The YML launchers wrap their corresponding programmatic APIs.
+The dependency direction is `perl <- sbk-api <- drivers` and `sbk-web-console <- sbk-api`. SBM depends on
+`sbk-api`; SBK-GEM depends on SBM. The YML launchers wrap their corresponding programmatic APIs.
 
 ## Drivers and output loggers
 

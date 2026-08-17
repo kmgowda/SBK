@@ -9,6 +9,8 @@
  */
 package io.sbk.webconsole;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Configuration for the SBK Local Web Console.
  */
@@ -24,6 +26,8 @@ public final class WebConsoleConfig {
     /** Number of minutes of snapshots retained for each benchmark run. */
     public int minutes;
     /** Optional display name for the benchmark board. */
+    @SuppressFBWarnings(value = "UUF_UNUSED_PUBLIC_OR_PROTECTED_FIELD",
+            justification = "The sbk-api WebConsoleLoggerSupport adapter reads and writes this public configuration")
     public String name;
 
     /**

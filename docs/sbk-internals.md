@@ -219,7 +219,7 @@ This document walks through each of those pieces in turn.
 
 ## 2. The ecosystem at a glance
 
-SBK is a multi-project Gradle build. The six modules listed in
+SBK is a multi-project Gradle build. The seven modules listed in
 [settings.gradle](../settings.gradle) form two layers — a
 **library/SPI layer** and a **launcher layer** — plus a distributed
 **aggregator** and **orchestrator**.
@@ -228,6 +228,7 @@ SBK is a multi-project Gradle build. The six modules listed in
 flowchart TB
     subgraph LIB["📚 Library and SPI layer"]
         PERL["<b>PerL</b><br/>Performance Logger<br/>(latency windows, histograms,<br/>lock-free queues)"]
+        WEB["<b>sbk-web-console</b><br/>Independent Local Web Console<br/>(HTTP protocol, histories,<br/>browser resources)"]
         API["<b>sbk-api</b><br/>Benchmark harness<br/>(Storage SPI, Logger SPI,<br/>SbkBenchmark)"]
     end
 
@@ -247,6 +248,7 @@ flowchart TB
     end
 
     API -->|depends on| PERL
+    API -->|publishes through| WEB
     SBK -->|uses| API
     YAL -->|uses| API
     GEM -->|uses| API
@@ -260,7 +262,7 @@ flowchart TB
     classDef dist fill:#fef3c7,stroke:#a16207,color:#000
     classDef drv fill:#fce7f3,stroke:#9d174d,color:#000
 
-    class PERL,API lib
+    class PERL,WEB,API lib
     class SBK,YAL launch
     class SBM,GEM,GYAL dist
     class DRV drv
@@ -271,6 +273,7 @@ flowchart TB
 | Module | Full name | Purpose |
 |---|---|---|
 | `perl` | **PerL** — Performance Logger | Storage-agnostic latency-recording library: lock-free queues, sliding windows, and exact primitive-map / array latency recorders. |
+| `sbk-web-console` | **SBK Local Web Console** | Independent HTTP server/client protocol, bounded histories, browser resources, and standalone launcher shared by the WebLogger adapters. |
 | `sbk-api` | **SBK** — Storage Benchmark Kit (harness layer) | The benchmarking harness: defines the `Storage<T>` SPI for drivers, orchestrates writers and readers, parses CLI args, integrates loggers. |
 | `sbk-yal` | **SBK-YAL** — SBK YML Arguments Loader | YML-driven launcher; converts a `.yml` benchmark spec into `sbk-api` args. |
 | `sbm` | **SBM** — Storage Benchmark Monitor | Standalone gRPC server that *aggregates* latency histograms from many SBK clients into a cluster-wide view. Listens on port 9717. Speaks the **SBP** (Storage Benchmark Protocol). |
@@ -2504,8 +2507,10 @@ totals to the console but do not publish those totals to the Local Web Console.
 The logger does not sample storage operations or insert HTTP work into the
 writer/reader hot path. The server keeps a bounded history--180 minutes by
 default, configurable with `-webminutes`--and streams new summaries to
-browsers with server-sent events (SSE). The implementation lives in
-`io.sbk.webconsole`; its command-line and YML controls use the `-web...`
+browsers with server-sent events (SSE). The reusable implementation lives in
+the independent `sbk-web-console` module under `io.sbk.webconsole`; the
+application-specific logger adapters remain in `sbk-api`, `sbm`, and `sbk-gem`.
+Its command-line and YML controls use the `-web...`
 option prefix, with `-boardname` supplying the benchmark board's display name.
 
 ```mermaid

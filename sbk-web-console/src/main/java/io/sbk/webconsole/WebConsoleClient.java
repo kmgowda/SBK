@@ -11,7 +11,8 @@ package io.sbk.webconsole;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import tools.jackson.databind.ObjectMapper;
-import io.sbk.system.Printer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.Desktop;
 import java.awt.GraphicsEnvironment;
@@ -42,6 +43,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Non-blocking Local Web Console publisher used by SBK loggers.
  */
 public final class WebConsoleClient implements AutoCloseable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebConsoleClient.class);
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(1);
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(2);
     private static final Duration START_TIMEOUT = Duration.ofSeconds(10);
@@ -189,7 +191,7 @@ public final class WebConsoleClient implements AutoCloseable {
                 publisherThread.join(REQUEST_TIMEOUT.toMillis());
             }
             if (publisherThread.isAlive()) {
-                Printer.log.warn("SBK Local Web Console publisher did not stop; skipping completion notification "
+                LOGGER.warn("SBK Local Web Console publisher did not stop; skipping completion notification "
                         + "to avoid racing an in-flight snapshot (the run lease will expire)");
                 return;
             }
@@ -197,7 +199,7 @@ public final class WebConsoleClient implements AutoCloseable {
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         } catch (IOException ex) {
-            Printer.log.warn("SBK Local Web Console completion notification failed: {}",
+            LOGGER.warn("SBK Local Web Console completion notification failed: {}",
                     Objects.toString(ex.getMessage(), ex.getClass().getSimpleName()));
         }
     }
@@ -220,7 +222,7 @@ public final class WebConsoleClient implements AutoCloseable {
                 Thread.currentThread().interrupt();
                 return;
             } catch (IOException ex) {
-                Printer.log.warn("SBK Local Web Console publication failed: {}",
+                LOGGER.warn("SBK Local Web Console publication failed: {}",
                         Objects.toString(ex.getMessage(), ex.getClass().getSimpleName()));
                 nextHeartbeat = System.nanoTime() + leaseHeartbeatInterval.toNanos();
             }
@@ -252,7 +254,7 @@ public final class WebConsoleClient implements AutoCloseable {
             try {
                 Desktop.getDesktop().browse(getRunUri());
             } catch (IOException | UnsupportedOperationException ex) {
-                Printer.log.info("Open the SBK Local Web Console at {}", getRunUri());
+                LOGGER.info("Open the SBK Local Web Console at {}", getRunUri());
             }
         });
     }
@@ -300,7 +302,7 @@ public final class WebConsoleClient implements AutoCloseable {
         command.addAll(runtimeJvmArgs());
         command.add("-cp");
         command.add(System.getProperty("java.class.path"));
-        command.add(SbkWebConsoleMain.class.getName());
+        command.add(WebConsoleMain.class.getName());
         command.add("-host");
         command.add(config.host);
         command.add("-port");
