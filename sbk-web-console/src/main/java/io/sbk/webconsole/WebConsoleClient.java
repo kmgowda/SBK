@@ -11,26 +11,20 @@ package io.sbk.webconsole;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import tools.jackson.databind.ObjectMapper;
-import io.sbk.system.Printer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.Desktop;
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -42,6 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Non-blocking Local Web Console publisher used by SBK loggers.
  */
 public final class WebConsoleClient implements AutoCloseable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebConsoleClient.class);
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(1);
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(2);
     private static final Duration START_TIMEOUT = Duration.ofSeconds(10);
@@ -65,14 +60,14 @@ public final class WebConsoleClient implements AutoCloseable {
         this.pending = new ArrayBlockingQueue<>(1);
         this.closing = new AtomicBoolean(false);
         this.leaseHeartbeatInterval = leaseHeartbeatInterval;
-        this.runLinks = webConsoleLinks(config.host, config.port, runId, localHostname(), localAddresses());
+        this.runLinks = WebConsoleLinks.localLinks(config.port, runId);
         postJson("/api/v1/runs", run, 201);
         this.publisherThread = Thread.ofVirtual().name("sbk-web-console-publisher-" + runId)
                 .start(this::publishLoop);
     }
 
     /**
-     * Connects to a compatible Local Web Console, starting one when configured and necessary.
+     * Connects to a compatible Local Web Console, starting one when necessary.
      *
      * @param config web console configuration
      * @param run    benchmark run metadata
@@ -90,18 +85,19 @@ public final class WebConsoleClient implements AutoCloseable {
         if (leaseHeartbeatInterval.isZero() || leaseHeartbeatInterval.isNegative()) {
             throw new IllegalArgumentException("Local Web Console lease heartbeat interval must be greater than zero");
         }
-        final URI baseUri = URI.create("http://" + connectionHost(config.host) + ":" + config.port);
+        final URI baseUri = URI.create("http://" + WebConsoleServer.LOCAL_HOST + ":" + config.port);
         final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).build();
         final Health health = health(httpClient, baseUri);
         if (health == Health.INCOMPATIBLE) {
             throw new IOException("Port " + config.port + " is not a compatible SBK Local Web Console");
         }
         if (health == Health.UNAVAILABLE) {
-            if (!config.start) {
-                throw new IOException("SBK Local Web Console is unavailable and automatic startup is disabled");
-            }
+            final Path logPath = backgroundLogPath(config.port);
+            LOGGER.info("Starting a new SBK Web Console on port {}. Background log: {}", config.port, logPath);
             startServer(config);
             waitUntilHealthy(httpClient, baseUri);
+        } else {
+            LOGGER.info("Using the existing SBK Web Console on port {}", config.port);
         }
         final WebConsoleClient client = new WebConsoleClient(httpClient, baseUri, config, run,
                 leaseHeartbeatInterval);
@@ -109,17 +105,6 @@ public final class WebConsoleClient implements AutoCloseable {
             client.openBrowser();
         }
         return client;
-    }
-
-    /**
-     * Selects a reachable local address when the server is configured to listen on every network interface.
-     * Wildcard addresses are valid bind addresses but are not suitable web console destinations for HTTP clients.
-     *
-     * @param host configured web console host or bind address
-     * @return host used by the Local Web Console publisher and browser URL
-     */
-    static String connectionHost(String host) {
-        return "0.0.0.0".equals(host) ? "127.0.0.1" : host;
     }
 
     /**
@@ -132,35 +117,12 @@ public final class WebConsoleClient implements AutoCloseable {
     }
 
     /**
-     * Returns copy-paste Local Web Console links reachable through the configured bind address.
+     * Returns the locally and remotely usable Web Console links for this benchmark run.
      *
-     * @return local link followed by hostname and available host-address links
+     * @return discovered host links
      */
     public List<WebConsoleLink> getRunLinks() {
         return new ArrayList<>(runLinks);
-    }
-
-    static List<WebConsoleLink> webConsoleLinks(String bindHost, int port, String runId, String hostname,
-            List<InetAddress> addresses) {
-        final boolean wildcard = "0.0.0.0".equals(bindHost);
-        final Map<String, String> hosts = new LinkedHashMap<>();
-        hosts.put(connectionHost(bindHost), wildcard ? "Local" : "Configured");
-        if (wildcard) {
-            if (hostname != null && !hostname.isBlank()) {
-                hosts.putIfAbsent(hostname, "Hostname");
-            }
-            addresses.stream()
-                    .filter(Inet4Address.class::isInstance)
-                    .filter(address -> !address.isAnyLocalAddress() && !address.isLoopbackAddress()
-                            && !address.isLinkLocalAddress() && !address.isMulticastAddress())
-                    .sorted(Comparator.comparing(InetAddress::isSiteLocalAddress)
-                            .thenComparing(InetAddress::getHostAddress))
-                    .forEach(address -> hosts.putIfAbsent(address.getHostAddress(),
-                            address.isSiteLocalAddress() ? "Private IP" : "Public IP"));
-        }
-        final List<WebConsoleLink> links = new ArrayList<>(hosts.size());
-        hosts.forEach((host, label) -> links.add(new WebConsoleLink(label, runUri(host, port, runId))));
-        return List.copyOf(links);
     }
 
     /**
@@ -189,7 +151,7 @@ public final class WebConsoleClient implements AutoCloseable {
                 publisherThread.join(REQUEST_TIMEOUT.toMillis());
             }
             if (publisherThread.isAlive()) {
-                Printer.log.warn("SBK Local Web Console publisher did not stop; skipping completion notification "
+                LOGGER.warn("SBK Local Web Console publisher did not stop; skipping completion notification "
                         + "to avoid racing an in-flight snapshot (the run lease will expire)");
                 return;
             }
@@ -197,7 +159,7 @@ public final class WebConsoleClient implements AutoCloseable {
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         } catch (IOException ex) {
-            Printer.log.warn("SBK Local Web Console completion notification failed: {}",
+            LOGGER.warn("SBK Local Web Console completion notification failed: {}",
                     Objects.toString(ex.getMessage(), ex.getClass().getSimpleName()));
         }
     }
@@ -220,7 +182,7 @@ public final class WebConsoleClient implements AutoCloseable {
                 Thread.currentThread().interrupt();
                 return;
             } catch (IOException ex) {
-                Printer.log.warn("SBK Local Web Console publication failed: {}",
+                LOGGER.warn("SBK Local Web Console publication failed: {}",
                         Objects.toString(ex.getMessage(), ex.getClass().getSimpleName()));
                 nextHeartbeat = System.nanoTime() + leaseHeartbeatInterval.toNanos();
             }
@@ -252,7 +214,7 @@ public final class WebConsoleClient implements AutoCloseable {
             try {
                 Desktop.getDesktop().browse(getRunUri());
             } catch (IOException | UnsupportedOperationException ex) {
-                Printer.log.info("Open the SBK Local Web Console at {}", getRunUri());
+                LOGGER.info("Open the SBK Local Web Console at {}", getRunUri());
             }
         });
     }
@@ -301,17 +263,30 @@ public final class WebConsoleClient implements AutoCloseable {
         command.add("-cp");
         command.add(System.getProperty("java.class.path"));
         command.add(SbkWebConsoleMain.class.getName());
-        command.add("-host");
-        command.add(config.host);
         command.add("-port");
         command.add(Integer.toString(config.port));
-        command.add("-minutes");
-        command.add(Integer.toString(config.minutes));
+        command.add("-websnapshotminutes");
+        command.add(Integer.toString(config.snapshotMinutes));
+        command.add("-webtimeoutminutes");
+        command.add(Integer.toString(config.timeoutMinutes));
+        final Path logPath = backgroundLogPath(config.port);
+        Files.createDirectories(Objects.requireNonNull(logPath.getParent()));
         final ProcessBuilder builder = new ProcessBuilder(command);
         builder.redirectInput(ProcessBuilder.Redirect.PIPE);
-        builder.redirectOutput(ProcessBuilder.Redirect.DISCARD);
-        builder.redirectError(ProcessBuilder.Redirect.DISCARD);
+        builder.redirectOutput(ProcessBuilder.Redirect.appendTo(logPath.toFile()));
+        builder.redirectError(ProcessBuilder.Redirect.appendTo(logPath.toFile()));
         builder.start();
+    }
+
+    /**
+     * Returns the persistent log used by an automatically started Web Console process.
+     *
+     * @param port Web Console HTTP port
+     * @return normalized background log path
+     */
+    static Path backgroundLogPath(int port) {
+        return Path.of(System.getProperty("user.home"), ".sbk", "logs",
+                "sbk-web-console-" + port + ".log").toAbsolutePath().normalize();
     }
 
     private static List<String> runtimeJvmArgs() {
@@ -327,50 +302,6 @@ public final class WebConsoleClient implements AutoCloseable {
             }
         }
         return List.copyOf(arguments);
-    }
-
-    private static String localHostname() {
-        try {
-            return InetAddress.getLocalHost().getHostName();
-        } catch (IOException ex) {
-            return "";
-        }
-    }
-
-    private static List<InetAddress> localAddresses() {
-        final List<InetAddress> addresses = new ArrayList<>();
-        try {
-            final InetAddress primaryAddress = InetAddress.getLocalHost();
-            if (!primaryAddress.isAnyLocalAddress() && !primaryAddress.isLoopbackAddress()
-                    && !primaryAddress.isLinkLocalAddress()) {
-                return List.of(primaryAddress);
-            }
-        } catch (IOException ex) {
-            // Fall back to interface enumeration when the local hostname cannot be resolved.
-        }
-        try {
-            final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            if (interfaces == null) {
-                return addresses;
-            }
-            while (interfaces.hasMoreElements()) {
-                final Enumeration<InetAddress> interfaceAddresses = interfaces.nextElement().getInetAddresses();
-                while (interfaceAddresses.hasMoreElements()) {
-                    addresses.add(interfaceAddresses.nextElement());
-                }
-            }
-        } catch (SocketException ex) {
-            return List.of();
-        }
-        return addresses;
-    }
-
-    private static URI runUri(String host, int port, String runId) {
-        try {
-            return new URI("http", null, host, port, "/", "run=" + runId, null);
-        } catch (URISyntaxException ex) {
-            throw new IllegalArgumentException("Invalid Local Web Console address: " + host, ex);
-        }
     }
 
     @SuppressFBWarnings(value = "ENV_USE_PROPERTY_INSTEAD_OF_ENV",
@@ -403,7 +334,7 @@ public final class WebConsoleClient implements AutoCloseable {
     public record WebConsoleLink(String label, URI uri) {
     }
 
-    /** Indicates that another benchmark owns the Local Web Console's single active-run lease. */
+    /** Indicates that Local Web Console run registration conflicts with an existing run identifier. */
     public static final class WebConsoleBusyException extends IOException {
         /**
          * Creates a Local Web Console ownership exception.

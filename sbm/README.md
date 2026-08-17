@@ -85,13 +85,14 @@ Start the dependency-free SBK Local Web Console instead of Prometheus:
 ./sbm/build/install/sbm/bin/sbm -out SbmWebLogger -class file -action r
 ```
 
-The Local Web Console uses plain HTTP and listens on all interfaces at port 9720 by default. Open
-`http://127.0.0.1:9720` locally or `http://<sbm-host>:9720` remotely. It displays aggregate SBM connection,
-workload, throughput, request-pressure, timeout, and latency-percentile data. It permits one active WebLogger benchmark,
-keeps completed graphs while a browser remains connected, and exits after one minute with neither an active publisher
-nor browser activity.
-An existing idle web console is reused; an active SBK, SBM, or SBK-GEM web console owner causes SBM to exit with an
-ownership error. The web console does not start SSH or enable TLS; expose it only on a trusted benchmark network.
+The Local Web Console uses plain HTTP and listens on all IPv4 interfaces at port 9720 by default. At benchmark start
+and completion, SBM prints run URLs for `localhost`, loopback, hostname, and every usable host IPv4 address. It
+displays aggregate SBM connection, workload, throughput, request-pressure, timeout, and latency-percentile data.
+Multiple SBK, SBM, and SBK-GEM
+WebLogger benchmarks can share the same port, with independent run URLs and browser selections. The console keeps
+completed graphs while a browser remains connected and exits after the configured idle timeout with neither an
+active publisher nor browser activity. The default idle timeout is one minute. Remote access requires suitable
+routing and firewall rules; because the service has no authentication or TLS, use a trusted network or SSH tunnel.
 
 See the [WebLogger guide](../docs/WEB_LOGGER.md) for web console options, lifecycle, browser leases, security, and a
 complete distributed example.

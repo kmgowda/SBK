@@ -48,6 +48,7 @@ flowchart TB
 ```mermaid
 flowchart LR
     PERL[perl]
+    WEB[sbk-web-console]
     API[sbk-api]
     DRIVERS[drivers projects]
     ROOT[root distribution]
@@ -57,6 +58,7 @@ flowchart LR
     GYAL[sbk-gem-yal]
 
     API --> PERL
+    API --> WEB
     DRIVERS --> API
     ROOT --> API
     ROOT --> DRIVERS
@@ -69,6 +71,7 @@ flowchart LR
 | Module | Owns | Does not own |
 |---|---|---|
 | `perl` | Timestamp abstraction, concurrent queues, latency windows, percentiles, periodic/total recording | Storage semantics or CLI driver configuration |
+| `sbk-web-console` | Local HTTP console server/client protocol, bounded histories, standalone process, and browser resources | Benchmark workers, measurement aggregation, or application-specific logger adapters |
 | `sbk-api` | Storage/logger SPIs, bootstrap, common CLI, worker orchestration, payload types | Vendor SDK calls |
 | `drivers/*` | Backend configuration and I/O adaptation | Benchmark scheduling or general percentile computation |
 | `sbm` | SBP/gRPC ingestion and multi-client aggregation | Remote process launch |

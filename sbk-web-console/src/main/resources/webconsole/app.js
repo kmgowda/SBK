@@ -10,7 +10,8 @@
 'use strict';
 
 const colors = ['#39d5ff', '#46e6a7', '#9b8cff', '#ffb454'];
-const state = {run: null, completed: false, abandoned: false, snapshots: [], events: null, historyTimer: null};
+const state = {run: null, runs: [], completed: false, abandoned: false, snapshots: [], events: null,
+    historyTimer: null};
 const elements = Object.fromEntries([...document.querySelectorAll('[id]')].map(item => [item.id, item]));
 const generatedBrowserId = globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function'
     ? globalThis.crypto.randomUUID()
@@ -213,6 +214,7 @@ async function loadRuns() {
     if (!response.ok) throw new Error(`Runs request returned HTTP ${response.status}`);
     const runs = await response.json();
     runs.sort((a, b) => b.run.startedAt - a.run.startedAt);
+    state.runs = runs;
     elements.runs.innerHTML = '';
     runs.forEach(view => {
         const option = document.createElement('option');
@@ -221,12 +223,24 @@ async function loadRuns() {
         elements.runs.append(option);
     });
     if (!runs.length) return;
-    const requested = new URLSearchParams(location.search).get('run');
+    const requested = (state.run ? state.run.runId : null)
+        || new URLSearchParams(location.search).get('run');
     const selected = runs.find(item => item.run.runId === requested) || runs[0];
     elements.runs.value = selected.run.runId;
-    elements.runs.onchange = () => selectRun(runs.find(item => item.run.runId === elements.runs.value));
+    elements.runs.onchange = () => selectRun(
+        state.runs.find(item => item.run.runId === elements.runs.value));
+    if (state.run && state.run.runId === selected.run.runId) {
+        state.completed = selected.completed;
+        state.abandoned = selected.abandoned;
+        update();
+        return;
+    }
     await selectRun(selected);
 }
 
 window.addEventListener('resize', drawAll);
-loadRuns().catch(error => { elements.subtitle.textContent = `Web Console error: ${error.message}`; });
+loadRuns().then(() => {
+    setInterval(() => loadRuns().catch(error => {
+        elements.subtitle.textContent = `Web Console refresh error: ${error.message}`;
+    }), 2000);
+}).catch(error => { elements.subtitle.textContent = `Web Console error: ${error.message}`; });

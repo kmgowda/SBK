@@ -76,12 +76,25 @@ reporting test.
 | `io.sbk.data` | Payload abstraction and built-in representations |
 | `io.sbk.logger` | Logger contracts, counters, request-event hooks |
 | `io.sbk.logger.impl` | System, SLF4J, CSV, Prometheus, and gRPC loggers |
-| `io.sbk.webconsole` | Local Web Console client/server protocol, lifecycle, snapshots, and browser resources |
+| `io.sbk.webconsole` | SBK-specific WebLogger configuration and compatibility entry point |
 | `io.sbk.action` | Workload action selection |
 | `io.sbk.thread` | Executor type selection |
 | `io.sbk.utils` | Argument and general utilities |
 | `src/main/proto` | SBP/gRPC service and message definitions |
 | `src/main/resources` | Harness and logger defaults, banner, logging configuration |
+
+## `sbk-web-console/`
+
+| Package/resource | Responsibility |
+|---|---|
+| `io.sbk.webconsole.WebConsoleServer` | Local HTTP API, active-run ownership, bounded histories, SSE, and idle shutdown |
+| `io.sbk.webconsole.WebConsoleClient` | Asynchronous snapshot publication, leases, browser links, and standalone-server startup |
+| `WebConsoleRun`, `WebConsoleSnapshot`, `WebConsoleConfig` | Transport and configuration model shared by all WebLogger adapters |
+| `io.sbk.webconsole.SbkWebConsoleMain` | Independent server entry point with an SBK-identifiable JVM process name |
+| `src/main/resources/webconsole` | Browser HTML, CSS, and JavaScript |
+
+This module depends only on generic libraries and the JDK. Application-specific
+logger adapters remain in `sbk-api`, `sbm`, and `sbk-gem`.
 
 ## Driver project
 
@@ -159,7 +172,7 @@ Because many vendor drivers require external services, their strongest verificat
 | Timestamp queue algorithm | `TimeStampNode`, `TimeStampMpscQueue`, queue arrays/channels | `./gradlew :perl:concurrencyCheck :perl:timeStampQueuePerformanceTest` |
 | End-to-end queue comparison | `drivers/perlbench`, `SbkParameters`, `SbkBenchmark` | `./gradlew :drivers:perlbench:check :sbk-api:check` |
 | Logger | `RWLogger`, `AbstractRWLogger`, similar implementation | `./gradlew :sbk-api:check` |
-| Local Web Console | `io.sbk.webconsole`, `WebLogger`, `SbmWebLogger`, `GemWebLogger` | `./gradlew :sbk-api:check :sbm:check :sbk-gem:check` |
+| Local Web Console | `sbk-web-console`, `WebLogger`, `SbmWebLogger`, `GemWebLogger` | `./gradlew :sbk-web-console:check :sbk-api:check :sbm:check :sbk-gem:check` |
 | gRPC aggregation | Proto definitions, `GrpcLogger`, `SbmGrpcService` | `./gradlew :sbm:check` |
 | Remote launch | `SbkGem`, `SbkGemBenchmark`, SSH classes | `./gradlew :sbk-gem:check` |
 | Distribution dependency | Root build and pathing JAR | `./gradlew clean :pathingJar installDist --rerun-tasks` |

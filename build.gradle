@@ -249,7 +249,8 @@ allprojects {
     */
 
     tasks.register('generateDockerfiles') {
-        def driversToSkip = ["sbk-api", "perl", "sbm", "sbk-gem", "drivers", "sbk-yal", "sbk-gem-yal"]
+        def driversToSkip = ["sbk-api", "sbk-web-console", "perl", "sbm", "sbk-gem", "drivers", "sbk-yal",
+                             "sbk-gem-yal"]
         def buffer = ""
         def outDir = 'build/dockers'
         def outFile = sbkProjectName + "-" + sbkVersion
@@ -784,6 +785,7 @@ gradle.rootProject {
 
 dependencies {
     api project(":perl")
+    api project(":sbk-web-console")
     api project(":sbk-api")
     api project(":sbk-yal")
     api project(":sbm")

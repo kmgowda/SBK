@@ -9,24 +9,17 @@
  */
 package io.sbk.webconsole;
 
-import io.sbk.action.Action;
-import io.sbk.logger.impl.WebLogger;
-import io.sbk.params.impl.SbkParameters;
-import io.time.NanoSeconds;
 import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
-import java.net.InetAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
 import java.time.Duration;
-import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,7 +33,7 @@ final class WebConsoleServerTest {
 
     @Test
     void reusesRunningServerAndRetainsOnlyConfiguredHistory() throws Exception {
-        try (WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2)) {
+        try (WebConsoleServer server = new WebConsoleServer(0, 2)) {
             server.start();
             final int port = server.getAddress().getPort();
             final WebConsoleConfig config = config(port);
@@ -70,68 +63,86 @@ final class WebConsoleServerTest {
     }
 
     @Test
-    void connectsOverPlainHttpWhenServerListensOnAllInterfaces() throws Exception {
-        try (WebConsoleServer server = new WebConsoleServer("0.0.0.0", 0, 2)) {
+    void bindsToAllIpv4Interfaces() throws Exception {
+        try (WebConsoleServer server = new WebConsoleServer(0, 2)) {
+            assertTrue(server.getAddress().getAddress().isAnyLocalAddress());
+        }
+    }
+
+    @Test
+    void standaloneEntryPointRejectsTheRemovedHostOption() {
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> SbkWebConsoleMain.main(new String[]{"-host", "0.0.0.0"}));
+        assertTrue(exception.getMessage().contains("Unknown Local Web Console option -host"));
+    }
+
+    @Test
+    void standaloneEntryPointRejectsTheRemovedMinutesOption() {
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> SbkWebConsoleMain.main(new String[]{"-minutes", "180"}));
+        assertTrue(exception.getMessage().contains("Unknown Local Web Console option -minutes"));
+    }
+
+    @Test
+    void standaloneEntryPointRejectsNonPositiveIdleTimeout() {
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> SbkWebConsoleMain.main(new String[]{"-webtimeoutminutes", "0"}));
+        assertTrue(exception.getMessage().contains("idle timeout must be greater than zero"));
+    }
+
+    @Test
+    void supportsConcurrentBenchmarksOnTheSameWebConsolePort() throws Exception {
+        try (WebConsoleServer server = new WebConsoleServer(0, 2)) {
             server.start();
+            final int port = server.getAddress().getPort();
+            final URI baseUri = URI.create("http://127.0.0.1:" + port);
             final WebConsoleConfig config = config(server.getAddress().getPort());
-            config.host = "0.0.0.0";
-            try (WebConsoleClient client = WebConsoleClient.connect(config, run("plain-http-run"))) {
-                assertEquals("http", client.getRunUri().getScheme());
-                assertEquals("127.0.0.1", client.getRunUri().getHost());
-                assertTrue(client.getRunLinks().stream().anyMatch(link -> "Hostname".equals(link.label())));
-                assertEquals(200, get(URI.create("http://127.0.0.1:" + server.getAddress().getPort()
-                        + "/api/v1/health")).statusCode());
+            try (WebConsoleClient file = WebConsoleClient.connect(config, run("file-run"));
+                 WebConsoleClient minio = WebConsoleClient.connect(config, run("minio-run"))) {
+                file.publish(snapshot("file-run", 1));
+                minio.publish(snapshot("minio-run", 2));
+                assertEquals(1, waitForHistory(baseUri, "file-run", 1).length);
+                assertEquals(1, waitForHistory(baseUri, "minio-run", 1).length);
+
+                file.close();
+                minio.publish(snapshot("minio-run", 3));
+                assertEquals(2, waitForHistory(baseUri, "minio-run", 2).length);
+                final String runs = get(baseUri.resolve("/api/v1/runs")).body();
+                assertTrue(runs.contains("\"runId\":\"file-run\""));
+                assertTrue(runs.contains("\"runId\":\"minio-run\""));
             }
         }
     }
 
     @Test
-    void createsCopyPasteLinksForHostnameAndHostAddresses() throws Exception {
-        final var links = WebConsoleClient.webConsoleLinks("0.0.0.0", 9720, "test-run", "benchmark-host",
-                java.util.List.of(InetAddress.getByName("127.0.0.1"), InetAddress.getByName("10.2.3.4"),
-                        InetAddress.getByName("8.8.8.8")));
-
-        assertEquals("http://127.0.0.1:9720/?run=test-run", links.get(0).uri().toString());
-        assertTrue(links.stream().anyMatch(link -> "Hostname".equals(link.label())
-                && "benchmark-host".equals(link.uri().getHost())));
-        assertTrue(links.stream().anyMatch(link -> "Public IP".equals(link.label())
-                && "8.8.8.8".equals(link.uri().getHost())));
-        assertTrue(links.stream().anyMatch(link -> "Private IP".equals(link.label())
-                && "10.2.3.4".equals(link.uri().getHost())));
-    }
-
-    @Test
-    void doesNotAdvertiseRemoteLinksForLoopbackBinding() throws Exception {
-        final var links = WebConsoleClient.webConsoleLinks("127.0.0.1", 9720, "test-run", "benchmark-host",
-                java.util.List.of(InetAddress.getByName("10.2.3.4")));
-
-        assertEquals(1, links.size());
-        assertEquals("Configured", links.getFirst().label());
-        assertEquals("127.0.0.1", links.getFirst().uri().getHost());
-    }
-
-    @Test
-    void rejectsASecondActiveBenchmarkWithOwnershipDetails() throws Exception {
-        try (WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2)) {
+    void expiringOneConcurrentRunDoesNotAffectAnotherRun() throws Exception {
+        final Duration idleTimeout = Duration.ofMinutes(1);
+        try (WebConsoleServer server = new WebConsoleServer(0, 2, idleTimeout,
+                Duration.ofMillis(20))) {
             server.start();
-            final WebConsoleConfig config = config(server.getAddress().getPort());
-            try (WebConsoleClient ignored = WebConsoleClient.connect(config, run("active-run"))) {
-                final WebConsoleClient.WebConsoleBusyException exception = assertThrows(
-                        WebConsoleClient.WebConsoleBusyException.class,
-                        () -> WebConsoleClient.connect(config, run("competing-run")));
-                assertTrue(exception.getMessage().contains("Web Console port " + server.getAddress().getPort()));
-                assertTrue(exception.getMessage().contains("already serving active SBK run active-run"));
-                assertTrue(exception.getMessage().contains("only one SBK, SBM, or SBK-GEM"));
-                assertTrue(exception.getMessage().contains("-webport <different-port>"));
-                assertTrue(exception.getMessage().contains("SbkWebConsoleMain"));
+            final int port = server.getAddress().getPort();
+            final URI baseUri = URI.create("http://127.0.0.1:" + port);
+
+            try (WebConsoleClient active = WebConsoleClient.connect(config(port), run("active-run"),
+                    Duration.ofMillis(75))) {
+                assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
+                        MAPPER.writeValueAsString(run("abandoned-run"))).statusCode());
+                server.expireRunAt("abandoned-run", Long.MAX_VALUE);
+
+                final String runs = get(baseUri.resolve("/api/v1/runs")).body();
+                assertTrue(runs.contains("\"runId\":\"active-run\",\"name\""));
+                assertTrue(runs.contains("\"runId\":\"abandoned-run\",\"name\""));
+                assertTrue(runs.contains("\"abandoned\":true"));
+                active.publish(snapshot("active-run", 1));
+                assertEquals(1, waitForHistory(baseUri, "active-run", 1).length);
             }
         }
     }
 
     @Test
     void allowsActiveBenchmarksOnDifferentWebConsolePorts() throws Exception {
-        try (WebConsoleServer firstServer = new WebConsoleServer("127.0.0.1", 0, 2);
-             WebConsoleServer secondServer = new WebConsoleServer("127.0.0.1", 0, 2)) {
+        try (WebConsoleServer firstServer = new WebConsoleServer(0, 2);
+             WebConsoleServer secondServer = new WebConsoleServer(0, 2)) {
             firstServer.start();
             secondServer.start();
             final URI firstBaseUri = URI.create("http://127.0.0.1:" + firstServer.getAddress().getPort());
@@ -151,7 +162,7 @@ final class WebConsoleServerTest {
     @Test
     void retainsCompletedLogsForBrowserThenStopsAfterBrowserDisconnects() throws Exception {
         final Duration idleTimeout = Duration.ofMillis(500);
-        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2, idleTimeout,
+        final WebConsoleServer server = new WebConsoleServer(0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
         final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
@@ -178,7 +189,7 @@ final class WebConsoleServerTest {
     @Test
     void browserConnectingDuringIdleGraceCancelsOriginalShutdown() throws Exception {
         final Duration idleTimeout = Duration.ofSeconds(2);
-        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2, idleTimeout,
+        final WebConsoleServer server = new WebConsoleServer(0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
         final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
@@ -201,8 +212,10 @@ final class WebConsoleServerTest {
 
     @Test
     void benchmarkConnectingDuringIdleGraceCancelsOriginalShutdown() throws Exception {
-        final Duration idleTimeout = Duration.ofSeconds(2);
-        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2, idleTimeout,
+        // Leave enough startup grace for the first loopback request while SpotBugs and other Gradle workers
+        // compete for CPU in the full check task.
+        final Duration idleTimeout = Duration.ofSeconds(5);
+        final WebConsoleServer server = new WebConsoleServer(0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
         final int port = server.getAddress().getPort();
@@ -211,9 +224,9 @@ final class WebConsoleServerTest {
             first.publish(snapshot("first-grace-run", 1));
         }
 
-        Thread.sleep(1000);
+        Thread.sleep(2500);
         try (WebConsoleClient second = WebConsoleClient.connect(config(port), run("second-grace-run"))) {
-            Thread.sleep(1500);
+            Thread.sleep(3000);
             assertEquals(200, get(baseUri.resolve("/api/v1/health")).statusCode());
             second.publish(snapshot("second-grace-run", 2));
             assertEquals(1, waitForHistory(baseUri, "second-grace-run", 1).length);
@@ -225,7 +238,7 @@ final class WebConsoleServerTest {
 
     @Test
     void closesPromptlyWhileBrowserEventStreamIsConnected() throws Exception {
-        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2);
+        final WebConsoleServer server = new WebConsoleServer(0, 2);
         server.start();
         final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
         try (WebConsoleClient client = WebConsoleClient.connect(config(server.getAddress().getPort()),
@@ -242,7 +255,7 @@ final class WebConsoleServerTest {
     @Test
     void abandonedRunWithoutBrowserStopsWebConsole() throws Exception {
         final Duration idleTimeout = Duration.ofMillis(300);
-        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2, idleTimeout,
+        final WebConsoleServer server = new WebConsoleServer(0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
         final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
@@ -256,7 +269,7 @@ final class WebConsoleServerTest {
     @Test
     void abandonedRunRemainsForAttachedBrowserAndReleasesOwnership() throws Exception {
         final Duration idleTimeout = Duration.ofMillis(300);
-        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2, idleTimeout,
+        final WebConsoleServer server = new WebConsoleServer(0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
         final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
@@ -281,7 +294,7 @@ final class WebConsoleServerTest {
     @Test
     void clientHeartbeatRenewsActiveRunLease() throws Exception {
         final Duration idleTimeout = Duration.ofMillis(300);
-        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2, idleTimeout,
+        final WebConsoleServer server = new WebConsoleServer(0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
         final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
@@ -299,7 +312,7 @@ final class WebConsoleServerTest {
     @Test
     void snapshotsRenewActiveRunLease() throws Exception {
         final Duration idleTimeout = Duration.ofMillis(300);
-        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2, idleTimeout,
+        final WebConsoleServer server = new WebConsoleServer(0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
         final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
@@ -319,7 +332,7 @@ final class WebConsoleServerTest {
 
     @Test
     void rejectsSnapshotsAfterRunCompletionWithoutChangingHistory() throws Exception {
-        try (WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2)) {
+        try (WebConsoleServer server = new WebConsoleServer(0, 2)) {
             server.start();
             final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
             assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
@@ -336,7 +349,7 @@ final class WebConsoleServerTest {
 
     @Test
     void webConsoleWithoutBenchmarkOrBrowserStopsAfterIdleTimeout() throws Exception {
-        final WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 2,
+        final WebConsoleServer server = new WebConsoleServer(0, 2,
                 Duration.ofMillis(200), Duration.ofMillis(20));
         server.start();
 
@@ -344,45 +357,24 @@ final class WebConsoleServerTest {
     }
 
     @Test
+    void defaultIdleTimeoutIsOneMinute() {
+        assertEquals(Duration.ofMinutes(1), WebConsoleServer.DEFAULT_IDLE_TIMEOUT);
+    }
+
+    @Test
+    void usesAStablePerPortBackgroundLogPath() {
+        final Path logPath = WebConsoleClient.backgroundLogPath(19720);
+
+        assertEquals("sbk-web-console-19720.log", logPath.getFileName().toString());
+        assertTrue(logPath.isAbsolute());
+        assertTrue(logPath.toString().contains(Path.of(".sbk", "logs").toString()));
+    }
+
+    @Test
     void convertsWebConsoleMinutesToFiveSecondSnapshots() {
         assertEquals(2160, SbkWebConsoleMain.retentionSnapshots(180));
         assertEquals(12, SbkWebConsoleMain.retentionSnapshots(1));
         assertThrows(IllegalArgumentException.class, () -> SbkWebConsoleMain.retentionSnapshots(0));
-    }
-
-    @Test
-    void webLoggerPublishesOnlyRegularIntervalResults() throws Exception {
-        try (WebConsoleServer server = new WebConsoleServer("127.0.0.1", 0, 4)) {
-            server.start();
-            final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
-            final WebLogger logger = new WebLogger();
-            final SbkParameters parameters = new SbkParameters("web-console-test");
-            logger.addArgs(parameters);
-            parameters.parseArgs(new String[]{"-writers", "1", "-size", "100",
-                    "-webhost", "127.0.0.1", "-webport",
-                    Integer.toString(server.getAddress().getPort()),
-                    "-webstart", "false", "-webopen", "false"});
-            logger.parseArgs(parameters);
-
-            logger.open(parameters, "File", Action.Writing, new NanoSeconds());
-            final String runId;
-            try {
-                runId = activeRunId(baseUri);
-                emitResult(logger, false, 10);
-                assertEquals(1, waitForHistory(baseUri, runId, 1).length);
-                emitResult(logger, true, 1000);
-            } finally {
-                logger.close(parameters);
-            }
-
-            final String historyJson =
-                    get(baseUri.resolve("/api/v1/runs/" + runId + "/history")).body();
-            final WebConsoleSnapshot[] history =
-                    MAPPER.readValue(historyJson, WebConsoleSnapshot[].class);
-            assertEquals(1, history.length);
-            assertEquals(10, history[0].performance().records());
-            assertFalse(historyJson.contains("\"total\""));
-        }
     }
 
     private static WebConsoleSnapshot[] waitForHistory(URI baseUri, String runId, int expected) throws Exception {
@@ -412,11 +404,10 @@ final class WebConsoleServerTest {
 
     private static WebConsoleConfig config(int port) {
         final WebConsoleConfig config = new WebConsoleConfig();
-        config.host = "127.0.0.1";
         config.port = port;
-        config.start = false;
         config.open = false;
-        config.minutes = 1;
+        config.snapshotMinutes = 1;
+        config.timeoutMinutes = 1;
         config.name = "test";
         return config;
     }
@@ -435,34 +426,4 @@ final class WebConsoleServerTest {
                         new double[]{50, 99}, new long[]{10, 20}, new long[]{1, 1}));
     }
 
-    private static String activeRunId(URI baseUri) throws Exception {
-        final List<?> runs = MAPPER.readValue(
-                get(baseUri.resolve("/api/v1/runs")).body(), List.class);
-        assertEquals(1, runs.size());
-        final Map<?, ?> view = (Map<?, ?>) runs.getFirst();
-        final Map<?, ?> run = (Map<?, ?>) view.get("run");
-        return run.get("runId").toString();
-    }
-
-    private static void emitResult(WebLogger logger, boolean total, long records) {
-        if (total) {
-            logger.printTotal(System.currentTimeMillis(), 1, 1, 0, 0,
-                    records * 100, 1, records, 1,
-                    0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    5, records * 100, records, records, 1,
-                    10, 1, 20, 0, 0, 0, 0, 0,
-                    new long[]{10, 20}, new long[]{1, 1});
-        } else {
-            logger.print(System.currentTimeMillis(), 1, 1, 0, 0,
-                    records * 100, 1, records, 1,
-                    0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    5, records * 100, records, records, 1,
-                    10, 1, 20, 0, 0, 0, 0, 0,
-                    new long[]{10, 20}, new long[]{1, 1});
-        }
-    }
 }

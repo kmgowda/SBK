@@ -35,7 +35,7 @@ driver SPI.
 
 - **Languages.** Java only (no Kotlin, no Scala). Build with Gradle (wrapper
   in tree: `./gradlew`). JDK 25 required.
-- **Modules.** 6 core modules + 53 enabled storage drivers. The source tree also
+- **Modules.** 7 core modules + 53 enabled storage drivers. The source tree also
   contains disabled drivers and a driver template. Each module is a
   Gradle subproject.
 - **License.** Apache 2.0.
@@ -46,6 +46,7 @@ driver SPI.
 | Module | Role | When you edit it |
 |---|---|---|
 | `perl/` | **PerL** — Performance Logger library (lock-free queues, latency windows, percentile math). Heart of the framework. | Rarely. Only when changing core measurement behaviour. |
+| `sbk-web-console/` | Independent Local Web Console runtime (HTTP server/client, protocol DTOs, UI resources). | When changing shared WebLogger transport or browser behavior. |
 | `sbk-api/` | The benchmark harness. Defines `Storage<T>` SPI, `RWLogger` SPI, `SbkBenchmark`, `Sbk` main bootstrap. | When changing the harness, CLI flags, the SPI, or how loggers work. |
 | `sbm/` | **SBM** — Storage Benchmark Monitor (gRPC aggregator on port 9717). | When changing distributed aggregation. |
 | `sbk-yal/` | YML-driven launcher (single-node). | Rarely. |
@@ -379,7 +380,7 @@ specific action** (not blanket approval):
   the specific developer confirmation required by §3.
 - Force-pushing, rewriting history, or deleting branches.
 
-For everything else inside `drivers/`, `sbk-api/`, `perl/`, `sbm/`,
+For everything else inside `drivers/`, `sbk-web-console/`, `sbk-api/`, `perl/`, `sbm/`,
 `docs/`, and the build files, normal edit-and-verify flow is fine.
 
 ---

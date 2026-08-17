@@ -219,7 +219,7 @@ This document walks through each of those pieces in turn.
 
 ## 2. The ecosystem at a glance
 
-SBK is a multi-project Gradle build. The six modules listed in
+SBK is a multi-project Gradle build. The seven modules listed in
 [settings.gradle](../settings.gradle) form two layers — a
 **library/SPI layer** and a **launcher layer** — plus a distributed
 **aggregator** and **orchestrator**.
@@ -228,6 +228,7 @@ SBK is a multi-project Gradle build. The six modules listed in
 flowchart TB
     subgraph LIB["📚 Library and SPI layer"]
         PERL["<b>PerL</b><br/>Performance Logger<br/>(latency windows, histograms,<br/>lock-free queues)"]
+        WEB["<b>sbk-web-console</b><br/>Independent Local Web Console<br/>(HTTP protocol, histories,<br/>browser resources)"]
         API["<b>sbk-api</b><br/>Benchmark harness<br/>(Storage SPI, Logger SPI,<br/>SbkBenchmark)"]
     end
 
@@ -247,6 +248,7 @@ flowchart TB
     end
 
     API -->|depends on| PERL
+    API -->|publishes through| WEB
     SBK -->|uses| API
     YAL -->|uses| API
     GEM -->|uses| API
@@ -260,7 +262,7 @@ flowchart TB
     classDef dist fill:#fef3c7,stroke:#a16207,color:#000
     classDef drv fill:#fce7f3,stroke:#9d174d,color:#000
 
-    class PERL,API lib
+    class PERL,WEB,API lib
     class SBK,YAL launch
     class SBM,GEM,GYAL dist
     class DRV drv
@@ -271,6 +273,7 @@ flowchart TB
 | Module | Full name | Purpose |
 |---|---|---|
 | `perl` | **PerL** — Performance Logger | Storage-agnostic latency-recording library: lock-free queues, sliding windows, and exact primitive-map / array latency recorders. |
+| `sbk-web-console` | **SBK Local Web Console** | Independent HTTP server/client protocol, bounded histories, browser resources, and standalone launcher shared by the WebLogger adapters. |
 | `sbk-api` | **SBK** — Storage Benchmark Kit (harness layer) | The benchmarking harness: defines the `Storage<T>` SPI for drivers, orchestrates writers and readers, parses CLI args, integrates loggers. |
 | `sbk-yal` | **SBK-YAL** — SBK YML Arguments Loader | YML-driven launcher; converts a `.yml` benchmark spec into `sbk-api` args. |
 | `sbm` | **SBM** — Storage Benchmark Monitor | Standalone gRPC server that *aggregates* latency histograms from many SBK clients into a cluster-wide view. Listens on port 9717. Speaks the **SBP** (Storage Benchmark Protocol). |
@@ -2503,10 +2506,19 @@ periodic interval snapshots. Their `printTotal(...)` methods print cumulative
 totals to the console but do not publish those totals to the Local Web Console.
 The logger does not sample storage operations or insert HTTP work into the
 writer/reader hot path. The server keeps a bounded history--180 minutes by
-default, configurable with `-webminutes`--and streams new summaries to
-browsers with server-sent events (SSE). The implementation lives in
-`io.sbk.webconsole`; its command-line and YML controls use the `-web...`
-option prefix, with `-boardname` supplying the benchmark board's display name.
+default, configurable with `-websnapshotminutes`--and streams new summaries to
+browsers with server-sent events (SSE). The reusable implementation lives in
+the independent `sbk-web-console` module under `io.sbk.webconsole`; the
+application-specific logger adapters remain in `sbk-api`, `sbm`, and `sbk-gem`.
+Its command-line and YML controls use the `-web...`
+option prefix. The benchmark board name defaults to the application plus storage
+class (for example, `SBK File`); `-boardname` supplies an explicit display name.
+The server's idle shutdown timeout defaults to one minute and is configurable
+in whole minutes with `-webtimeoutminutes`; a browser lease or active benchmark keeps
+the server alive. The server binds to all IPv4 interfaces. Each logger discovers
+the console host's `localhost`, loopback, hostname, and usable private/public IPv4
+run URLs once, and prints the same URL set when the benchmark starts and completes.
+Logger-to-server control traffic continues to use loopback.
 
 ```mermaid
 flowchart LR
@@ -2515,7 +2527,7 @@ flowchart LR
     PERL --> TOTAL["Cumulative total from printTotal(...)"]
     PERIODIC --> LOGGER["WebLogger family"]
     TOTAL --> CONSOLE["Console output only"]
-    LOGGER -->|Snapshot or 15-second heartbeat| LEASE["Active-run lease"]
+    LOGGER -->|Snapshot or 15-second heartbeat| LEASE["Independent run lease by UUID"]
     LEASE --> SERVER["Reusable Local Web Console server"]
     SERVER --> HISTORY["Bounded run history"]
     SERVER -->|SSE| BROWSER["Browser graphs"]
@@ -2530,33 +2542,34 @@ flowchart LR
     class BROWSER,BLEASE view
 ```
 
-Only one benchmark owns a Local Web Console server at a time. Registration starts an
-active-run lease. Each snapshot renews it, and a 15-second client heartbeat
-renews it during quiet reporting intervals. If neither arrives for one minute,
-the server marks the run abandoned and releases `activeRunId`; this prevents a
-crashed SBK, SBM, or SBK-GEM process from permanently blocking later runs.
+Multiple benchmarks can share one Local Web Console server and port. Registration creates an
+independent UUID-addressed run lease. Each snapshot renews its own lease, and a 15-second client heartbeat
+renews it during quiet reporting intervals. If neither arrives for the
+configured idle timeout, the server marks only that run abandoned; other SBK, SBM, or SBK-GEM runs continue.
 
 The browser has an independent 15-second lease. A fresh browser lease preserves
 the abandoned or completed run's graphs, but does not preserve benchmark
-ownership. If the run lease expires with no browser attached, the server exits
-immediately. Otherwise it remains available until there has been neither an
-active publisher nor a browser lease for one minute.
+activity. When the last run lease expires with no browser attached, the server exits
+immediately. Otherwise it remains available until there has been neither any
+active publisher nor a browser lease for the configured idle timeout.
 
 ```mermaid
 stateDiagram-v2
     [*] --> Idle: Server starts
-    Idle --> Active: Logger registers run
-    Active --> Active: Snapshot or logger heartbeat
-    Active --> Completed: Logger completes normally
-    Active --> Abandoned: No logger activity for one minute
-    Abandoned --> Active: New logger registers
-    Completed --> Active: New logger registers
+    Idle --> ActiveRuns: First logger registers
+    ActiveRuns --> ActiveRuns: Another logger registers
+    ActiveRuns --> ActiveRuns: Snapshot or logger heartbeat
+    ActiveRuns --> ActiveRuns: One of multiple runs completes or expires
+    ActiveRuns --> Completed: Last run completes normally
+    ActiveRuns --> Abandoned: Last run expires
+    Abandoned --> ActiveRuns: New logger registers
+    Completed --> ActiveRuns: New logger registers
     Completed --> Retained: Browser lease is active
     Abandoned --> Retained: Browser lease is active
-    Completed --> Stopped: No browser for one minute
+    Completed --> Stopped: No browser for idle timeout
     Abandoned --> Stopped: No browser at lease expiry
     Retained --> Retained: Browser heartbeat
-    Retained --> Stopped: No publisher or browser for one minute
+    Retained --> Stopped: No publisher or browser for idle timeout
     Stopped --> [*]
 ```
 

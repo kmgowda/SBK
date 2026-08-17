@@ -27,16 +27,14 @@ import java.util.UUID;
  * Shared Local Web Console configuration, lifecycle, and snapshot construction for SBK, SBM, and GEM loggers.
  */
 public final class WebConsoleLoggerSupport implements AutoCloseable {
-    /** Web console host CLI option. */
-    public static final String HOST_OPTION = "webhost";
     /** Web console port CLI option. */
     public static final String PORT_OPTION = "webport";
-    /** Web console automatic-start CLI option. */
-    public static final String START_OPTION = "webstart";
     /** Web console browser-open CLI option. */
     public static final String OPEN_OPTION = "webopen";
     /** Web console history duration CLI option. */
-    public static final String MINUTES_OPTION = "webminutes";
+    public static final String SNAPSHOT_MINUTES_OPTION = "websnapshotminutes";
+    /** Web console idle-timeout CLI option. */
+    public static final String TIMEOUT_OPTION = "webtimeoutminutes";
     /** Web console benchmark-board name CLI option. */
     public static final String BOARD_NAME_OPTION = "boardname";
     private static final String CONFIG_FILE = "webconsole.properties";
@@ -58,13 +56,16 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
      */
     public void addArgs(InputOptions params) {
         config = loadConfig();
-        params.addOption(HOST_OPTION, true, "Local Web Console host; default: " + config.host);
         params.addOption(PORT_OPTION, true, "Local Web Console port; default: " + config.port);
-        params.addOption(START_OPTION, true, "Start Local Web Console when unavailable; default: " + config.start);
         params.addOption(OPEN_OPTION, true, "Open Local Web Console in the local browser; default: " + config.open);
-        params.addOption(MINUTES_OPTION, true, "Minutes of snapshots retained per run; default: " + config.minutes);
+        params.addOption(SNAPSHOT_MINUTES_OPTION, true,
+                "Minutes of snapshots retained per run; default: " + config.snapshotMinutes);
+        params.addOption(TIMEOUT_OPTION, true,
+                "Idle minutes without a benchmark or browser before Local Web Console exits; default: "
+                        + config.timeoutMinutes);
         params.addOption(BOARD_NAME_OPTION, true,
-                "Optional display name for the benchmark board in Local Web Console; default: empty");
+                "Optional display name for the benchmark board in Local Web Console"
+                        + "; default: <application> <storage>");
     }
 
     /**
@@ -75,18 +76,21 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
      */
     public void parseArgs(ParsedOptions params) {
         ensureConfig();
-        config.host = params.getOptionValue(HOST_OPTION, config.host);
         config.port = Integer.parseInt(params.getOptionValue(PORT_OPTION, Integer.toString(config.port)));
-        config.start = Boolean.parseBoolean(params.getOptionValue(START_OPTION, Boolean.toString(config.start)));
         config.open = Boolean.parseBoolean(params.getOptionValue(OPEN_OPTION, Boolean.toString(config.open)));
-        config.minutes = Integer.parseInt(params.getOptionValue(MINUTES_OPTION,
-                Integer.toString(config.minutes)));
+        config.snapshotMinutes = Integer.parseInt(params.getOptionValue(SNAPSHOT_MINUTES_OPTION,
+                Integer.toString(config.snapshotMinutes)));
+        config.timeoutMinutes = Integer.parseInt(params.getOptionValue(TIMEOUT_OPTION,
+                Integer.toString(config.timeoutMinutes)));
         config.name = params.getOptionValue(BOARD_NAME_OPTION, Objects.requireNonNullElse(config.name, ""));
         if (config.port < 1 || config.port > 65535) {
             throw new IllegalArgumentException("Local Web Console port must be between 1 and 65535");
         }
-        if (config.minutes < 1) {
+        if (config.snapshotMinutes < 1) {
             throw new IllegalArgumentException("Local Web Console history minutes must be greater than zero");
+        }
+        if (config.timeoutMinutes < 1) {
+            throw new IllegalArgumentException("Local Web Console idle timeout minutes must be greater than zero");
         }
     }
 
@@ -98,7 +102,7 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
      * @param action      benchmark action
      * @param timeUnit    latency time unit
      * @param percentiles configured percentile labels
-     * @throws IOException if another benchmark is already using the web console
+     * @throws IOException if the web console cannot register this benchmark run
      */
     public void open(String source, String storage, Action action, TimeUnit timeUnit, double[] percentiles)
             throws IOException {
@@ -106,12 +110,12 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
         this.percentiles = percentiles.clone();
         this.runId = UUID.randomUUID().toString();
         final String version = Objects.requireNonNullElse(Sbk.class.getPackage().getImplementationVersion(), "dev");
-        final WebConsoleRun run = new WebConsoleRun(runId, config.name, source, storage, action.name(),
+        final String boardName = resolveBoardName(config.name, source, storage);
+        final WebConsoleRun run = new WebConsoleRun(runId, boardName, source, storage, action.name(),
                 timeUnit.name(), version, System.getProperty("java.runtime.version"), System.currentTimeMillis());
         try {
             client = WebConsoleClient.connect(config, run);
-            client.getRunLinks().forEach(link -> Printer.log.info("SBK Local Web Console ({}): {}",
-                    link.label(), link.uri()));
+            logRunLinks(client);
         } catch (WebConsoleClient.WebConsoleBusyException ex) {
             client = null;
             Printer.log.error("{} WebLogger cannot start: {}", source, ex.getMessage());
@@ -209,8 +213,8 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
      * @return web console options
      */
     public String[] getOptionsArgs() {
-        return new String[]{"-" + HOST_OPTION, "-" + PORT_OPTION, "-" + START_OPTION, "-" + OPEN_OPTION,
-                "-" + MINUTES_OPTION, "-" + BOARD_NAME_OPTION};
+        return new String[]{"-" + PORT_OPTION, "-" + OPEN_OPTION, "-" + SNAPSHOT_MINUTES_OPTION,
+                "-" + TIMEOUT_OPTION, "-" + BOARD_NAME_OPTION};
     }
 
     /**
@@ -220,9 +224,10 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
      */
     public String[] getParsedArgs() {
         ensureConfig();
-        return new String[]{"-" + HOST_OPTION, config.host, "-" + PORT_OPTION, Integer.toString(config.port),
-                "-" + START_OPTION, Boolean.toString(config.start), "-" + OPEN_OPTION,
-                Boolean.toString(config.open), "-" + MINUTES_OPTION, Integer.toString(config.minutes),
+        return new String[]{"-" + PORT_OPTION, Integer.toString(config.port), "-" + OPEN_OPTION,
+                Boolean.toString(config.open), "-" + SNAPSHOT_MINUTES_OPTION,
+                Integer.toString(config.snapshotMinutes),
+                "-" + TIMEOUT_OPTION, Integer.toString(config.timeoutMinutes),
                 "-" + BOARD_NAME_OPTION, Objects.requireNonNullElse(config.name, "")};
     }
 
@@ -230,8 +235,19 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
     public void close() {
         if (client != null) {
             client.close();
+            logRunLinks(client);
             client = null;
         }
+    }
+
+    private static void logRunLinks(WebConsoleClient webConsoleClient) {
+        webConsoleClient.getRunLinks().forEach(link -> Printer.log.info("SBK Web Console ({}): {}",
+                link.label(), link.uri()));
+    }
+
+    static String resolveBoardName(String configuredName, String source, String storage) {
+        return configuredName == null || configuredName.isBlank()
+                ? source + " " + storage : configuredName;
     }
 
     private static WebConsoleConfig loadConfig() {

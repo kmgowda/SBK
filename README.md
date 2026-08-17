@@ -102,7 +102,7 @@ An explicitly configured but invalid `SBK_JAVA_HOME` or `JAVA_HOME` is treated
 as an error so a configuration mistake is never hidden by an automatic
 download.
 
-Generated launchers for `sbk`, `sbk-yal`, `sbm`, `sbk-gem`, and `sbk-gem-yal`
+Generated launchers for `sbk`, `sbk-yal`, `sbm`, `sbk-gem`, `sbk-gem-yal`, and `sbk-web-console`
 use the same selection order and managed cache. They do not download Java at
 application startup; run the Gradle wrapper once to populate the cache, or set
 `SBK_JAVA_HOME`/`JAVA_HOME`. The standalone `./install-java` command uses the
@@ -256,6 +256,7 @@ Always treat `-help` as authoritative because drivers and loggers add their own 
 | Path | Responsibility |
 |---|---|
 | `perl/` | Performance Logger library: queues, latency windows, histograms, percentiles, and metrics |
+| `sbk-web-console/` | Independent Local Web Console server/client runtime, protocol DTOs, and browser resources |
 | `sbk-api/` | Storage and logger SPIs, CLI parsing, payload types, workers, and benchmark lifecycle |
 | `drivers/<name>/` | Backend-specific adapters |
 | `sbm/` | gRPC service that aggregates measurements from SBK clients |
@@ -263,7 +264,8 @@ Always treat `-help` as authoritative because drivers and loggers add their own 
 | `sbk-yal/` | YML-to-SBK argument adapter |
 | `sbk-gem-yal/` | YML-to-SBK-GEM argument adapter |
 
-The dependency direction is `perl <- sbk-api <- drivers`. SBM depends on `sbk-api`; SBK-GEM depends on SBM. The YML launchers wrap their corresponding programmatic APIs.
+The dependency direction is `perl <- sbk-api <- drivers` and `sbk-web-console <- sbk-api`. SBM depends on
+`sbk-api`; SBK-GEM depends on SBM. The YML launchers wrap their corresponding programmatic APIs.
 
 ## Drivers and output loggers
 
@@ -340,21 +342,26 @@ match between preparation and reading:
   -out WebLogger
 ```
 
-SBK opens `http://127.0.0.1:9720` in the default browser. By default, the lightweight Local Web Console accepts plain HTTP
-on all network interfaces at port 9720, retains the latest 180 minutes of snapshots in
-memory and streams new summaries with server-sent events. Change that duration with `-webminutes N`.
-A later SBK process reuses a compatible server already on
-that port. Startup prints copy-paste web console links for loopback, hostname, and available public/private host IPv4
-addresses. The server accepts one active SBK, SBM, or SBK-GEM benchmark at a time and reports an error if another
-WebLogger benchmark already owns it. Completed graphs remain available while a browser is connected; after the
-benchmark has finished and no browser has been connected for one minute, the server exits automatically. Snapshots
-and 15-second logger heartbeats renew the active-run lease. If a benchmark is killed without completing, one minute
-without either signal marks that run abandoned and releases web console ownership; an attached browser may continue
-viewing its graphs without preventing a new run. Use
-`-webopen false` on headless hosts, `-webstart false` to require a pre-existing server, and
-`-webport PORT` to select another port. Use `-boardname NAME` to give the benchmark board a recognizable display
-name. No SSH tunnel, TLS certificate, or HTTPS setup is enabled or required
-by default. From another system, open `http://<benchmark-host>:9720`; use this only on a trusted benchmark network.
+SBK opens the run URL in the default browser. The lightweight Local Web Console accepts plain HTTP on all IPv4
+interfaces at port 9720, retains the latest 180 minutes of snapshots in memory, and streams new summaries with
+server-sent events. At benchmark start and completion, SBK prints run-specific URLs for `localhost`, IPv4 loopback,
+the hostname, and every usable private or public IPv4 address discovered on the console host. Change the retention
+duration with `-websnapshotminutes N`.
+A later SBK process reuses a compatible server already on that port. Multiple SBK, SBM, and SBK-GEM WebLogger
+benchmarks can publish concurrently to the same server; each receives a unique run URL and remains independently
+selectable in the browser. Completed graphs remain available while a browser is connected; after all benchmarks
+have finished and no browser has been connected for one minute by default, the server exits automatically.
+WebLogger reports whether it starts a new console or uses the existing process. Automatically started consoles append
+lifecycle, WebLogger count, browser/client count, and exit diagnostics to
+`$HOME/.sbk/logs/sbk-web-console-<port>.log`.
+Change the idle grace period with `-webtimeoutminutes N`. Snapshots and 15-second logger heartbeats
+renew the active-run lease. If a benchmark is killed without completing, the configured idle timeout
+without either signal marks only that run abandoned; other active runs continue unaffected. Use `-webopen false` on
+headless hosts and `-webport PORT` to select another port. Boards default to `<application> <storage>`, such as
+`SBK File`, `SBM MinIO`, or `SBK-GEM Kafka`; use `-boardname NAME` to override that display name. The timeout supplied by
+the process that starts a web console remains in effect when later benchmarks reuse it. A remote browser can use a
+printed hostname or IP URL when routing and firewall rules permit. Because the console has no authentication or TLS,
+expose it only on a trusted benchmark network or use an SSH tunnel.
 Run `sbk -out WebLogger -help` for the complete option set.
 See the [WebLogger guide](docs/WEB_LOGGER.md) for every option, Local Web Console lifecycle, distributed usage, security,
 and troubleshooting.
@@ -369,8 +376,7 @@ sbm -out SbmWebLogger -class file -action r
 sbk-gem -out GemWebLogger -class file -nodes host1,host2 -writers 2 -size 4096 -seconds 60
 ```
 
-The Local Web Console listener defaults to `0.0.0.0` for direct HTTP access. Restrict it with
-`-webhost 127.0.0.1` when remote browser access is not required.
+The Local Web Console binds to `0.0.0.0`, while benchmark clients discover and reuse it through `127.0.0.1`.
 
 ## Distributed execution
 

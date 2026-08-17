@@ -9,45 +9,43 @@
  */
 package io.sbk.webconsole;
 
-import io.perl.config.PerlConfig;
-
 import java.io.IOException;
+import java.time.Duration;
 
 /**
  * Standalone entry point for the reusable SBK Local Web Console server.
  */
-public abstract class SbkWebConsoleMain {
+public final class SbkWebConsoleMain {
+    private static final int DEFAULT_REPORTING_INTERVAL_SECONDS = 5;
 
-    /**
-     * Creates a Local Web Console server entry point.
-     */
-    public SbkWebConsoleMain() {
+    private SbkWebConsoleMain() {
     }
 
     /**
      * Starts the Local Web Console server and waits until the process is terminated.
      *
-     * @param args {@code -host}, {@code -port}, and {@code -minutes} options
+     * @param args {@code -port}, {@code -websnapshotminutes}, and {@code -webtimeoutminutes} options
      * @throws IOException if the server cannot start
      * @throws InterruptedException if the process is interrupted
      * @throws IllegalArgumentException if an option or value is invalid
      */
     public static void main(String[] args) throws IOException, InterruptedException {
-        String host = "0.0.0.0";
         int port = 9720;
         int minutes = 180;
+        int timeout = Math.toIntExact(WebConsoleServer.DEFAULT_IDLE_TIMEOUT.toMinutes());
         for (int index = 0; index < args.length; index += 2) {
             if (index + 1 >= args.length) {
                 throw new IllegalArgumentException("Missing Local Web Console option value for " + args[index]);
             }
             switch (args[index]) {
-                case "-host" -> host = args[index + 1];
                 case "-port" -> port = Integer.parseInt(args[index + 1]);
-                case "-minutes" -> minutes = Integer.parseInt(args[index + 1]);
+                case "-websnapshotminutes" -> minutes = Integer.parseInt(args[index + 1]);
+                case "-webtimeoutminutes" -> timeout = Integer.parseInt(args[index + 1]);
                 default -> throw new IllegalArgumentException("Unknown Local Web Console option " + args[index]);
             }
         }
-        final WebConsoleServer webConsoleServer = new WebConsoleServer(host, port, retentionSnapshots(minutes));
+        final WebConsoleServer webConsoleServer = new WebConsoleServer(port, retentionSnapshots(minutes),
+                Duration.ofMinutes(timeout));
         Runtime.getRuntime().addShutdownHook(new Thread(webConsoleServer::close));
         webConsoleServer.start();
         webConsoleServer.awaitTermination();
@@ -65,7 +63,7 @@ public abstract class SbkWebConsoleMain {
             throw new IllegalArgumentException("Local Web Console history minutes must be greater than zero");
         }
         final long retention = Math.ceilDiv(Math.multiplyExact((long) minutes, 60L),
-                PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS);
+                DEFAULT_REPORTING_INTERVAL_SECONDS);
         if (retention > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("Local Web Console history minutes are too large: " + minutes);
         }

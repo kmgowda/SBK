@@ -9,21 +9,23 @@
  */
 package io.sbk.webconsole;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Configuration for the SBK Local Web Console.
  */
 public final class WebConsoleConfig {
-    /** Address on which the web console server listens. */
-    public String host;
     /** TCP port used by the web console server. */
     public int port;
-    /** Whether SBK may start the web console server when it is unavailable. */
-    public boolean start;
     /** Whether SBK should open the web console in the default browser. */
     public boolean open;
     /** Number of minutes of snapshots retained for each benchmark run. */
-    public int minutes;
+    public int snapshotMinutes;
+    /** Number of idle minutes before the web console exits. */
+    public int timeoutMinutes = Math.toIntExact(WebConsoleServer.DEFAULT_IDLE_TIMEOUT.toMinutes());
     /** Optional display name for the benchmark board. */
+    @SuppressFBWarnings(value = "UUF_UNUSED_PUBLIC_OR_PROTECTED_FIELD",
+            justification = "The sbk-api WebConsoleLoggerSupport adapter reads and writes this public configuration")
     public String name;
 
     /**
