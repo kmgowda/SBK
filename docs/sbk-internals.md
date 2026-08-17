@@ -2515,7 +2515,10 @@ option prefix. The benchmark board name defaults to the application plus storage
 class (for example, `SBK File`); `-boardname` supplies an explicit display name.
 The server's idle shutdown timeout defaults to one minute and is configurable
 in whole minutes with `-webtimeoutminutes`; a browser lease or active benchmark keeps
-the server alive.
+the server alive. The server binds to all IPv4 interfaces. Each logger discovers
+the console host's `localhost`, loopback, hostname, and usable private/public IPv4
+run URLs once, and prints the same URL set when the benchmark starts and completes.
+Logger-to-server control traffic continues to use loopback.
 
 ```mermaid
 flowchart LR

@@ -115,8 +115,7 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
                 timeUnit.name(), version, System.getProperty("java.runtime.version"), System.currentTimeMillis());
         try {
             client = WebConsoleClient.connect(config, run);
-            client.getRunLinks().forEach(link -> Printer.log.info("SBK Local Web Console ({}): {}",
-                    link.label(), link.uri()));
+            logRunLinks(client);
         } catch (WebConsoleClient.WebConsoleBusyException ex) {
             client = null;
             Printer.log.error("{} WebLogger cannot start: {}", source, ex.getMessage());
@@ -236,8 +235,14 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
     public void close() {
         if (client != null) {
             client.close();
+            logRunLinks(client);
             client = null;
         }
+    }
+
+    private static void logRunLinks(WebConsoleClient webConsoleClient) {
+        webConsoleClient.getRunLinks().forEach(link -> Printer.log.info("SBK Web Console ({}): {}",
+                link.label(), link.uri()));
     }
 
     static String resolveBoardName(String configuredName, String source, String storage) {

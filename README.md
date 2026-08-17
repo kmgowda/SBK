@@ -342,9 +342,11 @@ match between preparation and reading:
   -out WebLogger
 ```
 
-SBK opens `http://127.0.0.1:9720` in the default browser. The lightweight Local Web Console accepts plain HTTP only
-on the host loopback interface at port 9720, retains the latest 180 minutes of snapshots in memory, and streams new
-summaries with server-sent events. Change that duration with `-websnapshotminutes N`.
+SBK opens the run URL in the default browser. The lightweight Local Web Console accepts plain HTTP on all IPv4
+interfaces at port 9720, retains the latest 180 minutes of snapshots in memory, and streams new summaries with
+server-sent events. At benchmark start and completion, SBK prints run-specific URLs for `localhost`, IPv4 loopback,
+the hostname, and every usable private or public IPv4 address discovered on the console host. Change the retention
+duration with `-websnapshotminutes N`.
 A later SBK process reuses a compatible server already on that port. Multiple SBK, SBM, and SBK-GEM WebLogger
 benchmarks can publish concurrently to the same server; each receives a unique run URL and remains independently
 selectable in the browser. Completed graphs remain available while a browser is connected; after all benchmarks
@@ -354,8 +356,9 @@ renew the active-run lease. If a benchmark is killed without completing, the con
 without either signal marks only that run abandoned; other active runs continue unaffected. Use `-webopen false` on
 headless hosts and `-webport PORT` to select another port. Boards default to `<application> <storage>`, such as
 `SBK File`, `SBM MinIO`, or `SBK-GEM Kafka`; use `-boardname NAME` to override that display name. The timeout supplied by
-the process that starts a web console remains in effect when later benchmarks reuse it. From another system, use an
-SSH tunnel to the benchmark host's loopback port.
+the process that starts a web console remains in effect when later benchmarks reuse it. A remote browser can use a
+printed hostname or IP URL when routing and firewall rules permit. Because the console has no authentication or TLS,
+expose it only on a trusted benchmark network or use an SSH tunnel.
 Run `sbk -out WebLogger -help` for the complete option set.
 See the [WebLogger guide](docs/WEB_LOGGER.md) for every option, Local Web Console lifecycle, distributed usage, security,
 and troubleshooting.
@@ -370,7 +373,7 @@ sbm -out SbmWebLogger -class file -action r
 sbk-gem -out GemWebLogger -class file -nodes host1,host2 -writers 2 -size 4096 -seconds 60
 ```
 
-The Local Web Console is always bound to `127.0.0.1`; it is not exposed on benchmark-host network interfaces.
+The Local Web Console binds to `0.0.0.0`, while benchmark clients discover and reuse it through `127.0.0.1`.
 
 ## Distributed execution
 

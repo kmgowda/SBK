@@ -35,7 +35,10 @@ Build and run the standalone server:
   -port 9720 -websnapshotminutes 180 -webtimeoutminutes 1
 ```
 
-The server always binds to `127.0.0.1`. Remote browsers must use an SSH tunnel or equivalent host-local forwarding.
+The server binds to `0.0.0.0` and benchmark loggers print run URLs for `localhost`, loopback, hostname, and every
+usable host IPv4 address at both benchmark start and completion. Remote browsers can use a printed hostname or IP
+URL when routing and firewall rules permit. The service uses plain HTTP without authentication, so restrict it to a
+trusted benchmark network or use an SSH tunnel.
 `-webtimeoutminutes` sets the idle shutdown grace period in minutes and defaults to one minute.
 
 Run its verification suite with:

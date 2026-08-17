@@ -62,12 +62,10 @@ final class WebConsoleServerTest {
     }
 
     @Test
-    void createsOnlyTheHostLocalLoopbackLink() {
-        final var links = WebConsoleClient.webConsoleLinks(9720, "test-run");
-        assertEquals(1, links.size());
-        assertEquals("Local", links.getFirst().label());
-        assertEquals("127.0.0.1", links.getFirst().uri().getHost());
-        assertEquals("http://127.0.0.1:9720/?run=test-run", links.getFirst().uri().toString());
+    void bindsToAllIpv4Interfaces() throws Exception {
+        try (WebConsoleServer server = new WebConsoleServer(0, 2)) {
+            assertTrue(server.getAddress().getAddress().isAnyLocalAddress());
+        }
     }
 
     @Test

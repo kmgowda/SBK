@@ -38,11 +38,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Lightweight local HTTP server that stores bounded SBK histories and serves the Local Web Console.
+ * Lightweight HTTP server that stores bounded SBK histories and serves the SBK Web Console.
  */
 public final class WebConsoleServer implements AutoCloseable {
-    /** Loopback address used by the host-local Web Console. */
+    /** Loopback address used by local Web Console clients. */
     public static final String LOCAL_HOST = "127.0.0.1";
+    /** IPv4 wildcard address used by the Web Console server. */
+    public static final String BIND_HOST = "0.0.0.0";
     /** Local Web Console HTTP API version. */
     public static final int API_VERSION = 5;
     /** Time an unused web console remains available after its benchmark exits. */
@@ -68,7 +70,7 @@ public final class WebConsoleServer implements AutoCloseable {
     private boolean shuttingDown;
 
     /**
-     * Creates a Local Web Console server bound to the IPv4 loopback address.
+     * Creates a Web Console server bound to all IPv4 interfaces.
      *
      * @param port      TCP port
      * @param retention maximum snapshots retained per run
@@ -122,7 +124,7 @@ public final class WebConsoleServer implements AutoCloseable {
         this.termination = new CountDownLatch(1);
         this.browsers = new ConcurrentHashMap<>();
         this.activeRunIds = new HashSet<>();
-        this.server = HttpServer.create(new InetSocketAddress(LOCAL_HOST, port), 32);
+        this.server = HttpServer.create(new InetSocketAddress(BIND_HOST, port), 32);
         this.executor = Executors.newVirtualThreadPerTaskExecutor();
         this.scheduler = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
                 .name("sbk-web-console-idle-monitor").daemon().factory());

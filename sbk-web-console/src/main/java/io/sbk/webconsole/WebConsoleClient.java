@@ -18,7 +18,6 @@ import java.awt.Desktop;
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -60,14 +59,14 @@ public final class WebConsoleClient implements AutoCloseable {
         this.pending = new ArrayBlockingQueue<>(1);
         this.closing = new AtomicBoolean(false);
         this.leaseHeartbeatInterval = leaseHeartbeatInterval;
-        this.runLinks = webConsoleLinks(config.port, runId);
+        this.runLinks = WebConsoleLinks.localLinks(config.port, runId);
         postJson("/api/v1/runs", run, 201);
         this.publisherThread = Thread.ofVirtual().name("sbk-web-console-publisher-" + runId)
                 .start(this::publishLoop);
     }
 
     /**
-     * Connects to a compatible Local Web Console, starting one when configured and necessary.
+     * Connects to a compatible Local Web Console, starting one when necessary.
      *
      * @param config web console configuration
      * @param run    benchmark run metadata
@@ -113,16 +112,12 @@ public final class WebConsoleClient implements AutoCloseable {
     }
 
     /**
-     * Returns the host-local Web Console link for this benchmark run.
+     * Returns the locally and remotely usable Web Console links for this benchmark run.
      *
-     * @return local loopback link
+     * @return discovered host links
      */
     public List<WebConsoleLink> getRunLinks() {
         return new ArrayList<>(runLinks);
-    }
-
-    static List<WebConsoleLink> webConsoleLinks(int port, String runId) {
-        return List.of(new WebConsoleLink("Local", runUri(WebConsoleServer.LOCAL_HOST, port, runId)));
     }
 
     /**
@@ -289,14 +284,6 @@ public final class WebConsoleClient implements AutoCloseable {
             }
         }
         return List.copyOf(arguments);
-    }
-
-    private static URI runUri(String host, int port, String runId) {
-        try {
-            return new URI("http", null, host, port, "/", "run=" + runId, null);
-        } catch (URISyntaxException ex) {
-            throw new IllegalArgumentException("Invalid Local Web Console address: " + host, ex);
-        }
     }
 
     @SuppressFBWarnings(value = "ENV_USE_PROPERTY_INSTEAD_OF_ENV",

@@ -35,9 +35,9 @@ Use the logger matching the application:
 | `sbm` | `SbmWebLogger` | Aggregated results received from distributed SBK clients |
 | `sbk-gem` or `sbk-gem-yal` | `GemWebLogger` | Cluster aggregate produced by GEM's embedded SBM |
 
-The Local Web Console URL is <http://127.0.0.1:9720>. The server is always bound to the host loopback interface and
-cannot be reached directly through the machine hostname or network-interface addresses. A browser on another system
-must use an SSH tunnel or equivalent host-local forwarding. WebLogger does not start that tunnel itself.
+The server listens on all IPv4 interfaces at port 9720. At benchmark start and completion, the logger prints the
+run-specific URLs for `localhost`, IPv4 loopback, the hostname, and every usable private or public IPv4 address on
+the Web Console host. A remote browser can use a printed hostname or IP URL when routing and firewall rules permit.
 
 ## Quick start: filesystem read benchmark
 
@@ -60,7 +60,7 @@ Then run a 60-second filesystem read benchmark with live graphs:
 ```
 
 SBK starts the web console when necessary and normally opens the run URL in the default browser. On a headless host,
-disable automatic browser opening and connect through an appropriate secure tunnel:
+disable automatic browser opening and copy one of the printed URLs into a browser:
 
 ```bash
 ./build/install/sbk/bin/sbk \
@@ -89,7 +89,7 @@ Logger options appear only after selecting the WebLogger class. Treat generated 
 
 | Option | Default | Meaning |
 |---|---:|---|
-| `-webport PORT` | `9720` | Local Web Console HTTP port |
+| `-webport PORT` | `9720` | Web Console HTTP port on all IPv4 interfaces |
 | `-webopen true\|false` | `true` | Ask the local desktop to open the Local Web Console run URL |
 | `-websnapshotminutes N` | `180` | Minutes of interval snapshots retained for each run (three hours by default) |
 | `-webtimeoutminutes N` | `1` | Idle minutes without an active benchmark or browser before the Local Web Console exits |
@@ -167,14 +167,15 @@ GEM starts an embedded SBM. Remote SBK processes send SBP/gRPC measurements to t
 
 ## Network and security
 
-The Local Web Console is host-local by design and always binds to `127.0.0.1`. It cannot be exposed through a
-WebLogger option. A browser on another system must create an SSH tunnel or equivalent forwarding:
+The Local Web Console uses plain HTTP and binds to `0.0.0.0`, so it is reachable through the console host's usable
+IPv4 interfaces when routing and firewall rules permit. It provides neither authentication nor TLS. Run it only on
+a trusted benchmark network, restrict port 9720 with host or network firewall rules, or use an SSH tunnel:
 
 ```bash
 ssh -L 9720:127.0.0.1:9720 user@benchmark-host
 ```
 
-Then open <http://127.0.0.1:9720> locally.
+Then open the printed forwarded loopback URL locally. The WebLogger does not create the tunnel itself.
 
 ## Troubleshooting
 
@@ -184,11 +185,10 @@ Then open <http://127.0.0.1:9720> locally.
 | Local Web Console unavailable | Check `-webport` and whether another local process is using the port |
 | Port is incompatible | Stop the unrelated/older service or select another `-webport` |
 | Local Web Console remains on an older UI after upgrading SBK | Close every web console browser tab, wait for the configured idle timeout for the old server to exit, and retry |
-| Local Web Console already in use | Wait for the named active benchmark to finish; do not combine independent experiments |
 | Local Web Console reports an abandoned run | The logger stopped publishing snapshots and heartbeats for the configured idle timeout, usually because its SBK, SBM, or SBK-GEM process was killed or lost connectivity; correct the failure and start a new benchmark |
 | Read benchmark reports no useful data | Create and verify the input file first; use the same record size for preparation and reading |
 | Graph disappears after completion | Keep a browser page connected; otherwise the server intentionally exits after the configured idle timeout |
-| Remote browser cannot connect | Create an SSH tunnel to `127.0.0.1:9720` on the benchmark host, then open the local forwarded port |
+| Remote browser cannot connect | Use a printed hostname/IP URL and verify routing plus firewall access to `-webport`; otherwise create an SSH tunnel to `127.0.0.1:9720` |
 
 The reusable runtime is under `sbk-web-console/src/main/java/io/sbk/webconsole`; the SBK-specific
 `WebConsoleLoggerSupport` adapter remains under `sbk-api`. `WebConsoleServer` owns run registration, bounded
