@@ -1,0 +1,73 @@
+# Copyright (c) KMG. All Rights Reserved.
+# Licensed under the Apache License, Version 2.0.
+
+name: SBK Release Qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: Qualification profile
+        required: true
+        default: ci
+        type: choice
+        options:
+          - ci
+          - release
+
+permissions:
+  contents: read
+
+jobs:
+  qualify-ci:
+    if: inputs.profile == 'ci'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Run release qualification
+        run: ./gradlew clean releaseQualification -PreleaseProfile=ci --no-daemon --rerun-tasks
+
+  qualify-release:
+    if: inputs.profile == 'release'
+    runs-on: [self-hosted, linux, sbk-release]
+    timeout-minutes: 240
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Prepare private release inventory
+        env:
+          GEM_NODES: ${{ secrets.SBK_RELEASE_GEM_NODES }}
+          GEM_USER: ${{ secrets.SBK_RELEASE_GEM_USER }}
+          GEM_KNOWN_HOSTS: ${{ secrets.SBK_RELEASE_GEM_KNOWN_HOSTS }}
+        run: |
+          install -m 600 /dev/null "$RUNNER_TEMP/sbk-release-inventory.properties"
+          printf 'gem.nodes=%s\n' "$GEM_NODES" >> "$RUNNER_TEMP/sbk-release-inventory.properties"
+          printf 'gem.user=%s\n' "$GEM_USER" >> "$RUNNER_TEMP/sbk-release-inventory.properties"
+          printf 'gem.knownHosts=%s\n' "$GEM_KNOWN_HOSTS" >> "$RUNNER_TEMP/sbk-release-inventory.properties"
+
+      - name: Run release qualification
+        run: |
+          ./gradlew clean releaseQualification \
+            -PreleaseProfile=release \
+            "-PreleaseInventory=$RUNNER_TEMP/sbk-release-inventory.properties" \
+            --no-daemon --rerun-tasks

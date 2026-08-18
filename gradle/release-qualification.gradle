@@ -1,0 +1,318 @@
+/**
+ * Copyright (c) KMG. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import groovy.json.JsonOutput
+import java.security.MessageDigest
+
+def qualificationDefaults = new Properties()
+file('gradle/release-qualification.properties').withInputStream {
+    qualificationDefaults.load(it)
+}
+
+def qualificationValue = { String name ->
+    def camelCaseName = 'release' + name.substring(0, 1).toUpperCase() + name.substring(1)
+    def projectValue = (findProperty(camelCaseName) ?: findProperty("release.${name}"))
+            ?.toString()?.trim()
+    projectValue ?: qualificationDefaults.getProperty("qualification.${name}")
+}
+
+def qualificationProfile = qualificationValue('profile')
+if (!(qualificationProfile in ['local', 'ci', 'release'])) {
+    throw new GradleException("Invalid release qualification profile '${qualificationProfile}'; "
+            + "expected local, ci, or release")
+}
+
+def qualificationReportDir = layout.buildDirectory.dir('reports/release-qualification')
+def applicationProjects = [
+        project,
+        project(':sbm'),
+        project(':sbk-web-console')
+]
+
+tasks.register('releasePreflight') {
+    group = 'verification'
+    description = 'Validates the source tree and infrastructure required by the selected release profile.'
+    inputs.file('gradle/release-qualification.properties')
+    doLast {
+        if (JavaVersion.current().majorVersion != rootProject.ext.sbkJavaMajorVersion.toString()) {
+            throw new GradleException("Release qualification requires Java "
+                    + rootProject.ext.sbkJavaMajorVersion)
+        }
+
+        if (qualificationValue('requireCleanTree').toBoolean()) {
+            def output = new ByteArrayOutputStream()
+            def result = providers.exec {
+                commandLine 'git', 'status', '--porcelain', '--untracked-files=all'
+                standardOutput = output
+                errorOutput = output
+                ignoreExitValue = true
+            }.result.get()
+            if (result.exitValue != 0 || !output.toString('UTF-8').trim().isEmpty()) {
+                throw new GradleException('Release qualification requires a clean Git tree.\n'
+                        + output.toString('UTF-8'))
+            }
+        }
+
+        if (qualificationProfile == 'release') {
+            def inventoryName = findProperty('releaseInventory')?.toString()?.trim()
+            if (!inventoryName) {
+                throw new GradleException('The release profile requires '
+                        + '-PreleaseInventory=<private properties file>')
+            }
+            def inventory = file(inventoryName)
+            if (!inventory.isFile()) {
+                throw new GradleException("Release inventory does not exist: ${inventory}")
+            }
+            def values = new Properties()
+            inventory.withInputStream { values.load(it) }
+            ['gem.nodes', 'gem.user', 'gem.knownHosts'].each { key ->
+                if (!values.getProperty(key)?.trim()) {
+                    throw new GradleException("Release inventory is missing mandatory value '${key}'")
+                }
+            }
+            def knownHosts = file(values.getProperty('gem.knownHosts').trim())
+            if (!knownHosts.isFile()) {
+                throw new GradleException("Release known-hosts file does not exist: ${knownHosts}")
+            }
+        }
+        logger.lifecycle("SBK release qualification preflight: PASSED (${qualificationProfile} profile)")
+    }
+}
+
+tasks.register('releaseBuild') {
+    group = 'verification'
+    description = 'Runs compilation, static analysis, unit tests, and all enabled driver checks.'
+    dependsOn allprojects.findAll { it.path != ':drivers' }.collect {
+        it.path == ':' ? ':check' : "${it.path}:check"
+    }
+}
+
+tasks.register('releaseConcurrency') {
+    group = 'verification'
+    description = 'Runs PerL reclamation, Lincheck, and JCStress verification.'
+    dependsOn ':perl:concurrencyCheck'
+}
+
+tasks.register('releasePerformance') {
+    group = 'verification'
+    description = 'Runs latency-sensitive PerL and gRPC JMH qualification gates.'
+    if (qualificationProfile == 'release') {
+        dependsOn ':perl:timeStampQueuePerformanceTest'
+        dependsOn ':perl:latencyMapPerformanceTest'
+        dependsOn ':perl:cqueuePerformanceTest'
+        dependsOn ':sbk-api:grpcLoggerPerformanceTest'
+    } else {
+        doLast {
+            logger.lifecycle("Performance qualification is reserved for the release profile")
+        }
+    }
+}
+
+tasks.register('releasePackaging') {
+    group = 'verification'
+    description = 'Builds the SBK suite plus standalone SBM and Web Console distributions.'
+    dependsOn applicationProjects.collectMany { appProject ->
+        ['installDist', 'distZip', 'distTar'].collect { taskName ->
+            appProject.path == ':' ? ":${taskName}" : "${appProject.path}:${taskName}"
+        }
+    }
+}
+
+tasks.register('releaseFunctionalTest', Exec) {
+    group = 'verification'
+    description = 'Runs black-box launcher, logger, YAL, SBM, Web Console, and optional GEM tests.'
+    dependsOn tasks.named('releasePackaging')
+    executable 'bash'
+    args file('scripts/release-functional-tests.sh').absolutePath
+    environment 'SBK_RELEASE_ROOT', rootDir.absolutePath
+    environment 'SBK_RELEASE_PROFILE', qualificationProfile
+    environment 'SBK_RELEASE_VERSION', sbkVersion.toString()
+    environment 'SBK_RELEASE_RECORDS', qualificationValue('records')
+    environment 'SBK_RELEASE_RECORD_SIZE', qualificationValue('recordSize')
+    environment 'SBK_RELEASE_PROCESS_TIMEOUT_SECONDS', qualificationValue('processTimeoutSeconds')
+    environment 'SBK_RELEASE_STARTUP_TIMEOUT_SECONDS', qualificationValue('startupTimeoutSeconds')
+    environment 'SBK_RELEASE_WEB_TIMEOUT_MINUTES', qualificationValue('webTimeoutMinutes')
+    environment 'SBK_RELEASE_REPORT_DIR', qualificationReportDir.get().asFile.absolutePath
+    def inventoryName = findProperty('releaseInventory')?.toString()?.trim()
+    if (inventoryName) {
+        environment 'SBK_RELEASE_INVENTORY', file(inventoryName).absolutePath
+    }
+}
+
+tasks.register('releaseDocsCheck') {
+    group = 'verification'
+    description = 'Rejects stale generated API documentation and malformed repository whitespace.'
+    dependsOn applicationProjects.findAll { it != project }.collect { appProject ->
+        "${appProject.path}:javadoc"
+    }
+    dependsOn ':perl:javadoc'
+    dependsOn ':sbk-api:javadoc'
+    doLast {
+        def stalePages = []
+        [project(':perl'), project(':sbk-api'), project(':sbk-web-console'), project(':sbm'),
+         project(':sbk-yal'), project(':sbk-gem'), project(':sbk-gem-yal')].each { appProject ->
+            def docs = appProject.file('javadoc')
+            if (!docs.isDirectory()) {
+                stalePages << "${appProject.path}: missing tracked javadoc directory"
+                return
+            }
+            fileTree(docs) {
+                include '**/*.html'
+            }.matching {
+                include '**/index.html', '**/*Logger.html', '**/*Main.html'
+            }.files.each { page ->
+                def text = page.getText('UTF-8')
+                def matcher = text =~ /<title>[^<]+ ([0-9]+\.[0-9]+) API<\/title>/
+                if (matcher.find() && matcher.group(1) != sbkVersion.toString()) {
+                    stalePages << "${relativePath(page)}: ${matcher.group(1)}"
+                }
+            }
+        }
+        if (!stalePages.isEmpty()) {
+            throw new GradleException('Stale generated Javadocs; run ./gradlew updateDocs:\n'
+                    + stalePages.take(50).join('\n'))
+        }
+        providers.exec {
+            commandLine 'git', 'diff', '--check', '--', '.',
+                    ':(exclude)perl/javadoc/**',
+                    ':(exclude)sbk-api/javadoc/**',
+                    ':(exclude)sbk-web-console/javadoc/**',
+                    ':(exclude)sbm/javadoc/**',
+                    ':(exclude)sbk-yal/javadoc/**',
+                    ':(exclude)sbk-gem/javadoc/**',
+                    ':(exclude)sbk-gem-yal/javadoc/**'
+        }.result.get().assertNormalExitValue()
+    }
+}
+
+tasks.register('releasePublicationTest') {
+    group = 'verification'
+    description = 'Generates Maven metadata and verifies publication artifacts without external credentials.'
+    doLast {
+        if (!(qualificationProfile in ['ci', 'release'])) {
+            logger.lifecycle('Publication qualification is reserved for the ci and release profiles')
+            return
+        }
+
+        def missingArtifacts = []
+        allprojects.findAll {
+            it.tasks.findByName('generatePomFileForMavenJavaPublication') != null
+        }.each { publicationProject ->
+            def artifactPrefix = "${publicationProject.name}-${publicationProject.version}"
+            ["${artifactPrefix}.jar", "${artifactPrefix}-sources.jar",
+             "${artifactPrefix}-javadoc.jar"].each { artifactName ->
+                if (!publicationProject.layout.buildDirectory.file("libs/${artifactName}").get().asFile.isFile()) {
+                    missingArtifacts << "${publicationProject.path}:build/libs/${artifactName}"
+                }
+            }
+            if (!publicationProject.layout.buildDirectory
+                    .file('publications/mavenJava/pom-default.xml').get().asFile.isFile()) {
+                missingArtifacts << "${publicationProject.path}:build/publications/mavenJava/pom-default.xml"
+            }
+        }
+        if (!missingArtifacts.isEmpty()) {
+            throw new GradleException('Missing Maven publication artifacts:\n'
+                    + missingArtifacts.join('\n'))
+        }
+    }
+}
+
+gradle.projectsEvaluated {
+    if (qualificationProfile in ['ci', 'release']) {
+        tasks.named('releasePublicationTest').configure {
+            def publicationProjects = allprojects.findAll {
+                it.tasks.findByName('generatePomFileForMavenJavaPublication') != null
+            }
+            dependsOn publicationProjects.collectMany { publicationProject ->
+                ['jar', 'sourcesJar', 'javadocJar', 'generatePomFileForMavenJavaPublication']
+                        .collect { publicationProject.tasks.named(it) }
+            }
+        }
+    }
+}
+
+tasks.register('releaseQualification') {
+    group = 'verification'
+    description = 'Runs the authoritative one-command SBK release qualification gate.'
+    dependsOn tasks.named('releasePreflight')
+    dependsOn tasks.named('releaseBuild')
+    dependsOn tasks.named('releaseConcurrency')
+    dependsOn tasks.named('releasePerformance')
+    dependsOn tasks.named('releaseFunctionalTest')
+    dependsOn tasks.named('releaseDocsCheck')
+    dependsOn tasks.named('releasePublicationTest')
+    doLast {
+        def reportDirectory = qualificationReportDir.get().asFile
+        reportDirectory.mkdirs()
+        def digest = MessageDigest.getInstance('SHA-256')
+        def artifacts = []
+        applicationProjects.each { appProject ->
+            fileTree(appProject.layout.buildDirectory.dir('distributions')) {
+                include '*.zip', '*.tar'
+            }.files.sort().each { artifact ->
+                digest.reset()
+                artifact.withInputStream { stream ->
+                    byte[] buffer = new byte[8192]
+                    int count
+                    while ((count = stream.read(buffer)) > 0) {
+                        digest.update(buffer, 0, count)
+                    }
+                }
+                artifacts << [path: relativePath(artifact),
+                              sha256: digest.digest().encodeHex().toString()]
+            }
+        }
+        def commitOutput = providers.exec {
+            commandLine 'git', 'rev-parse', 'HEAD'
+        }.standardOutput.asText.get().trim()
+        def report = [
+                status: 'QUALIFIED',
+                version: sbkVersion.toString(),
+                commit: commitOutput,
+                profile: qualificationProfile,
+                javaVersion: System.getProperty('java.runtime.version'),
+                artifacts: artifacts
+        ]
+        new File(reportDirectory, 'qualification.json').text =
+                JsonOutput.prettyPrint(JsonOutput.toJson(report)) + System.lineSeparator()
+        logger.lifecycle("SBK ${sbkVersion} release qualification: QUALIFIED")
+        logger.lifecycle("Report: ${new File(reportDirectory, 'qualification.json')}")
+    }
+}
+
+[
+        'releaseBuild', 'releaseConcurrency', 'releasePerformance', 'releasePackaging',
+        'releaseFunctionalTest', 'releaseDocsCheck', 'releasePublicationTest', 'releaseQualification'
+].each { taskName ->
+    tasks.named(taskName).configure {
+        mustRunAfter tasks.named('releasePreflight')
+    }
+}
+
+tasks.named('releaseConcurrency').configure {
+    mustRunAfter tasks.named('releaseBuild')
+}
+tasks.named('releasePerformance').configure {
+    mustRunAfter tasks.named('releaseConcurrency')
+}
+tasks.named('releasePackaging').configure {
+    mustRunAfter tasks.named('releaseBuild')
+}
+tasks.named('releaseFunctionalTest').configure {
+    mustRunAfter tasks.named('releaseBuild')
+    mustRunAfter tasks.named('releaseConcurrency')
+    mustRunAfter tasks.named('releasePerformance')
+}

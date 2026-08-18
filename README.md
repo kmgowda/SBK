@@ -407,6 +407,13 @@ See the [reproducibility section](docs/sbk-internals.md#134-reproducibility-chec
 
 ## Contributing
 
+Before creating a release candidate, run the one-command automated release
+gate documented in [SBK Release Qualification](docs/RELEASE_QUALIFICATION.md).
+The release profile verifies installed launchers, logger contracts, PerL
+concurrency and performance, YAL mapping, SBM/gRPC aggregation, remote
+SBK-GEM execution, generated documentation, publications, and archive
+checksums.
+
 Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing code. The minimum verification sequence is normally:
 
 ```bash
