@@ -21,9 +21,16 @@ Use the `local` profile while developing:
   --no-daemon --rerun-tasks
 ```
 
-The `ci` profile adds Maven-local publication verification. The `release`
-profile additionally runs the JMH performance gates and requires real remote
-SBK-GEM hosts:
+The `local-docker` profile adds fully automatic SBK-GEM and SBK-GEM-YAL
+testing against a disposable local Docker SSH/JDK node. The `ci` profile adds
+Maven-local publication verification. The `release` profile additionally runs
+the JMH performance gates and requires real remote SBK-GEM hosts:
+
+```bash
+./gradlew clean releaseQualification \
+  -PreleaseProfile=local-docker \
+  --no-daemon --rerun-tasks
+```
 
 ```bash
 ./gradlew clean releaseQualification \
@@ -37,9 +44,10 @@ successful skip. Missing inventory, hosts, credentials, or required tools fail
 the gate.
 
 The `SBK Release Qualification` GitHub Actions workflow provides the same
-entry point. Its `ci` profile uses a GitHub-hosted runner. Its `release`
-profile requires a self-hosted Linux runner labeled `sbk-release`, because
-that machine must have network and SSH access to the private GEM inventory.
+entry point. Its `ci` and `local-docker` profiles use a GitHub-hosted runner.
+Its `release` profile requires a self-hosted Linux runner labeled
+`sbk-release`, because that machine must have network and SSH access to the
+private GEM inventory.
 
 ## Execution examples
 
@@ -68,6 +76,35 @@ During development, use the clean-tree override to qualify uncommitted code:
 Do not use this override as release evidence. A local-profile result verifies
 the local functional scope but does not qualify a release candidate.
 
+### Local gate with automatic GEM
+
+Use `local-docker` when a developer or ordinary GitHub-hosted runner must test
+the complete GEM orchestration path without provisioning a permanent remote
+host:
+
+```bash
+./gradlew clean releaseQualification \
+  -PreleaseProfile=local-docker \
+  --no-daemon --rerun-tasks
+```
+
+Requirements are Docker with an accessible daemon and the OpenSSH client
+tools `ssh`, `ssh-agent`, `ssh-add`, `ssh-keygen`, and `ssh-keyscan`. The gate:
+
+1. builds a JDK 25 fixture image;
+2. creates an ephemeral Ed25519 key and isolated SSH agent;
+3. starts one non-root SSH node with a dynamically assigned loopback port;
+4. verifies the generated `known_hosts` entry and remote Java runtime;
+5. runs `GemPrometheusLogger`, `GemWebLogger`, and SBK-GEM-YAL through the
+   normal copy, remote launch, SBM callback, aggregation, and cleanup paths;
+6. force-removes the container, SSH agent, and ephemeral credentials on both
+   success and failure.
+
+No inventory, persistent SSH key, exposed fixed port, or manual container
+setup is needed. The fixture is intentionally a single host. It proves GEM's
+deployment and protocol contracts, but it does not replace real multi-host
+fan-out, network, and backend qualification in the `release` profile.
+
 ### CI gate
 
 The CI profile adds Maven main, source, Javadoc JAR, and POM generation checks.
@@ -91,8 +128,10 @@ hosts:
   --no-daemon --rerun-tasks
 ```
 
-This is the only profile that runs the release-only JMH checks and real
-SBK-GEM and SBK-GEM-YAL executions. A valid result ends with output similar to:
+This is the only profile that runs the release-only JMH checks and uses the
+private real-host inventory. Both `local-docker` and `release` execute
+SBK-GEM and SBK-GEM-YAL, but only `release` supplies production-like remote
+evidence. A valid release result ends with output similar to:
 
 ```text
 PASS: sbk-gem-GemPrometheusLogger
@@ -191,8 +230,8 @@ checks:
 - SBK-YAL argument mapping and logger overrides;
 - real `GrpcLogger` clients against child SBM processes using both
   `SbmPrometheusLogger` and `SbmWebLogger`; and
-- both GEM logger families plus SBK-GEM-YAL when the release inventory is
-  supplied.
+- both GEM logger families plus SBK-GEM-YAL when either the automatic
+  `local-docker` fixture or the release inventory is selected.
 
 All child processes have bounded startup and execution times. Logs and a test
 summary are written below `build/reports/release-qualification/`.
@@ -240,9 +279,10 @@ cat build/reports/release-qualification/qualification.json
 ```
 
 Release evidence must contain both `"status": "QUALIFIED"` and
-`"profile": "release"`. Entries named `sbk-gem-external` or
-`sbk-gem-yal-external` mean that the local or CI profile was used; they are not
-remote GEM results.
+`"profile": "release"`. A `local-docker` report is strong automated
+functional evidence, but is not final release evidence. Entries named
+`sbk-gem-external` or `sbk-gem-yal-external` mean that the local or CI profile
+was used; they are not remote GEM results.
 
 Common preflight failures are intentional:
 
@@ -252,6 +292,8 @@ Common preflight failures are intentional:
   used without creating the file.
 - `Release known-hosts file does not exist` means `gem.knownHosts` does not
   identify a file on the qualification machine.
+- `The local-docker profile requires an accessible Docker daemon` means the
+  Docker client cannot reach its daemon with the current user's permissions.
 - SSH authentication or host-key failures must be corrected outside the
   repository; the release gate does not disable host-key verification.
 

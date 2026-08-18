@@ -122,7 +122,8 @@ manual subset:
 See [`docs/RELEASE_QUALIFICATION.md`](docs/RELEASE_QUALIFICATION.md). A release
 profile must fail when mandatory remote infrastructure is unavailable; it must
 not convert missing GEM hosts or required backend coverage into a successful
-skip.
+skip. Use `-PreleaseProfile=local-docker` for automatic disposable single-node
+GEM functional coverage; it does not replace real-host release evidence.
 
 ---
 

@@ -13,6 +13,7 @@ on:
         type: choice
         options:
           - ci
+          - local-docker
           - release
 
 permissions:
@@ -71,3 +72,22 @@ jobs:
             -PreleaseProfile=release \
             "-PreleaseInventory=$RUNNER_TEMP/sbk-release-inventory.properties" \
             --no-daemon --rerun-tasks
+
+  qualify-local-docker:
+    if: inputs.profile == 'local-docker'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Run Docker-backed local qualification
+        run: ./gradlew clean releaseQualification -PreleaseProfile=local-docker --no-daemon --rerun-tasks

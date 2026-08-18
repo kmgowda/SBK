@@ -367,8 +367,8 @@ run_sbm_case SbmPrometheusLogger sbm-prometheus-grpc
 run_sbm_case SbmWebLogger sbm-web-grpc
 run_sbm_case SbmPrometheusLogger sbk-yal-GrpcLogger yal
 
-if [[ $PROFILE == release ]]; then
-    INVENTORY=${SBK_RELEASE_INVENTORY:?Release profile requires SBK_RELEASE_INVENTORY}
+if [[ $PROFILE == release || $PROFILE == local-docker ]]; then
+    INVENTORY=${SBK_RELEASE_INVENTORY:?${PROFILE} profile requires SBK_RELEASE_INVENTORY}
     inventory_value() {
         local key=$1
         sed -n "s/^[[:space:]]*${key}[[:space:]]*=[[:space:]]*//p" "$INVENTORY" | tail -n 1
@@ -376,9 +376,16 @@ if [[ $PROFILE == release ]]; then
     GEM_NODES=$(inventory_value gem.nodes)
     GEM_USER=$(inventory_value gem.user)
     GEM_KNOWN_HOSTS=$(inventory_value gem.knownHosts)
+    GEM_PORT=$(inventory_value gem.port)
+    GEM_LOCAL_HOST=$(inventory_value gem.localhost)
+    GEM_PORT=${GEM_PORT:-22}
     for logger in GemPrometheusLogger GemWebLogger; do
         gem_args=(-nodes "$GEM_NODES" -gemuser "$GEM_USER" -knownhosts "$GEM_KNOWN_HOSTS"
-                  -class file -writers 1 -size "$RECORD_SIZE" -records "$RECORDS" -out "$logger")
+                  -gemport "$GEM_PORT" -class file -writers 1 -size "$RECORD_SIZE"
+                  -records "$RECORDS" -out "$logger")
+        if [[ -n $GEM_LOCAL_HOST ]]; then
+            gem_args+=(-localhost "$GEM_LOCAL_HOST")
+        fi
         if [[ $logger == GemWebLogger ]]; then
             gem_args+=(-webopen false -webport "$(free_port)" -webtimeoutminutes "$WEB_TIMEOUT_MINUTES")
         else
@@ -389,8 +396,13 @@ if [[ $PROFILE == release ]]; then
     done
 
     GEM_YAL_FILE="$WORK_DIR/sbk-gem-release.yml"
-    printf 'sbkGemArgs:\n  nodes: %s\n  gemuser: %s\n  knownhosts: %s\n  class: file\n  writers: 1\n  size: %s\n  records: %s\n  out: GemPrometheusLogger\n' \
-        "$GEM_NODES" "$GEM_USER" "$GEM_KNOWN_HOSTS" "$RECORD_SIZE" "$RECORDS" > "$GEM_YAL_FILE"
+    printf 'sbkGemArgs:\n  nodes: %s\n  gemuser: %s\n  knownhosts: %s\n  gemport: %s\n' \
+        "$GEM_NODES" "$GEM_USER" "$GEM_KNOWN_HOSTS" "$GEM_PORT" > "$GEM_YAL_FILE"
+    if [[ -n $GEM_LOCAL_HOST ]]; then
+        printf '  localhost: %s\n' "$GEM_LOCAL_HOST" >> "$GEM_YAL_FILE"
+    fi
+    printf '  class: file\n  writers: 1\n  size: %s\n  records: %s\n  out: GemPrometheusLogger\n' \
+        "$RECORD_SIZE" "$RECORDS" >> "$GEM_YAL_FILE"
     run_expect sbk-gem-yal-release "Merged YAML.*arguments|SBK-GEM.*SUCCESS" \
         "$SBK_GEM_YAL" -f "$GEM_YAL_FILE"
 else
