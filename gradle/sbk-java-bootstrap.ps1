@@ -14,14 +14,26 @@
 
 param(
     [ValidateSet('true', 'false')]
-    [string]$InstallIfMissing = 'true'
+    [string]$InstallIfMissing = 'true',
+    [Parameter(Mandatory = $true)]
+    [string]$ConfigFile
 )
 
 $ErrorActionPreference = 'Stop'
-$jdkVersion = '25.0.2'
-$jdkMajor = '25'
-$baseUrl = 'https://download.java.net/java/GA/jdk25.0.2/b1e0dfa218384cb9959bdcb897162d4e/10/GPL'
-$windowsX64Sha256 = '74784a0c07258f32d36e9224dd79187c566d831c30d47dc06888d4212087331d'
+$bootstrapConfig = @{}
+Get-Content -LiteralPath $ConfigFile | ForEach-Object {
+    $line = $_.Trim()
+    if ($line -and -not $line.StartsWith('#')) {
+        $parts = $line.Split('=', 2)
+        if ($parts.Length -eq 2) { $bootstrapConfig[$parts[0].Trim()] = $parts[1].Trim() }
+    }
+}
+$jdkVersion = $bootstrapConfig.SBK_JAVA_VERSION
+$jdkMajor = $bootstrapConfig.SBK_JAVA_MAJOR
+$baseUrl = $bootstrapConfig.SBK_JAVA_BASE_URL
+$windowsX64Sha256 = $bootstrapConfig.SBK_JAVA_SHA256_WINDOWS_X64
+$downloadTimeoutSeconds = [int]$bootstrapConfig.SBK_JAVA_DOWNLOAD_TIMEOUT_SECONDS
+$lockTimeoutSeconds = [int]$bootstrapConfig.SBK_JAVA_LOCK_TIMEOUT_SECONDS
 
 function Test-SbkJdk([string]$CandidateHome) {
     if (-not $CandidateHome) { return $false }
@@ -89,9 +101,9 @@ if (-not [Environment]::Is64BitOperatingSystem -or $env:PROCESSOR_ARCHITECTURE -
 }
 
 New-Item -ItemType Directory -Force -Path $cacheRoot | Out-Null
-$mutexName = 'Local\SBK-JDK-25.0.2-windows-x64'
+$mutexName = "Local\SBK-JDK-$jdkVersion-windows-x64"
 $mutex = [Threading.Mutex]::new($false, $mutexName)
-if (-not $mutex.WaitOne([TimeSpan]::FromMinutes(2))) {
+if (-not $mutex.WaitOne([TimeSpan]::FromSeconds($lockTimeoutSeconds))) {
     Stop-SbkJava "timed out waiting for another SBK JDK installation: $target"
 }
 
@@ -106,7 +118,7 @@ try {
     $url = "$baseUrl/openjdk-${jdkVersion}_windows-x64_bin.zip"
     [Console]::Error.WriteLine("Downloading OpenJDK $jdkVersion for windows-x64 to the SBK user cache...")
     $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest -Uri $url -OutFile $archive -UseBasicParsing -TimeoutSec 1800
+    Invoke-WebRequest -Uri $url -OutFile $archive -UseBasicParsing -TimeoutSec $downloadTimeoutSeconds
     $actualHash = (Get-FileHash -Algorithm SHA256 $archive).Hash.ToLowerInvariant()
     if ($actualHash -ne $windowsX64Sha256) {
         throw "OpenJDK checksum mismatch: expected $windowsX64Sha256, found $actualHash"

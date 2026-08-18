@@ -21,7 +21,7 @@ spec:
       containers:
         - args:
             - --config.file=/etc/prometheus/prometheus.yml
-          image: prom/prometheus
+          image: prom/prometheus:v3.10.0
           name: prometheus
           ports:
             - containerPort: 9090
@@ -32,8 +32,7 @@ spec:
       hostname: prometheus
       restartPolicy: Always
       volumes:
-        - hostPath:
-            path: /Users/kmg/projects/SBK/grafana/prometheus
-            type: Directory
+        - configMap:
+            name: prometheus-config
           name: etc-prometheus
 status: {}

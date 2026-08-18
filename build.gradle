@@ -63,6 +63,12 @@ plugins {
 def includeDriversDeps = (project.findProperty('includeDrivers') ?: 'false').toString().toBoolean()
 
 def SbkMainClass = "io.sbk.main.SbkMain"
+def javaBootstrapProperties = new Properties()
+file('gradle/sbk-java-bootstrap.properties').withInputStream { javaBootstrapProperties.load(it) }
+ext.sbkJavaMajorVersion = Integer.parseInt(javaBootstrapProperties.getProperty('SBK_JAVA_MAJOR'))
+
+def sbkMetricsConfig = new Properties()
+file('sbk-api/src/main/resources/metrics.properties').withInputStream { sbkMetricsConfig.load(it) }
 
 gradle.rootProject {
     //only for root project
@@ -80,8 +86,8 @@ allprojects {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/yahoo/HaloDB")
             credentials {
-                username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME") ?: "sbk-public"
-                password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN") ?: "\u0067hp_FBqmGRV6KLTcFjwnDTvozvlhs3VNja4F67B5"
+                username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME")
+                password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
             }
         }
         mavenLocal()
@@ -228,7 +234,7 @@ allprojects {
 
 
            // call with parameter
-           // ./gradlew generateDashboards -Poutdir="/Users/kmg/projects/SBK/grafana/dashboards"
+           // ./gradlew generateDashboards -Poutdir="$PWD/grafana/dashboards"
            // to generate dashboard files on single folder
 
             if (project.hasProperty("outdir")) {
@@ -257,7 +263,7 @@ allprojects {
 
         /*
                 call with parameter
-            ./gradlew generateDockerfiles -Poutdir="/Users/kmg/projects/SBK/dockers"
+            ./gradlew generateDockerfiles -Poutdir="$PWD/dockers"
             to generate dashboard files on single folder
         */
         if (project.hasProperty("outdir")) {
@@ -317,7 +323,7 @@ allprojects {
         def className = sbkClass.capitalize();
         mainClass SbkMainClass
         outputName sbkProjectName
-        javaVersion '25'
+        javaVersion rootProject.ext.sbkJavaMajorVersion
         graalVersion '21.0.0'
         option "-Dsbk.applicationName=$applicationName -Dsbk.className=$sbkClass"
         option "--initialize-at-build-time=io.sbk.$className"
@@ -764,7 +770,7 @@ gradle.rootProject {
 
     jib {
         from {
-            image = 'openjdk:25-jdk'
+            image = runtimeContainerImage
         }
 
         to {
@@ -776,7 +782,7 @@ gradle.rootProject {
             creationTime = 'USE_CURRENT_TIMESTAMP' // Useful for GitOps deployment approach
             mainClass = SbkMainClass
             jvmFlags = rootProject.ext.sbkRuntimeJvmArgs
-            ports = ['9718/tcp']
+            ports = ["${sbkMetricsConfig.getProperty('port')}/tcp"]
         }
 
     }

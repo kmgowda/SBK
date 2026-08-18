@@ -113,7 +113,7 @@ final public class PerlConfig extends LatencyConfig {
      * {@link java.util.concurrent.ConcurrentLinkedQueue} implementation.</p>
      */
     @JsonProperty("MpscQueueEnable")
-    public boolean mpscQueueEnable = true;
+    public boolean mpscQueueEnable;
 
     /** Creates an empty PerL configuration for property binding. */
     public PerlConfig() {

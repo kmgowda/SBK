@@ -136,6 +136,9 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
         try {
             loggerConfig = mapper.readValue(getLoggerConfigStream(), LoggerConfig.class);
+            if (loggerConfig.reportingSeconds < 1 || loggerConfig.maxRequestIds < 1) {
+                throw new IllegalArgumentException("Logger reportingSeconds and maxRequestIds must be positive");
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
@@ -264,6 +267,15 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
     @Override
     public int getPrintingIntervalSeconds() {
         return loggerConfig.reportingSeconds;
+    }
+
+    /**
+     * Returns the configured request-counter ID dimension limit.
+     *
+     * @return maximum request IDs
+     */
+    protected final int getConfiguredMaxRequestIds() {
+        return loggerConfig.maxRequestIds;
     }
 
     @Override

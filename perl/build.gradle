@@ -102,7 +102,7 @@ tasks.register('runTimeStampQueuePerformanceBenchmark', JavaExec) {
     classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
     mainClass = 'org.openjdk.jmh.Main'
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
     }
     jvmArgs rootProject.ext.sbkRuntimeJvmArgs
     args 'io.perl.benchmark.TimeStampQueueBenchmark.*',
@@ -238,7 +238,7 @@ tasks.register('runLatencyMapPerformanceBenchmark', JavaExec) {
     classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
     mainClass = 'org.openjdk.jmh.Main'
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
     }
     jvmArgs rootProject.ext.sbkRuntimeJvmArgs
     args 'io.perl.benchmark.LatencyMapBenchmark.*',
@@ -532,7 +532,7 @@ tasks.register('runCQueuePerformanceBenchmark', JavaExec) {
     classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
     mainClass = 'org.openjdk.jmh.Main'
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
     }
     jvmArgs rootProject.ext.sbkRuntimeJvmArgs
     args 'io.perl.(benchmark.QueueBenchmark|api.impl.CQueueRetentionBenchmark).*',
@@ -637,7 +637,7 @@ tasks.register('cqueueGcTest', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'io.perl.api.impl.CQueueGcSoak'
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
     }
     jvmArgs rootProject.ext.sbkRuntimeJvmArgs
     jvmArgs '-Xms32m', '-Xmx32m', '-XX:+ExitOnOutOfMemoryError'
@@ -650,7 +650,7 @@ tasks.register('timeStampMpscQueueGcTest', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'io.perl.api.impl.TimeStampMpscQueueGcSoak'
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
     }
     jvmArgs rootProject.ext.sbkRuntimeJvmArgs
     jvmArgs '-Xms32m', '-Xmx32m', '-XX:+ExitOnOutOfMemoryError',
@@ -705,7 +705,7 @@ tasks.register('jcstress', JavaExec) {
     })
     mainClass = 'org.openjdk.jcstress.Main'
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
     }
     jvmArgs '--enable-native-access=ALL-UNNAMED'
     args '-m', 'quick',

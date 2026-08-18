@@ -37,10 +37,12 @@ plugins.withId('java') {
     apply plugin: 'jacoco'
     apply plugin: 'signing'
 
+    def configuredJavaVersion = rootProject.ext.sbkJavaMajorVersion
+
     // Configure Java toolchain
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(25)
+            languageVersion = JavaLanguageVersion.of(configuredJavaVersion)
         }
     }
 
@@ -49,7 +51,7 @@ plugins.withId('java') {
     if (sbkJavaHome != null && !sbkJavaHome.isEmpty()) {
         javaToolchains {
             launcherFor {
-                languageVersion = JavaLanguageVersion.of(25)
+                languageVersion = JavaLanguageVersion.of(configuredJavaVersion)
             }
         }
         tasks.withType(JavaCompile).configureEach {
@@ -63,7 +65,7 @@ plugins.withId('java') {
 
     // Validate Java version
     def currentJavaVersion = JavaVersion.current()
-    def expectedJavaVersion = JavaVersion.VERSION_25
+    def expectedJavaVersion = JavaVersion.toVersion(configuredJavaVersion)
 
     if (currentJavaVersion != expectedJavaVersion) {
         throw new GradleException(

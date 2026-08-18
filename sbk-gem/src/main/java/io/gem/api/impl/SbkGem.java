@@ -79,7 +79,6 @@ import java.util.concurrent.TimeoutException;
  * - aggregate and print remote results.
  */
 final public class SbkGem {
-    final static String CONFIG_FILE = "gem.properties";
     final static String SBM_CONFIG_FILE = "sbm.properties";
     final static String SBK_CONFIG_FILE = "sbk.properties";
 
@@ -215,8 +214,7 @@ final public class SbkGem {
 
         sbmConfig = mapper.readValue(Sbm.class.getClassLoader().getResourceAsStream(SBM_CONFIG_FILE),
                 SbmConfig.class);
-        gemConfig = mapper.readValue(SbkGem.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
-                GemConfig.class);
+        gemConfig = GemConfig.load();
 
         if (StringUtils.isEmpty(gemConfig.gempass)) {
             Printer.log.info("SBK-GEM: The SSH password is not set in gem.properties; " +

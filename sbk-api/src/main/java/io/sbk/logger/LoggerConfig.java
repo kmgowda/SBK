@@ -9,7 +9,6 @@
  */
 package io.sbk.logger;
 
-import io.perl.config.PerlConfig;
 import io.time.TimeUnit;
 
 /**
@@ -21,7 +20,9 @@ import io.time.TimeUnit;
  */
 public final class LoggerConfig {
     /** Reporting interval in seconds for periodic prints. */
-    public int reportingSeconds = PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS;
+    public int reportingSeconds;
+    /** Maximum request-counter ID dimensions used by aggregation loggers. */
+    public int maxRequestIds;
     /** Time unit used to interpret configured minimum and maximum latency. */
     public TimeUnit timeUnit;
     /** Default minimum latency bound expressed in {@link #timeUnit}. */

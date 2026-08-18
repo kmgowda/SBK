@@ -37,6 +37,7 @@ final class GrpcStreamSender implements AutoCloseable {
     private final ArrayBlockingQueue<Object> batches;
     private final CountDownLatch responseCompleted;
     private final ExceptionHandler exceptionHandler;
+    private final long closeTimeoutSeconds;
     private final Thread senderThread;
     private volatile ClientCallStreamObserver<MessageLatenciesRecord> requestStream;
     private volatile Throwable failure;
@@ -47,13 +48,15 @@ final class GrpcStreamSender implements AutoCloseable {
      *
      * @param stub asynchronous service stub
      * @param maximumPendingBatches maximum number of retained immutable batches
+     * @param closeTimeoutSeconds maximum close-phase wait in seconds
      * @param exceptionHandler benchmark shutdown callback
      */
-    GrpcStreamSender(ServiceGrpc.ServiceStub stub, int maximumPendingBatches,
+    GrpcStreamSender(ServiceGrpc.ServiceStub stub, int maximumPendingBatches, long closeTimeoutSeconds,
                      ExceptionHandler exceptionHandler) {
         this.batches = new ArrayBlockingQueue<>(maximumPendingBatches);
         this.responseCompleted = new CountDownLatch(1);
         this.exceptionHandler = exceptionHandler;
+        this.closeTimeoutSeconds = closeTimeoutSeconds;
         this.closed = false;
         final ClientResponseObserver<MessageLatenciesRecord, Empty> responseObserver =
                 new ClientResponseObserver<>() {
@@ -169,15 +172,15 @@ final class GrpcStreamSender implements AutoCloseable {
         }
         closed = true;
         try {
-            if (!batches.offer(END, 5, TimeUnit.SECONDS)) {
+            if (!batches.offer(END, closeTimeoutSeconds, TimeUnit.SECONDS)) {
                 throw new IOException("Timed out while scheduling the final gRPC stream drain");
             }
-            senderThread.join(TimeUnit.SECONDS.toMillis(5));
+            senderThread.join(TimeUnit.SECONDS.toMillis(closeTimeoutSeconds));
             if (senderThread.isAlive()) {
                 throw new IOException("Timed out while draining the gRPC latency stream");
             }
             checkFailure();
-            if (!responseCompleted.await(5, TimeUnit.SECONDS)) {
+            if (!responseCompleted.await(closeTimeoutSeconds, TimeUnit.SECONDS)) {
                 checkFailure();
                 throw new IOException("Timed out waiting for the SBM gRPC stream acknowledgement");
             }

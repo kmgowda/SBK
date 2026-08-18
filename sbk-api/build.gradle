@@ -63,7 +63,7 @@ tasks.register('runGrpcLoggerPerformanceBenchmark', JavaExec) {
     classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
     mainClass = 'org.openjdk.jmh.Main'
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
     }
     jvmArgs rootProject.ext.sbkRuntimeJvmArgs
     args 'io.sbk.logger.impl.GrpcLatencyAccumulatorBenchmark.*',

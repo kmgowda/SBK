@@ -16,9 +16,11 @@
 # This file is sourced by gradlew and by the generated Unix launchers.
 # It intentionally installs into a user cache and never modifies the system JDK.
 
-SBK_JAVA_VERSION=25.0.2
-SBK_JAVA_MAJOR=25
-SBK_JAVA_BASE_URL=https://download.java.net/java/GA/jdk25.0.2/b1e0dfa218384cb9959bdcb897162d4e/10/GPL
+if [ -z "${SBK_JAVA_CONFIG_FILE:-}" ] || [ ! -r "$SBK_JAVA_CONFIG_FILE" ]; then
+    echo "ERROR: SBK Java bootstrap configuration is unavailable: ${SBK_JAVA_CONFIG_FILE:-not set}" >&2
+    return 1
+fi
+. "$SBK_JAVA_CONFIG_FILE" || return 1
 
 sbk_java_error() {
     echo "ERROR: $*" >&2
@@ -91,10 +93,13 @@ sbk_java_checksum() {
 
 sbk_java_download() {
     if command -v curl >/dev/null 2>&1; then
-        curl --fail --location --retry 3 --connect-timeout 30 --max-time 1800 \
+        curl --fail --location --retry "$SBK_JAVA_DOWNLOAD_RETRIES" \
+            --connect-timeout "$SBK_JAVA_CONNECT_TIMEOUT_SECONDS" \
+            --max-time "$SBK_JAVA_DOWNLOAD_TIMEOUT_SECONDS" \
             --output "$2" "$1"
     elif command -v wget >/dev/null 2>&1; then
-        wget --tries=3 --timeout=30 --output-document="$2" "$1"
+        wget --tries="$SBK_JAVA_DOWNLOAD_RETRIES" --timeout="$SBK_JAVA_CONNECT_TIMEOUT_SECONDS" \
+            --output-document="$2" "$1"
     else
         sbk_java_error "curl or wget is required to download the managed JDK."
     fi
@@ -106,23 +111,23 @@ sbk_java_managed_platform() {
     case "$sbk_java_os:$sbk_java_arch" in
         Linux:x86_64|Linux:amd64)
             SBK_JAVA_PLATFORM=linux-x64
-            SBK_JAVA_SHA256=555ce0821e4fe175ea50d54518cd6fbece9663c1998de529bc6ce429534457df
+            SBK_JAVA_SHA256=$SBK_JAVA_SHA256_LINUX_X64
             ;;
         Linux:aarch64|Linux:arm64)
             SBK_JAVA_PLATFORM=linux-aarch64
-            SBK_JAVA_SHA256=671208d205e70c9805da45a483f670d49dd64654990a7b7223ccffb2abb070dd
+            SBK_JAVA_SHA256=$SBK_JAVA_SHA256_LINUX_AARCH64
             ;;
         Darwin:x86_64|Darwin:amd64)
             SBK_JAVA_PLATFORM=macos-x64
-            SBK_JAVA_SHA256=4ec2f4bc47b057fdf9cda07af27fae8f3605e90fa963d4240d63baeb46ede460
+            SBK_JAVA_SHA256=$SBK_JAVA_SHA256_MACOS_X64
             ;;
         Darwin:arm64|Darwin:aarch64)
             SBK_JAVA_PLATFORM=macos-aarch64
-            SBK_JAVA_SHA256=7581b0d1752cd5acbf39e286c03f07b6cd6c205b562eb2fe753ff0253cf4c1bf
+            SBK_JAVA_SHA256=$SBK_JAVA_SHA256_MACOS_AARCH64
             ;;
         CYGWIN*:x86_64|MINGW*:x86_64|MSYS*:x86_64)
             SBK_JAVA_PLATFORM=windows-x64
-            SBK_JAVA_SHA256=74784a0c07258f32d36e9224dd79187c566d831c30d47dc06888d4212087331d
+            SBK_JAVA_SHA256=$SBK_JAVA_SHA256_WINDOWS_X64
             ;;
         *)
             sbk_java_error "automatic JDK installation is unsupported on $sbk_java_os/$sbk_java_arch. Set SBK_JAVA_HOME to a JDK 25 installation."
@@ -164,11 +169,11 @@ sbk_java_install_archive() (
                 ;;
         esac
         sbk_java_attempt=$((sbk_java_attempt + 1))
-        if [ "$sbk_java_attempt" -ge 120 ]; then
+        if [ "$sbk_java_attempt" -ge "$SBK_JAVA_LOCK_TIMEOUT_SECONDS" ]; then
             sbk_java_error "timed out waiting for another SBK JDK installation: $sbk_java_lock"
             exit 1
         fi
-        sleep 1
+        sleep "$SBK_JAVA_LOCK_POLL_SECONDS"
     done
     sbk_java_lock_owned=true
     printf '%s\n' "$$" > "$sbk_java_lock/owner"

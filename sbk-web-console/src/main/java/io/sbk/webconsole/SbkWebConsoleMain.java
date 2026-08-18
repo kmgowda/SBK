@@ -16,8 +16,6 @@ import java.time.Duration;
  * Standalone entry point for the reusable SBK Local Web Console server.
  */
 public final class SbkWebConsoleMain {
-    private static final int DEFAULT_REPORTING_INTERVAL_SECONDS = 5;
-
     private SbkWebConsoleMain() {
     }
 
@@ -30,9 +28,10 @@ public final class SbkWebConsoleMain {
      * @throws IllegalArgumentException if an option or value is invalid
      */
     public static void main(String[] args) throws IOException, InterruptedException {
-        int port = 9720;
-        int minutes = 180;
-        int timeout = Math.toIntExact(WebConsoleServer.DEFAULT_IDLE_TIMEOUT.toMinutes());
+        final WebConsoleConfig config = WebConsoleConfig.load();
+        int port = config.port;
+        int minutes = config.snapshotMinutes;
+        int timeout = config.timeoutMinutes;
         for (int index = 0; index < args.length; index += 2) {
             if (index + 1 >= args.length) {
                 throw new IllegalArgumentException("Missing Local Web Console option value for " + args[index]);
@@ -44,8 +43,8 @@ public final class SbkWebConsoleMain {
                 default -> throw new IllegalArgumentException("Unknown Local Web Console option " + args[index]);
             }
         }
-        final WebConsoleServer webConsoleServer = new WebConsoleServer(port, retentionSnapshots(minutes),
-                Duration.ofMinutes(timeout));
+        final WebConsoleServer webConsoleServer = new WebConsoleServer(port,
+                retentionSnapshots(minutes, config.reportingIntervalSeconds), Duration.ofMinutes(timeout));
         Runtime.getRuntime().addShutdownHook(new Thread(webConsoleServer::close));
         webConsoleServer.start();
         webConsoleServer.awaitTermination();
@@ -59,11 +58,15 @@ public final class SbkWebConsoleMain {
      * @throws IllegalArgumentException if the duration is not positive or exceeds the supported capacity
      */
     static int retentionSnapshots(int minutes) {
+        return retentionSnapshots(minutes, WebConsoleConfig.load().reportingIntervalSeconds);
+    }
+
+    static int retentionSnapshots(int minutes, int reportingIntervalSeconds) {
         if (minutes < 1) {
             throw new IllegalArgumentException("Local Web Console history minutes must be greater than zero");
         }
         final long retention = Math.ceilDiv(Math.multiplyExact((long) minutes, 60L),
-                DEFAULT_REPORTING_INTERVAL_SECONDS);
+                reportingIntervalSeconds);
         if (retention > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("Local Web Console history minutes are too large: " + minutes);
         }

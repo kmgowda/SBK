@@ -9,6 +9,7 @@
  */
 package io.sbk.utils;
 
+import io.sbk.config.SbkRuntimeConfig;
 import io.sbk.system.Printer;
 
 import java.util.concurrent.TimeUnit;
@@ -22,8 +23,6 @@ import java.util.concurrent.TimeUnit;
  * process from terminating after {@code SIGINT} or {@code SIGTERM}.
  */
 public final class ApplicationShutdownHook {
-    private static final long SHUTDOWN_TIMEOUT_SECONDS = 3;
-
     private ApplicationShutdownHook() {
     }
 
@@ -36,7 +35,8 @@ public final class ApplicationShutdownHook {
      */
     public static Thread register(String applicationName, Runnable cleanup) {
         final Thread hook = new Thread(
-                () -> runBounded(applicationName, cleanup, SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS),
+                () -> runBounded(applicationName, cleanup,
+                        SbkRuntimeConfig.get().shutdownHookTimeoutSeconds, TimeUnit.SECONDS),
                 applicationName + "-shutdown-hook");
         Runtime.getRuntime().addShutdownHook(hook);
         return hook;

@@ -10,7 +10,7 @@ spec:
       containers:
         - name: sbk
           # SBK Image.
-          image: kmgowda/sbk:latest
+          image: kmgowda/sbk:10.5
           imagePullPolicy: Always
           resources:
             limits:
@@ -21,14 +21,26 @@ spec:
               memory: "1Gi"
           args: [
             "-class","rabbitmq",
-            "-broker","192.168.0.192",    # IP address of the Rabbit MQ broker
+            "-broker","$(RABBITMQ_BROKER)",
             "-topic","kmg-topic-1",
             "-writers","1",
             "-readers","1",
             "-size","10"
           ]
           env:
+            - name: RABBITMQ_BROKER
+              valueFrom:
+                configMapKeyRef:
+                  name: sbk-rabbitmq
+                  key: broker
             - name: JAVA_OPTS
               value: "-Xmx1g -Xms1g"
           ports:
             - containerPort: 9718
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sbk-rabbitmq
+data:
+  broker: rabbitmq.default.svc.cluster.local

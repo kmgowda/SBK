@@ -24,13 +24,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public final class LoggerConfigTest {
 
     /**
-     * The bundled logger configuration must inherit PerL's authoritative
-     * reporting interval instead of duplicating its numeric value.
+     * The bundled logger configuration must expose its configured reporting interval.
      *
      * @throws IOException if the bundled properties cannot be parsed
      */
     @Test
-    public void inheritsDefaultReportingIntervalFromPerl() throws IOException {
+    public void loadsConfiguredReportingInterval() throws IOException {
         try (InputStream input = LoggerConfigTest.class.getClassLoader()
                 .getResourceAsStream("logger.properties")) {
             assertNotNull(input, "logger.properties must be available");

@@ -40,6 +40,10 @@ apply from: "$rootDir/gradle/spotbugs.gradle"
 
 
 def SbmMainClass = "io.sbm.main.SbmMain"
+def sbmConfigProperties = new Properties()
+def sbmMetricsProperties = new Properties()
+file('src/main/resources/sbm.properties').withInputStream { sbmConfigProperties.load(it) }
+file('src/main/resources/sbm-metrics.properties').withInputStream { sbmMetricsProperties.load(it) }
 
 version = project.version
 jar {
@@ -69,7 +73,7 @@ dependencies {
 
 jib {
     from {
-        image = 'openjdk:25-jdk'
+        image = runtimeContainerImage
     }
 
     to {
@@ -81,7 +85,8 @@ jib {
         creationTime = 'USE_CURRENT_TIMESTAMP' // Useful for GitOps deployment approach
         mainClass = SbmMainClass
         jvmFlags = rootProject.ext.sbkRuntimeJvmArgs
-        ports = ['9717/tcp', '9719/tcp']
+        ports = ["${sbmConfigProperties.getProperty('port')}/tcp",
+                 "${sbmMetricsProperties.getProperty('port')}/tcp"]
     }
 
 }

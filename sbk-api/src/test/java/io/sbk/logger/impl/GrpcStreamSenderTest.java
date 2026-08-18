@@ -82,7 +82,7 @@ final class GrpcStreamSenderTest {
 
         try {
             final GrpcStreamSender sender = new GrpcStreamSender(
-                    ServiceGrpc.newStub(channel), 4, failure::set);
+                    ServiceGrpc.newStub(channel), 4, 5, failure::set);
             sender.send(MessageLatenciesRecord.newBuilder().setSequenceNumber(1).build());
             sender.send(MessageLatenciesRecord.newBuilder().setSequenceNumber(2).build());
             sender.close();
@@ -109,7 +109,7 @@ final class GrpcStreamSenderTest {
             return requestStream;
         });
         final AtomicReference<Throwable> failure = new AtomicReference<>();
-        final GrpcStreamSender sender = new GrpcStreamSender(stub, 1, failure::set);
+        final GrpcStreamSender sender = new GrpcStreamSender(stub, 1, 5, failure::set);
 
         sender.send(MessageLatenciesRecord.getDefaultInstance());
         verify(requestStream, timeout(1_000).atLeastOnce()).isReady();
@@ -158,7 +158,7 @@ final class GrpcStreamSenderTest {
 
         try {
             final GrpcStreamSender sender = new GrpcStreamSender(
-                    ServiceGrpc.newStub(channel), 4, throwable -> {
+                    ServiceGrpc.newStub(channel), 4, 5, throwable -> {
                         failure.set(throwable);
                         failureReported.countDown();
                     });
@@ -191,7 +191,7 @@ final class GrpcStreamSenderTest {
         });
         final AtomicReference<Throwable> failure = new AtomicReference<>();
         final CountDownLatch failureReported = new CountDownLatch(1);
-        final GrpcStreamSender sender = new GrpcStreamSender(stub, 1, throwable -> {
+        final GrpcStreamSender sender = new GrpcStreamSender(stub, 1, 5, throwable -> {
             failure.set(throwable);
             failureReported.countDown();
         });

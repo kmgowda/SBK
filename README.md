@@ -98,6 +98,9 @@ installation. Set `SBK_JAVA_CACHE_DIR` to select a different cache directory.
 Automatic installation supports Linux x64/AArch64, macOS x64/AArch64, and
 Windows x64. Other platforms can use a manually installed JDK through
 `SBK_JAVA_HOME`.
+The pinned version, platform checksums, and bootstrap network/lock timeouts
+have one authoritative source:
+[`gradle/sbk-java-bootstrap.properties`](gradle/sbk-java-bootstrap.properties).
 An explicitly configured but invalid `SBK_JAVA_HOME` or `JAVA_HOME` is treated
 as an error so a configuration mistake is never hidden by an automatic
 download.

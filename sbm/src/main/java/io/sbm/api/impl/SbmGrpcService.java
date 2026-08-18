@@ -16,6 +16,7 @@ import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import io.sbp.api.Sbp;
 import io.sbp.config.SbpVersion;
+import io.sbp.config.SbpFailureLimits;
 import io.sbp.grpc.ClientID;
 import io.sbp.grpc.ClientFailure;
 import io.sbp.grpc.Config;
@@ -52,8 +53,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * records to an {@link SbmRegistry} for queueing/processing.
  */
 final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
-    private static final int MAXIMUM_FAILURE_COMPONENT_CHARACTERS = 64;
-    private static final int MAXIMUM_FAILURE_MESSAGE_CHARACTERS = 4096;
     private final AtomicInteger connections;
     private final Config config;
     private final CountConnections countConnections;
@@ -304,8 +303,8 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
                     .asRuntimeException());
             return;
         }
-        if (!isValidFailureText(request.getComponent(), MAXIMUM_FAILURE_COMPONENT_CHARACTERS)
-                || !isValidFailureText(request.getMessage(), MAXIMUM_FAILURE_MESSAGE_CHARACTERS)) {
+        if (!isValidFailureText(request.getComponent(), SbpFailureLimits.COMPONENT_CHARACTERS)
+                || !isValidFailureText(request.getMessage(), SbpFailureLimits.MESSAGE_CHARACTERS)) {
             responseObserver.onError(Status.INVALID_ARGUMENT
                     .withDescription("SBM terminal failure contains invalid or oversized text")
                     .asRuntimeException());

@@ -30,23 +30,26 @@ spec:
           volumeMounts:
             - mountPath: /var/lib/grafana/dashboards
               name: grafana-dashboards
-            - mountPath: /etc/grafana/provisioning
-              name: grafana-provisioning
+            - mountPath: /etc/grafana/provisioning/dashboards
+              name: grafana-provisioning-dashboards
+            - mountPath: /etc/grafana/provisioning/datasources
+              name: grafana-provisioning-datasources
             - mountPath: /etc/grafana/config.ini
               name: grafana-config
+              subPath: config.ini
       hostname: grafana
       restartPolicy: Always
       volumes:
-        - hostPath:
-            path: /Users/kmg/projects/SBK/grafana/dashboards
-            type: Directory
+        - configMap:
+            name: grafana-dashboards
           name: grafana-dashboards
-        - hostPath:
-            path: /Users/kmg/projects/SBK/grafana/provisioning
-            type: Directory
-          name: grafana-provisioning
-        - hostPath:
-            path: /Users/kmg/projects/SBK/grafana/config.ini
-            type: File
+        - configMap:
+            name: grafana-provisioning-dashboards
+          name: grafana-provisioning-dashboards
+        - configMap:
+            name: grafana-provisioning-datasources
+          name: grafana-provisioning-datasources
+        - configMap:
+            name: grafana-config
           name: grafana-config
 status: {}

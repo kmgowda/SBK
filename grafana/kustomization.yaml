@@ -1,0 +1,32 @@
+# Copyright (c) KMG. All Rights Reserved.
+# Licensed under the Apache License, Version 2.0.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - grafana-deployment.yaml
+  - grafana-service.yaml
+  - prometheus-deployment.yaml
+  - prometheus-service.yaml
+configMapGenerator:
+  - name: grafana-dashboards
+    files:
+      - dashboards/sbk-dashboard.json
+  - name: grafana-provisioning-dashboards
+    files:
+      - provisioning/dashboards/all.yml
+  - name: grafana-provisioning-datasources
+    files:
+      - provisioning/datasources/all.yml
+  - name: grafana-config
+    files:
+      - config.ini
+  - name: prometheus-config
+    files:
+      - prometheus/prometheus.yml
+      - prometheus/targets.json
+      - prometheus/sbm-targets.json
+      - prometheus/jmx-targets.json
+      - prometheus/sbm-jmx-targets.json
+      - prometheus/node-exporters.json
+generatorOptions:
+  disableNameSuffixHash: true

@@ -14,5 +14,7 @@
 # limitations under the License.
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P) || exit 1
+SBK_JAVA_CONFIG_FILE=$SCRIPT_DIR/gradle/sbk-java-bootstrap.properties
+export SBK_JAVA_CONFIG_FILE
 . "$SCRIPT_DIR/gradle/sbk-java-bootstrap.sh" || exit 1
 echo "SBK JDK is ready: $SBK_JAVA_HOME"

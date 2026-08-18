@@ -156,13 +156,15 @@ plugins.withId('maven-publish') {
 
 
 
+    def jreleaserConfigFile = project.findProperty('jreleaser.configFile')
+            ?: System.getenv('JRELEASER_CONFIG_FILE')
     jreleaser {
-        environment {
-            // Location of a properties file with key/value pairs
-            // Each key must be prefixed with `JRELEASER_` and match
-            // the environment variable it overrides.
-            //
-            variables = '/Users/kmg/.jreleaser/config.toml'
+        if (jreleaserConfigFile) {
+            environment {
+                // Each key must be prefixed with JRELEASER_ and match
+                // the environment variable it overrides.
+                variables = jreleaserConfigFile
+            }
         }
 
         release {

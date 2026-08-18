@@ -10,6 +10,12 @@
 
 package io.gem.config;
 
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Configuration properties for SBK-GEM orchestration.
  *
@@ -53,6 +59,7 @@ final public class GemConfig {
      * Command-line option name used to supply the SSH password.
      */
     final public static String GEM_PASS_OPTION = "gempass";
+    private static final String CONFIG_FILE = "gem.properties";
 
     //override by props file or command line parameters
     /**
@@ -142,11 +149,46 @@ final public class GemConfig {
      * Whether to fork a {@code ForkJoinPool} for execution (vs fixed thread pool).
      */
     public boolean fork;
+    /** Executor threads reserved for orchestration and embedded services. */
+    public int executorThreadReserve;
+    /** Maximum stdout/stderr bytes retained per SSH command. */
+    public int diagnosticBytes;
+    /** Maximum accepted OpenSSH-agent response frame bytes. */
+    public int maximumAgentResponseBytes;
+    /** Maximum characters retained in a summarized remote diagnostic. */
+    public int maximumDiagnosticCharacters;
+    /** Prefix characters retained when a remote diagnostic is truncated. */
+    public int diagnosticPrefixCharacters;
 
     /**
      * Creates an empty GEM configuration for property binding.
      */
     public GemConfig() {
+    }
+
+    /**
+     * Loads the module-owned GEM configuration.
+     *
+     * @return GEM configuration
+     * @throws IOException if the bundled configuration cannot be read
+     */
+    public static GemConfig load() throws IOException {
+        try (InputStream input = GemConfig.class.getClassLoader().getResourceAsStream(CONFIG_FILE)) {
+            if (input == null) {
+                throw new IOException("Missing " + CONFIG_FILE);
+            }
+            final GemConfig config = new ObjectMapper(new JavaPropsFactory()).readValue(input, GemConfig.class);
+            config.validate();
+            return config;
+        }
+    }
+
+    private void validate() {
+        if (executorThreadReserve < 1 || diagnosticBytes < 1 || maximumAgentResponseBytes < 1
+                || maximumDiagnosticCharacters < 1 || diagnosticPrefixCharacters < 1
+                || diagnosticPrefixCharacters >= maximumDiagnosticCharacters) {
+            throw new IllegalArgumentException("Invalid SBK-GEM runtime configuration");
+        }
     }
 
 }

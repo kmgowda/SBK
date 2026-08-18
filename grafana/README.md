@@ -4,7 +4,7 @@ This directory contains a local Docker Compose monitoring stack, Grafana provisi
 
 ## Local Compose stack
 
-Review host paths, ports, and image tags in `docker-compose.yml`, then start from this directory:
+Review ports and image tags in `docker-compose.yml`, then start from this directory:
 
 ```bash
 cd grafana
@@ -34,7 +34,12 @@ Replace example addresses with endpoints reachable from the Prometheus container
 
 ## Kubernetes manifests
 
-The Grafana and Prometheus deployment/service manifests are examples. Review volume paths, storage, namespaces, security context, credentials, service exposure, and resource limits before applying them. Host paths in example manifests are environment-specific.
+The Grafana and Prometheus deployment/service manifests are examples. Apply them
+with `kubectl apply -k grafana/` from the repository root. Kustomize generates
+ConfigMaps from the checked-in dashboards, provisioning, Grafana configuration,
+and Prometheus target files, so the manifests contain no workstation-specific
+host paths. Review namespaces, security context, credentials, service exposure,
+resource limits, and ConfigMap size limits before production use.
 
 ## Interpreting dashboards
 

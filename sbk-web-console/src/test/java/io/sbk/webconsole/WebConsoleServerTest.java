@@ -358,7 +358,7 @@ final class WebConsoleServerTest {
 
     @Test
     void defaultIdleTimeoutIsOneMinute() {
-        assertEquals(Duration.ofMinutes(1), WebConsoleServer.DEFAULT_IDLE_TIMEOUT);
+        assertEquals(1, WebConsoleConfig.load().timeoutMinutes);
     }
 
     @Test
@@ -403,7 +403,7 @@ final class WebConsoleServerTest {
     }
 
     private static WebConsoleConfig config(int port) {
-        final WebConsoleConfig config = new WebConsoleConfig();
+        final WebConsoleConfig config = WebConsoleConfig.load();
         config.port = port;
         config.open = false;
         config.snapshotMinutes = 1;
