@@ -36,6 +36,7 @@ def timeStampQueueMinimumAllocationReductionBytes = providers.gradleProperty(
         'timeStampQueueMinimumAllocationReductionBytes').map {
     it.toDouble()
 }
+def expectedJavaMajor = rootProject.ext.sbkJavaMajorVersion.toString()
 
 sourceSets {
     lincheck {
@@ -97,7 +98,7 @@ def latencyMapPerformanceReport = layout.buildDirectory.file(
 
 tasks.register('runTimeStampQueuePerformanceBenchmark', JavaExec) {
     group = 'verification'
-    description = 'Benchmarks the intrusive TimeStamp MPSC queue against the JDK 25 queue.'
+    description = "Benchmarks the intrusive TimeStamp MPSC queue against the JDK ${expectedJavaMajor} queue."
     dependsOn tasks.named('jmhJar')
     classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
     mainClass = 'org.openjdk.jmh.Main'
@@ -121,7 +122,7 @@ tasks.register('runTimeStampQueuePerformanceBenchmark', JavaExec) {
 
 tasks.register('timeStampQueuePerformanceTest') {
     group = 'verification'
-    description = 'Verifies intrusive timestamp latency, allocation, and MPSC progress on JDK 25.'
+    description = "Verifies intrusive timestamp latency, allocation, and MPSC progress on JDK ${expectedJavaMajor}."
     dependsOn tasks.named('runTimeStampQueuePerformanceBenchmark')
 
     doLast {
@@ -133,9 +134,9 @@ tasks.register('timeStampQueuePerformanceTest') {
             if (value == null) {
                 throw new GradleException("Missing JMH result: ${benchmark}")
             }
-            if (!value.jdkVersion.toString().startsWith('25')) {
+            if (!value.jdkVersion.toString().startsWith(expectedJavaMajor)) {
                 throw new GradleException(
-                        "Timestamp queue verification requires JDK 25; found ${value.jdkVersion}")
+                        "Timestamp queue verification requires JDK ${expectedJavaMajor}; found ${value.jdkVersion}")
             }
             value
         }
@@ -181,7 +182,7 @@ tasks.register('timeStampQueuePerformanceTest') {
         }
 
         logger.lifecycle('Timestamp queue performance comparison '
-                + '(TimeStampMpscQueue vs JDK 25 ConcurrentLinkedQueue):')
+                + "(TimeStampMpscQueue vs JDK ${expectedJavaMajor} ConcurrentLinkedQueue):")
         logger.lifecycle(String.format(
                 '  Round-trip latency : %.3f vs %.3f ns/op'
                         + ' -- TimeStampMpscQueue is %.3f ns/op (%.2f%%) %s',
@@ -233,7 +234,7 @@ tasks.register('timeStampQueuePerformanceTest') {
 
 tasks.register('runLatencyMapPerformanceBenchmark', JavaExec) {
     group = 'verification'
-    description = 'Benchmarks dense-array, primitive-map, and boxed-map latency recorders on JDK 25.'
+    description = "Benchmarks dense-array, primitive-map, and boxed-map latency recorders on JDK ${expectedJavaMajor}."
     dependsOn tasks.named('jmhJar')
     classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
     mainClass = 'org.openjdk.jmh.Main'
@@ -270,9 +271,9 @@ tasks.register('latencyMapPerformanceTest') {
                 throw new GradleException(
                         "Missing latency-map JMH result: ${benchmark}")
             }
-            if (!value.jdkVersion.toString().startsWith('25')) {
+            if (!value.jdkVersion.toString().startsWith(expectedJavaMajor)) {
                 throw new GradleException(
-                        "Latency-map comparison requires JDK 25; found "
+                        "Latency-map comparison requires JDK ${expectedJavaMajor}; found "
                                 + value.jdkVersion)
             }
             value
@@ -527,7 +528,7 @@ tasks.register('latencyMapPerformanceTest') {
 
 tasks.register('runCQueuePerformanceBenchmark', JavaExec) {
     group = 'verification'
-    description = 'Runs the isolated JDK 25 CQueue versus ConcurrentLinkedQueue benchmarks.'
+    description = "Runs the isolated JDK ${expectedJavaMajor} CQueue versus ConcurrentLinkedQueue benchmarks."
     dependsOn tasks.named('jmhJar')
     classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
     mainClass = 'org.openjdk.jmh.Main'
@@ -556,7 +557,7 @@ tasks.register('runCQueuePerformanceBenchmark', JavaExec) {
 
 tasks.register('cqueuePerformanceTest') {
     group = 'verification'
-    description = 'Verifies lower CQueue latency and higher 4P/1C throughput on JDK 25.'
+    description = "Verifies lower CQueue latency and higher 4P/1C throughput on JDK ${expectedJavaMajor}."
     dependsOn tasks.named('runCQueuePerformanceBenchmark')
 
     doLast {
@@ -567,9 +568,9 @@ tasks.register('cqueuePerformanceTest') {
             if (value == null) {
                 throw new GradleException("Missing JMH result: ${benchmark}")
             }
-            if (!value.jdkVersion.toString().startsWith('25')) {
+            if (!value.jdkVersion.toString().startsWith(expectedJavaMajor)) {
                 throw new GradleException(
-                        "CQueue performance verification requires JDK 25; found ${value.jdkVersion}")
+                        "CQueue performance verification requires JDK ${expectedJavaMajor}; found ${value.jdkVersion}")
             }
             value
         }

@@ -9,7 +9,6 @@
  */
 package io.sbk.logger;
 
-import io.perl.config.PerlConfig;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.javaprop.JavaPropsFactory;
@@ -36,8 +35,8 @@ public final class LoggerConfigTest {
             final LoggerConfig config = new ObjectMapper(new JavaPropsFactory())
                     .readValue(input, LoggerConfig.class);
 
-            assertEquals(PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS,
-                    config.reportingSeconds);
+            assertEquals(5, config.reportingSeconds);
+            assertEquals(10, config.maxRequestIds);
         }
     }
 }

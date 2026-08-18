@@ -28,5 +28,3 @@ configMapGenerator:
       - prometheus/jmx-targets.json
       - prometheus/sbm-jmx-targets.json
       - prometheus/node-exporters.json
-generatorOptions:
-  disableNameSuffixHash: true

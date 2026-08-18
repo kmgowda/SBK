@@ -32,8 +32,34 @@ $jdkVersion = $bootstrapConfig.SBK_JAVA_VERSION
 $jdkMajor = $bootstrapConfig.SBK_JAVA_MAJOR
 $baseUrl = $bootstrapConfig.SBK_JAVA_BASE_URL
 $windowsX64Sha256 = $bootstrapConfig.SBK_JAVA_SHA256_WINDOWS_X64
+$downloadRetries = [int]$bootstrapConfig.SBK_JAVA_DOWNLOAD_RETRIES
+$connectTimeoutSeconds = [int]$bootstrapConfig.SBK_JAVA_CONNECT_TIMEOUT_SECONDS
 $downloadTimeoutSeconds = [int]$bootstrapConfig.SBK_JAVA_DOWNLOAD_TIMEOUT_SECONDS
 $lockTimeoutSeconds = [int]$bootstrapConfig.SBK_JAVA_LOCK_TIMEOUT_SECONDS
+
+function Invoke-SbkJavaDownload([string]$Uri, [string]$OutFile) {
+    $curl = Get-Command curl.exe -ErrorAction SilentlyContinue
+    if ($curl) {
+        & $curl.Source --fail --location --retry $downloadRetries `
+            --connect-timeout $connectTimeoutSeconds --max-time $downloadTimeoutSeconds `
+            --output $OutFile $Uri
+        if ($LASTEXITCODE -ne 0) {
+            throw "curl.exe failed with exit code $LASTEXITCODE"
+        }
+        return
+    }
+
+    for ($attempt = 1; $attempt -le $downloadRetries; $attempt++) {
+        try {
+            Invoke-WebRequest -Uri $Uri -OutFile $OutFile -UseBasicParsing `
+                -TimeoutSec $downloadTimeoutSeconds
+            return
+        } catch {
+            if ($attempt -eq $downloadRetries) { throw }
+            Start-Sleep -Seconds 1
+        }
+    }
+}
 
 function Test-SbkJdk([string]$CandidateHome) {
     if (-not $CandidateHome) { return $false }
@@ -53,7 +79,7 @@ function Stop-SbkJava([string]$Message) {
 if ($env:SBK_JAVA_HOME) {
     $candidate = $env:SBK_JAVA_HOME.Trim('"')
     if (-not (Test-SbkJdk $candidate)) {
-        Stop-SbkJava "SBK_JAVA_HOME must point to a complete JDK 25 installation: $candidate"
+        Stop-SbkJava "SBK_JAVA_HOME must point to a complete JDK $jdkMajor installation: $candidate"
     }
     Write-Output $candidate
     exit 0
@@ -62,7 +88,7 @@ if ($env:SBK_JAVA_HOME) {
 if ($env:JAVA_HOME) {
     $candidate = $env:JAVA_HOME.Trim('"')
     if (-not (Test-SbkJdk $candidate)) {
-        Stop-SbkJava "JAVA_HOME must point to a complete JDK 25 installation: $candidate"
+        Stop-SbkJava "JAVA_HOME must point to a complete JDK $jdkMajor installation: $candidate"
     }
     Write-Output $candidate
     exit 0
@@ -93,11 +119,11 @@ if (Test-SbkJdk $target) {
     exit 0
 }
 if ($InstallIfMissing -ne 'true') {
-    Stop-SbkJava 'no usable JDK 25 was found. Run gradlew once to install the managed JDK, or set SBK_JAVA_HOME.'
+    Stop-SbkJava "no usable JDK $jdkMajor was found. Run gradlew once to install the managed JDK, or set SBK_JAVA_HOME."
 }
 
 if (-not [Environment]::Is64BitOperatingSystem -or $env:PROCESSOR_ARCHITECTURE -notin @('AMD64', 'x86')) {
-    Stop-SbkJava "automatic JDK installation is unsupported on Windows/$env:PROCESSOR_ARCHITECTURE. Set SBK_JAVA_HOME to a JDK 25 installation."
+    Stop-SbkJava "automatic JDK installation is unsupported on Windows/$env:PROCESSOR_ARCHITECTURE. Set SBK_JAVA_HOME to a JDK $jdkMajor installation."
 }
 
 New-Item -ItemType Directory -Force -Path $cacheRoot | Out-Null
@@ -118,14 +144,14 @@ try {
     $url = "$baseUrl/openjdk-${jdkVersion}_windows-x64_bin.zip"
     [Console]::Error.WriteLine("Downloading OpenJDK $jdkVersion for windows-x64 to the SBK user cache...")
     $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest -Uri $url -OutFile $archive -UseBasicParsing -TimeoutSec $downloadTimeoutSeconds
+    Invoke-SbkJavaDownload $url $archive
     $actualHash = (Get-FileHash -Algorithm SHA256 $archive).Hash.ToLowerInvariant()
     if ($actualHash -ne $windowsX64Sha256) {
         throw "OpenJDK checksum mismatch: expected $windowsX64Sha256, found $actualHash"
     }
     Expand-Archive -Path $archive -DestinationPath $temp
     $extracted = Join-Path $temp "jdk-$jdkVersion"
-    if (-not (Test-SbkJdk $extracted)) { throw 'Downloaded archive does not contain a valid JDK 25.' }
+    if (-not (Test-SbkJdk $extracted)) { throw "Downloaded archive does not contain a valid JDK $jdkMajor." }
     if (Test-Path $target) {
         Move-Item $target "$target.invalid.$PID"
     }

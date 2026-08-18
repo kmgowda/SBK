@@ -43,4 +43,4 @@ kind: ConfigMap
 metadata:
   name: sbk-rabbitmq
 data:
-  broker: rabbitmq.default.svc.cluster.local
+  broker: rabbitmq

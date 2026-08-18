@@ -24,6 +24,8 @@ import java.io.InputStream;
  * management, and SBM coordination.
  */
 final public class GemConfig {
+    /** Marker inserted between retained diagnostic prefix and suffix text. */
+    public static final String DIAGNOSTIC_TRUNCATION_MARKER = " ... [truncated] ... ";
     /**
      *<code>String SBK_GEM_APP_NAME = "sbk.gem.applicationName</code>.
      */
@@ -183,10 +185,11 @@ final public class GemConfig {
         }
     }
 
-    private void validate() {
+    void validate() {
         if (executorThreadReserve < 1 || diagnosticBytes < 1 || maximumAgentResponseBytes < 1
                 || maximumDiagnosticCharacters < 1 || diagnosticPrefixCharacters < 1
-                || diagnosticPrefixCharacters >= maximumDiagnosticCharacters) {
+                || maximumDiagnosticCharacters - diagnosticPrefixCharacters
+                <= DIAGNOSTIC_TRUNCATION_MARKER.length()) {
             throw new IllegalArgumentException("Invalid SBK-GEM runtime configuration");
         }
     }

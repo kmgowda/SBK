@@ -34,7 +34,7 @@ spec:
               name: grafana-provisioning-dashboards
             - mountPath: /etc/grafana/provisioning/datasources
               name: grafana-provisioning-datasources
-            - mountPath: /etc/grafana/config.ini
+            - mountPath: /etc/grafana/grafana.ini
               name: grafana-config
               subPath: config.ini
       hostname: grafana

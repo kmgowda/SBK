@@ -1271,7 +1271,7 @@ flowchart TB
     MAIN --> R["SbkReader tasks"]
     MAIN --> STEP["staged-start / completion tasks"]
 
-    BENCH --> PE["perlExecutor<br/>ForkJoinPool(5)"]
+    BENCH --> PE["perlExecutor<br/>ForkJoinPool(perlExecutorParallelism)"]
     PE --> WP["write PerL recorder<br/>when applicable"]
     PE --> RP["read PerL recorder<br/>when readers exist"]
 
@@ -2637,7 +2637,7 @@ sequenceDiagram
     Drv->>Mc: bucketExists("bench") → false
     Drv->>Mc: makeBucket("bench")
     Bench->>Drv: createWriter(0..3, params)  ×4
-    Note over PerlW: spawn 1 recorder thread<br/>via perlExec (ForkJoinPool(5))
+    Note over PerlW: spawn 1 recorder thread<br/>via perlExec (configured parallelism)
     Bench->>PerlW: writePerl.run(60, 0)
     Note over PerlW: recorder starts<br/>periodicRecorder.start(t0)
     Bench->>Bench: submit 4 SbkWriter tasks<br/>to platform-thread executor

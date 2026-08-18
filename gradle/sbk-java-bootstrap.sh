@@ -98,7 +98,9 @@ sbk_java_download() {
             --max-time "$SBK_JAVA_DOWNLOAD_TIMEOUT_SECONDS" \
             --output "$2" "$1"
     elif command -v wget >/dev/null 2>&1; then
-        wget --tries="$SBK_JAVA_DOWNLOAD_RETRIES" --timeout="$SBK_JAVA_CONNECT_TIMEOUT_SECONDS" \
+        wget --tries="$SBK_JAVA_DOWNLOAD_RETRIES" \
+            --connect-timeout="$SBK_JAVA_CONNECT_TIMEOUT_SECONDS" \
+            --read-timeout="$SBK_JAVA_DOWNLOAD_TIMEOUT_SECONDS" \
             --output-document="$2" "$1"
     else
         sbk_java_error "curl or wget is required to download the managed JDK."
@@ -150,7 +152,7 @@ sbk_java_install_archive() (
     }
     trap 'sbk_java_install_cleanup; exit 130' HUP INT TERM
 
-    sbk_java_attempt=0
+    sbk_java_lock_deadline=$(($(date +%s) + SBK_JAVA_LOCK_TIMEOUT_SECONDS))
     while ! mkdir "$sbk_java_lock" 2>/dev/null; do
         if sbk_java_select_home "$sbk_java_home"; then
             exit 0
@@ -168,12 +170,17 @@ sbk_java_install_archive() (
                 fi
                 ;;
         esac
-        sbk_java_attempt=$((sbk_java_attempt + 1))
-        if [ "$sbk_java_attempt" -ge "$SBK_JAVA_LOCK_TIMEOUT_SECONDS" ]; then
+        sbk_java_lock_now=$(date +%s)
+        if [ "$sbk_java_lock_now" -ge "$sbk_java_lock_deadline" ]; then
             sbk_java_error "timed out waiting for another SBK JDK installation: $sbk_java_lock"
             exit 1
         fi
-        sleep "$SBK_JAVA_LOCK_POLL_SECONDS"
+        sbk_java_lock_remaining=$((sbk_java_lock_deadline - sbk_java_lock_now))
+        sbk_java_lock_sleep=$SBK_JAVA_LOCK_POLL_SECONDS
+        if [ "$sbk_java_lock_sleep" -gt "$sbk_java_lock_remaining" ]; then
+            sbk_java_lock_sleep=$sbk_java_lock_remaining
+        fi
+        sleep "$sbk_java_lock_sleep"
     done
     sbk_java_lock_owned=true
     printf '%s\n' "$$" > "$sbk_java_lock/owner"

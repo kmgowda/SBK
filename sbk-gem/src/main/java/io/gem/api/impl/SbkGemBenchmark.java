@@ -62,7 +62,6 @@ import java.util.concurrent.TimeoutException;
  */
 final public class SbkGemBenchmark implements GemBenchmark {
     private static final GemConfig DEFAULT_CONFIG = loadDefaultConfig();
-    private static final String DIAGNOSTIC_TRUNCATION_MARKER = " ... [truncated] ... ";
     private final SbmBenchmark sbmBenchmark;
     private final GemConfig config;
     private final GemParameters params;
@@ -859,9 +858,10 @@ final public class SbkGemBenchmark implements GemBenchmark {
             return normalized;
         }
         final int suffixCharacters = DEFAULT_CONFIG.maximumDiagnosticCharacters
-                - DEFAULT_CONFIG.diagnosticPrefixCharacters - DIAGNOSTIC_TRUNCATION_MARKER.length();
+                - DEFAULT_CONFIG.diagnosticPrefixCharacters
+                - GemConfig.DIAGNOSTIC_TRUNCATION_MARKER.length();
         return normalized.substring(0, DEFAULT_CONFIG.diagnosticPrefixCharacters)
-                + DIAGNOSTIC_TRUNCATION_MARKER
+                + GemConfig.DIAGNOSTIC_TRUNCATION_MARKER
                 + normalized.substring(normalized.length() - suffixCharacters);
     }
 
