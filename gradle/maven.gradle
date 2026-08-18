@@ -156,15 +156,18 @@ plugins.withId('maven-publish') {
 
 
 
-    def jreleaserConfigFile = project.findProperty('jreleaser.configFile')
-            ?: System.getenv('JRELEASER_CONFIG_FILE')
+    def configuredJreleaserFile = project.findProperty('jreleaser.configFile')?.toString()?.trim()
+    def environmentJreleaserFile = System.getenv('JRELEASER_CONFIG_FILE')?.trim()
+    def defaultJreleaserFile = project.file(
+            "${System.getProperty('user.home')}/.jreleaser/config.toml").absolutePath
+    def jreleaserConfigFile = configuredJreleaserFile
+            ?: environmentJreleaserFile
+            ?: defaultJreleaserFile
     jreleaser {
-        if (jreleaserConfigFile) {
-            environment {
-                // Each key must be prefixed with JRELEASER_ and match
-                // the environment variable it overrides.
-                variables = jreleaserConfigFile
-            }
+        environment {
+            // Each key must be prefixed with JRELEASER_ and match
+            // the environment variable it overrides.
+            variables = jreleaserConfigFile
         }
 
         release {
