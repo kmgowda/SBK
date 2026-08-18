@@ -7,8 +7,9 @@ Licensed under the Apache License, Version 2.0.
 
 SBK has one authoritative release gate. It builds clean distributions, runs
 the normal verification suite, exercises every logger family through the SBK
-suite and standalone service launchers, verifies PerL concurrency, checks generated API documentation, and
-records the commit and archive checksums that were qualified.
+suite and standalone service launchers, verifies PerL concurrency, checks
+generated API documentation, and records the commit and archive checksums that
+were qualified.
 
 ## Profiles
 
@@ -40,6 +41,67 @@ entry point. Its `ci` profile uses a GitHub-hosted runner. Its `release`
 profile requires a self-hosted Linux runner labeled `sbk-release`, because
 that machine must have network and SSH access to the private GEM inventory.
 
+## Execution examples
+
+### Local development gate
+
+Use this command for a clean local checkout. It runs all builds, enabled-driver
+checks, concurrency tests, packaging, documentation checks, and local
+functional tests. It does not run the remote GEM or release-only performance
+tests.
+
+```bash
+./gradlew clean releaseQualification \
+  -PreleaseProfile=local \
+  --no-daemon --rerun-tasks
+```
+
+During development, use the clean-tree override to qualify uncommitted code:
+
+```bash
+./gradlew clean releaseQualification \
+  -PreleaseProfile=local \
+  -PreleaseRequireCleanTree=false \
+  --no-daemon --rerun-tasks
+```
+
+Do not use this override as release evidence. A local-profile result verifies
+the local functional scope but does not qualify a release candidate.
+
+### CI gate
+
+The CI profile adds Maven main, source, Javadoc JAR, and POM generation checks.
+It does not publish artifacts or require signing credentials.
+
+```bash
+./gradlew clean releaseQualification \
+  -PreleaseProfile=ci \
+  --no-daemon --rerun-tasks
+```
+
+### Complete release-candidate gate
+
+Use a clean checkout and a private inventory containing real SSH-accessible
+hosts:
+
+```bash
+./gradlew clean releaseQualification \
+  -PreleaseProfile=release \
+  -PreleaseInventory=/root/.config/sbk/release-inventory.properties \
+  --no-daemon --rerun-tasks
+```
+
+This is the only profile that runs the release-only JMH checks and real
+SBK-GEM and SBK-GEM-YAL executions. A valid result ends with output similar to:
+
+```text
+PASS: sbk-gem-GemPrometheusLogger
+PASS: sbk-gem-GemWebLogger
+PASS: sbk-gem-yal-release
+SBK 10.5 release qualification: QUALIFIED
+BUILD SUCCESSFUL
+```
+
 ## Release inventory
 
 Keep the inventory outside the repository. It contains locations, not secret
@@ -55,6 +117,63 @@ gem.knownHosts=/secure/sbk-release-known-hosts
 The nodes must permit non-interactive SSH, reach the selected backend, and
 connect back to the embedded SBM endpoint. SBK-GEM performs its normal version,
 copy, Java, execution, aggregation, and cleanup checks.
+
+### Single-host GEM qualification
+
+A single host is sufficient to automate the SSH deployment, remote execution,
+SBM/gRPC aggregation, GEM logger, and GEM-YAL contracts. It does not validate
+multi-host fan-out or aggregation across nodes.
+
+To use a separate host:
+
+```properties
+gem.nodes=10.118.232.92
+gem.user=sbk-release
+gem.knownHosts=/home/sbk-release/.ssh/known_hosts
+```
+
+To use the qualification machine itself, run an SSH server and use loopback:
+
+```properties
+gem.nodes=127.0.0.1
+gem.user=sbk-release
+gem.knownHosts=/home/sbk-release/.ssh/known_hosts
+```
+
+Verify non-interactive access before starting the six-minute-or-longer gate:
+
+```bash
+ssh -o BatchMode=yes sbk-release@127.0.0.1 java -version
+```
+
+The SSH host key must already be verified in the configured `known_hosts`
+file. Keep the private key on the qualification host or in its SSH agent; do
+not add it to the inventory or repository.
+
+### Automated GitHub Actions release gate
+
+Register an isolated self-hosted Linux runner with these labels:
+
+```text
+self-hosted
+linux
+sbk-release
+```
+
+Configure these repository Actions secrets. The known-hosts secret is a path
+on the self-hosted runner, not the file contents:
+
+```text
+SBK_RELEASE_GEM_NODES=127.0.0.1
+SBK_RELEASE_GEM_USER=sbk-release
+SBK_RELEASE_GEM_KNOWN_HOSTS=/home/sbk-release/.ssh/known_hosts
+```
+
+Open **Actions > SBK Release Qualification > Run workflow**, select the
+`release` profile, and run it. The workflow creates the inventory under
+`RUNNER_TEMP` and invokes the same complete release command shown above. After
+the one-time runner and SSH setup, SBK-GEM and SBK-GEM-YAL require no manual
+launcher commands.
 
 ## Automated functional coverage
 
@@ -111,6 +230,30 @@ build/reports/release-qualification/
 and SHA-256 checksum of every application ZIP/TAR. A release is qualified only
 when the command exits zero, no mandatory test was skipped, and the published
 artifacts have the recorded checksums.
+
+Inspect the functional and qualification results with:
+
+```bash
+cat build/reports/release-qualification/functional-summary.json
+grep 'sbk-gem' build/reports/release-qualification/functional-results.tsv
+cat build/reports/release-qualification/qualification.json
+```
+
+Release evidence must contain both `"status": "QUALIFIED"` and
+`"profile": "release"`. Entries named `sbk-gem-external` or
+`sbk-gem-yal-external` mean that the local or CI profile was used; they are not
+remote GEM results.
+
+Common preflight failures are intentional:
+
+- `Release qualification requires a clean Git tree` means tracked or
+  untracked files remain in the checkout.
+- `Release inventory does not exist` means the example inventory path was
+  used without creating the file.
+- `Release known-hosts file does not exist` means `gem.knownHosts` does not
+  identify a file on the qualification machine.
+- SSH authentication or host-key failures must be corrected outside the
+  repository; the release gate does not disable host-key verification.
 
 The deterministic gate validates the SBK framework and enabled-driver build.
 Runtime certification of every enabled driver still requires its actual
