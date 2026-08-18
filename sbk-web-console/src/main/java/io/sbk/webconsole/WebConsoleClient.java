@@ -37,10 +37,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class WebConsoleClient implements AutoCloseable {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebConsoleClient.class);
-    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(1);
-    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(2);
-    private static final Duration START_TIMEOUT = Duration.ofSeconds(10);
-    private static final Duration LEASE_HEARTBEAT_INTERVAL = Duration.ofSeconds(15);
     private static final String RUNTIME_JVM_ARGS_PROPERTY = "sbk.runtimeJvmArgs";
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private final HttpClient httpClient;
@@ -50,6 +46,8 @@ public final class WebConsoleClient implements AutoCloseable {
     private final AtomicBoolean closing;
     private final Thread publisherThread;
     private final Duration leaseHeartbeatInterval;
+    private final Duration requestTimeout;
+    private final long publisherPollMillis;
     private final List<WebConsoleLink> runLinks;
 
     private WebConsoleClient(HttpClient httpClient, URI baseUri, WebConsoleConfig config, WebConsoleRun run,
@@ -60,6 +58,8 @@ public final class WebConsoleClient implements AutoCloseable {
         this.pending = new ArrayBlockingQueue<>(1);
         this.closing = new AtomicBoolean(false);
         this.leaseHeartbeatInterval = leaseHeartbeatInterval;
+        this.requestTimeout = Duration.ofMillis(config.requestTimeoutMillis);
+        this.publisherPollMillis = config.publisherPollMillis;
         this.runLinks = WebConsoleLinks.localLinks(config.port, runId);
         postJson("/api/v1/runs", run, 201);
         this.publisherThread = Thread.ofVirtual().name("sbk-web-console-publisher-" + runId)
@@ -77,7 +77,7 @@ public final class WebConsoleClient implements AutoCloseable {
      */
     public static WebConsoleClient connect(WebConsoleConfig config, WebConsoleRun run)
             throws IOException, InterruptedException {
-        return connect(config, run, LEASE_HEARTBEAT_INTERVAL);
+        return connect(config, run, Duration.ofMillis(config.leaseHeartbeatMillis));
     }
 
     static WebConsoleClient connect(WebConsoleConfig config, WebConsoleRun run, Duration leaseHeartbeatInterval)
@@ -86,16 +86,17 @@ public final class WebConsoleClient implements AutoCloseable {
             throw new IllegalArgumentException("Local Web Console lease heartbeat interval must be greater than zero");
         }
         final URI baseUri = URI.create("http://" + WebConsoleServer.LOCAL_HOST + ":" + config.port);
-        final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).build();
-        final Health health = health(httpClient, baseUri);
+        final Duration connectTimeout = Duration.ofMillis(config.connectTimeoutMillis);
+        final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(connectTimeout).build();
+        final Health health = health(httpClient, baseUri, connectTimeout);
         if (health == Health.INCOMPATIBLE) {
             throw new IOException("Port " + config.port + " is not a compatible SBK Local Web Console");
         }
         if (health == Health.UNAVAILABLE) {
-            final Path logPath = backgroundLogPath(config.port);
+            final Path logPath = backgroundLogPath(config);
             LOGGER.info("Starting a new SBK Web Console on port {}. Background log: {}", config.port, logPath);
             startServer(config);
-            waitUntilHealthy(httpClient, baseUri);
+            waitUntilHealthy(httpClient, baseUri, config);
         } else {
             LOGGER.info("Using the existing SBK Web Console on port {}", config.port);
         }
@@ -145,10 +146,10 @@ public final class WebConsoleClient implements AutoCloseable {
             return;
         }
         try {
-            publisherThread.join(REQUEST_TIMEOUT.toMillis() * 3);
+            publisherThread.join(requestTimeout.toMillis() * 3);
             if (publisherThread.isAlive()) {
                 publisherThread.interrupt();
-                publisherThread.join(REQUEST_TIMEOUT.toMillis());
+                publisherThread.join(requestTimeout.toMillis());
             }
             if (publisherThread.isAlive()) {
                 LOGGER.warn("SBK Local Web Console publisher did not stop; skipping completion notification "
@@ -170,7 +171,8 @@ public final class WebConsoleClient implements AutoCloseable {
             try {
                 final long heartbeatWait = Math.max(1,
                         TimeUnit.NANOSECONDS.toMillis(nextHeartbeat - System.nanoTime()));
-                final WebConsoleSnapshot snapshot = pending.poll(Math.min(250, heartbeatWait), TimeUnit.MILLISECONDS);
+                final WebConsoleSnapshot snapshot = pending.poll(Math.min(publisherPollMillis, heartbeatWait),
+                        TimeUnit.MILLISECONDS);
                 if (snapshot != null) {
                     postJson("/api/v1/runs/" + runId + "/snapshots", snapshot, 204);
                     nextHeartbeat = System.nanoTime() + leaseHeartbeatInterval.toNanos();
@@ -191,7 +193,7 @@ public final class WebConsoleClient implements AutoCloseable {
 
     private void postJson(String path, Object body, int expectedStatus) throws IOException, InterruptedException {
         final HttpRequest request = HttpRequest.newBuilder(baseUri.resolve(path))
-                .timeout(REQUEST_TIMEOUT)
+                .timeout(requestTimeout)
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofByteArray(MAPPER.writeValueAsBytes(body)))
                 .build();
@@ -219,9 +221,9 @@ public final class WebConsoleClient implements AutoCloseable {
         });
     }
 
-    private static Health health(HttpClient client, URI baseUri) {
+    private static Health health(HttpClient client, URI baseUri, Duration connectTimeout) {
         final HttpRequest request = HttpRequest.newBuilder(baseUri.resolve("/api/v1/health"))
-                .timeout(CONNECT_TIMEOUT).GET().build();
+                .timeout(connectTimeout).GET().build();
         try {
             final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
@@ -239,20 +241,23 @@ public final class WebConsoleClient implements AutoCloseable {
         }
     }
 
-    private static void waitUntilHealthy(HttpClient client, URI baseUri) throws IOException, InterruptedException {
-        final long deadline = System.nanoTime() + START_TIMEOUT.toNanos();
+    private static void waitUntilHealthy(HttpClient client, URI baseUri, WebConsoleConfig config)
+            throws IOException, InterruptedException {
+        final Duration startTimeout = Duration.ofMillis(config.startTimeoutMillis);
+        final Duration connectTimeout = Duration.ofMillis(config.connectTimeoutMillis);
+        final long deadline = System.nanoTime() + startTimeout.toNanos();
         while (System.nanoTime() < deadline) {
-            final Health health = health(client, baseUri);
+            final Health health = health(client, baseUri, connectTimeout);
             if (health == Health.AVAILABLE) {
                 return;
             }
             if (health == Health.INCOMPATIBLE) {
                 throw new IOException("Another application is using the configured Local Web Console port");
             }
-            Thread.sleep(100);
+            Thread.sleep(config.startupPollMillis);
         }
         throw new IOException("SBK Local Web Console did not become ready within "
-                + START_TIMEOUT.toSeconds() + " seconds");
+                + startTimeout.toSeconds() + " seconds");
     }
 
     private static void startServer(WebConsoleConfig config) throws IOException {
@@ -269,7 +274,7 @@ public final class WebConsoleClient implements AutoCloseable {
         command.add(Integer.toString(config.snapshotMinutes));
         command.add("-webtimeoutminutes");
         command.add(Integer.toString(config.timeoutMinutes));
-        final Path logPath = backgroundLogPath(config.port);
+        final Path logPath = backgroundLogPath(config);
         Files.createDirectories(Objects.requireNonNull(logPath.getParent()));
         final ProcessBuilder builder = new ProcessBuilder(command);
         builder.redirectInput(ProcessBuilder.Redirect.PIPE);
@@ -285,8 +290,16 @@ public final class WebConsoleClient implements AutoCloseable {
      * @return normalized background log path
      */
     static Path backgroundLogPath(int port) {
-        return Path.of(System.getProperty("user.home"), ".sbk", "logs",
-                "sbk-web-console-" + port + ".log").toAbsolutePath().normalize();
+        final WebConsoleConfig config = WebConsoleConfig.load();
+        config.port = port;
+        return backgroundLogPath(config);
+    }
+
+    private static Path backgroundLogPath(WebConsoleConfig config) {
+        final Path configuredDirectory = Path.of(config.logDirectory);
+        final Path directory = configuredDirectory.isAbsolute() ? configuredDirectory
+                : Path.of(System.getProperty("user.home")).resolve(configuredDirectory);
+        return directory.resolve("sbk-web-console-" + config.port + ".log").toAbsolutePath().normalize();
     }
 
     private static List<String> runtimeJvmArgs() {

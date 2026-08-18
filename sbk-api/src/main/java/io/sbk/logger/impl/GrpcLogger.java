@@ -23,6 +23,7 @@ import io.sbk.action.Action;
 import io.perl.exception.ExceptionHandler;
 import io.sbp.api.Sbp;
 import io.sbp.config.SbpVersion;
+import io.sbp.config.SbpFailureLimits;
 import io.sbp.grpc.ClientID;
 import io.sbp.grpc.ClientFailure;
 import io.sbp.grpc.Config;
@@ -48,13 +49,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class GrpcLogger extends SystemLogger {
     private final static String CONFIG_FILE = "sbmhost.properties";
-    private final static int MAXIMUM_PENDING_BATCHES = 8;
     private final static int MINIMUM_PORT = 1;
     private final static int MAXIMUM_PORT = 65535;
-    private final static int MAXIMUM_FAILURE_MESSAGE_CHARACTERS = 4096;
-    private final static int FAILURE_MESSAGE_PREFIX_CHARACTERS = 3072;
-    private final static String FAILURE_MESSAGE_TRUNCATION_MARKER = " ... [truncated] ... ";
-    private final static int FAILURE_REPORT_TIMEOUT_SECONDS = 3;
 
     private SbmHostConfig sbmHostConfig;
     private long clientID;
@@ -107,7 +103,7 @@ public class GrpcLogger extends SystemLogger {
                 .setMessage(failureSummary(failure))
                 .build();
         try {
-            blockingStub.withDeadlineAfter(FAILURE_REPORT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            blockingStub.withDeadlineAfter(sbmHostConfig.failureReportTimeoutSeconds, TimeUnit.SECONDS)
                     .reportClientFailure(report);
         } catch (StatusRuntimeException exception) {
             Printer.log.warn("Unable to report terminal SBK failure to SBM: "
@@ -134,13 +130,13 @@ public class GrpcLogger extends SystemLogger {
             cause = cause.getCause();
         }
         final String normalized = detail.toString().replaceAll("\\s+", " ").trim();
-        if (normalized.length() <= MAXIMUM_FAILURE_MESSAGE_CHARACTERS) {
+        if (normalized.length() <= SbpFailureLimits.MESSAGE_CHARACTERS) {
             return normalized;
         }
-        final int suffixCharacters = MAXIMUM_FAILURE_MESSAGE_CHARACTERS
-                - FAILURE_MESSAGE_PREFIX_CHARACTERS - FAILURE_MESSAGE_TRUNCATION_MARKER.length();
-        return normalized.substring(0, FAILURE_MESSAGE_PREFIX_CHARACTERS)
-                + FAILURE_MESSAGE_TRUNCATION_MARKER
+        final int suffixCharacters = SbpFailureLimits.MESSAGE_CHARACTERS
+                - SbpFailureLimits.MESSAGE_PREFIX_CHARACTERS - SbpFailureLimits.TRUNCATION_MARKER.length();
+        return normalized.substring(0, SbpFailureLimits.MESSAGE_PREFIX_CHARACTERS)
+                + SbpFailureLimits.TRUNCATION_MARKER
                 + normalized.substring(normalized.length() - suffixCharacters);
     }
 
@@ -158,6 +154,13 @@ public class GrpcLogger extends SystemLogger {
             sbmHostConfig = mapper.readValue(
                     GrpcLogger.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
                     SbmHostConfig.class);
+            if (sbmHostConfig.maxRecordSizeMB < 1 || sbmHostConfig.maximumPendingBatches < 1
+                    || sbmHostConfig.failureReportTimeoutSeconds < 1
+                    || sbmHostConfig.streamCloseTimeoutSeconds < 1
+                    || sbmHostConfig.channelShutdownTimeoutSeconds < 1
+                    || sbmHostConfig.channelForceShutdownTimeoutSeconds < 1) {
+                throw new IllegalArgumentException("Invalid SBM gRPC transport configuration");
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new IllegalArgumentException(ex);
@@ -298,7 +301,8 @@ public class GrpcLogger extends SystemLogger {
         latencyAccumulator = new GrpcLatencyAccumulator(maxMessageBytes);
         builder = MessageLatenciesRecord.newBuilder();
         stub = ServiceGrpc.newStub(channel);
-        streamSender = new GrpcStreamSender(stub, MAXIMUM_PENDING_BATCHES, this::reportTransportFailure);
+        streamSender = new GrpcStreamSender(stub, sbmHostConfig.maximumPendingBatches,
+                sbmHostConfig.streamCloseTimeoutSeconds, this::reportTransportFailure);
         Printer.log.info("SBK GRPC Logger transport: SBP client stream with packed primitive latencies");
         Printer.log.info("SBK GRPC Logger Started");
     }
@@ -332,9 +336,9 @@ public class GrpcLogger extends SystemLogger {
         }
         channel.shutdown();
         try {
-            if (!channel.awaitTermination(5, TimeUnit.SECONDS)) {
+            if (!channel.awaitTermination(sbmHostConfig.channelShutdownTimeoutSeconds, TimeUnit.SECONDS)) {
                 channel.shutdownNow();
-                channel.awaitTermination(1, TimeUnit.SECONDS);
+                channel.awaitTermination(sbmHostConfig.channelForceShutdownTimeoutSeconds, TimeUnit.SECONDS);
             }
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();

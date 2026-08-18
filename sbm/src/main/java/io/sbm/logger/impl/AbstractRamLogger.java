@@ -30,7 +30,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class AbstractRamLogger extends CSVLogger implements RamLogger {
     final static String SBM_PREFIX = "SBM";
-    final static int MAX_REQUEST_RW_IDS = 10;
     private AtomicInteger connections;
     private AtomicInteger maxConnections;
 
@@ -50,8 +49,8 @@ public abstract class AbstractRamLogger extends CSVLogger implements RamLogger {
     @Override
     public void parseArgs(final ParsedOptions params) throws IllegalArgumentException {
         super.parseArgs(params);
-        setMaxReadersIds(MAX_REQUEST_RW_IDS);
-        setMaxWritersIds(MAX_REQUEST_RW_IDS);
+        setMaxReadersIds(getConfiguredMaxRequestIds());
+        setMaxWritersIds(getConfiguredMaxRequestIds());
     }
 
     /**

@@ -1224,13 +1224,14 @@ owns the lifecycle of one benchmark run. Reading the constructor
 ```java
 public SbkBenchmark(ParameterOptions params, Storage<Object> storage,
                     DataType<Object> dType, RWLogger rwLogger, Time time) {
-    int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
+    int threadCount = params.getWritersCount() + params.getReadersCount()
+            + runtimeConfig.workerExecutorReserve;
     this.executor = switch (params.getThreadType()) {
         case ForkJoin -> new ForkJoinPool(threadCount);
         case Virtual  -> Executors.newFixedThreadPool(threadCount, Thread.ofVirtual().factory());
         default       -> Executors.newFixedThreadPool(threadCount);
     };
-    this.perlExecutor = new ForkJoinPool(5);
+    this.perlExecutor = new ForkJoinPool(runtimeConfig.perlExecutorParallelism);
 
     if (writersCount > 0 && action == Writing) {
         writePerl = PerlBuilder.build(rwLogger, time, wConfig, perlExecutor);
@@ -1247,12 +1248,13 @@ Three things to notice:
 1. **Direction-specific PerL instances.** A write PerL is built for normal
    writing actions when writers are configured; a read PerL is built when
    readers are configured. Each instance owns its channels, recorder, and
-   windows, while both use the same `RWLogger` and the benchmark's shared
-   five-thread `perlExecutor`.
+   windows, while both use the same `RWLogger` and the benchmark's shared,
+   configured `perlExecutor`.
 2. **Thread model is selectable at runtime.** Virtual worker threads are used
    by default. `-thread v` selects them explicitly; `-thread f` selects a
    `ForkJoinPool`; and `-thread p` selects a fixed platform-thread pool. The
-   pool size is `writers + readers + 23`, providing capacity for
+   pool size is writers plus readers plus `workerExecutorReserve` from
+   `sbk-runtime.properties`, providing capacity for
    worker and coordination tasks. More workers can expose more storage and
    CPU parallelism, but useful scaling ends when the driver, storage target,
    recorder, network, memory allocator, or CPU becomes saturated.
@@ -1269,7 +1271,7 @@ flowchart TB
     MAIN --> R["SbkReader tasks"]
     MAIN --> STEP["staged-start / completion tasks"]
 
-    BENCH --> PE["perlExecutor<br/>ForkJoinPool(5)"]
+    BENCH --> PE["perlExecutor<br/>ForkJoinPool(perlExecutorParallelism)"]
     PE --> WP["write PerL recorder<br/>when applicable"]
     PE --> RP["read PerL recorder<br/>when readers exist"]
 
@@ -2124,7 +2126,8 @@ abolish CPU, memory, or scheduler limits.
 
 ### 8.3 Scale the worker stage with CPU and I/O concurrency
 
-`SbkBenchmark` sizes its main executor as `writers + readers + 23` and supports
+`SbkBenchmark` sizes its main executor as writers plus readers plus the configured
+`workerExecutorReserve` and supports
 three modes:
 
 | CLI | Executor | Best fit |
@@ -2634,7 +2637,7 @@ sequenceDiagram
     Drv->>Mc: bucketExists("bench") → false
     Drv->>Mc: makeBucket("bench")
     Bench->>Drv: createWriter(0..3, params)  ×4
-    Note over PerlW: spawn 1 recorder thread<br/>via perlExec (ForkJoinPool(5))
+    Note over PerlW: spawn 1 recorder thread<br/>via perlExec (configured parallelism)
     Bench->>PerlW: writePerl.run(60, 0)
     Note over PerlW: recorder starts<br/>periodicRecorder.start(t0)
     Bench->>Bench: submit 4 SbkWriter tasks<br/>to platform-thread executor

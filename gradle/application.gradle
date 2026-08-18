@@ -43,6 +43,8 @@ plugins.withId('application') {
 # only gradlew performs a first-run download.
 SBK_JAVA_INSTALL=false
 export SBK_JAVA_INSTALL
+SBK_JAVA_CONFIG_FILE=$APP_HOME/bin/sbk-java-bootstrap.properties
+export SBK_JAVA_CONFIG_FILE
 . "$APP_HOME/bin/sbk-java-bootstrap.sh" || die "Unable to resolve JDK 25. Run gradlew once or set SBK_JAVA_HOME."
 unset SBK_JAVA_INSTALL'''
             
@@ -114,7 +116,8 @@ if errorlevel 1 goto fail
         applicationDistribution.from(rootProject.files(
                 rootProject.file('gradle/sbk-java-bootstrap.sh'),
                 rootProject.file('gradle/sbk-java-bootstrap.bat'),
-                rootProject.file('gradle/sbk-java-bootstrap.ps1'))) {
+                rootProject.file('gradle/sbk-java-bootstrap.ps1'),
+                rootProject.file('gradle/sbk-java-bootstrap.properties'))) {
             into "bin"
         }
     }

@@ -9,8 +9,6 @@
  */
 package io.sbk.webconsole;
 
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.sbk.action.Action;
 import io.sbk.api.impl.Sbk;
 import io.sbk.params.InputOptions;
@@ -19,7 +17,6 @@ import io.sbk.system.Printer;
 import io.time.TimeUnit;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -37,7 +34,6 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
     public static final String TIMEOUT_OPTION = "webtimeoutminutes";
     /** Web console benchmark-board name CLI option. */
     public static final String BOARD_NAME_OPTION = "boardname";
-    private static final String CONFIG_FILE = "webconsole.properties";
     private WebConsoleConfig config;
     private WebConsoleClient client;
     private String runId;
@@ -251,11 +247,7 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
     }
 
     private static WebConsoleConfig loadConfig() {
-        try (InputStream input = WebConsoleLoggerSupport.class.getClassLoader().getResourceAsStream(CONFIG_FILE)) {
-            return new ObjectMapper(new JavaPropsFactory()).readValue(input, WebConsoleConfig.class);
-        } catch (IOException ex) {
-            throw new IllegalArgumentException("Unable to load " + CONFIG_FILE, ex);
-        }
+        return WebConsoleConfig.load();
     }
 
     private void ensureConfig() {

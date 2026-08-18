@@ -25,7 +25,7 @@ sbkGemArgs:
   # Verify server keys by default. Use a dedicated trust file when needed.
   hostkeycheck: true
   # knownhosts: /home/kmg/.ssh/known_hosts
-  sbkdir: /Users/kmg/projects/SBK/build/install/sbk
+  sbkdir:
   # Allow copying SBK when it is missing or outdated (default: true).
   copy: true
   # Delete an outdated SBK before copying its replacement (default: true).

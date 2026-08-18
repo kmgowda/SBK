@@ -11,6 +11,7 @@ package io.sbk.params.impl;
 
 import io.perl.config.PerlConfig;
 import io.sbk.action.Action;
+import io.sbk.config.SbkRuntimeConfig;
 import io.sbk.params.InputParameterOptions;
 import io.sbk.config.Config;
 import io.sbk.exception.HelpException;
@@ -103,7 +104,7 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
      */
     public SbkParameters(String name, String desc) {
         super(name, desc);
-        this.timeoutMS = PerlConfig.DEFAULT_TIMEOUT_MS;
+        this.timeoutMS = SbkRuntimeConfig.get().defaultOperationTimeoutMillis;
         this.action = Action.Reading;
         final PerlConfig perlDefaults = loadPerlDefaults();
         this.mpscQueueEnabled = perlDefaults.mpscQueueEnable;

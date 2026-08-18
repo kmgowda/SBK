@@ -10,7 +10,9 @@
 
 package io.gem.api;
 
+import io.gem.config.GemConfig;
 
+import java.io.IOException;
 import java.io.OutputStream;
 
 /**
@@ -21,7 +23,7 @@ import java.io.OutputStream;
  */
 public final class SshResponse {
     /** Maximum stdout or stderr bytes retained for one remote command. */
-    public static final int DEFAULT_DIAGNOSTIC_BYTES = 256 * 1024;
+    public static final int DEFAULT_DIAGNOSTIC_BYTES = loadDiagnosticBytes();
     /**
      * <code>OutputStream errOutputStream</code>.
      */
@@ -58,6 +60,14 @@ public final class SshResponse {
             this.stdOutputStream = new BoundedTailOutputStream(diagnosticBytes);
         } else {
             this.stdOutputStream = OutputStream.nullOutputStream();
+        }
+    }
+
+    private static int loadDiagnosticBytes() {
+        try {
+            return GemConfig.load().diagnosticBytes;
+        } catch (IOException exception) {
+            throw new ExceptionInInitializerError(exception);
         }
     }
 

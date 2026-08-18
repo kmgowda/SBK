@@ -49,10 +49,7 @@ public final class WebConsoleServer implements AutoCloseable {
     public static final String BIND_HOST = "0.0.0.0";
     /** Local Web Console HTTP API version. */
     public static final int API_VERSION = 5;
-    /** Time an unused web console remains available after its benchmark exits. */
-    public static final Duration DEFAULT_IDLE_TIMEOUT = Duration.ofMinutes(1);
     private static final Logger LOGGER = LoggerFactory.getLogger(WebConsoleServer.class);
-    private static final Duration DEFAULT_HEARTBEAT_INTERVAL = Duration.ofSeconds(5);
     private static final String API_PREFIX = "/api/v1/";
     private static final String RESOURCE_PREFIX = "/webconsole/";
     private static final String SSE_OWNED_ATTRIBUTE = "sbk.webconsole.sseOwned";
@@ -64,6 +61,8 @@ public final class WebConsoleServer implements AutoCloseable {
     private final ConcurrentHashMap<String, RunState> runs;
     private final Duration idleTimeout;
     private final Duration heartbeatInterval;
+    private final int sseRetryMillis;
+    private final Map<String, Integer> browserConfig;
     private final Object lifecycleLock;
     private final AtomicBoolean closed;
     private final CountDownLatch termination;
@@ -81,7 +80,7 @@ public final class WebConsoleServer implements AutoCloseable {
      * @throws IllegalArgumentException if retention is not positive
      */
     public WebConsoleServer(int port, int retention) throws IOException {
-        this(port, retention, DEFAULT_IDLE_TIMEOUT, DEFAULT_HEARTBEAT_INTERVAL);
+        this(port, retention, defaultIdleTimeout(), defaultHeartbeatInterval());
     }
 
     /**
@@ -94,7 +93,7 @@ public final class WebConsoleServer implements AutoCloseable {
      * @throws IllegalArgumentException if a size or duration is not positive
      */
     public WebConsoleServer(int port, int retention, Duration idleTimeout) throws IOException {
-        this(port, retention, idleTimeout, DEFAULT_HEARTBEAT_INTERVAL);
+        this(port, retention, idleTimeout, defaultHeartbeatInterval());
     }
 
     /**
@@ -121,19 +120,34 @@ public final class WebConsoleServer implements AutoCloseable {
         this.retention = retention;
         this.idleTimeout = idleTimeout;
         this.heartbeatInterval = heartbeatInterval;
+        final WebConsoleConfig config = WebConsoleConfig.load();
+        this.sseRetryMillis = config.sseRetryMillis;
+        this.browserConfig = Map.of(
+                "browserHeartbeatMillis", config.browserHeartbeatMillis,
+                "browserSnapshotLimit", config.browserSnapshotLimit,
+                "chartSnapshotLimit", config.chartSnapshotLimit,
+                "refreshMillis", config.refreshMillis);
         this.runs = new ConcurrentHashMap<>();
         this.lifecycleLock = new Object();
         this.closed = new AtomicBoolean();
         this.termination = new CountDownLatch(1);
         this.browsers = new ConcurrentHashMap<>();
         this.activeRunIds = new HashSet<>();
-        this.server = HttpServer.create(new InetSocketAddress(BIND_HOST, port), 32);
+        this.server = HttpServer.create(new InetSocketAddress(BIND_HOST, port), config.httpBacklog);
         this.executor = Executors.newVirtualThreadPerTaskExecutor();
         this.scheduler = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
                 .name("sbk-web-console-idle-monitor").daemon().factory());
         server.setExecutor(executor);
         server.createContext(API_PREFIX, this::handleApi);
         server.createContext("/", this::handleResource);
+    }
+
+    private static Duration defaultIdleTimeout() {
+        return Duration.ofMinutes(WebConsoleConfig.load().timeoutMinutes);
+    }
+
+    private static Duration defaultHeartbeatInterval() {
+        return Duration.ofMillis(WebConsoleConfig.load().serverHeartbeatMillis);
     }
 
     /**
@@ -200,6 +214,11 @@ public final class WebConsoleServer implements AutoCloseable {
                 requireMethod(exchange, "GET");
                 sendJson(exchange, 200, Map.of("service", "sbk-web-console", "apiVersion", API_VERSION,
                         "status", "ready"));
+                return;
+            }
+            if ((API_PREFIX + "config").equals(path)) {
+                requireMethod(exchange, "GET");
+                sendJson(exchange, 200, browserConfig);
                 return;
             }
             if ((API_PREFIX + "runs").equals(path)) {
@@ -648,7 +667,8 @@ public final class WebConsoleServer implements AutoCloseable {
             exchange.getResponseHeaders().set("Cache-Control", "no-cache");
             exchange.getResponseHeaders().set("Connection", "keep-alive");
             exchange.sendResponseHeaders(200, 0);
-            final SseClient client = new SseClient(exchange.getResponseBody(), heartbeatInterval);
+            final SseClient client = new SseClient(exchange.getResponseBody(), heartbeatInterval,
+                    sseRetryMillis);
             clients.add(client);
             try {
                 client.run();
@@ -673,12 +693,14 @@ public final class WebConsoleServer implements AutoCloseable {
         private final OutputStream output;
         private final ArrayBlockingQueue<String> events;
         private final Duration heartbeatInterval;
+        private final int retryMillis;
         private volatile boolean open;
 
-        private SseClient(OutputStream output, Duration heartbeatInterval) {
+        private SseClient(OutputStream output, Duration heartbeatInterval, int retryMillis) {
             this.output = output;
             this.events = new ArrayBlockingQueue<>(1);
             this.heartbeatInterval = heartbeatInterval;
+            this.retryMillis = retryMillis;
             this.open = true;
         }
 
@@ -690,7 +712,7 @@ public final class WebConsoleServer implements AutoCloseable {
         }
 
         private void run() throws IOException {
-            output.write("retry: 2000\n\n".getBytes(StandardCharsets.UTF_8));
+            output.write(("retry: " + retryMillis + "\n\n").getBytes(StandardCharsets.UTF_8));
             output.flush();
             while (open) {
                 try {

@@ -331,6 +331,21 @@ accidental topology changes between runs.
 
 Use generated `-help` output as the authority for accepted options. Use the relevant resource property file as the authority for defaults that are not printed in help.
 
+Operational defaults have one owning source:
+
+| Settings | Authoritative source |
+|---|---|
+| JDK download version, checksums, and bootstrap timeouts | `gradle/sbk-java-bootstrap.properties` |
+| SBK lifecycle, executor reserve, and shutdown timeouts | `sbk-api/src/main/resources/sbk-runtime.properties` |
+| Logger reporting and request-ID dimensions | `sbk-api/src/main/resources/logger.properties` |
+| SBM client transport queue and close timeouts | `sbk-api/src/main/resources/sbmhost.properties` |
+| Web Console server, client, browser, retention, and log settings | `sbk-web-console/src/main/resources/webconsole.properties` |
+| GEM orchestration and bounded diagnostic settings | `sbk-gem/src/main/resources/gem.properties` |
+
+The SBP failure text limits are protocol constraints rather than operator tuning;
+`SbpFailureLimits` is the shared client/server authority. Container manifests read
+service ports from their runtime properties where the build DSL supports it.
+
 ## Packaging and class loading
 
 The root distribution includes `sbk-api` and all drivers declared as API dependencies in `build-drivers.gradle`. Drivers also must be included in `settings-drivers.gradle` so Gradle creates their projects.

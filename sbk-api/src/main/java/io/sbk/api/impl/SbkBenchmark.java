@@ -14,6 +14,7 @@ import io.perl.api.Perl;
 import io.perl.config.PerlConfig;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
+import io.sbk.config.SbkRuntimeConfig;
 import io.sbk.api.Benchmark;
 import io.sbk.api.DataReader;
 import io.sbk.api.DataWriter;
@@ -70,7 +71,7 @@ import java.util.stream.IntStream;
  * </ul>
  */
 final public class SbkBenchmark implements Benchmark {
-    final private static long FORCED_SHUTDOWN_GRACE_SECONDS = 3;
+    final private static SbkRuntimeConfig RUNTIME_CONFIG = SbkRuntimeConfig.get();
     final private Storage<Object> storage;
     final private DataType<Object> dType;
     final private Time time;
@@ -111,7 +112,8 @@ final public class SbkBenchmark implements Benchmark {
         this.rwLogger = rwLogger;
         this.time = time;
 
-        final int threadCount = params.getWritersCount() + params.getReadersCount() + 23;
+        final int threadCount = params.getWritersCount() + params.getReadersCount()
+                + RUNTIME_CONFIG.workerExecutorReserve;
 
         this.executor = switch (params.getThreadType()) {
             case ThreadType.ForkJoin -> new ForkJoinPool(threadCount);
@@ -119,7 +121,7 @@ final public class SbkBenchmark implements Benchmark {
             default -> Executors.newFixedThreadPool(threadCount);
         };
 
-        this.perlExecutor = new ForkJoinPool(5);
+        this.perlExecutor = new ForkJoinPool(RUNTIME_CONFIG.perlExecutorParallelism);
         this.lifecycleExecutor = Executors.newSingleThreadExecutor(Thread.ofPlatform()
                 .name("sbk-benchmark-lifecycle").factory());
 
@@ -379,7 +381,8 @@ final public class SbkBenchmark implements Benchmark {
             timeoutExecutor.schedule(this::requestTimedShutdown,
                     params.getTotalSecondsToRun(), TimeUnit.SECONDS);
             timeoutExecutor.schedule(this::forceTimedCompletion,
-                    params.getTotalSecondsToRun() + FORCED_SHUTDOWN_GRACE_SECONDS, TimeUnit.SECONDS);
+                    params.getTotalSecondsToRun() + RUNTIME_CONFIG.forcedShutdownGraceSeconds,
+                    TimeUnit.SECONDS);
         }
 
         if (wStatFuture != null && !wStatFuture.isDone()) {
@@ -486,7 +489,8 @@ final public class SbkBenchmark implements Benchmark {
     private void forceTimedCompletion() {
         if (retFuture.complete(null)) {
             Printer.log.warn("SBK timed benchmark cleanup exceeded "
-                    + FORCED_SHUTDOWN_GRACE_SECONDS + " seconds; forcing application exit");
+                    + RUNTIME_CONFIG.forcedShutdownGraceSeconds
+                    + " seconds; forcing application exit");
             executor.shutdownNow();
             perlExecutor.shutdownNow();
             lifecycleExecutor.shutdownNow();
@@ -542,7 +546,7 @@ final public class SbkBenchmark implements Benchmark {
             Printer.log.warn("Unable to close SBK storage or logger during shutdown", e);
         }
         try {
-            executor.awaitTermination(1, TimeUnit.SECONDS);
+            executor.awaitTermination(RUNTIME_CONFIG.workerTerminationSeconds, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             Printer.log.warn("Interrupted while waiting for SBK workers to stop", e);

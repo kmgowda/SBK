@@ -21,12 +21,17 @@ Files:
 5. Select nodes, storage classes, and network paths that match the experiment.
 6. Use a disposable namespace and backend data set.
 7. Confirm the pod can reach the backend and, for `GrpcLogger`, the SBM service.
+8. Deploy RabbitMQ as a Service named `rabbitmq` in the benchmark namespace, or
+   replace the `sbk-rabbitmq` ConfigMap value with the selected broker address.
 
 ```bash
 kubectl create namespace sbk-benchmark
 kubectl -n sbk-benchmark apply -f kubernetes/sbk-rabbitmq-k8-sample.yaml
 kubectl -n sbk-benchmark logs -f <pod-name>
 ```
+
+The helper script uses `sbk-benchmark` by default. Override it with
+`NAMESPACE=<namespace> kubernetes/sbk-rabbitmq-k8-sample.sh` when required.
 
 Inspect the manifest's actual resource name before replacing `<pod-name>`.
 

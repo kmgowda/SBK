@@ -78,6 +78,8 @@ CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
 # Resolve a complete JDK 25, installing a checksum-verified user-local JDK
 # when no configured or system JDK is usable.
+SBK_JAVA_CONFIG_FILE=$APP_HOME/gradle/sbk-java-bootstrap.properties
+export SBK_JAVA_CONFIG_FILE
 . "$APP_HOME/gradle/sbk-java-bootstrap.sh" || die "Unable to resolve JDK 25."
 
 # Increase the maximum file descriptors if we can.

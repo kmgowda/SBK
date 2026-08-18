@@ -61,9 +61,7 @@ import java.util.concurrent.TimeoutException;
  * - Aggregate remote outputs into {@link io.gem.api.RemoteResponse}[] and shutdown cleanly.
  */
 final public class SbkGemBenchmark implements GemBenchmark {
-    private static final int MAXIMUM_DIAGNOSTIC_CHARACTERS = 512;
-    private static final int DIAGNOSTIC_PREFIX_CHARACTERS = 320;
-    private static final String DIAGNOSTIC_TRUNCATION_MARKER = " ... [truncated] ... ";
+    private static final GemConfig DEFAULT_CONFIG = loadDefaultConfig();
     private final SbmBenchmark sbmBenchmark;
     private final GemConfig config;
     private final GemParameters params;
@@ -104,9 +102,9 @@ final public class SbkGemBenchmark implements GemBenchmark {
         this.remoteCommandsCompleted = false;
         final ConnectionConfig[] connections = params.getConnections();
         if (config.fork) {
-            executor = new ForkJoinPool(connections.length + 10);
+            executor = new ForkJoinPool(connections.length + config.executorThreadReserve);
         } else {
-            executor = Executors.newFixedThreadPool(connections.length + 10);
+            executor = Executors.newFixedThreadPool(connections.length + config.executorThreadReserve);
         }
         this.remoteResults = new RemoteResponse[connections.length];
         this.nodes = new SshSession[connections.length];
@@ -856,14 +854,23 @@ final public class SbkGemBenchmark implements GemBenchmark {
             return "";
         }
         final String normalized = errorOutput.replaceAll("\\s+", " ").trim();
-        if (normalized.length() <= MAXIMUM_DIAGNOSTIC_CHARACTERS) {
+        if (normalized.length() <= DEFAULT_CONFIG.maximumDiagnosticCharacters) {
             return normalized;
         }
-        final int suffixCharacters = MAXIMUM_DIAGNOSTIC_CHARACTERS
-                - DIAGNOSTIC_PREFIX_CHARACTERS - DIAGNOSTIC_TRUNCATION_MARKER.length();
-        return normalized.substring(0, DIAGNOSTIC_PREFIX_CHARACTERS)
-                + DIAGNOSTIC_TRUNCATION_MARKER
+        final int suffixCharacters = DEFAULT_CONFIG.maximumDiagnosticCharacters
+                - DEFAULT_CONFIG.diagnosticPrefixCharacters
+                - GemConfig.DIAGNOSTIC_TRUNCATION_MARKER.length();
+        return normalized.substring(0, DEFAULT_CONFIG.diagnosticPrefixCharacters)
+                + GemConfig.DIAGNOSTIC_TRUNCATION_MARKER
                 + normalized.substring(normalized.length() - suffixCharacters);
+    }
+
+    private static GemConfig loadDefaultConfig() {
+        try {
+            return GemConfig.load();
+        } catch (IOException exception) {
+            throw new ExceptionInInitializerError(exception);
+        }
     }
 
     @SuppressWarnings("unchecked")

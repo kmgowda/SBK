@@ -10,6 +10,7 @@
 'use strict';
 
 const colors = ['#39d5ff', '#46e6a7', '#9b8cff', '#ffb454'];
+const config = {};
 const state = {run: null, runs: [], completed: false, abandoned: false, snapshots: [], events: null,
     historyTimer: null};
 const elements = Object.fromEntries([...document.querySelectorAll('[id]')].map(item => [item.id, item]));
@@ -32,8 +33,6 @@ function releaseBrowserLease() {
     navigator.sendBeacon('/api/v1/browser/disconnect', JSON.stringify({browserId}));
 }
 
-updateBrowserLease();
-setInterval(updateBrowserLease, 15000);
 window.addEventListener('pagehide', releaseBrowserLease);
 window.addEventListener('pageshow', updateBrowserLease);
 
@@ -105,7 +104,9 @@ function mergeSnapshot(snapshot) {
         state.snapshots.push(snapshot);
     }
     state.snapshots.sort((left, right) => left.timestamp - right.timestamp);
-    if (state.snapshots.length > 3600) state.snapshots.splice(0, state.snapshots.length - 3600);
+    if (state.snapshots.length > config.browserSnapshotLimit) {
+        state.snapshots.splice(0, state.snapshots.length - config.browserSnapshotLimit);
+    }
 }
 
 async function refreshHistory(runId) {
@@ -157,7 +158,7 @@ function drawChart(canvas, series) {
 }
 
 function drawAll() {
-    const data = state.snapshots.slice(-600);
+    const data = state.snapshots.slice(-config.chartSnapshotLimit);
     drawChart(elements.rateChart, [
         {name: 'Completed', values: data.map(item => item.performance.recordsPerSec)},
         {name: 'Write requests', values: data.map(item => item.requests.writeRecordsPerSec)},
@@ -196,7 +197,7 @@ async function selectRun(runView) {
         refreshHistory(runId).catch(error => {
             elements.subtitle.textContent = `Web Console refresh error: ${error.message}`;
         });
-    }, 2000);
+    }, config.refreshMillis);
     state.events = new EventSource(`/api/v1/runs/${runId}/events`);
     state.events.addEventListener('snapshot', event => {
         mergeSnapshot(JSON.parse(event.data));
@@ -238,9 +239,17 @@ async function loadRuns() {
     await selectRun(selected);
 }
 
-window.addEventListener('resize', drawAll);
-loadRuns().then(() => {
+async function start() {
+    const response = await fetch('/api/v1/config', {cache: 'no-store'});
+    if (!response.ok) throw new Error(`Configuration request returned HTTP ${response.status}`);
+    Object.assign(config, await response.json());
+    updateBrowserLease();
+    setInterval(updateBrowserLease, config.browserHeartbeatMillis);
+    await loadRuns();
     setInterval(() => loadRuns().catch(error => {
         elements.subtitle.textContent = `Web Console refresh error: ${error.message}`;
-    }), 2000);
-}).catch(error => { elements.subtitle.textContent = `Web Console error: ${error.message}`; });
+    }), config.refreshMillis);
+}
+
+window.addEventListener('resize', drawAll);
+start().catch(error => { elements.subtitle.textContent = `Web Console error: ${error.message}`; });

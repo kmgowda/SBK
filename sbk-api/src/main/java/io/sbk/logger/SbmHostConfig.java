@@ -22,6 +22,16 @@ public final class SbmHostConfig {
     public int port;
     /** Maximum record payload size in MB when sending latencies. */
     public int maxRecordSizeMB;
+    /** Maximum number of immutable batches waiting for the gRPC sender. */
+    public int maximumPendingBatches;
+    /** Terminal failure-report deadline in seconds. */
+    public long failureReportTimeoutSeconds;
+    /** Stream drain and acknowledgement timeout in seconds. */
+    public long streamCloseTimeoutSeconds;
+    /** Graceful channel shutdown timeout in seconds. */
+    public long channelShutdownTimeoutSeconds;
+    /** Forced channel shutdown timeout in seconds. */
+    public long channelForceShutdownTimeoutSeconds;
 
     /**
      * Creates an empty SBM host configuration for property binding.

@@ -10,6 +10,7 @@
 
 package io.gem.api;
 
+import io.gem.config.GemConfig;
 import org.apache.sshd.agent.common.AbstractAgentProxy;
 import org.apache.sshd.common.SshException;
 import org.apache.sshd.common.util.buffer.Buffer;
@@ -32,7 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * transport and therefore needs no additional native library.
  */
 final class JdkUnixAgent extends AbstractAgentProxy {
-    private static final int MAX_RESPONSE_SIZE = 16 * 1024 * 1024;
+    private static final int MAX_RESPONSE_SIZE = loadMaximumResponseSize();
 
     private final SocketChannel channel;
     private final AtomicBoolean open;
@@ -104,6 +105,14 @@ final class JdkUnixAgent extends AbstractAgentProxy {
             if (channel.read(buffer) < 0) {
                 throw new EOFException("SSH agent closed the socket before sending a complete response");
             }
+        }
+    }
+
+    private static int loadMaximumResponseSize() {
+        try {
+            return GemConfig.load().maximumAgentResponseBytes;
+        } catch (IOException exception) {
+            throw new ExceptionInInitializerError(exception);
         }
     }
 }

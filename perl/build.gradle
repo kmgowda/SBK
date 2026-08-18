@@ -36,6 +36,7 @@ def timeStampQueueMinimumAllocationReductionBytes = providers.gradleProperty(
         'timeStampQueueMinimumAllocationReductionBytes').map {
     it.toDouble()
 }
+def expectedJavaMajor = rootProject.ext.sbkJavaMajorVersion.toString()
 
 sourceSets {
     lincheck {
@@ -97,12 +98,12 @@ def latencyMapPerformanceReport = layout.buildDirectory.file(
 
 tasks.register('runTimeStampQueuePerformanceBenchmark', JavaExec) {
     group = 'verification'
-    description = 'Benchmarks the intrusive TimeStamp MPSC queue against the JDK 25 queue.'
+    description = "Benchmarks the intrusive TimeStamp MPSC queue against the JDK ${expectedJavaMajor} queue."
     dependsOn tasks.named('jmhJar')
     classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
     mainClass = 'org.openjdk.jmh.Main'
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
     }
     jvmArgs rootProject.ext.sbkRuntimeJvmArgs
     args 'io.perl.benchmark.TimeStampQueueBenchmark.*',
@@ -121,7 +122,7 @@ tasks.register('runTimeStampQueuePerformanceBenchmark', JavaExec) {
 
 tasks.register('timeStampQueuePerformanceTest') {
     group = 'verification'
-    description = 'Verifies intrusive timestamp latency, allocation, and MPSC progress on JDK 25.'
+    description = "Verifies intrusive timestamp latency, allocation, and MPSC progress on JDK ${expectedJavaMajor}."
     dependsOn tasks.named('runTimeStampQueuePerformanceBenchmark')
 
     doLast {
@@ -133,9 +134,9 @@ tasks.register('timeStampQueuePerformanceTest') {
             if (value == null) {
                 throw new GradleException("Missing JMH result: ${benchmark}")
             }
-            if (!value.jdkVersion.toString().startsWith('25')) {
+            if (!value.jdkVersion.toString().startsWith(expectedJavaMajor)) {
                 throw new GradleException(
-                        "Timestamp queue verification requires JDK 25; found ${value.jdkVersion}")
+                        "Timestamp queue verification requires JDK ${expectedJavaMajor}; found ${value.jdkVersion}")
             }
             value
         }
@@ -181,7 +182,7 @@ tasks.register('timeStampQueuePerformanceTest') {
         }
 
         logger.lifecycle('Timestamp queue performance comparison '
-                + '(TimeStampMpscQueue vs JDK 25 ConcurrentLinkedQueue):')
+                + "(TimeStampMpscQueue vs JDK ${expectedJavaMajor} ConcurrentLinkedQueue):")
         logger.lifecycle(String.format(
                 '  Round-trip latency : %.3f vs %.3f ns/op'
                         + ' -- TimeStampMpscQueue is %.3f ns/op (%.2f%%) %s',
@@ -233,12 +234,12 @@ tasks.register('timeStampQueuePerformanceTest') {
 
 tasks.register('runLatencyMapPerformanceBenchmark', JavaExec) {
     group = 'verification'
-    description = 'Benchmarks dense-array, primitive-map, and boxed-map latency recorders on JDK 25.'
+    description = "Benchmarks dense-array, primitive-map, and boxed-map latency recorders on JDK ${expectedJavaMajor}."
     dependsOn tasks.named('jmhJar')
     classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
     mainClass = 'org.openjdk.jmh.Main'
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
     }
     jvmArgs rootProject.ext.sbkRuntimeJvmArgs
     args 'io.perl.benchmark.LatencyMapBenchmark.*',
@@ -270,9 +271,9 @@ tasks.register('latencyMapPerformanceTest') {
                 throw new GradleException(
                         "Missing latency-map JMH result: ${benchmark}")
             }
-            if (!value.jdkVersion.toString().startsWith('25')) {
+            if (!value.jdkVersion.toString().startsWith(expectedJavaMajor)) {
                 throw new GradleException(
-                        "Latency-map comparison requires JDK 25; found "
+                        "Latency-map comparison requires JDK ${expectedJavaMajor}; found "
                                 + value.jdkVersion)
             }
             value
@@ -527,12 +528,12 @@ tasks.register('latencyMapPerformanceTest') {
 
 tasks.register('runCQueuePerformanceBenchmark', JavaExec) {
     group = 'verification'
-    description = 'Runs the isolated JDK 25 CQueue versus ConcurrentLinkedQueue benchmarks.'
+    description = "Runs the isolated JDK ${expectedJavaMajor} CQueue versus ConcurrentLinkedQueue benchmarks."
     dependsOn tasks.named('jmhJar')
     classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
     mainClass = 'org.openjdk.jmh.Main'
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
     }
     jvmArgs rootProject.ext.sbkRuntimeJvmArgs
     args 'io.perl.(benchmark.QueueBenchmark|api.impl.CQueueRetentionBenchmark).*',
@@ -556,7 +557,7 @@ tasks.register('runCQueuePerformanceBenchmark', JavaExec) {
 
 tasks.register('cqueuePerformanceTest') {
     group = 'verification'
-    description = 'Verifies lower CQueue latency and higher 4P/1C throughput on JDK 25.'
+    description = "Verifies lower CQueue latency and higher 4P/1C throughput on JDK ${expectedJavaMajor}."
     dependsOn tasks.named('runCQueuePerformanceBenchmark')
 
     doLast {
@@ -567,9 +568,9 @@ tasks.register('cqueuePerformanceTest') {
             if (value == null) {
                 throw new GradleException("Missing JMH result: ${benchmark}")
             }
-            if (!value.jdkVersion.toString().startsWith('25')) {
+            if (!value.jdkVersion.toString().startsWith(expectedJavaMajor)) {
                 throw new GradleException(
-                        "CQueue performance verification requires JDK 25; found ${value.jdkVersion}")
+                        "CQueue performance verification requires JDK ${expectedJavaMajor}; found ${value.jdkVersion}")
             }
             value
         }
@@ -637,7 +638,7 @@ tasks.register('cqueueGcTest', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'io.perl.api.impl.CQueueGcSoak'
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
     }
     jvmArgs rootProject.ext.sbkRuntimeJvmArgs
     jvmArgs '-Xms32m', '-Xmx32m', '-XX:+ExitOnOutOfMemoryError'
@@ -650,7 +651,7 @@ tasks.register('timeStampMpscQueueGcTest', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'io.perl.api.impl.TimeStampMpscQueueGcSoak'
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
     }
     jvmArgs rootProject.ext.sbkRuntimeJvmArgs
     jvmArgs '-Xms32m', '-Xmx32m', '-XX:+ExitOnOutOfMemoryError',
@@ -705,7 +706,7 @@ tasks.register('jcstress', JavaExec) {
     })
     mainClass = 'org.openjdk.jcstress.Main'
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
     }
     jvmArgs '--enable-native-access=ALL-UNNAMED'
     args '-m', 'quick',
