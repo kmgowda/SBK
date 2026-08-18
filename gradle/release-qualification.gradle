@@ -53,16 +53,16 @@ tasks.register('releasePreflight') {
         }
 
         if (qualificationValue('requireCleanTree').toBoolean()) {
-            def output = new ByteArrayOutputStream()
-            def result = providers.exec {
+            def statusOutput = providers.exec {
                 commandLine 'git', 'status', '--porcelain', '--untracked-files=all'
-                standardOutput = output
-                errorOutput = output
                 ignoreExitValue = true
-            }.result.get()
-            if (result.exitValue != 0 || !output.toString('UTF-8').trim().isEmpty()) {
+            }
+            def result = statusOutput.result.get()
+            def output = statusOutput.standardOutput.asText.get()
+            def error = statusOutput.standardError.asText.get()
+            if (result.exitValue != 0 || !output.trim().isEmpty()) {
                 throw new GradleException('Release qualification requires a clean Git tree.\n'
-                        + output.toString('UTF-8'))
+                        + output + error)
             }
         }
 
