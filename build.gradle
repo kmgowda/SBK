@@ -805,3 +805,5 @@ dependencies {
 }
 
 apply from: "build-drivers.gradle"
+
+apply from: "gradle/release-qualification.gradle"

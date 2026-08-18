@@ -117,6 +117,10 @@ plugins.withId('java') {
         source = sourceSets.main.allJava
         classpath = sourceSets.main.runtimeClasspath
         failOnError = true
+        // Keep the publication Javadocs separate from the standard `javadoc`
+        // task. Gradle 9 rejects two independently scheduled tasks that write
+        // the same output directory during the release qualification graph.
+        destinationDir = layout.buildDirectory.dir('docs/generatedJavadoc').get().asFile
     }
 
     tasks.register('javadocJar', Jar) {

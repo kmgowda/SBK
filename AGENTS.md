@@ -109,6 +109,22 @@ Verification is proportional to the affected surface:
 Report exact commands and distinguish a pass from a check that was not run or
 could not run.
 
+For a release candidate, use the authoritative gate rather than assembling a
+manual subset:
+
+```bash
+./gradlew clean releaseQualification \
+  -PreleaseProfile=release \
+  -PreleaseInventory=/secure/sbk-release-inventory.properties \
+  --no-daemon --rerun-tasks
+```
+
+See [`docs/RELEASE_QUALIFICATION.md`](docs/RELEASE_QUALIFICATION.md). A release
+profile must fail when mandatory remote infrastructure is unavailable; it must
+not convert missing GEM hosts or required backend coverage into a successful
+skip. Use `-PreleaseProfile=local-docker` for automatic disposable single-node
+GEM functional coverage; it does not replace real-host release evidence.
+
 ---
 
 ## 3. Repository conventions
