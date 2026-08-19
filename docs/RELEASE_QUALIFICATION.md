@@ -99,6 +99,9 @@ tools `ssh`, `ssh-agent`, `ssh-add`, `ssh-keygen`, and `ssh-keyscan`. The gate:
 5. runs `GemPrometheusLogger`, `GemWebLogger`, and SBK-GEM-YAL through the
    normal copy, two-client coordinated launch, SBM callback, aggregation, and
    cleanup paths, requiring two successful nodes and two SBM registrations;
+   the timed Prometheus case uses `-totalrecords`, the Web case combines
+   per-client `-records` with `-totalthroughput`, and the fixed-count YAL case
+   combines `totalrecords` with `totalthroughput`;
 6. force-removes both containers, the SSH agent, and ephemeral credentials on both
    success and failure.
 
@@ -234,7 +237,9 @@ checks:
 - real `GrpcLogger` clients against child SBM processes using both
   `SbmPrometheusLogger` and `SbmWebLogger`; and
 - both GEM logger families plus SBK-GEM-YAL when either the automatic
-  `local-docker` fixture or the release inventory is selected.
+  `local-docker` fixture or the release inventory is selected, including
+  aggregate `-totalrecords` and `-totalthroughput` distribution, existing
+  per-client `-records`, and combined fixed aggregate record/throughput control.
 
 All child processes have bounded startup and execution times. Logs and a test
 summary are written below `build/reports/release-qualification/`.
@@ -246,6 +251,10 @@ Safe harness defaults live in
 such as `-PreleaseRecords=50000`. These settings configure only the test
 harness; module runtime defaults remain in their existing authoritative
 properties files.
+
+The aggregate-throughput GEM cases default to 100 MB/s. Override that harness
+input with `-PreleaseTotalThroughputMBPerSec=<value>` when the release fixture
+needs a different rate.
 
 The same file is the single source for child-process shutdown grace periods,
 port-selection limits, smoke and EOF workloads, SBM settling time, Docker node

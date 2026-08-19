@@ -24,11 +24,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -47,6 +49,8 @@ import java.util.Objects;
  * - -copy, -delete, -deleteafter, -javacopy, -javaversion, -javadir
  * - -localhost
  * - -sbmport, -sbmsleepms
+ * - -totalrecords
+ * - -totalthroughput
  */
 @Slf4j
 public final class SbkGemParameters extends SbkDriversParameters implements GemParameterOptions {
@@ -73,6 +77,17 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
 
     @Getter
     private int sbmIdleSleepMilliSeconds;
+
+    @Getter
+    private boolean totalRecordsOption;
+
+    private long distributedTotalRecords;
+
+    @Getter
+    private boolean totalThroughputOption;
+
+    @Getter
+    private BigDecimal totalThroughput;
 
     /**
      * Construct GEM parameters with defaults and register GEM options.
@@ -123,10 +138,17 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("sbmport", true, "SBM port number; default: " + this.sbmPort);
         addOption("sbmsleepms", true, "SBM idle milliseconds to sleep; default: " + this.sbmIdleSleepMilliSeconds +
                 " ms");
+        addOption("totalrecords", true, "Total records across all remote SBK clients; without -seconds this is " +
+                "a fixed record count, and with -seconds this is the aggregate records/second rate; mutually " +
+                "exclusive with -records and -throughput");
+        addOption("totalthroughput", true, "Total throughput in MB/s across all remote SBK clients; mutually " +
+                "exclusive with -throughput");
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-hostkeycheck", "-knownhosts",
                 "-gemport", "-sbkdir", "-sbkcommand", "-copy", "-javacopy", "-javaversion", "-javadir",
-                "-delete", "-deleteafter", "-localhost", "-sbmport", "-sbmsleepms"};
+                "-delete", "-deleteafter", "-localhost", "-sbmport", "-sbmsleepms", "-totalrecords",
+                "--totalrecords", "-totalthroughput", "--totalthroughput"};
         this.parsedArgs = null;
+        this.totalThroughput = BigDecimal.ZERO;
     }
 
 
@@ -142,7 +164,26 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
      * @throws HelpException             if help text needs to be displayed by upstream handling
      */
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
-        super.parseArgs(args);
+        totalRecordsOption = hasCommandLineOption(args, "totalrecords");
+        totalThroughputOption = hasCommandLineOption(args, "totalthroughput");
+        if (totalRecordsOption && hasCommandLineOption(args, "records")) {
+            throw new IllegalArgumentException("The '-totalrecords' and '-records' options are mutually exclusive");
+        }
+        if (totalRecordsOption && hasCommandLineOption(args, "throughput")) {
+            throw new IllegalArgumentException(
+                    "The '-totalrecords' and '-throughput' options are mutually exclusive");
+        }
+        if (totalThroughputOption && hasCommandLineOption(args, "throughput")) {
+            throw new IllegalArgumentException(
+                    "The '-totalthroughput' and '-throughput' options are mutually exclusive");
+        }
+        if (totalRecordsOption) {
+            distributedTotalRecords = parseTotalRecords(args);
+        }
+        if (totalThroughputOption) {
+            totalThroughput = parseTotalThroughput(args);
+        }
+        super.parseArgs(normalizeAggregateOptions(args));
         final String nodeString = getOptionValue("nodes", config.nodes);
         String[] nodes = nodeString.replace("[ ]+", " ")
                 .replace("[,] +", ",")
@@ -185,6 +226,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
                     config.remoteDir, config.hostkeycheck, config.knownhosts);
         }
 
+        validateAggregateOptions(nodes.length);
+
         if (StringUtils.isEmpty(config.sbkdir)) {
             String errMsg = "The SBK application directory not supplied!";
             Printer.log.error(errMsg);
@@ -218,6 +261,127 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
             throw new IllegalArgumentException(errMsg);
         }
 
+    }
+
+    /**
+     * Get the configured record value. The GEM aggregate value is returned when {@code -totalrecords} is supplied;
+     * otherwise, this returns the standard SBK record value. The aggregate value is a fixed count without
+     * {@code -seconds} and a records/second rate with {@code -seconds}.
+     *
+     * @return aggregate or standard record value, according to the selected option
+     */
+    @Override
+    public long getTotalRecords() {
+        return totalRecordsOption ? distributedTotalRecords : super.getTotalRecords();
+    }
+
+    private void validateAggregateOptions(int nodeCount) {
+        if (totalRecordsOption) {
+            validateTotalRecords(nodeCount);
+        }
+        if (totalThroughputOption && totalThroughput.signum() <= 0) {
+            throw new IllegalArgumentException("The '-totalthroughput' value must be greater than zero");
+        }
+        if (totalThroughputOption) {
+            validateMatchingMixedWorkerCounts("-totalthroughput");
+        }
+        if (totalRecordsOption && totalThroughputOption && getTotalSecondsToRun() > 0) {
+            throw new IllegalArgumentException("The '-totalrecords' and '-totalthroughput' options cannot be " +
+                    "combined with '-seconds' because both would define the benchmark rate");
+        }
+    }
+
+    private void validateTotalRecords(int nodeCount) {
+        if (distributedTotalRecords <= 0) {
+            throw new IllegalArgumentException("The '-totalrecords' value must be greater than zero");
+        }
+        if (getTotalSecondsToRun() > 0) {
+            validateMatchingMixedWorkerCounts("-totalrecords");
+            final int workers = getWritersCount() > 0 ? getWritersCount() : getReadersCount();
+            if (distributedTotalRecords % workers != 0) {
+                throw new IllegalArgumentException("The '-totalrecords' records/second value must be divisible by " +
+                        "the active worker count " + workers);
+            }
+            if (distributedTotalRecords / workers < nodeCount) {
+                throw new IllegalArgumentException("The '-totalrecords' records/second value must provide at " +
+                        "least one record/second per active worker on each of the " + nodeCount + " nodes");
+            }
+        } else if (distributedTotalRecords < nodeCount) {
+            throw new IllegalArgumentException("The '-totalrecords' value must be at least the number of nodes: " +
+                    nodeCount);
+        }
+    }
+
+    private void validateMatchingMixedWorkerCounts(String option) {
+        final int writers = getWritersCount();
+        final int readers = getReadersCount();
+        if (writers > 0 && readers > 0 && writers != readers) {
+            throw new IllegalArgumentException("The '" + option + "' aggregate rate requires equal writer and " +
+                    "reader counts for mixed workloads; configured writers: " + writers + ", readers: " + readers);
+        }
+    }
+
+    private static long parseTotalRecords(String[] args) {
+        for (int i = 0; i < args.length; i++) {
+            if (isOption(args[i], "totalrecords")) {
+                if (i + 1 >= args.length) {
+                    throw new IllegalArgumentException("The '-totalrecords' option requires a value");
+                }
+                try {
+                    return Long.parseLong(args[i + 1]);
+                } catch (NumberFormatException ex) {
+                    throw new IllegalArgumentException("Invalid '-totalrecords' value: " + args[i + 1], ex);
+                }
+            }
+        }
+        throw new IllegalArgumentException("The '-totalrecords' option requires a value");
+    }
+
+    private static BigDecimal parseTotalThroughput(String[] args) {
+        for (int i = 0; i < args.length; i++) {
+            if (isOption(args[i], "totalthroughput")) {
+                if (i + 1 >= args.length) {
+                    throw new IllegalArgumentException("The '-totalthroughput' option requires a value");
+                }
+                try {
+                    final BigDecimal value = new BigDecimal(args[i + 1]);
+                    if (!Double.isFinite(value.doubleValue())) {
+                        throw new IllegalArgumentException("The '-totalthroughput' value is outside the supported " +
+                                "SBK throughput range: " + args[i + 1]);
+                    }
+                    return value;
+                } catch (NumberFormatException ex) {
+                    throw new IllegalArgumentException("Invalid '-totalthroughput' value: " + args[i + 1], ex);
+                }
+            }
+        }
+        throw new IllegalArgumentException("The '-totalthroughput' option requires a value");
+    }
+
+    private static String[] normalizeAggregateOptions(String[] args) {
+        final String[] normalized = Arrays.copyOf(args, args.length);
+        for (int i = 0; i < normalized.length; i++) {
+            if (isOption(normalized[i], "totalrecords")) {
+                normalized[i] = "-records";
+                if (i + 1 < normalized.length) {
+                    normalized[i + 1] = "1";
+                }
+            } else if (isOption(normalized[i], "totalthroughput")) {
+                normalized[i] = "-throughput";
+                if (i + 1 < normalized.length) {
+                    normalized[i + 1] = "1";
+                }
+            }
+        }
+        return normalized;
+    }
+
+    private static boolean hasCommandLineOption(String[] args, String option) {
+        return Arrays.stream(args).anyMatch(argument -> isOption(argument, option));
+    }
+
+    private static boolean isOption(String argument, String option) {
+        return ("-" + option).equals(argument) || ("--" + option).equals(argument);
     }
 
     @Override

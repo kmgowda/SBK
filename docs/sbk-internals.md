@@ -1909,6 +1909,13 @@ sequenceDiagram
     participant N2 as "Remote node 2"
 
     User->>GEM: sbk-gem -nodes h1,h2 -class minio ...
+    Note over GEM: build common GrpcLogger and SBM callback arguments
+    opt totalrecords is supplied
+        Note over GEM: divide the aggregate count or rate<br/>into node-specific -records values
+    end
+    opt totalthroughput is supplied
+        Note over GEM: divide aggregate MB/s<br/>into node-specific -throughput values
+    end
     GEM->>SSH: createSessionAsync(h1)
     GEM->>SSH: createSessionAsync(h2)
     par connect, verify host key, and authenticate
@@ -1945,7 +1952,6 @@ sequenceDiagram
     GEM->>SSH: resolve and verify absolute SBK executable per node
 
     GEM->>SBM: sbmBenchmark.start()<br/>(listen on :9717 locally)
-
     GEM->>SSH: export SBK_JAVA_HOME and run sbkCommand on each node
     Note over SSH: remote command starts SBK with<br/>-out GrpcLogger -sbm localHost -sbmport 9717
 
@@ -2008,6 +2014,25 @@ This separation matters. The aggregator logic lives in **one place**
 the SSH / orchestration code at all. Likewise, you can use SBM
 standalone without SBK-GEM if your nodes are already set up — just
 point each one's `-out GrpcLogger -sbm <host>` at it.
+
+GEM normally forwards `-records` unchanged to every remote SBK instance, so
+that value is per client. Its `-totalrecords` orchestration option instead
+splits one aggregate value into node-specific `-records` arguments. Without
+`-seconds`, quotient/remainder allocation preserves the exact fixed record
+count. With `-seconds`, allocation uses whole worker-rate units so the exact
+aggregate records/second limit survives SBK's per-worker integer division.
+The `-totalthroughput` orchestration option similarly divides one aggregate
+MB/s target into node-specific `-throughput` arguments. It can pace fixed
+per-client `-records` or fixed aggregate `-totalrecords`; timed
+`-totalrecords` cannot be combined with it because both options would define
+the run rate. Decimal allocation retains an exact aggregate command-line value,
+subject to SBK's existing MB/s-to-whole-records-per-worker conversion.
+Because SBK currently derives one shared per-worker rate for both directions,
+timed aggregate controls require equal writer and reader counts in mixed
+workloads. Unequal mixed counts are rejected; writer-only, reader-only, and
+equal mixed workloads retain their existing behavior.
+This planning happens before remote launch and does not add work to the SBK,
+PerL, or SBM measurement hot paths.
 
 ### 7.3 SSH implementation
 
@@ -3077,7 +3102,9 @@ your "Experimental Setup" section makes the study fully reproducible:
    standalone PerL defaults are in
    [perl.properties](../perl/src/main/resources/perl.properties).
 4. **Workload**: `-writers`, `-readers`, `-size`, `-seconds` or
-   `-records`, `-throughput`, and any driver-specific flags.
+   `-records`, SBK-GEM `-totalrecords` when used, `-throughput`, SBK-GEM
+   `-totalthroughput` when used, and any
+   driver-specific flags.
 5. **Storage configuration** (cluster size, replication, region,
    storage class, etc.).
 6. **JVM**: vendor + version + heap size, e.g. `OpenJDK 25 -Xmx16g`.

@@ -17,13 +17,16 @@ import io.gem.api.SshResponse;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.CancellationException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -175,5 +178,99 @@ final class SbkGemBenchmarkTest {
         assertSame(remoteFailure, failure);
         assertEquals(1, failure.getSuppressed().length);
         assertSame(sbmFailure, failure.getSuppressed()[0]);
+    }
+
+    @Test
+    void distributesFixedRecordsAcrossNodesIncludingRemainder() {
+        final List<List<String>> arguments = SbkGem.distributeTotalRecords(
+                List.of("-class", "file"), 1001, 2, 1, false);
+
+        assertEquals(List.of("-class", "file", "-records", "501"), arguments.get(0));
+        assertEquals(List.of("-class", "file", "-records", "500"), arguments.get(1));
+    }
+
+    @Test
+    void distributesExactAggregateRateInWholeWorkerUnits() {
+        final List<List<String>> arguments = SbkGem.distributeTotalRecords(
+                List.of("-class", "file", "-seconds", "30"), 1000, 3, 2, true);
+
+        assertEquals("334", arguments.get(0).getLast());
+        assertEquals("334", arguments.get(1).getLast());
+        assertEquals("332", arguments.get(2).getLast());
+        assertEquals(1000, arguments.stream().mapToLong(values -> Long.parseLong(values.getLast())).sum());
+    }
+
+    @Test
+    void doesNotModifyCommonArgumentsDuringDistribution() {
+        final List<String> commonArguments = List.of("-class", "file");
+
+        SbkGem.distributeTotalRecords(commonArguments, 10, 2, 1, false);
+
+        assertEquals(List.of("-class", "file"), commonArguments);
+    }
+
+    @Test
+    void rejectsPerWorkerRateBeyondSbkIntegerLimit() {
+        final long excessiveRate = (long) Integer.MAX_VALUE + 1;
+
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> SbkGem.distributeTotalRecords(List.of("-class", "file"), excessiveRate, 1, 1, true));
+
+        assertTrue(exception.getMessage().contains("exceeds"));
+    }
+
+    @Test
+    void distributesAggregateThroughputAcrossNodes() {
+        final List<List<String>> arguments = SbkGem.distributeTotalThroughput(
+                List.of(List.of("-class", "file"), List.of("-class", "file")),
+                new BigDecimal("10"), 4096, 1);
+
+        assertEquals(List.of("-class", "file", "-throughput", "5"), arguments.get(0));
+        assertEquals(List.of("-class", "file", "-throughput", "5"), arguments.get(1));
+    }
+
+    @Test
+    void preservesExactDecimalTotalWhenThroughputDoesNotDivideEvenly() {
+        final List<List<String>> arguments = SbkGem.distributeTotalThroughput(
+                List.of(List.of(), List.of(), List.of()), new BigDecimal("10"), 4096, 1);
+
+        final BigDecimal distributedTotal = arguments.stream()
+                .map(values -> new BigDecimal(values.getLast()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        assertEquals(new BigDecimal("10.000000000000"), distributedTotal);
+        assertEquals("3.333333333334", arguments.get(0).getLast());
+        assertEquals("3.333333333333", arguments.get(1).getLast());
+        assertEquals("3.333333333333", arguments.get(2).getLast());
+    }
+
+    @Test
+    void retainsExistingNodeSpecificArgumentsWhenAddingThroughput() {
+        final List<List<String>> source = List.of(
+                List.of("-records", "51"), List.of("-records", "50"));
+
+        final List<List<String>> arguments = SbkGem.distributeTotalThroughput(
+                source, new BigDecimal("20"), 4096, 1);
+
+        assertEquals(List.of("-records", "51", "-throughput", "10"), arguments.get(0));
+        assertEquals(List.of("-records", "50", "-throughput", "10"), arguments.get(1));
+        assertEquals(List.of("-records", "51"), source.get(0));
+    }
+
+    @Test
+    void rejectsAggregateThroughputThatDisablesSbkRateControl() {
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> SbkGem.distributeTotalThroughput(List.of(List.of(), List.of()),
+                        new BigDecimal("0.001"), 1048576, 1));
+
+        assertTrue(exception.getMessage().contains("at least one record/second"));
+    }
+
+    @Test
+    void rejectsAggregateThroughputBeyondSbkIntegerRateLimit() {
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> SbkGem.distributeTotalThroughput(List.of(List.of()),
+                        new BigDecimal("1000000000"), 1, 1));
+
+        assertTrue(exception.getMessage().contains("maximum record/second rate"));
     }
 }

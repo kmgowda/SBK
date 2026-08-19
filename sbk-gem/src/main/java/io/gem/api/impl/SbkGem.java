@@ -26,6 +26,7 @@ import io.gem.params.impl.SbkGemParameters;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.perl.config.PerlConfig;
 import io.perl.api.impl.PerlBuilder;
+import io.perl.data.Bytes;
 import io.sbk.action.Action;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
@@ -56,6 +57,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,6 +87,7 @@ final public class SbkGem {
 
     final static String BANNER_FILE = "gem-banner.txt";
     private static final int MINIMUM_RESULT_SEPARATOR_WIDTH = 80;
+    private static final int TOTAL_THROUGHPUT_SCALE = 12;
 
     /**
      * Creates an SBK-GEM orchestration helper.
@@ -409,6 +413,26 @@ final public class SbkGem {
         addOption(sbkCommandArgs, "-sbm", params.getLocalHost());
         addOption(sbkCommandArgs, "-sbmport", Integer.toString(params.getSbmPort()));
 
+        List<List<String>> remoteSbkCommandArgs;
+        if (params.isTotalRecordsOption()) {
+            final int workers = params.getWritersCount() > 0 ? params.getWritersCount() : params.getReadersCount();
+            final boolean rateMode = params.getTotalSecondsToRun() > 0;
+            remoteSbkCommandArgs = distributeTotalRecords(sbkCommandArgs, params.getTotalRecords(),
+                    params.getConnections().length, workers, rateMode);
+            Printer.log.info("SBK-GEM: Distributing {} total {} across {} remote SBK clients",
+                    params.getTotalRecords(), rateMode ? "records/second" : "records",
+                    params.getConnections().length);
+        } else {
+            remoteSbkCommandArgs = identicalRemoteArguments(sbkCommandArgs, params.getConnections().length);
+        }
+        if (params.isTotalThroughputOption()) {
+            final int workers = params.getWritersCount() > 0 ? params.getWritersCount() : params.getReadersCount();
+            remoteSbkCommandArgs = distributeTotalThroughput(remoteSbkCommandArgs, params.getTotalThroughput(),
+                    params.getRecordSize(), workers);
+            Printer.log.info("SBK-GEM: Distributing {} MB/s total throughput across {} remote SBK clients",
+                    params.getTotalThroughput().toPlainString(), params.getConnections().length);
+        }
+
         Printer.log.info("SBK dir: " + params.getSbkDir());
         Printer.log.info("SBK command: " + params.getSbkCommand());
         Printer.log.info("Arguments to remote SBK command: "
@@ -452,7 +476,77 @@ final public class SbkGem {
         }
         Printer.log.info("SBK-GEM: Arguments to SBM command verification Success..");
         return new SbkGemBenchmark(new SbmBenchmark(sbmConfig, ramParams, ramLogger, time, true), gemConfig, params,
-                sbkCommandArgs);
+                remoteSbkCommandArgs);
+    }
+
+    static List<List<String>> distributeTotalRecords(List<String> commonArguments, long totalRecords, int nodeCount,
+                                                      int workers, boolean rateMode) {
+        if (totalRecords <= 0 || nodeCount <= 0 || workers <= 0) {
+            throw new IllegalArgumentException("Total records, node count, and worker count must be positive");
+        }
+        final long allocationUnits = rateMode ? totalRecords / workers : totalRecords;
+        if (rateMode && totalRecords % workers != 0) {
+            throw new IllegalArgumentException("Total records/second must be divisible by the worker count");
+        }
+        if (allocationUnits < nodeCount) {
+            throw new IllegalArgumentException("Total records must allocate at least one unit to every node");
+        }
+        final long unitsPerNode = allocationUnits / nodeCount;
+        final long remainder = allocationUnits % nodeCount;
+        final List<List<String>> argumentsByNode = new ArrayList<>(nodeCount);
+        for (int i = 0; i < nodeCount; i++) {
+            final long nodeUnits = unitsPerNode + (i < remainder ? 1 : 0);
+            if (rateMode && nodeUnits > Integer.MAX_VALUE) {
+                throw new IllegalArgumentException("The per-worker records/second value on node " + (i + 1) +
+                        " exceeds " + Integer.MAX_VALUE);
+            }
+            final long nodeRecords = rateMode ? Math.multiplyExact(nodeUnits, workers) : nodeUnits;
+            final List<String> nodeArguments = new ArrayList<>(commonArguments.size() + 2);
+            nodeArguments.addAll(commonArguments);
+            addOption(nodeArguments, "-records", Long.toString(nodeRecords));
+            argumentsByNode.add(List.copyOf(nodeArguments));
+        }
+        return List.copyOf(argumentsByNode);
+    }
+
+    static List<List<String>> distributeTotalThroughput(List<List<String>> argumentsByNode,
+                                                         BigDecimal totalThroughput, int recordSize, int workers) {
+        if (argumentsByNode.isEmpty() || totalThroughput.signum() <= 0 || recordSize <= 0 || workers <= 0) {
+            throw new IllegalArgumentException(
+                    "Remote arguments, total throughput, record size, and worker count must be positive");
+        }
+        final BigDecimal nodeCount = BigDecimal.valueOf(argumentsByNode.size());
+        final BigDecimal baseThroughput = totalThroughput.divide(nodeCount, TOTAL_THROUGHPUT_SCALE,
+                RoundingMode.DOWN);
+        final BigDecimal remainder = totalThroughput.subtract(baseThroughput.multiply(nodeCount));
+        final List<List<String>> distributedArguments = new ArrayList<>(argumentsByNode.size());
+        for (int i = 0; i < argumentsByNode.size(); i++) {
+            final BigDecimal nodeThroughput = i == 0 ? baseThroughput.add(remainder) : baseThroughput;
+            final double nodeThroughputValue = nodeThroughput.doubleValue();
+            final double recordsPerWorker = nodeThroughputValue * Bytes.BYTES_PER_MB / recordSize / workers;
+            if (!Double.isFinite(nodeThroughputValue) || recordsPerWorker < 1) {
+                throw new IllegalArgumentException("The '-totalthroughput' value must provide at least one " +
+                        "record/second per active worker on every node");
+            }
+            if (!Double.isFinite(recordsPerWorker) || recordsPerWorker > Integer.MAX_VALUE) {
+                throw new IllegalArgumentException("The '-totalthroughput' value exceeds SBK's maximum " +
+                        "record/second rate per active worker");
+            }
+            final List<String> nodeArguments = new ArrayList<>(argumentsByNode.get(i).size() + 2);
+            nodeArguments.addAll(argumentsByNode.get(i));
+            addOption(nodeArguments, "-throughput", nodeThroughput.stripTrailingZeros().toPlainString());
+            distributedArguments.add(List.copyOf(nodeArguments));
+        }
+        return List.copyOf(distributedArguments);
+    }
+
+    private static List<List<String>> identicalRemoteArguments(List<String> commonArguments, int nodeCount) {
+        final List<String> immutableArguments = List.copyOf(commonArguments);
+        final List<List<String>> argumentsByNode = new ArrayList<>(nodeCount);
+        for (int i = 0; i < nodeCount; i++) {
+            argumentsByNode.add(immutableArguments);
+        }
+        return List.copyOf(argumentsByNode);
     }
 
     private static String firstNonEmpty(String first, String second) {

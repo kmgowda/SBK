@@ -179,6 +179,7 @@ tasks.register('releaseFunctionalTest', Exec) {
     environment 'SBK_RELEASE_VERSION', sbkVersion.toString()
     environment 'SBK_RELEASE_RECORDS', qualificationValue('records')
     environment 'SBK_RELEASE_RECORD_SIZE', qualificationValue('recordSize')
+    environment 'SBK_RELEASE_TOTAL_THROUGHPUT_MB_PER_SEC', qualificationValue('totalThroughputMBPerSec')
     environment 'SBK_RELEASE_PROCESS_TIMEOUT_SECONDS', qualificationValue('processTimeoutSeconds')
     environment 'SBK_RELEASE_STARTUP_TIMEOUT_SECONDS', qualificationValue('startupTimeoutSeconds')
     environment 'SBK_RELEASE_WEB_TIMEOUT_MINUTES', qualificationValue('webTimeoutMinutes')
