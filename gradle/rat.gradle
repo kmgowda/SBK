@@ -55,6 +55,7 @@ tasks.register('rat', JavaExec) {
     })
     outputs.file(ratReport)
     ignoreExitValue = true
+    standardOutput = OutputStream.nullOutputStream()
 
     args '--input-exclude'
     args ratExcludes
