@@ -10,7 +10,10 @@ dependencies {
     api project(":sbk-api")
 
     // ChromaDB Java client
-    implementation 'io.github.amikos-tech:chromadb-java-client:0.1.7'
+    implementation('io.github.amikos-tech:chromadb-java-client:0.1.7') {
+        // The client publishes its test BOM as a regular dependency.
+        exclude group: 'org.testcontainers', module: 'testcontainers-bom'
+    }
     
     // HTTP client for ChromaDB REST API (already included in chromadb-java-client)
     // implementation 'com.squareup.okhttp3:okhttp:4.12.0'

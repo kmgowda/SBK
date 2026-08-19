@@ -9,18 +9,6 @@
  *
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            url = gradlePluginRepositoryUrl
-        }
-    }
-    dependencies {
-        classpath "org.nosphere.apache:creadur-rat-gradle:$apacheRatVersion"
-    }
-}
-
 /*
 plugins {
     id 'org.jreleaser' version  "${jReleaserPluginVersion}"

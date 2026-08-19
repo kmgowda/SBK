@@ -17,7 +17,6 @@ buildscript {
         }
     }
     dependencies {
-        classpath "org.nosphere.apache:creadur-rat-gradle:$apacheRatVersion"
         classpath "me.champeau.jmh:jmh-gradle-plugin:$jmhGradleVersion"
     }
 }
