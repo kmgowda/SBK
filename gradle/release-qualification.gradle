@@ -29,7 +29,16 @@ def qualificationValue = { String name ->
     projectValue ?: qualificationDefaults.getProperty("qualification.${name}")
 }
 
-def qualificationProfile = qualificationValue('profile')
+def obsoleteProfileProperty = ['releaseProfile', 'release.profile'].find {
+    findProperty(it) != null
+}
+if (obsoleteProfileProperty) {
+    throw new GradleException("Gradle property '${obsoleteProfileProperty}' was renamed to 'profile'; "
+            + "use -Pprofile=<local|local-docker|ci|release>")
+}
+
+def qualificationProfile = findProperty('profile')?.toString()?.trim()
+        ?: qualificationDefaults.getProperty('qualification.profile')
 if (!(qualificationProfile in ['local', 'local-docker', 'ci', 'release'])) {
     throw new GradleException("Invalid release qualification profile '${qualificationProfile}'; "
             + "expected local, local-docker, ci, or release")
@@ -267,7 +276,7 @@ gradle.projectsEvaluated {
     }
 }
 
-tasks.register('releaseQualification') {
+tasks.register('releasecheck') {
     group = 'verification'
     description = 'Runs the authoritative one-command SBK release qualification gate.'
     dependsOn tasks.named('releasePreflight')
@@ -318,7 +327,7 @@ tasks.register('releaseQualification') {
 
 [
         'releaseBuild', 'releaseConcurrency', 'releasePerformance', 'releasePackaging',
-        'releaseFunctionalTest', 'releaseDocsCheck', 'releasePublicationTest', 'releaseQualification'
+        'releaseFunctionalTest', 'releaseDocsCheck', 'releasePublicationTest', 'releasecheck'
 ].each { taskName ->
     tasks.named(taskName).configure {
         mustRunAfter tasks.named('releasePreflight')

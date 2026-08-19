@@ -16,8 +16,8 @@ were qualified.
 Use the `local` profile while developing:
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=local \
+./gradlew clean releasecheck \
+  -Pprofile=local \
   --no-daemon --rerun-tasks
 ```
 
@@ -27,14 +27,14 @@ Maven-local publication verification. The `release` profile additionally runs
 the JMH performance gates and requires real remote SBK-GEM hosts:
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=local-docker \
+./gradlew clean releasecheck \
+  -Pprofile=local-docker \
   --no-daemon --rerun-tasks
 ```
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=release \
+./gradlew clean releasecheck \
+  -Pprofile=release \
   -PreleaseInventory=/secure/sbk-release-inventory.properties \
   --no-daemon --rerun-tasks
 ```
@@ -59,16 +59,16 @@ functional tests. It does not run the remote GEM or release-only performance
 tests.
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=local \
+./gradlew clean releasecheck \
+  -Pprofile=local \
   --no-daemon --rerun-tasks
 ```
 
 During development, use the clean-tree override to qualify uncommitted code:
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=local \
+./gradlew clean releasecheck \
+  -Pprofile=local \
   -PreleaseRequireCleanTree=false \
   --no-daemon --rerun-tasks
 ```
@@ -83,8 +83,8 @@ the complete GEM orchestration path without provisioning a permanent remote
 host:
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=local-docker \
+./gradlew clean releasecheck \
+  -Pprofile=local-docker \
   --no-daemon --rerun-tasks
 ```
 
@@ -111,8 +111,8 @@ The CI profile adds Maven main, source, Javadoc JAR, and POM generation checks.
 It does not publish artifacts or require signing credentials.
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=ci \
+./gradlew clean releasecheck \
+  -Pprofile=ci \
   --no-daemon --rerun-tasks
 ```
 
@@ -122,8 +122,8 @@ Use a clean checkout and a private inventory containing real SSH-accessible
 hosts:
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=release \
+./gradlew clean releasecheck \
+  -Pprofile=release \
   -PreleaseInventory=/root/.config/sbk/release-inventory.properties \
   --no-daemon --rerun-tasks
 ```
@@ -249,7 +249,7 @@ local diagnostic run, but a release candidate must use the default:
 
 ```bash
 ./gradlew releaseFunctionalTest \
-  -PreleaseProfile=local \
+  -Pprofile=local \
   -PreleaseRequireCleanTree=false
 ```
 
