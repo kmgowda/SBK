@@ -16,6 +16,7 @@ import java.time.Duration;
  * Standalone entry point for the reusable SBK Local Web Console server.
  */
 public final class SbkWebConsoleMain {
+    private static final int OPTION_PAIR_WIDTH = 2;
     private SbkWebConsoleMain() {
     }
 
@@ -32,7 +33,7 @@ public final class SbkWebConsoleMain {
         int port = config.port;
         int minutes = config.snapshotMinutes;
         int timeout = config.timeoutMinutes;
-        for (int index = 0; index < args.length; index += 2) {
+        for (int index = 0; index < args.length; index += OPTION_PAIR_WIDTH) {
             if (index + 1 >= args.length) {
                 throw new IllegalArgumentException("Missing Local Web Console option value for " + args[index]);
             }
@@ -65,7 +66,7 @@ public final class SbkWebConsoleMain {
         if (minutes < 1) {
             throw new IllegalArgumentException("Local Web Console history minutes must be greater than zero");
         }
-        final long retention = Math.ceilDiv(Math.multiplyExact((long) minutes, 60L),
+        final long retention = Math.ceilDiv(Duration.ofMinutes(minutes).toSeconds(),
                 reportingIntervalSeconds);
         if (retention > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("Local Web Console history minutes are too large: " + minutes);

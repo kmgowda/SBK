@@ -83,6 +83,7 @@ final public class SbkGem {
     final static String SBK_CONFIG_FILE = "sbk.properties";
 
     final static String BANNER_FILE = "gem-banner.txt";
+    private static final int MINIMUM_RESULT_SEPARATOR_WIDTH = 80;
 
     /**
      * Creates an SBK-GEM orchestration helper.
@@ -500,7 +501,8 @@ final public class SbkGem {
                 "; expected nodes: " + results.length + "; successful nodes: " + successful +
                 "; failed nodes: " + failed + "; maximum SBM registrations: " + registrationText;
         final String title = "SBK-GEM Distributed Benchmark Final Results";
-        int separatorWidth = Math.max(80, Math.max(title.length(), summary.length()));
+        int separatorWidth = Math.max(MINIMUM_RESULT_SEPARATOR_WIDTH,
+                Math.max(title.length(), summary.length()));
         for (int i = 0; i < results.length; i++) {
             separatorWidth = Math.max(separatorWidth, remoteHostSummary(results[i], i).length());
         }

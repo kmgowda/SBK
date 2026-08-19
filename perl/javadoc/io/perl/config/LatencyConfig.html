@@ -58,6 +58,10 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#field-detail" tabindex="0">Field Details</a>
 <ol class="toc-list">
+<li><a href="#SLC_COUNT" tabindex="0">SLC_COUNT</a></li>
+<li><a href="#LATENCY_MAP_ENTRY_VALUE_COUNT" tabindex="0">LATENCY_MAP_ENTRY_VALUE_COUNT</a></li>
+<li><a href="#PERCENTAGE_SCALE" tabindex="0">PERCENTAGE_SCALE</a></li>
+<li><a href="#MEDIAN_PERCENTILE" tabindex="0">MEDIAN_PERCENTILE</a></li>
 <li><a href="#PERCENTILE_FORMAT" tabindex="0">PERCENTILE_FORMAT</a></li>
 <li><a href="#LATENCY_VALUE_SIZE_BYTES" tabindex="0">LATENCY_VALUE_SIZE_BYTES</a></li>
 <li><a href="#LONG_MAX" tabindex="0">LONG_MAX</a></li>
@@ -148,34 +152,54 @@ latency storage.</div>
 <div class="block">Whether histogram output is enabled.</div>
 </div>
 <div class="col-first even-row-color"><code>static final int</code></div>
-<div class="col-second even-row-color"><code><a href="#LATENCY_VALUE_SIZE_BYTES" class="member-name-link">LATENCY_VALUE_SIZE_BYTES</a></code></div>
+<div class="col-second even-row-color"><code><a href="#LATENCY_MAP_ENTRY_VALUE_COUNT" class="member-name-link">LATENCY_MAP_ENTRY_VALUE_COUNT</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Number of long values retained for each latency-map entry.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final int</code></div>
+<div class="col-second odd-row-color"><code><a href="#LATENCY_VALUE_SIZE_BYTES" class="member-name-link">LATENCY_VALUE_SIZE_BYTES</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Size in bytes of a single latency value (64-bit long).</div>
 </div>
-<div class="col-first odd-row-color"><code>static final long</code></div>
-<div class="col-second odd-row-color"><code><a href="#LONG_MAX" class="member-name-link">LONG_MAX</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>static final long</code></div>
+<div class="col-second even-row-color"><code><a href="#LONG_MAX" class="member-name-link">LONG_MAX</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Safety cap for individual latency counters to avoid overflow.</div>
 </div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#maxArraySizeMB" class="member-name-link">maxArraySizeMB</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#maxArraySizeMB" class="member-name-link">maxArraySizeMB</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Maximum memory allowed (in MB) for array-based latency storage.</div>
 </div>
-<div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#maxHashMapSizeMB" class="member-name-link">maxHashMapSizeMB</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#maxHashMapSizeMB" class="member-name-link">maxHashMapSizeMB</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Maximum memory allowed (in MB) for HashMap-based latency storage.</div>
 </div>
-<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#PERCENTILE_FORMAT" class="member-name-link">PERCENTILE_FORMAT</a></code></div>
+<div class="col-first odd-row-color"><code>static final double</code></div>
+<div class="col-second odd-row-color"><code><a href="#MEDIAN_PERCENTILE" class="member-name-link">MEDIAN_PERCENTILE</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Median percentile as a percentage.</div>
+</div>
+<div class="col-first even-row-color"><code>static final double</code></div>
+<div class="col-second even-row-color"><code><a href="#PERCENTAGE_SCALE" class="member-name-link">PERCENTAGE_SCALE</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Scale converting percentile fractions to percentages.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#PERCENTILE_FORMAT" class="member-name-link">PERCENTILE_FORMAT</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Format string used when printing percentile values.</div>
 </div>
-<div class="col-first odd-row-color"><code>static final double[]</code></div>
-<div class="col-second odd-row-color"><code><a href="#PERCENTILES" class="member-name-link">PERCENTILES</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>static final double[]</code></div>
+<div class="col-second even-row-color"><code><a href="#PERCENTILES" class="member-name-link">PERCENTILES</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Default percentiles to compute and report.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final int</code></div>
+<div class="col-second odd-row-color"><code><a href="#SLC_COUNT" class="member-name-link">SLC_COUNT</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Number of Sliding Latency Coverage counters.</div>
 </div>
 <div class="col-first even-row-color"><code>static final long</code></div>
 <div class="col-second even-row-color"><code><a href="#TOTAL_LATENCY_MAX" class="member-name-link">TOTAL_LATENCY_MAX</a></code></div>
@@ -223,6 +247,74 @@ latency storage.</div>
 <section class="field-details" id="field-detail">
 <h2>Field Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="SLC_COUNT">
+<h3>SLC_COUNT</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">SLC_COUNT</span></div>
+<div class="block">Number of Sliding Latency Coverage counters.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.perl.config.LatencyConfig.SLC_COUNT">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="LATENCY_MAP_ENTRY_VALUE_COUNT">
+<h3>LATENCY_MAP_ENTRY_VALUE_COUNT</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">LATENCY_MAP_ENTRY_VALUE_COUNT</span></div>
+<div class="block">Number of long values retained for each latency-map entry.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.perl.config.LatencyConfig.LATENCY_MAP_ENTRY_VALUE_COUNT">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="PERCENTAGE_SCALE">
+<h3>PERCENTAGE_SCALE</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">PERCENTAGE_SCALE</span></div>
+<div class="block">Scale converting percentile fractions to percentages.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.perl.config.LatencyConfig.PERCENTAGE_SCALE">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="MEDIAN_PERCENTILE">
+<h3>MEDIAN_PERCENTILE</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">MEDIAN_PERCENTILE</span></div>
+<div class="block">Median percentile as a percentage.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.perl.config.LatencyConfig.MEDIAN_PERCENTILE">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
 <li>
 <section class="detail" id="PERCENTILE_FORMAT">
 <h3>PERCENTILE_FORMAT</h3>

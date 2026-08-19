@@ -14,6 +14,8 @@ package io.sbk.config;
  * Class Config.
  */
 final public class Config {
+    /** Number of tokens in a command-line option/value pair. */
+    public static final int OPTION_PAIR_WIDTH = 2;
 
     /**
      * <code>NAME = "sbk";</code>.

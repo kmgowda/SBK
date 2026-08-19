@@ -10,7 +10,9 @@
 
 package io.gem.api.impl;
 
+import io.gem.api.RemoteExitCode;
 import io.gem.api.SshResponse;
+import io.sbk.config.ExitCode;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -21,6 +23,9 @@ import java.util.regex.Pattern;
  * Builds remote Java discovery commands and interprets their responses.
  */
 final class RemoteJavaDeployment {
+    private static final int LEGACY_JAVA_MAJOR = 1;
+    private static final int VERSION_MAJOR_GROUP = 1;
+    private static final int VERSION_MINOR_GROUP = 2;
     private static final Pattern QUOTED_VERSION_PATTERN = Pattern.compile("version \\\"(\\d+)(?:\\.(\\d+))?.*\\\"");
     private static final Pattern SIMPLE_VERSION_PATTERN = Pattern.compile("^(\\d+)(?:\\.(\\d+))?.*$");
     private static final Pattern JAVA_HOME_PATTERN = Pattern.compile("(?m)^SBK_JAVA_HOME=(.+)$");
@@ -34,7 +39,7 @@ final class RemoteJavaDeployment {
      * @return POSIX-shell discovery command
      */
     static String pathProbeCommand() {
-        return "JAVA_BIN=$(command -v java) || exit 127; " +
+        return "JAVA_BIN=$(command -v java) || exit " + RemoteExitCode.COMMAND_NOT_FOUND + "; " +
                 "JAVA_BIN=$(readlink -f \"$JAVA_BIN\" 2>/dev/null || printf '%s' \"$JAVA_BIN\"); " +
                 "SBK_HOME=$(dirname \"$(dirname \"$JAVA_BIN\")\"); " +
                 "\"$JAVA_BIN\" -version; printf '\\nSBK_JAVA_HOME=%s\\n' \"$SBK_HOME\"";
@@ -50,7 +55,8 @@ final class RemoteJavaDeployment {
         final String quotedHome = RemoteSbkDeployment.shellQuote(javaHome);
         final String quotedJava = RemoteSbkDeployment.shellQuote(javaHome + "/bin/java");
         return "if [ -x " + quotedJava + " ]; then " + quotedJava +
-                " -version; printf '\\nSBK_JAVA_HOME=%s\\n' " + quotedHome + "; else exit 127; fi";
+                " -version; printf '\\nSBK_JAVA_HOME=%s\\n' " + quotedHome + "; else exit "
+                + RemoteExitCode.COMMAND_NOT_FOUND + "; fi";
     }
 
     /**
@@ -88,7 +94,7 @@ final class RemoteJavaDeployment {
      * @return true when the probe succeeded and its Java major version matches
      */
     static boolean hasExpectedVersion(SshResponse response, int expectedMajor) {
-        if (response == null || response.returnCode != 0) {
+        if (response == null || response.returnCode != ExitCode.SUCCESS) {
             return false;
         }
         final int stdoutMajor = parseMajorVersion(response.stdOutputStream.toString());
@@ -146,8 +152,9 @@ final class RemoteJavaDeployment {
                 return -1;
             }
         }
-        final int first = Integer.parseInt(matcher.group(1));
-        return first == 1 && matcher.group(2) != null ? Integer.parseInt(matcher.group(2)) : first;
+        final int first = Integer.parseInt(matcher.group(VERSION_MAJOR_GROUP));
+        return first == LEGACY_JAVA_MAJOR && matcher.group(VERSION_MINOR_GROUP) != null
+                ? Integer.parseInt(matcher.group(VERSION_MINOR_GROUP)) : first;
     }
 
     /**

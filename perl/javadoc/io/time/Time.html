@@ -57,6 +57,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#field-detail" tabindex="0">Field Details</a>
 <ol class="toc-list">
+<li><a href="#SECONDS_PER_MIN" tabindex="0">SECONDS_PER_MIN</a></li>
 <li><a href="#NS_PER_MICRO" tabindex="0">NS_PER_MICRO</a></li>
 <li><a href="#MICROS_PER_MS" tabindex="0">MICROS_PER_MS</a></li>
 <li><a href="#MS_PER_SEC" tabindex="0">MS_PER_SEC</a></li>
@@ -121,7 +122,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code>static final int</code></div>
 <div class="col-second even-row-color"><code><a href="#MS_PER_MIN" class="member-name-link">MS_PER_MIN</a></code></div>
 <div class="col-last even-row-color">
-<div class="block"><code>MS_PER_MIN = MS_PER_SEC * 60</code>.</div>
+<div class="block"><code>MS_PER_MIN = MS_PER_SEC * SECONDS_PER_MIN</code>.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final int</code></div>
 <div class="col-second odd-row-color"><code><a href="#MS_PER_SEC" class="member-name-link">MS_PER_SEC</a></code></div>
@@ -142,6 +143,11 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color"><code><a href="#NS_PER_SEC" class="member-name-link">NS_PER_SEC</a></code></div>
 <div class="col-last even-row-color">
 <div class="block"><code>NS_PER_SEC = MS_PER_SEC * NS_PER_MS</code>.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final int</code></div>
+<div class="col-second odd-row-color"><code><a href="#SECONDS_PER_MIN" class="member-name-link">SECONDS_PER_MIN</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Number of seconds per minute.</div>
 </div>
 </div>
 </section>
@@ -214,6 +220,23 @@ loadScripts(document, 'script');</script>
 <section class="field-details" id="field-detail">
 <h2>Field Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="SECONDS_PER_MIN">
+<h3>SECONDS_PER_MIN</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">SECONDS_PER_MIN</span></div>
+<div class="block">Number of seconds per minute.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#io.time.Time.SECONDS_PER_MIN">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
 <li>
 <section class="detail" id="NS_PER_MICRO">
 <h3>NS_PER_MICRO</h3>
@@ -304,7 +327,7 @@ loadScripts(document, 'script');</script>
 <h3>MS_PER_MIN</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">MS_PER_MIN</span></div>
-<div class="block"><code>MS_PER_MIN = MS_PER_SEC * 60</code>.</div>
+<div class="block"><code>MS_PER_MIN = MS_PER_SEC * SECONDS_PER_MIN</code>.</div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd>

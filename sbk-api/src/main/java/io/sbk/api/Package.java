@@ -43,6 +43,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class Package<T> {
     final private static int MAX_PRINT_WIDTH = 80;
+    private static final int PRINT_PADDING = 30;
+    private static final int OPTION_INDENT = 2;
     final private String packageName;
     final private String[] simpleNames;
     final private String[] names;
@@ -139,13 +141,13 @@ public abstract class Package<T> {
         final String printStr = header + " Classes in package '" + packageName + "': " + simpleNames.length;
         final StringBuilder builder = new StringBuilder(printStr);
         builder.append(" [");
-        int length = printStr.length() + 30;
+        int length = printStr.length() + PRINT_PADDING;
         for (int i = 0; i < simpleNames.length; i++) {
             builder.append(simpleNames[i]);
             length += simpleNames[i].length();
             if (i + 1 < simpleNames.length) {
                 builder.append(", ");
-                length += 2;
+                length += OPTION_INDENT;
             }
             if (length > MAX_PRINT_WIDTH && i + 1 < simpleNames.length) {
                 builder.append("\n");

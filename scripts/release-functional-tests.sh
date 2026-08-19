@@ -8,11 +8,24 @@ set -o pipefail
 ROOT=${SBK_RELEASE_ROOT:?SBK_RELEASE_ROOT is required}
 PROFILE=${SBK_RELEASE_PROFILE:-local}
 VERSION=${SBK_RELEASE_VERSION:?SBK_RELEASE_VERSION is required}
-RECORDS=${SBK_RELEASE_RECORDS:-10000}
-RECORD_SIZE=${SBK_RELEASE_RECORD_SIZE:-4096}
-PROCESS_TIMEOUT=${SBK_RELEASE_PROCESS_TIMEOUT_SECONDS:-180}
-STARTUP_TIMEOUT=${SBK_RELEASE_STARTUP_TIMEOUT_SECONDS:-30}
-WEB_TIMEOUT_MINUTES=${SBK_RELEASE_WEB_TIMEOUT_MINUTES:-1}
+RECORDS=${SBK_RELEASE_RECORDS:?SBK_RELEASE_RECORDS is required}
+RECORD_SIZE=${SBK_RELEASE_RECORD_SIZE:?SBK_RELEASE_RECORD_SIZE is required}
+PROCESS_TIMEOUT=${SBK_RELEASE_PROCESS_TIMEOUT_SECONDS:?SBK_RELEASE_PROCESS_TIMEOUT_SECONDS is required}
+STARTUP_TIMEOUT=${SBK_RELEASE_STARTUP_TIMEOUT_SECONDS:?SBK_RELEASE_STARTUP_TIMEOUT_SECONDS is required}
+WEB_TIMEOUT_MINUTES=${SBK_RELEASE_WEB_TIMEOUT_MINUTES:?SBK_RELEASE_WEB_TIMEOUT_MINUTES is required}
+KILL_GRACE_SECONDS=${SBK_RELEASE_KILL_GRACE_SECONDS:?SBK_RELEASE_KILL_GRACE_SECONDS is required}
+PORT_SELECTION_ATTEMPTS=${SBK_RELEASE_PORT_SELECTION_ATTEMPTS:?SBK_RELEASE_PORT_SELECTION_ATTEMPTS is required}
+PORT_RANGE_START=${SBK_RELEASE_PORT_RANGE_START:?SBK_RELEASE_PORT_RANGE_START is required}
+PORT_RANGE_SIZE=${SBK_RELEASE_PORT_RANGE_SIZE:?SBK_RELEASE_PORT_RANGE_SIZE is required}
+SHUTDOWN_ATTEMPTS=${SBK_RELEASE_SHUTDOWN_ATTEMPTS:?SBK_RELEASE_SHUTDOWN_ATTEMPTS is required}
+SHUTDOWN_POLL_SECONDS=${SBK_RELEASE_SHUTDOWN_POLL_SECONDS:?SBK_RELEASE_SHUTDOWN_POLL_SECONDS is required}
+TERMINATE_GRACE_SECONDS=${SBK_RELEASE_TERMINATE_GRACE_SECONDS:?SBK_RELEASE_TERMINATE_GRACE_SECONDS is required}
+EOF_RECORDS=${SBK_RELEASE_EOF_RECORDS:?SBK_RELEASE_EOF_RECORDS is required}
+EOF_BENCHMARK_SECONDS=${SBK_RELEASE_EOF_BENCHMARK_SECONDS:?SBK_RELEASE_EOF_BENCHMARK_SECONDS is required}
+EOF_MAXIMUM_SECONDS=${SBK_RELEASE_EOF_MAXIMUM_SECONDS:?SBK_RELEASE_EOF_MAXIMUM_SECONDS is required}
+SMOKE_BENCHMARK_SECONDS=${SBK_RELEASE_SMOKE_BENCHMARK_SECONDS:?SBK_RELEASE_SMOKE_BENCHMARK_SECONDS is required}
+SBM_SETTLE_SECONDS=${SBK_RELEASE_SBM_SETTLE_SECONDS:?SBK_RELEASE_SBM_SETTLE_SECONDS is required}
+MINIMUM_REUSED_WEB_RUNS=2
 REPORT_DIR=${SBK_RELEASE_REPORT_DIR:-"$ROOT/build/reports/release-qualification"}
 WORK_DIR="$ROOT/build/release-qualification"
 LOG_DIR="$REPORT_DIR/logs"
@@ -51,7 +64,7 @@ run_expect() {
     local expected=$2
     shift 2
     local log="$LOG_DIR/${name}.log"
-    timeout --signal=INT --kill-after=10s "${PROCESS_TIMEOUT}s" "$@" > "$log" 2>&1
+    timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" "$@" > "$log" 2>&1
     local status=$?
     if [[ $status -ne 0 ]]; then
         record_result "$name" FAIL "exit code $status; see $log"
@@ -67,7 +80,7 @@ run_reject() {
     local expected=$2
     shift 2
     local log="$LOG_DIR/${name}.log"
-    timeout --signal=INT --kill-after=10s "${PROCESS_TIMEOUT}s" "$@" > "$log" 2>&1
+    timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" "$@" > "$log" 2>&1
     local status=$?
     if [[ $status -eq 0 ]]; then
         record_result "$name" FAIL "invalid command exited zero; see $log"
@@ -81,11 +94,11 @@ run_reject() {
 free_port() {
     local candidate
     local attempts=0
-    while [[ $attempts -lt 100 ]]; do
+    while [[ $attempts -lt $PORT_SELECTION_ATTEMPTS ]]; do
         # Stay below the usual Linux ephemeral client-port range. Selecting
         # from that range can find a port with no listener that is still not
         # immediately reusable because a prior client connection is in TIME_WAIT.
-        candidate=$((10000 + RANDOM % 9000))
+        candidate=$((PORT_RANGE_START + RANDOM % PORT_RANGE_SIZE))
         if ! (exec 3<>"/dev/tcp/127.0.0.1/$candidate") 2>/dev/null; then
             printf '%s\n' "$candidate"
             return 0
@@ -102,7 +115,7 @@ wait_for_url() {
         if curl --fail --silent --show-error "$url" >/dev/null 2>&1; then
             return 0
         fi
-        sleep 1
+        sleep "$SHUTDOWN_POLL_SECONDS"
         attempts=$((attempts - 1))
     done
     return 1
@@ -120,7 +133,7 @@ wait_for_port() {
             exec 3>&-
             return 0
         fi
-        sleep 1
+        sleep "$SHUTDOWN_POLL_SECONDS"
         attempts=$((attempts - 1))
     done
     return 1
@@ -133,14 +146,14 @@ stop_process() {
         return
     fi
     kill -INT "$pid" 2>/dev/null
-    local attempts=20
+    local attempts=$SHUTDOWN_ATTEMPTS
     while kill -0 "$pid" 2>/dev/null && [[ $attempts -gt 0 ]]; do
-        sleep 1
+        sleep "$SHUTDOWN_POLL_SECONDS"
         attempts=$((attempts - 1))
     done
     if kill -0 "$pid" 2>/dev/null; then
         kill -TERM "$pid" 2>/dev/null
-        sleep 2
+        sleep "$TERMINATE_GRACE_SECONDS"
     fi
     if kill -0 "$pid" 2>/dev/null; then
         kill -KILL "$pid" 2>/dev/null
@@ -182,12 +195,12 @@ fi
 
 EOF_FILE="$WORK_DIR/sbk-eof.dat"
 run_expect sbk-eof-prepare "Total File Writing" \
-    "$SBK" -class file -file "$EOF_FILE" -writers 1 -size "$RECORD_SIZE" -records 1000
+    "$SBK" -class file -file "$EOF_FILE" -writers 1 -size "$RECORD_SIZE" -records "$EOF_RECORDS"
 eof_start=$(date +%s)
 run_expect sbk-eof-reader "EOF|Total File Reading" \
-    "$SBK" -class file -file "$EOF_FILE" -readers 1 -size "$RECORD_SIZE" -seconds 120
+    "$SBK" -class file -file "$EOF_FILE" -readers 1 -size "$RECORD_SIZE" -seconds "$EOF_BENCHMARK_SECONDS"
 eof_elapsed=$(( $(date +%s) - eof_start ))
-if [[ $eof_elapsed -lt 30 ]]; then
+if [[ $eof_elapsed -lt $EOF_MAXIMUM_SECONDS ]]; then
     record_result eof-lifecycle PASS "reader exited in ${eof_elapsed}s"
 else
     record_result eof-lifecycle FAIL "reader took ${eof_elapsed}s after EOF"
@@ -195,9 +208,10 @@ fi
 
 PROM_PORT=$(free_port)
 PROM_LOG="$LOG_DIR/sbk-PrometheusLogger.log"
-timeout --signal=INT --kill-after=10s "${PROCESS_TIMEOUT}s" \
+timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" \
     "$SBK" -class file -file "$WORK_DIR/sbk-prom.dat" -writers 1 -size "$RECORD_SIZE" \
-    -seconds 8 -out PrometheusLogger -context "$PROM_PORT/metrics" > "$PROM_LOG" 2>&1 &
+    -seconds "$SMOKE_BENCHMARK_SECONDS" -out PrometheusLogger \
+    -context "$PROM_PORT/metrics" > "$PROM_LOG" 2>&1 &
 prom_pid=$!
 if wait_for_url "http://127.0.0.1:$PROM_PORT/metrics"; then
     curl --fail --silent "http://127.0.0.1:$PROM_PORT/metrics" > "$WORK_DIR/sbk-prometheus.metrics"
@@ -219,9 +233,9 @@ fi
 
 WEB_PORT=$(free_port)
 WEB_LOG="$LOG_DIR/sbk-WebLogger.log"
-timeout --signal=INT --kill-after=10s "${PROCESS_TIMEOUT}s" \
+timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" \
     "$SBK" -class file -file "$WORK_DIR/sbk-web.dat" -writers 1 -size "$RECORD_SIZE" \
-    -seconds 8 -out WebLogger -webopen false -webport "$WEB_PORT" \
+    -seconds "$SMOKE_BENCHMARK_SECONDS" -out WebLogger -webopen false -webport "$WEB_PORT" \
     -webtimeoutminutes "$WEB_TIMEOUT_MINUTES" > "$WEB_LOG" 2>&1 &
 web_pid=$!
 if wait_for_url "http://127.0.0.1:$WEB_PORT/api/v1/health"; then
@@ -231,7 +245,7 @@ if wait_for_url "http://127.0.0.1:$WEB_PORT/api/v1/health"; then
         if grep -q 'SBK File' "$WORK_DIR/web-runs.json"; then
             break
         fi
-        sleep 1
+        sleep "$SHUTDOWN_POLL_SECONDS"
         web_attempts=$((web_attempts - 1))
     done
     if grep -q 'SBK File' "$WORK_DIR/web-runs.json"; then
@@ -251,7 +265,7 @@ else
 fi
 
 WEB_REUSE_LOG="$LOG_DIR/sbk-WebLogger-reuse.log"
-timeout --signal=INT --kill-after=10s "${PROCESS_TIMEOUT}s" \
+timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" \
     "$SBK" -class file -file "$WORK_DIR/sbk-web-reuse.dat" -writers 1 -size "$RECORD_SIZE" \
     -records "$RECORDS" -out WebLogger -webopen false -webport "$WEB_PORT" \
     -webtimeoutminutes "$WEB_TIMEOUT_MINUTES" > "$WEB_REUSE_LOG" 2>&1
@@ -260,7 +274,7 @@ curl --fail --silent "http://127.0.0.1:$WEB_PORT/api/v1/runs" > "$WORK_DIR/web-r
 web_run_count=$(grep -o '"runId"' "$WORK_DIR/web-reused-runs.json" | wc -l)
 if [[ $web_reuse_status -eq 0 ]] \
         && grep -q 'Using the existing SBK Web Console' "$WEB_REUSE_LOG" \
-        && [[ $web_run_count -ge 2 ]]; then
+        && [[ $web_run_count -ge $MINIMUM_REUSED_WEB_RUNS ]]; then
     record_result web-console-reuse PASS "$WORK_DIR/web-reused-runs.json"
 else
     record_result web-console-reuse FAIL "status=$web_reuse_status runs=$web_run_count; see $WEB_REUSE_LOG"
@@ -280,8 +294,8 @@ done
 
 YAL_PROM_PORT=$(free_port)
 YAL_PROM_LOG="$LOG_DIR/sbk-yal-PrometheusLogger.log"
-timeout --signal=INT --kill-after=10s "${PROCESS_TIMEOUT}s" \
-    "$SBK_YAL" -f "$YAL_FILE" -seconds 8 -out PrometheusLogger \
+timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" \
+    "$SBK_YAL" -f "$YAL_FILE" -seconds "$SMOKE_BENCHMARK_SECONDS" -out PrometheusLogger \
     -context "$YAL_PROM_PORT/metrics" > "$YAL_PROM_LOG" 2>&1 &
 yal_prom_pid=$!
 if wait_for_url "http://127.0.0.1:$YAL_PROM_PORT/metrics"; then
@@ -292,7 +306,7 @@ fi
 wait "$yal_prom_pid"
 
 YAL_WEB_LOG="$LOG_DIR/sbk-yal-WebLogger.log"
-timeout --signal=INT --kill-after=10s "${PROCESS_TIMEOUT}s" \
+timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" \
     "$SBK_YAL" -f "$YAL_FILE" -out WebLogger -webopen false -webport "$WEB_PORT" \
     -webtimeoutminutes "$WEB_TIMEOUT_MINUTES" > "$YAL_WEB_LOG" 2>&1
 yal_web_status=$?
@@ -342,17 +356,17 @@ run_sbm_case() {
         return
     fi
     if [[ $client_mode == yal ]]; then
-        timeout --signal=INT --kill-after=10s "${PROCESS_TIMEOUT}s" \
+        timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" \
             "$SBK_YAL" -f "$YAL_FILE" -out GrpcLogger -sbm 127.0.0.1 -sbmport "$sbm_port" \
             > "$client_log" 2>&1
     else
-        timeout --signal=INT --kill-after=10s "${PROCESS_TIMEOUT}s" \
+        timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" \
             "$SBK" -class file -file "$WORK_DIR/${name}.dat" -writers 1 -size "$RECORD_SIZE" \
             -records "$RECORDS" -out GrpcLogger -sbm 127.0.0.1 -sbmport "$sbm_port" \
             > "$client_log" 2>&1
     fi
     local client_status=$?
-    sleep 2
+    sleep "$SBM_SETTLE_SECONDS"
     stop_process "$sbm_pid"
     if [[ $client_status -eq 0 ]] \
             && grep -Eiq 'GRPC Logger Shutdown' "$client_log" \
@@ -381,7 +395,7 @@ if [[ $PROFILE == release || $PROFILE == local-docker ]]; then
     GEM_PORT=${GEM_PORT:-22}
     GEM_NODE_COUNT=$(printf '%s\n' "$GEM_NODES" | tr ',[:space:]' '\n' | sed '/^$/d' | wc -l)
     GEM_NODE_COUNT=${GEM_NODE_COUNT//[[:space:]]/}
-    if [[ $PROFILE == local-docker && $GEM_NODE_COUNT -ne 2 ]]; then
+    if [[ $PROFILE == local-docker && $GEM_NODE_COUNT -ne $SBK_RELEASE_DOCKER_NODE_COUNT ]]; then
         printf 'The local-docker profile requires exactly two GEM nodes; found %s\n' \
             "$GEM_NODE_COUNT" >&2
         exit 1

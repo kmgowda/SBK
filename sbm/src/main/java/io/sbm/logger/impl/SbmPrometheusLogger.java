@@ -30,6 +30,7 @@ import java.io.InputStream;
  * connection counts, request/response stats, throughput, and latency percentiles.
  */
 public class SbmPrometheusLogger extends AbstractRamLogger {
+    private static final int CONTEXT_PART_LIMIT = 2;
     private static final String CONFIG_FILE = "sbm-metrics.properties";
     private MetricsConfig metricsConfig;
     private boolean contextDisabled;
@@ -79,9 +80,9 @@ public class SbmPrometheusLogger extends AbstractRamLogger {
                 metricsConfig.port + metricsConfig.context);
         contextDisabled = parsedContext.equalsIgnoreCase(DISABLE_STRING);
         if (!contextDisabled) {
-            final String[] values = parsedContext.split("/", 2);
+            final String[] values = parsedContext.split("/", CONTEXT_PART_LIMIT);
             metricsConfig.port = Integer.parseInt(values[0]);
-            if (values.length == 2 && values[1] != null) {
+            if (values.length == CONTEXT_PART_LIMIT && values[1] != null) {
                 metricsConfig.context = "/" + values[1];
             }
         }

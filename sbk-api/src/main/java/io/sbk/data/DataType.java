@@ -15,6 +15,12 @@ package io.sbk.data;
  * @param <T> represented data type
  */
 public interface DataType<T> {
+    /** Number of uppercase ASCII characters used for generated payloads. */
+    final static int GENERATED_DATA_ALPHABET_SIZE = 26;
+
+    /** ASCII code of the first uppercase character used for generated payloads. */
+    final static int GENERATED_DATA_ASCII_BASE = 'A';
+
     /**
      * <code>TIME_HEADER_BYTES = 8;</code>.
      */

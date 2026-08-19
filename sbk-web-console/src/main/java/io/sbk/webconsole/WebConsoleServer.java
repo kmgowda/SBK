@@ -39,6 +39,15 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static java.net.HttpURLConnection.HTTP_BAD_METHOD;
+import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
+import static java.net.HttpURLConnection.HTTP_CONFLICT;
+import static java.net.HttpURLConnection.HTTP_CREATED;
+import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
+import static java.net.HttpURLConnection.HTTP_OK;
+
 /**
  * Lightweight HTTP server that stores bounded SBK histories and serves the SBK Web Console.
  */
@@ -49,8 +58,11 @@ public final class WebConsoleServer implements AutoCloseable {
     public static final String BIND_HOST = "0.0.0.0";
     /** Local Web Console HTTP API version. */
     public static final int API_VERSION = 5;
+    private static final int EVENT_QUEUE_CAPACITY = 1;
+    private static final int RUN_PATH_ELEMENT_COUNT = 3;
+    private static final int RUN_PATH_RESOURCE_INDEX = 0;
+    private static final int RUN_PATH_ACTION_INDEX = 2;
     private static final Logger LOGGER = LoggerFactory.getLogger(WebConsoleServer.class);
-    private static final String API_PREFIX = "/api/v1/";
     private static final String RESOURCE_PREFIX = "/webconsole/";
     private static final String SSE_OWNED_ATTRIBUTE = "sbk.webconsole.sseOwned";
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -138,7 +150,7 @@ public final class WebConsoleServer implements AutoCloseable {
         this.scheduler = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
                 .name("sbk-web-console-idle-monitor").daemon().factory());
         server.setExecutor(executor);
-        server.createContext(API_PREFIX, this::handleApi);
+        server.createContext(WebConsoleProtocol.API_PREFIX, this::handleApi);
         server.createContext("/", this::handleResource);
     }
 
@@ -210,61 +222,61 @@ public final class WebConsoleServer implements AutoCloseable {
     private void handleApi(HttpExchange exchange) throws IOException {
         try {
             final String path = exchange.getRequestURI().getPath();
-            if ((API_PREFIX + "health").equals(path)) {
-                requireMethod(exchange, "GET");
-                sendJson(exchange, 200, Map.of("service", "sbk-web-console", "apiVersion", API_VERSION,
+            if (WebConsoleProtocol.HEALTH_PATH.equals(path)) {
+                requireMethod(exchange, WebConsoleProtocol.METHOD_GET);
+                sendJson(exchange, HTTP_OK, Map.of("service", "sbk-web-console", "apiVersion", API_VERSION,
                         "status", "ready"));
                 return;
             }
-            if ((API_PREFIX + "config").equals(path)) {
-                requireMethod(exchange, "GET");
-                sendJson(exchange, 200, browserConfig);
+            if (WebConsoleProtocol.CONFIG_PATH.equals(path)) {
+                requireMethod(exchange, WebConsoleProtocol.METHOD_GET);
+                sendJson(exchange, HTTP_OK, browserConfig);
                 return;
             }
-            if ((API_PREFIX + "runs").equals(path)) {
-                if ("GET".equals(exchange.getRequestMethod())) {
-                    sendJson(exchange, 200, runs.values().stream().map(RunState::view).toList());
+            if (WebConsoleProtocol.RUNS_PATH.equals(path)) {
+                if (WebConsoleProtocol.METHOD_GET.equals(exchange.getRequestMethod())) {
+                    sendJson(exchange, HTTP_OK, runs.values().stream().map(RunState::view).toList());
                 } else {
-                    requireMethod(exchange, "POST");
+                    requireMethod(exchange, WebConsoleProtocol.METHOD_POST);
                     final WebConsoleRun run = MAPPER.readValue(exchange.getRequestBody(), WebConsoleRun.class);
                     if (run.runId() == null || run.runId().isBlank()) {
-                        sendText(exchange, 400, "runId is required", "text/plain; charset=utf-8");
+                        sendText(exchange, HTTP_BAD_REQUEST, "runId is required", WebConsoleProtocol.TEXT_UTF_8);
                         return;
                     }
                     final String conflict = register(run);
                     if (conflict != null) {
-                        sendText(exchange, 409, conflict, "text/plain; charset=utf-8");
+                        sendText(exchange, HTTP_CONFLICT, conflict, WebConsoleProtocol.TEXT_UTF_8);
                     } else {
-                        sendJson(exchange, 201, run);
+                        sendJson(exchange, HTTP_CREATED, run);
                     }
                 }
                 return;
             }
-            if ((API_PREFIX + "browser/connect").equals(path)
-                    || (API_PREFIX + "browser/disconnect").equals(path)) {
-                requireMethod(exchange, "POST");
+            if (WebConsoleProtocol.BROWSER_CONNECT_PATH.equals(path)
+                    || WebConsoleProtocol.BROWSER_DISCONNECT_PATH.equals(path)) {
+                requireMethod(exchange, WebConsoleProtocol.METHOD_POST);
                 final Map<?, ?> request = MAPPER.readValue(exchange.getRequestBody(), Map.class);
                 final String browserId = Objects.toString(request.get("browserId"), "");
                 if (browserId.isBlank()) {
-                    sendText(exchange, 400, "browserId is required", "text/plain; charset=utf-8");
+                    sendText(exchange, HTTP_BAD_REQUEST, "browserId is required", WebConsoleProtocol.TEXT_UTF_8);
                     return;
                 }
-                if (path.endsWith("/connect")) {
+                if (path.endsWith(WebConsoleProtocol.CONNECT_SUFFIX)) {
                     browserSeen(browserId);
                 } else {
                     browserGone(browserId);
                 }
-                exchange.sendResponseHeaders(204, -1);
+                exchange.sendResponseHeaders(HTTP_NO_CONTENT, -1);
                 return;
             }
             handleRunApi(exchange, path);
         } catch (MethodNotAllowedException ex) {
-            sendText(exchange, 405, ex.getMessage(), "text/plain; charset=utf-8");
+            sendText(exchange, HTTP_BAD_METHOD, ex.getMessage(), WebConsoleProtocol.TEXT_UTF_8);
         } catch (IllegalArgumentException ex) {
-            sendText(exchange, 400, ex.getMessage(), "text/plain; charset=utf-8");
+            sendText(exchange, HTTP_BAD_REQUEST, ex.getMessage(), WebConsoleProtocol.TEXT_UTF_8);
         } catch (Exception ex) {
-            sendText(exchange, 500, Objects.toString(ex.getMessage(), ex.getClass().getSimpleName()),
-                    "text/plain; charset=utf-8");
+            sendText(exchange, HTTP_INTERNAL_ERROR,
+                    Objects.toString(ex.getMessage(), ex.getClass().getSimpleName()), WebConsoleProtocol.TEXT_UTF_8);
         } finally {
             if (!Boolean.TRUE.equals(exchange.getAttribute(SSE_OWNED_ATTRIBUTE))) {
                 exchange.close();
@@ -273,99 +285,100 @@ public final class WebConsoleServer implements AutoCloseable {
     }
 
     private void handleRunApi(HttpExchange exchange, String path) throws IOException {
-        final String relative = path.substring(API_PREFIX.length());
+        final String relative = path.substring(WebConsoleProtocol.API_PREFIX.length());
         final String[] elements = relative.split("/");
-        if (elements.length != 3 || !"runs".equals(elements[0])) {
-            sendText(exchange, 404, "Not found", "text/plain; charset=utf-8");
+        if (elements.length != RUN_PATH_ELEMENT_COUNT
+                || !WebConsoleProtocol.RUNS_RESOURCE.equals(elements[RUN_PATH_RESOURCE_INDEX])) {
+            sendText(exchange, HTTP_NOT_FOUND, "Not found", WebConsoleProtocol.TEXT_UTF_8);
             return;
         }
         final RunState state = runs.get(elements[1]);
         if (state == null) {
-            sendText(exchange, 404, "Unknown Local Web Console run", "text/plain; charset=utf-8");
+            sendText(exchange, HTTP_NOT_FOUND, "Unknown Local Web Console run", WebConsoleProtocol.TEXT_UTF_8);
             return;
         }
-        switch (elements[2]) {
+        switch (elements[RUN_PATH_ACTION_INDEX]) {
             case "snapshots" -> {
-                requireMethod(exchange, "POST");
+                requireMethod(exchange, WebConsoleProtocol.METHOD_POST);
                 final WebConsoleSnapshot snapshot = MAPPER.readValue(exchange.getRequestBody(),
                         WebConsoleSnapshot.class);
                 if (!state.run.runId().equals(snapshot.runId())) {
                     throw new IllegalArgumentException("Snapshot runId does not match URL");
                 }
                 if (!benchmarkSeen(state.run.runId())) {
-                    sendText(exchange, 409, "Local Web Console run lease has expired",
-                            "text/plain; charset=utf-8");
+                    sendText(exchange, HTTP_CONFLICT, "Local Web Console run lease has expired",
+                            WebConsoleProtocol.TEXT_UTF_8);
                     return;
                 }
                 if (!state.add(snapshot)) {
-                    sendText(exchange, 409, "Local Web Console run has completed",
-                            "text/plain; charset=utf-8");
+                    sendText(exchange, HTTP_CONFLICT, "Local Web Console run has completed",
+                            WebConsoleProtocol.TEXT_UTF_8);
                     return;
                 }
-                exchange.sendResponseHeaders(204, -1);
+                exchange.sendResponseHeaders(HTTP_NO_CONTENT, -1);
             }
             case "heartbeat" -> {
-                requireMethod(exchange, "POST");
+                requireMethod(exchange, WebConsoleProtocol.METHOD_POST);
                 if (!benchmarkSeen(state.run.runId())) {
-                    sendText(exchange, 409, "Local Web Console run lease has expired",
-                            "text/plain; charset=utf-8");
+                    sendText(exchange, HTTP_CONFLICT, "Local Web Console run lease has expired",
+                            WebConsoleProtocol.TEXT_UTF_8);
                     return;
                 }
-                exchange.sendResponseHeaders(204, -1);
+                exchange.sendResponseHeaders(HTTP_NO_CONTENT, -1);
             }
             case "complete" -> {
-                requireMethod(exchange, "POST");
+                requireMethod(exchange, WebConsoleProtocol.METHOD_POST);
                 state.complete();
                 benchmarkCompleted(state.run.runId());
-                exchange.sendResponseHeaders(204, -1);
+                exchange.sendResponseHeaders(HTTP_NO_CONTENT, -1);
             }
             case "history" -> {
-                requireMethod(exchange, "GET");
-                sendJson(exchange, 200, state.history());
+                requireMethod(exchange, WebConsoleProtocol.METHOD_GET);
+                sendJson(exchange, HTTP_OK, state.history());
             }
             case "events" -> {
-                requireMethod(exchange, "GET");
+                requireMethod(exchange, WebConsoleProtocol.METHOD_GET);
                 state.events(exchange);
             }
-            default -> sendText(exchange, 404, "Not found", "text/plain; charset=utf-8");
+            default -> sendText(exchange, HTTP_NOT_FOUND, "Not found", WebConsoleProtocol.TEXT_UTF_8);
         }
     }
 
     private void handleResource(HttpExchange exchange) throws IOException {
         try {
-            requireMethod(exchange, "GET");
+            requireMethod(exchange, WebConsoleProtocol.METHOD_GET);
             final String path = exchange.getRequestURI().getPath();
             final String resource;
             final String contentType;
             if ("/".equals(path) || "/index.html".equals(path)) {
                 resource = RESOURCE_PREFIX + "index.html";
-                contentType = "text/html; charset=utf-8";
+                contentType = WebConsoleProtocol.HTML_UTF_8;
             } else if ("/app.js".equals(path)) {
                 resource = RESOURCE_PREFIX + "app.js";
-                contentType = "text/javascript; charset=utf-8";
+                contentType = WebConsoleProtocol.JAVASCRIPT_UTF_8;
             } else if ("/style.css".equals(path)) {
                 resource = RESOURCE_PREFIX + "style.css";
-                contentType = "text/css; charset=utf-8";
+                contentType = WebConsoleProtocol.CSS_UTF_8;
             } else {
-                sendText(exchange, 404, "Not found", "text/plain; charset=utf-8");
+                sendText(exchange, HTTP_NOT_FOUND, "Not found", WebConsoleProtocol.TEXT_UTF_8);
                 return;
             }
             try (InputStream input = WebConsoleServer.class.getResourceAsStream(resource)) {
                 if (input == null) {
-                    sendText(exchange, 404, "Local Web Console resource not found",
-                            "text/plain; charset=utf-8");
+                    sendText(exchange, HTTP_NOT_FOUND, "Local Web Console resource not found",
+                            WebConsoleProtocol.TEXT_UTF_8);
                     return;
                 }
                 final byte[] body = input.readAllBytes();
-                exchange.getResponseHeaders().set("Content-Type", contentType);
-                exchange.getResponseHeaders().set("Cache-Control", "no-cache");
-                exchange.sendResponseHeaders(200, body.length);
+                exchange.getResponseHeaders().set(WebConsoleProtocol.CONTENT_TYPE_HEADER, contentType);
+                exchange.getResponseHeaders().set(WebConsoleProtocol.CACHE_CONTROL_HEADER, WebConsoleProtocol.NO_CACHE);
+                exchange.sendResponseHeaders(HTTP_OK, body.length);
                 try (OutputStream output = exchange.getResponseBody()) {
                     output.write(body);
                 }
             }
         } catch (MethodNotAllowedException ex) {
-            sendText(exchange, 405, ex.getMessage(), "text/plain; charset=utf-8");
+            sendText(exchange, HTTP_BAD_METHOD, ex.getMessage(), WebConsoleProtocol.TEXT_UTF_8);
         } finally {
             exchange.close();
         }
@@ -379,8 +392,8 @@ public final class WebConsoleServer implements AutoCloseable {
 
     private static void sendJson(HttpExchange exchange, int status, Object body) throws IOException {
         final byte[] bytes = MAPPER.writeValueAsBytes(body);
-        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
-        exchange.getResponseHeaders().set("Cache-Control", "no-store");
+        exchange.getResponseHeaders().set(WebConsoleProtocol.CONTENT_TYPE_HEADER, WebConsoleProtocol.JSON_UTF_8);
+        exchange.getResponseHeaders().set(WebConsoleProtocol.CACHE_CONTROL_HEADER, WebConsoleProtocol.NO_STORE);
         exchange.sendResponseHeaders(status, bytes.length);
         try (OutputStream output = exchange.getResponseBody()) {
             output.write(bytes);
@@ -390,7 +403,7 @@ public final class WebConsoleServer implements AutoCloseable {
     private static void sendText(HttpExchange exchange, int status, String body, String contentType)
             throws IOException {
         final byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().set("Content-Type", contentType);
+        exchange.getResponseHeaders().set(WebConsoleProtocol.CONTENT_TYPE_HEADER, contentType);
         exchange.sendResponseHeaders(status, bytes.length);
         try (OutputStream output = exchange.getResponseBody()) {
             output.write(bytes);
@@ -663,10 +676,11 @@ public final class WebConsoleServer implements AutoCloseable {
 
         private void events(HttpExchange exchange) throws IOException {
             exchange.setAttribute(SSE_OWNED_ATTRIBUTE, Boolean.TRUE);
-            exchange.getResponseHeaders().set("Content-Type", "text/event-stream; charset=utf-8");
-            exchange.getResponseHeaders().set("Cache-Control", "no-cache");
+            exchange.getResponseHeaders().set(WebConsoleProtocol.CONTENT_TYPE_HEADER,
+                    WebConsoleProtocol.EVENT_STREAM_UTF_8);
+            exchange.getResponseHeaders().set(WebConsoleProtocol.CACHE_CONTROL_HEADER, WebConsoleProtocol.NO_CACHE);
             exchange.getResponseHeaders().set("Connection", "keep-alive");
-            exchange.sendResponseHeaders(200, 0);
+            exchange.sendResponseHeaders(HTTP_OK, 0);
             final SseClient client = new SseClient(exchange.getResponseBody(), heartbeatInterval,
                     sseRetryMillis);
             clients.add(client);
@@ -698,7 +712,7 @@ public final class WebConsoleServer implements AutoCloseable {
 
         private SseClient(OutputStream output, Duration heartbeatInterval, int retryMillis) {
             this.output = output;
-            this.events = new ArrayBlockingQueue<>(1);
+            this.events = new ArrayBlockingQueue<>(EVENT_QUEUE_CAPACITY);
             this.heartbeatInterval = heartbeatInterval;
             this.retryMillis = retryMillis;
             this.open = true;

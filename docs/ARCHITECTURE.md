@@ -336,15 +336,23 @@ Operational defaults have one owning source:
 | Settings | Authoritative source |
 |---|---|
 | JDK download version, checksums, and bootstrap timeouts | `gradle/sbk-java-bootstrap.properties` |
+| Build repositories, publication endpoints, and Maven POM identity | `gradle.properties` |
+| Release-gate topology, timing, workload, and artifact limits | `gradle/release-qualification.properties` |
+| SBK command defaults | `sbk-api/src/main/resources/sbk-command.properties` |
+| SBK PerL queue topology | `sbk-api/src/main/resources/sbk.properties` |
 | SBK lifecycle, executor reserve, and shutdown timeouts | `sbk-api/src/main/resources/sbk-runtime.properties` |
 | Logger reporting and request-ID dimensions | `sbk-api/src/main/resources/logger.properties` |
 | SBM client transport queue and close timeouts | `sbk-api/src/main/resources/sbmhost.properties` |
+| SBM server defaults, including its default action | `sbm/src/main/resources/sbm.properties` |
 | Web Console server, client, browser, retention, and log settings | `sbk-web-console/src/main/resources/webconsole.properties` |
 | GEM orchestration and bounded diagnostic settings | `sbk-gem/src/main/resources/gem.properties` |
 
 The SBP failure text limits are protocol constraints rather than operator tuning;
 `SbpFailureLimits` is the shared client/server authority. Container manifests read
-service ports from their runtime properties where the build DSL supports it.
+service ports from their runtime properties where the build DSL supports it. Fixed
+HTTP paths, status codes, unit conversions, exit codes, collection dimensions, and
+algorithm constants remain named source constants because changing them is a code or
+protocol change rather than runtime configuration.
 
 ## Packaging and class loading
 

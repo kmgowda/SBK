@@ -53,7 +53,7 @@ public sealed class MapLatencyRecorder extends LatencyRecordWindow permits HashM
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         this.latencies = map;
         this.maxMapSizeBytes = (long) maxMapSizeMB * Bytes.BYTES_PER_MB;
-        this.incBytes = LatencyConfig.LATENCY_VALUE_SIZE_BYTES * 2;
+        this.incBytes = LatencyConfig.LATENCY_VALUE_SIZE_BYTES * LatencyConfig.LATENCY_MAP_ENTRY_VALUE_COUNT;
         this.mapBytesCount = 0;
     }
 

@@ -73,7 +73,7 @@ public final class SbkUtils {
                 i++;
             } else if (i + 1 < redacted.length) {
                 redacted[i + 1] = "******";
-                i += 2;
+                i += Config.OPTION_PAIR_WIDTH;
             } else {
                 i++;
             }
@@ -159,7 +159,7 @@ public final class SbkUtils {
      * @return option value, or an empty string when absent
      */
     public static String getArgValue(String[] args, String argName) {
-        if (args == null || args.length < 2) {
+        if (args == null || args.length < Config.OPTION_PAIR_WIDTH) {
             return "";
         }
         for (int i = 0; i < args.length; i++) {
@@ -262,7 +262,7 @@ public final class SbkUtils {
      */
     public static Map<String, String> argsToMap(String[] args, boolean removeArgPrefix) {
         final Map<String, String> map = new LinkedHashMap<>();
-        for (int i = 0; i < args.length; i += 2) {
+        for (int i = 0; i < args.length; i += Config.OPTION_PAIR_WIDTH) {
             String name = args[i].strip();
             final String key = name.startsWith(Config.ARG_PREFIX) && removeArgPrefix ? args[i].substring(1) : name;
             String val = "";
@@ -292,7 +292,7 @@ public final class SbkUtils {
         if (args == null) {
             return;
         }
-        for (int i = 0; i < args.length; i += 2) {
+        for (int i = 0; i < args.length; i += Config.OPTION_PAIR_WIDTH) {
             final String option = normalizeOptionName(args[i]);
             final String value = i + 1 < args.length ? args[i + 1].strip() : "";
             merged.put(option, value);

@@ -17,10 +17,12 @@ import io.gem.api.SshSession;
 import io.gem.config.GemConfig;
 import io.gem.api.GemBenchmark;
 import io.gem.api.RemoteExecutionStatus;
+import io.gem.api.RemoteExitCode;
 import io.gem.api.RemoteResponse;
 import io.gem.api.ConnectionConfig;
 import io.gem.params.GemParameters;
 import io.perl.config.PerlConfig;
+import io.sbk.config.ExitCode;
 import io.sbk.system.Printer;
 import io.sbk.utils.SbkUtils;
 import io.sbm.api.impl.SbmBenchmark;
@@ -527,7 +529,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     private static void requireSuccessful(CompletableFuture<SshResponse>[] futures, String operation)
             throws InterruptedException, ExecutionException {
         for (CompletableFuture<SshResponse> future : futures) {
-            if (future.get().returnCode != 0) {
+            if (future.get().returnCode != ExitCode.SUCCESS) {
                 throw new InterruptedException("SBK-GEM: " + operation + " failed");
             }
         }
@@ -558,7 +560,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 continue;
             }
 
-            if (response == null || response.returnCode != 0 && response.returnCode != 127) {
+            if (response == null || response.returnCode != ExitCode.SUCCESS
+                    && response.returnCode != RemoteExitCode.COMMAND_NOT_FOUND) {
                 final String remoteError = response == null ? "no response" :
                         response.errOutputStream.toString().trim();
                 final String errMsg = "SBK-GEM: Host '" + nodes[i].connection.getHost() +
@@ -580,7 +583,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
             copyTargets[i] = RemoteSbkDeployment.requiresCopy(true, response, config.sbkVersion);
             deleteTargets[i] = RemoteSbkDeployment.requiresDeleteBeforeCopy(params.isDelete(), response,
                     config.sbkVersion);
-            if (response.returnCode == 127) {
+            if (response.returnCode == RemoteExitCode.COMMAND_NOT_FOUND) {
                 Printer.log.info("SBK-GEM: Host '" + nodes[i].connection.getHost() +
                         "' has no remote SBK executable; scheduling copy");
             } else if (deleteTargets[i]) {
@@ -681,7 +684,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
         waitFor(CompletableFuture.allOf(mkdirFutures), "remote directory creation");
         for (CompletableFuture<SshResponse> mkdirFuture : mkdirFutures) {
-            if (mkdirFuture.get().returnCode != 0) {
+            if (mkdirFuture.get().returnCode != ExitCode.SUCCESS) {
                 throw new InterruptedException("SBK-GEM: Creating a remote SBK directory failed");
             }
         }
@@ -720,7 +723,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
         waitFor(CompletableFuture.allOf(deleteFutures), "remote SBK directory deletion");
         for (CompletableFuture<SshResponse> deleteResult : deleteFutures) {
-            if (deleteResult.get().returnCode != 0) {
+            if (deleteResult.get().returnCode != ExitCode.SUCCESS) {
                 return false;
             }
         }
@@ -796,7 +799,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
     static RemoteResponse remoteCommandResult(String host, SshResponse response, Throwable failure) {
         if (failure == null && response != null) {
-            final RemoteExecutionStatus status = response.returnCode == 0
+            final RemoteExecutionStatus status = response.returnCode == ExitCode.SUCCESS
                     ? RemoteExecutionStatus.SUCCESS : RemoteExecutionStatus.EXIT_FAILURE;
             final String message = status == RemoteExecutionStatus.SUCCESS ? ""
                     : "SBK-GEM: Remote SBK on host '" + host + "' returned exit code " + response.returnCode;
@@ -891,7 +894,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         final CompletableFuture<Void> rmFuture = CompletableFuture.allOf(rmCfArray);
         waitFor(rmFuture, "remote directory deletion");
         for (CompletableFuture<SshResponse> rmResult : rmCfArray) {
-            if (rmResult.get().returnCode != 0) {
+            if (rmResult.get().returnCode != ExitCode.SUCCESS) {
                 return false;
             }
         }

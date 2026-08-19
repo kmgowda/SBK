@@ -182,6 +182,20 @@ tasks.register('releaseFunctionalTest', Exec) {
     environment 'SBK_RELEASE_PROCESS_TIMEOUT_SECONDS', qualificationValue('processTimeoutSeconds')
     environment 'SBK_RELEASE_STARTUP_TIMEOUT_SECONDS', qualificationValue('startupTimeoutSeconds')
     environment 'SBK_RELEASE_WEB_TIMEOUT_MINUTES', qualificationValue('webTimeoutMinutes')
+    environment 'SBK_RELEASE_KILL_GRACE_SECONDS', qualificationValue('killGraceSeconds')
+    environment 'SBK_RELEASE_PORT_SELECTION_ATTEMPTS', qualificationValue('portSelectionAttempts')
+    environment 'SBK_RELEASE_PORT_RANGE_START', qualificationValue('portRangeStart')
+    environment 'SBK_RELEASE_PORT_RANGE_SIZE', qualificationValue('portRangeSize')
+    environment 'SBK_RELEASE_SHUTDOWN_ATTEMPTS', qualificationValue('shutdownAttempts')
+    environment 'SBK_RELEASE_SHUTDOWN_POLL_SECONDS', qualificationValue('shutdownPollSeconds')
+    environment 'SBK_RELEASE_TERMINATE_GRACE_SECONDS', qualificationValue('terminateGraceSeconds')
+    environment 'SBK_RELEASE_EOF_RECORDS', qualificationValue('eofRecords')
+    environment 'SBK_RELEASE_EOF_BENCHMARK_SECONDS', qualificationValue('eofBenchmarkSeconds')
+    environment 'SBK_RELEASE_EOF_MAXIMUM_SECONDS', qualificationValue('eofMaximumSeconds')
+    environment 'SBK_RELEASE_SMOKE_BENCHMARK_SECONDS', qualificationValue('smokeBenchmarkSeconds')
+    environment 'SBK_RELEASE_SBM_SETTLE_SECONDS', qualificationValue('sbmSettleSeconds')
+    environment 'SBK_RELEASE_DOCKER_NODE_COUNT', qualificationValue('dockerNodeCount')
+    environment 'SBK_RELEASE_DOCKER_SSH_READY_ATTEMPTS', qualificationValue('dockerSshReadyAttempts')
     environment 'SBK_RELEASE_REPORT_DIR', qualificationReportDir.get().asFile.absolutePath
     def inventoryName = findProperty('releaseInventory')?.toString()?.trim()
     if (inventoryName) {
@@ -220,7 +234,7 @@ tasks.register('releaseDocsCheck') {
         }
         if (!stalePages.isEmpty()) {
             throw new GradleException('Stale generated Javadocs; run ./gradlew updateDocs:\n'
-                    + stalePages.take(50).join('\n'))
+                    + stalePages.take(qualificationValue('staleDocumentLimit').toInteger()).join('\n'))
         }
         providers.exec {
             commandLine 'git', 'diff', '--check', '--', '.',
@@ -302,7 +316,7 @@ tasks.register('releasecheck') {
             }.files.sort().each { artifact ->
                 digest.reset()
                 artifact.withInputStream { stream ->
-                    byte[] buffer = new byte[8192]
+                    byte[] buffer = new byte[qualificationValue('artifactBufferBytes').toInteger()]
                     int count
                     while ((count = stream.read(buffer)) > 0) {
                         digest.update(buffer, 0, count)

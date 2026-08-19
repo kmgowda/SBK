@@ -79,8 +79,9 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
         config.timeoutMinutes = Integer.parseInt(params.getOptionValue(TIMEOUT_OPTION,
                 Integer.toString(config.timeoutMinutes)));
         config.name = params.getOptionValue(BOARD_NAME_OPTION, Objects.requireNonNullElse(config.name, ""));
-        if (config.port < 1 || config.port > 65535) {
-            throw new IllegalArgumentException("Local Web Console port must be between 1 and 65535");
+        if (config.port < WebConsoleConfig.MIN_PORT || config.port > WebConsoleConfig.MAX_PORT) {
+            throw new IllegalArgumentException("Local Web Console port must be between "
+                    + WebConsoleConfig.MIN_PORT + " and " + WebConsoleConfig.MAX_PORT);
         }
         if (config.snapshotMinutes < 1) {
             throw new IllegalArgumentException("Local Web Console history minutes must be greater than zero");

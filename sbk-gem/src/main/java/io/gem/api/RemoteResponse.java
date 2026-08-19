@@ -10,6 +10,8 @@
 
 package io.gem.api;
 
+import io.sbk.config.ExitCode;
+
 /**
  * Immutable result of executing a command on a remote host.
  *
@@ -56,8 +58,9 @@ public final class RemoteResponse {
      */
     public RemoteResponse(int returnCode, String stdOutput, String errOutput, String host) {
         this(returnCode, stdOutput, errOutput, host,
-                returnCode == 0 ? RemoteExecutionStatus.SUCCESS : RemoteExecutionStatus.EXIT_FAILURE,
-                returnCode == 0 ? "" : "Host '" + host + "' remote process returned exit code " + returnCode);
+                returnCode == ExitCode.SUCCESS ? RemoteExecutionStatus.SUCCESS : RemoteExecutionStatus.EXIT_FAILURE,
+                returnCode == ExitCode.SUCCESS ? "" : "Host '" + host
+                        + "' remote process returned exit code " + returnCode);
     }
 
     /**

@@ -50,7 +50,7 @@ final public class LongHashMapLatencyRecorder extends LatencyRecordWindow  {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         this.latencies = new LongLongHashMap();
         this.maxMapSizeBytes = (long) maxMapSizeMB * Bytes.BYTES_PER_MB;
-        this.incBytes = LatencyConfig.LATENCY_VALUE_SIZE_BYTES * 2;
+        this.incBytes = LatencyConfig.LATENCY_VALUE_SIZE_BYTES * LatencyConfig.LATENCY_MAP_ENTRY_VALUE_COUNT;
         this.mapBytesCount = 0;
         this.sortedLatencies = EMPTY_SORTED_LATENCIES;
     }

@@ -10,6 +10,31 @@
 'use strict';
 
 const colors = ['#39d5ff', '#46e6a7', '#9b8cff', '#ffb454'];
+const api = {
+    browserConnect: '/api/v1/browser/connect',
+    browserDisconnect: '/api/v1/browser/disconnect',
+    config: '/api/v1/config',
+    runs: '/api/v1/runs'
+};
+const jsonHeaders = {'Content-Type': 'application/json'};
+const bytesPerUnit = 1024;
+const secondsPerMinute = 60;
+const millisecondsPerSecond = 1000;
+const displayPercentiles = [50, 95, 99, 99.9];
+const primaryPercentile = 99;
+const clockFieldWidth = 2;
+const chartLayout = {
+    padding: {left: 54, right: 14, top: 18, bottom: 28},
+    gridLines: 4,
+    lineWidth: 2,
+    legendSpacing: 125,
+    legendWidth: 10,
+    legendHeight: 3,
+    legendBottom: 12,
+    legendTextOffset: 15,
+    legendTextBottom: 7,
+    axisLabelOffset: 4
+};
 const config = {};
 const state = {run: null, runs: [], completed: false, abandoned: false, snapshots: [], events: null,
     historyTimer: null};
@@ -21,16 +46,16 @@ const browserId = sessionStorage.getItem('sbkWebConsoleBrowserId') || generatedB
 sessionStorage.setItem('sbkWebConsoleBrowserId', browserId);
 
 function updateBrowserLease() {
-    fetch('/api/v1/browser/connect', {
+    fetch(api.browserConnect, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: jsonHeaders,
         body: JSON.stringify({browserId}),
         keepalive: true
     }).catch(() => {});
 }
 
 function releaseBrowserLease() {
-    navigator.sendBeacon('/api/v1/browser/disconnect', JSON.stringify({browserId}));
+    navigator.sendBeacon(api.browserDisconnect, JSON.stringify({browserId}));
 }
 
 window.addEventListener('pagehide', releaseBrowserLease);
@@ -44,17 +69,18 @@ function bytes(value) {
     const units = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
     let number = Math.max(0, value || 0);
     let unit = 0;
-    while (number >= 1024 && unit < units.length - 1) { number /= 1024; unit++; }
+    while (number >= bytesPerUnit && unit < units.length - 1) { number /= bytesPerUnit; unit++; }
     return `${number.toFixed(unit ? 1 : 0)} ${units[unit]}`;
 }
 
 function duration(seconds) {
     const value = Math.max(0, Math.floor(seconds || 0));
-    return `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
+    return `${String(Math.floor(value / secondsPerMinute)).padStart(clockFieldWidth, '0')}`
+        + `:${String(value % secondsPerMinute).padStart(clockFieldWidth, '0')}`;
 }
 
 function elapsedSeconds(run, snapshot) {
-    return Math.max(0, (snapshot.timestamp - run.startedAt) / 1000);
+    return Math.max(0, (snapshot.timestamp - run.startedAt) / millisecondsPerSecond);
 }
 
 function percentile(snapshot, target) {
@@ -82,7 +108,7 @@ function update() {
     elements.elapsed.textContent = duration(elapsedSeconds(run, snapshot));
     elements.recordsRate.textContent = compact(snapshot.performance.recordsPerSec);
     elements.throughput.textContent = `${snapshot.performance.mbPerSec.toFixed(2)} MB/s`;
-    elements.p99.textContent = `${compact(percentile(snapshot, 99))} ${run.timeUnit}`;
+    elements.p99.textContent = `${compact(percentile(snapshot, primaryPercentile))} ${run.timeUnit}`;
     elements.workers.textContent = snapshot.workers.writers + snapshot.workers.readers;
     elements.connections.textContent = snapshot.workers.connections;
     elements.latencyUnit.textContent = run.timeUnit;
@@ -110,7 +136,7 @@ function mergeSnapshot(snapshot) {
 }
 
 async function refreshHistory(runId) {
-    const response = await fetch(`/api/v1/runs/${runId}/history`, {cache: 'no-store'});
+    const response = await fetch(`${api.runs}/${runId}/history`, {cache: 'no-store'});
     if (!response.ok) throw new Error(`History request returned HTTP ${response.status}`);
     const snapshots = await response.json();
     if (!state.run || state.run.runId !== runId) return;
@@ -127,7 +153,7 @@ function drawChart(canvas, series) {
     ctx.scale(ratio, ratio);
     const width = rect.width;
     const height = rect.height;
-    const pad = {left: 54, right: 14, top: 18, bottom: 28};
+    const pad = chartLayout.padding;
     const plotWidth = width - pad.left - pad.right;
     const plotHeight = height - pad.top - pad.bottom;
     const values = series.flatMap(item => item.values);
@@ -136,14 +162,15 @@ function drawChart(canvas, series) {
     ctx.strokeStyle = 'rgba(140,164,186,.14)';
     ctx.fillStyle = '#7891a8';
     ctx.font = '11px system-ui';
-    for (let line = 0; line <= 4; line++) {
-        const y = pad.top + plotHeight * line / 4;
+    for (let line = 0; line <= chartLayout.gridLines; line++) {
+        const y = pad.top + plotHeight * line / chartLayout.gridLines;
         ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(width - pad.right, y); ctx.stroke();
-        ctx.fillText(compact(maximum * (1 - line / 4)), 4, y + 4);
+        ctx.fillText(compact(maximum * (1 - line / chartLayout.gridLines)), chartLayout.axisLabelOffset,
+            y + chartLayout.axisLabelOffset);
     }
     series.forEach((item, seriesIndex) => {
         ctx.strokeStyle = colors[seriesIndex % colors.length];
-        ctx.lineWidth = 2;
+        ctx.lineWidth = chartLayout.lineWidth;
         ctx.beginPath();
         item.values.forEach((value, index) => {
             const x = pad.left + plotWidth * index / Math.max(1, item.values.length - 1);
@@ -152,8 +179,10 @@ function drawChart(canvas, series) {
         });
         ctx.stroke();
         ctx.fillStyle = colors[seriesIndex % colors.length];
-        ctx.fillRect(pad.left + seriesIndex * 125, height - 12, 10, 3);
-        ctx.fillText(item.name, pad.left + 15 + seriesIndex * 125, height - 7);
+        ctx.fillRect(pad.left + seriesIndex * chartLayout.legendSpacing,
+            height - chartLayout.legendBottom, chartLayout.legendWidth, chartLayout.legendHeight);
+        ctx.fillText(item.name, pad.left + chartLayout.legendTextOffset
+            + seriesIndex * chartLayout.legendSpacing, height - chartLayout.legendTextBottom);
     });
 }
 
@@ -169,12 +198,10 @@ function drawAll() {
         {name: 'Write', values: data.map(item => item.requests.writeMbPerSec)},
         {name: 'Read', values: data.map(item => item.requests.readMbPerSec)}
     ]);
-    drawChart(elements.latencyChart, [
-        {name: 'p50', values: data.map(item => percentile(item, 50))},
-        {name: 'p95', values: data.map(item => percentile(item, 95))},
-        {name: 'p99', values: data.map(item => percentile(item, 99))},
-        {name: 'p99.9', values: data.map(item => percentile(item, 99.9))}
-    ]);
+    drawChart(elements.latencyChart, displayPercentiles.map(value => ({
+        name: `p${value}`,
+        values: data.map(item => percentile(item, value))
+    })));
     drawChart(elements.workerChart, [
         {name: 'Writers', values: data.map(item => item.workers.writers)},
         {name: 'Readers', values: data.map(item => item.workers.readers)},
@@ -198,7 +225,7 @@ async function selectRun(runView) {
             elements.subtitle.textContent = `Web Console refresh error: ${error.message}`;
         });
     }, config.refreshMillis);
-    state.events = new EventSource(`/api/v1/runs/${runId}/events`);
+    state.events = new EventSource(`${api.runs}/${runId}/events`);
     state.events.addEventListener('snapshot', event => {
         mergeSnapshot(JSON.parse(event.data));
         update();
@@ -211,7 +238,7 @@ async function selectRun(runView) {
 }
 
 async function loadRuns() {
-    const response = await fetch('/api/v1/runs', {cache: 'no-store'});
+    const response = await fetch(api.runs, {cache: 'no-store'});
     if (!response.ok) throw new Error(`Runs request returned HTTP ${response.status}`);
     const runs = await response.json();
     runs.sort((a, b) => b.run.startedAt - a.run.startedAt);
@@ -240,7 +267,7 @@ async function loadRuns() {
 }
 
 async function start() {
-    const response = await fetch('/api/v1/config', {cache: 'no-store'});
+    const response = await fetch(api.config, {cache: 'no-store'});
     if (!response.ok) throw new Error(`Configuration request returned HTTP ${response.status}`);
     Object.assign(config, await response.json());
     updateBrowserLease();

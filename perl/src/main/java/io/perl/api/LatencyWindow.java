@@ -10,6 +10,7 @@
 
 package io.perl.api;
 
+import io.perl.config.LatencyConfig;
 import io.perl.data.Bytes;
 import io.perl.logger.Print;
 import io.time.Time;
@@ -61,7 +62,7 @@ abstract public sealed class LatencyWindow extends LatencyRecorder permits Laten
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax);
         this.percentiles = new LatencyPercentiles(percentilesFractions);
         this.time = time;
-        this.slc = new long[2];
+        this.slc = new long[LatencyConfig.SLC_COUNT];
     }
 
     /**

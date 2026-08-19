@@ -11,6 +11,7 @@
 package io.gem.main;
 
 import io.gem.api.impl.SbkGem;
+import io.sbk.config.ExitCode;
 import io.gem.config.GemConfig;
 import io.gem.exception.SbkGemParameterException;
 import io.sbk.webconsole.WebConsoleClient.WebConsoleBusyException;
@@ -43,22 +44,22 @@ public abstract class SbkGemMain {
         if (SbkUtils.hasVersion(args)) {
             final String version = io.gem.api.impl.SbkGem.class.getPackage().getImplementationVersion();
             System.out.println(GemConfig.NAME.toUpperCase() + " Version: " + version);
-            System.exit(0);
+            System.exit(ExitCode.SUCCESS);
         }
         try {
             SbkGem.run(args, null, null, null);
         } catch (WebConsoleBusyException ex) {
-            System.exit(1);
+            System.exit(ExitCode.FAILURE);
         } catch (UnrecognizedOptionException ex) {
-            System.exit(2);
+            System.exit(ExitCode.INVALID_ARGUMENT);
         } catch (SbkGemParameterException ex) {
-            System.exit(1);
+            System.exit(ExitCode.FAILURE);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException | InterruptedException |
                  ExecutionException | InstantiationException | ClassNotFoundException | InvocationTargetException |
                  NoSuchMethodException | IllegalAccessException ex) {
             ex.printStackTrace();
-            System.exit(1);
+            System.exit(ExitCode.FAILURE);
         }
-        System.exit(0);
+        System.exit(ExitCode.SUCCESS);
     }
 }

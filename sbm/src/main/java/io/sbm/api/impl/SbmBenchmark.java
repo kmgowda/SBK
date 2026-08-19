@@ -50,6 +50,8 @@ import java.util.concurrent.TimeUnit;
  * - Periodically print results and on shutdown emit totals.
  */
 final public class SbmBenchmark implements Benchmark {
+    private static final int CSV_RANDOM_BOUND = 1_000_000;
+    private static final String CSV_RANDOM_FORMAT = "%06d";
     final SbmConfig sbmConfig;
     final private Time time;
     final private RamLogger logger;
@@ -101,7 +103,7 @@ final public class SbmBenchmark implements Benchmark {
         percentileFractions = new double[percentiles.length];
 
         for (int i = 0; i < percentiles.length; i++) {
-            percentileFractions[i] = percentiles[i] / 100.0;
+            percentileFractions[i] = percentiles[i] / LatencyConfig.PERCENTAGE_SCALE;
         }
 
         latencyRecorder = createLatencyRecorder();
@@ -146,7 +148,7 @@ final public class SbmBenchmark implements Benchmark {
             totalWindowExtension = new CSVExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX,
                     percentileFractions, time, totalWindow, sbmConfig.csvFileSizeGB,
-                    Config.NAME + "-" + String.format("%06d", random.nextInt(1000000)) + ".csv");
+                    Config.NAME + "-" + String.format(CSV_RANDOM_FORMAT, random.nextInt(CSV_RANDOM_BOUND)) + ".csv");
             Printer.log.info("Total Window Extension: CSV, Size: " +
                     totalWindowExtension.getMaxMemoryBytes() / Bytes.BYTES_PER_GB + " GB");
         } else {

@@ -76,7 +76,7 @@ plugins.withId('maven-publish') {
                     println "Publishing SBK packages to Maven Central"
                     maven {
                         name = "SBK-Maven"
-                        url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                        url = uri(mavenLegacyStagingUrl)
                         credentials {
                             username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
                             password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
@@ -86,7 +86,7 @@ plugins.withId('maven-publish') {
                     println "Publishing SBK packages to Git Hub"
                     maven {
                         name = "SBK-GitHub"
-                        url = uri("https://maven.pkg.github.com/kmgowda/SBK")
+                        url = uri(githubPackagesRepositoryUrl)
                         credentials {
                             username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME")
                             password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
@@ -109,25 +109,25 @@ plugins.withId('maven-publish') {
 
                 pom {
                     groupId = group
-                    name = "SBK"
-                    url = "https://github.com/kmgowda/sbk"
-                    description = "Storage Benchmark Kit"
+                    name = publicationName
+                    url = publicationProjectUrl
+                    description = publicationDescription
                     scm {
-                        url = 'https://github.com/kmgowda/sbk/tree/master'
-                        connection = 'scm:git:git://github.com/kmgowda/sbk.git'
-                        developerConnection = 'scm:git:https://github.com/kmgowda/sbk.git'
+                        url = publicationScmUrl
+                        connection = publicationScmConnection
+                        developerConnection = publicationScmDeveloperConnection
                     }
                     licenses {
                         license {
-                            name = 'The Apache License, Version 2.0'
-                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            name = publicationLicenseName
+                            url = publicationLicenseUrl
                         }
                     }
                     developers {
                         developer {
-                            id = 'kmgowda'
-                            name = 'Keshava Munegowda'
-                            email = 'keshava.gowda@gmail.com'
+                            id = publicationDeveloperId
+                            name = publicationDeveloperName
+                            email = publicationDeveloperEmail
                         }
                     }
                 }
@@ -195,7 +195,7 @@ plugins.withId('maven-publish') {
                     sonatype {
                         active = 'ALWAYS'
                         stage = "UPLOAD"     // only upload, no release
-                        url = 'https://central.sonatype.com/api/v1/publisher'
+                        url = mavenCentralPublisherUrl
                         stagingRepository(layout.buildDirectory.dir(localRepoDir).get().toString())
                         setAuthorization("Basic")
                         sign = true

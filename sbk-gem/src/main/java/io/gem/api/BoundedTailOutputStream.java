@@ -24,6 +24,7 @@ import java.util.Arrays;
  * SBK-GEM host heap.
  */
 final class BoundedTailOutputStream extends OutputStream {
+    private static final int INITIAL_BUFFER_CAPACITY = 32;
     private static final byte[] EMPTY = new byte[0];
     private final int capacity;
     private byte[] buffer;
@@ -119,7 +120,7 @@ final class BoundedTailOutputStream extends OutputStream {
         if (buffer.length >= required) {
             return;
         }
-        int expanded = Math.min(capacity, Math.max(32, buffer.length));
+        int expanded = Math.min(capacity, Math.max(INITIAL_BUFFER_CAPACITY, buffer.length));
         while (expanded < required && expanded < capacity) {
             expanded = Math.min(capacity, expanded << 1);
         }

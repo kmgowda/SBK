@@ -139,9 +139,10 @@ public final class HdrExtendedLatencyRecorder extends LatencyRecordWindow {
 
             percentiles.reset(this.recorder.getValidLatencyRecords());
             for (int i = 0; i < percentiles.fractions.length; i++) {
-                percentiles.latencies[i] = this.histogram.getValueAtPercentile(percentiles.fractions[i] * 100.0);
+                percentiles.latencies[i] = this.histogram.getValueAtPercentile(
+                        percentiles.fractions[i] * LatencyConfig.PERCENTAGE_SCALE);
             }
-            percentiles.medianLatency = this.histogram.getValueAtPercentile(50);
+            percentiles.medianLatency = this.histogram.getValueAtPercentile(LatencyConfig.MEDIAN_PERCENTILE);
         }
 
         public long getMaxMemoryBytes() {

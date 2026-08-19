@@ -61,6 +61,11 @@ loadScripts(document, 'script');</script>
 <li><a href="#%3Cinit%3E()" tabindex="0">DefaultLogger()</a></li>
 </ol>
 </li>
+<li><a href="#method-detail" tabindex="0">Method Details</a>
+<ol class="toc-list">
+<li><a href="#recordLatency(long,int,int,long)" tabindex="0">recordLatency(long, int, int, long)</a></li>
+</ol>
+</li>
 </ol>
 <button class="hide-sidebar"><span>Hide sidebar&nbsp;</span><img src="../../../../resource-files/left.svg" alt="Hide sidebar"></button><button class="show-sidebar"><img src="../../../../resource-files/right.svg" alt="Show sidebar"><span>&nbsp;Show sidebar</span></button></nav>
 <main role="main">
@@ -92,7 +97,13 @@ loadScripts(document, 'script');</script>
 <a href="ResultsLogger.html" title="class in io.perl.logger.impl"><code>ResultsLogger</code></a> that exposes two constructors: a fully-configurable
 constructor and a no-argument convenience constructor that uses default
 values from configuration. Use this logger when you want human-readable
-results on the console or redirected to a file.</div>
+results on the console or redirected to a file.
+
+<p>The individual-latency callback is a final no-op so the default reporting
+path cannot add work to the single PerL performance-recorder thread. Custom
+loggers that require individual latency values should extend
+<a href="ResultsLogger.html" title="class in io.perl.logger.impl"><code>ResultsLogger</code></a> or implement
+<a href="../PerformanceLogger.html" title="interface in io.perl.logger"><code>PerformanceLogger</code></a> directly.</p></div>
 </div>
 </section>
 <section class="summary">
@@ -124,6 +135,24 @@ results on the console or redirected to a file.</div>
 <li>
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
+<div id="method-summary-table">
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
+<div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Method</div>
+<div class="table-header col-last">Description</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#recordLatency(long,int,int,long)" class="member-name-link">recordLatency</a><wbr>(long&nbsp;startTime,
+ int&nbsp;events,
+ int&nbsp;bytes,
+ long&nbsp;latency)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Intentionally ignores the individual latency callback.</div>
+</div>
+</div>
+</div>
+</div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.perl.logger.impl.ResultsLogger">Methods inherited from class&nbsp;<a href="ResultsLogger.html#method-summary" title="class in io.perl.logger.impl">ResultsLogger</a></h3>
 <code><a href="ResultsLogger.html#appendResultString(java.lang.StringBuilder,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D)" title="appendResultString(StringBuilder, double, long, long, double, double, double, long, long, long, long, long, long, long, long[])">appendResultString</a>, <a href="ResultsLogger.html#getMaxLatency()" title="getMaxLatency()">getMaxLatency</a>, <a href="ResultsLogger.html#getMinLatency()" title="getMinLatency()">getMinLatency</a>, <a href="ResultsLogger.html#getPercentileNames()" title="getPercentileNames()">getPercentileNames</a>, <a href="ResultsLogger.html#getPercentiles()" title="getPercentiles()">getPercentiles</a>, <a href="ResultsLogger.html#getPrefix()" title="getPrefix()">getPrefix</a>, <a href="ResultsLogger.html#getTimeUnit()" title="getTimeUnit()">getTimeUnit</a>, <a href="ResultsLogger.html#print(double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" title="print(double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])">print</a>, <a href="ResultsLogger.html#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" title="printTotal(double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])">printTotal</a>, <a href="ResultsLogger.html#setMaxLatency(long)" title="setMaxLatency(long)">setMaxLatency</a>, <a href="ResultsLogger.html#setMinLatency(long)" title="setMinLatency(long)">setMinLatency</a>, <a href="ResultsLogger.html#setPercentiles(double%5B%5D)" title="setPercentiles(double[])">setPercentiles</a>, <a href="ResultsLogger.html#setPrefix(java.lang.String)" title="setPrefix(String)">setPrefix</a>, <a href="ResultsLogger.html#setTimeUnit(io.time.TimeUnit)" title="setTimeUnit(TimeUnit)">setTimeUnit</a></code></div>
@@ -132,7 +161,7 @@ results on the console or redirected to a file.</div>
 <code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#finalize()" title="class or interface in java.lang" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#getClass()" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#hashCode()" title="class or interface in java.lang" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#notify()" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#notifyAll()" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#toString()" title="class or interface in java.lang" class="external-link">toString</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait()" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait(long)" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="class or interface in java.lang" class="external-link">wait</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.perl.logger.PerformanceLogger">Methods inherited from interface&nbsp;<a href="../PerformanceLogger.html#method-summary" title="interface in io.perl.logger">PerformanceLogger</a></h3>
-<code><a href="../PerformanceLogger.html#getPrintingIntervalSeconds()" title="getPrintingIntervalSeconds()">getPrintingIntervalSeconds</a>, <a href="../PerformanceLogger.html#recordLatency(long,int,int,long)" title="recordLatency(long, int, int, long)">recordLatency</a></code></div>
+<code><a href="../PerformanceLogger.html#getPrintingIntervalSeconds()" title="getPrintingIntervalSeconds()">getPrintingIntervalSeconds</a></code></div>
 </section>
 </li>
 </ul>
@@ -171,6 +200,33 @@ results on the console or redirected to a file.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">DefaultLogger</span>()</div>
 <div class="block">Constructor DefaultLogger takes no arguments but initialize all values with default values.</div>
+</div>
+</section>
+</li>
+</ul>
+</section>
+</li>
+<!-- ============ METHOD DETAIL ========== -->
+<li>
+<section class="method-details" id="method-detail">
+<h2>Method Details</h2>
+<ul class="member-list">
+<li>
+<section class="detail" id="recordLatency(long,int,int,long)">
+<h3>recordLatency</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">recordLatency</span><wbr><span class="parameters">(long&nbsp;startTime,
+ int&nbsp;events,
+ int&nbsp;bytes,
+ long&nbsp;latency)</span></div>
+<div class="block">Intentionally ignores the individual latency callback.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>startTime</code> - event start time</dd>
+<dd><code>events</code> - number of events represented by this measurement</dd>
+<dd><code>bytes</code> - number of bytes represented by this measurement</dd>
+<dd><code>latency</code> - measured latency</dd>
+</dl>
 </div>
 </section>
 </li>

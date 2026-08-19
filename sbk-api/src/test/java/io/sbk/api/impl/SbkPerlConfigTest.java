@@ -11,6 +11,7 @@
 package io.sbk.api.impl;
 
 import io.perl.config.PerlConfig;
+import io.sbk.config.SbkConfig;
 import io.sbk.params.impl.SbkParameters;
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +27,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Tests the PerL configuration bundled with the SBK application.
  */
 public class SbkPerlConfigTest {
+
+    /** Verifies that the centralized command defaults preserve established CLI behavior. */
+    @Test
+    public void commandDefaultsPreserveExistingBehavior() {
+        final SbkConfig config = SbkConfig.get();
+
+        assertFalse(config.defaultReadOnly);
+        assertEquals(0, config.defaultWriters);
+        assertEquals(0, config.defaultReaders);
+        assertEquals(0, config.defaultRecords);
+        assertEquals(0, config.defaultRecordSize);
+        assertEquals(0, config.defaultSyncRecords);
+        assertEquals(-1.0, config.defaultThroughput);
+        assertEquals(1, config.defaultWriterStep);
+        assertEquals(0, config.defaultWriterStepSeconds);
+        assertEquals(1, config.defaultReaderStep);
+        assertEquals(0, config.defaultReaderStepSeconds);
+        assertEquals(0, config.defaultIdleSleepMillis);
+        assertEquals("v", config.defaultThreadType);
+    }
 
     /**
      * Verifies that installed SBK applications explicitly select the optimized

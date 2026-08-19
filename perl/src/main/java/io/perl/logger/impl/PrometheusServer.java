@@ -24,6 +24,8 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static java.net.HttpURLConnection.HTTP_OK;
+
 /**
  * Lightweight embedded HTTP server that exposes a Prometheus scrape endpoint.
  *
@@ -116,7 +118,7 @@ public final class PrometheusServer extends CompositeMeterRegistry {
         final HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext(context, httpExchange -> {
             String response = prometheusRegistry.scrape();
-            httpExchange.sendResponseHeaders(200, response.getBytes().length);
+            httpExchange.sendResponseHeaders(HTTP_OK, response.getBytes().length);
             try (OutputStream os = httpExchange.getResponseBody()) {
                 os.write(response.getBytes());
             }

@@ -118,7 +118,7 @@ public final class PerlBuilder {
 
         final double[] percentileFractions = new double[percentiles.length];
         for (int i = 0; i < percentiles.length; i++) {
-            percentileFractions[i] = percentiles[i] / 100.0;
+            percentileFractions[i] = percentiles[i] / LatencyConfig.PERCENTAGE_SCALE;
         }
 
         window = buildLatencyRecordWindow(config, time, minLatency, maxLatency, percentileFractions);

@@ -125,7 +125,8 @@ final public class CSVExtendedLatencyRecorder extends LatencyRecordWindow {
             this.recorder = recorder;
             this.csvFile = fileName;
             this.maxCsvSizeBytes = csvFileSizeGB * Bytes.BYTES_PER_GB;
-            this.incBytes = LatencyConfig.LATENCY_VALUE_SIZE_BYTES * 2;
+            this.incBytes = LatencyConfig.LATENCY_VALUE_SIZE_BYTES
+                    * LatencyConfig.LATENCY_MAP_ENTRY_VALUE_COUNT;
             this.csvBytesCount = 0;
             this.csvPrinter = null;
         }

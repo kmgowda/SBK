@@ -26,6 +26,7 @@ import java.io.InputStream;
  * Class for Recoding/Printing benchmark results on micrometer Composite Meter Registry.
  */
 public class PrometheusLogger extends CSVLogger {
+    private static final int CONTEXT_PART_LIMIT = 2;
     final private static String CONFIG_FILE = "metrics.properties";
     private MetricsConfig metricsConfig;
     private boolean contextDisabled;
@@ -91,9 +92,9 @@ public class PrometheusLogger extends CSVLogger {
             contextDisabled = true;
         } else {
             contextDisabled = false;
-            String[] str = parsedContext.split("/", 2);
+            String[] str = parsedContext.split("/", CONTEXT_PART_LIMIT);
             metricsConfig.port = Integer.parseInt(str[0]);
-            if (str.length == 2 && str[1] != null) {
+            if (str.length == CONTEXT_PART_LIMIT && str[1] != null) {
                 metricsConfig.context = "/" + str[1];
             }
         }

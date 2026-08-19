@@ -10,18 +10,19 @@
 package io.sbk.params.impl;
 
 import io.perl.config.PerlConfig;
+import io.perl.data.Bytes;
 import io.sbk.action.Action;
-import io.sbk.config.SbkRuntimeConfig;
-import io.sbk.params.InputParameterOptions;
 import io.sbk.config.Config;
+import io.sbk.config.SbkConfig;
+import io.sbk.config.SbkRuntimeConfig;
 import io.sbk.exception.HelpException;
+import io.sbk.params.InputParameterOptions;
 import io.sbk.thread.ThreadType;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Parses and exposes common SBK benchmark parameters.
@@ -44,8 +45,6 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
 
     /** CLI option selecting the intrusive or JDK timestamp queue. */
     public static final String MPSC_QUEUE_OPTION = "mpscqueue";
-
-    private static final String CONFIG_FILE = "sbk.properties";
 
     @Getter
     final private int timeoutMS;
@@ -106,9 +105,8 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         super(name, desc);
         this.timeoutMS = SbkRuntimeConfig.get().defaultOperationTimeoutMillis;
         this.action = Action.Reading;
-        final PerlConfig perlDefaults = loadPerlDefaults();
-        this.mpscQueueEnabled = perlDefaults.mpscQueueEnable;
-        validatePerlQueueTopology(perlDefaults);
+        final SbkConfig defaults = SbkConfig.get();
+        this.mpscQueueEnabled = defaults.getPerlConfig().mpscQueueEnable;
 
         addOption("writers", true, "Number of writers");
         addOption("readers", true, "Number of readers");
@@ -132,20 +130,22 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
                         If 0, writes/reads 'records'
                         If -1, get the maximum throughput (default: -1)""");
         addOption("wstep", true,
-                "Number of writers/step, default: 1");
+                "Number of writers/step, default: " + defaults.defaultWriterStep);
         addOption("wsec", true,
-                "Number of seconds/step for writers, default: 0");
+                "Number of seconds/step for writers, default: " + defaults.defaultWriterStepSeconds);
         addOption("rstep", true,
-                "Number of readers/step, default: 1");
+                "Number of readers/step, default: " + defaults.defaultReaderStep);
         addOption("rsec", true,
-                "Number of seconds/step for readers, default: 0");
+                "Number of seconds/step for readers, default: " + defaults.defaultReaderStepSeconds);
         addOption("ro", true,
                 """
                            Readonly Benchmarking,
-                           Applicable only if both writers and readers are set; default: false""");
-        addOption("millisecsleep", true, "Idle sleep in milliseconds; default: 0 ms");
+                           Applicable only if both writers and readers are set; default: """
+                        + defaults.defaultReadOnly);
+        addOption("millisecsleep", true, "Idle sleep in milliseconds; default: "
+                + defaults.defaultIdleSleepMillis + " ms");
         addOption("thread", true,
-                "Thread Type [p: platform, f: fork-join, v: virtual], default: v");
+                "Thread Type [p: platform, f: fork-join, v: virtual], default: " + defaults.defaultThreadType);
         addOption(MPSC_QUEUE_OPTION, true,
                 ("PerL timestamp queue [true: TimeStampMpscQueue,%n"
                         + "false: JDK ConcurrentLinkedQueue];%n"
@@ -174,21 +174,23 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
     @Override
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         super.parseArgs(args);
-        final boolean writeReadOnly = Boolean.parseBoolean(getOptionValue("ro", "false"));
-        writersCount = Integer.parseInt(getOptionValue("writers", "0"));
-        readersCount = Integer.parseInt(getOptionValue("readers", "0"));
+        final SbkConfig defaults = SbkConfig.get();
+        final boolean writeReadOnly = Boolean.parseBoolean(getOptionValue("ro",
+                Boolean.toString(defaults.defaultReadOnly)));
+        writersCount = Integer.parseInt(getOptionValue("writers", Integer.toString(defaults.defaultWriters)));
+        readersCount = Integer.parseInt(getOptionValue("readers", Integer.toString(defaults.defaultReaders)));
 
         if (writersCount == 0 && readersCount == 0) {
             throw new IllegalArgumentException("Error: Must specify the number of writers or readers");
         }
 
-        totalRecords = Long.parseLong(getOptionValue("records", "0"));
-        recordSize = Integer.parseInt(getOptionValue("size", "0"));
+        totalRecords = Long.parseLong(getOptionValue("records", Long.toString(defaults.defaultRecords)));
+        recordSize = Integer.parseInt(getOptionValue("size", Integer.toString(defaults.defaultRecordSize)));
         if (recordSize <= 0) {
             throw new IllegalArgumentException(
                     "Error: The record 'size' must be greater than zero");
         }
-        int syncRecords = Integer.parseInt(getOptionValue("sync", "0"));
+        int syncRecords = Integer.parseInt(getOptionValue("sync", Integer.toString(defaults.defaultSyncRecords)));
         if (syncRecords > 0) {
             recordsPerSync = syncRecords;
         } else {
@@ -207,14 +209,17 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         if (hasOptionValue("throughput")) {
             throughput = Double.parseDouble(getOptionValue("throughput"));
         } else {
-            throughput = -1;
+            throughput = defaults.defaultThroughput;
         }
 
-        writersStep = Integer.parseInt(getOptionValue("wstep", "1"));
-        writersStepSeconds = Integer.parseInt(getOptionValue("wsec", "0"));
-        readersStep = Integer.parseInt(getOptionValue("rstep", "1"));
-        readersStepSeconds = Integer.parseInt(getOptionValue("rsec", "0"));
-        idleSleepMilliSeconds = Integer.parseInt(getOptionValue("millisecsleep", "0"));
+        writersStep = Integer.parseInt(getOptionValue("wstep", Integer.toString(defaults.defaultWriterStep)));
+        writersStepSeconds = Integer.parseInt(getOptionValue("wsec",
+                Integer.toString(defaults.defaultWriterStepSeconds)));
+        readersStep = Integer.parseInt(getOptionValue("rstep", Integer.toString(defaults.defaultReaderStep)));
+        readersStepSeconds = Integer.parseInt(getOptionValue("rsec",
+                Integer.toString(defaults.defaultReaderStepSeconds)));
+        idleSleepMilliSeconds = Integer.parseInt(getOptionValue("millisecsleep",
+                Integer.toString(defaults.defaultIdleSleepMillis)));
         parseMpscQueueOption();
 
         int workersCnt = writersCount;
@@ -229,7 +234,7 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
             }
             recordsPerSec = (int) recsPerSec;
         } else if (throughput > 0) {
-            recordsPerSec = (int) (((throughput * 1024 * 1024) / recordSize) / workersCnt);
+            recordsPerSec = (int) (((throughput * Bytes.BYTES_PER_MB) / recordSize) / workersCnt);
         } else {
             recordsPerSec = 0;
         }
@@ -244,7 +249,7 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
             action = Action.Writing;
         }
 
-        String threadString = getOptionValue("thread", "v");
+        String threadString = getOptionValue("thread", defaults.defaultThreadType);
         threadType = switch (threadString.toLowerCase()) {
             case "f" -> ThreadType.ForkJoin;
             case "v" -> ThreadType.Virtual;
@@ -264,29 +269,6 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         mpscQueueEnabled = Boolean.parseBoolean(queueEnabled);
     }
 
-    private static void validatePerlQueueTopology(PerlConfig config) {
-        if (config.maxQs < 0) {
-            throw new IllegalArgumentException(
-                    "Error: sbk.properties maxQs must be zero or greater");
-        }
-
-        if (config.qPerWorker < PerlConfig.MIN_Q_PER_WORKER) {
-            throw new IllegalArgumentException(
-                    "Error: sbk.properties qPerWorker must be at least "
-                    + PerlConfig.MIN_Q_PER_WORKER);
-        }
-    }
-
-    private static PerlConfig loadPerlDefaults() {
-        try {
-            return loadPerlConfig();
-        } catch (IOException exception) {
-            throw new IllegalStateException(
-                    "Unable to load PerL defaults from " + CONFIG_FILE,
-                    exception);
-        }
-    }
-
     /**
      * Load the PerL defaults bundled with the SBK application.
      *
@@ -294,13 +276,6 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
      * @throws IOException if {@code sbk.properties} is missing or invalid
      */
     public static PerlConfig loadPerlConfig() throws IOException {
-        final InputStream inputStream = SbkParameters.class.getClassLoader()
-                .getResourceAsStream(CONFIG_FILE);
-        if (inputStream == null) {
-            throw new IOException("Missing classpath resource: " + CONFIG_FILE);
-        }
-        try (inputStream) {
-            return PerlConfig.build(inputStream);
-        }
+        return SbkConfig.get().getPerlConfig();
     }
 }
