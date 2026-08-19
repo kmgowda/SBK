@@ -108,7 +108,7 @@ implements <a href="../GemBenchmark.html" title="interface in io.gem.api">GemBen
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(io.sbm.api.impl.SbmBenchmark,io.gem.config.GemConfig,io.gem.params.GemParameters,java.util.List)" class="member-name-link">SbkGemBenchmark</a><wbr>(io.sbm.api.impl.SbmBenchmark&nbsp;sbmBenchmark,
  @NotNull <a href="../../config/GemConfig.html" title="class in io.gem.config">GemConfig</a>&nbsp;config,
  @NotNull <a href="../../params/GemParameters.html" title="interface in io.gem.params">GemParameters</a>&nbsp;params,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;sbkArgs)</code></div>
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&gt;&nbsp;sbkArgsByNode)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Constructor SbkGemBenchmark is responsible for initializing all values.</div>
 </div>
@@ -162,14 +162,16 @@ implements <a href="../GemBenchmark.html" title="interface in io.gem.api">GemBen
  @NotNull <a href="../../config/GemConfig.html" title="class in io.gem.config">GemConfig</a>&nbsp;config,
  @NotNull
  @NotNull <a href="../../params/GemParameters.html" title="interface in io.gem.params">GemParameters</a>&nbsp;params,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;sbkArgs)</span></div>
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&gt;&nbsp;sbkArgsByNode)</span></div>
 <div class="block">Constructor SbkGemBenchmark is responsible for initializing all values.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>sbmBenchmark</code> - embedded SBM benchmark</dd>
 <dd><code>config</code> - NotNull GemConfig</dd>
 <dd><code>params</code> - NotNull GemParameters</dd>
-<dd><code>sbkArgs</code> - normalized remote SBK argument tokens</dd>
+<dd><code>sbkArgsByNode</code> - normalized remote SBK argument tokens for each node</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - when the argument-set count does not match the connection count</dd>
 </dl>
 </div>
 </section>

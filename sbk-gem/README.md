@@ -111,6 +111,35 @@ For mixed writer/reader runs, the aggregate rate applies independently to each
 direction, matching SBK's existing `-records` semantics. `-totalrecords` is
 mutually exclusive with `-records` and `-throughput`.
 
+### Aggregate throughput control
+
+Use `-throughput` to apply the supplied MB/s limit independently to every
+remote SBK client. Use the GEM-only `-totalthroughput` option when one MB/s
+limit must apply to the distributed benchmark as a whole:
+
+```bash
+# Limit two remote clients to 200 MB/s in aggregate for 60 seconds.
+sbk-gem -nodes node-a,node-b -class file -writers 4 -size 4096 \
+  -totalthroughput 200 -seconds 60
+
+# Execute exactly 1,000,001 aggregate records at 200 MB/s aggregate throughput.
+sbk-gem -nodes node-a,node-b -class file -writers 4 -size 4096 \
+  -totalrecords 1000001 -totalthroughput 200
+```
+
+GEM divides the aggregate throughput across the remote clients and forwards a
+node-specific `-throughput` value to each one. Decimal division retains twelve
+fractional digits and assigns any remainder to the first client, so the
+forwarded values sum to the requested aggregate value. Each allocation must
+provide at least one record/second to every active worker after SBK converts
+MB/s to its per-worker record rate.
+
+`-totalthroughput` is mutually exclusive with `-throughput`. It may be combined
+with fixed `-records` or fixed `-totalrecords`. It must not be combined with
+timed `-totalrecords`, because in that mode `-totalrecords` already means an
+aggregate records/second limit and the two options would define competing
+rates. The option is also supported by SBK-GEM-YAL as `totalthroughput`.
+
 By default, SBK-GEM runs `<remote-sbk-command> -version` on every node. A node is left unchanged when that command exists, succeeds, and reports the exact expected version. The three deployment lifecycle options are independent:
 
 - `-copy true|false` permits SBK-GEM to copy SBK when it is missing or mismatched; the default is `true`. With `false`, a missing or mismatched installation is reported as an error.

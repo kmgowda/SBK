@@ -13,6 +13,8 @@ package io.gem.params;
 import io.gem.api.ConnectionConfig;
 import io.sbk.params.Parameters;
 
+import java.math.BigDecimal;
+
 /**
  * Interface GemParameters.
  */
@@ -67,6 +69,20 @@ public sealed interface GemParameters extends Parameters permits GemParameterOpt
      * @return true when {@code -totalrecords} was supplied
      */
     boolean isTotalRecordsOption();
+
+    /**
+     * Check whether throughput is an aggregate across all remote SBK clients.
+     *
+     * @return true when {@code -totalthroughput} was supplied
+     */
+    boolean isTotalThroughputOption();
+
+    /**
+     * Get the aggregate throughput requested for all remote SBK clients.
+     *
+     * @return aggregate throughput in MB/s
+     */
+    BigDecimal getTotalThroughput();
 
 
     /**

@@ -1949,6 +1949,9 @@ sequenceDiagram
     opt totalrecords is supplied
         Note over GEM: divide the aggregate count or rate<br/>into node-specific -records values
     end
+    opt totalthroughput is supplied
+        Note over GEM: divide aggregate MB/s<br/>into node-specific -throughput values
+    end
     GEM->>SSH: export SBK_JAVA_HOME and run sbkCommand on each node
     Note over SSH: remote command starts SBK with<br/>-out GrpcLogger -sbm localHost -sbmport 9717
 
@@ -2018,6 +2021,12 @@ splits one aggregate value into node-specific `-records` arguments. Without
 `-seconds`, quotient/remainder allocation preserves the exact fixed record
 count. With `-seconds`, allocation uses whole worker-rate units so the exact
 aggregate records/second limit survives SBK's per-worker integer division.
+The `-totalthroughput` orchestration option similarly divides one aggregate
+MB/s target into node-specific `-throughput` arguments. It can pace fixed
+per-client `-records` or fixed aggregate `-totalrecords`; timed
+`-totalrecords` cannot be combined with it because both options would define
+the run rate. Decimal allocation retains an exact aggregate command-line value,
+subject to SBK's existing MB/s-to-whole-records-per-worker conversion.
 This planning happens before remote launch and does not add work to the SBK,
 PerL, or SBM measurement hot paths.
 
@@ -3089,7 +3098,8 @@ your "Experimental Setup" section makes the study fully reproducible:
    standalone PerL defaults are in
    [perl.properties](../perl/src/main/resources/perl.properties).
 4. **Workload**: `-writers`, `-readers`, `-size`, `-seconds` or
-   `-records`, SBK-GEM `-totalrecords` when used, `-throughput`, and any
+   `-records`, SBK-GEM `-totalrecords` when used, `-throughput`, SBK-GEM
+   `-totalthroughput` when used, and any
    driver-specific flags.
 5. **Storage configuration** (cluster size, replication, region,
    storage class, etc.).

@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
@@ -49,6 +50,7 @@ import java.util.Objects;
  * - -localhost
  * - -sbmport, -sbmsleepms
  * - -totalrecords
+ * - -totalthroughput
  */
 @Slf4j
 public final class SbkGemParameters extends SbkDriversParameters implements GemParameterOptions {
@@ -80,6 +82,12 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     private boolean totalRecordsOption;
 
     private long distributedTotalRecords;
+
+    @Getter
+    private boolean totalThroughputOption;
+
+    @Getter
+    private BigDecimal totalThroughput;
 
     /**
      * Construct GEM parameters with defaults and register GEM options.
@@ -133,11 +141,14 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("totalrecords", true, "Total records across all remote SBK clients; without -seconds this is " +
                 "a fixed record count, and with -seconds this is the aggregate records/second rate; mutually " +
                 "exclusive with -records and -throughput");
+        addOption("totalthroughput", true, "Total throughput in MB/s across all remote SBK clients; mutually " +
+                "exclusive with -throughput");
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-hostkeycheck", "-knownhosts",
                 "-gemport", "-sbkdir", "-sbkcommand", "-copy", "-javacopy", "-javaversion", "-javadir",
                 "-delete", "-deleteafter", "-localhost", "-sbmport", "-sbmsleepms", "-totalrecords",
-                "--totalrecords"};
+                "--totalrecords", "-totalthroughput", "--totalthroughput"};
         this.parsedArgs = null;
+        this.totalThroughput = BigDecimal.ZERO;
     }
 
 
@@ -154,6 +165,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
      */
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         totalRecordsOption = hasCommandLineOption(args, "totalrecords");
+        totalThroughputOption = hasCommandLineOption(args, "totalthroughput");
         if (totalRecordsOption && hasCommandLineOption(args, "records")) {
             throw new IllegalArgumentException("The '-totalrecords' and '-records' options are mutually exclusive");
         }
@@ -161,10 +173,17 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
             throw new IllegalArgumentException(
                     "The '-totalrecords' and '-throughput' options are mutually exclusive");
         }
+        if (totalThroughputOption && hasCommandLineOption(args, "throughput")) {
+            throw new IllegalArgumentException(
+                    "The '-totalthroughput' and '-throughput' options are mutually exclusive");
+        }
         if (totalRecordsOption) {
             distributedTotalRecords = parseTotalRecords(args);
         }
-        super.parseArgs(totalRecordsOption ? normalizeTotalRecords(args) : args);
+        if (totalThroughputOption) {
+            totalThroughput = parseTotalThroughput(args);
+        }
+        super.parseArgs(normalizeAggregateOptions(args));
         final String nodeString = getOptionValue("nodes", config.nodes);
         String[] nodes = nodeString.replace("[ ]+", " ")
                 .replace("[,] +", ",")
@@ -207,7 +226,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
                     config.remoteDir, config.hostkeycheck, config.knownhosts);
         }
 
-        validateTotalRecords(nodes.length);
+        validateAggregateOptions(nodes.length);
 
         if (StringUtils.isEmpty(config.sbkdir)) {
             String errMsg = "The SBK application directory not supplied!";
@@ -249,10 +268,20 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         return totalRecordsOption ? distributedTotalRecords : super.getTotalRecords();
     }
 
-    private void validateTotalRecords(int nodeCount) {
-        if (!totalRecordsOption) {
-            return;
+    private void validateAggregateOptions(int nodeCount) {
+        if (totalRecordsOption) {
+            validateTotalRecords(nodeCount);
         }
+        if (totalThroughputOption && totalThroughput.signum() <= 0) {
+            throw new IllegalArgumentException("The '-totalthroughput' value must be greater than zero");
+        }
+        if (totalRecordsOption && totalThroughputOption && getTotalSecondsToRun() > 0) {
+            throw new IllegalArgumentException("The '-totalrecords' and '-totalthroughput' options cannot be " +
+                    "combined with '-seconds' because both would define the benchmark rate");
+        }
+    }
+
+    private void validateTotalRecords(int nodeCount) {
         if (distributedTotalRecords <= 0) {
             throw new IllegalArgumentException("The '-totalrecords' value must be greater than zero");
         }
@@ -288,7 +317,28 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         throw new IllegalArgumentException("The '-totalrecords' option requires a value");
     }
 
-    private static String[] normalizeTotalRecords(String[] args) {
+    private static BigDecimal parseTotalThroughput(String[] args) {
+        for (int i = 0; i < args.length; i++) {
+            if (isOption(args[i], "totalthroughput")) {
+                if (i + 1 >= args.length) {
+                    throw new IllegalArgumentException("The '-totalthroughput' option requires a value");
+                }
+                try {
+                    final BigDecimal value = new BigDecimal(args[i + 1]);
+                    if (!Double.isFinite(value.doubleValue())) {
+                        throw new IllegalArgumentException("The '-totalthroughput' value is outside the supported " +
+                                "SBK throughput range: " + args[i + 1]);
+                    }
+                    return value;
+                } catch (NumberFormatException ex) {
+                    throw new IllegalArgumentException("Invalid '-totalthroughput' value: " + args[i + 1], ex);
+                }
+            }
+        }
+        throw new IllegalArgumentException("The '-totalthroughput' option requires a value");
+    }
+
+    private static String[] normalizeAggregateOptions(String[] args) {
         final String[] normalized = Arrays.copyOf(args, args.length);
         for (int i = 0; i < normalized.length; i++) {
             if (isOption(normalized[i], "totalrecords")) {
@@ -296,7 +346,11 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
                 if (i + 1 < normalized.length) {
                     normalized[i + 1] = "1";
                 }
-                return normalized;
+            } else if (isOption(normalized[i], "totalthroughput")) {
+                normalized[i] = "-throughput";
+                if (i + 1 < normalized.length) {
+                    normalized[i + 1] = "1";
+                }
             }
         }
         return normalized;

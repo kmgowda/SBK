@@ -10,6 +10,7 @@ PROFILE=${SBK_RELEASE_PROFILE:-local}
 VERSION=${SBK_RELEASE_VERSION:?SBK_RELEASE_VERSION is required}
 RECORDS=${SBK_RELEASE_RECORDS:?SBK_RELEASE_RECORDS is required}
 RECORD_SIZE=${SBK_RELEASE_RECORD_SIZE:?SBK_RELEASE_RECORD_SIZE is required}
+TOTAL_THROUGHPUT=${SBK_RELEASE_TOTAL_THROUGHPUT_MB_PER_SEC:?SBK_RELEASE_TOTAL_THROUGHPUT_MB_PER_SEC is required}
 PROCESS_TIMEOUT=${SBK_RELEASE_PROCESS_TIMEOUT_SECONDS:?SBK_RELEASE_PROCESS_TIMEOUT_SECONDS is required}
 STARTUP_TIMEOUT=${SBK_RELEASE_STARTUP_TIMEOUT_SECONDS:?SBK_RELEASE_STARTUP_TIMEOUT_SECONDS is required}
 WEB_TIMEOUT_MINUTES=${SBK_RELEASE_WEB_TIMEOUT_MINUTES:?SBK_RELEASE_WEB_TIMEOUT_MINUTES is required}
@@ -408,7 +409,7 @@ if [[ $PROFILE == release || $PROFILE == local-docker ]]; then
         if [[ $logger == GemPrometheusLogger ]]; then
             gem_args+=(-totalrecords "$RECORDS" -seconds "$SMOKE_BENCHMARK_SECONDS")
         else
-            gem_args+=(-records "$RECORDS")
+            gem_args+=(-records "$RECORDS" -totalthroughput "$TOTAL_THROUGHPUT")
         fi
         gem_args+=(-out "$logger")
         if [[ -n $GEM_LOCAL_HOST ]]; then
@@ -429,8 +430,10 @@ if [[ $PROFILE == release || $PROFILE == local-docker ]]; then
     if [[ -n $GEM_LOCAL_HOST ]]; then
         printf '  localhost: %s\n' "$GEM_LOCAL_HOST" >> "$GEM_YAL_FILE"
     fi
-    printf '  class: file\n  writers: 1\n  size: %s\n  totalrecords: %s\n  out: GemPrometheusLogger\n' \
+    printf '  class: file\n  writers: 1\n  size: %s\n  totalrecords: %s\n' \
         "$RECORD_SIZE" "$RECORDS" >> "$GEM_YAL_FILE"
+    printf '  totalthroughput: %s\n  out: GemPrometheusLogger\n' \
+        "$TOTAL_THROUGHPUT" >> "$GEM_YAL_FILE"
     run_expect sbk-gem-yal-release "$GEM_SUCCESS_PATTERN" \
         "$SBK_GEM_YAL" -f "$GEM_YAL_FILE"
 else
