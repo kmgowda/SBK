@@ -244,8 +244,11 @@ such as `-PreleaseRecords=50000`. These settings configure only the test
 harness; module runtime defaults remain in their existing authoritative
 properties files.
 
-`releaseRequireCleanTree` defaults to `true`. A developer may disable it for a
-local diagnostic run, but a release candidate must use the default:
+`releaseRequireCleanTree` defaults to `true`. The `local` and `local-docker`
+profiles reject modifications to tracked files but ignore untracked files. The
+`ci` and `release` profiles require a completely clean tree, including no
+untracked files. A developer may disable the check for a local diagnostic run,
+but a release candidate must use the default:
 
 ```bash
 ./gradlew releaseFunctionalTest \
@@ -286,8 +289,10 @@ was used; they are not remote GEM results.
 
 Common preflight failures are intentional:
 
-- `Release qualification requires a clean Git tree` means tracked or
-  untracked files remain in the checkout.
+- `Release qualification requires no uncommitted tracked changes` means the
+  `local` or `local-docker` profile found a modified tracked file.
+- `Release qualification requires a clean Git tree` means the `ci` or
+  `release` profile found a tracked modification or an untracked file.
 - `Release inventory does not exist` means the example inventory path was
   used without creating the file.
 - `Release known-hosts file does not exist` means `gem.knownHosts` does not

@@ -62,15 +62,20 @@ tasks.register('releasePreflight') {
         }
 
         if (qualificationValue('requireCleanTree').toBoolean()) {
+            def includeUntrackedFiles = qualificationProfile in ['ci', 'release']
             def statusOutput = providers.exec {
-                commandLine 'git', 'status', '--porcelain', '--untracked-files=all'
+                commandLine 'git', 'status', '--porcelain',
+                        "--untracked-files=${includeUntrackedFiles ? 'all' : 'no'}"
                 ignoreExitValue = true
             }
             def result = statusOutput.result.get()
             def output = statusOutput.standardOutput.asText.get()
             def error = statusOutput.standardError.asText.get()
             if (result.exitValue != 0 || !output.trim().isEmpty()) {
-                throw new GradleException('Release qualification requires a clean Git tree.\n'
+                def requirement = includeUntrackedFiles
+                        ? 'a clean Git tree'
+                        : 'no uncommitted tracked changes'
+                throw new GradleException("Release qualification requires ${requirement}.\n"
                         + output + error)
             }
         }
