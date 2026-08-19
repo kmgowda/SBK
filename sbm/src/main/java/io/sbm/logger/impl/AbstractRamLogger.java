@@ -141,11 +141,6 @@ public abstract class AbstractRamLogger extends CSVLogger implements RamLogger {
     }
 
     @Override
-    public final void recordLatency(long startTime, int events, int bytes, long latency) {
-
-    }
-
-    @Override
     public void print(long reportTime, int writers, int maxWriters, int readers, int maxReaders,
                       long writeRequestBytes, double writeRequestMbPerSec, long writeRequestRecords,
                       double writeRequestRecordsPerSec, long readRequestBytes, double readRequestMbPerSec,
