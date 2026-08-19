@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Streams exact SBK latency frequencies and request counters to an SBM aggregator.
  */
-public class GrpcLogger extends SystemLogger {
+public final class GrpcLogger extends AbstractSystemLogger {
     private final static String CONFIG_FILE = "sbmhost.properties";
     private final static int MINIMUM_PORT = 1;
     private final static int MAXIMUM_PORT = 65535;
