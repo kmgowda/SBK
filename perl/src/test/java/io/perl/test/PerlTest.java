@@ -15,6 +15,7 @@ import io.perl.api.PerlChannel;
 import io.perl.api.impl.PerlBuilder;
 import io.perl.config.PerlConfig;
 import io.perl.logger.impl.DefaultLogger;
+import io.perl.logger.impl.ResultsLogger;
 import io.perl.system.PerlPrinter;
 import io.time.MicroSeconds;
 import io.time.NanoSeconds;
@@ -28,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -48,7 +50,7 @@ public class PerlTest {
     public final static int PERL_TIMEOUT_SECONDS = 5;
     public final static int PERL_SLEEP_MS = 100;
 
-    public static class TestLogger extends DefaultLogger {
+    public static class TestLogger extends ResultsLogger {
         public final AtomicLong latencyReporterCnt;
         public final AtomicLong printCnt;
         public final AtomicLong totalPrintCnt;
@@ -88,6 +90,12 @@ public class PerlTest {
             PerlPrinter.log.info("recordLatency : receiving records " + events);
             latencyReporterCnt.addAndGet(events);
         }
+    }
+
+    @Test
+    public void defaultLoggerLatencyCallbackIsFinal() throws NoSuchMethodException {
+        assertTrue(Modifier.isFinal(DefaultLogger.class.getMethod("recordLatency",
+                long.class, int.class, int.class, long.class).getModifiers()));
     }
 
 

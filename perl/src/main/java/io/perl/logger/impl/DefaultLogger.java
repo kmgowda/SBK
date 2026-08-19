@@ -20,6 +20,12 @@ import io.time.TimeUnit;
  * constructor and a no-argument convenience constructor that uses default
  * values from configuration. Use this logger when you want human-readable
  * results on the console or redirected to a file.
+ *
+ * <p>The individual-latency callback is a final no-op so the default reporting
+ * path cannot add work to the single PerL performance-recorder thread. Custom
+ * loggers that require individual latency values should extend
+ * {@link ResultsLogger} or implement
+ * {@link io.perl.logger.PerformanceLogger} directly.</p>
  */
 public class DefaultLogger extends ResultsLogger {
 
@@ -42,6 +48,18 @@ public class DefaultLogger extends ResultsLogger {
      */
     public DefaultLogger() {
         super();
+    }
+
+    /**
+     * Intentionally ignores the individual latency callback.
+     *
+     * @param startTime event start time
+     * @param events number of events represented by this measurement
+     * @param bytes number of bytes represented by this measurement
+     * @param latency measured latency
+     */
+    @Override
+    public final void recordLatency(long startTime, int events, int bytes, long latency) {
     }
 
 }
