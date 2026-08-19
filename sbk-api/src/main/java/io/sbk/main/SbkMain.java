@@ -11,6 +11,7 @@
 package io.sbk.main;
 
 import io.sbk.api.impl.Sbk;
+import io.sbk.config.ExitCode;
 import io.sbk.config.Config;
 import io.sbk.webconsole.WebConsoleClient.WebConsoleBusyException;
 import io.sbk.utils.SbkUtils;
@@ -37,20 +38,20 @@ public abstract class SbkMain {
         if (SbkUtils.hasVersion(args)) {
             final String version = io.sbk.api.impl.Sbk.class.getPackage().getImplementationVersion();
             System.out.println(Config.NAME.toUpperCase() + " Version: " + version);
-            System.exit(0);
+            System.exit(ExitCode.SUCCESS);
         }
         try {
             Sbk.run(args, null, null, null);
         } catch (WebConsoleBusyException ex) {
-            System.exit(1);
+            System.exit(ExitCode.FAILURE);
         } catch (UnrecognizedOptionException ex) {
-            System.exit(2);
+            System.exit(ExitCode.INVALID_ARGUMENT);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException | InterruptedException |
                 ExecutionException | InstantiationException | ClassNotFoundException | InvocationTargetException |
                 NoSuchMethodException | IllegalAccessException ex) {
             ex.printStackTrace();
-            System.exit(1);
+            System.exit(ExitCode.FAILURE);
         }
-        System.exit(0);
+        System.exit(ExitCode.SUCCESS);
     }
 }

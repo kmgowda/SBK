@@ -66,11 +66,17 @@ loadScripts(document, 'script');</script>
 <li><a href="#maxQueues" tabindex="0">maxQueues</a></li>
 <li><a href="#idleMS" tabindex="0">idleMS</a></li>
 <li><a href="#maxRecordSizeMB" tabindex="0">maxRecordSizeMB</a></li>
+<li><a href="#defaultAction" tabindex="0">defaultAction</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
 <li><a href="#%3Cinit%3E()" tabindex="0">SbmConfig()</a></li>
+</ol>
+</li>
+<li><a href="#method-detail" tabindex="0">Method Details</a>
+<ol class="toc-list">
+<li><a href="#get()" tabindex="0">get()</a></li>
 </ol>
 </li>
 </ol>
@@ -104,50 +110,55 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Field</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#DESC" class="member-name-link">DESC</a></code></div>
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#defaultAction" class="member-name-link">defaultAction</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Default benchmark action selector.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#DESC" class="member-name-link">DESC</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block"><code>String DESC = "Storage Benchmark Monitorr"</code>.</div>
 </div>
-<div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#idleMS" class="member-name-link">idleMS</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#idleMS" class="member-name-link">idleMS</a></code></div>
+<div class="col-last even-row-color">
 <div class="block"><code>int idleMS</code>.</div>
 </div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#maxConnections" class="member-name-link">maxConnections</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#maxConnections" class="member-name-link">maxConnections</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block"><code>int maxConnections</code>.</div>
 </div>
-<div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#maxQueues" class="member-name-link">maxQueues</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#maxQueues" class="member-name-link">maxQueues</a></code></div>
+<div class="col-last even-row-color">
 <div class="block"><code>int maxQueues</code>.</div>
 </div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#maxRecordSizeMB" class="member-name-link">maxRecordSizeMB</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#maxRecordSizeMB" class="member-name-link">maxRecordSizeMB</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Maximum inbound SBP latency-record size in MiB.</div>
 </div>
-<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#NAME" class="member-name-link">NAME</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#NAME" class="member-name-link">NAME</a></code></div>
+<div class="col-last even-row-color">
 <div class="block"><code>String NAME = "sbm"</code>.</div>
 </div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#port" class="member-name-link">port</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#port" class="member-name-link">port</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block"><code>int port</code>.</div>
 </div>
-<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#SBM_LOGGER_PACKAGE_NAME" class="member-name-link">SBM_LOGGER_PACKAGE_NAME</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#SBM_LOGGER_PACKAGE_NAME" class="member-name-link">SBM_LOGGER_PACKAGE_NAME</a></code></div>
+<div class="col-last even-row-color">
 <div class="block"><code>SBM_LOGGER_PACKAGE_NAME = "io.sbm.logger";</code>.</div>
 </div>
 </div>
 <div class="inherited-list">
 <h3 id="fields-inherited-from-class-io.perl.config.LatencyConfig">Fields inherited from class&nbsp;io.perl.config.LatencyConfig</h3>
-<code>csv, csvFileSizeGB, DEFAULT_MAX_LATENCY, DEFAULT_MIN_LATENCY, HDR_SIGNIFICANT_DIGITS, histogram, LATENCY_VALUE_SIZE_BYTES, LONG_MAX, maxArraySizeMB, maxHashMapSizeMB, PERCENTILE_FORMAT, PERCENTILES, TOTAL_LATENCY_MAX, totalMaxHashMapSizeMB</code></div>
+<code>csv, csvFileSizeGB, DEFAULT_MAX_LATENCY, DEFAULT_MIN_LATENCY, HDR_SIGNIFICANT_DIGITS, histogram, LATENCY_MAP_ENTRY_VALUE_COUNT, LATENCY_VALUE_SIZE_BYTES, LONG_MAX, maxArraySizeMB, maxHashMapSizeMB, MEDIAN_PERCENTILE, PERCENTAGE_SCALE, PERCENTILE_FORMAT, PERCENTILES, SLC_COUNT, TOTAL_LATENCY_MAX, totalMaxHashMapSizeMB</code></div>
 </section>
 </li>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
@@ -169,6 +180,21 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
+<div id="method-summary-table">
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab1" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab1', 3)" class="table-tab">Static Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
+<div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Method</div>
+<div class="table-header col-last">Description</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="SbmConfig.html" title="class in io.sbm.config">SbmConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#get()" class="member-name-link">get</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Returns the validated bundled SBM configuration.</div>
+</div>
+</div>
+</div>
+</div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">Methods inherited from class&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#method-summary" title="class or interface in java.lang" class="external-link">Object</a></h3>
 <code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#finalize()" title="class or interface in java.lang" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#getClass()" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#hashCode()" title="class or interface in java.lang" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#notify()" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#notifyAll()" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#toString()" title="class or interface in java.lang" class="external-link">toString</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait()" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait(long)" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="class or interface in java.lang" class="external-link">wait</a></code></div>
@@ -279,6 +305,15 @@ loadScripts(document, 'script');</script>
 </div>
 </section>
 </li>
+<li>
+<section class="detail" id="defaultAction">
+<h3>defaultAction</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">defaultAction</span></div>
+<div class="block">Default benchmark action selector.</div>
+</div>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -293,6 +328,27 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">SbmConfig</span>()</div>
 <div class="block">Creates an empty SBM configuration for property binding.</div>
+</div>
+</section>
+</li>
+</ul>
+</section>
+</li>
+<!-- ============ METHOD DETAIL ========== -->
+<li>
+<section class="method-details" id="method-detail">
+<h2>Method Details</h2>
+<ul class="member-list">
+<li>
+<section class="detail" id="get()">
+<h3>get</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="SbmConfig.html" title="class in io.sbm.config">SbmConfig</a></span>&nbsp;<span class="element-name">get</span>()</div>
+<div class="block">Returns the validated bundled SBM configuration.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>shared SBM configuration</dd>
+</dl>
 </div>
 </section>
 </li>

@@ -23,6 +23,15 @@ import io.time.Time;
  */
 public class LatencyConfig {
 
+    /** Number of Sliding Latency Coverage counters. */
+    public static final int SLC_COUNT = 2;
+    /** Number of long values retained for each latency-map entry. */
+    public static final int LATENCY_MAP_ENTRY_VALUE_COUNT = 2;
+    /** Scale converting percentile fractions to percentages. */
+    public static final double PERCENTAGE_SCALE = 100.0;
+    /** Median percentile as a percentage. */
+    public static final double MEDIAN_PERCENTILE = 50.0;
+
     /**
      * Format string used when printing percentile values.
      * <code>PERCENTILE_FORMAT = "0.##"</code>.

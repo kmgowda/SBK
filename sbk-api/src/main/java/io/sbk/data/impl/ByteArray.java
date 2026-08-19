@@ -49,7 +49,7 @@ final public class ByteArray implements DataType<byte[]> {
     public byte[] create(int size) {
         byte[] bytes = allocate(size);
         for (int i = 0; i < size; ++i) {
-            bytes[i] = (byte) (random.nextInt(26) + 65);
+            bytes[i] = (byte) (random.nextInt(GENERATED_DATA_ALPHABET_SIZE) + GENERATED_DATA_ASCII_BASE);
         }
         return bytes;
     }

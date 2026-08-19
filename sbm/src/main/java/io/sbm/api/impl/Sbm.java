@@ -10,8 +10,6 @@
 package io.sbm.api.impl;
 
 
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.api.Benchmark;
@@ -49,7 +47,6 @@ import java.util.concurrent.TimeoutException;
  * records from remote SBK clients.
  */
 final public class Sbm {
-    final static String CONFIG_FILE = "sbm.properties";
     final static String BANNER_FILE = "sbm-banner.txt";
 
     /**
@@ -142,10 +139,7 @@ final public class Sbm {
         Printer.log.info("SBP Version Major: " + sbpVersion.major+", Minor: "+sbpVersion.minor);
         loggerStore.printClasses("Logger");
 
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
-
-        sbmConfig = mapper.readValue(Sbm.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
-                SbmConfig.class);
+        sbmConfig = SbmConfig.get();
 
         if (StringUtils.isEmpty(argsLoggerName)) {
             logger = new  SbmPrometheusLogger();

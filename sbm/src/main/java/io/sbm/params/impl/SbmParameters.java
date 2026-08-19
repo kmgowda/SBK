@@ -101,7 +101,7 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
         }
         storageName = name;
 
-        String actionString = getOptionValue("action", "r");
+        String actionString = getOptionValue("action", SbmConfig.get().defaultAction);
         action = switch (actionString.toLowerCase()) {
             case "wro" -> Action.Write_OnlyReading;
             case "wr" -> Action.Write_Reading;

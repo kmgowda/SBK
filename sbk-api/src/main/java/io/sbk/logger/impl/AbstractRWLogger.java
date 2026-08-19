@@ -13,6 +13,7 @@ package io.sbk.logger.impl;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.javaprop.JavaPropsFactory;
+import io.perl.config.LatencyConfig;
 import io.perl.data.Bytes;
 import io.perl.logger.impl.ResultsLogger;
 import io.sbk.action.Action;
@@ -236,9 +237,10 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         this.action = action;
         this.time = time;
         for (double p : Objects.requireNonNull(getPercentiles())) {
-            if (p < 0 || p > 100) {
+            if (p < 0 || p > LatencyConfig.PERCENTAGE_SCALE) {
                 Printer.log.error("Invalid percentiles indices : " + Arrays.toString(getPercentiles()));
-                Printer.log.error("Percentile indices should be greater than 0 and less than 100");
+                Printer.log.error("Percentile indices should be greater than 0 and less than "
+                        + LatencyConfig.PERCENTAGE_SCALE);
                 throw new IllegalArgumentException();
             }
         }

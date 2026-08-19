@@ -15,6 +15,9 @@ package io.time;
  */
 public sealed interface Time permits MilliSeconds, MicroSeconds, NanoSeconds {
 
+    /** Number of seconds per minute. */
+    int SECONDS_PER_MIN = 60;
+
     /**
      * <code>NS_PER_MICRO = 1000</code>.
      */
@@ -42,9 +45,9 @@ public sealed interface Time permits MilliSeconds, MicroSeconds, NanoSeconds {
     long NS_PER_SEC = MS_PER_SEC * NS_PER_MS;
 
     /**
-     * <code>MS_PER_MIN = MS_PER_SEC * 60</code>.
+     * <code>MS_PER_MIN = MS_PER_SEC * SECONDS_PER_MIN</code>.
      */
-    int MS_PER_MIN = MS_PER_SEC * 60;
+    int MS_PER_MIN = MS_PER_SEC * SECONDS_PER_MIN;
 
     /**
      * <code>MICROS_PER_SEC = MICROS_PER_MS * MS_PER_SEC</code>.
@@ -121,5 +124,4 @@ public sealed interface Time permits MilliSeconds, MicroSeconds, NanoSeconds {
     double convertToMilliSeconds(double t);
 
 }
-
 

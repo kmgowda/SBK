@@ -32,10 +32,16 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static java.net.HttpURLConnection.HTTP_CONFLICT;
+import static java.net.HttpURLConnection.HTTP_CREATED;
+import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
+import static java.net.HttpURLConnection.HTTP_OK;
+
 /**
  * Non-blocking Local Web Console publisher used by SBK loggers.
  */
 public final class WebConsoleClient implements AutoCloseable {
+    private static final int PENDING_SNAPSHOT_CAPACITY = 1;
     private static final Logger LOGGER = LoggerFactory.getLogger(WebConsoleClient.class);
     private static final String RUNTIME_JVM_ARGS_PROPERTY = "sbk.runtimeJvmArgs";
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -48,6 +54,7 @@ public final class WebConsoleClient implements AutoCloseable {
     private final Duration leaseHeartbeatInterval;
     private final Duration requestTimeout;
     private final long publisherPollMillis;
+    private final long publisherShutdownTimeoutMillis;
     private final List<WebConsoleLink> runLinks;
 
     private WebConsoleClient(HttpClient httpClient, URI baseUri, WebConsoleConfig config, WebConsoleRun run,
@@ -55,13 +62,14 @@ public final class WebConsoleClient implements AutoCloseable {
         this.httpClient = httpClient;
         this.baseUri = baseUri;
         this.runId = run.runId();
-        this.pending = new ArrayBlockingQueue<>(1);
+        this.pending = new ArrayBlockingQueue<>(PENDING_SNAPSHOT_CAPACITY);
         this.closing = new AtomicBoolean(false);
         this.leaseHeartbeatInterval = leaseHeartbeatInterval;
         this.requestTimeout = Duration.ofMillis(config.requestTimeoutMillis);
         this.publisherPollMillis = config.publisherPollMillis;
+        this.publisherShutdownTimeoutMillis = config.publisherShutdownTimeoutMillis;
         this.runLinks = WebConsoleLinks.localLinks(config.port, runId);
-        postJson("/api/v1/runs", run, 201);
+        postJson(WebConsoleProtocol.RUNS_PATH, run, HTTP_CREATED);
         this.publisherThread = Thread.ofVirtual().name("sbk-web-console-publisher-" + runId)
                 .start(this::publishLoop);
     }
@@ -146,7 +154,7 @@ public final class WebConsoleClient implements AutoCloseable {
             return;
         }
         try {
-            publisherThread.join(requestTimeout.toMillis() * 3);
+            publisherThread.join(publisherShutdownTimeoutMillis);
             if (publisherThread.isAlive()) {
                 publisherThread.interrupt();
                 publisherThread.join(requestTimeout.toMillis());
@@ -156,7 +164,7 @@ public final class WebConsoleClient implements AutoCloseable {
                         + "to avoid racing an in-flight snapshot (the run lease will expire)");
                 return;
             }
-            postJson("/api/v1/runs/" + runId + "/complete", Map.of(), 204);
+            postJson(WebConsoleProtocol.RUN_PATH_PREFIX + runId + "/complete", Map.of(), HTTP_NO_CONTENT);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         } catch (IOException ex) {
@@ -174,10 +182,10 @@ public final class WebConsoleClient implements AutoCloseable {
                 final WebConsoleSnapshot snapshot = pending.poll(Math.min(publisherPollMillis, heartbeatWait),
                         TimeUnit.MILLISECONDS);
                 if (snapshot != null) {
-                    postJson("/api/v1/runs/" + runId + "/snapshots", snapshot, 204);
+                    postJson(WebConsoleProtocol.RUN_PATH_PREFIX + runId + "/snapshots", snapshot, HTTP_NO_CONTENT);
                     nextHeartbeat = System.nanoTime() + leaseHeartbeatInterval.toNanos();
                 } else if (!closing.get() && System.nanoTime() >= nextHeartbeat) {
-                    postJson("/api/v1/runs/" + runId + "/heartbeat", Map.of(), 204);
+                    postJson(WebConsoleProtocol.RUN_PATH_PREFIX + runId + "/heartbeat", Map.of(), HTTP_NO_CONTENT);
                     nextHeartbeat = System.nanoTime() + leaseHeartbeatInterval.toNanos();
                 }
             } catch (InterruptedException ex) {
@@ -194,11 +202,11 @@ public final class WebConsoleClient implements AutoCloseable {
     private void postJson(String path, Object body, int expectedStatus) throws IOException, InterruptedException {
         final HttpRequest request = HttpRequest.newBuilder(baseUri.resolve(path))
                 .timeout(requestTimeout)
-                .header("Content-Type", "application/json")
+                .header(WebConsoleProtocol.CONTENT_TYPE_HEADER, WebConsoleProtocol.JSON)
                 .POST(HttpRequest.BodyPublishers.ofByteArray(MAPPER.writeValueAsBytes(body)))
                 .build();
         final HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() == 409) {
+        if (response.statusCode() == HTTP_CONFLICT) {
             throw new WebConsoleBusyException(response.body());
         }
         if (response.statusCode() != expectedStatus) {
@@ -222,11 +230,11 @@ public final class WebConsoleClient implements AutoCloseable {
     }
 
     private static Health health(HttpClient client, URI baseUri, Duration connectTimeout) {
-        final HttpRequest request = HttpRequest.newBuilder(baseUri.resolve("/api/v1/health"))
+        final HttpRequest request = HttpRequest.newBuilder(baseUri.resolve(WebConsoleProtocol.HEALTH_PATH))
                 .timeout(connectTimeout).GET().build();
         try {
             final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200) {
+            if (response.statusCode() != HTTP_OK) {
                 return Health.INCOMPATIBLE;
             }
             final Map<?, ?> values = MAPPER.readValue(response.body(), Map.class);

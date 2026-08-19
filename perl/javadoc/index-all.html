@@ -697,6 +697,10 @@ benchmarking events.</div>
 <dd>
 <div class="block">Counts for each percentile (populated during copyLatency).</div>
 </dd>
+<dt><a href="io/perl/config/LatencyConfig.html#LATENCY_MAP_ENTRY_VALUE_COUNT" class="member-name-link">LATENCY_MAP_ENTRY_VALUE_COUNT</a> - Static variable in class io.perl.config.<a href="io/perl/config/LatencyConfig.html" title="class in io.perl.config">LatencyConfig</a></dt>
+<dd>
+<div class="block">Number of long values retained for each latency-map entry.</div>
+</dd>
 <dt><a href="io/perl/config/LatencyConfig.html#LATENCY_VALUE_SIZE_BYTES" class="member-name-link">LATENCY_VALUE_SIZE_BYTES</a> - Static variable in class io.perl.config.<a href="io/perl/config/LatencyConfig.html" title="class in io.perl.config">LatencyConfig</a></dt>
 <dd>
 <div class="block">Size in bytes of a single latency value (64-bit long).</div>
@@ -824,6 +828,10 @@ interfaces to receive both per-latency and aggregated latency records.</div>
 <dd>
 <div class="block"><code>mcs { public String toString() {return "MICROSECONDS";} }</code>.</div>
 </dd>
+<dt><a href="io/perl/config/LatencyConfig.html#MEDIAN_PERCENTILE" class="member-name-link">MEDIAN_PERCENTILE</a> - Static variable in class io.perl.config.<a href="io/perl/config/LatencyConfig.html" title="class in io.perl.config">LatencyConfig</a></dt>
+<dd>
+<div class="block">Median percentile as a percentage.</div>
+</dd>
 <dt><a href="io/perl/api/LatencyPercentiles.html#medianIndex" class="member-name-link">medianIndex</a> - Variable in class io.perl.api.<a href="io/perl/api/LatencyPercentiles.html" title="class in io.perl.api">LatencyPercentiles</a></dt>
 <dd>
 <div class="block">Median index position used to detect median bucket.</div>
@@ -902,7 +910,7 @@ interfaces to receive both per-latency and aggregated latency records.</div>
 </dd>
 <dt><a href="io/time/Time.html#MS_PER_MIN" class="member-name-link">MS_PER_MIN</a> - Static variable in interface io.time.<a href="io/time/Time.html" title="interface in io.time">Time</a></dt>
 <dd>
-<div class="block"><code>MS_PER_MIN = MS_PER_SEC * 60</code>.</div>
+<div class="block"><code>MS_PER_MIN = MS_PER_SEC * SECONDS_PER_MIN</code>.</div>
 </dd>
 <dt><a href="io/time/Time.html#MS_PER_SEC" class="member-name-link">MS_PER_SEC</a> - Static variable in interface io.time.<a href="io/time/Time.html" title="interface in io.time">Time</a></dt>
 <dd>
@@ -942,6 +950,10 @@ interfaces to receive both per-latency and aggregated latency records.</div>
 </dl>
 <h2 class="title" id="I:P">P</h2>
 <dl class="index">
+<dt><a href="io/perl/config/LatencyConfig.html#PERCENTAGE_SCALE" class="member-name-link">PERCENTAGE_SCALE</a> - Static variable in class io.perl.config.<a href="io/perl/config/LatencyConfig.html" title="class in io.perl.config">LatencyConfig</a></dt>
+<dd>
+<div class="block">Scale converting percentile fractions to percentages.</div>
+</dd>
 <dt><a href="io/perl/config/LatencyConfig.html#PERCENTILE_FORMAT" class="member-name-link">PERCENTILE_FORMAT</a> - Static variable in class io.perl.config.<a href="io/perl/config/LatencyConfig.html" title="class in io.perl.config">LatencyConfig</a></dt>
 <dd>
 <div class="block">Format string used when printing percentile values.</div>
@@ -1178,6 +1190,10 @@ using an embedded <a href="io/perl/logger/impl/PrometheusServer.html" title="cla
 </dd>
 <dt><a href="io/perl/api/impl/TotalWindowLatencyRecorder.html#recordLatency(long,int,int,long)" class="member-name-link">recordLatency(long, int, int, long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/TotalWindowLatencyRecorder.html" title="class in io.perl.api.impl">TotalWindowLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/perl/logger/impl/DefaultLogger.html#recordLatency(long,int,int,long)" class="member-name-link">recordLatency(long, int, int, long)</a> - Method in class io.perl.logger.impl.<a href="io/perl/logger/impl/DefaultLogger.html" title="class in io.perl.logger.impl">DefaultLogger</a></dt>
+<dd>
+<div class="block">Intentionally ignores the individual latency callback.</div>
+</dd>
 <dt><a href="io/perl/logger/PerformanceLogger.html#recordLatency(long,int,int,long)" class="member-name-link">recordLatency(long, int, int, long)</a> - Method in interface io.perl.logger.<a href="io/perl/logger/PerformanceLogger.html" title="interface in io.perl.logger">PerformanceLogger</a></dt>
 <dd>
 <div class="block">Default no-op implementation to record per-event latency.</div>
@@ -1313,6 +1329,10 @@ records count.</div>
 </dl>
 <h2 class="title" id="I:S">S</h2>
 <dl class="index">
+<dt><a href="io/time/Time.html#SECONDS_PER_MIN" class="member-name-link">SECONDS_PER_MIN</a> - Static variable in interface io.time.<a href="io/time/Time.html" title="interface in io.time">Time</a></dt>
+<dd>
+<div class="block">Number of seconds per minute.</div>
+</dd>
 <dt><a href="io/perl/api/PerlChannel.html#send(long,long,int,int)" class="member-name-link">send(long, long, int, int)</a> - Method in interface io.perl.api.<a href="io/perl/api/PerlChannel.html" title="interface in io.perl.api">PerlChannel</a></dt>
 <dd>
 <div class="block">Send benchmarking data for aggregation.</div>
@@ -1344,6 +1364,10 @@ records count.</div>
 <dt><a href="io/perl/logger/impl/ResultsLogger.html#setTimeUnit(io.time.TimeUnit)" class="member-name-link">setTimeUnit(TimeUnit)</a> - Method in class io.perl.logger.impl.<a href="io/perl/logger/impl/ResultsLogger.html" title="class in io.perl.logger.impl">ResultsLogger</a></dt>
 <dd>
 <div class="block">Sets the unit used to display latency values.</div>
+</dd>
+<dt><a href="io/perl/config/LatencyConfig.html#SLC_COUNT" class="member-name-link">SLC_COUNT</a> - Static variable in class io.perl.config.<a href="io/perl/config/LatencyConfig.html" title="class in io.perl.config">LatencyConfig</a></dt>
+<dd>
+<div class="block">Number of Sliding Latency Coverage counters.</div>
 </dd>
 <dt><a href="io/perl/logger/impl/Metrics.html#slc1Name" class="member-name-link">slc1Name</a> - Variable in class io.perl.logger.impl.<a href="io/perl/logger/impl/Metrics.html" title="class in io.perl.logger.impl">Metrics</a></dt>
 <dd>

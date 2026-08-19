@@ -30,6 +30,7 @@ import java.util.function.LongConsumer;
 @NotThreadSafe
 public final class ElasticWait {
     private static final double CALIBRATION_WEIGHT = 0.25;
+    private static final int BACKOFF_MULTIPLIER = 2;
 
     private final int windowIntervalMS;
     private final int idleNS;
@@ -182,6 +183,7 @@ public final class ElasticWait {
     }
 
     private static long saturatingMultiplyByTwo(long value) {
-        return value > Long.MAX_VALUE / 2 ? Long.MAX_VALUE : value * 2;
+        return value > Long.MAX_VALUE / BACKOFF_MULTIPLIER
+                ? Long.MAX_VALUE : value * BACKOFF_MULTIPLIER;
     }
 }

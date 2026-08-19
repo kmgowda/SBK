@@ -63,6 +63,7 @@ loadScripts(document, 'script');</script>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
+<li><a href="#recordLatency(long,int,int,long)" tabindex="0">recordLatency(long, int, int, long)</a></li>
 <li><a href="#getTimeStamp(long)" tabindex="0">getTimeStamp(long)</a></li>
 <li><a href="#print(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" tabindex="0">print(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a></li>
 <li><a href="#print(long,int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" tabindex="0">print(long, int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a></li>
@@ -91,7 +92,7 @@ loadScripts(document, 'script');</script>
 </dl>
 <dl class="notes">
 <dt>Direct Known Subclasses:</dt>
-<dd><code><a href="CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</a>, <a href="GrpcLogger.html" title="class in io.sbk.logger.impl">GrpcLogger</a>, <a href="Sl4jLogger.html" title="class in io.sbk.logger.impl">Sl4jLogger</a></code></dd>
+<dd><code><a href="CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</a>, <a href="Sl4jLogger.html" title="class in io.sbk.logger.impl">Sl4jLogger</a></code></dd>
 </dl>
 <hr>
 <div class="horizontal-scroll">
@@ -100,11 +101,9 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="AbstractRWLogger.html" title="class in io.sbk.logger.impl">AbstractRWLogger</a></span></div>
 <div class="block">Logger implementation that prints periodic and total benchmark results to <code>System.out</code>.
 
-<p>This implementation relies on the aggregation utilities provided by
-<a href="AbstractRWLogger.html" title="class in io.sbk.logger.impl"><code>AbstractRWLogger</code></a> and formats the final output line using
-<a href="AbstractRWLogger.html#appendResultString(java.lang.StringBuilder,int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)"><code>AbstractRWLogger.appendResultString(StringBuilder, int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</code></a> 
-<p>Note: Marked <code>NotThreadSafe</code> because printing occurs from a single
-scheduling context while internal counters are updated by the base class.</div>
+<p>The per-latency callback is intentionally a final no-op. System-output loggers and their
+CSV, SLF4J, Prometheus, Web Console, and SBM subclasses must not add work to the PerL
+performance-recorder path.</p></div>
 </div>
 </section>
 <section class="summary">
@@ -306,6 +305,14 @@ scheduling context while internal counters are updated by the base class.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Print the final accumulated totals to <code>System.out</code> at the end of the run.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#recordLatency(long,int,int,long)" class="member-name-link">recordLatency</a><wbr>(long&nbsp;startTime,
+ int&nbsp;events,
+ int&nbsp;bytes,
+ long&nbsp;latency)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Intentionally ignores the individual latency callback.</div>
+</div>
 </div>
 </div>
 </div>
@@ -323,7 +330,7 @@ scheduling context while internal counters are updated by the base class.</div>
 <code><a href="../Logger.html#reportFailure(java.lang.Throwable)" title="reportFailure(Throwable)">reportFailure</a>, <a href="../Logger.html#setExceptionHandler(io.perl.exception.ExceptionHandler)" title="setExceptionHandler(ExceptionHandler)">setExceptionHandler</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.perl.logger.PerformanceLogger">Methods inherited from interface&nbsp;io.perl.logger.PerformanceLogger</h3>
-<code>getMaxLatency, getMinLatency, getPercentiles, getTimeUnit, recordLatency</code></div>
+<code>getMaxLatency, getMinLatency, getPercentiles, getTimeUnit</code></div>
 </section>
 </li>
 </ul>
@@ -352,6 +359,25 @@ scheduling context while internal counters are updated by the base class.</div>
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="recordLatency(long,int,int,long)">
+<h3>recordLatency</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">recordLatency</span><wbr><span class="parameters">(long&nbsp;startTime,
+ int&nbsp;events,
+ int&nbsp;bytes,
+ long&nbsp;latency)</span></div>
+<div class="block">Intentionally ignores the individual latency callback.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>startTime</code> - event start time</dd>
+<dd><code>events</code> - number of events represented by this measurement</dd>
+<dd><code>bytes</code> - number of bytes represented by this measurement</dd>
+<dd><code>latency</code> - measured latency</dd>
+</dl>
+</div>
+</section>
+</li>
 <li>
 <section class="detail" id="getTimeStamp(long)">
 <h3>getTimeStamp</h3>

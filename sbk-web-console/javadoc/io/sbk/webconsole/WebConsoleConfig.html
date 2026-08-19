@@ -58,6 +58,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#field-detail" tabindex="0">Field Details</a>
 <ol class="toc-list">
+<li><a href="#MIN_PORT" tabindex="0">MIN_PORT</a></li>
+<li><a href="#MAX_PORT" tabindex="0">MAX_PORT</a></li>
 <li><a href="#port" tabindex="0">port</a></li>
 <li><a href="#open" tabindex="0">open</a></li>
 <li><a href="#snapshotMinutes" tabindex="0">snapshotMinutes</a></li>
@@ -66,6 +68,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#reportingIntervalSeconds" tabindex="0">reportingIntervalSeconds</a></li>
 <li><a href="#connectTimeoutMillis" tabindex="0">connectTimeoutMillis</a></li>
 <li><a href="#requestTimeoutMillis" tabindex="0">requestTimeoutMillis</a></li>
+<li><a href="#publisherShutdownTimeoutMillis" tabindex="0">publisherShutdownTimeoutMillis</a></li>
 <li><a href="#startTimeoutMillis" tabindex="0">startTimeoutMillis</a></li>
 <li><a href="#leaseHeartbeatMillis" tabindex="0">leaseHeartbeatMillis</a></li>
 <li><a href="#publisherPollMillis" tabindex="0">publisherPollMillis</a></li>
@@ -154,6 +157,16 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Background server log directory, relative to the user's home when not absolute.</div>
 </div>
+<div class="col-first odd-row-color"><code>static final int</code></div>
+<div class="col-second odd-row-color"><code><a href="#MAX_PORT" class="member-name-link">MAX_PORT</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Highest valid TCP port.</div>
+</div>
+<div class="col-first even-row-color"><code>static final int</code></div>
+<div class="col-second even-row-color"><code><a href="#MIN_PORT" class="member-name-link">MIN_PORT</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Lowest valid TCP port.</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#name" class="member-name-link">name</a></code></div>
 <div class="col-last odd-row-color">
@@ -175,48 +188,53 @@ loadScripts(document, 'script');</script>
 <div class="block">Publisher queue polling interval in milliseconds.</div>
 </div>
 <div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#refreshMillis" class="member-name-link">refreshMillis</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#publisherShutdownTimeoutMillis" class="member-name-link">publisherShutdownTimeoutMillis</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Maximum wait for the publisher thread to finish during shutdown.</div>
+</div>
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#refreshMillis" class="member-name-link">refreshMillis</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Browser run/history refresh interval in milliseconds.</div>
 </div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#reportingIntervalSeconds" class="member-name-link">reportingIntervalSeconds</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#reportingIntervalSeconds" class="member-name-link">reportingIntervalSeconds</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Periodic benchmark reporting interval used to size retained history.</div>
 </div>
-<div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#requestTimeoutMillis" class="member-name-link">requestTimeoutMillis</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#requestTimeoutMillis" class="member-name-link">requestTimeoutMillis</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">HTTP request timeout in milliseconds.</div>
 </div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#serverHeartbeatMillis" class="member-name-link">serverHeartbeatMillis</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#serverHeartbeatMillis" class="member-name-link">serverHeartbeatMillis</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Server-sent event heartbeat interval in milliseconds.</div>
 </div>
-<div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#snapshotMinutes" class="member-name-link">snapshotMinutes</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#snapshotMinutes" class="member-name-link">snapshotMinutes</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Number of minutes of snapshots retained for each benchmark run.</div>
 </div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#sseRetryMillis" class="member-name-link">sseRetryMillis</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#sseRetryMillis" class="member-name-link">sseRetryMillis</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Server-sent event retry interval in milliseconds.</div>
 </div>
-<div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#startTimeoutMillis" class="member-name-link">startTimeoutMillis</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#startTimeoutMillis" class="member-name-link">startTimeoutMillis</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Child-server startup timeout in milliseconds.</div>
 </div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#startupPollMillis" class="member-name-link">startupPollMillis</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#startupPollMillis" class="member-name-link">startupPollMillis</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Child-server startup polling interval in milliseconds.</div>
 </div>
-<div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#timeoutMinutes" class="member-name-link">timeoutMinutes</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#timeoutMinutes" class="member-name-link">timeoutMinutes</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Number of idle minutes before the web console exits.</div>
 </div>
 </div>
@@ -270,6 +288,40 @@ loadScripts(document, 'script');</script>
 <section class="field-details" id="field-detail">
 <h2>Field Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="MIN_PORT">
+<h3>MIN_PORT</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">MIN_PORT</span></div>
+<div class="block">Lowest valid TCP port.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.sbk.webconsole.WebConsoleConfig.MIN_PORT">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="MAX_PORT">
+<h3>MAX_PORT</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">MAX_PORT</span></div>
+<div class="block">Highest valid TCP port.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.sbk.webconsole.WebConsoleConfig.MAX_PORT">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
 <li>
 <section class="detail" id="port">
 <h3>port</h3>
@@ -339,6 +391,15 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">requestTimeoutMillis</span></div>
 <div class="block">HTTP request timeout in milliseconds.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="publisherShutdownTimeoutMillis">
+<h3>publisherShutdownTimeoutMillis</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">publisherShutdownTimeoutMillis</span></div>
+<div class="block">Maximum wait for the publisher thread to finish during shutdown.</div>
 </div>
 </section>
 </li>

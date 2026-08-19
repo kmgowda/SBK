@@ -414,9 +414,61 @@ metrics and provides default harness-driven write workloads.</div>
 </dd>
 <dt><a href="io/sbk/logger/impl/AbstractRWLogger.html#decrementWriters()" class="member-name-link">decrementWriters()</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/AbstractRWLogger.html" title="class in io.sbk.logger.impl">AbstractRWLogger</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/sbk/config/SbkConfig.html#defaultIdleSleepMillis" class="member-name-link">defaultIdleSleepMillis</a> - Variable in class io.sbk.config.<a href="io/sbk/config/SbkConfig.html" title="class in io.sbk.config">SbkConfig</a></dt>
+<dd>
+<div class="block">Default worker idle sleep in milliseconds.</div>
+</dd>
 <dt><a href="io/sbk/config/SbkRuntimeConfig.html#defaultOperationTimeoutMillis" class="member-name-link">defaultOperationTimeoutMillis</a> - Variable in class io.sbk.config.<a href="io/sbk/config/SbkRuntimeConfig.html" title="class in io.sbk.config">SbkRuntimeConfig</a></dt>
 <dd>
 <div class="block">Default storage-operation timeout in milliseconds.</div>
+</dd>
+<dt><a href="io/sbk/config/SbkConfig.html#defaultReaders" class="member-name-link">defaultReaders</a> - Variable in class io.sbk.config.<a href="io/sbk/config/SbkConfig.html" title="class in io.sbk.config">SbkConfig</a></dt>
+<dd>
+<div class="block">Default reader count when the option is omitted.</div>
+</dd>
+<dt><a href="io/sbk/config/SbkConfig.html#defaultReaderStep" class="member-name-link">defaultReaderStep</a> - Variable in class io.sbk.config.<a href="io/sbk/config/SbkConfig.html" title="class in io.sbk.config">SbkConfig</a></dt>
+<dd>
+<div class="block">Default reader ramp step.</div>
+</dd>
+<dt><a href="io/sbk/config/SbkConfig.html#defaultReaderStepSeconds" class="member-name-link">defaultReaderStepSeconds</a> - Variable in class io.sbk.config.<a href="io/sbk/config/SbkConfig.html" title="class in io.sbk.config">SbkConfig</a></dt>
+<dd>
+<div class="block">Default reader ramp interval in seconds.</div>
+</dd>
+<dt><a href="io/sbk/config/SbkConfig.html#defaultReadOnly" class="member-name-link">defaultReadOnly</a> - Variable in class io.sbk.config.<a href="io/sbk/config/SbkConfig.html" title="class in io.sbk.config">SbkConfig</a></dt>
+<dd>
+<div class="block">Default read-only mode for mixed writer/reader benchmarks.</div>
+</dd>
+<dt><a href="io/sbk/config/SbkConfig.html#defaultRecords" class="member-name-link">defaultRecords</a> - Variable in class io.sbk.config.<a href="io/sbk/config/SbkConfig.html" title="class in io.sbk.config">SbkConfig</a></dt>
+<dd>
+<div class="block">Default record count when the option is omitted.</div>
+</dd>
+<dt><a href="io/sbk/config/SbkConfig.html#defaultRecordSize" class="member-name-link">defaultRecordSize</a> - Variable in class io.sbk.config.<a href="io/sbk/config/SbkConfig.html" title="class in io.sbk.config">SbkConfig</a></dt>
+<dd>
+<div class="block">Default record size when the option is omitted.</div>
+</dd>
+<dt><a href="io/sbk/config/SbkConfig.html#defaultSyncRecords" class="member-name-link">defaultSyncRecords</a> - Variable in class io.sbk.config.<a href="io/sbk/config/SbkConfig.html" title="class in io.sbk.config">SbkConfig</a></dt>
+<dd>
+<div class="block">Default records per sync when the option is omitted.</div>
+</dd>
+<dt><a href="io/sbk/config/SbkConfig.html#defaultThreadType" class="member-name-link">defaultThreadType</a> - Variable in class io.sbk.config.<a href="io/sbk/config/SbkConfig.html" title="class in io.sbk.config">SbkConfig</a></dt>
+<dd>
+<div class="block">Default thread selector: p, f, or v.</div>
+</dd>
+<dt><a href="io/sbk/config/SbkConfig.html#defaultThroughput" class="member-name-link">defaultThroughput</a> - Variable in class io.sbk.config.<a href="io/sbk/config/SbkConfig.html" title="class in io.sbk.config">SbkConfig</a></dt>
+<dd>
+<div class="block">Default throughput selector when the option is omitted.</div>
+</dd>
+<dt><a href="io/sbk/config/SbkConfig.html#defaultWriters" class="member-name-link">defaultWriters</a> - Variable in class io.sbk.config.<a href="io/sbk/config/SbkConfig.html" title="class in io.sbk.config">SbkConfig</a></dt>
+<dd>
+<div class="block">Default writer count when the option is omitted.</div>
+</dd>
+<dt><a href="io/sbk/config/SbkConfig.html#defaultWriterStep" class="member-name-link">defaultWriterStep</a> - Variable in class io.sbk.config.<a href="io/sbk/config/SbkConfig.html" title="class in io.sbk.config">SbkConfig</a></dt>
+<dd>
+<div class="block">Default writer ramp step.</div>
+</dd>
+<dt><a href="io/sbk/config/SbkConfig.html#defaultWriterStepSeconds" class="member-name-link">defaultWriterStepSeconds</a> - Variable in class io.sbk.config.<a href="io/sbk/config/SbkConfig.html" title="class in io.sbk.config">SbkConfig</a></dt>
+<dd>
+<div class="block">Default writer ramp interval in seconds.</div>
 </dd>
 <dt><a href="io/sbk/config/Config.html#DESC" class="member-name-link">DESC</a> - Static variable in class io.sbk.config.<a href="io/sbk/config/Config.html" title="class in io.sbk.config">Config</a></dt>
 <dd>
@@ -437,9 +489,17 @@ metrics and provides default harness-driven write workloads.</div>
 <dd>
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </dd>
+<dt><a href="io/sbk/config/ExitCode.html" class="type-name-link" title="class in io.sbk.config">ExitCode</a> - Class in <a href="io/sbk/config/package-summary.html">io.sbk.config</a></dt>
+<dd>
+<div class="block">Process exit statuses shared by SBK suite launchers.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:F">F</h2>
 <dl class="index">
+<dt><a href="io/sbk/config/ExitCode.html#FAILURE" class="member-name-link">FAILURE</a> - Static variable in class io.sbk.config.<a href="io/sbk/config/ExitCode.html" title="class in io.sbk.config">ExitCode</a></dt>
+<dd>
+<div class="block">Runtime or operational failure.</div>
+</dd>
 <dt><a href="io/sbk/logger/SbmHostConfig.html#failureReportTimeoutSeconds" class="member-name-link">failureReportTimeoutSeconds</a> - Variable in class io.sbk.logger.<a href="io/sbk/logger/SbmHostConfig.html" title="class in io.sbk.logger">SbmHostConfig</a></dt>
 <dd>
 <div class="block">Terminal failure-report deadline in seconds.</div>
@@ -463,6 +523,14 @@ metrics and provides default harness-driven write workloads.</div>
 </dl>
 <h2 class="title" id="I:G">G</h2>
 <dl class="index">
+<dt><a href="io/sbk/data/DataType.html#GENERATED_DATA_ALPHABET_SIZE" class="member-name-link">GENERATED_DATA_ALPHABET_SIZE</a> - Static variable in interface io.sbk.data.<a href="io/sbk/data/DataType.html" title="interface in io.sbk.data">DataType</a></dt>
+<dd>
+<div class="block">Number of uppercase ASCII characters used for generated payloads.</div>
+</dd>
+<dt><a href="io/sbk/data/DataType.html#GENERATED_DATA_ASCII_BASE" class="member-name-link">GENERATED_DATA_ASCII_BASE</a> - Static variable in interface io.sbk.data.<a href="io/sbk/data/DataType.html" title="interface in io.sbk.data">DataType</a></dt>
+<dd>
+<div class="block">ASCII code of the first uppercase character used for generated payloads.</div>
+</dd>
 <dt><a href="io/sbk/api/DataRecordsReader.html#genericRecordsReader(io.sbk.api.Worker,long,io.sbk.data.DataType,io.time.Time,io.sbk.api.DataRecordsReader.RecordTime)" class="member-name-link">genericRecordsReader(Worker, long, DataType, Time, DataRecordsReader.RecordTime)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/DataRecordsReader.html" title="interface in io.sbk.api">DataRecordsReader</a></dt>
 <dd>
 <div class="block">Benchmarking reader by reading given number of records.</div>
@@ -494,6 +562,10 @@ metrics and provides default harness-driven write workloads.</div>
 <dt><a href="io/sbk/api/DataRecordsReader.html#genericRecordsTimeReaderRateControl(io.sbk.api.Worker,long,io.sbk.data.DataType,io.time.Time,io.sbk.api.RateController,io.sbk.api.DataRecordsReader.RecordTimeRequests,io.sbk.logger.ReadRequestsLogger)" class="member-name-link">genericRecordsTimeReaderRateControl(Worker, long, DataType, Time, RateController, DataRecordsReader.RecordTimeRequests, ReadRequestsLogger)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/DataRecordsReader.html" title="interface in io.sbk.api">DataRecordsReader</a></dt>
 <dd>
 <div class="block">Benchmarking reader by reading events/records with Rate Controls.</div>
+</dd>
+<dt><a href="io/sbk/config/SbkConfig.html#get()" class="member-name-link">get()</a> - Static method in class io.sbk.config.<a href="io/sbk/config/SbkConfig.html" title="class in io.sbk.config">SbkConfig</a></dt>
+<dd>
+<div class="block">Returns the validated bundled SBK configuration.</div>
 </dd>
 <dt><a href="io/sbk/config/SbkRuntimeConfig.html#get()" class="member-name-link">get()</a> - Static method in class io.sbk.config.<a href="io/sbk/config/SbkRuntimeConfig.html" title="class in io.sbk.config">SbkRuntimeConfig</a></dt>
 <dd>
@@ -631,6 +703,10 @@ metrics and provides default harness-driven write workloads.</div>
 <dd>
 <div class="block">Returns the current web console option/value pairs for forwarding to SBM.</div>
 </dd>
+<dt><a href="io/sbk/config/SbkConfig.html#getPerlConfig()" class="member-name-link">getPerlConfig()</a> - Method in class io.sbk.config.<a href="io/sbk/config/SbkConfig.html" title="class in io.sbk.config">SbkConfig</a></dt>
+<dd>
+<div class="block">Returns the validated PerL settings loaded from the SBK PerL properties resource.</div>
+</dd>
 <dt><a href="io/sbk/logger/impl/AbstractRWLogger.html#getPrintingIntervalSeconds()" class="member-name-link">getPrintingIntervalSeconds()</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/AbstractRWLogger.html" title="class in io.sbk.logger.impl">AbstractRWLogger</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/params/impl/SbkYalParameters.html#getPrintOptionDescription()" class="member-name-link">getPrintOptionDescription()</a> - Method in class io.sbk.params.impl.<a href="io/sbk/params/impl/SbkYalParameters.html" title="class in io.sbk.params.impl">SbkYalParameters</a></dt>
@@ -705,7 +781,27 @@ metrics and provides default harness-driven write workloads.</div>
 <dd>
 <div class="block">Time out for data to read.</div>
 </dd>
+<dt><a href="io/sbk/logger/impl/CSVLogger.html#getTimeStamp(long)" class="member-name-link">getTimeStamp(long)</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</a></dt>
+<dd>
+<div class="block">Formats a report timestamp in the local time zone.</div>
+</dd>
+<dt><a href="io/sbk/logger/impl/GrpcLogger.html#getTimeStamp(long)" class="member-name-link">getTimeStamp(long)</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/GrpcLogger.html" title="class in io.sbk.logger.impl">GrpcLogger</a></dt>
+<dd>
+<div class="block">Formats a report timestamp in the local time zone.</div>
+</dd>
+<dt><a href="io/sbk/logger/impl/PrometheusLogger.html#getTimeStamp(long)" class="member-name-link">getTimeStamp(long)</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/PrometheusLogger.html" title="class in io.sbk.logger.impl">PrometheusLogger</a></dt>
+<dd>
+<div class="block">Formats a report timestamp in the local time zone.</div>
+</dd>
+<dt><a href="io/sbk/logger/impl/Sl4jLogger.html#getTimeStamp(long)" class="member-name-link">getTimeStamp(long)</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/Sl4jLogger.html" title="class in io.sbk.logger.impl">Sl4jLogger</a></dt>
+<dd>
+<div class="block">Formats a report timestamp in the local time zone.</div>
+</dd>
 <dt><a href="io/sbk/logger/impl/SystemLogger.html#getTimeStamp(long)" class="member-name-link">getTimeStamp(long)</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
+<dd>
+<div class="block">Formats a report timestamp in the local time zone.</div>
+</dd>
+<dt><a href="io/sbk/logger/impl/WebLogger.html#getTimeStamp(long)" class="member-name-link">getTimeStamp(long)</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/WebLogger.html" title="class in io.sbk.logger.impl">WebLogger</a></dt>
 <dd>
 <div class="block">Formats a report timestamp in the local time zone.</div>
 </dd>
@@ -848,6 +944,10 @@ metrics and provides default harness-driven write workloads.</div>
 <dt><a href="io/sbk/params/InputParameterOptions.html" class="type-name-link" title="interface in io.sbk.params">InputParameterOptions</a> - Interface in <a href="io/sbk/params/package-summary.html">io.sbk.params</a></dt>
 <dd>
 <div class="block">Composite interface bundling option registration, parsing, and typed parameter access.</div>
+</dd>
+<dt><a href="io/sbk/config/ExitCode.html#INVALID_ARGUMENT" class="member-name-link">INVALID_ARGUMENT</a> - Static variable in class io.sbk.config.<a href="io/sbk/config/ExitCode.html" title="class in io.sbk.config">ExitCode</a></dt>
+<dd>
+<div class="block">Invalid command-line arguments.</div>
 </dd>
 <dt><a href="io/sbp/config/SbpVersion.html#INVALID_VERSION" class="member-name-link">INVALID_VERSION</a> - Static variable in class io.sbp.config.<a href="io/sbp/config/SbpVersion.html" title="class in io.sbp.config">SbpVersion</a></dt>
 <dd>
@@ -1095,6 +1195,10 @@ metrics and provides default harness-driven write workloads.</div>
 <dd>
 <div class="block">Open the storage device / client to perform the benchmarking.</div>
 </dd>
+<dt><a href="io/sbk/config/Config.html#OPTION_PAIR_WIDTH" class="member-name-link">OPTION_PAIR_WIDTH</a> - Static variable in class io.sbk.config.<a href="io/sbk/config/Config.html" title="class in io.sbk.config">Config</a></dt>
+<dd>
+<div class="block">Number of tokens in a command-line option/value pair.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:P">P</h2>
 <dl class="index">
@@ -1198,17 +1302,41 @@ metrics and provides default harness-driven write workloads.</div>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/logger/impl/AbstractRWLogger.html#print(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/AbstractRWLogger.html" title="class in io.sbk.logger.impl">AbstractRWLogger</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/sbk/logger/impl/SbkPrometheusServer.html#print(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SbkPrometheusServer.html" title="class in io.sbk.logger.impl">SbkPrometheusServer</a></dt>
+<dt><a href="io/sbk/logger/impl/CSVLogger.html#print(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</a></dt>
 <dd>
-<div class="block">Update Micrometer counters/gauges and delegate latency stats to the base server.</div>
+<div class="block">Print the periodic results to <code>System.out</code> at the end of each interval.</div>
+</dd>
+<dt><a href="io/sbk/logger/impl/GrpcLogger.html#print(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/GrpcLogger.html" title="class in io.sbk.logger.impl">GrpcLogger</a></dt>
+<dd>
+<div class="block">Print the periodic results to <code>System.out</code> at the end of each interval.</div>
+</dd>
+<dt><a href="io/sbk/logger/impl/PrometheusLogger.html#print(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/PrometheusLogger.html" title="class in io.sbk.logger.impl">PrometheusLogger</a></dt>
+<dd>
+<div class="block">Print the periodic results to <code>System.out</code> at the end of each interval.</div>
+</dd>
+<dt><a href="io/sbk/logger/impl/Sl4jLogger.html#print(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/Sl4jLogger.html" title="class in io.sbk.logger.impl">Sl4jLogger</a></dt>
+<dd>
+<div class="block">Print the periodic results to <code>System.out</code> at the end of each interval.</div>
 </dd>
 <dt><a href="io/sbk/logger/impl/SystemLogger.html#print(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
 <dd>
 <div class="block">Print the periodic results to <code>System.out</code> at the end of each interval.</div>
 </dd>
+<dt><a href="io/sbk/logger/impl/WebLogger.html#print(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/WebLogger.html" title="class in io.sbk.logger.impl">WebLogger</a></dt>
+<dd>
+<div class="block">Print the periodic results to <code>System.out</code> at the end of each interval.</div>
+</dd>
+<dt><a href="io/sbk/logger/impl/SbkPrometheusServer.html#print(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SbkPrometheusServer.html" title="class in io.sbk.logger.impl">SbkPrometheusServer</a></dt>
+<dd>
+<div class="block">Update Micrometer counters/gauges and delegate latency stats to the base server.</div>
+</dd>
 <dt><a href="io/sbk/logger/RWPrint.html#print(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in interface io.sbk.logger.<a href="io/sbk/logger/RWPrint.html" title="interface in io.sbk.logger">RWPrint</a></dt>
 <dd>
 <div class="block">Print the Periodic performance results.</div>
+</dd>
+<dt><a href="io/sbk/logger/impl/SystemLogger.html#print(long,int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(long, int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
+<dd>
+<div class="block">Print the periodic results to <code>System.out</code> at the end of each interval.</div>
 </dd>
 <dt><a href="io/sbk/logger/impl/CSVLogger.html#print(long,int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(long, int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</a></dt>
 <dd>&nbsp;</dd>
@@ -1221,10 +1349,6 @@ metrics and provides default harness-driven write workloads.</div>
 <dt><a href="io/sbk/logger/impl/Sl4jLogger.html#print(long,int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(long, int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/Sl4jLogger.html" title="class in io.sbk.logger.impl">Sl4jLogger</a></dt>
 <dd>
 <div class="block">Log the periodic results using SLF4J at info level.</div>
-</dd>
-<dt><a href="io/sbk/logger/impl/SystemLogger.html#print(long,int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(long, int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
-<dd>
-<div class="block">Print the periodic results to <code>System.out</code> at the end of each interval.</div>
 </dd>
 <dt><a href="io/sbk/logger/impl/WebLogger.html#print(long,int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(long, int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/WebLogger.html" title="class in io.sbk.logger.impl">WebLogger</a></dt>
 <dd>&nbsp;</dd>
@@ -1256,7 +1380,27 @@ metrics and provides default harness-driven write workloads.</div>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/logger/impl/AbstractRWLogger.html#printTotal(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">printTotal(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/AbstractRWLogger.html" title="class in io.sbk.logger.impl">AbstractRWLogger</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/sbk/logger/impl/CSVLogger.html#printTotal(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">printTotal(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</a></dt>
+<dd>
+<div class="block">Print the final accumulated totals to <code>System.out</code> at the end of the run.</div>
+</dd>
+<dt><a href="io/sbk/logger/impl/GrpcLogger.html#printTotal(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">printTotal(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/GrpcLogger.html" title="class in io.sbk.logger.impl">GrpcLogger</a></dt>
+<dd>
+<div class="block">Print the final accumulated totals to <code>System.out</code> at the end of the run.</div>
+</dd>
+<dt><a href="io/sbk/logger/impl/PrometheusLogger.html#printTotal(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">printTotal(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/PrometheusLogger.html" title="class in io.sbk.logger.impl">PrometheusLogger</a></dt>
+<dd>
+<div class="block">Print the final accumulated totals to <code>System.out</code> at the end of the run.</div>
+</dd>
+<dt><a href="io/sbk/logger/impl/Sl4jLogger.html#printTotal(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">printTotal(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/Sl4jLogger.html" title="class in io.sbk.logger.impl">Sl4jLogger</a></dt>
+<dd>
+<div class="block">Print the final accumulated totals to <code>System.out</code> at the end of the run.</div>
+</dd>
 <dt><a href="io/sbk/logger/impl/SystemLogger.html#printTotal(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">printTotal(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
+<dd>
+<div class="block">Print the final accumulated totals to <code>System.out</code> at the end of the run.</div>
+</dd>
+<dt><a href="io/sbk/logger/impl/WebLogger.html#printTotal(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">printTotal(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/WebLogger.html" title="class in io.sbk.logger.impl">WebLogger</a></dt>
 <dd>
 <div class="block">Print the final accumulated totals to <code>System.out</code> at the end of the run.</div>
 </dd>
@@ -1264,15 +1408,19 @@ metrics and provides default harness-driven write workloads.</div>
 <dd>
 <div class="block">Print the "Total" roll-up, typically at the end of a benchmark run.</div>
 </dd>
+<dt><a href="io/sbk/logger/impl/GrpcLogger.html#printTotal(long,int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">printTotal(long, int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/GrpcLogger.html" title="class in io.sbk.logger.impl">GrpcLogger</a></dt>
+<dd>
+<div class="block">Print the final accumulated totals to <code>System.out</code> at the end of the run.</div>
+</dd>
+<dt><a href="io/sbk/logger/impl/SystemLogger.html#printTotal(long,int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">printTotal(long, int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
+<dd>
+<div class="block">Print the final accumulated totals to <code>System.out</code> at the end of the run.</div>
+</dd>
 <dt><a href="io/sbk/logger/impl/CSVLogger.html#printTotal(long,int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">printTotal(long, int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/CSVLogger.html" title="class in io.sbk.logger.impl">CSVLogger</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbk/logger/impl/Sl4jLogger.html#printTotal(long,int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">printTotal(long, int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/Sl4jLogger.html" title="class in io.sbk.logger.impl">Sl4jLogger</a></dt>
 <dd>
 <div class="block">Log the final accumulated totals using SLF4J at info level.</div>
-</dd>
-<dt><a href="io/sbk/logger/impl/SystemLogger.html#printTotal(long,int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">printTotal(long, int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
-<dd>
-<div class="block">Print the final accumulated totals to <code>System.out</code> at the end of the run.</div>
 </dd>
 <dt><a href="io/sbk/logger/impl/WebLogger.html#printTotal(long,int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">printTotal(long, int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/WebLogger.html" title="class in io.sbk.logger.impl">WebLogger</a></dt>
 <dd>&nbsp;</dd>
@@ -1357,6 +1505,10 @@ configured duration or record target is reached.</div>
 <dt><a href="io/sbk/logger/impl/GrpcLogger.html#recordLatency(long,int,int,long)" class="member-name-link">recordLatency(long, int, int, long)</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/GrpcLogger.html" title="class in io.sbk.logger.impl">GrpcLogger</a></dt>
 <dd>
 <div class="block">Record individual latency values into the local <code>LatencyRecorder</code> and stage them for gRPC export.</div>
+</dd>
+<dt><a href="io/sbk/logger/impl/SystemLogger.html#recordLatency(long,int,int,long)" class="member-name-link">recordLatency(long, int, int, long)</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/SystemLogger.html" title="class in io.sbk.logger.impl">SystemLogger</a></dt>
+<dd>
+<div class="block">Intentionally ignores the individual latency callback.</div>
 </dd>
 <dt><a href="io/sbk/api/AsyncReader.html#recordRead(io.sbk.data.DataType,int,io.time.Time,io.sbk.api.Status,io.perl.api.PerlChannel)" class="member-name-link">recordRead(DataType, int, Time, Status, PerlChannel)</a> - Method in interface io.sbk.api.<a href="io/sbk/api/AsyncReader.html" title="interface in io.sbk.api">AsyncReader</a></dt>
 <dd>
@@ -1928,6 +2080,14 @@ options replaced by a fixed mask.</div>
 <div class="deprecation-block"><span class="deprecated-label">Deprecated.</span></div>
 <div class="block">Creates the deprecated callback-based benchmark reader.</div>
 </dd>
+<dt><a href="io/sbk/config/SbkConfig.html" class="type-name-link" title="class in io.sbk.config">SbkConfig</a> - Class in <a href="io/sbk/config/package-summary.html">io.sbk.config</a></dt>
+<dd>
+<div class="block">SBK command defaults and the separately loaded PerL configuration.</div>
+</dd>
+<dt><a href="io/sbk/config/SbkConfig.html#%3Cinit%3E()" class="member-name-link">SbkConfig()</a> - Constructor for class io.sbk.config.<a href="io/sbk/config/SbkConfig.html" title="class in io.sbk.config">SbkConfig</a></dt>
+<dd>
+<div class="block">Creates an empty configuration for properties binding.</div>
+</dd>
 <dt><a href="io/sbk/params/impl/SbkDriversParameters.html" class="type-name-link" title="class in io.sbk.params.impl">SbkDriversParameters</a> - Class in <a href="io/sbk/params/impl/package-summary.html">io.sbk.params.impl</a></dt>
 <dd>
 <div class="block">Parameters implementation that exposes storage driver and logger selection options.</div>
@@ -2213,6 +2373,10 @@ implementations on the classpath.</div>
 <dt><a href="io/sbk/logger/SbmHostConfig.html#streamCloseTimeoutSeconds" class="member-name-link">streamCloseTimeoutSeconds</a> - Variable in class io.sbk.logger.<a href="io/sbk/logger/SbmHostConfig.html" title="class in io.sbk.logger">SbmHostConfig</a></dt>
 <dd>
 <div class="block">Stream drain and acknowledgement timeout in seconds.</div>
+</dd>
+<dt><a href="io/sbk/config/ExitCode.html#SUCCESS" class="member-name-link">SUCCESS</a> - Static variable in class io.sbk.config.<a href="io/sbk/config/ExitCode.html" title="class in io.sbk.config">ExitCode</a></dt>
+<dd>
+<div class="block">Successful execution.</div>
 </dd>
 <dt><a href="io/sbk/api/DataRecordsWriter.html#sync()" class="member-name-link">sync()</a> - Method in interface io.sbk.api.<a href="io/sbk/api/DataRecordsWriter.html" title="interface in io.sbk.api">DataRecordsWriter</a></dt>
 <dd>

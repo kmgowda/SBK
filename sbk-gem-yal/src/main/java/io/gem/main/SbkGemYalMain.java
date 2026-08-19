@@ -11,6 +11,7 @@
 package io.gem.main;
 
 import io.gem.api.impl.SbkGemYal;
+import io.sbk.config.ExitCode;
 import io.gem.exception.SbkGemParameterException;
 import io.sbk.webconsole.WebConsoleClient.WebConsoleBusyException;
 import io.sbk.exception.HelpException;
@@ -43,24 +44,24 @@ public abstract class SbkGemYalMain {
         if (SbkUtils.hasVersion(args)) {
             final String version = io.gem.api.impl.SbkGemYal.class.getPackage().getImplementationVersion();
             System.out.println("SBK-GEM-YAL Version: " + version);
-            System.exit(0);
+            System.exit(ExitCode.SUCCESS);
         }
         try {
             SbkGemYal.run(args, null, null, null);
         } catch (WebConsoleBusyException ex) {
-            System.exit(1);
+            System.exit(ExitCode.FAILURE);
         } catch (HelpException ex) {
-            System.exit(0);
+            System.exit(ExitCode.SUCCESS);
         } catch (UnrecognizedOptionException ex) {
-            System.exit(2);
+            System.exit(ExitCode.INVALID_ARGUMENT);
         } catch (SbkGemParameterException ex) {
-            System.exit(1);
+            System.exit(ExitCode.FAILURE);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException | InterruptedException |
                  ExecutionException | ClassNotFoundException | InvocationTargetException | InstantiationException |
                  NoSuchMethodException | IllegalAccessException ex) {
             ex.printStackTrace();
-            System.exit(1);
+            System.exit(ExitCode.FAILURE);
         }
-        System.exit(0);
+        System.exit(ExitCode.SUCCESS);
     }
 }

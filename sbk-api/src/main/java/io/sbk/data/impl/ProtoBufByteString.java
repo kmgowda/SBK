@@ -48,7 +48,7 @@ final public class ProtoBufByteString implements DataType<ByteString> {
     public ByteString create(int size) {
         byte[] bytes = new byte[size];
         for (int i = 0; i < size; ++i) {
-            bytes[i] = (byte) (random.nextInt(26) + 65);
+            bytes[i] = (byte) (random.nextInt(GENERATED_DATA_ALPHABET_SIZE) + GENERATED_DATA_ASCII_BASE);
         }
         return ByteString.copyFrom(bytes);
     }

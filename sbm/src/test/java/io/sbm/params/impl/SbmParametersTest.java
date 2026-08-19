@@ -9,12 +9,24 @@
  */
 package io.sbm.params.impl;
 
+import io.sbk.action.Action;
+import io.sbm.config.SbmConfig;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /** Tests parsing of storage identity used by SBM metrics. */
 final class SbmParametersTest {
+
+    @Test
+    void usesConfiguredDefaultAction() throws Exception {
+        final SbmParameters parameters = new SbmParameters("test", 9717, 1, 0, null);
+
+        parameters.parseArgs(new String[]{"-class", "File"});
+
+        assertEquals("r", SbmConfig.get().defaultAction);
+        assertEquals(Action.Reading, parameters.getAction());
+    }
 
     @Test
     void preservesCanonicalStorageClassName() throws Exception {

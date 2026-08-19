@@ -49,7 +49,7 @@ final public class NioByteBuffer implements DataType<ByteBuffer> {
     public ByteBuffer create(int size) {
         ByteBuffer buffer = allocate(size);
         for (int i = 0; i < size; ++i) {
-            buffer.put((byte) (random.nextInt(26) + 65));
+            buffer.put((byte) (random.nextInt(GENERATED_DATA_ALPHABET_SIZE) + GENERATED_DATA_ASCII_BASE));
         }
         buffer.flip();
         return buffer;

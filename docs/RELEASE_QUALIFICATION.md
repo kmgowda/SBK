@@ -247,6 +247,20 @@ such as `-PreleaseRecords=50000`. These settings configure only the test
 harness; module runtime defaults remain in their existing authoritative
 properties files.
 
+The same file is the single source for child-process shutdown grace periods,
+port-selection limits, smoke and EOF workloads, SBM settling time, Docker node
+count and SSH readiness, and report-generation limits. The Gradle task exports
+those resolved values to the shell harnesses, so the scripts do not maintain a
+second set of fallback defaults. Use the matching Gradle property name to
+override one value, for example:
+
+```bash
+./gradlew releasecheck \
+  -Pprofile=local-docker \
+  -PreleaseDockerNodeCount=2 \
+  -PreleaseSmokeBenchmarkSeconds=10
+```
+
 `releaseRequireCleanTree` defaults to `true`. The `local` and `local-docker`
 profiles reject modifications to tracked files but ignore untracked files. The
 `ci` and `release` profiles require a completely clean tree, including no

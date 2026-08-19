@@ -20,6 +20,10 @@ import java.io.InputStream;
  * Configuration for the SBK Local Web Console.
  */
 public final class WebConsoleConfig {
+    /** Lowest valid TCP port. */
+    public static final int MIN_PORT = 1;
+    /** Highest valid TCP port. */
+    public static final int MAX_PORT = 65535;
     private static final String CONFIG_FILE = "webconsole.properties";
     /** TCP port used by the web console server. */
     public int port;
@@ -39,6 +43,8 @@ public final class WebConsoleConfig {
     public int connectTimeoutMillis;
     /** HTTP request timeout in milliseconds. */
     public int requestTimeoutMillis;
+    /** Maximum wait for the publisher thread to finish during shutdown. */
+    public int publisherShutdownTimeoutMillis;
     /** Child-server startup timeout in milliseconds. */
     public int startTimeoutMillis;
     /** Benchmark lease heartbeat interval in milliseconds. */
@@ -91,9 +97,10 @@ public final class WebConsoleConfig {
     }
 
     private void validate() {
-        if (port < 1 || port > 65535 || snapshotMinutes < 1 || timeoutMinutes < 1
+        if (port < MIN_PORT || port > MAX_PORT || snapshotMinutes < 1 || timeoutMinutes < 1
                 || reportingIntervalSeconds < 1 || connectTimeoutMillis < 1 || requestTimeoutMillis < 1
-                || startTimeoutMillis < 1 || leaseHeartbeatMillis < 1 || publisherPollMillis < 1
+                || publisherShutdownTimeoutMillis < 1 || startTimeoutMillis < 1 || leaseHeartbeatMillis < 1
+                || publisherPollMillis < 1
                 || startupPollMillis < 1 || serverHeartbeatMillis < 1 || httpBacklog < 1
                 || sseRetryMillis < 1 || browserHeartbeatMillis < 1 || browserSnapshotLimit < 1
                 || chartSnapshotLimit < 1 || refreshMillis < 1 || logDirectory == null

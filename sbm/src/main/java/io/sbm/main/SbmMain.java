@@ -13,6 +13,7 @@ package io.sbm.main;
 import io.sbk.webconsole.WebConsoleClient.WebConsoleBusyException;
 import io.sbk.utils.SbkUtils;
 import io.sbm.api.impl.Sbm;
+import io.sbk.config.ExitCode;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 
@@ -41,20 +42,20 @@ public abstract class SbmMain {
         if (SbkUtils.hasVersion(args)) {
             final String version = io.sbm.api.impl.Sbm.class.getPackage().getImplementationVersion();
             System.out.println(io.sbm.config.SbmConfig.NAME.toUpperCase() + " Version: " + version);
-            System.exit(0);
+            System.exit(ExitCode.SUCCESS);
         }
         try {
             Sbm.run(args, null, null);
         } catch (WebConsoleBusyException ex) {
-            System.exit(1);
+            System.exit(ExitCode.FAILURE);
         } catch (UnrecognizedOptionException ex) {
-            System.exit(2);
+            System.exit(ExitCode.INVALID_ARGUMENT);
         } catch (ParseException | IllegalArgumentException | IOException | TimeoutException | InterruptedException |
                  ExecutionException | InstantiationException | ClassNotFoundException | InvocationTargetException |
                  NoSuchMethodException | IllegalAccessException ex) {
             ex.printStackTrace();
-            System.exit(1);
+            System.exit(ExitCode.FAILURE);
         }
-        System.exit(0);
+        System.exit(ExitCode.SUCCESS);
     }
 }

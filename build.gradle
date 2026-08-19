@@ -18,7 +18,7 @@ buildscript {
         mavenLocal()
         mavenCentral()
         maven {
-            url = "https://plugins.gradle.org/m2/"
+            url = gradlePluginRepositoryUrl
         }
     }
     dependencies {
@@ -84,7 +84,7 @@ allprojects {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/yahoo/HaloDB")
+            url = uri(haloDbRepositoryUrl)
             credentials {
                 username = project.findProperty("github.username")
                         ?: System.getenv("GITHUB_USERNAME")
@@ -98,7 +98,7 @@ allprojects {
         mavenLocal()
         mavenCentral()
         maven {
-            url = "https://plugins.gradle.org/m2/"
+            url = gradlePluginRepositoryUrl
         }
     }
     group = sbkGroup

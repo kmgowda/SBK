@@ -10,7 +10,9 @@
 
 package io.gem.api.impl;
 
+import io.gem.api.RemoteExitCode;
 import io.gem.api.SshResponse;
+import io.sbk.config.ExitCode;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -49,7 +51,7 @@ final class RemoteSbkDeployment {
      * @return absolute directory, or null when resolution failed or returned invalid output
      */
     static String absoluteDirectoryPath(SshResponse response) {
-        if (response == null || response.returnCode != 0) {
+        if (response == null || response.returnCode != ExitCode.SUCCESS) {
             return null;
         }
         final String path = response.stdOutputStream.toString().trim();
@@ -67,7 +69,8 @@ final class RemoteSbkDeployment {
      */
     static String versionProbeCommand(String commandPath) {
         final String quotedCommand = shellQuote(commandPath);
-        return "if [ -x " + quotedCommand + " ]; then " + quotedCommand + " -version; else exit 127; fi";
+        return "if [ -x " + quotedCommand + " ]; then " + quotedCommand + " -version; else exit "
+                + RemoteExitCode.COMMAND_NOT_FOUND + "; fi";
     }
 
     /**
@@ -88,7 +91,7 @@ final class RemoteSbkDeployment {
         return "cd -- " + shellQuote(remoteDirectory) + " && base=\"$(pwd -P)\" && sbk_path=\"$base/\"" +
                 shellQuote(relativeCommandPath) + " && if [ -x \"$sbk_path\" ]; then printf '%s\\n' " +
                 "\"$sbk_path\"; else printf '%s\\n' \"SBK executable not found or not executable: $sbk_path\" " +
-                ">&2; exit 127; fi";
+                ">&2; exit " + RemoteExitCode.COMMAND_NOT_FOUND + "; fi";
     }
 
     /**
@@ -98,7 +101,7 @@ final class RemoteSbkDeployment {
      * @return absolute executable path, or null when resolution failed or returned invalid output
      */
     static String absoluteExecutablePath(SshResponse response) {
-        if (response == null || response.returnCode != 0) {
+        if (response == null || response.returnCode != ExitCode.SUCCESS) {
             return null;
         }
         final String path = response.stdOutputStream.toString().trim();
@@ -116,7 +119,8 @@ final class RemoteSbkDeployment {
      * @return true only when the command succeeded and printed the exact expected version
      */
     static boolean hasExpectedVersion(SshResponse response, String expectedVersion) {
-        if (response == null || response.returnCode != 0 || expectedVersion == null || expectedVersion.isBlank()) {
+        if (response == null || response.returnCode != ExitCode.SUCCESS
+                || expectedVersion == null || expectedVersion.isBlank()) {
             return false;
         }
         final Matcher matcher = VERSION_PATTERN.matcher(response.stdOutputStream.toString());
@@ -146,7 +150,8 @@ final class RemoteSbkDeployment {
      * @return true when copying is enabled and the expected version is unavailable
      */
     static boolean requiresCopy(boolean copyEnabled, SshResponse response, String expectedVersion) {
-        return copyEnabled && response != null && (response.returnCode == 0 || response.returnCode == 127) &&
+        return copyEnabled && response != null && (response.returnCode == ExitCode.SUCCESS
+                || response.returnCode == RemoteExitCode.COMMAND_NOT_FOUND) &&
                 !hasExpectedVersion(response, expectedVersion);
     }
 
@@ -159,7 +164,7 @@ final class RemoteSbkDeployment {
      * @return true when a remote executable exists but does not provide the expected version
      */
     static boolean requiresDeleteBeforeCopy(boolean deleteEnabled, SshResponse response, String expectedVersion) {
-        return deleteEnabled && response != null && response.returnCode == 0 &&
+        return deleteEnabled && response != null && response.returnCode == ExitCode.SUCCESS &&
                 !hasExpectedVersion(response, expectedVersion);
     }
 

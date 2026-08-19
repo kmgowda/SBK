@@ -362,6 +362,11 @@ final class WebConsoleServerTest {
     }
 
     @Test
+    void publisherShutdownTimeoutPreservesExistingBehavior() {
+        assertEquals(6000, WebConsoleConfig.load().publisherShutdownTimeoutMillis);
+    }
+
+    @Test
     void usesAStablePerPortBackgroundLogPath() {
         final Path logPath = WebConsoleClient.backgroundLogPath(19720);
 
