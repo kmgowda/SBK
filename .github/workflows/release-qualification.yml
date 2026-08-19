@@ -37,7 +37,7 @@ jobs:
           java-version: '25'
 
       - name: Run release qualification
-        run: ./gradlew clean releaseQualification -PreleaseProfile=ci --no-daemon --rerun-tasks
+        run: ./gradlew clean releasecheck -Pprofile=ci --no-daemon --rerun-tasks
 
   qualify-release:
     if: inputs.profile == 'release'
@@ -68,8 +68,8 @@ jobs:
 
       - name: Run release qualification
         run: |
-          ./gradlew clean releaseQualification \
-            -PreleaseProfile=release \
+          ./gradlew clean releasecheck \
+            -Pprofile=release \
             "-PreleaseInventory=$RUNNER_TEMP/sbk-release-inventory.properties" \
             --no-daemon --rerun-tasks
 
@@ -90,4 +90,4 @@ jobs:
           java-version: '25'
 
       - name: Run Docker-backed local qualification
-        run: ./gradlew clean releaseQualification -PreleaseProfile=local-docker --no-daemon --rerun-tasks
+        run: ./gradlew clean releasecheck -Pprofile=local-docker --no-daemon --rerun-tasks

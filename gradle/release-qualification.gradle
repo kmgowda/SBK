@@ -29,7 +29,16 @@ def qualificationValue = { String name ->
     projectValue ?: qualificationDefaults.getProperty("qualification.${name}")
 }
 
-def qualificationProfile = qualificationValue('profile')
+def obsoleteProfileProperty = ['releaseProfile', 'release.profile'].find {
+    findProperty(it) != null
+}
+if (obsoleteProfileProperty) {
+    throw new GradleException("Gradle property '${obsoleteProfileProperty}' was renamed to 'profile'; "
+            + "use -Pprofile=<local|local-docker|ci|release>")
+}
+
+def qualificationProfile = findProperty('profile')?.toString()?.trim()
+        ?: qualificationDefaults.getProperty('qualification.profile')
 if (!(qualificationProfile in ['local', 'local-docker', 'ci', 'release'])) {
     throw new GradleException("Invalid release qualification profile '${qualificationProfile}'; "
             + "expected local, local-docker, ci, or release")
@@ -53,15 +62,20 @@ tasks.register('releasePreflight') {
         }
 
         if (qualificationValue('requireCleanTree').toBoolean()) {
+            def includeUntrackedFiles = qualificationProfile in ['ci', 'release']
             def statusOutput = providers.exec {
-                commandLine 'git', 'status', '--porcelain', '--untracked-files=all'
+                commandLine 'git', 'status', '--porcelain',
+                        "--untracked-files=${includeUntrackedFiles ? 'all' : 'no'}"
                 ignoreExitValue = true
             }
             def result = statusOutput.result.get()
             def output = statusOutput.standardOutput.asText.get()
             def error = statusOutput.standardError.asText.get()
             if (result.exitValue != 0 || !output.trim().isEmpty()) {
-                throw new GradleException('Release qualification requires a clean Git tree.\n'
+                def requirement = includeUntrackedFiles
+                        ? 'a clean Git tree'
+                        : 'no uncommitted tracked changes'
+                throw new GradleException("Release qualification requires ${requirement}.\n"
                         + output + error)
             }
         }
@@ -267,7 +281,7 @@ gradle.projectsEvaluated {
     }
 }
 
-tasks.register('releaseQualification') {
+tasks.register('releasecheck') {
     group = 'verification'
     description = 'Runs the authoritative one-command SBK release qualification gate.'
     dependsOn tasks.named('releasePreflight')
@@ -318,7 +332,7 @@ tasks.register('releaseQualification') {
 
 [
         'releaseBuild', 'releaseConcurrency', 'releasePerformance', 'releasePackaging',
-        'releaseFunctionalTest', 'releaseDocsCheck', 'releasePublicationTest', 'releaseQualification'
+        'releaseFunctionalTest', 'releaseDocsCheck', 'releasePublicationTest', 'releasecheck'
 ].each { taskName ->
     tasks.named(taskName).configure {
         mustRunAfter tasks.named('releasePreflight')

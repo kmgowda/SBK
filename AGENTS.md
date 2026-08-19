@@ -113,8 +113,8 @@ For a release candidate, use the authoritative gate rather than assembling a
 manual subset:
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=release \
+./gradlew clean releasecheck \
+  -Pprofile=release \
   -PreleaseInventory=/secure/sbk-release-inventory.properties \
   --no-daemon --rerun-tasks
 ```
@@ -122,7 +122,7 @@ manual subset:
 See [`docs/RELEASE_QUALIFICATION.md`](docs/RELEASE_QUALIFICATION.md). A release
 profile must fail when mandatory remote infrastructure is unavailable; it must
 not convert missing GEM hosts or required backend coverage into a successful
-skip. Use `-PreleaseProfile=local-docker` for automatic disposable single-node
+skip. Use `-Pprofile=local-docker` for automatic disposable two-node
 GEM functional coverage; it does not replace real-host release evidence.
 
 ---

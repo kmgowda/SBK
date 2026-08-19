@@ -379,6 +379,15 @@ if [[ $PROFILE == release || $PROFILE == local-docker ]]; then
     GEM_PORT=$(inventory_value gem.port)
     GEM_LOCAL_HOST=$(inventory_value gem.localhost)
     GEM_PORT=${GEM_PORT:-22}
+    GEM_NODE_COUNT=$(printf '%s\n' "$GEM_NODES" | tr ',[:space:]' '\n' | sed '/^$/d' | wc -l)
+    GEM_NODE_COUNT=${GEM_NODE_COUNT//[[:space:]]/}
+    if [[ $PROFILE == local-docker && $GEM_NODE_COUNT -ne 2 ]]; then
+        printf 'The local-docker profile requires exactly two GEM nodes; found %s\n' \
+            "$GEM_NODE_COUNT" >&2
+        exit 1
+    fi
+    GEM_SUCCESS_PATTERN="expected nodes: ${GEM_NODE_COUNT}; successful nodes: ${GEM_NODE_COUNT}; "
+    GEM_SUCCESS_PATTERN+="failed nodes: 0; maximum SBM registrations: ${GEM_NODE_COUNT}/${GEM_NODE_COUNT}"
     for logger in GemPrometheusLogger GemWebLogger; do
         gem_args=(-nodes "$GEM_NODES" -gemuser "$GEM_USER" -knownhosts "$GEM_KNOWN_HOSTS"
                   -gemport "$GEM_PORT" -class file -writers 1 -size "$RECORD_SIZE"
@@ -391,7 +400,7 @@ if [[ $PROFILE == release || $PROFILE == local-docker ]]; then
         else
             gem_args+=(-context "$(free_port)/metrics")
         fi
-        run_expect "sbk-gem-${logger}" "SBK-GEM.*(Shutdown|SUCCESS)|Distributed.*SUCCESS" \
+        run_expect "sbk-gem-${logger}" "$GEM_SUCCESS_PATTERN" \
             "$SBK_GEM" "${gem_args[@]}"
     done
 
@@ -403,7 +412,7 @@ if [[ $PROFILE == release || $PROFILE == local-docker ]]; then
     fi
     printf '  class: file\n  writers: 1\n  size: %s\n  records: %s\n  out: GemPrometheusLogger\n' \
         "$RECORD_SIZE" "$RECORDS" >> "$GEM_YAL_FILE"
-    run_expect sbk-gem-yal-release "Merged YAML.*arguments|SBK-GEM.*SUCCESS" \
+    run_expect sbk-gem-yal-release "$GEM_SUCCESS_PATTERN" \
         "$SBK_GEM_YAL" -f "$GEM_YAL_FILE"
 else
     record_result sbk-gem-external PASS "not mandatory in ${PROFILE} profile; release profile requires inventory"

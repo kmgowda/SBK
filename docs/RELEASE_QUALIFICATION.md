@@ -16,25 +16,25 @@ were qualified.
 Use the `local` profile while developing:
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=local \
+./gradlew clean releasecheck \
+  -Pprofile=local \
   --no-daemon --rerun-tasks
 ```
 
 The `local-docker` profile adds fully automatic SBK-GEM and SBK-GEM-YAL
-testing against a disposable local Docker SSH/JDK node. The `ci` profile adds
+testing against two disposable local Docker SSH/JDK nodes. The `ci` profile adds
 Maven-local publication verification. The `release` profile additionally runs
 the JMH performance gates and requires real remote SBK-GEM hosts:
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=local-docker \
+./gradlew clean releasecheck \
+  -Pprofile=local-docker \
   --no-daemon --rerun-tasks
 ```
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=release \
+./gradlew clean releasecheck \
+  -Pprofile=release \
   -PreleaseInventory=/secure/sbk-release-inventory.properties \
   --no-daemon --rerun-tasks
 ```
@@ -59,16 +59,16 @@ functional tests. It does not run the remote GEM or release-only performance
 tests.
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=local \
+./gradlew clean releasecheck \
+  -Pprofile=local \
   --no-daemon --rerun-tasks
 ```
 
 During development, use the clean-tree override to qualify uncommitted code:
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=local \
+./gradlew clean releasecheck \
+  -Pprofile=local \
   -PreleaseRequireCleanTree=false \
   --no-daemon --rerun-tasks
 ```
@@ -83,8 +83,8 @@ the complete GEM orchestration path without provisioning a permanent remote
 host:
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=local-docker \
+./gradlew clean releasecheck \
+  -Pprofile=local-docker \
   --no-daemon --rerun-tasks
 ```
 
@@ -93,17 +93,20 @@ tools `ssh`, `ssh-agent`, `ssh-add`, `ssh-keygen`, and `ssh-keyscan`. The gate:
 
 1. builds a JDK 25 fixture image;
 2. creates an ephemeral Ed25519 key and isolated SSH agent;
-3. starts one non-root SSH node with a dynamically assigned loopback port;
-4. verifies the generated `known_hosts` entry and remote Java runtime;
+3. starts two non-root SSH nodes sharing a dynamically assigned SSH port on
+   separate loopback addresses;
+4. verifies both generated `known_hosts` entries and remote Java runtimes;
 5. runs `GemPrometheusLogger`, `GemWebLogger`, and SBK-GEM-YAL through the
-   normal copy, remote launch, SBM callback, aggregation, and cleanup paths;
-6. force-removes the container, SSH agent, and ephemeral credentials on both
+   normal copy, two-client coordinated launch, SBM callback, aggregation, and
+   cleanup paths, requiring two successful nodes and two SBM registrations;
+6. force-removes both containers, the SSH agent, and ephemeral credentials on both
    success and failure.
 
 No inventory, persistent SSH key, exposed fixed port, or manual container
-setup is needed. The fixture is intentionally a single host. It proves GEM's
-deployment and protocol contracts, but it does not replace real multi-host
-fan-out, network, and backend qualification in the `release` profile.
+setup is needed. The fixture proves two-node fan-out, coordinated SBM startup,
+aggregation, and protocol contracts on one Docker host. It does not replace
+qualification across real hosts, networks, and storage backends in the
+`release` profile.
 
 ### CI gate
 
@@ -111,8 +114,8 @@ The CI profile adds Maven main, source, Javadoc JAR, and POM generation checks.
 It does not publish artifacts or require signing credentials.
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=ci \
+./gradlew clean releasecheck \
+  -Pprofile=ci \
   --no-daemon --rerun-tasks
 ```
 
@@ -122,8 +125,8 @@ Use a clean checkout and a private inventory containing real SSH-accessible
 hosts:
 
 ```bash
-./gradlew clean releaseQualification \
-  -PreleaseProfile=release \
+./gradlew clean releasecheck \
+  -Pprofile=release \
   -PreleaseInventory=/root/.config/sbk/release-inventory.properties \
   --no-daemon --rerun-tasks
 ```
@@ -244,12 +247,15 @@ such as `-PreleaseRecords=50000`. These settings configure only the test
 harness; module runtime defaults remain in their existing authoritative
 properties files.
 
-`releaseRequireCleanTree` defaults to `true`. A developer may disable it for a
-local diagnostic run, but a release candidate must use the default:
+`releaseRequireCleanTree` defaults to `true`. The `local` and `local-docker`
+profiles reject modifications to tracked files but ignore untracked files. The
+`ci` and `release` profiles require a completely clean tree, including no
+untracked files. A developer may disable the check for a local diagnostic run,
+but a release candidate must use the default:
 
 ```bash
 ./gradlew releaseFunctionalTest \
-  -PreleaseProfile=local \
+  -Pprofile=local \
   -PreleaseRequireCleanTree=false
 ```
 
@@ -286,8 +292,10 @@ was used; they are not remote GEM results.
 
 Common preflight failures are intentional:
 
-- `Release qualification requires a clean Git tree` means tracked or
-  untracked files remain in the checkout.
+- `Release qualification requires no uncommitted tracked changes` means the
+  `local` or `local-docker` profile found a modified tracked file.
+- `Release qualification requires a clean Git tree` means the `ci` or
+  `release` profile found a tracked modification or an untracked file.
 - `Release inventory does not exist` means the example inventory path was
   used without creating the file.
 - `Release known-hosts file does not exist` means `gem.knownHosts` does not
