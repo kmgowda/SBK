@@ -41,6 +41,8 @@ SBK_GEM="$ROOT/build/install/sbk/bin/sbk-gem"
 SBK_GEM_YAL="$ROOT/build/install/sbk/bin/sbk-gem-yal"
 WEB_CONSOLE="$ROOT/sbk-web-console/build/install/sbk-web-console/bin/sbk-web-console"
 
+source "$ROOT/scripts/release-process-timeout.sh"
+
 mkdir -p "$WORK_DIR" "$LOG_DIR"
 : > "$RESULTS_FILE"
 
@@ -65,7 +67,7 @@ run_expect() {
     local expected=$2
     shift 2
     local log="$LOG_DIR/${name}.log"
-    timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" "$@" > "$log" 2>&1
+    run_with_timeout "$PROCESS_TIMEOUT" "$KILL_GRACE_SECONDS" "$@" > "$log" 2>&1
     local status=$?
     if [[ $status -ne 0 ]]; then
         record_result "$name" FAIL "exit code $status; see $log"
@@ -81,7 +83,7 @@ run_reject() {
     local expected=$2
     shift 2
     local log="$LOG_DIR/${name}.log"
-    timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" "$@" > "$log" 2>&1
+    run_with_timeout "$PROCESS_TIMEOUT" "$KILL_GRACE_SECONDS" "$@" > "$log" 2>&1
     local status=$?
     if [[ $status -eq 0 ]]; then
         record_result "$name" FAIL "invalid command exited zero; see $log"
@@ -209,7 +211,7 @@ fi
 
 PROM_PORT=$(free_port)
 PROM_LOG="$LOG_DIR/sbk-PrometheusLogger.log"
-timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" \
+run_with_timeout "$PROCESS_TIMEOUT" "$KILL_GRACE_SECONDS" \
     "$SBK" -class file -file "$WORK_DIR/sbk-prom.dat" -writers 1 -size "$RECORD_SIZE" \
     -seconds "$SMOKE_BENCHMARK_SECONDS" -out PrometheusLogger \
     -context "$PROM_PORT/metrics" > "$PROM_LOG" 2>&1 &
@@ -234,7 +236,7 @@ fi
 
 WEB_PORT=$(free_port)
 WEB_LOG="$LOG_DIR/sbk-WebLogger.log"
-timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" \
+run_with_timeout "$PROCESS_TIMEOUT" "$KILL_GRACE_SECONDS" \
     "$SBK" -class file -file "$WORK_DIR/sbk-web.dat" -writers 1 -size "$RECORD_SIZE" \
     -seconds "$SMOKE_BENCHMARK_SECONDS" -out WebLogger -webopen false -webport "$WEB_PORT" \
     -webtimeoutminutes "$WEB_TIMEOUT_MINUTES" > "$WEB_LOG" 2>&1 &
@@ -266,7 +268,7 @@ else
 fi
 
 WEB_REUSE_LOG="$LOG_DIR/sbk-WebLogger-reuse.log"
-timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" \
+run_with_timeout "$PROCESS_TIMEOUT" "$KILL_GRACE_SECONDS" \
     "$SBK" -class file -file "$WORK_DIR/sbk-web-reuse.dat" -writers 1 -size "$RECORD_SIZE" \
     -records "$RECORDS" -out WebLogger -webopen false -webport "$WEB_PORT" \
     -webtimeoutminutes "$WEB_TIMEOUT_MINUTES" > "$WEB_REUSE_LOG" 2>&1
@@ -295,7 +297,7 @@ done
 
 YAL_PROM_PORT=$(free_port)
 YAL_PROM_LOG="$LOG_DIR/sbk-yal-PrometheusLogger.log"
-timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" \
+run_with_timeout "$PROCESS_TIMEOUT" "$KILL_GRACE_SECONDS" \
     "$SBK_YAL" -f "$YAL_FILE" -seconds "$SMOKE_BENCHMARK_SECONDS" -out PrometheusLogger \
     -context "$YAL_PROM_PORT/metrics" > "$YAL_PROM_LOG" 2>&1 &
 yal_prom_pid=$!
@@ -307,7 +309,7 @@ fi
 wait "$yal_prom_pid"
 
 YAL_WEB_LOG="$LOG_DIR/sbk-yal-WebLogger.log"
-timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" \
+run_with_timeout "$PROCESS_TIMEOUT" "$KILL_GRACE_SECONDS" \
     "$SBK_YAL" -f "$YAL_FILE" -out WebLogger -webopen false -webport "$WEB_PORT" \
     -webtimeoutminutes "$WEB_TIMEOUT_MINUTES" > "$YAL_WEB_LOG" 2>&1
 yal_web_status=$?
@@ -357,11 +359,11 @@ run_sbm_case() {
         return
     fi
     if [[ $client_mode == yal ]]; then
-        timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" \
+        run_with_timeout "$PROCESS_TIMEOUT" "$KILL_GRACE_SECONDS" \
             "$SBK_YAL" -f "$YAL_FILE" -out GrpcLogger -sbm 127.0.0.1 -sbmport "$sbm_port" \
             > "$client_log" 2>&1
     else
-        timeout --signal=INT --kill-after="${KILL_GRACE_SECONDS}s" "${PROCESS_TIMEOUT}s" \
+        run_with_timeout "$PROCESS_TIMEOUT" "$KILL_GRACE_SECONDS" \
             "$SBK" -class file -file "$WORK_DIR/${name}.dat" -writers 1 -size "$RECORD_SIZE" \
             -records "$RECORDS" -out GrpcLogger -sbm 127.0.0.1 -sbmport "$sbm_port" \
             > "$client_log" 2>&1

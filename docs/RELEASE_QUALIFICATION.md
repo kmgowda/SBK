@@ -76,6 +76,10 @@ During development, use the clean-tree override to qualify uncommitted code:
 Do not use this override as release evidence. A local-profile result verifies
 the local functional scope but does not qualify a release candidate.
 
+The local functional harness supports both macOS and Linux using the Bash,
+`kill`, and `sleep` commands supplied by the operating system. GNU coreutils
+`timeout` (or the Homebrew `gtimeout` equivalent) is not required.
+
 ### Local gate with automatic GEM
 
 Use `local-docker` when a developer or ordinary GitHub-hosted runner must test
