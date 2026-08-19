@@ -17,7 +17,6 @@ buildscript {
         }
     }
     dependencies {
-        classpath "org.nosphere.apache:creadur-rat-gradle:$apacheRatVersion"
         classpath "com.google.cloud.tools.jib:com.google.cloud.tools.jib.gradle.plugin:$jibVersion"
     }
 }

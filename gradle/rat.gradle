@@ -8,28 +8,72 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  */
-apply plugin: "org.nosphere.apache.rat"
+def ratExcludes = [
+        '**/.*/**',
+        '**/*.iml',
+        '**/*.iws',
+        '**/*.ipr',
+        '**/*passwd',
+        '**/gradle/wrapper/**',
+        '**/build/**',
+        '**/out/**',
+        '**/javadoc/**',
+        '**/generated/**',
+        '**/checkstyle/**',
+        'deployment/aws/installer/hosts-template',
+        'lombok.config',
+        '**/*.log',
+        '**/*.lock',
+        '**/*.json',
+        '**/config/*jks*',
+        '**/*.txt',
+        'CODE_OF_CONDUCT.md'
+]
 
-rat {
-    excludes = [
-            '**/.*/**',
-            '**/*.iml',
-            '**/*.iws',
-            '**/*.ipr',
-            '**/*passwd',
-            '**/gradle/wrapper/**',
-            '**/build/**',
-            '**/out/**',
-            '**/javadoc/**',
-            '**/generated/**',
-            '**/checkstyle/**',
-            'deployment/aws/installer/hosts-template',
-            'lombok.config',
-            '**/*.log',
-            '**/*.lock',
-            '**/*.json',
-            '**/config/*jks*',
-            '**/*.txt',
-            'CODE_OF_CONDUCT.md'
-    ]
+def apacheRat = configurations.create('apacheRat') {
+    description = 'Apache RAT command-line runtime.'
+    canBeConsumed = false
+    canBeResolved = true
+}
+
+dependencies.add(apacheRat.name, "org.apache.rat:apache-rat:$apacheRatVersion")
+dependencies.add(apacheRat.name, "org.slf4j:slf4j-simple:$slf4jVersion")
+
+def ratReport = layout.buildDirectory.file('reports/rat/rat-report.txt')
+
+tasks.register('rat', JavaExec) {
+    group = 'verification'
+    description = 'Runs Apache RAT to verify source license headers.'
+    classpath = apacheRat
+    mainClass = 'org.apache.rat.Report'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
+    }
+    workingDir = projectDir
+    inputs.files(fileTree(projectDir) {
+        exclude ratExcludes
+    })
+    outputs.file(ratReport)
+    ignoreExitValue = true
+
+    args '--input-exclude'
+    args ratExcludes
+    args '--output-file', ratReport.get().asFile.absolutePath
+    args '--output-style', 'plain-rat'
+    args '--log-level', 'WARN'
+    args '--', projectDir.absolutePath
+
+    doFirst {
+        ratReport.get().asFile.parentFile.mkdirs()
+    }
+    doLast {
+        if (executionResult.get().exitValue != 0) {
+            throw new GradleException(
+                    "Apache RAT audit failed. See ${ratReport.get().asFile.toURI()}")
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('rat')
 }

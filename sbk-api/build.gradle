@@ -19,7 +19,6 @@ buildscript {
     }
     dependencies {
         classpath "com.google.protobuf:protobuf-gradle-plugin:$protobufGradlePlugin"
-        classpath "org.nosphere.apache:creadur-rat-gradle:$apacheRatVersion"
         classpath "me.champeau.jmh:jmh-gradle-plugin:$jmhGradleVersion"
     }
 }
