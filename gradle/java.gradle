@@ -87,8 +87,7 @@ plugins.withId('java') {
                 "-Xlint:empty",
                 "-Xlint:fallthrough",
                 "-Xlint:finally",
-                "-Xlint:overrides",
-                "-Xlint:path"
+                "-Xlint:overrides"
         ])
     }
 
