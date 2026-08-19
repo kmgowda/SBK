@@ -184,7 +184,9 @@ instances for each target node.
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalRecords()" class="member-name-link">getTotalRecords</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the configured record value.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isCopy()" class="member-name-link">isCopy</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -318,11 +320,16 @@ command exists and is executable.</div>
 <h3>getTotalRecords</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">getTotalRecords</span>()</div>
+<div class="block">Get the configured record value. The GEM aggregate value is returned when <code>-totalrecords</code> is supplied;
+otherwise, this returns the standard SBK record value. The aggregate value is a fixed count without
+<code>-seconds</code> and a records/second rate with <code>-seconds</code>.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code>getTotalRecords</code>&nbsp;in interface&nbsp;<code>io.sbk.params.Parameters</code></dd>
 <dt>Overrides:</dt>
 <dd><code>getTotalRecords</code>&nbsp;in class&nbsp;<code>io.sbk.params.impl.SbkParameters</code></dd>
+<dt>Returns:</dt>
+<dd>aggregate or standard record value, according to the selected option</dd>
 </dl>
 </div>
 </section>

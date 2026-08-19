@@ -1909,6 +1909,13 @@ sequenceDiagram
     participant N2 as "Remote node 2"
 
     User->>GEM: sbk-gem -nodes h1,h2 -class minio ...
+    Note over GEM: build common GrpcLogger and SBM callback arguments
+    opt totalrecords is supplied
+        Note over GEM: divide the aggregate count or rate<br/>into node-specific -records values
+    end
+    opt totalthroughput is supplied
+        Note over GEM: divide aggregate MB/s<br/>into node-specific -throughput values
+    end
     GEM->>SSH: createSessionAsync(h1)
     GEM->>SSH: createSessionAsync(h2)
     par connect, verify host key, and authenticate
@@ -1945,13 +1952,6 @@ sequenceDiagram
     GEM->>SSH: resolve and verify absolute SBK executable per node
 
     GEM->>SBM: sbmBenchmark.start()<br/>(listen on :9717 locally)
-
-    opt totalrecords is supplied
-        Note over GEM: divide the aggregate count or rate<br/>into node-specific -records values
-    end
-    opt totalthroughput is supplied
-        Note over GEM: divide aggregate MB/s<br/>into node-specific -throughput values
-    end
     GEM->>SSH: export SBK_JAVA_HOME and run sbkCommand on each node
     Note over SSH: remote command starts SBK with<br/>-out GrpcLogger -sbm localHost -sbmport 9717
 
@@ -2027,6 +2027,10 @@ per-client `-records` or fixed aggregate `-totalrecords`; timed
 `-totalrecords` cannot be combined with it because both options would define
 the run rate. Decimal allocation retains an exact aggregate command-line value,
 subject to SBK's existing MB/s-to-whole-records-per-worker conversion.
+Because SBK currently derives one shared per-worker rate for both directions,
+timed aggregate controls require equal writer and reader counts in mixed
+workloads. Unequal mixed counts are rejected; writer-only, reader-only, and
+equal mixed workloads retain their existing behavior.
 This planning happens before remote launch and does not add work to the SBK,
 PerL, or SBM measurement hot paths.
 

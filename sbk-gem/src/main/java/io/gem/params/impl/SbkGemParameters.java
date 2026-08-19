@@ -263,6 +263,13 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
 
     }
 
+    /**
+     * Get the configured record value. The GEM aggregate value is returned when {@code -totalrecords} is supplied;
+     * otherwise, this returns the standard SBK record value. The aggregate value is a fixed count without
+     * {@code -seconds} and a records/second rate with {@code -seconds}.
+     *
+     * @return aggregate or standard record value, according to the selected option
+     */
     @Override
     public long getTotalRecords() {
         return totalRecordsOption ? distributedTotalRecords : super.getTotalRecords();
@@ -275,6 +282,9 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         if (totalThroughputOption && totalThroughput.signum() <= 0) {
             throw new IllegalArgumentException("The '-totalthroughput' value must be greater than zero");
         }
+        if (totalThroughputOption) {
+            validateMatchingMixedWorkerCounts("-totalthroughput");
+        }
         if (totalRecordsOption && totalThroughputOption && getTotalSecondsToRun() > 0) {
             throw new IllegalArgumentException("The '-totalrecords' and '-totalthroughput' options cannot be " +
                     "combined with '-seconds' because both would define the benchmark rate");
@@ -285,8 +295,9 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         if (distributedTotalRecords <= 0) {
             throw new IllegalArgumentException("The '-totalrecords' value must be greater than zero");
         }
-        final int workers = getWritersCount() > 0 ? getWritersCount() : getReadersCount();
         if (getTotalSecondsToRun() > 0) {
+            validateMatchingMixedWorkerCounts("-totalrecords");
+            final int workers = getWritersCount() > 0 ? getWritersCount() : getReadersCount();
             if (distributedTotalRecords % workers != 0) {
                 throw new IllegalArgumentException("The '-totalrecords' records/second value must be divisible by " +
                         "the active worker count " + workers);
@@ -298,6 +309,15 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         } else if (distributedTotalRecords < nodeCount) {
             throw new IllegalArgumentException("The '-totalrecords' value must be at least the number of nodes: " +
                     nodeCount);
+        }
+    }
+
+    private void validateMatchingMixedWorkerCounts(String option) {
+        final int writers = getWritersCount();
+        final int readers = getReadersCount();
+        if (writers > 0 && readers > 0 && writers != readers) {
+            throw new IllegalArgumentException("The '" + option + "' aggregate rate requires equal writer and " +
+                    "reader counts for mixed workloads; configured writers: " + writers + ", readers: " + readers);
         }
     }
 

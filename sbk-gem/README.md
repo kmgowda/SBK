@@ -108,8 +108,9 @@ records/second rate in whole per-worker units so the requested total remains
 exact. The rate must therefore be divisible by the active worker count and
 must provide at least one record/second to every active worker on every node.
 For mixed writer/reader runs, the aggregate rate applies independently to each
-direction, matching SBK's existing `-records` semantics. `-totalrecords` is
-mutually exclusive with `-records` and `-throughput`.
+direction when writer and reader counts are equal, matching SBK's shared
+per-worker rate model. Timed aggregate rates reject unequal mixed worker counts.
+`-totalrecords` is mutually exclusive with `-records` and `-throughput`.
 
 ### Aggregate throughput control
 
@@ -139,6 +140,8 @@ with fixed `-records` or fixed `-totalrecords`. It must not be combined with
 timed `-totalrecords`, because in that mode `-totalrecords` already means an
 aggregate records/second limit and the two options would define competing
 rates. The option is also supported by SBK-GEM-YAL as `totalthroughput`.
+Mixed writer/reader runs require equal writer and reader counts because SBK
+uses one shared per-worker rate for both directions.
 
 By default, SBK-GEM runs `<remote-sbk-command> -version` on every node. A node is left unchanged when that command exists, succeeds, and reports the exact expected version. The three deployment lifecycle options are independent:
 
@@ -170,12 +173,13 @@ Before a multi-host run:
 
 1. `SbkGemMain` delegates to `SbkGem`.
 2. GEM parses connection, remote-path, SBM, and forwarded SBK arguments.
-3. It constructs an embedded `SbmBenchmark`.
-4. `SbkGemBenchmark` establishes SSH sessions, discovers or provisions Java, and reconciles the SBK version on every node.
-5. GEM distributes `-totalrecords` when requested, then appends `-out GrpcLogger`, the SBM callback host, and the SBM port to remote commands.
-6. Remote SBK processes run their selected driver against the storage system.
-7. Measurements return to embedded SBM and are reported as aggregate windows and totals.
-8. GEM collects remote responses and shuts down sessions and SBM.
+3. GEM adds the common `GrpcLogger`, SBM callback host, and SBM port arguments.
+4. It distributes `-totalrecords` and `-totalthroughput` when requested, creating node-specific `-records` and `-throughput` argument lists.
+5. It constructs the embedded `SbmBenchmark` and `SbkGemBenchmark`.
+6. `SbkGemBenchmark` establishes SSH sessions, discovers or provisions Java, and reconciles the SBK version on every node.
+7. It starts SBM and launches every remote SBK process with its node-specific arguments.
+8. Measurements return to embedded SBM and are reported as aggregate windows and totals.
+9. GEM collects remote responses and shuts down sessions and SBM.
 
 ## Distributed failure reporting
 

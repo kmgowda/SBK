@@ -99,6 +99,29 @@ final class SbkGemTotalThroughputTest {
     }
 
     @Test
+    void rejectsAggregateThroughputWithUnequalMixedWorkerCounts() throws IOException {
+        final SbkGemParameters parameters = parameters();
+
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(arguments("node-a,node-b", "-writers", "1", "-readers", "2",
+                        "-totalthroughput", "20", "-seconds", "10")));
+
+        assertTrue(exception.getMessage().contains("requires equal writer and reader counts"));
+    }
+
+    @Test
+    void permitsAggregateThroughputWithEqualMixedWorkerCounts() throws Exception {
+        final SbkGemParameters parameters = parameters();
+
+        parameters.parseArgs(arguments("node-a,node-b", "-writers", "2", "-readers", "2",
+                "-totalthroughput", "20", "-seconds", "10"));
+
+        assertEquals(new BigDecimal("20"), parameters.getTotalThroughput());
+        assertEquals(2, parameters.getWritersCount());
+        assertEquals(2, parameters.getReadersCount());
+    }
+
+    @Test
     void exposesAggregateThroughputOptionInHelp() throws IOException {
         assertTrue(parameters().getHelpText().contains("-totalthroughput"));
     }

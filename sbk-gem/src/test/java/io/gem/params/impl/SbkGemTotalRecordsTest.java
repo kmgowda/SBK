@@ -95,6 +95,29 @@ final class SbkGemTotalRecordsTest {
     }
 
     @Test
+    void rejectsTimedAggregateRateWithUnequalMixedWorkerCounts() throws IOException {
+        final SbkGemParameters parameters = parameters();
+
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(arguments("node-a,node-b", "-writers", "2", "-readers", "3",
+                        "-totalrecords", "1200", "-seconds", "10")));
+
+        assertTrue(exception.getMessage().contains("requires equal writer and reader counts"));
+    }
+
+    @Test
+    void permitsTimedAggregateRateWithEqualMixedWorkerCounts() throws Exception {
+        final SbkGemParameters parameters = parameters();
+
+        parameters.parseArgs(arguments("node-a,node-b", "-writers", "2", "-readers", "2",
+                "-totalrecords", "1200", "-seconds", "10"));
+
+        assertEquals(1200, parameters.getTotalRecords());
+        assertEquals(2, parameters.getWritersCount());
+        assertEquals(2, parameters.getReadersCount());
+    }
+
+    @Test
     void exposesAggregateOptionInHelp() throws IOException {
         assertTrue(parameters().getHelpText().contains("-totalrecords"));
     }
