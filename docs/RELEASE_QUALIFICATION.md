@@ -22,7 +22,7 @@ Use the `local` profile while developing:
 ```
 
 The `local-docker` profile adds fully automatic SBK-GEM and SBK-GEM-YAL
-testing against a disposable local Docker SSH/JDK node. The `ci` profile adds
+testing against two disposable local Docker SSH/JDK nodes. The `ci` profile adds
 Maven-local publication verification. The `release` profile additionally runs
 the JMH performance gates and requires real remote SBK-GEM hosts:
 
@@ -93,17 +93,20 @@ tools `ssh`, `ssh-agent`, `ssh-add`, `ssh-keygen`, and `ssh-keyscan`. The gate:
 
 1. builds a JDK 25 fixture image;
 2. creates an ephemeral Ed25519 key and isolated SSH agent;
-3. starts one non-root SSH node with a dynamically assigned loopback port;
-4. verifies the generated `known_hosts` entry and remote Java runtime;
+3. starts two non-root SSH nodes sharing a dynamically assigned SSH port on
+   separate loopback addresses;
+4. verifies both generated `known_hosts` entries and remote Java runtimes;
 5. runs `GemPrometheusLogger`, `GemWebLogger`, and SBK-GEM-YAL through the
-   normal copy, remote launch, SBM callback, aggregation, and cleanup paths;
-6. force-removes the container, SSH agent, and ephemeral credentials on both
+   normal copy, two-client coordinated launch, SBM callback, aggregation, and
+   cleanup paths, requiring two successful nodes and two SBM registrations;
+6. force-removes both containers, the SSH agent, and ephemeral credentials on both
    success and failure.
 
 No inventory, persistent SSH key, exposed fixed port, or manual container
-setup is needed. The fixture is intentionally a single host. It proves GEM's
-deployment and protocol contracts, but it does not replace real multi-host
-fan-out, network, and backend qualification in the `release` profile.
+setup is needed. The fixture proves two-node fan-out, coordinated SBM startup,
+aggregation, and protocol contracts on one Docker host. It does not replace
+qualification across real hosts, networks, and storage backends in the
+`release` profile.
 
 ### CI gate
 
