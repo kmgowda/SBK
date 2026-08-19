@@ -61,6 +61,13 @@ public sealed interface GemParameters extends Parameters permits GemParameterOpt
      */
     int getSbmIdleSleepMilliSeconds();
 
+    /**
+     * Check whether the record value is an aggregate across all remote SBK clients.
+     *
+     * @return true when {@code -totalrecords} was supplied
+     */
+    boolean isTotalRecordsOption();
+
 
     /**
      * Check whether copying missing or mismatched SBK installations is enabled.

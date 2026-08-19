@@ -67,7 +67,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     private final SbmBenchmark sbmBenchmark;
     private final GemConfig config;
     private final GemParameters params;
-    private final List<String> sbkArgs;
+    private final List<List<String>> sbkArgsByNode;
     private final CompletableFuture<RemoteResponse[]> retFuture;
     private final RemoteResponse[] remoteResults;
     private final ExecutorService executor;
@@ -89,20 +89,24 @@ final public class SbkGemBenchmark implements GemBenchmark {
      * @param sbmBenchmark  embedded SBM benchmark
      * @param config        NotNull GemConfig
      * @param params        NotNull GemParameters
-     * @param sbkArgs       normalized remote SBK argument tokens
+     * @param sbkArgsByNode normalized remote SBK argument tokens for each node
+     * @throws IllegalArgumentException when the argument-set count does not match the connection count
      */
     public SbkGemBenchmark(SbmBenchmark sbmBenchmark, @NotNull GemConfig config, @NotNull GemParameters params,
-                           List<String> sbkArgs) {
+                           List<List<String>> sbkArgsByNode) {
         this.sbmBenchmark = sbmBenchmark;
         this.config = config;
         this.params = params;
-        this.sbkArgs = List.copyOf(sbkArgs);
+        this.sbkArgsByNode = sbkArgsByNode.stream().map(List::copyOf).toList();
         this.retFuture = new CompletableFuture<>();
         this.state = State.BEGIN;
         this.sbmStarted = false;
         this.sbmCompletion = null;
         this.remoteCommandsCompleted = false;
         final ConnectionConfig[] connections = params.getConnections();
+        if (this.sbkArgsByNode.size() != connections.length) {
+            throw new IllegalArgumentException("Remote SBK argument count must match the connection count");
+        }
         if (config.fork) {
             executor = new ForkJoinPool(connections.length + config.executorThreadReserve);
         } else {
@@ -195,6 +199,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
         // Start remote SBK instances
         for (int i = 0; i < nodes.length; i++) {
+            final List<String> sbkArgs = sbkArgsByNode.get(i);
             final List<String> commandTokens = new ArrayList<>(sbkArgs.size() + 1);
             commandTokens.add(absoluteSbkCommands[i]);
             commandTokens.addAll(sbkArgs);

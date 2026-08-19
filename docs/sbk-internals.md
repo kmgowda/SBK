@@ -1946,6 +1946,9 @@ sequenceDiagram
 
     GEM->>SBM: sbmBenchmark.start()<br/>(listen on :9717 locally)
 
+    opt totalrecords is supplied
+        Note over GEM: divide the aggregate count or rate<br/>into node-specific -records values
+    end
     GEM->>SSH: export SBK_JAVA_HOME and run sbkCommand on each node
     Note over SSH: remote command starts SBK with<br/>-out GrpcLogger -sbm localHost -sbmport 9717
 
@@ -2008,6 +2011,15 @@ This separation matters. The aggregator logic lives in **one place**
 the SSH / orchestration code at all. Likewise, you can use SBM
 standalone without SBK-GEM if your nodes are already set up — just
 point each one's `-out GrpcLogger -sbm <host>` at it.
+
+GEM normally forwards `-records` unchanged to every remote SBK instance, so
+that value is per client. Its `-totalrecords` orchestration option instead
+splits one aggregate value into node-specific `-records` arguments. Without
+`-seconds`, quotient/remainder allocation preserves the exact fixed record
+count. With `-seconds`, allocation uses whole worker-rate units so the exact
+aggregate records/second limit survives SBK's per-worker integer division.
+This planning happens before remote launch and does not add work to the SBK,
+PerL, or SBM measurement hot paths.
 
 ### 7.3 SSH implementation
 
@@ -3077,7 +3089,8 @@ your "Experimental Setup" section makes the study fully reproducible:
    standalone PerL defaults are in
    [perl.properties](../perl/src/main/resources/perl.properties).
 4. **Workload**: `-writers`, `-readers`, `-size`, `-seconds` or
-   `-records`, `-throughput`, and any driver-specific flags.
+   `-records`, SBK-GEM `-totalrecords` when used, `-throughput`, and any
+   driver-specific flags.
 5. **Storage configuration** (cluster size, replication, region,
    storage class, etc.).
 6. **JVM**: vendor + version + heap size, e.g. `OpenJDK 25 -Xmx16g`.

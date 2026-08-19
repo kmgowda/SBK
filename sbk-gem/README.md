@@ -86,6 +86,31 @@ Display the current connection, remote-installation, SBM, and benchmark options:
 
 SBK-GEM accepts GEM-specific options and forwards an SBK argument set to remote processes. Because authentication and connection-file formats are security-sensitive and evolve independently of a sample environment, use generated help and the checked-in example configuration files as the authority.
 
+### Aggregate record control
+
+Use `-records` to preserve the standard SBK behavior: the supplied value is
+forwarded to every remote SBK client. Use the GEM-only `-totalrecords` option
+when the value must apply to the distributed benchmark as a whole:
+
+```bash
+# Execute exactly 1,000,000 records across all configured nodes.
+sbk-gem -nodes node-a,node-b -class file -writers 4 -size 4096 \
+  -totalrecords 1000000
+
+# Limit the aggregate write rate to exactly 120,000 records/second for 60 seconds.
+sbk-gem -nodes node-a,node-b -class file -writers 4 -size 4096 \
+  -totalrecords 120000 -seconds 60
+```
+
+Without `-seconds`, GEM divides the fixed count across nodes and assigns any
+remainder to the first nodes. With `-seconds`, it divides the aggregate
+records/second rate in whole per-worker units so the requested total remains
+exact. The rate must therefore be divisible by the active worker count and
+must provide at least one record/second to every active worker on every node.
+For mixed writer/reader runs, the aggregate rate applies independently to each
+direction, matching SBK's existing `-records` semantics. `-totalrecords` is
+mutually exclusive with `-records` and `-throughput`.
+
 By default, SBK-GEM runs `<remote-sbk-command> -version` on every node. A node is left unchanged when that command exists, succeeds, and reports the exact expected version. The three deployment lifecycle options are independent:
 
 - `-copy true|false` permits SBK-GEM to copy SBK when it is missing or mismatched; the default is `true`. With `false`, a missing or mismatched installation is reported as an error.
@@ -118,7 +143,7 @@ Before a multi-host run:
 2. GEM parses connection, remote-path, SBM, and forwarded SBK arguments.
 3. It constructs an embedded `SbmBenchmark`.
 4. `SbkGemBenchmark` establishes SSH sessions, discovers or provisions Java, and reconciles the SBK version on every node.
-5. GEM appends `-out GrpcLogger`, the SBM callback host, and the SBM port to remote commands.
+5. GEM distributes `-totalrecords` when requested, then appends `-out GrpcLogger`, the SBM callback host, and the SBM port to remote commands.
 6. Remote SBK processes run their selected driver against the storage system.
 7. Measurements return to embedded SBM and are reported as aggregate windows and totals.
 8. GEM collects remote responses and shuts down sessions and SBM.

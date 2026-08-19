@@ -19,11 +19,13 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.CancellationException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -175,5 +177,44 @@ final class SbkGemBenchmarkTest {
         assertSame(remoteFailure, failure);
         assertEquals(1, failure.getSuppressed().length);
         assertSame(sbmFailure, failure.getSuppressed()[0]);
+    }
+
+    @Test
+    void distributesFixedRecordsAcrossNodesIncludingRemainder() {
+        final List<List<String>> arguments = SbkGem.distributeTotalRecords(
+                List.of("-class", "file"), 1001, 2, 1, false);
+
+        assertEquals(List.of("-class", "file", "-records", "501"), arguments.get(0));
+        assertEquals(List.of("-class", "file", "-records", "500"), arguments.get(1));
+    }
+
+    @Test
+    void distributesExactAggregateRateInWholeWorkerUnits() {
+        final List<List<String>> arguments = SbkGem.distributeTotalRecords(
+                List.of("-class", "file", "-seconds", "30"), 1000, 3, 2, true);
+
+        assertEquals("334", arguments.get(0).getLast());
+        assertEquals("334", arguments.get(1).getLast());
+        assertEquals("332", arguments.get(2).getLast());
+        assertEquals(1000, arguments.stream().mapToLong(values -> Long.parseLong(values.getLast())).sum());
+    }
+
+    @Test
+    void doesNotModifyCommonArgumentsDuringDistribution() {
+        final List<String> commonArguments = List.of("-class", "file");
+
+        SbkGem.distributeTotalRecords(commonArguments, 10, 2, 1, false);
+
+        assertEquals(List.of("-class", "file"), commonArguments);
+    }
+
+    @Test
+    void rejectsPerWorkerRateBeyondSbkIntegerLimit() {
+        final long excessiveRate = (long) Integer.MAX_VALUE + 1;
+
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> SbkGem.distributeTotalRecords(List.of("-class", "file"), excessiveRate, 1, 1, true));
+
+        assertTrue(exception.getMessage().contains("exceeds"));
     }
 }

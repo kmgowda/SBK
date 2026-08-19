@@ -409,6 +409,19 @@ final public class SbkGem {
         addOption(sbkCommandArgs, "-sbm", params.getLocalHost());
         addOption(sbkCommandArgs, "-sbmport", Integer.toString(params.getSbmPort()));
 
+        final List<List<String>> remoteSbkCommandArgs;
+        if (params.isTotalRecordsOption()) {
+            final int workers = params.getWritersCount() > 0 ? params.getWritersCount() : params.getReadersCount();
+            final boolean rateMode = params.getTotalSecondsToRun() > 0;
+            remoteSbkCommandArgs = distributeTotalRecords(sbkCommandArgs, params.getTotalRecords(),
+                    params.getConnections().length, workers, rateMode);
+            Printer.log.info("SBK-GEM: Distributing {} total {} across {} remote SBK clients",
+                    params.getTotalRecords(), rateMode ? "records/second" : "records",
+                    params.getConnections().length);
+        } else {
+            remoteSbkCommandArgs = identicalRemoteArguments(sbkCommandArgs, params.getConnections().length);
+        }
+
         Printer.log.info("SBK dir: " + params.getSbkDir());
         Printer.log.info("SBK command: " + params.getSbkCommand());
         Printer.log.info("Arguments to remote SBK command: "
@@ -452,7 +465,46 @@ final public class SbkGem {
         }
         Printer.log.info("SBK-GEM: Arguments to SBM command verification Success..");
         return new SbkGemBenchmark(new SbmBenchmark(sbmConfig, ramParams, ramLogger, time, true), gemConfig, params,
-                sbkCommandArgs);
+                remoteSbkCommandArgs);
+    }
+
+    static List<List<String>> distributeTotalRecords(List<String> commonArguments, long totalRecords, int nodeCount,
+                                                      int workers, boolean rateMode) {
+        if (totalRecords <= 0 || nodeCount <= 0 || workers <= 0) {
+            throw new IllegalArgumentException("Total records, node count, and worker count must be positive");
+        }
+        final long allocationUnits = rateMode ? totalRecords / workers : totalRecords;
+        if (rateMode && totalRecords % workers != 0) {
+            throw new IllegalArgumentException("Total records/second must be divisible by the worker count");
+        }
+        if (allocationUnits < nodeCount) {
+            throw new IllegalArgumentException("Total records must allocate at least one unit to every node");
+        }
+        final long unitsPerNode = allocationUnits / nodeCount;
+        final long remainder = allocationUnits % nodeCount;
+        final List<List<String>> argumentsByNode = new ArrayList<>(nodeCount);
+        for (int i = 0; i < nodeCount; i++) {
+            final long nodeUnits = unitsPerNode + (i < remainder ? 1 : 0);
+            if (rateMode && nodeUnits > Integer.MAX_VALUE) {
+                throw new IllegalArgumentException("The per-worker records/second value on node " + (i + 1) +
+                        " exceeds " + Integer.MAX_VALUE);
+            }
+            final long nodeRecords = rateMode ? Math.multiplyExact(nodeUnits, workers) : nodeUnits;
+            final List<String> nodeArguments = new ArrayList<>(commonArguments.size() + 2);
+            nodeArguments.addAll(commonArguments);
+            addOption(nodeArguments, "-records", Long.toString(nodeRecords));
+            argumentsByNode.add(List.copyOf(nodeArguments));
+        }
+        return List.copyOf(argumentsByNode);
+    }
+
+    private static List<List<String>> identicalRemoteArguments(List<String> commonArguments, int nodeCount) {
+        final List<String> immutableArguments = List.copyOf(commonArguments);
+        final List<List<String>> argumentsByNode = new ArrayList<>(nodeCount);
+        for (int i = 0; i < nodeCount; i++) {
+            argumentsByNode.add(immutableArguments);
+        }
+        return List.copyOf(argumentsByNode);
     }
 
     private static String firstNonEmpty(String first, String second) {

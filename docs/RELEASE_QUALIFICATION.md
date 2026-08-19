@@ -99,6 +99,8 @@ tools `ssh`, `ssh-agent`, `ssh-add`, `ssh-keygen`, and `ssh-keyscan`. The gate:
 5. runs `GemPrometheusLogger`, `GemWebLogger`, and SBK-GEM-YAL through the
    normal copy, two-client coordinated launch, SBM callback, aggregation, and
    cleanup paths, requiring two successful nodes and two SBM registrations;
+   the timed Prometheus and fixed-count YAL cases use `-totalrecords`, while
+   the Web case retains per-client `-records` coverage;
 6. force-removes both containers, the SSH agent, and ephemeral credentials on both
    success and failure.
 
@@ -234,7 +236,8 @@ checks:
 - real `GrpcLogger` clients against child SBM processes using both
   `SbmPrometheusLogger` and `SbmWebLogger`; and
 - both GEM logger families plus SBK-GEM-YAL when either the automatic
-  `local-docker` fixture or the release inventory is selected.
+  `local-docker` fixture or the release inventory is selected, including
+  aggregate `-totalrecords` distribution and existing per-client `-records`.
 
 All child processes have bounded startup and execution times. Logs and a test
 summary are written below `build/reports/release-qualification/`.
