@@ -10,8 +10,7 @@
  */
 
 plugins.withId('maven-publish') {
-    def localRepoDir = "sbk-repo"
-    def buildRepoDir = "build" + File.separator + localRepoDir
+    def localRepoDir = mavenStagingRepositoryDirectory.toString()
     def requestedTaskNames = gradle.startParameter.taskNames
     def githubPackagesRequested = requestedTaskNames.any {
         it.tokenize(':').last() == 'releasePublishCoreToGitHubPackages'
@@ -125,83 +124,7 @@ plugins.withId('maven-publish') {
             }
         }
 
-        if (!project.property("signing.keyId")) {
-            project.setProperty("signing.keyId", System.getenv("SIGNING_KEYID"))
-        }
-
-        if (!project.property("signing.password")) {
-            project.setProperty("signing.password", System.getenv("SIGNING_PASSWORD"))
-        }
-
-        if (!project.property("signing.secretKeyRingFile")) {
-            def secretKeyPath = project.file("${System.getProperty("user.home")}/.gnupg/secring.gpg").absolutePath
-            project.setProperty("signing.secretKeyRingFile", secretKeyPath)
-        }
-
-        def signingKeyRing = project.file(project.property("signing.secretKeyRingFile"))
-        if (project.property("signing.keyId") && project.property("signing.password")
-                && signingKeyRing.isFile()) {
-            signing {
-                sign publications.mavenJava
-            }
-        }
     }
-
-    def configuredJreleaserFile = project.findProperty('jreleaser.configFile')?.toString()?.trim()
-    def environmentJreleaserFile = System.getenv('JRELEASER_CONFIG_FILE')?.trim()
-    def defaultJreleaserFile = project.file(
-            "${System.getProperty('user.home')}/.jreleaser/config.toml").absolutePath
-    def jreleaserConfigFile = configuredJreleaserFile
-            ?: environmentJreleaserFile
-            ?: defaultJreleaserFile
-    jreleaser {
-        environment {
-            // Each key must be prefixed with JRELEASER_ and match
-            // the environment variable it overrides.
-            variables = jreleaserConfigFile
-        }
-
-        release {
-            github {
-                // GitHub Actions owns the immutable tag, release assets, and container release.
-                // JReleaser remains responsible only for Maven Central staging/deployment.
-                enabled = true
-                skipRelease = true
-                skipTag = true
-                overwrite = false
-            }
-        }
-
-        upload {
-            active = 'ALWAYS'
-            enabled = true
-        }
-
-        signing {
-            active = 'ALWAYS'
-            armored = true
-        }
-
-        deploy {
-            maven {
-                mavenCentral {
-                    sonatype {
-                        active = 'ALWAYS'
-                        stage = "UPLOAD"     // only upload, no release
-                        url = mavenCentralPublisherUrl
-                        stagingRepository(layout.buildDirectory.dir(localRepoDir).get().toString())
-                        setAuthorization("Basic")
-                        sign = true
-                        checksums = true
-                        sourceJar = true
-                        javadocJar = true
-                        applyMavenCentralRules = true
-                    }
-                }
-            }
-        }
-    }
-
 }
 
 

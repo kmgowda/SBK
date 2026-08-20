@@ -87,6 +87,11 @@ and uses the internal `releasePublishCoreToGitHubPackages` task for GitHub
 Packages. Driver projects are excluded from standalone publication. The root
 `publish` task dispatches this complete guarded workflow.
 
+JReleaser configuration is centralized in
+`gradle/release-publication.gradle`, which explicitly registers every core
+module staging repository. `gradle/maven.gradle` only stages unsigned module
+artifacts; Maven Central signing is owned exclusively by JReleaser.
+
 ## Maintenance checklist
 
 When adding an authoritative document:

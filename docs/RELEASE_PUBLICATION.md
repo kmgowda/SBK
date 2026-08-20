@@ -135,6 +135,14 @@ secret; the workflow writes it to a mode-0600 temporary file and sets
 exported to the JReleaser steps; they are scoped only to the subsequent
 GitHub Packages publication step.
 
+The custom TOML supplies JReleaser credentials and environment values. The
+root Gradle release configuration remains authoritative for the staging
+repository inventory and always registers PerL, SBK Web Console, SBK API,
+SBM, SBK-YAL, SBK-GEM, and SBK-GEM-YAL. Module Maven publication stages
+unsigned artifacts; JReleaser is the sole component that signs the Maven
+Central payload. Legacy Gradle signing properties must not create
+`signMavenJavaPublication` tasks.
+
 The release environment must also provide the real-host qualification secrets
 documented in [Release qualification](RELEASE_QUALIFICATION.md).
 

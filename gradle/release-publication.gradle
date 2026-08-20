@@ -28,6 +28,7 @@ def releaseAssetsDirectory = layout.buildDirectory.dir('release-assets')
 def releaseIntermediateDirectory = layout.buildDirectory.dir('release-intermediates')
 def releaseContainerDirectory = layout.buildDirectory.dir('release-container')
 def qualificationDirectory = layout.buildDirectory.dir('reports/release-qualification')
+def releaseMavenStagingDirectory = mavenStagingRepositoryDirectory.toString()
 def releaseApplicationProjects = [project, project(':sbm'), project(':sbk-web-console')]
 def releaseMavenProjects = [
         project(':perl'), project(':sbk-web-console'), project(':sbk-api'), project(':sbm'),
@@ -47,6 +48,64 @@ def releaseBooleanProperty = { String propertyName ->
         throw new GradleException("${propertyName} must be true or false")
     }
     value
+}
+
+def configuredJreleaserFile = findProperty('jreleaser.configFile')?.toString()?.trim()
+def environmentJreleaserFile = System.getenv('JRELEASER_CONFIG_FILE')?.trim()
+def defaultJreleaserFile = file(
+        "${System.getProperty('user.home')}/.jreleaser/config.toml").absolutePath
+def jreleaserConfigFile = configuredJreleaserFile
+        ?: environmentJreleaserFile
+        ?: defaultJreleaserFile
+
+// JReleaser is the sole signing and Maven Central deployment authority. Keep
+// all core staging repositories in one root configuration so newly extracted
+// modules cannot be omitted by per-project configuration order.
+jreleaser {
+    environment {
+        variables = jreleaserConfigFile
+    }
+
+    release {
+        github {
+            enabled = true
+            skipRelease = true
+            skipTag = true
+            overwrite = false
+        }
+    }
+
+    upload {
+        active = 'ALWAYS'
+        enabled = true
+    }
+
+    signing {
+        active = 'ALWAYS'
+        armored = true
+    }
+
+    deploy {
+        maven {
+            mavenCentral {
+                sonatype {
+                    active = 'ALWAYS'
+                    stage = 'UPLOAD'
+                    url = mavenCentralPublisherUrl
+                    releaseMavenProjects.each { publicationProject ->
+                        stagingRepository(publicationProject.layout.buildDirectory
+                                .dir(releaseMavenStagingDirectory).get().toString())
+                    }
+                    setAuthorization('Basic')
+                    sign = true
+                    checksums = true
+                    sourceJar = true
+                    javadocJar = true
+                    applyMavenCentralRules = true
+                }
+            }
+        }
+    }
 }
 def sha256File = { File artifact ->
     def digest = MessageDigest.getInstance('SHA-256')
@@ -100,6 +159,15 @@ def verifyReleasePublicationScope = tasks.register('verifyReleasePublicationScop
             throw new GradleException('Drivers must not apply maven-publish: '
                     + publishableDriverProjects.collect { it.path }.join(', '))
         }
+        def gradleMavenSigningTasks = releaseMavenProjects.collectMany { publicationProject ->
+            publicationProject.tasks.matching {
+                it.name == 'signMavenJavaPublication'
+            }.toList()
+        }
+        if (!gradleMavenSigningTasks.isEmpty()) {
+            throw new GradleException('JReleaser must be the sole Maven publication signer: '
+                    + gradleMavenSigningTasks.collect { it.path }.join(', '))
+        }
     }
 }
 
@@ -124,7 +192,8 @@ def verifyCorePublicationStaging = tasks.register('verifyCorePublicationStaging'
     doLast {
         releaseMavenProjects.each { publicationProject ->
             def artifactDirectory = publicationProject.layout.buildDirectory.dir(
-                    "sbk-repo/${sbkGroup.replace('.', '/')}/${publicationProject.name}/${sbkVersion}")
+                    "${releaseMavenStagingDirectory}/${sbkGroup.replace('.', '/')}/" +
+                            "${publicationProject.name}/${sbkVersion}")
                     .get().asFile
             def requiredFiles = [
                     "${publicationProject.name}-${sbkVersion}.pom",
