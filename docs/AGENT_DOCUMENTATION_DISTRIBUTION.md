@@ -61,19 +61,31 @@ Artifact names use the version from `gradle.properties`; documentation must not 
 
 ## GitHub release workflow
 
-The release workflow:
+The guarded release workflow:
 
-1. Builds installed, ZIP, and TAR distributions.
+1. Requires a successful release qualification and builds installed, ZIP, and
+   TAR distributions for SBK, SBM, and the Local Web Console.
 2. Creates `sbk-agent-docs.tar.gz` from root entry points, the complete `docs/`
    directory, and agent configurations while preserving discovery paths such
    as `.cursor/rules/` and `.devin/skills/`.
-3. Attaches distributions, the documentation archive, and selected standalone entry-point documents to a GitHub release. The archive command includes hidden paths such as `.cursor/` and `.aider.conf.yml`.
+3. Adds qualification evidence, checksums, the release manifest, and direct
+   CycloneDX SBOMs for the publishable core modules to the contracted asset
+   directory.
+4. Attaches the complete, verified directory to a draft GitHub Release and
+   publishes the release only after container and package publication succeeds.
 
-The workflow runs only under its configured tag/release conditions. Editing this document does not publish anything.
+See [Release publication](RELEASE_PUBLICATION.md) for the safe local and Actions
+dry runs. Editing this document or running a dry run does not publish anything.
 
 ## Maven publication
 
-`gradle/maven.gradle` adds `docsJar` to each applicable Maven publication. Publication repositories and credentials are selected by Gradle properties and environment configuration. Publishing is a maintainer action and is not part of documentation verification.
+`gradle/maven.gradle` adds `docsJar` to each applicable Maven publication. The
+release dry run exercises these publications against project-local repositories.
+The guarded workflow stages only the explicit core allow-list with
+`releaseStageCorePublications`, deploys to Sonatype Central with JReleaser,
+and uses the internal `releasePublishCoreToGitHubPackages` task for GitHub
+Packages. Driver projects are excluded from standalone publication. The root
+`publish` task dispatches this complete guarded workflow.
 
 ## Maintenance checklist
 
