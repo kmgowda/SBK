@@ -408,10 +408,10 @@ final public class SbkGemBenchmark implements GemBenchmark {
             }
         }
 
-        final Set<Map.Entry<String, String>> visited = new HashSet<>();
+        final Set<RemoteTarget> visited = new HashSet<>();
         final CompletableFuture<SshResponse>[] prepareFutures = new CompletableFuture[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
-            final Map.Entry<String, String> key = javaTargetKey(i, targets[i]);
+            final RemoteTarget key = javaTargetKey(i, targets[i]);
             if (!copyTargets[i] || !visited.add(key)) {
                 prepareFutures[i] = CompletableFuture.completedFuture(new SshResponse(true));
             } else {
@@ -427,7 +427,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         visited.clear();
         final CompletableFuture<?>[] copyFutures = new CompletableFuture[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
-            final Map.Entry<String, String> key = javaTargetKey(i, targets[i]);
+            final RemoteTarget key = javaTargetKey(i, targets[i]);
             if (!copyTargets[i] || !visited.add(key)) {
                 copyFutures[i] = CompletableFuture.completedFuture(null);
             } else {
@@ -440,7 +440,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         visited.clear();
         final CompletableFuture<SshResponse>[] moveFutures = new CompletableFuture[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
-            final Map.Entry<String, String> key = javaTargetKey(i, targets[i]);
+            final RemoteTarget key = javaTargetKey(i, targets[i]);
             if (!copyTargets[i] || targets[i].equals(uploadTargets[i]) || !visited.add(key)) {
                 moveFutures[i] = CompletableFuture.completedFuture(new SshResponse(true));
             } else {
@@ -473,9 +473,10 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
     }
 
-    private Map.Entry<String, String> javaTargetKey(int index, String target) {
-        return Map.entry(nodes[index].connection.getHost().toLowerCase(), target == null ? "" :
-                target.toLowerCase());
+    private RemoteTarget javaTargetKey(int index, String target) {
+        final ConnectionConfig connection = nodes[index].connection;
+        return new RemoteTarget(connection.getHost().toLowerCase(), connection.getPort(),
+                target == null ? "" : target.toLowerCase());
     }
 
     @SuppressWarnings("unchecked")
@@ -980,17 +981,20 @@ final public class SbkGemBenchmark implements GemBenchmark {
     private record SbkDeploymentPlan(boolean[] copyTargets, boolean[] deleteTargets) {
     }
 
+    private record RemoteTarget(String host, int port, String path) {
+    }
+
     /**
-     * Tracks visited (host, remoteDir) combinations to avoid duplicate operations
+     * Tracks visited (host, port, remoteDir) combinations to avoid duplicate operations
      * when multiple connections point to the same remote target.
      */
     private final static class ConnectionsMap {
-        private final Map<Map.Entry<String, String>, Boolean> kMap;
+        private final Map<RemoteTarget, Boolean> kMap;
 
         public ConnectionsMap(@NotNull ConnectionConfig[] conn) {
             this.kMap = new HashMap<>();
             for (ConnectionConfig connectionConfig : conn) {
-                this.kMap.put(Map.entry(connectionConfig.getHost().toLowerCase(), connectionConfig.getDir().toLowerCase()), false);
+                this.kMap.put(key(connectionConfig), false);
             }
         }
 
@@ -999,11 +1003,16 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
 
         void visit(@NotNull ConnectionConfig conn) {
-            this.kMap.put(Map.entry(conn.getHost().toLowerCase(), conn.getDir().toLowerCase()), true);
+            this.kMap.put(key(conn), true);
         }
 
         boolean isVisited(@NotNull ConnectionConfig conn) {
-            return this.kMap.get(Map.entry(conn.getHost().toLowerCase(), conn.getDir().toLowerCase()));
+            return this.kMap.get(key(conn));
+        }
+
+        private static RemoteTarget key(ConnectionConfig connection) {
+            return new RemoteTarget(connection.getHost().toLowerCase(), connection.getPort(),
+                    connection.getDir().toLowerCase());
         }
     }
 }

@@ -106,8 +106,9 @@ out beneath a long directory name. The gate:
 
 1. builds a JDK 25 fixture image;
 2. creates an ephemeral Ed25519 key and isolated SSH agent;
-3. starts two non-root SSH nodes sharing a dynamically assigned SSH port on
-   separate loopback addresses;
+3. starts two non-root SSH nodes on `127.0.0.1`, each with an independently
+   assigned ephemeral host port, so macOS does not require extra loopback
+   aliases;
 4. verifies both generated `known_hosts` entries and remote Java runtimes;
 5. runs `GemPrometheusLogger`, `GemWebLogger`, and SBK-GEM-YAL through the
    normal copy, two-client coordinated launch, SBM callback, aggregation, and

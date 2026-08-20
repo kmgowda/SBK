@@ -43,7 +43,7 @@ import java.util.Objects;
  * instances for each target node.
  *
  * <p>Supported options (help text shows defaults from {@link GemConfig}):
- * - -nodes: comma/space/newline-separated hostnames
+ * - -nodes: comma/space/newline-separated hostnames or host:port endpoints
  * - -gemuser, -gempass, -gemport
  * - -sbkdir, -sbkcommand
  * - -copy, -delete, -deleteafter, -javacopy, -javaversion, -javadir
@@ -54,6 +54,9 @@ import java.util.Objects;
  */
 @Slf4j
 public final class SbkGemParameters extends SbkDriversParameters implements GemParameterOptions {
+
+    private static final int MINIMUM_PORT = 1;
+    private static final int MAXIMUM_PORT = 65_535;
 
     final private GemConfig config;
 
@@ -113,7 +116,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
             this.localHost = GemConfig.LOCAL_HOST;
         }
         addOption("nodes", true, """
-                remote hostnames separated by ',';
+                remote hostnames or host:port endpoints separated by ',';
                 default:""" + config.nodes);
         addOption("gemuser", true, "ssh user name of the remote hosts, default: " + config.gemuser);
         addOption(GemConfig.GEM_PASS_OPTION, true, "ssh user password of the remote hosts, default: " +
@@ -194,6 +197,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
                 Boolean.toString(config.hostkeycheck)));
         config.knownhosts = getOptionValue("knownhosts", Objects.requireNonNullElse(config.knownhosts, ""));
         config.gemport = Integer.parseInt(getOptionValue("gemport", Integer.toString(config.gemport)));
+        validatePort(config.gemport, "-gemport");
         config.sbkdir = getOptionValue("sbkdir", config.sbkdir);
         config.sbkcommand = getOptionValue("sbkcommand", config.sbkcommand);
         localHost = getOptionValue("localhost", localHost);
@@ -222,7 +226,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
 
         connections = new ConnectionConfig[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
-            connections[i] = new ConnectionConfig(nodes[i], config.gemuser, config.gempass, config.gemport,
+            final NodeEndpoint endpoint = parseNodeEndpoint(nodes[i], config.gemport);
+            connections[i] = new ConnectionConfig(endpoint.host(), config.gemuser, config.gempass, endpoint.port(),
                     config.remoteDir, config.hostkeycheck, config.knownhosts);
         }
 
@@ -382,6 +387,58 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
 
     private static boolean isOption(String argument, String option) {
         return ("-" + option).equals(argument) || ("--" + option).equals(argument);
+    }
+
+    private static NodeEndpoint parseNodeEndpoint(String value, int defaultPort) {
+        if (value.startsWith("[")) {
+            final int bracket = value.indexOf(']');
+            if (bracket < 0) {
+                throw new IllegalArgumentException("Invalid bracketed node endpoint: " + value);
+            }
+            final String host = value.substring(1, bracket);
+            if (host.isBlank()) {
+                throw new IllegalArgumentException("The node host must not be empty: " + value);
+            }
+            if (bracket == value.length() - 1) {
+                return new NodeEndpoint(host, defaultPort);
+            }
+            if (value.charAt(bracket + 1) != ':' || bracket + 2 >= value.length()) {
+                throw new IllegalArgumentException("Invalid bracketed node endpoint: " + value);
+            }
+            return new NodeEndpoint(host, parsePort(value.substring(bracket + 2), value));
+        }
+
+        final int firstColon = value.indexOf(':');
+        final int lastColon = value.lastIndexOf(':');
+        if (firstColon > 0 && firstColon == lastColon) {
+            return new NodeEndpoint(value.substring(0, firstColon),
+                    parsePort(value.substring(firstColon + 1), value));
+        }
+        if (value.isBlank()) {
+            throw new IllegalArgumentException("The node host must not be empty");
+        }
+        return new NodeEndpoint(value, defaultPort);
+    }
+
+    private static int parsePort(String value, String endpoint) {
+        final int port;
+        try {
+            port = Integer.parseInt(value);
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException("Invalid SSH port in node endpoint: " + endpoint, ex);
+        }
+        validatePort(port, "node endpoint " + endpoint);
+        return port;
+    }
+
+    private static void validatePort(int port, String option) {
+        if (port < MINIMUM_PORT || port > MAXIMUM_PORT) {
+            throw new IllegalArgumentException("The SSH port for " + option + " must be between "
+                    + MINIMUM_PORT + " and " + MAXIMUM_PORT + ": " + port);
+        }
+    }
+
+    private record NodeEndpoint(String host, int port) {
     }
 
     @Override

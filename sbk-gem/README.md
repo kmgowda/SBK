@@ -86,6 +86,22 @@ Display the current connection, remote-installation, SBM, and benchmark options:
 
 SBK-GEM accepts GEM-specific options and forwards an SBK argument set to remote processes. Because authentication and connection-file formats are security-sensitive and evolve independently of a sample environment, use generated help and the checked-in example configuration files as the authority.
 
+### Node SSH endpoints
+
+`-gemport` remains the default SSH port for every entry in `-nodes`. A node can
+override that default by using a `host:port` endpoint. This supports multiple
+SSH nodes exposed through different ports on one host, including disposable
+Docker fixtures:
+
+```bash
+sbk-gem -nodes 127.0.0.1:2201,127.0.0.1:2202 -gemport 22 \
+  -class file -writers 1 -records 1000 -size 4096
+```
+
+Use brackets when an IPv6 address includes a port, for example
+`-nodes [::1]:2201`. Hostnames and addresses without an endpoint-specific port
+continue to use `-gemport`.
+
 ### Aggregate record control
 
 Use `-records` to preserve the standard SBK behavior: the supplied value is
