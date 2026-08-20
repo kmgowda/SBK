@@ -16,6 +16,7 @@
 
 import groovy.json.JsonOutput
 import java.security.MessageDigest
+import org.gradle.api.tasks.testing.Test
 
 def qualificationDefaults = new Properties()
 file('gradle/release-qualification.properties').withInputStream {
@@ -50,6 +51,19 @@ def applicationProjects = [
         project(':sbm'),
         project(':sbk-web-console')
 ]
+
+sourceSets {
+    releaseFunctionalTest {
+        java.srcDir 'src/releaseFunctionalTest/java'
+        resources.srcDir 'src/releaseFunctionalTest/resources'
+    }
+}
+
+dependencies {
+    releaseFunctionalTestImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    releaseFunctionalTestRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+    releaseFunctionalTestRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
 
 tasks.register('releasePreflight') {
     group = 'verification'
@@ -103,12 +117,16 @@ tasks.register('releasePreflight') {
             }
         }
         if (qualificationProfile == 'local-docker') {
+            def pathDirectories = (System.getenv('PATH') ?: '').split(File.pathSeparator)
+            def executableSuffixes = System.getProperty('os.name').toLowerCase().contains('windows')
+                    ? ['', '.exe', '.cmd', '.bat'] : ['']
             ['docker', 'ssh-agent', 'ssh-add', 'ssh-keygen', 'ssh-keyscan', 'ssh'].each { command ->
-                def commandLookup = providers.exec {
-                    commandLine 'sh', '-c', 'command -v "$1"', 'sh', command
-                    ignoreExitValue = true
+                def executableFound = pathDirectories.any { directory ->
+                    executableSuffixes.any { suffix ->
+                        new File(directory, command + suffix).isFile()
+                    }
                 }
-                if (commandLookup.result.get().exitValue != 0) {
+                if (!executableFound) {
                     throw new GradleException("The local-docker profile requires '${command}' on PATH")
                 }
             }
@@ -165,43 +183,33 @@ tasks.register('releasePackaging') {
     }
 }
 
-tasks.register('releaseFunctionalTest', Exec) {
+tasks.register('releaseFunctionalTest', Test) {
     group = 'verification'
     description = 'Runs black-box launcher, logger, YAL, SBM, Web Console, and profile-gated GEM tests.'
     dependsOn tasks.named('releasePackaging')
-    executable 'bash'
-    def functionalScript = qualificationProfile == 'local-docker'
-            ? 'scripts/release-functional-tests-docker.sh'
-            : 'scripts/release-functional-tests.sh'
-    args file(functionalScript).absolutePath
-    environment 'SBK_RELEASE_ROOT', rootDir.absolutePath
-    environment 'SBK_RELEASE_PROFILE', qualificationProfile
-    environment 'SBK_RELEASE_VERSION', sbkVersion.toString()
-    environment 'SBK_RELEASE_RECORDS', qualificationValue('records')
-    environment 'SBK_RELEASE_RECORD_SIZE', qualificationValue('recordSize')
-    environment 'SBK_RELEASE_TOTAL_THROUGHPUT_MB_PER_SEC', qualificationValue('totalThroughputMBPerSec')
-    environment 'SBK_RELEASE_PROCESS_TIMEOUT_SECONDS', qualificationValue('processTimeoutSeconds')
-    environment 'SBK_RELEASE_STARTUP_TIMEOUT_SECONDS', qualificationValue('startupTimeoutSeconds')
-    environment 'SBK_RELEASE_WEB_TIMEOUT_MINUTES', qualificationValue('webTimeoutMinutes')
-    environment 'SBK_RELEASE_KILL_GRACE_SECONDS', qualificationValue('killGraceSeconds')
-    environment 'SBK_RELEASE_PORT_SELECTION_ATTEMPTS', qualificationValue('portSelectionAttempts')
-    environment 'SBK_RELEASE_PORT_RANGE_START', qualificationValue('portRangeStart')
-    environment 'SBK_RELEASE_PORT_RANGE_SIZE', qualificationValue('portRangeSize')
-    environment 'SBK_RELEASE_SHUTDOWN_ATTEMPTS', qualificationValue('shutdownAttempts')
-    environment 'SBK_RELEASE_SHUTDOWN_POLL_SECONDS', qualificationValue('shutdownPollSeconds')
-    environment 'SBK_RELEASE_TERMINATE_GRACE_SECONDS', qualificationValue('terminateGraceSeconds')
-    environment 'SBK_RELEASE_EOF_RECORDS', qualificationValue('eofRecords')
-    environment 'SBK_RELEASE_EOF_BENCHMARK_SECONDS', qualificationValue('eofBenchmarkSeconds')
-    environment 'SBK_RELEASE_EOF_MAXIMUM_SECONDS', qualificationValue('eofMaximumSeconds')
-    environment 'SBK_RELEASE_SMOKE_BENCHMARK_SECONDS', qualificationValue('smokeBenchmarkSeconds')
-    environment 'SBK_RELEASE_SBM_SETTLE_SECONDS', qualificationValue('sbmSettleSeconds')
-    environment 'SBK_RELEASE_DOCKER_NODE_COUNT', qualificationValue('dockerNodeCount')
-    environment 'SBK_RELEASE_DOCKER_SSH_READY_ATTEMPTS', qualificationValue('dockerSshReadyAttempts')
-    environment 'SBK_RELEASE_REPORT_DIR', qualificationReportDir.get().asFile.absolutePath
+    testClassesDirs = sourceSets.releaseFunctionalTest.output.classesDirs
+    classpath = sourceSets.releaseFunctionalTest.runtimeClasspath
+    filter {
+        includeTestsMatching 'io.sbk.release.ReleaseFunctionalTest'
+        failOnNoMatchingTests = true
+    }
+    testLogging.showStandardStreams = true
+    systemProperty 'sbk.release.root', rootDir.absolutePath
+    systemProperty 'sbk.release.profile', qualificationProfile
+    systemProperty 'sbk.release.version', sbkVersion.toString()
+    ['records', 'recordSize', 'totalThroughputMBPerSec', 'processTimeoutSeconds',
+     'startupTimeoutSeconds', 'webTimeoutMinutes', 'killGraceSeconds',
+     'shutdownPollSeconds', 'eofRecords', 'eofBenchmarkSeconds', 'eofMaximumSeconds',
+     'smokeBenchmarkSeconds', 'sbmSettleSeconds', 'dockerNodeCount',
+     'dockerSshReadyAttempts'].each { name ->
+        systemProperty "sbk.release.${name}", qualificationValue(name)
+    }
+    systemProperty 'sbk.release.reportDir', qualificationReportDir.get().asFile.absolutePath
     def inventoryName = findProperty('releaseInventory')?.toString()?.trim()
     if (inventoryName) {
-        environment 'SBK_RELEASE_INVENTORY', file(inventoryName).absolutePath
+        systemProperty 'sbk.release.inventory', file(inventoryName).absolutePath
     }
+    outputs.upToDateWhen { false }
 }
 
 tasks.register('releaseDocsCheck') {
