@@ -11,6 +11,12 @@ suite and standalone service launchers, verifies PerL concurrency, checks
 generated API documentation, and records the commit and archive checksums that
 were qualified.
 
+The normal `./gradlew check` lifecycle remains the compile, static-analysis,
+and unit-test gate. It intentionally does not start installed applications or
+external services. Run `./gradlew releaseFunctionalTest -Pprofile=local` for
+only the black-box JVM harness, or `releasecheck` for the complete ordered
+release gate.
+
 ## Profiles
 
 Use the `local` profile while developing:
@@ -76,9 +82,9 @@ During development, use the clean-tree override to qualify uncommitted code:
 Do not use this override as release evidence. A local-profile result verifies
 the local functional scope but does not qualify a release candidate.
 
-The local functional harness supports both macOS and Linux using the Bash,
-`kill`, and `sleep` commands supplied by the operating system. GNU coreutils
-`timeout` (or the Homebrew `gtimeout` equivalent) is not required.
+The functional harness is a dedicated JUnit source set executed by Gradle. It
+uses JDK process, timeout, HTTP, socket, and file APIs on both macOS and Linux;
+it does not require Bash, `curl`, GNU `timeout`, or Homebrew `gtimeout`.
 
 ### Local gate with automatic GEM
 
@@ -246,7 +252,8 @@ checks:
   per-client `-records`, and combined fixed aggregate record/throughput control.
 
 All child processes have bounded startup and execution times. Logs and a test
-summary are written below `build/reports/release-qualification/`.
+summary are written below `build/reports/release-qualification/`; Gradle also
+writes standard JUnit XML and HTML results for `releaseFunctionalTest`.
 
 ## Configuration
 
@@ -261,11 +268,12 @@ input with `-PreleaseTotalThroughputMBPerSec=<value>` when the release fixture
 needs a different rate.
 
 The same file is the single source for child-process shutdown grace periods,
-port-selection limits, smoke and EOF workloads, SBM settling time, Docker node
-count and SSH readiness, and report-generation limits. The Gradle task exports
-those resolved values to the shell harnesses, so the scripts do not maintain a
-second set of fallback defaults. Use the matching Gradle property name to
-override one value, for example:
+smoke and EOF workloads, SBM settling time, Docker node count and SSH
+readiness, the pinned Docker JDK image, fixture SSH user/port and host alias,
+socket connection timeout, and report-generation limits. Gradle passes those
+resolved values to the JVM harness and Docker build, so the Java and container
+sources do not maintain a second set of fallback defaults. Use the matching
+Gradle property name to override one value, for example:
 
 ```bash
 ./gradlew releasecheck \

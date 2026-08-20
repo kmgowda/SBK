@@ -37,6 +37,8 @@ import java.util.concurrent.ForkJoinPool;
  * periodic recorders) based on supplied configuration and logger choices.
  */
 public final class PerlBuilder {
+    private static final String CSV_FILE_NUMBER_FORMAT = "%06d";
+    private static final int CSV_FILE_NUMBER_BOUND = 1_000_000;
 
     /** Creates a PerL component builder. */
     public PerlBuilder() {
@@ -139,7 +141,8 @@ public final class PerlBuilder {
             totalWindowExtension = new CSVExtendedLatencyRecorder(minLatency, maxLatency,
                     LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX,
                     percentileFractions, time, totalWindow, config.csvFileSizeGB,
-                    PerlConfig.NAME + "-" + String.format("%06d", randomNum.nextInt(1000000)) + ".csv");
+                    PerlConfig.NAME + "-" + String.format(CSV_FILE_NUMBER_FORMAT,
+                            randomNum.nextInt(CSV_FILE_NUMBER_BOUND)) + ".csv");
             PerlPrinter.log.info("Total Window Extension: CSV, Size: " +
                     totalWindowExtension.getMaxMemoryBytes() / Bytes.BYTES_PER_GB + " GB");
         } else {

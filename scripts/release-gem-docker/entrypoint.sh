@@ -4,12 +4,14 @@
 
 set -euo pipefail
 
-install -d -m 0700 -o sbk-release -g sbk-release /home/sbk-release/.ssh
-install -m 0600 -o sbk-release -g sbk-release \
-    /run/sbk/authorized_key /home/sbk-release/.ssh/authorized_keys
+install -d -m 0700 -o "$SBK_RELEASE_SSH_USER" -g "$SBK_RELEASE_SSH_USER" \
+    "/home/$SBK_RELEASE_SSH_USER/.ssh"
+install -m 0600 -o "$SBK_RELEASE_SSH_USER" -g "$SBK_RELEASE_SSH_USER" \
+    /run/sbk/authorized_key "/home/$SBK_RELEASE_SSH_USER/.ssh/authorized_keys"
 ssh-keygen -A
 
 exec /usr/sbin/sshd -D -e \
+    -p "$SBK_RELEASE_SSH_PORT" \
     -o PasswordAuthentication=no \
     -o KbdInteractiveAuthentication=no \
     -o PubkeyAuthentication=yes \
