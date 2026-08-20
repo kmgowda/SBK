@@ -45,6 +45,8 @@ plugins.withId('maven-publish') {
             include 'REPOSITORY_MAP.md'
             include 'DRIVER_GUIDE.md'
             include 'DOCUMENTATION_GUIDE.md'
+            include 'RELEASE_QUALIFICATION.md'
+            include 'RELEASE_PUBLICATION.md'
             include 'PROMETHEUS_LOGGER.md'
             include 'WEB_LOGGER.md'
             into 'docs'
@@ -65,39 +67,27 @@ plugins.withId('maven-publish') {
     }
 
     /*
-      Use command : ./gradlew publish  -Pmaven -Pgithub
-      -Pmaven - parameter to publish in maven central   #### This is not working since November 2025
-      -Pgithub - parameter to publish to Git hub
+      ./gradlew publish stages artifacts locally for JReleaser.
+      ./gradlew publish -Pgithub publishes the same consumable coordinates to GitHub Packages.
+      Sonatype Central publication is performed by JReleaser, not by a Gradle Maven repository.
      */
     publishing {
         repositories {
-            if (project.gradle.startParameter.taskNames.contains("publish")) {
-                if (project.hasProperty("maven")) {
-                    println "Publishing SBK packages to Maven Central"
-                    maven {
-                        name = "SBK-Maven"
-                        url = uri(mavenLegacyStagingUrl)
-                        credentials {
-                            username = project.findProperty("oss.username") ?: System.getenv("OSS_USERNAME")
-                            password = project.findProperty("oss.password") ?: System.getenv("OSS_PASSWORD")
-                        }
+            if (project.hasProperty("github")) {
+                maven {
+                    name = "SBK-GitHub"
+                    url = uri(githubPackagesRepositoryUrl)
+                    credentials {
+                        username = project.findProperty("github.username")
+                                ?: System.getenv("GITHUB_USER")
+                                ?: System.getenv("GITHUB_USERNAME")
+                        password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
                     }
-                } else if (project.hasProperty("github")) {
-                    println "Publishing SBK packages to Git Hub"
-                    maven {
-                        name = "SBK-GitHub"
-                        url = uri(githubPackagesRepositoryUrl)
-                        credentials {
-                            username = project.findProperty("github.username") ?: System.getenv("GITHUB_USERNAME")
-                            password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
-                        }
-                    }
-                } else {
-                    def stagingDir = project.getProjectDir().toString() + File.separator + buildRepoDir
-                    println "Publishing SBK packages to local Maven repository $stagingDir"
-                    maven {
-                        url = layout.buildDirectory.dir(localRepoDir)
-                    }
+                }
+            } else {
+                maven {
+                    name = "SBK-Local-Staging"
+                    url = layout.buildDirectory.dir(localRepoDir)
                 }
             }
         }
@@ -147,7 +137,9 @@ plugins.withId('maven-publish') {
             project.setProperty("signing.secretKeyRingFile", secretKeyPath)
         }
 
-        if (project.property("signing.keyId") && project.property("signing.password") && project.property("signing.secretKeyRingFile")) {
+        def signingKeyRing = project.file(project.property("signing.secretKeyRingFile"))
+        if (project.property("signing.keyId") && project.property("signing.password")
+                && signingKeyRing.isFile()) {
             signing {
                 sign publications.mavenJava
             }
@@ -172,10 +164,12 @@ plugins.withId('maven-publish') {
 
         release {
             github {
+                // GitHub Actions owns the immutable tag, release assets, and container release.
+                // JReleaser remains responsible only for Maven Central staging/deployment.
                 enabled = true
-                skipRelease = false
-                skipTag = false
-                overwrite = true
+                skipRelease = true
+                skipTag = true
+                overwrite = false
             }
         }
 
@@ -213,24 +207,14 @@ plugins.withId('maven-publish') {
 
 
 /*
-perform the following command to publish the sbk packages via jreleaser
+Publish SBK packages through Sonatype Central with JReleaser:
 
-Once all configuration is in place you may execute the following commands:
+1) Verify configuration: ./gradlew jreleaserConfig
+2) Stage every Maven publication locally: ./gradlew clean publish
+3) Upload for portal inspection: ./gradlew jreleaserDeploy
+4) Or explicitly upload and publish in one guarded release operation:
+   JRELEASER_MAVENCENTRAL_STAGE=FULL ./gradlew jreleaserDeploy
 
-1) Verify release & deploy configuration
-$ ./gradlew jreleaserConfig
-
-2) Ensure a clean deployment
-$ ./gradlew clean
-
-3) Stage all artifacts to a local directory
-$ ./gradlew publish
-
-4) Deploy and release    // This make full release   , since  stage = "UPLOAD" , this command will fail
-   you should login to sontype : https://central.sonatype.com/publishing/deployments and make the release manually
-$ ./gradlew jreleaserFullRelease
-
-or
-
-$ ./gradlew jreleaserdeploy   // This also does full release
+The source default is UPLOAD. GitHub Packages use the independent
+./gradlew publish -Pgithub path with the same Maven coordinates.
 */

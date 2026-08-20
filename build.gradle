@@ -55,6 +55,7 @@ buildscript {
 plugins {
     id 'org.jreleaser' version  "${jReleaserPluginVersion}"
     id 'io.github.ben-manes.versions' version "${gradleVersionsPluginVersion}"
+    id 'org.cyclonedx.bom' version "${cycloneDxPluginVersion}" apply false
 }
 
 /*
@@ -124,11 +125,17 @@ allprojects {
     }
 
     repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url = gradlePluginRepositoryUrl
+        }
         maven {
             name = "GitHubPackages"
             url = uri(haloDbRepositoryUrl)
             credentials {
                 username = project.findProperty("github.username")
+                        ?: System.getenv("GITHUB_USER")
                         ?: System.getenv("GITHUB_USERNAME")
                         ?: "sbk-public"
                 // Never keep a source-controlled token fallback. HaloDB is disabled by default.
@@ -136,11 +143,6 @@ allprojects {
                         ?: System.getenv("GITHUB_TOKEN")
                         ?: ""
             }
-        }
-        mavenLocal()
-        mavenCentral()
-        maven {
-            url = gradlePluginRepositoryUrl
         }
     }
     group = sbkGroup
@@ -497,6 +499,8 @@ application {
             include "REPOSITORY_MAP.md"
             include "DRIVER_GUIDE.md"
             include "DOCUMENTATION_GUIDE.md"
+            include "RELEASE_QUALIFICATION.md"
+            include "RELEASE_PUBLICATION.md"
             include "PROMETHEUS_LOGGER.md"
             include "WEB_LOGGER.md"
         }
@@ -687,3 +691,4 @@ dependencies {
 apply from: "build-drivers.gradle"
 
 apply from: "gradle/release-qualification.gradle"
+apply from: "gradle/release-publication.gradle"

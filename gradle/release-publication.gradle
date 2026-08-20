@@ -1,0 +1,324 @@
+/**
+ * Copyright (c) KMG. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.security.MessageDigest
+import org.gradle.api.tasks.bundling.Compression
+
+def releaseAssetsDirectory = layout.buildDirectory.dir('release-assets')
+def releaseIntermediateDirectory = layout.buildDirectory.dir('release-intermediates')
+def releaseContainerDirectory = layout.buildDirectory.dir('release-container')
+def qualificationDirectory = layout.buildDirectory.dir('reports/release-qualification')
+def releaseApplicationProjects = [project, project(':sbm'), project(':sbk-web-console')]
+def releaseMavenProjects = [
+        project(':perl'), project(':sbk-web-console'), project(':sbk-api'), project(':sbm'),
+        project(':sbk-yal'), project(':sbk-gem'), project(':sbk-gem-yal')
+]
+def expectedReleaseMavenProjectPaths = [
+        ':perl', ':sbk-web-console', ':sbk-api', ':sbm', ':sbk-yal', ':sbk-gem', ':sbk-gem-yal'
+] as Set
+def releaseImageNames = ['kmgowda/sbk', 'ghcr.io/kmgowda/sbk']
+def releasePlatforms = ['linux/amd64', 'linux/arm64']
+def sha256File = { File artifact ->
+    def digest = MessageDigest.getInstance('SHA-256')
+    artifact.withInputStream { input ->
+        byte[] buffer = new byte[8192]
+        int count
+        while ((count = input.read(buffer)) > 0) {
+            digest.update(buffer, 0, count)
+        }
+    }
+    digest.digest().encodeHex().toString()
+}
+def writeReleaseChecksums = { File assetsDirectory ->
+    def checksumFiles = assetsDirectory.listFiles().findAll {
+        it.isFile() && it.name != 'SHA256SUMS'
+    }.sort { left, right -> left.name <=> right.name }
+    def checksumLines = checksumFiles.collect { artifact ->
+        "${sha256File(artifact)}  ${artifact.name}"
+    }
+    new File(assetsDirectory, 'SHA256SUMS').text =
+            checksumLines.join(System.lineSeparator()) + System.lineSeparator()
+}
+
+releaseMavenProjects.each { publicationProject ->
+    publicationProject.apply plugin: 'org.cyclonedx.bom'
+    publicationProject.tasks.named('cyclonedxDirectBom').configure {
+        includeConfigs = ['runtimeClasspath']
+        skipConfigs = ['(?i).*test.*']
+        testConfigs = []
+    }
+}
+
+def releaseCoreSboms = tasks.register('releaseCoreSboms') {
+    group = 'distribution'
+    description = 'Generates direct CycloneDX SBOMs for publishable core modules only.'
+    dependsOn releaseMavenProjects.collect { it.tasks.named('cyclonedxDirectBom') }
+}
+
+def verifyReleasePublicationScope = tasks.register('verifyReleasePublicationScope') {
+    group = 'verification'
+    description = 'Proves that standalone release publication is restricted to core modules.'
+    doLast {
+        def configuredPaths = releaseMavenProjects.collect { it.path } as Set
+        if (configuredPaths != expectedReleaseMavenProjectPaths) {
+            throw new GradleException("Unexpected Maven release project set: ${configuredPaths}")
+        }
+        def publishableDriverProjects = rootProject.allprojects.findAll {
+            it.path.startsWith(':drivers:') && it.pluginManager.hasPlugin('maven-publish')
+        }
+        if (!publishableDriverProjects.isEmpty()) {
+            throw new GradleException('Drivers must not apply maven-publish: '
+                    + publishableDriverProjects.collect { it.path }.join(', '))
+        }
+    }
+}
+
+def releaseStageCorePublications = tasks.register('releaseStageCorePublications') {
+    group = 'publishing'
+    description = 'Publishes only core SBK modules to local staging or, with -Pgithub, GitHub Packages.'
+    dependsOn verifyReleasePublicationScope
+    dependsOn releaseMavenProjects.collect { "${it.path}:publish" }
+}
+
+def verifyCorePublicationStaging = tasks.register('verifyCorePublicationStaging') {
+    group = 'verification'
+    description = 'Validates the core Maven artifacts staged for JReleaser deployment.'
+    dependsOn releaseStageCorePublications
+    doLast {
+        releaseMavenProjects.each { publicationProject ->
+            def artifactDirectory = publicationProject.layout.buildDirectory.dir(
+                    "sbk-repo/${sbkGroup.replace('.', '/')}/${publicationProject.name}/${sbkVersion}")
+                    .get().asFile
+            def requiredFiles = [
+                    "${publicationProject.name}-${sbkVersion}.pom",
+                    "${publicationProject.name}-${sbkVersion}.jar",
+                    "${publicationProject.name}-${sbkVersion}-sources.jar",
+                    "${publicationProject.name}-${sbkVersion}-javadoc.jar",
+                    "${publicationProject.name}-${sbkVersion}-docs.jar"
+            ]
+            def missingFiles = requiredFiles.findAll {
+                def artifact = new File(artifactDirectory, it)
+                !artifact.isFile() || artifact.length() == 0L
+            }
+            if (!missingFiles.isEmpty()) {
+                throw new GradleException("Missing staged artifacts for ${publicationProject.path}: "
+                        + missingFiles.join(', '))
+            }
+        }
+    }
+}
+
+def releaseAgentDocs = tasks.register('releaseAgentDocs', Tar) {
+    group = 'distribution'
+    description = 'Creates the complete SBK agent and engineering documentation archive.'
+    archiveFileName = 'sbk-agent-docs.tar.gz'
+    destinationDirectory = releaseIntermediateDirectory
+    compression = Compression.GZIP
+    reproducibleFileOrder = true
+    preserveFileTimestamps = false
+
+    from('AGENTS.md')
+    from('INSTRUCTIONS.md')
+    from('README.md')
+    from('.cursorrules')
+    from('.aider.conf.yml')
+    from('.cursor') {
+        into '.cursor'
+    }
+    from('.devin/skills') {
+        into '.devin/skills'
+    }
+    from('docs') {
+        into 'docs'
+    }
+}
+
+def collectReleaseAssets = tasks.register('collectReleaseAssets', Sync) {
+    group = 'distribution'
+    description = 'Collects qualified distributions, reports, documentation, and core-module SBOMs.'
+    dependsOn tasks.named('releasePackaging')
+    dependsOn releaseAgentDocs
+    dependsOn releaseCoreSboms
+    mustRunAfter tasks.named('releasecheck')
+    into releaseAssetsDirectory
+
+    releaseApplicationProjects.each { applicationProject ->
+        from(applicationProject.layout.buildDirectory.dir('distributions')) {
+            include '*.zip', '*.tar'
+        }
+    }
+    from(releaseAgentDocs.flatMap { it.archiveFile })
+    from(qualificationDirectory) {
+        include 'qualification.json', 'functional-summary.json', 'functional-results.tsv'
+    }
+    releaseMavenProjects.each { publicationProject ->
+        from(publicationProject.layout.buildDirectory.dir('reports/cyclonedx-direct')) {
+            include 'bom.json'
+            rename { "${publicationProject.name}-${sbkVersion}-sbom.cdx.json" }
+        }
+        from(publicationProject.layout.buildDirectory.dir('reports/cyclonedx-direct')) {
+            include 'bom.xml'
+            rename { "${publicationProject.name}-${sbkVersion}-sbom.cdx.xml" }
+        }
+    }
+}
+
+def generateReleaseManifest = tasks.register('generateReleaseManifest') {
+    group = 'distribution'
+    description = 'Generates the checksum and immutable metadata contract for an SBK release.'
+    dependsOn collectReleaseAssets
+    outputs.files(
+            releaseAssetsDirectory.map { it.file('SHA256SUMS') },
+            releaseAssetsDirectory.map { it.file('release-manifest.json') })
+    outputs.upToDateWhen { false }
+
+    doLast {
+        def assetsDirectory = releaseAssetsDirectory.get().asFile
+        def qualificationFile = new File(assetsDirectory, 'qualification.json')
+        if (!qualificationFile.isFile()) {
+            throw new GradleException('qualification.json is missing; run releasecheck before packaging a release')
+        }
+        def qualification = new JsonSlurper().parse(qualificationFile)
+        if (qualification.status != 'QUALIFIED' || qualification.version != sbkVersion.toString()) {
+            throw new GradleException('Release assets require a matching QUALIFIED qualification.json')
+        }
+
+        def requiredAssets = [
+                "sbk-${sbkVersion}.zip",
+                "sbk-${sbkVersion}.tar",
+                "sbm-${sbkVersion}.zip",
+                "sbm-${sbkVersion}.tar",
+                "sbk-web-console-${sbkVersion}.zip",
+                "sbk-web-console-${sbkVersion}.tar",
+                'sbk-agent-docs.tar.gz',
+                'qualification.json',
+                'functional-summary.json',
+                'functional-results.tsv'
+        ] + releaseMavenProjects.collectMany { publicationProject ->
+            ["${publicationProject.name}-${sbkVersion}-sbom.cdx.json",
+             "${publicationProject.name}-${sbkVersion}-sbom.cdx.xml"]
+        }
+        def missingAssets = requiredAssets.findAll {
+            def artifact = new File(assetsDirectory, it)
+            !artifact.isFile() || artifact.length() == 0L
+        }
+        if (!missingAssets.isEmpty()) {
+            throw new GradleException('Missing contracted release assets:\n' + missingAssets.join('\n'))
+        }
+
+        def payloadFiles = assetsDirectory.listFiles().findAll {
+            it.isFile() && !(it.name in ['SHA256SUMS', 'release-manifest.json'])
+        }.sort { left, right -> left.name <=> right.name }
+        def artifacts = payloadFiles.collect { artifact ->
+            [name: artifact.name, size: artifact.length(), sha256: sha256File(artifact)]
+        }
+
+        def configuredContainerDigest = findProperty('releaseContainerDigest')?.toString()?.trim()
+        def manifest = [
+                schemaVersion: 1,
+                product: 'SBK',
+                version: sbkVersion.toString(),
+                tag: "v${sbkVersion}",
+                commit: qualification.commit,
+                qualificationProfile: qualification.profile,
+                artifacts: artifacts,
+                containers: [
+                        status: configuredContainerDigest ? 'published' : 'dry-run',
+                        images: releaseImageNames,
+                        platforms: releasePlatforms,
+                        digest: configuredContainerDigest ?: null
+                ]
+        ]
+        def manifestFile = new File(assetsDirectory, 'release-manifest.json')
+        manifestFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(manifest)) + System.lineSeparator()
+        writeReleaseChecksums(assetsDirectory)
+    }
+}
+
+tasks.register('finalizeReleaseManifest') {
+    group = 'distribution'
+    description = 'Binds an already-built release manifest to the published container digest.'
+    outputs.upToDateWhen { false }
+    doLast {
+        def configuredContainerDigest = findProperty('releaseContainerDigest')?.toString()?.trim()
+        if (configuredContainerDigest == null || !(configuredContainerDigest ==~ /sha256:[0-9a-f]{64}/)) {
+            throw new GradleException(
+                    'finalizeReleaseManifest requires -PreleaseContainerDigest=sha256:<64 hex characters>')
+        }
+        def assetsDirectoryProperty = findProperty('releaseAssetsDir')?.toString()?.trim()
+        def assetsDirectory = assetsDirectoryProperty
+                ? file(assetsDirectoryProperty) : releaseAssetsDirectory.get().asFile
+        def manifestFile = new File(assetsDirectory, 'release-manifest.json')
+        if (!manifestFile.isFile()) {
+            throw new GradleException("Release manifest does not exist: ${manifestFile}")
+        }
+        def manifest = new JsonSlurper().parse(manifestFile)
+        if (manifest.version != sbkVersion.toString() || manifest.tag != "v${sbkVersion}") {
+            throw new GradleException('Release manifest version does not match the SBK build version')
+        }
+        manifest.containers.status = 'published'
+        manifest.containers.digest = configuredContainerDigest
+        manifestFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(manifest)) + System.lineSeparator()
+        writeReleaseChecksums(assetsDirectory)
+    }
+}
+
+def prepareReleaseContainer = tasks.register('prepareReleaseContainer', Sync) {
+    group = 'distribution'
+    description = 'Creates the minimal Docker build context from the installed SBK distribution.'
+    dependsOn tasks.named('installDist')
+    into releaseContainerDirectory
+    from('Dockerfile') {
+        filter { line -> line.replace('SBK_RUNTIME_IMAGE', runtimeContainerImage.toString()) }
+    }
+    from(layout.buildDirectory.dir('install/sbk')) {
+        into 'sbk'
+    }
+}
+
+def releasePublicationDryRun = tasks.register('releasePublicationDryRun') {
+    group = 'verification'
+    description = 'Runs qualification and prepares every release asset without publishing or creating a tag.'
+    dependsOn tasks.named('releasecheck')
+    dependsOn generateReleaseManifest
+    dependsOn prepareReleaseContainer
+    dependsOn verifyCorePublicationStaging
+    doLast {
+        logger.lifecycle('SBK release publication dry run: PASSED')
+        logger.lifecycle("Assets: ${releaseAssetsDirectory.get().asFile}")
+        logger.lifecycle('No Git tag, GitHub Release, Maven package, or container image was published.')
+    }
+}
+
+gradle.projectsEvaluated {
+    releaseMavenProjects.each { publicationProject ->
+        publicationProject.tasks.named('publish').configure {
+            mustRunAfter rootProject.tasks.named('releasecheck')
+        }
+    }
+    tasks.named('jreleaserConfig').configure { mustRunAfter releaseStageCorePublications }
+    tasks.named('jreleaserDeploy').configure { mustRunAfter releaseStageCorePublications }
+}
+
+gradle.taskGraph.whenReady { graph ->
+    if (graph.hasTask(releasePublicationDryRun.get())
+            && project.hasProperty('github')) {
+        throw new GradleException('releasePublicationDryRun only publishes to local build repositories; '
+                + 'remove -Pgithub')
+    }
+}

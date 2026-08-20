@@ -234,6 +234,11 @@ Open **Actions > SBK Release Qualification > Run workflow**, select the
 the one-time runner and SSH setup, SBK-GEM and SBK-GEM-YAL require no manual
 launcher commands.
 
+Qualification does not itself create a tag or publish a release. After the
+candidate qualifies, follow [Release publication](RELEASE_PUBLICATION.md) for
+the non-mutating publication dry run and the guarded GitHub Release, GitHub
+Packages, Docker Hub, and GHCR workflow.
+
 ## Automated functional coverage
 
 The black-box harness runs binaries from the generated install trees and

@@ -46,6 +46,8 @@ This directory contains the authoritative engineering documentation for Storage 
 6. [Agent-documentation distribution](AGENT_DOCUMENTATION_DISTRIBUTION.md): how documentation enters release artifacts.
 7. [Release qualification](RELEASE_QUALIFICATION.md): the one-command local,
    CI, and release-candidate gates and their required infrastructure.
+8. [Release publication](RELEASE_PUBLICATION.md): dry runs, contracted assets,
+   GitHub Packages, Docker Hub/GHCR images, signing, and guarded publication.
 
 ### Coding agent
 
@@ -72,6 +74,7 @@ discover `AGENTS.md` directly; it does not replace the full guide.
 | [AGENT_TOOLKIT.md](AGENT_TOOLKIT.md) | Cross-tool agent discovery, context routing, permissions, and verification |
 | [AGENT_DOCUMENTATION_DISTRIBUTION.md](AGENT_DOCUMENTATION_DISTRIBUTION.md) | Agent-documentation release and artifact packaging |
 | [RELEASE_QUALIFICATION.md](RELEASE_QUALIFICATION.md) | Automated build, concurrency, packaging, logger, SBM, GEM, documentation, publication, and performance release gates |
+| [RELEASE_PUBLICATION.md](RELEASE_PUBLICATION.md) | Release dry run, artifact contract, container registries, authentication, and publication workflow |
 | [DRIVER_SPECIFICATION.md](DRIVER_SPECIFICATION.md) | Fillable design template for new drivers |
 | [DOCUMENTATION_GUIDE.md](DOCUMENTATION_GUIDE.md) | Documentation ownership, required content, and validation |
 | [WEB_LOGGER.md](WEB_LOGGER.md) | SBK Local Web Console usage, lifecycle, options, security, and troubleshooting |

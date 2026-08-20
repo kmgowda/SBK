@@ -8,8 +8,6 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-  release:
-    types: [created]
 
 jobs:
   build:
@@ -35,54 +33,3 @@ jobs:
         name: sbk-distribution
         path: build/install/sbk/
         retention-days: 90
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release' && github.event.action == 'created'
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 25
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '25'
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Build distribution
-      run: ./gradlew installDist distZip distTar
-    - name: Create documentation archive
-      run: |
-        mkdir -p docs-archive
-        cp AGENTS.md docs-archive/
-        cp INSTRUCTIONS.md docs-archive/
-        cp README.md docs-archive/
-        cp .cursorrules docs-archive/
-        cp .aider.conf.yml docs-archive/
-        cp -r .cursor docs-archive/
-        cp -r docs docs-archive/
-        mkdir -p docs-archive/.devin
-        cp -r .devin/skills docs-archive/.devin/
-        cd docs-archive
-        tar -czf ../sbk-agent-docs.tar.gz .
-    - name: Upload release assets
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          build/distributions/*.zip
-          build/distributions/*.tar
-          sbk-agent-docs.tar.gz
-          AGENTS.md
-          INSTRUCTIONS.md
-          docs/AGENT_RECIPES.md
-          docs/DRIVER_SPECIFICATION.md
-          docs/AGENT_TOOLKIT.md
-          docs/AGENT_DOCUMENTATION_DISTRIBUTION.md
-          docs/sbk-internals.md
-          docs/README.md
-          docs/ARCHITECTURE.md
-          docs/REPOSITORY_MAP.md
-          docs/DRIVER_GUIDE.md
-          docs/DOCUMENTATION_GUIDE.md
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
