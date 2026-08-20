@@ -287,12 +287,13 @@ YAL_FILE="$WORK_DIR/sbk-release.yml"
 printf 'sbkArgs:\n  class: file\n  file: %s\n  writers: 1\n  size: %s\n  records: %s\n' \
     "$WORK_DIR/sbk-yal.dat" "$RECORD_SIZE" "$RECORDS" > "$YAL_FILE"
 for logger in SystemLogger Sl4jLogger CSVLogger; do
-    extra=()
     if [[ $logger == CSVLogger ]]; then
-        extra=(-csvfile "$WORK_DIR/sbk-yal.csv")
+        run_expect "sbk-yal-${logger}" "Merged YAML.*arguments|SBK Benchmark Shutdown" \
+            "$SBK_YAL" -f "$YAL_FILE" -out "$logger" -csvfile "$WORK_DIR/sbk-yal.csv"
+    else
+        run_expect "sbk-yal-${logger}" "Merged YAML.*arguments|SBK Benchmark Shutdown" \
+            "$SBK_YAL" -f "$YAL_FILE" -out "$logger"
     fi
-    run_expect "sbk-yal-${logger}" "Merged YAML.*arguments|SBK Benchmark Shutdown" \
-        "$SBK_YAL" -f "$YAL_FILE" -out "$logger" "${extra[@]}"
 done
 
 YAL_PROM_PORT=$(free_port)
