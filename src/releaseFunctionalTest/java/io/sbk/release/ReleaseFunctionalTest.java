@@ -706,13 +706,23 @@ class ReleaseFunctionalTest {
             command(runner, config, directory, Map.of(), "ssh-keygen", "ssh-keygen", "-q", "-t", "ed25519",
                     "-N", "", "-C", "sbk-release-qualification", "-f",
                     directory.resolve("id_ed25519").toString());
-            Path socket = directory.resolve("ssh-agent.sock");
             ProcessOutcome agent = command(runner, config, directory, Map.of(), "ssh-agent",
-                    "ssh-agent", "-a", socket.toString(), "-s");
-            var matcher = Pattern.compile("SSH_AGENT_PID=([0-9]+)").matcher(Files.readString(agent.log));
-            require(matcher.find(), "Unable to start release qualification SSH agent; see " + agent.log);
-            long agentPid = Long.parseLong(matcher.group(1));
-            Map<String, String> environment = Map.of("SSH_AUTH_SOCK", socket.toString(),
+                    "ssh-agent", "-s");
+            String agentOutput = Files.readString(agent.log);
+            var socketMatcher = Pattern.compile("SSH_AUTH_SOCK=([^;\\r\\n]+);").matcher(agentOutput);
+            var pidMatcher = Pattern.compile("SSH_AGENT_PID=([0-9]+);").matcher(agentOutput);
+            boolean socketFound = socketMatcher.find();
+            boolean pidFound = pidMatcher.find();
+            if (!socketFound || !pidFound) {
+                if (pidFound) {
+                    ProcessHandle.of(Long.parseLong(pidMatcher.group(1))).ifPresent(ProcessHandle::destroy);
+                }
+                throw new IllegalStateException(
+                        "Unable to read release qualification SSH agent environment; see " + agent.log);
+            }
+            String socket = socketMatcher.group(1);
+            long agentPid = Long.parseLong(pidMatcher.group(1));
+            Map<String, String> environment = Map.of("SSH_AUTH_SOCK", socket,
                     "SSH_AGENT_PID", Long.toString(agentPid));
             DockerFixture fixture = new DockerFixture(config, runner, directory, containers,
                     agentPid, environment, null);
@@ -816,7 +826,13 @@ class ReleaseFunctionalTest {
                     // Best-effort cleanup; the original qualification failure remains authoritative.
                 }
             }
-            ProcessHandle.of(agentPid).ifPresent(ProcessHandle::destroy);
+            try {
+                runner.run("ssh-agent-cleanup", directory.resolve("ssh-agent-cleanup.log"),
+                        agentEnvironment, List.of("ssh-agent", "-k"), config.killGraceSeconds);
+            } catch (Exception ignored) {
+                // Fall through to the process-handle cleanup below.
+            }
+            ProcessHandle.of(agentPid).filter(ProcessHandle::isAlive).ifPresent(ProcessHandle::destroy);
             try (Stream<Path> paths = Files.walk(directory)) {
                 paths.sorted(Comparator.reverseOrder()).forEach(path -> {
                     try {

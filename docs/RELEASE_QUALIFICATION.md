@@ -99,7 +99,10 @@ host:
 ```
 
 Requirements are Docker with an accessible daemon and the OpenSSH client
-tools `ssh`, `ssh-agent`, `ssh-add`, `ssh-keygen`, and `ssh-keyscan`. The gate:
+tools `ssh`, `ssh-agent`, `ssh-add`, `ssh-keygen`, and `ssh-keyscan`. The
+fixture lets `ssh-agent` select its own platform-safe Unix-domain-socket path,
+avoiding the shorter socket-path limit on macOS when the repository is checked
+out beneath a long directory name. The gate:
 
 1. builds a JDK 25 fixture image;
 2. creates an ephemeral Ed25519 key and isolated SSH agent;
