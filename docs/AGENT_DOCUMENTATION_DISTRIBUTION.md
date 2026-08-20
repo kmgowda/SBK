@@ -83,8 +83,9 @@ dry runs. Editing this document or running a dry run does not publish anything.
 release dry run exercises these publications against project-local repositories.
 The guarded workflow stages only the explicit core allow-list with
 `releaseStageCorePublications`, deploys to Sonatype Central with JReleaser,
-and uses `releaseStageCorePublications -Pgithub` for GitHub Packages. Driver
-projects are excluded from standalone publication.
+and uses the internal `releasePublishCoreToGitHubPackages` task for GitHub
+Packages. Driver projects are excluded from standalone publication. The root
+`publish` task dispatches this complete guarded workflow.
 
 ## Maintenance checklist
 

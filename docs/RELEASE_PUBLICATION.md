@@ -29,8 +29,9 @@ contract:
 ```
 
 It never creates or pushes a Git tag, GitHub Release, Maven package, Docker
-Hub image, or GHCR image. Do not add `-Pgithub`; the task rejects that remote
-repository selector. Results are written to:
+Hub image, or GHCR image. The former `publish -Pgithub` selector has been
+removed; GitHub Packages are part of the complete guarded release. Results are
+written to:
 
 ```text
 build/release-assets/
@@ -79,16 +80,17 @@ and `sbk-gem-yal` launchers. SBM and the Local Web Console have separate
 standalone distributions.
 
 No `drivers:*` project is published as a standalone archive, Maven package, or
-CycloneDX project. The guarded workflow calls `releaseStageCorePublications`,
-whose explicit allow-list excludes `drivers/`; it also fails if a driver ever
-applies `maven-publish`. Drivers remain runtime plugins inside the SBK
-distribution and container. Direct CycloneDX release files are generated only
-for the publishable core modules: PerL, SBK API, SBK Web Console transport,
-SBM, SBK-YAL, SBK-GEM, and SBK-GEM-YAL. `sbk-api` and `sbk-web-console` are
-included because they are required compile/runtime dependencies of the public
-SBK API used by external applications. BuildKit separately generates an image
-SBOM from the complete container filesystem, including the driver libraries
-actually bundled there.
+CycloneDX project. The guarded workflow calls `releaseStageCorePublications`
+for local JReleaser staging and `releasePublishCoreToGitHubPackages` for GitHub
+Packages. Both use the same explicit allow-list that excludes `drivers/`; the
+scope verifier also fails if a driver ever applies `maven-publish`. Drivers
+remain runtime plugins inside the SBK distribution and container. Direct
+CycloneDX release files are generated only for the publishable core modules:
+PerL, SBK API, SBK Web Console transport, SBM, SBK-YAL, SBK-GEM, and
+SBK-GEM-YAL. `sbk-api` and `sbk-web-console` are included because they are
+required compile/runtime dependencies of the public SBK API used by external
+applications. BuildKit separately generates an image SBOM from the complete
+container filesystem, including the driver libraries actually bundled there.
 
 ## Container publication
 
@@ -108,8 +110,8 @@ Cosign and GitHub OIDC.
 
 ## Authentication
 
-GitHub operations and the existing Gradle `publish -Pgithub` path resolve the
-GitHub identity from these sources:
+GitHub workflow dispatch and the internal GitHub Packages publication resolve
+the GitHub identity from these sources:
 
 1. Gradle properties `github.username` and `github.token`, when Gradle is run
    directly;
@@ -138,7 +140,31 @@ documented in [Release qualification](RELEASE_QUALIFICATION.md).
 
 ## Publishing a release
 
-Run **Actions > SBK Release > Run workflow** from `master` with:
+Dispatch the complete guarded release from Gradle:
+
+```bash
+GITHUB_TOKEN=<actions-write-token> ./gradlew publish \
+  -Pprofile=release \
+  -PreleaseConfirm=RELEASE-10.5 \
+  --no-daemon
+```
+
+The confirmation value must exactly match `RELEASE-<sbkVersion>`. The task
+always sends `dry_run=false` and dispatches `.github/workflows/release.yml`
+from `master`; therefore, it performs an actual release rather than a local
+dry run. Use `-Pgithub.token=<token>` instead of `GITHUB_TOKEN` when Gradle
+property-based authentication is preferred. This token authorizes only the
+GitHub Actions workflow dispatch; JReleaser still obtains its Maven Central
+configuration and credentials exclusively from the custom TOML file.
+
+Optional release controls are:
+
+```text
+-PreleasePrerelease=true
+-PreleaseResume=true
+```
+
+Both default to `false`. The task submits the following workflow inputs:
 
 ```text
 version=<exact sbkVersion from gradle.properties>
@@ -148,11 +174,14 @@ prerelease=false
 resume=false
 ```
 
+The same inputs remain available through **Actions > SBK Release > Run
+workflow** when a browser-driven release is required.
+
 The workflow runs the authoritative real-host release gate, performs a local
 Maven publication dry run, validates both container architectures, publishes
 the image to Docker Hub and GHCR, stages only core packages with
 `releaseStageCorePublications`, deploys them to Sonatype Central with
-`jreleaserDeploy`, invokes `releaseStageCorePublications -Pgithub` for GitHub
+`jreleaserDeploy`, invokes `releasePublishCoreToGitHubPackages` for GitHub
 Packages, creates an annotated tag, creates a draft GitHub Release,
 uploads and compares every asset, and publishes the release last.
 

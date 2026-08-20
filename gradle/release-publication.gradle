@@ -16,7 +16,12 @@
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.security.MessageDigest
+import java.time.Duration
 import org.gradle.api.tasks.bundling.Compression
 
 def releaseAssetsDirectory = layout.buildDirectory.dir('release-assets')
@@ -33,6 +38,16 @@ def expectedReleaseMavenProjectPaths = [
 ] as Set
 def releaseImageNames = ['kmgowda/sbk', 'ghcr.io/kmgowda/sbk']
 def releasePlatforms = ['linux/amd64', 'linux/arm64']
+def rootReleasePublishRequested = gradle.startParameter.taskNames.any {
+    it == 'publish' || it == ':publish'
+}
+def releaseBooleanProperty = { String propertyName ->
+    def value = findProperty(propertyName)?.toString()?.trim()?.toLowerCase() ?: 'false'
+    if (!(value in ['true', 'false'])) {
+        throw new GradleException("${propertyName} must be true or false")
+    }
+    value
+}
 def sha256File = { File artifact ->
     def digest = MessageDigest.getInstance('SHA-256')
     artifact.withInputStream { input ->
@@ -90,7 +105,14 @@ def verifyReleasePublicationScope = tasks.register('verifyReleasePublicationScop
 
 def releaseStageCorePublications = tasks.register('releaseStageCorePublications') {
     group = 'publishing'
-    description = 'Publishes only core SBK modules to local staging or, with -Pgithub, GitHub Packages.'
+    description = 'Stages only core SBK module publications locally for JReleaser.'
+    dependsOn verifyReleasePublicationScope
+    dependsOn releaseMavenProjects.collect { "${it.path}:publish" }
+}
+
+def releasePublishCoreToGitHubPackages = tasks.register('releasePublishCoreToGitHubPackages') {
+    group = 'publishing'
+    description = 'Internal workflow task that publishes only core SBK modules to GitHub Packages.'
     dependsOn verifyReleasePublicationScope
     dependsOn releaseMavenProjects.collect { "${it.path}:publish" }
 }
@@ -305,7 +327,79 @@ def releasePublicationDryRun = tasks.register('releasePublicationDryRun') {
     }
 }
 
+tasks.register('publish') {
+    group = 'publishing'
+    description = 'Dispatches the guarded GitHub Actions workflow to publish an actual SBK release.'
+    doLast {
+        def requestedProfile = findProperty('profile')?.toString()?.trim()
+        if (requestedProfile != 'release') {
+            throw new GradleException('publish requires -Pprofile=release')
+        }
+
+        def expectedConfirmation = "RELEASE-${sbkVersion}"
+        def suppliedConfirmation = findProperty('releaseConfirm')?.toString()?.trim()
+        if (suppliedConfirmation != expectedConfirmation) {
+            throw new GradleException(
+                    "Actual publication requires -PreleaseConfirm=${expectedConfirmation}")
+        }
+
+        def githubToken = findProperty('github.token')?.toString()?.trim()
+                ?: System.getenv('GITHUB_TOKEN')?.trim()
+        if (githubToken == null) {
+            throw new GradleException(
+                    'GitHub Actions dispatch requires -Pgithub.token or GITHUB_TOKEN')
+        }
+
+        def prerelease = releaseBooleanProperty('releasePrerelease')
+        def resume = releaseBooleanProperty('releaseResume')
+        def repository = releaseGitHubRepository.toString().trim()
+        def workflow = releaseWorkflowFile.toString().trim()
+        def workflowRef = releaseWorkflowRef.toString().trim()
+        def apiUrl = releaseGitHubApiUrl.toString().replaceAll('/+$', '')
+        def requestPath = "${apiUrl}/repos/${repository}/actions/workflows/" +
+                "${workflow}/dispatches"
+        def requestUri = URI.create(requestPath)
+        def requestPayload = JsonOutput.toJson([
+                ref: workflowRef,
+                inputs: [
+                        version: sbkVersion.toString(),
+                        profile: 'release',
+                        dry_run: 'false',
+                        prerelease: prerelease,
+                        resume: resume
+                ]
+        ])
+        def timeout = Duration.ofSeconds(releaseDispatchTimeoutSeconds.toString().toLong())
+        def httpClient = HttpClient.newBuilder().connectTimeout(timeout).build()
+        def request = HttpRequest.newBuilder(requestUri)
+                .timeout(timeout)
+                .header('Accept', 'application/vnd.github+json')
+                .header('Authorization', "Bearer ${githubToken}")
+                .header('X-GitHub-Api-Version', releaseGitHubApiVersion.toString())
+                .POST(HttpRequest.BodyPublishers.ofString(requestPayload))
+                .build()
+        def response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+        if (response.statusCode() != 204) {
+            throw new GradleException(
+                    "GitHub release workflow dispatch failed with HTTP ${response.statusCode()}: "
+                            + response.body())
+        }
+
+        logger.lifecycle("SBK ${sbkVersion} release workflow dispatched from ${workflowRef}.")
+        def webUrl = releaseGitHubWebUrl.toString().replaceAll('/+$', '')
+        logger.lifecycle("Monitor: ${webUrl}/${repository}/actions/workflows/${workflow}")
+    }
+}
+
 gradle.projectsEvaluated {
+    if (rootReleasePublishRequested) {
+        releaseMavenProjects.each { publicationProject ->
+            publicationProject.tasks.named('publish').configure {
+                setDependsOn([])
+                enabled = false
+            }
+        }
+    }
     releaseMavenProjects.each { publicationProject ->
         publicationProject.tasks.named('publish').configure {
             mustRunAfter rootProject.tasks.named('releasecheck')
@@ -316,9 +410,13 @@ gradle.projectsEvaluated {
 }
 
 gradle.taskGraph.whenReady { graph ->
-    if (graph.hasTask(releasePublicationDryRun.get())
-            && project.hasProperty('github')) {
-        throw new GradleException('releasePublicationDryRun only publishes to local build repositories; '
-                + 'remove -Pgithub')
+    if (project.hasProperty('github')) {
+        throw new GradleException(
+                '-Pgithub has been removed; use the root publish task for a complete release')
+    }
+    if (graph.hasTask(releasePublishCoreToGitHubPackages.get())
+            && System.getenv('SBK_RELEASE_WORKFLOW') != 'true') {
+        throw new GradleException(
+                'releasePublishCoreToGitHubPackages is restricted to the guarded release workflow')
     }
 }

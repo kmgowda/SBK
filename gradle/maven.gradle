@@ -12,6 +12,10 @@
 plugins.withId('maven-publish') {
     def localRepoDir = "sbk-repo"
     def buildRepoDir = "build" + File.separator + localRepoDir
+    def requestedTaskNames = gradle.startParameter.taskNames
+    def githubPackagesRequested = requestedTaskNames.any {
+        it.tokenize(':').last() == 'releasePublishCoreToGitHubPackages'
+    }
     group = sbkGroup
     setVersion(sbkVersion)
 
@@ -66,14 +70,11 @@ plugins.withId('maven-publish') {
         }
     }
 
-    /*
-      ./gradlew publish stages artifacts locally for JReleaser.
-      ./gradlew publish -Pgithub publishes the same consumable coordinates to GitHub Packages.
-      Sonatype Central publication is performed by JReleaser, not by a Gradle Maven repository.
-     */
+    // Core artifacts stage locally for JReleaser unless the guarded workflow
+    // invokes the internal GitHub Packages publication task.
     publishing {
         repositories {
-            if (project.hasProperty("github")) {
+            if (githubPackagesRequested) {
                 maven {
                     name = "SBK-GitHub"
                     url = uri(githubPackagesRepositoryUrl)
@@ -146,8 +147,6 @@ plugins.withId('maven-publish') {
         }
     }
 
-
-
     def configuredJreleaserFile = project.findProperty('jreleaser.configFile')?.toString()?.trim()
     def environmentJreleaserFile = System.getenv('JRELEASER_CONFIG_FILE')?.trim()
     def defaultJreleaserFile = project.file(
@@ -210,11 +209,11 @@ plugins.withId('maven-publish') {
 Publish SBK packages through Sonatype Central with JReleaser:
 
 1) Verify configuration: ./gradlew jreleaserConfig
-2) Stage every Maven publication locally: ./gradlew clean publish
+2) Stage every Maven publication locally: ./gradlew verifyCorePublicationStaging
 3) Upload for portal inspection: ./gradlew jreleaserDeploy
 4) Or explicitly upload and publish in one guarded release operation:
    JRELEASER_MAVENCENTRAL_STAGE=FULL ./gradlew jreleaserDeploy
 
-The source default is UPLOAD. GitHub Packages use the independent
-./gradlew publish -Pgithub path with the same Maven coordinates.
+The source default is UPLOAD. The guarded release workflow publishes the same
+core coordinates to GitHub Packages through releasePublishCoreToGitHubPackages.
 */

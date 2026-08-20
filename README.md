@@ -428,6 +428,9 @@ The guarded [release publication workflow](docs/RELEASE_PUBLICATION.md) adds
 native AMD64/ARM64 container validation and can publish the qualified archives,
 SBOM, reports, and manifests to a GitHub Release, the Java modules to GitHub
 Packages, and the signed multi-architecture image to Docker Hub and GHCR.
+After qualification, an authorized maintainer can dispatch the actual release
+with the root `publish` Gradle task; see the publication guide for the required
+version confirmation, credentials, and recovery controls.
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing code. The minimum verification sequence is normally:
 
