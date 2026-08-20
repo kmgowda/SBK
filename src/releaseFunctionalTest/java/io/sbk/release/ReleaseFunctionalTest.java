@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -46,6 +47,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 /** Cross-platform black-box qualification of the installed SBK applications. */
 class ReleaseFunctionalTest {
     private static final int MINIMUM_REUSED_WEB_RUNS = 2;
+    private static final int HTTP_SUCCESS_MINIMUM = 200;
+    private static final int HTTP_SUCCESS_MAXIMUM_EXCLUSIVE = 300;
+    private static final int MAXIMUM_DOCKER_LOOPBACK_NODES = 254;
+    private static final String DOCKER_LOOPBACK_PREFIX = "127.0.0.";
     private static final String LOOPBACK = "127.0.0.1";
 
     private final Config config = Config.load();
@@ -126,7 +131,7 @@ class ReleaseFunctionalTest {
         caseRun("sbk-yal-GrpcLogger", () -> sbmCase(yal, "SbmPrometheusLogger", true));
         if (config.profile.equals("release") || config.profile.equals("local-docker")) {
             Inventory inventory = dockerFixture == null
-                    ? Inventory.load(config.inventory, Map.of()) : dockerFixture.inventory;
+                    ? Inventory.load(config.inventory, Map.of(), config.sshPort) : dockerFixture.inventory;
             caseRun("sbk-gem-GemPrometheusLogger",
                     () -> gemLogger(inventory, "GemPrometheusLogger"));
             caseRun("sbk-gem-GemWebLogger", () -> gemLogger(inventory, "GemWebLogger"));
@@ -422,7 +427,8 @@ class ReleaseFunctionalTest {
         HttpResponse<String> response = http.send(HttpRequest.newBuilder(URI.create(url))
                         .timeout(Duration.ofSeconds(config.startupTimeoutSeconds)).GET().build(),
                 HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+        if (response.statusCode() < HTTP_SUCCESS_MINIMUM
+                || response.statusCode() >= HTTP_SUCCESS_MAXIMUM_EXCLUSIVE) {
             throw new IOException("HTTP " + response.statusCode() + " from " + url);
         }
         return response.body();
@@ -432,7 +438,7 @@ class ReleaseFunctionalTest {
         for (int attempt = 0; attempt < config.startupTimeoutSeconds; attempt++) {
             require(owner.process.isAlive(), "process exited before port " + port + " became ready");
             try (Socket socket = new Socket()) {
-                socket.connect(new InetSocketAddress(LOOPBACK, port), 500);
+                socket.connect(new InetSocketAddress(LOOPBACK, port), config.socketConnectTimeoutMillis);
                 return;
             } catch (IOException exception) {
                 Thread.sleep(Duration.ofSeconds(config.shutdownPollSeconds));
@@ -586,7 +592,9 @@ class ReleaseFunctionalTest {
                           long eofMaximumSeconds, String smokeBenchmarkSeconds, long sbmSettleSeconds,
                           int dockerNodeCount, int dockerSshReadyAttempts, Path reportDir, Path workDir,
                           Path logDir, Path inventory, Path sbk, Path sbkYal, Path sbm, Path sbkGem,
-                          Path sbkGemYal, Path webConsole) {
+                          Path sbkGemYal, Path webConsole, int socketConnectTimeoutMillis,
+                          String sshPort, String dockerSshUser, String dockerHostAlias,
+                          String dockerJdkImage) {
         private static Config load() {
             Path root = Path.of(required("sbk.release.root"));
             Path report = Path.of(required("sbk.release.reportDir"));
@@ -605,7 +613,10 @@ class ReleaseFunctionalTest {
                     root.resolve("build/install/sbk/bin/sbk"), root.resolve("build/install/sbk/bin/sbk-yal"),
                     root.resolve("sbm/build/install/sbm/bin/sbm"), root.resolve("build/install/sbk/bin/sbk-gem"),
                     root.resolve("build/install/sbk/bin/sbk-gem-yal"),
-                    root.resolve("sbk-web-console/build/install/sbk-web-console/bin/sbk-web-console"));
+                    root.resolve("sbk-web-console/build/install/sbk-web-console/bin/sbk-web-console"),
+                    (int) number("socketConnectTimeoutMillis"), required("sbk.release.sshPort"),
+                    required("sbk.release.dockerSshUser"), required("sbk.release.dockerHostAlias"),
+                    required("sbk.release.dockerJdkImage"));
         }
 
         private static String required(final String name) {
@@ -623,14 +634,15 @@ class ReleaseFunctionalTest {
 
     private record Inventory(String nodes, String user, String knownHosts, String port,
                              String localhost, Map<String, String> environment) {
-        private static Inventory load(final Path file, final Map<String, String> environment) throws IOException {
+        private static Inventory load(final Path file, final Map<String, String> environment,
+                                      final String defaultPort) throws IOException {
             require(file != null && Files.isRegularFile(file), "GEM inventory does not exist: " + file);
             Properties properties = new Properties();
             try (var input = Files.newInputStream(file)) {
                 properties.load(input);
             }
             return new Inventory(required(properties, "gem.nodes"), required(properties, "gem.user"),
-                    required(properties, "gem.knownHosts"), properties.getProperty("gem.port", "22").trim(),
+                    required(properties, "gem.knownHosts"), properties.getProperty("gem.port", defaultPort).trim(),
                     properties.getProperty("gem.localhost", "").trim(), Map.copyOf(environment));
         }
 
@@ -681,8 +693,15 @@ class ReleaseFunctionalTest {
         private static DockerFixture start(final Config config, final CommandRunner runner) throws Exception {
             Path directory = Files.createTempDirectory(config.workDir, "docker-gem.");
             String suffix = Long.toUnsignedString(System.nanoTime());
-            List<String> containers = List.of("sbk-release-gem-" + suffix + "-1",
-                    "sbk-release-gem-" + suffix + "-2");
+            require(config.dockerNodeCount > 0, "local-docker requires at least one GEM node");
+            require(config.dockerNodeCount <= MAXIMUM_DOCKER_LOOPBACK_NODES,
+                    "local-docker supports at most " + MAXIMUM_DOCKER_LOOPBACK_NODES + " GEM nodes");
+            List<String> nodeHosts = IntStream.range(0, config.dockerNodeCount)
+                    .mapToObj(index -> DOCKER_LOOPBACK_PREFIX + (index + 1))
+                    .toList();
+            List<String> containers = IntStream.range(0, config.dockerNodeCount)
+                    .mapToObj(index -> "sbk-release-gem-" + suffix + "-" + (index + 1))
+                    .toList();
             String image = "sbk-release-gem-fixture:" + config.version;
             command(runner, config, directory, Map.of(), "ssh-keygen", "ssh-keygen", "-q", "-t", "ed25519",
                     "-N", "", "-C", "sbk-release-qualification", "-f",
@@ -700,37 +719,37 @@ class ReleaseFunctionalTest {
             try {
                 command(runner, config, directory, environment, "ssh-add", "ssh-add",
                         directory.resolve("id_ed25519").toString());
-                command(runner, config, directory, environment, "docker-build", "docker", "build", "--tag",
-                        image, config.root.resolve("scripts/release-gem-docker").toString());
-                command(runner, config, directory, environment, "docker-run-1", "docker", "run", "--detach",
-                        "--name", containers.get(0), "--add-host", "host.docker.internal:host-gateway",
-                        "--publish", "127.0.0.1::22", "--volume",
-                        directory.resolve("id_ed25519.pub") + ":/run/sbk/authorized_key:ro", image);
+                command(runner, config, directory, environment, "docker-build", "docker", "build",
+                        "--build-arg", "SBK_RELEASE_JDK_IMAGE=" + config.dockerJdkImage,
+                        "--build-arg", "SBK_RELEASE_SSH_USER=" + config.dockerSshUser,
+                        "--build-arg", "SBK_RELEASE_SSH_PORT=" + config.sshPort,
+                        "--tag", image, config.root.resolve("scripts/release-gem-docker").toString());
+                startContainer(runner, config, directory, environment, image,
+                        containers.getFirst(), nodeHosts.getFirst(), "");
                 ProcessOutcome portResult = command(runner, config, directory, environment, "docker-port",
-                        "docker", "port", containers.get(0), "22/tcp");
+                        "docker", "port", containers.getFirst(), config.sshPort + "/tcp");
                 String portText = Files.readString(portResult.log).trim();
                 String port = portText.substring(portText.lastIndexOf(':') + 1);
                 require(port.matches("[0-9]+"), "Unable to determine fixture SSH port: " + portText);
-                command(runner, config, directory, environment, "docker-run-2", "docker", "run", "--detach",
-                        "--name", containers.get(1), "--add-host", "host.docker.internal:host-gateway",
-                        "--publish", "127.0.0.2:" + port + ":22", "--volume",
-                        directory.resolve("id_ed25519.pub") + ":/run/sbk/authorized_key:ro", image);
-                require(config.dockerNodeCount == 2,
-                        "local-docker requires exactly two GEM nodes; configured " + config.dockerNodeCount);
+                for (int index = 1; index < config.dockerNodeCount; index++) {
+                    startContainer(runner, config, directory, environment, image,
+                            containers.get(index), nodeHosts.get(index), port);
+                }
                 Path knownHosts = directory.resolve("known_hosts");
                 Files.writeString(knownHosts, "", StandardCharsets.UTF_8);
-                for (int index = 0; index < 2; index++) {
-                    String host = "127.0.0." + (index + 1);
-                    Path nodeHosts = directory.resolve("known-hosts-" + index);
+                for (int index = 0; index < config.dockerNodeCount; index++) {
+                    String host = nodeHosts.get(index);
+                    Path nodeKnownHosts = directory.resolve("known-hosts-" + index);
                     boolean ready = false;
                     for (int attempt = 0; attempt < config.dockerSshReadyAttempts; attempt++) {
                         ProcessOutcome scan = run(runner, config, directory, environment,
                                 "ssh-keyscan-" + index, List.of("ssh-keyscan", "-p", port, host));
                         if (scan.exitCode == 0 && Files.size(scan.log) > 0) {
-                            Files.copy(scan.log, nodeHosts, StandardCopyOption.REPLACE_EXISTING);
+                            Files.copy(scan.log, nodeKnownHosts, StandardCopyOption.REPLACE_EXISTING);
                             ProcessOutcome probe = run(runner, config, directory, environment,
                                     "ssh-probe-" + index, List.of("ssh", "-p", port, "-o", "BatchMode=yes",
-                                            "-o", "UserKnownHostsFile=" + nodeHosts, "sbk-release@" + host,
+                                            "-o", "UserKnownHostsFile=" + nodeKnownHosts,
+                                            config.dockerSshUser + "@" + host,
                                             "java", "-version"));
                             if (probe.exitCode == 0) {
                                 ready = true;
@@ -740,22 +759,34 @@ class ReleaseFunctionalTest {
                         Thread.sleep(Duration.ofSeconds(config.shutdownPollSeconds));
                     }
                     require(ready, "Docker GEM fixture node did not become ready: " + host);
-                    Files.writeString(knownHosts, Files.readString(nodeHosts), StandardCharsets.UTF_8,
+                    Files.writeString(knownHosts, Files.readString(nodeKnownHosts), StandardCharsets.UTF_8,
                             StandardOpenOption.APPEND);
                 }
                 Path inventoryFile = directory.resolve("inventory.properties");
-                Files.writeString(inventoryFile, "gem.nodes=127.0.0.1,127.0.0.2\n"
-                        + "gem.user=sbk-release\ngem.knownHosts=" + knownHosts + "\ngem.port=" + port
-                        + "\ngem.localhost=host.docker.internal\n", StandardCharsets.UTF_8);
-                Inventory inventory = Inventory.load(inventoryFile, environment);
-                System.out.println("SBK local-docker GEM fixture ready: sbk-release@{127.0.0.1,127.0.0.2}:"
-                        + port + " (2 clients)");
+                String nodes = String.join(",", nodeHosts);
+                Files.writeString(inventoryFile, "gem.nodes=" + nodes + "\ngem.user=" + config.dockerSshUser
+                        + "\ngem.knownHosts=" + knownHosts + "\ngem.port=" + port
+                        + "\ngem.localhost=" + config.dockerHostAlias + "\n", StandardCharsets.UTF_8);
+                Inventory inventory = Inventory.load(inventoryFile, environment, config.sshPort);
+                System.out.println("SBK local-docker GEM fixture ready: " + config.dockerSshUser + "@{" + nodes
+                        + "}:" + port + " (" + config.dockerNodeCount + " clients)");
                 return new DockerFixture(config, runner, directory, containers,
                         agentPid, environment, inventory);
             } catch (Throwable throwable) {
                 fixture.close();
                 throw throwable;
             }
+        }
+
+        private static void startContainer(final CommandRunner runner, final Config config,
+                                           final Path directory, final Map<String, String> environment,
+                                           final String image, final String container, final String host,
+                                           final String hostPort) throws Exception {
+            command(runner, config, directory, environment, "docker-run-" + container, "docker", "run",
+                    "--detach", "--name", container, "--add-host",
+                    config.dockerHostAlias + ":host-gateway", "--publish",
+                    host + ":" + hostPort + ":" + config.sshPort, "--volume",
+                    directory.resolve("id_ed25519.pub") + ":/run/sbk/authorized_key:ro", image);
         }
 
         private static ProcessOutcome command(final CommandRunner runner, final Config config,

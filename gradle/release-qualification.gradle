@@ -201,7 +201,8 @@ tasks.register('releaseFunctionalTest', Test) {
      'startupTimeoutSeconds', 'webTimeoutMinutes', 'killGraceSeconds',
      'shutdownPollSeconds', 'eofRecords', 'eofBenchmarkSeconds', 'eofMaximumSeconds',
      'smokeBenchmarkSeconds', 'sbmSettleSeconds', 'dockerNodeCount',
-     'dockerSshReadyAttempts'].each { name ->
+     'dockerSshReadyAttempts', 'socketConnectTimeoutMillis', 'sshPort',
+     'dockerSshUser', 'dockerHostAlias', 'dockerJdkImage'].each { name ->
         systemProperty "sbk.release.${name}", qualificationValue(name)
     }
     systemProperty 'sbk.release.reportDir', qualificationReportDir.get().asFile.absolutePath

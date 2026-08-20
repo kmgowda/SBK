@@ -11,26 +11,16 @@ package io.sbk.logger.impl;
 
 import io.sbk.logger.MetricsConfig;
 import io.sbk.system.Printer;
+import io.sbk.webconsole.LocalHttpLinks;
 
-import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /** Builds and prints copy-paste URLs for the embedded Prometheus scrape endpoint. */
 public final class PrometheusLinks {
-    private static final String LOCALHOST = "localhost";
-    private static final String IPV4_LOOPBACK = "127.0.0.1";
-
     private PrometheusLinks() {
     }
 
@@ -58,71 +48,26 @@ public final class PrometheusLinks {
      * @return deduplicated endpoint links
      */
     public static List<Link> localLinks(int port, String context) {
-        return links(port, context, localHostname(), localAddresses());
+        return createLinks(port, context, LocalHttpLinks.localHosts());
     }
 
     static List<Link> links(int port, String context, String hostname, List<InetAddress> addresses) {
-        final Map<String, String> hosts = new LinkedHashMap<>();
-        hosts.put(LOCALHOST, "Localhost");
-        hosts.put(IPV4_LOOPBACK, "IPv4 Loopback");
-        if (hostname != null && !hostname.isBlank()) {
-            hosts.putIfAbsent(hostname, "Hostname");
-        }
-        addresses.stream()
-                .filter(Inet4Address.class::isInstance)
-                .filter(PrometheusLinks::isUsableAddress)
-                .sorted(Comparator.comparing((InetAddress address) -> !address.isSiteLocalAddress())
-                        .thenComparing(InetAddress::getHostAddress))
-                .forEach(address -> hosts.putIfAbsent(address.getHostAddress(),
-                        address.isSiteLocalAddress() ? "Private IP" : "Public IP"));
+        return createLinks(port, context, LocalHttpLinks.hosts(hostname, addresses));
+    }
 
+    private static List<Link> createLinks(int port, String context, List<LocalHttpLinks.Host> hosts) {
         final List<Link> links = new ArrayList<>(hosts.size());
-        hosts.forEach((host, label) -> {
+        hosts.forEach(host -> {
             try {
-                links.add(new Link(label, endpointUri(host, port, context)));
+                links.add(new Link(host.label(), endpointUri(host.address(), port, context)));
             } catch (IllegalArgumentException ex) {
-                if (LOCALHOST.equals(host) || IPV4_LOOPBACK.equals(host)) {
+                if (LocalHttpLinks.LOCALHOST.equals(host.address())
+                        || LocalHttpLinks.IPV4_LOOPBACK.equals(host.address())) {
                     throw ex;
                 }
             }
         });
         return List.copyOf(links);
-    }
-
-    private static boolean isUsableAddress(InetAddress address) {
-        return !address.isAnyLocalAddress() && !address.isLoopbackAddress()
-                && !address.isLinkLocalAddress() && !address.isMulticastAddress();
-    }
-
-    private static String localHostname() {
-        try {
-            return InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException ex) {
-            return "";
-        }
-    }
-
-    private static List<InetAddress> localAddresses() {
-        final List<InetAddress> addresses = new ArrayList<>();
-        try {
-            final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            if (interfaces == null) {
-                return addresses;
-            }
-            while (interfaces.hasMoreElements()) {
-                final NetworkInterface networkInterface = interfaces.nextElement();
-                if (!networkInterface.isUp()) {
-                    continue;
-                }
-                final Enumeration<InetAddress> interfaceAddresses = networkInterface.getInetAddresses();
-                while (interfaceAddresses.hasMoreElements()) {
-                    addresses.add(interfaceAddresses.nextElement());
-                }
-            }
-        } catch (SocketException ex) {
-            return List.of();
-        }
-        return addresses;
     }
 
     private static URI endpointUri(String host, int port, String context) {

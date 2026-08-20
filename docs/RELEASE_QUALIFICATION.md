@@ -269,10 +269,11 @@ needs a different rate.
 
 The same file is the single source for child-process shutdown grace periods,
 smoke and EOF workloads, SBM settling time, Docker node count and SSH
-readiness, and report-generation limits. Gradle passes those resolved values
-to the JVM harness as system properties, so the test code does not maintain a
-second set of fallback defaults. Use the matching Gradle property name to
-override one value, for example:
+readiness, the pinned Docker JDK image, fixture SSH user/port and host alias,
+socket connection timeout, and report-generation limits. Gradle passes those
+resolved values to the JVM harness and Docker build, so the Java and container
+sources do not maintain a second set of fallback defaults. Use the matching
+Gradle property name to override one value, for example:
 
 ```bash
 ./gradlew releasecheck \

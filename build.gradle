@@ -70,6 +70,48 @@ ext.sbkJavaMajorVersion = Integer.parseInt(javaBootstrapProperties.getProperty('
 def sbkMetricsConfig = new Properties()
 file('sbk-api/src/main/resources/metrics.properties').withInputStream { sbkMetricsConfig.load(it) }
 
+def launcherJvmOptions = { String applicationName, String className = null ->
+    def options = ['-Dsbk.applicationName=' + applicationName]
+    if (className != null) {
+        options << '-Dsbk.className=' + className
+    }
+    options + ['-Dsbk.appHome=SBK_APP_HOME', '-Dsbk.jmxExport=false']
+}
+
+def configureSbkStartScripts = { taskProvider, Project targetProject, Object jmxPort ->
+    taskProvider.configure {
+        doLast {
+            def pathingJarTask = targetProject.tasks.named('pathingJar').get()
+            def jarTask = targetProject.tasks.named('jar').get()
+            def pathingJarName = pathingJarTask.archiveFileName.get()
+            def jarName = jarTask.archiveFileName.get()
+
+            unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
+            unixScript.text = unixScript.text.replace("-Dsbk.appHome=\$APP_HOME",
+                    "-Dsbk.appHome='\$APP_HOME'")
+            unixScript.text = unixScript.text.replaceAll('CLASSPATH=.*',
+                    Matcher.quoteReplacement(
+                            "CLASSPATH=\$APP_HOME/lib/${pathingJarName}:\$APP_HOME/lib/${jarName}"))
+
+            windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
+            windowsScript.text = windowsScript.text.replace("-Dsbk.appHome=\$APP_HOME",
+                    "-Dsbk.appHome='\$APP_HOME'")
+            windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*',
+                    Matcher.quoteReplacement(
+                            "set CLASSPATH=%APP_HOME%\\lib\\${pathingJarName};%APP_HOME%\\lib\\${jarName}"))
+
+            if (jmxExport.toString().toBoolean()) {
+                def unixAgent = "-Dsbk.jmxExport=true\" \"-javaagent:'\$APP_HOME'/lib/"
+                        + "${jmxAgent}-${jmxPrometheusVersion}.jar=${jmxPort}:'\$APP_HOME'/bin/jmx-config.yml"
+                def windowsAgent = "-Dsbk.jmxExport=true\" \"-javaagent:'\$APP_HOME'\\lib\\"
+                        + "${jmxAgent}-${jmxPrometheusVersion}.jar=${jmxPort}:'\$APP_HOME'\\bin\\jmx-config.yml"
+                unixScript.text = unixScript.text.replace('-Dsbk.jmxExport=false', unixAgent)
+                windowsScript.text = windowsScript.text.replace('-Dsbk.jmxExport=false', windowsAgent)
+            }
+        }
+    }
+}
+
 gradle.rootProject {
     //only for root project
     apply plugin: 'com.google.cloud.tools.jib'
@@ -178,56 +220,15 @@ allprojects {
             className = ""
         }
 
-        applicationDefaultJvmArgs = ['-Dsbk.applicationName=' + applicationName, '-Dsbk.className=' + className,
-                                     '-Dsbk.appHome=SBK_APP_HOME', '-Dsbk.jmxExport=false']
+        applicationDefaultJvmArgs = launcherJvmOptions(applicationName, className)
+    }
 
-        startScripts {
-        def projectName = project.name
-        def rootProjectName = rootProject.name
-        def projectPath = project.path
-
-            doLast {
-
-                def jmxPort = jmxSbmPort
-
-                if (projectPath.startsWith(":driver-") || projectName == rootProjectName ||
-                        projectName.startsWith('sbk-api')) {
-                    jmxPort = jmxSbkPort
-                }
-
-                unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
-
-                //make sure that we enclose $APP_HOME within ' ' character set
-                unixScript.text = unixScript.text.replace("-Dsbk.appHome=\$APP_HOME", "-Dsbk.appHome='\$APP_HOME'")
-
-                // Replace the classpath on windows with the pathing JAR and the main archive
-                unixScript.text = unixScript.text.replaceAll('CLASSPATH=.*',
-                        Matcher.quoteReplacement(
-                                "CLASSPATH=\$APP_HOME/lib/${pathingJar.archiveFileName.get()}:\$APP_HOME/lib/${jar.archiveFileName.get()}"))
-
-                if (jmxExport.matches("true")) {
-                    unixScript.text = unixScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
-                            "-javaagent:'\$APP_HOME'/lib/${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                            "=$jmxPort:'\$APP_HOME'/bin/jmx-config.yml")
-                }
-                windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
-                //make sure that we enclose $APP_HOME within ' ' character set
-                windowsScript.text = windowsScript.text.replace("-Dsbk.appHome=\$APP_HOME", "-Dsbk.appHome='\$APP_HOME'")
-                windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*',
-                        Matcher.quoteReplacement(
-                                "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveFileName.get()};%APP_HOME%\\lib\\${jar.archiveFileName.get()}"))
-                if (jmxExport.matches("true")) {
-                    windowsScript.text = windowsScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
-                            "-javaagent:'\$APP_HOME'\\lib\\${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                            "=$jmxPort:'\$APP_HOME'\\bin\\jmx-config.yml")
-                }
-            }
-
-            copy {
-                from "$rootDir/jmx-config.yml"
-                into outputDir
-            }
-        }
+    def projectJmxPort = project.path.startsWith(':driver-') || project.name == rootProject.name
+            || project.name.startsWith('sbk-api') ? jmxSbkPort : jmxSbmPort
+    configureSbkStartScripts(tasks.named('startScripts'), project, projectJmxPort)
+    copy {
+        from "$rootDir/jmx-config.yml"
+        into tasks.named('startScripts').get().outputDir
     }
 
     /*
@@ -449,157 +450,36 @@ tasks.register('buildJar', Jar) {
     with jar
 }
 
-tasks.register('SbkYal', CreateStartScripts) {
-    mainClass = 'io.sbk.main.SbkYalMain'
-    applicationName = 'sbk-yal'
-    defaultJvmOpts = ['-Dsbk.applicationName=' + rootProject.name, '-Dsbk.appHome=SBK_APP_HOME', '-Dsbk.jmxExport=false']
-    outputDir = startScripts.outputDir
-    classpath = startScripts.classpath
-    SbkYal {
-        doLast {
-            unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
-
-            //make sure that we enclose $APP_HOME within ' ' character set
-            unixScript.text = unixScript.text.replace("-Dsbk.appHome=\$APP_HOME", "-Dsbk.appHome='\$APP_HOME'")
-
-            // Replace the classpath on windows with the pathing JAR and the main archive
-            unixScript.text = unixScript.text.replaceAll('CLASSPATH=.*',
-                    Matcher.quoteReplacement(
-                            "CLASSPATH=\$APP_HOME/lib/${pathingJar.archiveFileName.get()}:\$APP_HOME/lib/${jar.archiveFileName.get()}"))
-
-            if (jmxExport.matches("true")) {
-                unixScript.text = unixScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
-                        "-javaagent:'\$APP_HOME'/lib/${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                        "=$jmxSbmPort:'\$APP_HOME'/bin/jmx-config.yml")
-            }
-            windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
-            //make sure that we enclose $APP_HOME within ' ' character set
-            windowsScript.text = windowsScript.text.replace("-Dsbk.appHome=\$APP_HOME", "-Dsbk.appHome='\$APP_HOME'")
-            windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*',
-                    Matcher.quoteReplacement(
-                            "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveFileName.get()};%APP_HOME%\\lib\\${jar.archiveFileName.get()}"))
-            if (jmxExport.matches("true")) {
-                windowsScript.text = windowsScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
-                        "-javaagent:'\$APP_HOME'\\lib\\${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                        "=$jmxSbmPort:'\$APP_HOME'\\bin\\jmx-config.yml")
-            }
-        }
+def registerSbkLauncher = { String taskName, String launcherMainClass, String launcherName ->
+    def launcher = tasks.register(taskName, CreateStartScripts) {
+        mainClass = launcherMainClass
+        applicationName = launcherName
+        defaultJvmOpts = launcherJvmOptions(rootProject.name)
+        outputDir = startScripts.outputDir
+        classpath = startScripts.classpath
     }
+    configureSbkStartScripts(launcher, project, jmxSbmPort)
+    launcher
 }
 
-tasks.register('SbkGem', CreateStartScripts) {
-    mainClass = 'io.gem.main.SbkGemMain'
-    applicationName = 'sbk-gem'
-    defaultJvmOpts = ['-Dsbk.applicationName=' + rootProject.name, '-Dsbk.appHome=SBK_APP_HOME', '-Dsbk.jmxExport=false']
-    outputDir = startScripts.outputDir
-    classpath = startScripts.classpath
-    SbkGem {
-        doLast {
-            unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
-
-            //make sure that we enclose $APP_HOME within ' ' character set
-            unixScript.text = unixScript.text.replace("-Dsbk.appHome=\$APP_HOME", "-Dsbk.appHome='\$APP_HOME'")
-
-            // Replace the classpath on windows with the pathing JAR and the main archive
-            unixScript.text = unixScript.text.replaceAll('CLASSPATH=.*',
-                    Matcher.quoteReplacement(
-                            "CLASSPATH=\$APP_HOME/lib/${pathingJar.archiveFileName.get()}:\$APP_HOME/lib/${jar.archiveFileName.get()}"))
-
-            if (jmxExport.matches("true")) {
-                unixScript.text = unixScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
-                        "-javaagent:'\$APP_HOME'/lib/${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                        "=$jmxSbmPort:'\$APP_HOME'/bin/jmx-config.yml")
-            }
-            windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
-            //make sure that we enclose $APP_HOME within ' ' character set
-            windowsScript.text = windowsScript.text.replace("-Dsbk.appHome=\$APP_HOME", "-Dsbk.appHome='\$APP_HOME'")
-            windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*',
-                    Matcher.quoteReplacement(
-                            "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveFileName.get()};%APP_HOME%\\lib\\${jar.archiveFileName.get()}"))
-            if (jmxExport.matches("true")) {
-                windowsScript.text = windowsScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
-                        "-javaagent:'\$APP_HOME'\\lib\\${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                        "=$jmxSbmPort:'\$APP_HOME'\\bin\\jmx-config.yml")
-            }
-        }
-    }
-}
-
-tasks.register('SbkGemYal', CreateStartScripts) {
-    mainClass = 'io.gem.main.SbkGemYalMain'
-    applicationName = 'sbk-gem-yal'
-    defaultJvmOpts = ['-Dsbk.applicationName=' + rootProject.name, '-Dsbk.appHome=SBK_APP_HOME', '-Dsbk.jmxExport=false']
-    outputDir = startScripts.outputDir
-    classpath = startScripts.classpath
-    SbkGemYal {
-        doLast {
-            unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
-
-            //make sure that we enclose $APP_HOME within ' ' character set
-            unixScript.text = unixScript.text.replace("-Dsbk.appHome=\$APP_HOME", "-Dsbk.appHome='\$APP_HOME'")
-
-            // Replace the classpath on windows with the pathing JAR and the main archive
-            unixScript.text = unixScript.text.replaceAll('CLASSPATH=.*',
-                    Matcher.quoteReplacement(
-                            "CLASSPATH=\$APP_HOME/lib/${pathingJar.archiveFileName.get()}:\$APP_HOME/lib/${jar.archiveFileName.get()}"))
-
-            if (jmxExport.matches("true")) {
-                unixScript.text = unixScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
-                        "-javaagent:'\$APP_HOME'/lib/${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                        "=$jmxSbmPort:'\$APP_HOME'/bin/jmx-config.yml")
-            }
-            windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
-            //make sure that we enclose $APP_HOME within ' ' character set
-            windowsScript.text = windowsScript.text.replace("-Dsbk.appHome=\$APP_HOME", "-Dsbk.appHome='\$APP_HOME'")
-            windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*',
-                    Matcher.quoteReplacement(
-                            "set CLASSPATH=%APP_HOME%\\lib\\${pathingJar.archiveFileName.get()};%APP_HOME%\\lib\\${jar.archiveFileName.get()}"))
-            if (jmxExport.matches("true")) {
-                windowsScript.text = windowsScript.text.replace("-Dsbk.jmxExport=false", "-Dsbk.jmxExport=true" + "\" \"" +
-                        "-javaagent:'\$APP_HOME'\\lib\\${jmxAgent}-${jmxPrometheusVersion}.jar" +
-                        "=$jmxSbmPort:'\$APP_HOME'\\bin\\jmx-config.yml")
-            }
-        }
-    }
-}
+def additionalLaunchers = [
+        registerSbkLauncher('SbkYal', 'io.sbk.main.SbkYalMain', 'sbk-yal'),
+        registerSbkLauncher('SbkGem', 'io.gem.main.SbkGemMain', 'sbk-gem'),
+        registerSbkLauncher('SbkGemYal', 'io.gem.main.SbkGemYalMain', 'sbk-gem-yal')
+]
 
 application {
-    applicationDistribution.into("bin") {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        from(SbkYal)
-       // fileMode = 0755
-        filePermissions {
-            user {
-                read = true
-                execute = true
+    additionalLaunchers.each { launcher ->
+        applicationDistribution.into("bin") {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+            from(launcher)
+            filePermissions {
+                user {
+                    read = true
+                    execute = true
+                }
+                other.execute = true
             }
-            other.execute = true
-        }
-    }
-
-    applicationDistribution.into("bin") {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        from(SbkGem)
-        //fileMode = 0755
-        filePermissions {
-            user {
-                read = true
-                execute = true
-            }
-            other.execute = true
-        }
-    }
-
-    applicationDistribution.into("bin") {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        from(SbkGemYal)
-       // fileMode = 0755
-        filePermissions {
-            user {
-                read = true
-                execute = true
-            }
-            other.execute = true
         }
     }
 
