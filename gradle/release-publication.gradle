@@ -65,7 +65,7 @@ def releaseBooleanProperty = { String propertyName ->
 
 def runReleaseCommand = { List<String> command, Map<String, String> environment,
                           String standardInput = null ->
-    def processBuilder = new ProcessBuilder(command)
+    def processBuilder = new ProcessBuilder(command.collect { it.toString() })
             .directory(rootDir)
             .redirectError(ProcessBuilder.Redirect.INHERIT)
             .redirectOutput(ProcessBuilder.Redirect.INHERIT)
@@ -87,7 +87,7 @@ def runReleaseCommand = { List<String> command, Map<String, String> environment,
 }
 
 def readReleaseCommand = { List<String> command ->
-    def process = new ProcessBuilder(command)
+    def process = new ProcessBuilder(command.collect { it.toString() })
             .directory(rootDir)
             .redirectErrorStream(true)
             .start()
