@@ -319,7 +319,6 @@ jobs:
       contents: read
       packages: write
     env:
-      JRELEASER_CONFIG_FILE: ${{ runner.temp }}/jreleaser-config.toml
       JRELEASER_MAVENCENTRAL_STAGE: FULL
       SBK_RELEASE_WORKFLOW: 'true'
     steps:
@@ -331,6 +330,7 @@ jobs:
           cache: gradle
       - name: Install private JReleaser configuration
         env:
+          JRELEASER_CONFIG_FILE: ${{ runner.temp }}/jreleaser-config.toml
           JRELEASER_CONFIG_TOML: ${{ secrets.JRELEASER_CONFIG_TOML }}
         run: |
           set -euo pipefail
@@ -340,8 +340,12 @@ jobs:
       - name: Stage the complete Maven Central artifact set locally
         run: ./gradlew verifyCorePublicationStaging --no-daemon
       - name: Validate the JReleaser deployment configuration
+        env:
+          JRELEASER_CONFIG_FILE: ${{ runner.temp }}/jreleaser-config.toml
         run: ./gradlew jreleaserConfig --no-daemon
       - name: Publish staged packages to Sonatype Central with JReleaser
+        env:
+          JRELEASER_CONFIG_FILE: ${{ runner.temp }}/jreleaser-config.toml
         run: ./gradlew jreleaserDeploy --no-daemon
       - name: Publish the same consumable modules to GitHub Packages
         env:
