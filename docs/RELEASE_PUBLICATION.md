@@ -7,24 +7,23 @@ Licensed under the Apache License, Version 2.0.
 
 SBK uses one guarded GitHub Actions workflow for GitHub Release assets,
 GitHub Packages, Docker Hub, and the GitHub Container Registry. Publication
-is separate from qualification:
-`releasecheck` proves the candidate, while `.github/workflows/release.yml`
-coordinates those remote publication steps. Maven Central publication is an
+is independent from qualification. `releasecheck` can prove a candidate, but
+`.github/workflows/release.yml` neither invokes it nor requires its output.
+Maven Central publication is an
 independent maintainer operation performed with the established local
 JReleaser configuration; the GitHub workflow never configures or invokes
 JReleaser. The legacy Gradle `-Pmaven` repository path is not used.
 
 ## Safe local dry run
 
-The following command runs qualification and then exercises every core-module
-Maven `publish` task against project-local repositories, validates
+The following command exercises every core-module Maven `publish` task against
+project-local repositories, validates
 the exact main/source/Javadoc/documentation artifact set that JReleaser will
 deploy, assembles the container context, and creates the complete release asset
 contract:
 
 ```bash
 ./gradlew clean releasePublicationDryRun \
-  -Pprofile=ci \
   --no-daemon --rerun-tasks
 ```
 
@@ -39,12 +38,10 @@ build/release-container/
 ```
 
 The Gradle dry run prepares the Docker context but does not require a Docker
-daemon. The GitHub release workflow never runs `releasecheck`. First run **SBK
-Release Qualification** with the `release` profile. After that workflow
-succeeds, open **SBK Release**, enter its run ID, and keep `dry_run=true`. The
-release workflow downloads the exact-commit qualification evidence, verifies
-the rebuilt archives against its checksums, and executes native AMD64 and
-ARM64 images without performing a registry login or push.
+daemon. The GitHub release workflow never runs or consumes `releasecheck`.
+Open **Actions > SBK Release > Run workflow**, enter the version, and keep
+`dry_run=true` to build the complete asset contract and execute native AMD64
+and ARM64 images without performing a registry login or push.
 
 The local dry run and GitHub workflow intentionally do not invoke
 `jreleaserDeploy`. JReleaser requires the maintainer's private signing and
@@ -62,19 +59,15 @@ sbm-<version>.tar
 sbk-web-console-<version>.zip
 sbk-web-console-<version>.tar
 sbk-agent-docs.tar.gz
-qualification.json
-functional-summary.json
-functional-results.tsv
 <core-module>-<version>-sbom.cdx.json
 <core-module>-<version>-sbom.cdx.xml
 release-manifest.json
 SHA256SUMS
 ```
 
-`release-manifest.json` binds the candidate version and Git commit to every
-payload checksum, qualification profile, supported container platform, image
-repository, and immutable container digest. `SHA256SUMS` also covers the
-manifest itself.
+`release-manifest.json` binds the version and Git commit to every payload
+checksum, supported container platform, image repository, and immutable
+container digest. `SHA256SUMS` also covers the manifest itself.
 
 The root SBK distribution already contains the `sbk`, `sbk-yal`, `sbk-gem`,
 and `sbk-gem-yal` launchers. SBM and the Local Web Console have separate
@@ -143,9 +136,9 @@ unsigned artifacts; JReleaser is the sole component that signs the Maven
 Central payload. Legacy Gradle signing properties must not create
 `signMavenJavaPublication` tasks.
 
-The separate qualification environment must provide the real-host secrets
-documented in [Release qualification](RELEASE_QUALIFICATION.md). The release
-workflow receives no remote benchmark credentials.
+Release qualification may independently use the real-host secrets documented
+in [Release qualification](RELEASE_QUALIFICATION.md). The publication workflow
+does not receive or require remote benchmark credentials.
 
 ## Publishing a release
 
@@ -153,7 +146,6 @@ Dispatch the complete guarded release from Gradle:
 
 ```bash
 GITHUB_TOKEN=<actions-write-token> ./gradlew publish \
-  -PreleaseQualificationRunId=<successful-release-qualification-run-id> \
   -PreleaseConfirm=RELEASE-10.5 \
   --no-daemon
 ```
@@ -176,7 +168,6 @@ Both default to `false`. The task submits the following workflow inputs:
 
 ```text
 version=<exact sbkVersion from gradle.properties>
-qualification_run_id=<successful exact-commit release qualification run ID>
 dry_run=false
 prerelease=false
 resume=false
@@ -185,10 +176,9 @@ resume=false
 The same inputs remain available through **Actions > SBK Release > Run
 workflow** when a browser-driven release is required.
 
-The workflow verifies and downloads immutable evidence from the separate
-authoritative real-host release gate. It rebuilds and checksum-compares the
-contracted distributions without running `releasecheck`, validates both
-container architectures, publishes the image to Docker Hub and GHCR, invokes
+The workflow builds the complete contracted asset set without running or
+depending on `releasecheck`, validates both container architectures, publishes
+the image to Docker Hub and GHCR, invokes
 `releasePublishCoreToGitHubPackages` for GitHub Packages, creates an annotated
 tag, creates a draft GitHub Release, uploads and compares every asset, and
 publishes the release last with the versioned details from

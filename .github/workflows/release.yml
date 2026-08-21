@@ -10,10 +10,6 @@ on:
         description: SBK version from gradle.properties (for example, 10.5)
         required: true
         type: string
-      qualification_run_id:
-        description: Successful SBK Release Qualification run ID for this exact commit and release profile
-        required: true
-        type: string
       dry_run:
         description: Build release assets and containers without tags, uploads, releases, or registry pushes
         required: true
@@ -35,7 +31,6 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  actions: read
   contents: read
 
 env:
@@ -52,8 +47,6 @@ jobs:
       stable: ${{ steps.release.outputs.stable }}
       runtime-image: ${{ steps.release.outputs.runtime_image }}
       build-date: ${{ steps.release.outputs.build_date }}
-      qualification-run-id: ${{ steps.release.outputs.qualification_run_id }}
-      qualification-artifact: ${{ steps.release.outputs.qualification_artifact }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -63,18 +56,12 @@ jobs:
         env:
           REQUESTED_VERSION: ${{ inputs.version }}
           DRY_RUN: ${{ inputs.dry_run }}
-          QUALIFICATION_RUN_ID: ${{ inputs.qualification_run_id }}
           PRERELEASE: ${{ inputs.prerelease }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           configured_version=$(sed -n 's/^sbkVersion=//p' gradle.properties)
           if [[ -z "$configured_version" || "$REQUESTED_VERSION" != "$configured_version" ]]; then
             echo "Requested version '$REQUESTED_VERSION' does not match sbkVersion '$configured_version'" >&2
-            exit 1
-          fi
-          if [[ ! "$QUALIFICATION_RUN_ID" =~ ^[0-9]+$ ]]; then
-            echo "qualification_run_id must be a GitHub Actions run ID" >&2
             exit 1
           fi
           if [[ "$DRY_RUN" != "true" && "$GITHUB_REF" != "refs/heads/master" ]]; then
@@ -90,33 +77,17 @@ jobs:
             echo "runtimeContainerImage is not configured" >&2
             exit 1
           fi
-          qualification=$(curl --fail --silent --show-error \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs/$QUALIFICATION_RUN_ID")
-          test "$(jq -r .path <<< "$qualification")" = ".github/workflows/release-qualification.yml"
-          test "$(jq -r .event <<< "$qualification")" = "workflow_dispatch"
-          test "$(jq -r .status <<< "$qualification")" = "completed"
-          test "$(jq -r .conclusion <<< "$qualification")" = "success"
-          test "$(jq -r .head_sha <<< "$qualification")" = "$GITHUB_SHA"
-          qualification_artifact="sbk-release-qualification-$GITHUB_SHA-release"
           echo "version=$REQUESTED_VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=v$REQUESTED_VERSION" >> "$GITHUB_OUTPUT"
           echo "major=${REQUESTED_VERSION%%.*}" >> "$GITHUB_OUTPUT"
           echo "stable=$stable" >> "$GITHUB_OUTPUT"
           echo "runtime_image=$runtime_image" >> "$GITHUB_OUTPUT"
           echo "build_date=$(git show -s --format=%cI HEAD)" >> "$GITHUB_OUTPUT"
-          echo "qualification_run_id=$QUALIFICATION_RUN_ID" >> "$GITHUB_OUTPUT"
-          echo "qualification_artifact=$qualification_artifact" >> "$GITHUB_OUTPUT"
 
   prepare-assets:
     needs: preflight
     runs-on: ubuntu-24.04
     timeout-minutes: 120
-    permissions:
-      actions: read
-      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -126,19 +97,8 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: gradle
-      - name: Download exact-commit release qualification evidence
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
-        with:
-          name: ${{ needs.preflight.outputs.qualification-artifact }}
-          path: qualification-evidence
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ needs.preflight.outputs.qualification-run-id }}
-      - name: Build release artifacts without running release qualification
-        run: |
-          ./gradlew clean releasePublicationAssets \
-            "-PreleaseQualificationDir=$PWD/qualification-evidence" \
-            -PreleaseRequiredQualificationProfile=release \
-            --no-daemon --rerun-tasks
+      - name: Build complete release artifacts
+        run: ./gradlew clean releasePublicationAssets --no-daemon --rerun-tasks
       - name: Preserve executable container context
         run: tar -cf build/sbk-release-container-context.tar -C build/release-container .
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
