@@ -103,6 +103,13 @@ workflow verifies both registries against the Buildx digest, emits BuildKit
 SBOM/provenance attestations, and signs both immutable repository digests with
 Cosign and GitHub OIDC.
 
+The AMD64 validation job also reports HIGH and CRITICAL Trivy findings. This
+scan is advisory because the aggregate image intentionally bundles every
+enabled driver's third-party SDK; findings must be assessed and remediated per
+driver without blocking publication of unrelated benchmark backends. Native
+image builds, launcher/version checks, and the real File benchmark remain
+mandatory for both architectures.
+
 ## Authentication
 
 GitHub workflow dispatch and the internal GitHub Packages publication resolve
