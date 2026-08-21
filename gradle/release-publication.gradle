@@ -22,12 +22,17 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.security.MessageDigest
 import java.time.Duration
+import java.nio.file.Files
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.bundling.Compression
 
 def releaseAssetsDirectory = layout.buildDirectory.dir('release-assets')
 def releaseIntermediateDirectory = layout.buildDirectory.dir('release-intermediates')
 def releaseContainerDirectory = layout.buildDirectory.dir('release-container')
+def releaseDockerHubDigestFile = layout.buildDirectory.file(
+        'reports/release-publication/dockerhub-digest.txt')
+def releaseDockerHubMetadataFile = layout.buildDirectory.file(
+        'reports/release-publication/dockerhub-metadata.json')
 def releaseMavenStagingDirectory = mavenStagingRepositoryDirectory.toString()
 def releaseApplicationProjects = [project, project(':sbm'), project(':sbk-web-console')]
 def releaseMavenProjects = [
@@ -56,6 +61,44 @@ def releaseBooleanProperty = { String propertyName ->
         throw new GradleException("${propertyName} must be true or false")
     }
     value
+}
+
+def runReleaseCommand = { List<String> command, Map<String, String> environment,
+                          String standardInput = null ->
+    def processBuilder = new ProcessBuilder(command)
+            .directory(rootDir)
+            .redirectError(ProcessBuilder.Redirect.INHERIT)
+            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+    processBuilder.environment().putAll(environment)
+    def process = processBuilder.start()
+    if (standardInput == null) {
+        process.outputStream.close()
+    } else {
+        process.outputStream.withWriter('UTF-8') { writer ->
+            writer.write(standardInput)
+            writer.write(System.lineSeparator())
+        }
+    }
+    def exitCode = process.waitFor()
+    if (exitCode != 0) {
+        throw new GradleException(
+                "Release command '${command.first()}' failed with exit code ${exitCode}")
+    }
+}
+
+def readReleaseCommand = { List<String> command ->
+    def process = new ProcessBuilder(command)
+            .directory(rootDir)
+            .redirectErrorStream(true)
+            .start()
+    process.outputStream.close()
+    def output = process.inputStream.getText('UTF-8').trim()
+    def exitCode = process.waitFor()
+    if (exitCode != 0) {
+        throw new GradleException(
+                "Release command '${command.first()}' failed with exit code ${exitCode}: ${output}")
+    }
+    output
 }
 
 def configuredJreleaserFile = findProperty('jreleaser.configFile')?.toString()?.trim()
@@ -400,9 +443,127 @@ def releasePublicationDryRun = tasks.register('releasePublicationDryRun') {
     }
 }
 
+def verifyDockerHubPublication = tasks.register('verifyDockerHubPublication') {
+    group = 'verification'
+    description = 'Validates the confirmation and local Docker Hub credentials before publication.'
+    doLast {
+        def expectedConfirmation = "RELEASE-${sbkVersion}"
+        def suppliedConfirmation = findProperty('releaseConfirm')?.toString()?.trim()
+        if (suppliedConfirmation != expectedConfirmation) {
+            throw new GradleException(
+                    "Docker Hub publication requires -PreleaseConfirm=${expectedConfirmation}")
+        }
+        if (!System.getenv('DOCKER_USERNAME')?.trim() || !System.getenv('DOCKER_PASSWORD')) {
+            throw new GradleException(
+                    'Docker Hub publication requires DOCKER_USERNAME and DOCKER_PASSWORD')
+        }
+    }
+}
+
+def publishDockerHub = tasks.register('publishDockerHub') {
+    group = 'publishing'
+    description = 'Publishes the multi-architecture SBK image to Docker Hub using local credentials.'
+    dependsOn verifyDockerHubPublication
+    dependsOn prepareReleaseContainer
+    outputs.file releaseDockerHubDigestFile
+    outputs.file releaseDockerHubMetadataFile
+    outputs.upToDateWhen { false }
+    doLast {
+        def dockerUsername = System.getenv('DOCKER_USERNAME')?.trim()
+        def dockerPassword = System.getenv('DOCKER_PASSWORD')
+
+        def prerelease = releaseBooleanProperty('releasePrerelease') == 'true'
+                || sbkVersion.toString().contains('-')
+        def majorVersion = sbkVersion.toString().tokenize('.').first()
+        def buildDate = readReleaseCommand(['git', 'show', '-s', '--format=%cI', 'HEAD'])
+        def commit = readReleaseCommand(['git', 'rev-parse', 'HEAD'])
+        def metadataFile = releaseDockerHubMetadataFile.get().asFile
+        metadataFile.parentFile.mkdirs()
+        def digestFile = releaseDockerHubDigestFile.get().asFile
+        digestFile.parentFile.mkdirs()
+        def dockerConfigDirectory = Files.createTempDirectory('sbk-docker-config-').toFile()
+        def environment = ['DOCKER_CONFIG': dockerConfigDirectory.absolutePath]
+
+        try {
+            runReleaseCommand(['docker', 'buildx', 'version'], environment)
+            runReleaseCommand(
+                    ['docker', 'login', '--username', dockerUsername, '--password-stdin'],
+                    environment, dockerPassword)
+
+            def command = [
+                    'docker', 'buildx', 'build',
+                    '--platform', releasePlatforms.join(','),
+                    '--push',
+                    '--provenance=mode=max',
+                    '--sbom=true',
+                    '--build-arg', "RUNTIME_IMAGE=${runtimeContainerImage}",
+                    '--build-arg', "APPLICATION_VERSION=${sbkVersion}",
+                    '--build-arg', "VCS_REF=${commit}",
+                    '--build-arg', "BUILD_DATE=${buildDate}",
+                    '--label', "org.opencontainers.image.created=${buildDate}",
+                    '--label', "org.opencontainers.image.revision=${commit}",
+                    '--label', "org.opencontainers.image.version=${sbkVersion}",
+                    '--metadata-file', metadataFile.absolutePath,
+                    '--tag', "kmgowda/sbk:${sbkVersion}"
+            ]
+            if (!prerelease) {
+                command.addAll([
+                        '--tag', "kmgowda/sbk:${majorVersion}",
+                        '--tag', 'kmgowda/sbk:latest'
+                ])
+            }
+            command.add(releaseContainerDirectory.get().asFile.absolutePath)
+            runReleaseCommand(command, environment)
+
+            def metadata = new JsonSlurper().parse(metadataFile)
+            def digest = metadata['containerimage.digest']?.toString()?.trim()
+            if (!(digest ==~ /sha256:[0-9a-f]{64}/)) {
+                throw new GradleException(
+                        "Docker Buildx did not report a valid image digest: ${digest}")
+            }
+            runReleaseCommand(
+                    ['docker', 'buildx', 'imagetools', 'inspect', "kmgowda/sbk@${digest}"],
+                    environment)
+            digestFile.text = digest + System.lineSeparator()
+            logger.lifecycle("Docker Hub image published: kmgowda/sbk@${digest}")
+        } finally {
+            delete dockerConfigDirectory
+        }
+    }
+}
+
+prepareReleaseContainer.configure {
+    mustRunAfter verifyDockerHubPublication
+}
+
+def verifyReleaseDispatch = tasks.register('verifyReleaseDispatch') {
+    group = 'verification'
+    description = 'Validates GitHub dispatch credentials before any release publication occurs.'
+    doLast {
+        def expectedConfirmation = "RELEASE-${sbkVersion}"
+        def suppliedConfirmation = findProperty('releaseConfirm')?.toString()?.trim()
+        if (suppliedConfirmation != expectedConfirmation) {
+            throw new GradleException(
+                    "Actual publication requires -PreleaseConfirm=${expectedConfirmation}")
+        }
+        def githubToken = findProperty('github.token')?.toString()?.trim()
+                ?: System.getenv('GITHUB_TOKEN')?.trim()
+        if (githubToken == null) {
+            throw new GradleException(
+                    'GitHub Actions dispatch requires -Pgithub.token or GITHUB_TOKEN')
+        }
+    }
+}
+
+publishDockerHub.configure {
+    mustRunAfter verifyReleaseDispatch
+}
+
 tasks.register('publish') {
     group = 'publishing'
-    description = 'Dispatches the guarded GitHub Actions workflow to publish an actual SBK release.'
+    description = 'Publishes Docker Hub locally and dispatches the GitHub release workflow.'
+    dependsOn verifyReleaseDispatch
+    dependsOn publishDockerHub
     doLast {
         def expectedConfirmation = "RELEASE-${sbkVersion}"
         def suppliedConfirmation = findProperty('releaseConfirm')?.toString()?.trim()
@@ -420,6 +581,11 @@ tasks.register('publish') {
 
         def prerelease = releaseBooleanProperty('releasePrerelease')
         def resume = releaseBooleanProperty('releaseResume')
+        def dockerHubDigest = releaseDockerHubDigestFile.get().asFile.text.trim()
+        if (!(dockerHubDigest ==~ /sha256:[0-9a-f]{64}/)) {
+            throw new GradleException(
+                    "Invalid locally published Docker Hub digest: ${dockerHubDigest}")
+        }
         def repository = releaseGitHubRepository.toString().trim()
         def workflow = releaseWorkflowFile.toString().trim()
         def workflowRef = releaseWorkflowRef.toString().trim()
@@ -433,7 +599,8 @@ tasks.register('publish') {
                         version: sbkVersion.toString(),
                         dry_run: 'false',
                         prerelease: prerelease,
-                        resume: resume
+                        resume: resume,
+                        dockerhub_digest: dockerHubDigest
                 ]
         ])
         def timeout = Duration.ofSeconds(releaseDispatchTimeoutSeconds.toString().toLong())

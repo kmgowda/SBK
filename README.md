@@ -428,9 +428,11 @@ does not execute or depend on `releasecheck`. It builds the current version's
 reproducible archives, validates native AMD64/ARM64 containers, and can publish
 the distributions, SBOMs, manifest, and checksums to a detailed GitHub
 Release, the Java modules to GitHub Packages, and the signed
-multi-architecture image to Docker Hub and GHCR. An authorized maintainer can
-dispatch it with the root `publish` Gradle task; see the publication guide for
-the required confirmation, credentials, and recovery controls.
+multi-architecture image to Docker Hub and GHCR. The root `publish` task uses
+local Docker Hub environment credentials without sending them to GitHub, then
+dispatches the workflow with only the immutable public image digest. See the
+publication guide for the required confirmation, credentials, and recovery
+controls.
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing code. The minimum verification sequence is normally:
 

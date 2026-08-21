@@ -89,8 +89,9 @@ container filesystem, including the driver libraries actually bundled there.
 
 ## Container publication
 
-The workflow validates native `linux/amd64` and `linux/arm64` images before
-publishing one multi-architecture manifest to:
+The local `publish` task first publishes one multi-architecture manifest to
+Docker Hub. The workflow validates independently built native `linux/amd64`
+and `linux/arm64` images, then copies the exact public Docker Hub manifest to:
 
 ```text
 kmgowda/sbk
@@ -99,9 +100,10 @@ ghcr.io/kmgowda/sbk
 
 Every version receives the exact version tag. Stable releases also update the
 major-version and `latest` tags; prereleases never update stable aliases. The
-workflow verifies both registries against the Buildx digest, emits BuildKit
-SBOM/provenance attestations, and signs both immutable repository digests with
-Cosign and GitHub OIDC.
+workflow verifies both registries against the same Buildx digest. The local
+Buildx publication emits SBOM/provenance attestations. The workflow signs the
+GHCR immutable repository digest with Cosign and GitHub OIDC; Docker Hub is
+verified by immutable digest without transmitting its credentials to GitHub.
 
 The AMD64 validation job also reports HIGH and CRITICAL Trivy findings. This
 scan is advisory because the aggregate image intentionally bundles every
@@ -123,12 +125,14 @@ the GitHub identity from these sources:
    falling back to the workflow actor and repository `GITHUB_TOKEN`.
 
 Docker Hub is a different authentication service; a GitHub token cannot be
-used there. Configure either `DOCKERHUB_USER`/`DOCKERHUB_TOKEN`, the existing
-`DOCKERHUB_USERNAME`/`DOCKERHUB_TOKEN` pair,
-`DOCKER_USERNAME`/`DOCKER_PASSWORD`, or the generic
-`RELEASE_DOCKER_USER`/`RELEASE_DOCKER_TOKEN` repository secrets. A local
-environment variable is not inherited by a GitHub-hosted runner; store its
-value as the corresponding repository secret before dispatching the workflow.
+used there. Set `DOCKER_USERNAME` and `DOCKER_PASSWORD` only in the local
+environment that invokes Gradle. The `publishDockerHub` task supplies the
+password through `docker login --password-stdin`, uses a temporary
+`DOCKER_CONFIG`, pushes the multi-architecture image, records its public
+immutable digest, and deletes the temporary configuration before Gradle exits.
+Neither Docker credential is sent to GitHub or stored in the repository. The
+workflow receives only the non-secret public digest and copies that exact
+manifest to GHCR.
 
 JReleaser does not use the GitHub credentials above for Maven Central and is
 never invoked by the GitHub workflow. Local invocations resolve its private
@@ -155,6 +159,8 @@ does not receive or require remote benchmark credentials.
 Dispatch the complete guarded release from Gradle:
 
 ```bash
+DOCKER_USERNAME=<docker-user> \
+DOCKER_PASSWORD=<docker-token> \
 GITHUB_TOKEN=<actions-write-token> ./gradlew publish \
   -PreleaseConfirm=RELEASE-10.5 \
   --no-daemon
@@ -181,14 +187,16 @@ version=<exact sbkVersion from gradle.properties>
 dry_run=false
 prerelease=false
 resume=false
+dockerhub_digest=sha256:<immutable-public-digest>
 ```
 
 The same inputs remain available through **Actions > SBK Release > Run
 workflow** when a browser-driven release is required.
 
-The workflow builds the complete contracted asset set without running or
-depending on `releasecheck`, validates both container architectures, publishes
-the image to Docker Hub and GHCR, invokes
+The local Gradle task publishes Docker Hub before dispatch. The workflow builds
+the complete contracted asset set without running or depending on
+`releasecheck`, validates both container architectures, copies the exact image
+to GHCR, invokes
 `releasePublishCoreToGitHubPackages` for GitHub Packages, creates an annotated
 tag, creates a draft GitHub Release, uploads and compares every asset, and
 publishes the release last with the versioned details from
