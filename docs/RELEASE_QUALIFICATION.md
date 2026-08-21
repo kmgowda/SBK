@@ -315,6 +315,13 @@ build/reports/release-qualification/
 └── logs/
 ```
 
+The **SBK Release Qualification** GitHub workflow uploads these files as an
+immutable artifact named
+`sbk-release-qualification-<commit>-<profile>`. Record the successful workflow
+run ID. The separate release workflow accepts only a completed successful run
+for its exact commit and downloads the `release` profile artifact by that run
+ID; it never reruns `releasecheck`.
+
 `qualification.json` contains the version, Git commit, profile, Java runtime,
 and SHA-256 checksum of every application ZIP/TAR. A release is qualified only
 when the command exits zero, no mandatory test was skipped, and the published

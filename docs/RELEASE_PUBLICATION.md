@@ -16,8 +16,8 @@ JReleaser. The legacy Gradle `-Pmaven` repository path is not used.
 
 ## Safe local dry run
 
-The following command runs the CI qualification profile, exercises every
-core-module Maven `publish` task against project-local repositories, validates
+The following command runs qualification and then exercises every core-module
+Maven `publish` task against project-local repositories, validates
 the exact main/source/Javadoc/documentation artifact set that JReleaser will
 deploy, assembles the container context, and creates the complete release asset
 contract:
@@ -39,10 +39,12 @@ build/release-container/
 ```
 
 The Gradle dry run prepares the Docker context but does not require a Docker
-daemon. For the complete two-architecture dry run, open **Actions > SBK
-Release > Run workflow**, enter the version, keep `dry_run=true`, and select
-`ci`, `local-docker`, or `release`. The workflow builds and executes native
-AMD64 and ARM64 images but performs no registry login or push.
+daemon. The GitHub release workflow never runs `releasecheck`. First run **SBK
+Release Qualification** with the `release` profile. After that workflow
+succeeds, open **SBK Release**, enter its run ID, and keep `dry_run=true`. The
+release workflow downloads the exact-commit qualification evidence, verifies
+the rebuilt archives against its checksums, and executes native AMD64 and
+ARM64 images without performing a registry login or push.
 
 The local dry run and GitHub workflow intentionally do not invoke
 `jreleaserDeploy`. JReleaser requires the maintainer's private signing and
@@ -141,8 +143,9 @@ unsigned artifacts; JReleaser is the sole component that signs the Maven
 Central payload. Legacy Gradle signing properties must not create
 `signMavenJavaPublication` tasks.
 
-The release environment must also provide the real-host qualification secrets
-documented in [Release qualification](RELEASE_QUALIFICATION.md).
+The separate qualification environment must provide the real-host secrets
+documented in [Release qualification](RELEASE_QUALIFICATION.md). The release
+workflow receives no remote benchmark credentials.
 
 ## Publishing a release
 
@@ -150,7 +153,7 @@ Dispatch the complete guarded release from Gradle:
 
 ```bash
 GITHUB_TOKEN=<actions-write-token> ./gradlew publish \
-  -Pprofile=release \
+  -PreleaseQualificationRunId=<successful-release-qualification-run-id> \
   -PreleaseConfirm=RELEASE-10.5 \
   --no-daemon
 ```
@@ -173,7 +176,7 @@ Both default to `false`. The task submits the following workflow inputs:
 
 ```text
 version=<exact sbkVersion from gradle.properties>
-profile=release
+qualification_run_id=<successful exact-commit release qualification run ID>
 dry_run=false
 prerelease=false
 resume=false
@@ -182,12 +185,15 @@ resume=false
 The same inputs remain available through **Actions > SBK Release > Run
 workflow** when a browser-driven release is required.
 
-The workflow runs the authoritative real-host release gate, performs a local
-Maven publication dry run, validates both container architectures, publishes
-the image to Docker Hub and GHCR, invokes
+The workflow verifies and downloads immutable evidence from the separate
+authoritative real-host release gate. It rebuilds and checksum-compares the
+contracted distributions without running `releasecheck`, validates both
+container architectures, publishes the image to Docker Hub and GHCR, invokes
 `releasePublishCoreToGitHubPackages` for GitHub Packages, creates an annotated
 tag, creates a draft GitHub Release, uploads and compares every asset, and
-publishes the release last. It does not configure or execute JReleaser.
+publishes the release last with the versioned details from
+`.github/release-notes/<version>.md`. It does not configure or execute
+JReleaser.
 
 If publication stops after the exact tag or draft release is created, inspect
 the partial state before rerunning with `resume=true`. Resume is accepted only

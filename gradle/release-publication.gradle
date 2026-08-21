@@ -22,12 +22,18 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.security.MessageDigest
 import java.time.Duration
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.bundling.Compression
 
 def releaseAssetsDirectory = layout.buildDirectory.dir('release-assets')
 def releaseIntermediateDirectory = layout.buildDirectory.dir('release-intermediates')
 def releaseContainerDirectory = layout.buildDirectory.dir('release-container')
 def qualificationDirectory = layout.buildDirectory.dir('reports/release-qualification')
+def configuredQualificationDirectory = findProperty('releaseQualificationDir')?.toString()?.trim()
+def releaseQualificationDirectory = configuredQualificationDirectory
+        ? file(configuredQualificationDirectory) : qualificationDirectory.get().asFile
+def requiredQualificationProfile = findProperty('releaseRequiredQualificationProfile')
+        ?.toString()?.trim()
 def releaseMavenStagingDirectory = mavenStagingRepositoryDirectory.toString()
 def releaseApplicationProjects = [project, project(':sbm'), project(':sbk-web-console')]
 def releaseMavenProjects = [
@@ -39,6 +45,16 @@ def expectedReleaseMavenProjectPaths = [
 ] as Set
 def releaseImageNames = ['kmgowda/sbk', 'ghcr.io/kmgowda/sbk']
 def releasePlatforms = ['linux/amd64', 'linux/arm64']
+
+// Qualification and publication run in separate workflows. Their distribution
+// archives must therefore be byte-for-byte reproducible so the publication
+// workflow can prove that it rebuilt exactly the binaries that were qualified.
+releaseApplicationProjects.each { applicationProject ->
+    applicationProject.tasks.withType(AbstractArchiveTask).configureEach {
+        reproducibleFileOrder = true
+        preserveFileTimestamps = false
+    }
+}
 def rootReleasePublishRequested = gradle.startParameter.taskNames.any {
     it == 'publish' || it == ':publish'
 }
@@ -254,7 +270,7 @@ def collectReleaseAssets = tasks.register('collectReleaseAssets', Sync) {
         }
     }
     from(releaseAgentDocs.flatMap { it.archiveFile })
-    from(qualificationDirectory) {
+    from(releaseQualificationDirectory) {
         include 'qualification.json', 'functional-summary.json', 'functional-results.tsv'
     }
     releaseMavenProjects.each { publicationProject ->
@@ -288,6 +304,17 @@ def generateReleaseManifest = tasks.register('generateReleaseManifest') {
         if (qualification.status != 'QUALIFIED' || qualification.version != sbkVersion.toString()) {
             throw new GradleException('Release assets require a matching QUALIFIED qualification.json')
         }
+        def currentCommit = providers.exec {
+            commandLine 'git', 'rev-parse', 'HEAD'
+        }.standardOutput.asText.get().trim()
+        if (qualification.commit != currentCommit) {
+            throw new GradleException("Qualification commit ${qualification.commit} does not match "
+                    + "release commit ${currentCommit}")
+        }
+        if (requiredQualificationProfile && qualification.profile != requiredQualificationProfile) {
+            throw new GradleException("Release assets require qualification profile "
+                    + "'${requiredQualificationProfile}', not '${qualification.profile}'")
+        }
 
         def requiredAssets = [
                 "sbk-${sbkVersion}.zip",
@@ -310,6 +337,21 @@ def generateReleaseManifest = tasks.register('generateReleaseManifest') {
         }
         if (!missingAssets.isEmpty()) {
             throw new GradleException('Missing contracted release assets:\n' + missingAssets.join('\n'))
+        }
+
+        def qualifiedArtifacts = qualification.artifacts.collectEntries { artifact ->
+            [(new File(artifact.path.toString()).name): artifact.sha256.toString()]
+        }
+        def distributionAssets = requiredAssets.findAll {
+            it.endsWith('.zip') || it.endsWith('.tar')
+        }
+        def mismatchedDistributions = distributionAssets.findAll { artifactName ->
+            def qualifiedChecksum = qualifiedArtifacts[artifactName]
+            qualifiedChecksum == null || sha256File(new File(assetsDirectory, artifactName)) != qualifiedChecksum
+        }
+        if (!mismatchedDistributions.isEmpty()) {
+            throw new GradleException('Release distributions do not match qualification evidence:\n'
+                    + mismatchedDistributions.join('\n'))
         }
 
         def payloadFiles = assetsDirectory.listFiles().findAll {
@@ -382,13 +424,23 @@ def prepareReleaseContainer = tasks.register('prepareReleaseContainer', Sync) {
     }
 }
 
+def releasePublicationAssets = tasks.register('releasePublicationAssets') {
+    group = 'distribution'
+    description = 'Builds release assets from previously generated qualification evidence without running checks.'
+    dependsOn generateReleaseManifest
+    dependsOn prepareReleaseContainer
+    dependsOn verifyCorePublicationStaging
+    doLast {
+        logger.lifecycle('SBK release publication assets: PREPARED')
+        logger.lifecycle("Assets: ${releaseAssetsDirectory.get().asFile}")
+    }
+}
+
 def releasePublicationDryRun = tasks.register('releasePublicationDryRun') {
     group = 'verification'
     description = 'Runs qualification and prepares every release asset without publishing or creating a tag.'
     dependsOn tasks.named('releasecheck')
-    dependsOn generateReleaseManifest
-    dependsOn prepareReleaseContainer
-    dependsOn verifyCorePublicationStaging
+    dependsOn releasePublicationAssets
     doLast {
         logger.lifecycle('SBK release publication dry run: PASSED')
         logger.lifecycle("Assets: ${releaseAssetsDirectory.get().asFile}")
@@ -400,16 +452,17 @@ tasks.register('publish') {
     group = 'publishing'
     description = 'Dispatches the guarded GitHub Actions workflow to publish an actual SBK release.'
     doLast {
-        def requestedProfile = findProperty('profile')?.toString()?.trim()
-        if (requestedProfile != 'release') {
-            throw new GradleException('publish requires -Pprofile=release')
-        }
-
         def expectedConfirmation = "RELEASE-${sbkVersion}"
         def suppliedConfirmation = findProperty('releaseConfirm')?.toString()?.trim()
         if (suppliedConfirmation != expectedConfirmation) {
             throw new GradleException(
                     "Actual publication requires -PreleaseConfirm=${expectedConfirmation}")
+        }
+
+        def qualificationRunId = findProperty('releaseQualificationRunId')?.toString()?.trim()
+        if (!(qualificationRunId ==~ /[0-9]+/)) {
+            throw new GradleException(
+                    'publish requires -PreleaseQualificationRunId=<successful release qualification run ID>')
         }
 
         def githubToken = findProperty('github.token')?.toString()?.trim()
@@ -432,7 +485,7 @@ tasks.register('publish') {
                 ref: workflowRef,
                 inputs: [
                         version: sbkVersion.toString(),
-                        profile: 'release',
+                        qualification_run_id: qualificationRunId,
                         dry_run: 'false',
                         prerelease: prerelease,
                         resume: resume

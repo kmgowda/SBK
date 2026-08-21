@@ -126,8 +126,10 @@ skip. Use `-Pprofile=local-docker` for automatic disposable two-node
 GEM functional coverage; it does not replace real-host release evidence.
 
 After qualification, only an authorized maintainer may dispatch an actual
-release with the root `publish` task, `-Pprofile=release`, and the exact
-`-PreleaseConfirm=RELEASE-<version>` confirmation. See
+release with the root `publish` task, the successful exact-commit release
+qualification run ID, and the exact `-PreleaseConfirm=RELEASE-<version>`
+confirmation. The release workflow consumes that immutable evidence and does
+not rerun `releasecheck`. See
 [`docs/RELEASE_PUBLICATION.md`](docs/RELEASE_PUBLICATION.md) for credentials,
 prerelease/resume controls, the non-publishing artifact/container dry run, and
 the complete publication contract.

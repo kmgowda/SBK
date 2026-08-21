@@ -19,6 +19,9 @@ on:
 permissions:
   contents: read
 
+env:
+  QUALIFICATION_ARTIFACT: sbk-release-qualification-${{ github.sha }}-${{ inputs.profile }}
+
 jobs:
   qualify-ci:
     if: inputs.profile == 'ci'
@@ -38,6 +41,14 @@ jobs:
 
       - name: Run release qualification
         run: ./gradlew clean releasecheck -Pprofile=ci --no-daemon --rerun-tasks
+
+      - name: Upload immutable qualification evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.QUALIFICATION_ARTIFACT }}
+          path: build/reports/release-qualification/
+          if-no-files-found: error
+          retention-days: 30
 
   qualify-release:
     if: inputs.profile == 'release'
@@ -73,6 +84,14 @@ jobs:
             "-PreleaseInventory=$RUNNER_TEMP/sbk-release-inventory.properties" \
             --no-daemon --rerun-tasks
 
+      - name: Upload immutable qualification evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.QUALIFICATION_ARTIFACT }}
+          path: build/reports/release-qualification/
+          if-no-files-found: error
+          retention-days: 30
+
   qualify-local-docker:
     if: inputs.profile == 'local-docker'
     runs-on: ubuntu-latest
@@ -91,3 +110,11 @@ jobs:
 
       - name: Run Docker-backed local qualification
         run: ./gradlew clean releasecheck -Pprofile=local-docker --no-daemon --rerun-tasks
+
+      - name: Upload immutable qualification evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.QUALIFICATION_ARTIFACT }}
+          path: build/reports/release-qualification/
+          if-no-files-found: error
+          retention-days: 30
