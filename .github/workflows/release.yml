@@ -192,8 +192,8 @@ jobs:
     env:
       GITHUB_USER: ${{ secrets.RELEASE_GITHUB_USER || vars.GITHUB_USER || github.actor }}
       GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
-      DOCKER_USER: ${{ secrets.DOCKERHUB_USER || secrets.DOCKERHUB_USERNAME || secrets.RELEASE_DOCKER_USER }}
-      DOCKER_TOKEN: ${{ secrets.DOCKERHUB_TOKEN || secrets.RELEASE_DOCKER_TOKEN }}
+      DOCKER_USER: ${{ secrets.DOCKERHUB_USER || secrets.DOCKERHUB_USERNAME || secrets.DOCKER_USERNAME || vars.DOCKER_USERNAME || secrets.RELEASE_DOCKER_USER }}
+      DOCKER_TOKEN: ${{ secrets.DOCKERHUB_TOKEN || secrets.DOCKER_PASSWORD || secrets.RELEASE_DOCKER_TOKEN }}
     steps:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:

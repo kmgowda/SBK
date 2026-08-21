@@ -124,8 +124,11 @@ the GitHub identity from these sources:
 
 Docker Hub is a different authentication service; a GitHub token cannot be
 used there. Configure either `DOCKERHUB_USER`/`DOCKERHUB_TOKEN`, the existing
-`DOCKERHUB_USERNAME`/`DOCKERHUB_TOKEN` pair, or the generic
-`RELEASE_DOCKER_USER`/`RELEASE_DOCKER_TOKEN` repository secrets.
+`DOCKERHUB_USERNAME`/`DOCKERHUB_TOKEN` pair,
+`DOCKER_USERNAME`/`DOCKER_PASSWORD`, or the generic
+`RELEASE_DOCKER_USER`/`RELEASE_DOCKER_TOKEN` repository secrets. A local
+environment variable is not inherited by a GitHub-hosted runner; store its
+value as the corresponding repository secret before dispatching the workflow.
 
 JReleaser does not use the GitHub credentials above for Maven Central and is
 never invoked by the GitHub workflow. Local invocations resolve its private
