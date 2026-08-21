@@ -63,14 +63,16 @@ Artifact names use the version from `gradle.properties`; documentation must not 
 
 The guarded release workflow:
 
-1. Requires a successful release qualification and builds installed, ZIP, and
-   TAR distributions for SBK, SBM, and the Local Web Console.
+1. Independently builds installed, ZIP, and TAR distributions for SBK, SBM,
+   and the Local Web Console. Release qualification is a separate maintainer
+   gate and is intentionally not invoked or consumed by this workflow.
 2. Creates `sbk-agent-docs.tar.gz` from root entry points, the complete `docs/`
    directory, and agent configurations while preserving discovery paths such
    as `.cursor/rules/` and `.devin/skills/`.
-3. Adds qualification evidence, checksums, the release manifest, and direct
-   CycloneDX SBOMs for the publishable core modules to the contracted asset
-   directory.
+3. Adds checksums, the release manifest, and direct CycloneDX SBOMs for the
+   publishable core modules to the contracted asset directory. Qualification
+   evidence remains under `build/reports/release-qualification/` and must be
+   retained separately for the exact released commit.
 4. Attaches the complete, verified directory to a draft GitHub Release and
    publishes the release only after container and package publication succeeds.
 
@@ -86,8 +88,11 @@ The guarded workflow uses the internal
 maintainer-run Maven Central publication stages the explicit core allow-list
 with `releaseStageCorePublications` and deploys it with JReleaser. The GitHub
 workflow never configures or invokes JReleaser. Driver projects are excluded
-from standalone publication. The root `publish` task dispatches the guarded
-GitHub-owned publication workflow.
+from standalone publication. The root `publish` task first publishes the
+multi-architecture Docker Hub image with local
+`DOCKER_USERNAME`/`DOCKER_PASSWORD` credentials and then dispatches the
+guarded GitHub-owned publication workflow with only its public immutable
+digest. Docker Hub credentials are not sent to GitHub.
 
 JReleaser configuration is centralized in
 `gradle/release-publication.gradle`, which explicitly registers every core
@@ -109,4 +114,5 @@ Source locations:
 
 - Root distribution: `build.gradle`
 - Documentation JAR: `gradle/maven.gradle`
-- Release archive/assets: `.github/workflows/gradle.yml`
+- Release archive/assets: `gradle/release-publication.gradle` and
+  `.github/workflows/release.yml`

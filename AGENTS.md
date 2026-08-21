@@ -128,7 +128,11 @@ GEM functional coverage; it does not replace real-host release evidence.
 Release qualification and publication are independent. Only an authorized
 maintainer may dispatch an actual release with the root `publish` task and the
 exact `-PreleaseConfirm=RELEASE-<version>` confirmation. The publication
-workflow does not invoke or require `releasecheck`. See
+workflow does not invoke or require `releasecheck`. The task uses locally
+supplied `DOCKER_USERNAME` and `DOCKER_PASSWORD` credentials for Docker Hub,
+then sends only the public image digest to GitHub. It returns after dispatch,
+so the maintainer must monitor the asynchronous workflow and verify the public
+tag, assets, packages, and container manifests. See
 [`docs/RELEASE_PUBLICATION.md`](docs/RELEASE_PUBLICATION.md) for credentials,
 prerelease/resume controls, the non-publishing artifact/container dry run, and
 the complete publication contract.

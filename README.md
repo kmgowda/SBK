@@ -428,11 +428,27 @@ does not execute or depend on `releasecheck`. It builds the current version's
 reproducible archives, validates native AMD64/ARM64 containers, and can publish
 the distributions, SBOMs, manifest, and checksums to a detailed GitHub
 Release, the Java modules to GitHub Packages, and the signed
-multi-architecture image to Docker Hub and GHCR. The root `publish` task uses
+multi-architecture GHCR image plus the digest-identical Docker Hub image. The
+root `publish` task uses
 local Docker Hub environment credentials without sending them to GitHub, then
 dispatches the workflow with only the immutable public image digest. See the
 publication guide for the required confirmation, credentials, and recovery
 controls.
+
+For authorized maintainers, the final publication entry point is:
+
+```bash
+VERSION=$(sed -n 's/^sbkVersion=//p' gradle.properties)
+DOCKER_USERNAME="<docker-user>" \
+DOCKER_PASSWORD="<docker-access-token>" \
+GITHUB_TOKEN="<actions-workflow-token>" \
+./gradlew publish "-PreleaseConfirm=RELEASE-${VERSION}" --no-daemon
+```
+
+Run it only from a clean, synchronized `master` after separately qualifying
+the same commit. The command publishes Docker Hub and dispatches the
+asynchronous GitHub workflow; monitor that workflow and complete the
+post-release checks in the publication guide.
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing code. The minimum verification sequence is normally:
 

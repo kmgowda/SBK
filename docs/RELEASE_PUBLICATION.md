@@ -14,6 +14,66 @@ independent maintainer operation performed with the established local
 JReleaser configuration; the GitHub workflow never configures or invokes
 JReleaser. The legacy Gradle `-Pmaven` repository path is not used.
 
+## Maintainer release procedure
+
+Qualification and publication are deliberately separate operations. Complete
+this checklist in order for a normal stable release:
+
+1. Update `sbkVersion` in `gradle.properties`, complete the matching release
+   notes at `.github/release-notes/<version>.md`, merge the changes, and use a
+   clean local checkout of the latest `origin/master`.
+2. Qualify that exact commit independently with the release profile:
+
+   ```bash
+   ./gradlew clean releasecheck \
+     -Pprofile=release \
+     -PreleaseInventory=/secure/sbk-release-inventory.properties \
+     --no-daemon --rerun-tasks
+   ```
+
+   Preserve `build/reports/release-qualification/qualification.json` and the
+   functional reports as release evidence. The publication workflow does not
+   consume them, so the maintainer must verify that qualification covered the
+   same commit that will be released.
+3. Assemble and inspect every publication artifact without publishing:
+
+   ```bash
+   ./gradlew releasePublicationDryRun --no-daemon --rerun-tasks
+   # Linux:
+   (cd build/release-assets && sha256sum -c SHA256SUMS)
+   # macOS:
+   (cd build/release-assets && shasum -a 256 -c SHA256SUMS)
+   ```
+
+4. If Maven Central is part of the release, stage, verify, and deploy the seven
+   core modules from the authorized JReleaser host using the commands in
+   [Maven Central publication](#maven-central-publication). This operation is
+   independent because its signing and Sonatype credentials never enter the
+   GitHub workflow.
+5. Export the local Docker Hub and GitHub dispatch credentials, then invoke the
+   guarded root task with the exact version confirmation:
+
+   ```bash
+   export DOCKER_USERNAME="<docker-user>"
+   export DOCKER_PASSWORD="<docker-access-token>"
+   export GITHUB_TOKEN="<actions-workflow-token>"
+   VERSION=$(sed -n 's/^sbkVersion=//p' gradle.properties)
+   ./gradlew publish \
+     "-PreleaseConfirm=RELEASE-${VERSION}" \
+     --no-daemon
+   ```
+
+6. Monitor **Actions > SBK Release** until every job succeeds, then perform the
+   [post-release verification](#post-release-verification). The Gradle task
+   returns after dispatch; a successful local exit does not by itself mean the
+   asynchronous GitHub release completed.
+
+Do not run step 5 from an unmerged commit. The Docker image records the local
+`HEAD`, while the workflow runs from `master` and rejects an image whose
+revision label differs from the dispatched commit. Do not insert `clean`
+between qualification and evidence retention unless the reports have first
+been copied outside `build/`.
+
 ## Safe local dry run
 
 The following command exercises every core-module Maven `publish` task against
@@ -130,6 +190,7 @@ environment that invokes Gradle. The `publishDockerHub` task supplies the
 password through `docker login --password-stdin`, uses a temporary
 `DOCKER_CONFIG`, pushes the multi-architecture image, records its public
 immutable digest, and deletes the temporary configuration before Gradle exits.
+The supplied Docker identity must have push permission for `kmgowda/sbk`.
 Neither Docker credential is sent to GitHub or stored in the repository. The
 workflow receives only the non-secret public digest and copies that exact
 manifest to GHCR.
@@ -159,10 +220,12 @@ does not receive or require remote benchmark credentials.
 Dispatch the complete guarded release from Gradle:
 
 ```bash
-DOCKER_USERNAME=<docker-user> \
-DOCKER_PASSWORD=<docker-token> \
-GITHUB_TOKEN=<actions-write-token> ./gradlew publish \
-  -PreleaseConfirm=RELEASE-10.5 \
+VERSION=$(sed -n 's/^sbkVersion=//p' gradle.properties)
+DOCKER_USERNAME="<docker-user>" \
+DOCKER_PASSWORD="<docker-access-token>" \
+GITHUB_TOKEN="<actions-workflow-token>" \
+./gradlew publish \
+  "-PreleaseConfirm=RELEASE-${VERSION}" \
   --no-daemon
 ```
 
@@ -191,7 +254,11 @@ dockerhub_digest=sha256:<immutable-public-digest>
 ```
 
 The same inputs remain available through **Actions > SBK Release > Run
-workflow** when a browser-driven release is required.
+workflow** when a browser-driven release is required. For an actual
+browser-driven publication, first run `publishDockerHub` locally with the same
+confirmation and credentials, then copy the resulting
+`build/reports/release-publication/dockerhub-digest.txt` value into the
+`dockerhub_digest` workflow input. A dry run does not require that digest.
 
 The local Gradle task publishes Docker Hub before dispatch. The workflow builds
 the complete contracted asset set without running or depending on
@@ -214,6 +281,15 @@ JARs must exist and be non-empty; generated Javadoc can vary across JDK patch
 releases, and the documentation JAR may contain newer release-operations
 guidance added while recovering the same immutable code release.
 
+If Docker Hub publication succeeds but workflow dispatch or a later workflow
+job fails, do not delete or overwrite the version tag. Inspect the public
+digest written to `build/reports/release-publication/dockerhub-digest.txt` and
+the partial GitHub state. Correct the failure and rerun with
+`-PreleaseResume=true`; the workflow accepts only the same tag, commit,
+byte-identical assets, and immutable image digest.
+
+## Maven Central publication
+
 Publish the Maven Central coordinates independently from an authorized host:
 
 ```bash
@@ -231,3 +307,33 @@ SBK source checkout, for example with `sbk-api`, `sbk-gem`, or `sbm` from Maven
 Central. The same coordinates may be resolved from GitHub Packages after
 adding its repository and credentials. See the
 [SBK examples repository](https://github.com/kmgowda/sbk-examples).
+
+## Post-release verification
+
+Verify the public state rather than relying only on the workflow conclusion:
+
+```bash
+VERSION=$(sed -n 's/^sbkVersion=//p' gradle.properties)
+git fetch --tags origin
+git rev-list -n 1 "v${VERSION}"
+gh release view "v${VERSION}" \
+  --json isDraft,isPrerelease,tagName,targetCommitish,url,assets
+docker buildx imagetools inspect "kmgowda/sbk:${VERSION}"
+docker buildx imagetools inspect "ghcr.io/kmgowda/sbk:${VERSION}"
+```
+
+Confirm that:
+
+- the annotated `v<version>` tag resolves to the qualified `master` commit;
+- the GitHub Release is published with the intended stable/prerelease status
+  and contains every contracted asset listed above;
+- `SHA256SUMS` verifies every downloaded release asset;
+- Docker Hub and GHCR expose the same immutable digest with both
+  `linux/amd64` and `linux/arm64` manifests;
+- stable releases update `<major>` and `latest`, while prereleases do not;
+- all seven core coordinates exist in GitHub Packages; and
+- when Maven Central publication was requested, all seven coordinates are
+  visible there after Sonatype Central finishes synchronizing.
+
+Record the release URL, workflow-run URL, tag commit, container digest, and
+Maven Central result with the retained qualification evidence.

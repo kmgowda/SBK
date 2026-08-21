@@ -115,6 +115,18 @@ Discuss these before implementation or explicitly call them out for approval:
 
 Publishing, tagging, pushing another contributor's branch, and destructive history changes are never implied by a code-change request.
 
+## Release maintainers
+
+Release qualification and release publication are separate procedures. Use
+the `release` profile in
+[the qualification guide](docs/RELEASE_QUALIFICATION.md) to qualify the exact
+commit first. Then follow the ordered checklist in
+[the publication guide](docs/RELEASE_PUBLICATION.md) for the non-publishing
+artifact dry run, independent Maven Central/JReleaser operation, locally
+authenticated Docker Hub publication, guarded GitHub workflow dispatch,
+recovery, and post-release verification. Never infer publication authority
+from a request to build, test, or prepare a candidate.
+
 ## Definition of done
 
 - The implementation respects module ownership and performance invariants.
