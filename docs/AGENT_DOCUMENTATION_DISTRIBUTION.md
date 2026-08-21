@@ -81,11 +81,13 @@ dry runs. Editing this document or running a dry run does not publish anything.
 
 `gradle/maven.gradle` adds `docsJar` to each applicable Maven publication. The
 release dry run exercises these publications against project-local repositories.
-The guarded workflow stages only the explicit core allow-list with
-`releaseStageCorePublications`, deploys to Sonatype Central with JReleaser,
-and uses the internal `releasePublishCoreToGitHubPackages` task for GitHub
-Packages. Driver projects are excluded from standalone publication. The root
-`publish` task dispatches this complete guarded workflow.
+The guarded workflow uses the internal
+`releasePublishCoreToGitHubPackages` task for GitHub Packages. Independent
+maintainer-run Maven Central publication stages the explicit core allow-list
+with `releaseStageCorePublications` and deploys it with JReleaser. The GitHub
+workflow never configures or invokes JReleaser. Driver projects are excluded
+from standalone publication. The root `publish` task dispatches the guarded
+GitHub-owned publication workflow.
 
 JReleaser configuration is centralized in
 `gradle/release-publication.gradle`, which explicitly registers every core

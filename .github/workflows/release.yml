@@ -319,7 +319,6 @@ jobs:
       contents: read
       packages: write
     env:
-      JRELEASER_MAVENCENTRAL_STAGE: FULL
       SBK_RELEASE_WORKFLOW: 'true'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -328,26 +327,7 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: gradle
-      - name: Install private JReleaser configuration
-        env:
-          JRELEASER_CONFIG_FILE: ${{ runner.temp }}/jreleaser-config.toml
-          JRELEASER_CONFIG_TOML: ${{ secrets.JRELEASER_CONFIG_TOML }}
-        run: |
-          set -euo pipefail
-          test -n "$JRELEASER_CONFIG_TOML"
-          install -m 600 /dev/null "$JRELEASER_CONFIG_FILE"
-          printf '%s\n' "$JRELEASER_CONFIG_TOML" > "$JRELEASER_CONFIG_FILE"
-      - name: Stage the complete Maven Central artifact set locally
-        run: ./gradlew verifyCorePublicationStaging --no-daemon
-      - name: Validate the JReleaser deployment configuration
-        env:
-          JRELEASER_CONFIG_FILE: ${{ runner.temp }}/jreleaser-config.toml
-        run: ./gradlew jreleaserConfig --no-daemon
-      - name: Publish staged packages to Sonatype Central with JReleaser
-        env:
-          JRELEASER_CONFIG_FILE: ${{ runner.temp }}/jreleaser-config.toml
-        run: ./gradlew jreleaserDeploy --no-daemon
-      - name: Publish the same consumable modules to GitHub Packages
+      - name: Publish consumable modules to GitHub Packages
         env:
           GITHUB_USER: ${{ secrets.RELEASE_GITHUB_USER || vars.GITHUB_USER || github.actor }}
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
