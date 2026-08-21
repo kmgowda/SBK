@@ -206,6 +206,13 @@ JReleaser.
 If publication stops after the exact tag or draft release is created, inspect
 the partial state before rerunning with `resume=true`. Resume is accepted only
 for the same tag and commit, and existing assets must be byte-identical.
+GitHub Packages versions are also immutable. A retry accepts HTTP 409 only
+after authenticated verification proves that every required artifact exists
+for all seven core modules and that each POM, executable JAR, and sources JAR
+is byte-identical to the locally staged publication. Javadoc and documentation
+JARs must exist and be non-empty; generated Javadoc can vary across JDK patch
+releases, and the documentation JAR may contain newer release-operations
+guidance added while recovering the same immutable code release.
 
 Publish the Maven Central coordinates independently from an authorized host:
 

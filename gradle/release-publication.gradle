@@ -23,6 +23,7 @@ import java.net.http.HttpResponse
 import java.security.MessageDigest
 import java.time.Duration
 import java.nio.file.Files
+import java.util.Base64
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.bundling.Compression
 
@@ -262,6 +263,79 @@ def verifyCorePublicationStaging = tasks.register('verifyCorePublicationStaging'
                         + missingFiles.join(', '))
             }
         }
+    }
+}
+
+def verifyExistingCoreGitHubPackages = tasks.register('verifyExistingCoreGitHubPackages') {
+    group = 'verification'
+    description = 'Verifies immutable core artifacts already published to GitHub Packages.'
+    dependsOn verifyCorePublicationStaging
+    doLast {
+        def githubUser = findProperty('github.username')?.toString()?.trim()
+                ?: System.getenv('GITHUB_USER')?.trim()
+                ?: System.getenv('GITHUB_USERNAME')?.trim()
+        def githubToken = findProperty('github.token')?.toString()?.trim()
+                ?: System.getenv('GITHUB_TOKEN')?.trim()
+        if (!githubUser || !githubToken) {
+            throw new GradleException(
+                    'GitHub Packages verification requires GITHUB_USER and GITHUB_TOKEN')
+        }
+
+        def authorization = Base64.encoder.encodeToString(
+                "${githubUser}:${githubToken}".getBytes('UTF-8'))
+        def timeout = Duration.ofSeconds(releaseDispatchTimeoutSeconds.toString().toLong())
+        def httpClient = HttpClient.newBuilder()
+                .connectTimeout(timeout)
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .build()
+        def repository = githubPackagesRepositoryUrl.toString().replaceAll('/+$', '')
+        releaseMavenProjects.each { publicationProject ->
+            def artifactDirectory = publicationProject.layout.buildDirectory.dir(
+                    "${releaseMavenStagingDirectory}/${sbkGroup.replace('.', '/')}/" +
+                            "${publicationProject.name}/${sbkVersion}")
+                    .get().asFile
+            def requiredFiles = [
+                    "${publicationProject.name}-${sbkVersion}.pom",
+                    "${publicationProject.name}-${sbkVersion}.jar",
+                    "${publicationProject.name}-${sbkVersion}-sources.jar",
+                    "${publicationProject.name}-${sbkVersion}-javadoc.jar",
+                    "${publicationProject.name}-${sbkVersion}-docs.jar"
+            ]
+            requiredFiles.each { artifactName ->
+                def artifact = new File(artifactDirectory, artifactName)
+                def artifactUri = URI.create(
+                        "${repository}/${sbkGroup.replace('.', '/')}/" +
+                                "${publicationProject.name}/${sbkVersion}/${artifactName}")
+                def request = HttpRequest.newBuilder(artifactUri)
+                        .timeout(timeout)
+                        .header('Authorization', "Basic ${authorization}")
+                        .GET()
+                        .build()
+                def response = httpClient.send(
+                        request, HttpResponse.BodyHandlers.ofByteArray())
+                if (response.statusCode() != 200 || response.body().length == 0) {
+                    throw new GradleException(
+                            "Missing immutable GitHub Packages artifact ${artifactName}: " +
+                                    "HTTP ${response.statusCode()}")
+                }
+                // Generated Javadoc varies across JDK patch releases, and the
+                // documentation JAR intentionally contains evolving release
+                // operations guidance. The POM, executable JAR, and sources
+                // JAR are the byte-identical public code contract.
+                if (!artifactName.endsWith('-docs.jar')
+                        && !artifactName.endsWith('-javadoc.jar')) {
+                    def digest = MessageDigest.getInstance('SHA-256')
+                    def remoteChecksum = digest.digest(response.body()).encodeHex().toString()
+                    def localChecksum = sha256File(artifact)
+                    if (remoteChecksum != localChecksum) {
+                        throw new GradleException(
+                                "Immutable GitHub Packages artifact differs: ${artifactName}")
+                    }
+                }
+            }
+        }
+        logger.lifecycle(
+                "Existing SBK ${sbkVersion} GitHub Packages payload verified")
     }
 }
 

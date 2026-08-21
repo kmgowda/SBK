@@ -285,7 +285,17 @@ jobs:
         env:
           GITHUB_USER: ${{ secrets.RELEASE_GITHUB_USER || vars.GITHUB_USER || github.actor }}
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
-        run: ./gradlew releasePublishCoreToGitHubPackages --no-daemon
+        run: |
+          set -o pipefail
+          publish_log=$(mktemp)
+          if ./gradlew releasePublishCoreToGitHubPackages --no-daemon 2>&1 | tee "$publish_log"; then
+            exit 0
+          fi
+          if ! grep -Fq 'Received status code 409' "$publish_log"; then
+            echo "GitHub Packages publication failed without an immutable-version conflict" >&2
+            exit 1
+          fi
+          ./gradlew verifyExistingCoreGitHubPackages --no-daemon
 
   publish-release:
     if: ${{ !inputs.dry_run }}
