@@ -33,7 +33,6 @@ public final class ElasticWait {
     private static final int BACKOFF_MULTIPLIER = 2;
 
     private final int windowIntervalMS;
-    private final int maximumCheckIntervalMS;
     private final int idleNS;
     private final long maximumCalibrationCount;
     private final LongConsumer idleStrategy;
@@ -52,35 +51,17 @@ public final class ElasticWait {
      * @throws IllegalArgumentException if any argument is zero or negative
      */
     public ElasticWait(int idleNS, int windowIntervalMS, int minIntervalMS) {
-        this(idleNS, windowIntervalMS, minIntervalMS, windowIntervalMS, LockSupport::parkNanos);
-    }
-
-    /**
-     * Creates an adaptive idle strategy with a bounded wall-clock check interval.
-     *
-     * @param idleNS requested park duration in nanoseconds
-     * @param windowIntervalMS reporting-window duration in milliseconds
-     * @param minIntervalMS maximum bootstrap calibration interval in milliseconds
-     * @param maximumCheckIntervalMS maximum interval between wall-clock checks
-     */
-    public ElasticWait(int idleNS, int windowIntervalMS, int minIntervalMS, int maximumCheckIntervalMS) {
-        this(idleNS, windowIntervalMS, minIntervalMS, maximumCheckIntervalMS, LockSupport::parkNanos);
+        this(idleNS, windowIntervalMS, minIntervalMS, LockSupport::parkNanos);
     }
 
     ElasticWait(int idleNS, int windowIntervalMS, int minIntervalMS, LongConsumer idleStrategy) {
-        this(idleNS, windowIntervalMS, minIntervalMS, windowIntervalMS, idleStrategy);
-    }
-
-    ElasticWait(int idleNS, int windowIntervalMS, int minIntervalMS, int maximumCheckIntervalMS,
-                LongConsumer idleStrategy) {
-        if (idleNS <= 0 || windowIntervalMS <= 0 || minIntervalMS <= 0 || maximumCheckIntervalMS <= 0) {
+        if (idleNS <= 0 || windowIntervalMS <= 0 || minIntervalMS <= 0) {
             throw new IllegalArgumentException("ElasticWait intervals must be greater than zero");
         }
         if (idleStrategy == null) {
             throw new IllegalArgumentException("ElasticWait idle strategy must not be null");
         }
         this.windowIntervalMS = windowIntervalMS;
-        this.maximumCheckIntervalMS = maximumCheckIntervalMS;
         this.idleNS = idleNS;
         this.idleStrategy = idleStrategy;
         waitsPerMillisecond = (Time.NS_PER_MS * 1.0) / this.idleNS;
@@ -97,8 +78,7 @@ public final class ElasticWait {
     public void reset() {
         idleCount = 0;
         previousElapsedIntervalMS = 0;
-        elasticCount = calibrated ? waitCount(waitsPerMillisecond,
-                Math.min(windowIntervalMS, maximumCheckIntervalMS)) : 1;
+        elasticCount = calibrated ? waitCount(waitsPerMillisecond, windowIntervalMS) : 1;
     }
 
     /**
@@ -132,7 +112,7 @@ public final class ElasticWait {
             final long remainingIntervalMS =
                     Math.max(1, windowIntervalMS - elapsed);
             elasticCount = waitCount(
-                    waitsPerMillisecond, Math.min(remainingIntervalMS, maximumCheckIntervalMS));
+                    waitsPerMillisecond, remainingIntervalMS);
         } else {
             elasticCount = 1;
         }
@@ -158,8 +138,7 @@ public final class ElasticWait {
         idleCount = 0;
         if (calibrated) {
             final long remainingIntervalMS = Math.max(1, windowIntervalMS - elapsed);
-            elasticCount = waitCount(waitsPerMillisecond,
-                    Math.min(remainingIntervalMS, maximumCheckIntervalMS));
+            elasticCount = waitCount(waitsPerMillisecond, remainingIntervalMS);
         } else {
             elasticCount = Math.min(
                     saturatingMultiplyByTwo(elasticCount),

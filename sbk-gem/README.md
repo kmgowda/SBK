@@ -94,6 +94,8 @@ is used. Each positive performance result restarts the full interval. A remote
 PerL idle failure therefore terminates that SBK process and becomes a
 host-tagged GEM failure; an embedded SBM idle failure also terminates GEM
 immediately rather than leaving fixed-record orchestration waiting indefinitely.
+The value must be strictly greater than the reporting interval used by the
+remote SBK loggers and embedded SBM logger.
 
 ### Node SSH endpoints
 

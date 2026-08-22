@@ -179,21 +179,21 @@ class ReleaseFunctionalTest {
     }
 
     private void sbkIdleTimeout() throws Exception {
-        reject(config.sbk, "No performance benchmarking event was received for 1 seconds",
+        reject(config.sbk, "No performance benchmarking event was received for 6 seconds",
                 "-class", "null", "-readers", "1", "-size", config.recordSize,
-                "-records", config.records, "-idletimeoutseconds", "1");
+                "-records", config.records, "-idletimeoutseconds", "6");
     }
 
     private void sbmIdleTimeout() throws Exception {
-        reject(config.sbm, "No performance benchmarking event was received for 1 seconds",
+        reject(config.sbm, "No performance benchmarking event was received for 6 seconds",
                 "-class", "File", "-port", Integer.toString(freePort()),
-                "-records", config.records, "-idletimeoutseconds", "1");
+                "-records", config.records, "-idletimeoutseconds", "6");
     }
 
     private void sbkTimedIdleDisabled() throws Exception {
         expect(config.sbk, "SBK Benchmark Shutdown",
                 "-class", "null", "-readers", "1", "-size", config.recordSize,
-                "-seconds", "2", "-idletimeoutseconds", "1");
+                "-seconds", "7", "-idletimeoutseconds", "6");
     }
 
     private void prometheusEndpoint() throws Exception {

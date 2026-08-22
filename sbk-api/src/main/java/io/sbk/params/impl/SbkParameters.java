@@ -149,7 +149,8 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         addOption("millisecsleep", true, "Idle sleep in milliseconds; default: "
                 + defaults.defaultIdleSleepMillis + " ms");
         addOption(PerlConfig.IDLE_TIMEOUT_OPTION, true,
-                "Maximum seconds without a performance benchmarking event; default: "
+                "Maximum seconds without a performance benchmarking event in fixed-record mode; "
+                        + "must exceed the logger reporting interval; default: "
                         + this.idleTimeoutSeconds);
         addOption("thread", true,
                 "Thread Type [p: platform, f: fork-join, v: virtual], default: " + defaults.defaultThreadType);

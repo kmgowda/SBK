@@ -89,7 +89,8 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
         addOption("max", true, "Maximum number of connections; default: " + this.maxConnections);
         addOption("millisecsleep", true, "Idle sleep in milliseconds; default: " + this.idleSleepMilliSeconds + " ms");
         addOption(PerlConfig.IDLE_TIMEOUT_OPTION, true,
-                "Maximum seconds without an SBK performance batch in fixed-record mode; default: "
+                "Maximum seconds without an SBK performance batch in fixed-record mode; "
+                        + "must exceed the logger reporting interval; default: "
                         + this.idleTimeoutSeconds);
         addOption("records", true, "Fixed-record benchmark count; enables the idle timeout");
     }

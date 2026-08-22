@@ -71,7 +71,9 @@ exits with a failed benchmark if no SBK performance batch arrives for
 `-idletimeoutseconds N`; the default is 600 seconds. Without `-records`, the
 deadline is disabled. The check runs only while the ingestion queues are empty.
 Every SBP batch containing completed records renews the complete deadline; an
-empty periodic batch is still printable but does not represent progress.
+empty periodic batch is still printable but does not represent progress. The
+idle timeout must be strictly greater than the selected logger's reporting
+interval.
 
 Start the aggregate Prometheus exporter explicitly:
 

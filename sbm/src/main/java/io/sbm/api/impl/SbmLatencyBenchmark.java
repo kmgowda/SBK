@@ -67,7 +67,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
      * @param window              periodic/total latency recorder
      * @param reportingIntervalMS interval in ms between periodic window prints
      * @param idleTimeoutSeconds maximum interval without an SBK performance batch
-     * @throws IllegalArgumentException when the idle timeout is not positive
+     * @throws IllegalArgumentException when the idle timeout is not positive or does not exceed the reporting interval
      */
     public SbmLatencyBenchmark(int maxQs, int idleMS, Time time, SbmPeriodicRecorder window, int reportingIntervalMS,
                                int idleTimeoutSeconds) {
@@ -84,7 +84,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
      * @param reportingIntervalMS interval in ms between periodic window prints
      * @param idleTimeoutSeconds maximum interval without an SBK performance batch
      * @param idleTimeoutEnabled whether fixed-record idle enforcement is enabled
-     * @throws IllegalArgumentException when the idle timeout is not positive
+     * @throws IllegalArgumentException when the idle timeout is not positive or does not exceed the reporting interval
      */
     public SbmLatencyBenchmark(int maxQs, int idleMS, Time time, SbmPeriodicRecorder window, int reportingIntervalMS,
                                int idleTimeoutSeconds, boolean idleTimeoutEnabled) {
@@ -92,13 +92,19 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
         if (idleTimeoutSeconds <= 0) {
             throw new IllegalArgumentException("SBM idle timeout seconds must be greater than zero");
         }
+        final long configuredIdleTimeoutMS = Math.multiplyExact(
+                (long) idleTimeoutSeconds, Time.MS_PER_SEC);
+        if (configuredIdleTimeoutMS <= reportingIntervalMS) {
+            throw new IllegalArgumentException("SBM idle timeout seconds must be greater than the reporting "
+                    + "interval of " + reportingIntervalMS + " milliseconds");
+        }
         this.maxQs = maxQs;
         this.idleMS = idleMS;
         this.window = window;
         this.time = time;
         this.reportingIntervalMS = reportingIntervalMS;
         this.idleTimeoutSeconds = idleTimeoutSeconds;
-        this.idleTimeoutMS = Math.multiplyExact((long) idleTimeoutSeconds, Time.MS_PER_SEC);
+        this.idleTimeoutMS = configuredIdleTimeoutMS;
         this.idleTimeoutEnabled = idleTimeoutEnabled;
         this.counter = new AtomicLong(BASE_CLIENT_ID_VALUE);
         this.retFuture = new CompletableFuture<>();

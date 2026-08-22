@@ -140,7 +140,7 @@ final class SbmLatencyBenchmarkTest {
     void failsWhenNoPerformanceBatchArrivesBeforeIdleTimeout() throws Exception {
         final CapturingWindow window = new CapturingWindow();
         final SbmLatencyBenchmark benchmark = new SbmLatencyBenchmark(
-                1, 1, new MilliSeconds(), window, 5_000, 1, true);
+                1, 1, new MilliSeconds(), window, 100, 1, true);
 
         benchmark.enQueue(MessageLatenciesRecord.newBuilder()
                 .setSequenceNumber(1)
@@ -164,7 +164,7 @@ final class SbmLatencyBenchmarkTest {
     void doesNotApplyIdleTimeoutOutsideFixedRecordMode() throws Exception {
         final CapturingWindow window = new CapturingWindow();
         final SbmLatencyBenchmark benchmark = new SbmLatencyBenchmark(
-                1, 1, new MilliSeconds(), window, 5_000, 1, false);
+                1, 1, new MilliSeconds(), window, 100, 1, false);
         final CompletableFuture<Void> completion = benchmark.start();
 
         try {
@@ -175,6 +175,16 @@ final class SbmLatencyBenchmarkTest {
             assertTimeoutPreemptively(Duration.ofSeconds(2), benchmark::stop);
         }
         completion.get(2, TimeUnit.SECONDS);
+    }
+
+    /** Verifies that the idle timeout must strictly exceed the reporting interval. */
+    @Test
+    void rejectsIdleTimeoutEqualToReportingInterval() {
+        final IllegalArgumentException failure = assertThrows(IllegalArgumentException.class,
+                () -> new SbmLatencyBenchmark(1, 1, new MilliSeconds(),
+                        new CapturingWindow(), 1_000, 1, true));
+
+        assertTrue(failure.getMessage().contains("must be greater than the reporting interval"));
     }
 
     private void awaitThreadExit(Thread thread) throws InterruptedException {

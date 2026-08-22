@@ -246,7 +246,7 @@ Driver-specific options are added after SBK discovers `-class`. Use the selected
 | `-seconds N` | Time-based run duration |
 | `-records N` | Total records in count mode, or the per-second target in timed mode |
 | `-throughput MBPS` | Throughput target; `-1` requests maximum throughput |
-| `-idletimeoutseconds N` | In fixed-record mode, fail after `N` continuous seconds without a performance event; default: `600` |
+| `-idletimeoutseconds N` | In fixed-record mode, fail after `N` continuous seconds without a performance event; must exceed the logger reporting interval; default: `600` |
 | `-mpscqueue true\|false` | Select intrusive `TimeStampMpscQueue` or the JDK `ConcurrentLinkedQueue` fallback; default comes from `sbk.properties` |
 | `-sync N` | Records per flush/sync or transaction |
 | `-ro true` | With readers and writers configured, read without writing new records |
@@ -258,7 +258,9 @@ Always treat `-help` as authoritative because drivers and loggers add their own 
 The idle timeout applies only to fixed-record runs selected with `-records` and
 without `-seconds`. Each positive performance event renews the full interval;
 the benchmark fails only after one uninterrupted idle stretch. Timed runs do
-not use this deadline. PerL raises the terminal failure, SBK performs bounded
+not use this deadline. The configured timeout must be strictly greater than
+the active logger's reporting interval so the recorder can observe an empty
+reporting window before declaring the benchmark idle. PerL raises the terminal failure, SBK performs bounded
 cleanup, and SBM uses the same rule for missing gRPC performance batches.
 SBK-GEM forwards the value and fixed-record mode to its remote SBK processes
 and embedded SBM.

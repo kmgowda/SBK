@@ -42,19 +42,25 @@ abstract public class PerformanceRecorder {
      * @param time                  time helper for conversions
      * @param reportingIntervalMS   reporting interval in milliseconds
      * @param idleTimeoutSeconds    maximum interval without a performance event
-     * @throws IllegalArgumentException when the idle timeout is not positive
+     * @throws IllegalArgumentException when the idle timeout is not positive or does not exceed the reporting interval
      */
     public PerformanceRecorder(PeriodicRecorder periodicRecorder, @Nonnull Channel[] channels, Time time,
                                int reportingIntervalMS, int idleTimeoutSeconds) {
         if (idleTimeoutSeconds <= 0) {
             throw new IllegalArgumentException("PerL idle timeout seconds must be greater than zero");
         }
+        final long configuredIdleTimeoutMS = Math.multiplyExact(
+                (long) idleTimeoutSeconds, Time.MS_PER_SEC);
+        if (configuredIdleTimeoutMS <= reportingIntervalMS) {
+            throw new IllegalArgumentException("PerL idle timeout seconds must be greater than the reporting "
+                    + "interval of " + reportingIntervalMS + " milliseconds");
+        }
         this.periodicRecorder = periodicRecorder;
         this.channels = channels.clone();
         this.time = time;
         this.windowIntervalMS = reportingIntervalMS;
         this.idleTimeoutSeconds = idleTimeoutSeconds;
-        this.idleTimeoutMS = Math.multiplyExact((long) idleTimeoutSeconds, Time.MS_PER_SEC);
+        this.idleTimeoutMS = configuredIdleTimeoutMS;
     }
 
     /**
@@ -71,15 +77,6 @@ abstract public class PerformanceRecorder {
         if (time.elapsedMilliSeconds(currentTime, lastEventTime) >= idleTimeoutMS) {
             throw new BenchmarkIdleTimeoutException(idleTimeoutSeconds);
         }
-    }
-
-    /**
-     * Returns a bounded clock-check interval for idle-only polling.
-     *
-     * @return idle timeout in milliseconds, capped at the integer range
-     */
-    final protected int idleTimeoutCheckIntervalMS() {
-        return (int) Math.min(idleTimeoutMS, Integer.MAX_VALUE);
     }
 
     /**

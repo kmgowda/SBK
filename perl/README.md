@@ -129,7 +129,8 @@ For SBK:
 - `-mpscqueue true|false` overrides only `MpscQueueEnable`;
 - `-idletimeoutseconds N` overrides `idleTimeoutSeconds`; the property default
   is 600 seconds for both standalone PerL and SBK and is used only by
-  fixed-record runs;
+  fixed-record runs. It must be strictly greater than the logger reporting
+  interval;
 - `qPerWorker` and `maxQs` determine queue topology and remain property-backed;
 - invalid negative `maxQs` or `qPerWorker` below the supported minimum is
   rejected while common parameters are constructed;

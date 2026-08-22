@@ -94,6 +94,14 @@ public class PerlTest {
         }
     }
 
+    /** Logger with a short reporting interval for idle-timeout tests. */
+    public static final class FastReportingTestLogger extends TestLogger {
+        @Override
+        public int getPrintingIntervalSeconds() {
+            return 1;
+        }
+    }
+
     @Test
     public void defaultLoggerLatencyCallbackIsFinal() throws NoSuchMethodException {
         assertTrue(Modifier.isFinal(DefaultLogger.class.getMethod("recordLatency",
@@ -261,15 +269,15 @@ public class PerlTest {
     @Test
     public void testZeroRecordTimestampDoesNotRenewIdleTimeout() throws Exception {
         final PerlConfig config = PerlConfig.build();
-        config.idleTimeoutSeconds = 1;
-        final Perl perl = PerlBuilder.build(new TestLogger(), null, config, null);
+        config.idleTimeoutSeconds = 2;
+        final Perl perl = PerlBuilder.build(new FastReportingTestLogger(), null, config, null);
         final PerlChannel channel = perl.getPerlChannel();
         final CompletableFuture<Void> completion = perl.run(0, Long.MAX_VALUE);
         final long now = System.currentTimeMillis();
         channel.send(now, now, 0, 0);
 
         final ExecutionException failure = assertThrows(ExecutionException.class,
-                () -> completion.get(4, TimeUnit.SECONDS));
+                () -> completion.get(5, TimeUnit.SECONDS));
 
         assertInstanceOf(BenchmarkIdleTimeoutException.class, failure.getCause());
     }
@@ -278,23 +286,35 @@ public class PerlTest {
     @Test
     public void testTimedRunDoesNotApplyIdleTimeout() throws Exception {
         final PerlConfig config = PerlConfig.build();
-        config.idleTimeoutSeconds = 1;
-        final Perl perl = PerlBuilder.build(new TestLogger(), null, config, null);
+        config.idleTimeoutSeconds = 2;
+        final Perl perl = PerlBuilder.build(new FastReportingTestLogger(), null, config, null);
 
-        perl.run(2, Long.MAX_VALUE).get(4, TimeUnit.SECONDS);
+        perl.run(3, Long.MAX_VALUE).get(5, TimeUnit.SECONDS);
+    }
+
+    /** Verifies that the idle timeout must exceed the logger reporting interval. */
+    @Test
+    public void testIdleTimeoutMustExceedReportingInterval() throws IOException {
+        final PerlConfig config = PerlConfig.build();
+        config.idleTimeoutSeconds = 1;
+
+        final IllegalArgumentException failure = assertThrows(IllegalArgumentException.class,
+                () -> PerlBuilder.build(new FastReportingTestLogger(), null, config, null));
+
+        assertTrue(failure.getMessage().contains("must be greater than the reporting interval"));
     }
 
     private void assertIdleTimeout(int sleepMS) throws Exception {
         final PerlConfig config = PerlConfig.build();
         config.sleepMS = sleepMS;
-        config.idleTimeoutSeconds = 1;
-        final Perl perl = PerlBuilder.build(new TestLogger(), null, config, null);
+        config.idleTimeoutSeconds = 2;
+        final Perl perl = PerlBuilder.build(new FastReportingTestLogger(), null, config, null);
 
         final ExecutionException failure = assertThrows(ExecutionException.class,
-                () -> perl.run(0, Long.MAX_VALUE).get(4, TimeUnit.SECONDS));
+                () -> perl.run(0, Long.MAX_VALUE).get(5, TimeUnit.SECONDS));
 
         assertInstanceOf(BenchmarkIdleTimeoutException.class, failure.getCause());
-        assertEquals("No performance benchmarking event was received for 1 seconds",
+        assertEquals("No performance benchmarking event was received for 2 seconds",
                 failure.getCause().getMessage());
     }
 

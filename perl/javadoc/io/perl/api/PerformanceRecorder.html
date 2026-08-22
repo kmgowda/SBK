@@ -72,7 +72,6 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#checkIdleTimeout(long,long)" tabindex="0">checkIdleTimeout(long, long)</a></li>
-<li><a href="#idleTimeoutCheckIntervalMS()" tabindex="0">idleTimeoutCheckIntervalMS()</a></li>
 <li><a href="#run(long,long)" tabindex="0">run(long, long)</a></li>
 </ol>
 </li>
@@ -171,15 +170,10 @@ loop in <a href="#run(long,long)"><code>run(long, long)</code></a> and manage ch
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Fails an idle consumer after the configured interval.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected final int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#idleTimeoutCheckIntervalMS()" class="member-name-link">idleTimeoutCheckIntervalMS</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns a bounded clock-check interval for idle-only polling.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#run(long,long)" class="member-name-link">run</a><wbr>(long&nbsp;secondsToRun,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#run(long,long)" class="member-name-link">run</a><wbr>(long&nbsp;secondsToRun,
  long&nbsp;totalRecords)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Main loop that consumes channel events and updates periodic recorders.</div>
 </div>
 </div>
@@ -262,7 +256,7 @@ loop in <a href="#run(long,long)"><code>run(long, long)</code></a> and manage ch
 <dd><code>reportingIntervalMS</code> - reporting interval in milliseconds</dd>
 <dd><code>idleTimeoutSeconds</code> - maximum interval without a performance event</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - when the idle timeout is not positive</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - when the idle timeout is not positive or does not exceed the reporting interval</dd>
 </dl>
 </div>
 </section>
@@ -291,19 +285,6 @@ It is never called for a successful queue dequeue or latency-window update.</p><
 <dd><code>lastEventTime</code> - time of the most recently consumed performance event</dd>
 <dt>Throws:</dt>
 <dd><code><a href="../exception/BenchmarkIdleTimeoutException.html" title="class in io.perl.exception">BenchmarkIdleTimeoutException</a></code> - when the configured idle interval has elapsed</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="idleTimeoutCheckIntervalMS()">
-<h3>idleTimeoutCheckIntervalMS</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">protected final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">idleTimeoutCheckIntervalMS</span>()</div>
-<div class="block">Returns a bounded clock-check interval for idle-only polling.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>idle timeout in milliseconds, capped at the integer range</dd>
 </dl>
 </div>
 </section>
