@@ -54,6 +54,7 @@ public class PerformanceRecorderIdleSleep extends PerformanceRecorder {
         long lastEventTime = startTime;
         long recordsCnt = 0;
         boolean notFound;
+        long positiveRecordsInSweep;
         TimeStamp t;
         PerlPrinter.log.info("PerformanceRecorderIdleSleep Started : {} milliseconds idle sleep",
                 this.sleepMS);
@@ -61,6 +62,7 @@ public class PerformanceRecorderIdleSleep extends PerformanceRecorder {
         periodicRecorder.startWindow(startTime);
         while (doWork) {
             notFound = true;
+            positiveRecordsInSweep = 0;
             for (int i = 0; doWork && (i < channels.length); i++) {
                 t = channels[i].receive(windowIntervalMS);
                 if (t != null) {
@@ -69,9 +71,7 @@ public class PerformanceRecorderIdleSleep extends PerformanceRecorder {
                     if (t.isEnd()) {
                         doWork = false;
                     } else {
-                        if (t.records > 0) {
-                            lastEventTime = Math.max(lastEventTime, t.endTime);
-                        }
+                        positiveRecordsInSweep = Math.max(positiveRecordsInSweep, t.records);
                         recordsCnt += t.records;
                         periodicRecorder.record(t.startTime, t.endTime, t.records, t.bytes);
                         if (msToRun > 0) {
@@ -87,6 +87,9 @@ public class PerformanceRecorderIdleSleep extends PerformanceRecorder {
                         periodicRecorder.startWindow(ctime);
                     }
                 }
+            }
+            if (positiveRecordsInSweep > 0) {
+                lastEventTime = time.getCurrentTime();
             }
             if (doWork) {
                 if (notFound) {

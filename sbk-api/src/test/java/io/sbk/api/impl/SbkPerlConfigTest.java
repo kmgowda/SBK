@@ -21,6 +21,7 @@ import java.io.InputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -127,5 +128,17 @@ public class SbkPerlConfigTest {
 
         assertEquals(17, parameters.getIdleTimeoutSeconds());
         assertEquals(17, SbkBenchmark.buildPerlConfig(parameters).idleTimeoutSeconds);
+    }
+
+    /** Verifies that benchmark overrides cannot mutate the validated singleton defaults. */
+    @Test
+    public void eachBenchmarkLoadsAnIndependentPerlConfiguration() throws Exception {
+        final PerlConfig first = SbkParameters.loadPerlConfig();
+        final PerlConfig second = SbkParameters.loadPerlConfig();
+
+        assertNotSame(first, second);
+        first.idleTimeoutSeconds = 17;
+        assertEquals(600, second.idleTimeoutSeconds);
+        assertEquals(600, SbkConfig.get().getPerlConfig().idleTimeoutSeconds);
     }
 }

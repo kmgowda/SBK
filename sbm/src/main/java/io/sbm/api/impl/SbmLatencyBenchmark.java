@@ -129,6 +129,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
         boolean doWork = true;
         boolean notFound;
         boolean receivedBatchInWindow = false;
+        long positiveRecordsInSweep;
         Printer.log.info("SbmLatencyBenchmark Started : {} milliseconds idle sleep", this.idleMS);
         long currentTime = time.getCurrentTime();
         long lastEventTime = currentTime;
@@ -136,6 +137,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
         window.startWindow(currentTime);
         while (doWork) {
             notFound = true;
+            positiveRecordsInSweep = 0;
             for (int qIndex = 0; qIndex < maxQs; qIndex++) {
                 record = poll(qIndex);
                 if (record != null) {
@@ -147,9 +149,8 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
                             throw new IllegalStateException("SBM failed to aggregate latency batch for client "
                                     + record.getClientID() + " at sequence " + record.getSequenceNumber(), exception);
                         }
-                        if (record.getTotalRecords() > 0) {
-                            lastEventTime = currentTime;
-                        }
+                        positiveRecordsInSweep = Math.max(
+                                positiveRecordsInSweep, record.getTotalRecords());
                         receivedBatchInWindow = true;
                     } else {
                         doWork = false;
@@ -166,6 +167,9 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
             }
 
             currentTime = time.getCurrentTime();
+            if (positiveRecordsInSweep > 0) {
+                lastEventTime = currentTime;
+            }
             if (window.elapsedMilliSecondsWindow(currentTime) > reportingIntervalMS) {
                 /*
                  * SBM starts before remote SBK processes and can remain alive after

@@ -807,6 +807,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
     }
 
     static Throwable combineTerminalFailures(Throwable primary, Throwable additional) {
+        primary = unwrapCompletionFailure(primary);
+        additional = unwrapCompletionFailure(additional);
         if (primary == null) {
             return additional;
         }
@@ -933,7 +935,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     private void shutdown(Throwable ex, BenchmarkTermination requestedTermination) {
         if (state != State.END) {
             state = State.END;
-            Throwable terminalFailure = ex;
+            Throwable terminalFailure = unwrapCompletionFailure(ex);
             int maximumRegisteredClients = -1;
             if (params.isDeleteAfter()) {
                 try {

@@ -83,6 +83,7 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#get()" tabindex="0">get()</a></li>
 <li><a href="#getPerlConfig()" tabindex="0">getPerlConfig()</a></li>
+<li><a href="#loadPerlConfig()" tabindex="0">loadPerlConfig()</a></li>
 </ol>
 </li>
 </ol>
@@ -217,6 +218,11 @@ loadScripts(document, 'script');</script>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPerlConfig()" class="member-name-link">getPerlConfig</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the validated PerL settings loaded from the SBK PerL properties resource.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static io.perl.config.PerlConfig</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#loadPerlConfig()" class="member-name-link">loadPerlConfig</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Loads a fresh validated copy of the bundled PerL settings.</div>
 </div>
 </div>
 </div>
@@ -399,6 +405,26 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>shared PerL configuration</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="loadPerlConfig()">
+<h3>loadPerlConfig</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">io.perl.config.PerlConfig</span>&nbsp;<span class="element-name">loadPerlConfig</span>()
+                                                throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Loads a fresh validated copy of the bundled PerL settings.
+
+<p>Callers may safely apply benchmark-specific command-line overrides to
+the returned object without mutating the shared <a href="#get()"><code>get()</code></a> defaults.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>independently mutable validated PerL configuration</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if the bundled PerL properties are missing or invalid</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if a bundled PerL value violates SBK constraints</dd>
 </dl>
 </div>
 </section>

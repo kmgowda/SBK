@@ -252,7 +252,7 @@ final public class SbmBenchmark implements Benchmark {
     private void shutdown(Throwable failure, BenchmarkTermination requestedTermination) {
         if (state != State.END) {
             state = State.END;
-            Throwable lifecycleFailure = failure;
+            Throwable lifecycleFailure = unwrapCompletionFailure(failure);
             if (serverStarted) {
                 server.shutdown();
                 serverStarted = false;
@@ -302,11 +302,13 @@ final public class SbmBenchmark implements Benchmark {
             future.join();
             return null;
         } catch (CompletionException | CancellationException exception) {
-            return exception.getCause() == null ? exception : exception.getCause();
+            return unwrapCompletionFailure(exception);
         }
     }
 
     private static Throwable retainFailure(Throwable primary, Throwable additional) {
+        primary = unwrapCompletionFailure(primary);
+        additional = unwrapCompletionFailure(additional);
         if (primary == null) {
             return additional;
         }
@@ -314,6 +316,15 @@ final public class SbmBenchmark implements Benchmark {
             primary.addSuppressed(additional);
         }
         return primary;
+    }
+
+    private static Throwable unwrapCompletionFailure(Throwable failure) {
+        Throwable unwrapped = failure;
+        while ((unwrapped instanceof CompletionException || unwrapped instanceof ExecutionException)
+                && unwrapped.getCause() != null) {
+            unwrapped = unwrapped.getCause();
+        }
+        return unwrapped;
     }
 
     private void forceIdleCompletion(BenchmarkIdleTimeoutException idleTimeout) {

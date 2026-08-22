@@ -64,6 +64,7 @@ public final class PerformanceRecorderElasticWait extends PerformanceRecorder {
         long recordsCnt = 0;
         boolean notFound;
         boolean dataSinceIdle = false;
+        long positiveRecordsInSweep;
         TimeStamp t;
         PerlPrinter.log.info("PerformanceRecorderElasticWait Started : {} nanoseconds adaptive idle park",
                 this.idleNS);
@@ -71,6 +72,7 @@ public final class PerformanceRecorderElasticWait extends PerformanceRecorder {
         periodicRecorder.startWindow(startTime);
         while (doWork) {
             notFound = true;
+            positiveRecordsInSweep = 0;
             for (int i = 0; doWork && (i < channels.length); i++) {
                 t = channels[i].receive(windowIntervalMS);
                 if (t != null) {
@@ -80,9 +82,7 @@ public final class PerformanceRecorderElasticWait extends PerformanceRecorder {
                     if (t.isEnd()) {
                         doWork = false;
                     } else {
-                        if (t.records > 0) {
-                            lastEventTime = Math.max(lastEventTime, t.endTime);
-                        }
+                        positiveRecordsInSweep = Math.max(positiveRecordsInSweep, t.records);
                         recordsCnt += t.records;
                         periodicRecorder.record(t.startTime, t.endTime, t.records, t.bytes);
                         if (msToRun > 0) {
@@ -100,6 +100,9 @@ public final class PerformanceRecorderElasticWait extends PerformanceRecorder {
                         dataSinceIdle = false;
                     }
                 }
+            }
+            if (positiveRecordsInSweep > 0) {
+                lastEventTime = time.getCurrentTime();
             }
             if (doWork) {
                 if (notFound) {

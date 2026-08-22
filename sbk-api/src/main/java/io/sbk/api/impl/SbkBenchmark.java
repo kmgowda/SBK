@@ -395,14 +395,14 @@ final public class SbkBenchmark implements Benchmark {
                     TimeUnit.SECONDS);
         }
 
-        if (writePerlCompletion != null && !writePerlCompletion.isDone()) {
+        if (writePerlCompletion != null) {
             writePerlCompletion.exceptionally(ex -> {
                 requestShutdown(ex);
                 return null;
             });
         }
 
-        if (readPerlCompletion != null && !readPerlCompletion.isDone()) {
+        if (readPerlCompletion != null) {
             readPerlCompletion.exceptionally(ex -> {
                 requestShutdown(ex);
                 return null;
@@ -549,10 +549,10 @@ final public class SbkBenchmark implements Benchmark {
             return;
         }
         state = State.END;
-        Throwable terminalFailure = ex;
-        if (ex != null) {
+        Throwable terminalFailure = unwrapCompletionFailure(ex);
+        if (terminalFailure != null) {
             try {
-                rwLogger.reportFailure(ex);
+                rwLogger.reportFailure(terminalFailure);
             } catch (RuntimeException reportFailure) {
                 terminalFailure = retainFailure(terminalFailure, reportFailure);
             }
@@ -636,11 +636,13 @@ final public class SbkBenchmark implements Benchmark {
             future.join();
             return null;
         } catch (CompletionException | CancellationException exception) {
-            return exception.getCause() == null ? exception : exception.getCause();
+            return unwrapCompletionFailure(exception);
         }
     }
 
     private static Throwable retainFailure(Throwable primary, Throwable additional) {
+        primary = unwrapCompletionFailure(primary);
+        additional = unwrapCompletionFailure(additional);
         if (primary == null) {
             return additional;
         }
@@ -648,6 +650,15 @@ final public class SbkBenchmark implements Benchmark {
             primary.addSuppressed(additional);
         }
         return primary;
+    }
+
+    private static Throwable unwrapCompletionFailure(Throwable failure) {
+        Throwable unwrapped = failure;
+        while ((unwrapped instanceof CompletionException || unwrapped instanceof ExecutionException)
+                && unwrapped.getCause() != null) {
+            unwrapped = unwrapped.getCause();
+        }
+        return unwrapped;
     }
 
     /**

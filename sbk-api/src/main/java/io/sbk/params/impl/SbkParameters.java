@@ -289,11 +289,6 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
      * @throws IOException if {@code sbk.properties} is missing or invalid
      */
     public static PerlConfig loadPerlConfig() throws IOException {
-        try (var input = SbkParameters.class.getClassLoader().getResourceAsStream("sbk.properties")) {
-            if (input == null) {
-                throw new IOException("Missing sbk.properties");
-            }
-            return PerlConfig.build(input);
-        }
+        return SbkConfig.loadPerlConfig();
     }
 }
