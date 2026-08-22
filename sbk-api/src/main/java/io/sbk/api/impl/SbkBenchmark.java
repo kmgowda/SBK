@@ -10,8 +10,10 @@
 package io.sbk.api.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.perl.api.BenchmarkTermination;
 import io.perl.api.Perl;
 import io.perl.config.PerlConfig;
+import io.perl.exception.BenchmarkIdleTimeoutException;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.config.SbkRuntimeConfig;
@@ -36,6 +38,7 @@ import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
@@ -92,6 +95,12 @@ final public class SbkBenchmark implements Benchmark {
 
     @GuardedBy("this")
     private boolean shutdownRequested;
+
+    @GuardedBy("this")
+    private CompletableFuture<Void> writePerlCompletion;
+
+    @GuardedBy("this")
+    private CompletableFuture<Void> readPerlCompletion;
 
     /**
      * Create SBK Benchmark.
@@ -152,6 +161,8 @@ final public class SbkBenchmark implements Benchmark {
         readers = new ArrayList<>();
         state = State.BEGIN;
         shutdownRequested = false;
+        writePerlCompletion = null;
+        readPerlCompletion = null;
     }
 
     /**
@@ -178,6 +189,7 @@ final public class SbkBenchmark implements Benchmark {
     static void applyMpscQueueOption(ParameterOptions params,
                                      PerlConfig config) {
         config.mpscQueueEnable = params.isMpscQueueEnabled();
+        config.idleTimeoutSeconds = params.getIdleTimeoutSeconds();
     }
 
     /**
@@ -213,8 +225,6 @@ final public class SbkBenchmark implements Benchmark {
         final List<SbkReader> sbkReaders;
         final List<CompletableFuture<Void>> writeFutures;
         final List<CompletableFuture<Void>> readFutures;
-        final CompletableFuture<Void> wStatFuture;
-        final CompletableFuture<Void> rStatFuture;
         final CompletableFuture<Void> chainFuture;
         final CompletableFuture<Void> writersCB;
         final CompletableFuture<Void> readersCB;
@@ -267,14 +277,14 @@ final public class SbkBenchmark implements Benchmark {
         }
 
         if (writePerl != null && params.getAction() == Action.Writing && sbkWriters != null) {
-            wStatFuture = writePerl.run(params.getTotalSecondsToRun(), params.getTotalRecords());
+            writePerlCompletion = writePerl.run(params.getTotalSecondsToRun(), params.getTotalRecords());
         } else {
-            wStatFuture = null;
+            writePerlCompletion = null;
         }
         if (readPerl != null && sbkReaders != null) {
-            rStatFuture = readPerl.run(params.getTotalSecondsToRun(), params.getTotalRecords());
+            readPerlCompletion = readPerl.run(params.getTotalSecondsToRun(), params.getTotalRecords());
         } else {
-            rStatFuture = null;
+            readPerlCompletion = null;
         }
         if (sbkWriters != null) {
             writeFutures = new ArrayList<>();
@@ -385,22 +395,23 @@ final public class SbkBenchmark implements Benchmark {
                     TimeUnit.SECONDS);
         }
 
-        if (wStatFuture != null && !wStatFuture.isDone()) {
-            wStatFuture.exceptionally(ex -> {
+        if (writePerlCompletion != null) {
+            writePerlCompletion.exceptionally(ex -> {
                 requestShutdown(ex);
                 return null;
             });
         }
 
-        if (rStatFuture != null && !rStatFuture.isDone()) {
-            rStatFuture.exceptionally(ex -> {
+        if (readPerlCompletion != null) {
+            readPerlCompletion.exceptionally(ex -> {
                 requestShutdown(ex);
                 return null;
             });
         }
         rwLogger.setExceptionHandler(this::requestShutdown);
         assert chainFuture != null;
-        chainFuture.whenComplete((ignored, ex) -> requestShutdown(ex));
+        chainFuture.whenComplete((ignored, ex) -> requestShutdown(ex,
+                BenchmarkTermination.configured(params.getTotalSecondsToRun(), params.getTotalRecords())));
 
         return retFuture.toCompletableFuture();
     }
@@ -463,13 +474,23 @@ final public class SbkBenchmark implements Benchmark {
      *
      * @param ex failure that initiated shutdown, or {@code null} for normal completion
      */
-    @Synchronized
     private void requestShutdown(Throwable ex) {
+        requestShutdown(ex, BenchmarkTermination.INTERNAL_FAILURE);
+    }
+
+    @Synchronized
+    private void requestShutdown(Throwable ex, BenchmarkTermination requestedTermination) {
         if (state == State.END || shutdownRequested || lifecycleExecutor.isShutdown()) {
             return;
         }
         shutdownRequested = true;
-        lifecycleExecutor.execute(() -> shutdown(ex));
+        final BenchmarkIdleTimeoutException idleTimeout = BenchmarkIdleTimeoutException.find(ex);
+        if (idleTimeout != null) {
+            Printer.log.warn("SBK benchmark idle timeout: {}", idleTimeout.getMessage());
+            timeoutExecutor.schedule(() -> forceIdleCompletion(idleTimeout),
+                    RUNTIME_CONFIG.forcedShutdownGraceSeconds, TimeUnit.SECONDS);
+        }
+        lifecycleExecutor.execute(() -> shutdown(ex, requestedTermination));
     }
 
     /**
@@ -477,7 +498,7 @@ final public class SbkBenchmark implements Benchmark {
      */
     private void requestTimedShutdown() {
         executor.shutdownNow();
-        requestShutdown(null);
+        requestShutdown(null, BenchmarkTermination.SECONDS_COMPLETED);
     }
 
     /**
@@ -498,65 +519,94 @@ final public class SbkBenchmark implements Benchmark {
     }
 
     /**
+     * Releases the application if idle-timeout cleanup is blocked in a driver or SDK.
+     *
+     * @param idleTimeout terminal idle-timeout failure
+     */
+    private void forceIdleCompletion(BenchmarkIdleTimeoutException idleTimeout) {
+        if (retFuture.completeExceptionally(idleTimeout)) {
+            Printer.log.warn("SBK idle-timeout cleanup exceeded "
+                    + RUNTIME_CONFIG.forcedShutdownGraceSeconds
+                    + " seconds; forcing application exit");
+            executor.shutdownNow();
+            perlExecutor.shutdownNow();
+            lifecycleExecutor.shutdownNow();
+        }
+    }
+
+    /**
      * Shutdown SBK Benchmark.
      *
      * closes all writers/readers.
      * closes the storage device/client.
      *
      * @param ex Throwable exception
+     * @param requestedTermination lifecycle completion expected by the caller
      */
     @Synchronized
-    private void shutdown(Throwable ex) {
+    private void shutdown(Throwable ex, BenchmarkTermination requestedTermination) {
         if (state == State.END) {
             return;
         }
         state = State.END;
-        if (ex != null) {
+        Throwable terminalFailure = unwrapCompletionFailure(ex);
+        if (terminalFailure != null) {
             try {
-                rwLogger.reportFailure(ex);
+                rwLogger.reportFailure(terminalFailure);
             } catch (RuntimeException reportFailure) {
-                Printer.log.warn("Unable to report terminal SBK failure", reportFailure);
+                terminalFailure = retainFailure(terminalFailure, reportFailure);
             }
         }
         executor.shutdownNow();
         if (params.getTotalSecondsToRun() > 0) {
-            stopPerformanceRecorders();
+            stopPerformanceRecorders(requestedTermination);
         }
-        readers.forEach(c -> {
+        for (DataReader<Object> reader : readers) {
             try {
-                c.close();
+                reader.close();
             } catch (IOException e) {
-                Printer.log.warn("Unable to close an SBK reader during shutdown", e);
+                terminalFailure = retainFailure(terminalFailure, e);
             }
-        });
-        writers.forEach(c -> {
+        }
+        for (DataWriter<Object> writer : writers) {
             try {
-                c.close();
+                writer.close();
             } catch (IOException e) {
-                Printer.log.warn("Unable to close an SBK writer during shutdown", e);
+                terminalFailure = retainFailure(terminalFailure, e);
             }
-        });
+        }
         if (params.getTotalSecondsToRun() <= 0) {
-            stopPerformanceRecorders();
+            stopPerformanceRecorders(requestedTermination);
         }
+        terminalFailure = retainFailure(terminalFailure, completedFutureFailure(writePerlCompletion));
+        terminalFailure = retainFailure(terminalFailure, completedFutureFailure(readPerlCompletion));
         try {
             storage.closeStorage(params);
+        } catch (IOException e) {
+            terminalFailure = retainFailure(terminalFailure, e);
+        }
+        try {
             rwLogger.close(params);
         } catch (IOException e) {
-            Printer.log.warn("Unable to close SBK storage or logger during shutdown", e);
+            terminalFailure = retainFailure(terminalFailure, e);
         }
         try {
             executor.awaitTermination(RUNTIME_CONFIG.workerTerminationSeconds, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            Printer.log.warn("Interrupted while waiting for SBK workers to stop", e);
+            terminalFailure = retainFailure(terminalFailure, e);
         }
 
-        if (ex != null) {
-            Printer.log.warn("SBK Benchmark Shutdown with Exception " + ex);
-            retFuture.completeExceptionally(ex);
+        final BenchmarkTermination termination = BenchmarkTermination.resolve(requestedTermination, terminalFailure);
+        if (terminalFailure != null) {
+            Printer.log.warn("SBK Benchmark Shutdown: {}", termination.describe(
+                    params.getTotalSecondsToRun(), params.getTotalRecords(),
+                    params.getIdleTimeoutSeconds(), terminalFailure), terminalFailure);
+            retFuture.completeExceptionally(terminalFailure);
         } else {
-            Printer.log.info("SBK Benchmark Shutdown");
+            Printer.log.info("SBK Benchmark Shutdown: {}", termination.describe(
+                    params.getTotalSecondsToRun(), params.getTotalRecords(),
+                    params.getIdleTimeoutSeconds(), null));
             retFuture.complete(null);
         }
         timeoutExecutor.shutdownNow();
@@ -564,13 +614,51 @@ final public class SbkBenchmark implements Benchmark {
 
     }
 
-    private void stopPerformanceRecorders() {
+    private void stopPerformanceRecorders(BenchmarkTermination requestedTermination) {
+        final BenchmarkTermination recorderTermination = requestedTermination.isSuccessfulCompletion()
+                ? requestedTermination : BenchmarkTermination.STOP_REQUESTED;
         if (writePerl != null) {
-            writePerl.stop();
+            writePerl.stop(recorderTermination);
         }
         if (readPerl != null) {
-            readPerl.stop();
+            readPerl.stop(recorderTermination);
         }
+    }
+
+    private static Throwable completedFutureFailure(CompletableFuture<?> future) {
+        if (future == null) {
+            return null;
+        }
+        if (!future.isDone()) {
+            return new IllegalStateException("PerL completion remained pending during SBK shutdown");
+        }
+        try {
+            future.join();
+            return null;
+        } catch (CompletionException | CancellationException exception) {
+            return unwrapCompletionFailure(exception);
+        }
+    }
+
+    private static Throwable retainFailure(Throwable primary, Throwable additional) {
+        primary = unwrapCompletionFailure(primary);
+        additional = unwrapCompletionFailure(additional);
+        if (primary == null) {
+            return additional;
+        }
+        if (additional != null && additional != primary) {
+            primary.addSuppressed(additional);
+        }
+        return primary;
+    }
+
+    private static Throwable unwrapCompletionFailure(Throwable failure) {
+        Throwable unwrapped = failure;
+        while ((unwrapped instanceof CompletionException || unwrapped instanceof ExecutionException)
+                && unwrapped.getCause() != null) {
+            unwrapped = unwrapped.getCause();
+        }
+        return unwrapped;
     }
 
     /**
@@ -604,6 +692,6 @@ final public class SbkBenchmark implements Benchmark {
      */
     @Override
     public void stop() {
-        shutdown(null);
+        shutdown(null, BenchmarkTermination.STOP_REQUESTED);
     }
 }

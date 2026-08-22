@@ -42,9 +42,7 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
     final private Time time;
     final private CompletableFuture<Void> ret;
     final private Callback<Object> callback;
-    final private AtomicLong readCnt;
-    final private long timeUnitsToRun;
-    final private long totalRecords;
+    final private BenchmarkRecorder benchmarkRecorder;
     private long beginTime;
 
     /**
@@ -64,14 +62,15 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
         this.dataType = dataType;
         this.time = time;
         this.ret = new CompletableFuture<>();
-        this.readCnt = new AtomicLong(0);
         this.beginTime = 0;
-        this.timeUnitsToRun = switch (time.getTimeUnit()) {
-            case ms -> params.getTotalSecondsToRun() * Time.MS_PER_SEC;
-            case mcs -> params.getTotalSecondsToRun() * Time.MICROS_PER_SEC;
-            case ns -> params.getTotalSecondsToRun() * Time.NS_PER_SEC;
-        };
-        this.totalRecords = params.getTotalRecords();
+        if (params.getTotalSecondsToRun() > 0) {
+            benchmarkRecorder = new DurationBenchmarkRecorder(
+                    time.secondsToTimeUnits(params.getTotalSecondsToRun()));
+        } else if (params.getTotalRecords() > 0) {
+            benchmarkRecorder = new RecordsBenchmarkRecorder(params.getTotalRecords());
+        } else {
+            benchmarkRecorder = new UnboundedBenchmarkRecorder();
+        }
 
         if (params.getAction() == Action.Write_Reading) {
             callback = this::consumeRW;
@@ -103,13 +102,7 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
      */
     @Override
     public void record(long startTime, long endTime, int dataSize, int events) {
-        final long cnt = readCnt.addAndGet(events);
-        perlChannel.send(startTime, endTime, events, dataSize);
-        if (this.timeUnitsToRun > 0 && time.elapsed(endTime, beginTime) >= this.timeUnitsToRun) {
-            ret.complete(null);
-        } else if (this.totalRecords > 0 && cnt >= this.totalRecords) {
-            ret.complete(null);
-        }
+        benchmarkRecorder.record(startTime, endTime, dataSize, events);
     }
 
     @Override
@@ -124,5 +117,50 @@ final public class SbkCallbackReader extends Worker implements Callback<Object>,
 
     private void consumeRW(Object data) {
         record(dataType.getTime(data), time.getCurrentTime(), dataType.length(data), 1);
+    }
+
+    private interface BenchmarkRecorder {
+        void record(long startTime, long endTime, int dataSize, int events);
+    }
+
+    private final class DurationBenchmarkRecorder implements BenchmarkRecorder {
+        private final long timeUnitsToRun;
+
+        private DurationBenchmarkRecorder(long timeUnitsToRun) {
+            this.timeUnitsToRun = timeUnitsToRun;
+        }
+
+        @Override
+        public void record(long startTime, long endTime, int dataSize, int events) {
+            perlChannel.send(startTime, endTime, events, dataSize);
+            if (time.elapsed(endTime, beginTime) >= timeUnitsToRun) {
+                ret.complete(null);
+            }
+        }
+    }
+
+    private final class RecordsBenchmarkRecorder implements BenchmarkRecorder {
+        private final AtomicLong readCount = new AtomicLong();
+        private final long totalRecords;
+
+        private RecordsBenchmarkRecorder(long totalRecords) {
+            this.totalRecords = totalRecords;
+        }
+
+        @Override
+        public void record(long startTime, long endTime, int dataSize, int events) {
+            final long count = readCount.addAndGet(events);
+            perlChannel.send(startTime, endTime, events, dataSize);
+            if (count >= totalRecords) {
+                ret.complete(null);
+            }
+        }
+    }
+
+    private final class UnboundedBenchmarkRecorder implements BenchmarkRecorder {
+        @Override
+        public void record(long startTime, long endTime, int dataSize, int events) {
+            perlChannel.send(startTime, endTime, events, dataSize);
+        }
     }
 }

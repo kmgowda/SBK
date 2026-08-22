@@ -94,6 +94,64 @@ def timeStampQueuePerformanceReport = layout.buildDirectory.file(
         "reports/jmh/timestamp-queue-performance.json")
 def latencyMapPerformanceReport = layout.buildDirectory.file(
         "reports/jmh/latency-map-performance.json")
+def periodicRecorderPerformanceReport = layout.buildDirectory.file(
+        "reports/jmh/periodic-recorder-performance.json")
+
+tasks.register('periodicRecorderPerformanceTest', JavaExec) {
+    group = 'verification'
+    description = 'Verifies array-specialized PerL periodic recording latency with JMH.'
+    dependsOn tasks.named('jmhJar')
+    classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
+    mainClass = 'org.openjdk.jmh.Main'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
+    }
+    jvmArgs rootProject.ext.sbkRuntimeJvmArgs
+    args 'io.perl.benchmark.PeriodicRecorderCallbackBenchmark.*',
+            '-prof', 'gc',
+            '-jvmArgs', (rootProject.ext.sbkRuntimeJvmArgs
+                    + ['-Djmh.blackhole.autoDetect=false']).join(' '),
+            '-rf', 'json',
+            '-rff', periodicRecorderPerformanceReport.get().asFile.absolutePath
+    outputs.file(periodicRecorderPerformanceReport)
+    outputs.upToDateWhen { false }
+    doFirst {
+        periodicRecorderPerformanceReport.get().asFile.parentFile.mkdirs()
+        delete periodicRecorderPerformanceReport
+    }
+    doLast {
+        def results = new groovy.json.JsonSlurper().parse(
+                periodicRecorderPerformanceReport.get().asFile)
+        def byName = results.collectEntries {
+            [(it.benchmark.tokenize('.').last()): it.primaryMetric]
+        }
+        def requireResult = { String name ->
+            def result = byName[name]
+            if (result == null) {
+                throw new GradleException("Missing PerL recorder JMH result: ${name}")
+            }
+            result
+        }
+        def verifyLower = { String optimizedName, String referenceName ->
+            def optimized = requireResult(optimizedName)
+            def reference = requireResult(referenceName)
+            if (optimized.scoreConfidence[1] >= reference.scoreConfidence[0]) {
+                throw new GradleException(String.format(
+                        '%s JMH 99.9%% CI [%f, %f] does not remain below %s [%f, %f]',
+                        optimizedName, optimized.scoreConfidence[0],
+                        optimized.scoreConfidence[1], referenceName,
+                        reference.scoreConfidence[0], reference.scoreConfidence[1]))
+            }
+            logger.lifecycle(String.format(
+                    '%s: %.2f%% lower mean latency than %s (%.3f vs %.3f ns/op)',
+                    optimizedName,
+                    (reference.score - optimized.score) * 100.0d / reference.score,
+                    referenceName, optimized.score, reference.score))
+        }
+        verifyLower('arrayWithNoOpCallback', 'withNoOpCallback')
+        verifyLower('arrayWithoutCallback', 'withoutCallback')
+    }
+}
 
 tasks.register('runTimeStampQueuePerformanceBenchmark', JavaExec) {
     group = 'verification'

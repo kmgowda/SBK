@@ -58,6 +58,7 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#printTotal(double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" tabindex="0">printTotal(double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a></li>
 <li><a href="#recordLatency(long,int,int,long)" tabindex="0">recordLatency(long, int, int, long)</a></li>
+<li><a href="#recordsIndividualLatencies()" tabindex="0">recordsIndividualLatencies()</a></li>
 <li><a href="#getPrintingIntervalSeconds()" tabindex="0">getPrintingIntervalSeconds()</a></li>
 <li><a href="#getTimeUnit()" tabindex="0">getTimeUnit()</a></li>
 <li><a href="#getMinLatency()" tabindex="0">getMinLatency()</a></li>
@@ -183,6 +184,11 @@ that this logger expects to receive.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
 <div class="block">Default no-op implementation to record per-event latency.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#recordsIndividualLatencies()" class="member-name-link">recordsIndividualLatencies</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Indicates whether this logger consumes every individual latency value.</div>
+</div>
 </div>
 </div>
 </div>
@@ -263,6 +269,24 @@ can override to collect more detailed latency information.</div>
 <dd><code>events</code> - number of events included in this record</dd>
 <dd><code>bytes</code> - bytes processed for the events</dd>
 <dd><code>latency</code> - measured latency for the event(s)</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="recordsIndividualLatencies()">
+<h3>recordsIndividualLatencies</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">recordsIndividualLatencies</span>()</div>
+<div class="block">Indicates whether this logger consumes every individual latency value.
+
+<p>The default preserves compatibility for custom loggers. Loggers with
+a final no-op <a href="#recordLatency(long,int,int,long)"><code>recordLatency(long, int, int, long)</code></a> implementation
+should return <code>false</code>, allowing PerL to omit the callback from its
+single-threaded measurement path.</p></div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>true when PerL must invoke <code>recordLatency</code> for every event</dd>
 </dl>
 </div>
 </section>

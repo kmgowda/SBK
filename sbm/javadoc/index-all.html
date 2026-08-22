@@ -110,6 +110,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbm/api/impl/SbmGrpcService.html#closeClient(io.sbp.grpc.ClientID,io.grpc.stub.StreamObserver)" class="member-name-link">closeClient(ClientID, StreamObserver)</a> - Method in class io.sbm.api.impl.<a href="io/sbm/api/impl/SbmGrpcService.html" title="class in io.sbm.api.impl">SbmGrpcService</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/sbm/api/impl/SbmBenchmark.html#completeSuccessfully(long,long)" class="member-name-link">completeSuccessfully(long, long)</a> - Method in class io.sbm.api.impl.<a href="io/sbm/api/impl/SbmBenchmark.html" title="class in io.sbm.api.impl">SbmBenchmark</a></dt>
+<dd>
+<div class="block">Completes an orchestrated SBM run after every remote benchmark exits successfully.</div>
+</dd>
 <dt><a href="io/sbm/logger/CountConnections.html" class="type-name-link" title="interface in io.sbm.logger">CountConnections</a> - Interface in <a href="io/sbm/logger/package-summary.html">io.sbm.logger</a></dt>
 <dd>
 <div class="block">Interface CountConnections.</div>
@@ -186,6 +190,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">get duration idle sleep in Milliseconds.</div>
 </dd>
+<dt><a href="io/sbm/params/RamParameters.html#getIdleTimeoutSeconds()" class="member-name-link">getIdleTimeoutSeconds()</a> - Method in interface io.sbm.params.<a href="io/sbm/params/RamParameters.html" title="interface in io.sbm.params">RamParameters</a></dt>
+<dd>
+<div class="block">Get the maximum interval without an SBK performance batch.</div>
+</dd>
 <dt><a href="io/sbm/params/RamParameters.html#getMaxConnections()" class="member-name-link">getMaxConnections()</a> - Method in interface io.sbm.params.<a href="io/sbm/params/RamParameters.html" title="interface in io.sbm.params">RamParameters</a></dt>
 <dd>
 <div class="block">get Max Connections.</div>
@@ -249,6 +257,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block"><code>int idleMS</code>.</div>
 </dd>
+<dt><a href="io/sbm/config/SbmConfig.html#idleTimeoutSeconds" class="member-name-link">idleTimeoutSeconds</a> - Variable in class io.sbm.config.<a href="io/sbm/config/SbmConfig.html" title="class in io.sbm.config">SbmConfig</a></dt>
+<dd>
+<div class="block">Maximum interval without an SBK performance batch, in seconds.</div>
+</dd>
 <dt><a href="io/sbm/logger/CountConnections.html#incrementConnections()" class="member-name-link">incrementConnections()</a> - Method in interface io.sbm.logger.<a href="io/sbm/logger/CountConnections.html" title="interface in io.sbm.logger">CountConnections</a></dt>
 <dd>
 <div class="block">Increment.</div>
@@ -277,6 +289,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbm/params/impl/package-summary.html">io.sbm.params.impl</a> - package io.sbm.params.impl</dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/sbm/params/RamParameters.html#isFixedRecordMode()" class="member-name-link">isFixedRecordMode()</a> - Method in interface io.sbm.params.<a href="io/sbm/params/RamParameters.html" title="interface in io.sbm.params">RamParameters</a></dt>
+<dd>
+<div class="block">Reports whether SBM is aggregating a fixed-record benchmark.</div>
+</dd>
 <dt><a href="io/sbm/api/impl/SbmGrpcService.html#isVersionSupported(io.sbp.grpc.Version,io.grpc.stub.StreamObserver)" class="member-name-link">isVersionSupported(Version, StreamObserver)</a> - Method in class io.sbm.api.impl.<a href="io/sbm/api/impl/SbmGrpcService.html" title="class in io.sbm.api.impl">SbmGrpcService</a></dt>
 <dd>&nbsp;</dd>
 </dl>
@@ -475,9 +491,13 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">In-memory aggregator that receives latency records from remote clients and reports metrics.</div>
 </dd>
-<dt><a href="io/sbm/api/impl/SbmLatencyBenchmark.html#%3Cinit%3E(int,int,io.time.Time,io.sbm.api.SbmPeriodicRecorder,int)" class="member-name-link">SbmLatencyBenchmark(int, int, Time, SbmPeriodicRecorder, int)</a> - Constructor for class io.sbm.api.impl.<a href="io/sbm/api/impl/SbmLatencyBenchmark.html" title="class in io.sbm.api.impl">SbmLatencyBenchmark</a></dt>
+<dt><a href="io/sbm/api/impl/SbmLatencyBenchmark.html#%3Cinit%3E(int,int,io.time.Time,io.sbm.api.SbmPeriodicRecorder,int,int)" class="member-name-link">SbmLatencyBenchmark(int, int, Time, SbmPeriodicRecorder, int, int)</a> - Constructor for class io.sbm.api.impl.<a href="io/sbm/api/impl/SbmLatencyBenchmark.html" title="class in io.sbm.api.impl">SbmLatencyBenchmark</a></dt>
 <dd>
 <div class="block">Constructor RamBenchmark initializing all values.</div>
+</dd>
+<dt><a href="io/sbm/api/impl/SbmLatencyBenchmark.html#%3Cinit%3E(int,int,io.time.Time,io.sbm.api.SbmPeriodicRecorder,int,int,boolean)" class="member-name-link">SbmLatencyBenchmark(int, int, Time, SbmPeriodicRecorder, int, int, boolean)</a> - Constructor for class io.sbm.api.impl.<a href="io/sbm/api/impl/SbmLatencyBenchmark.html" title="class in io.sbm.api.impl">SbmLatencyBenchmark</a></dt>
+<dd>
+<div class="block">Creates the latency consumer with an optional fixed-record idle deadline.</div>
 </dd>
 <dt><a href="io/sbm/main/SbmMain.html" class="type-name-link" title="class in io.sbm.main">SbmMain</a> - Class in <a href="io/sbm/main/package-summary.html">io.sbm.main</a></dt>
 <dd>

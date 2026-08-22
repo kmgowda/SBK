@@ -10,6 +10,7 @@
 package io.perl.api.impl;
 
 import io.perl.api.Channel;
+import io.perl.api.BenchmarkTermination;
 import io.perl.api.PerformanceRecorder;
 import io.perl.api.PeriodicRecorder;
 import io.perl.api.Perl;
@@ -26,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
@@ -39,6 +41,7 @@ final public class CQueuePerl implements Perl {
     final private Time time;
     final private ExecutorService executor;
     final private CompletableFuture<Void> retFuture;
+    final private int idleTimeoutSeconds;
 
     @GuardedBy("this")
     private int index;
@@ -48,6 +51,12 @@ final public class CQueuePerl implements Perl {
 
     @GuardedBy("this")
     private CompletableFuture<Void> qFuture;
+
+    @GuardedBy("this")
+    private long secondsToRun;
+
+    @GuardedBy("this")
+    private long recordsCount;
 
 
     /**
@@ -65,6 +74,7 @@ final public class CQueuePerl implements Perl {
         this.time = time;
         this.executor = executor;
         this.retFuture = new CompletableFuture<>();
+        this.idleTimeoutSeconds = perlConfig.idleTimeoutSeconds;
         this.state = State.BEGIN;
         if (perlConfig.maxQs > 0) {
             maxQs = perlConfig.maxQs;
@@ -81,10 +91,10 @@ final public class CQueuePerl implements Perl {
         }
         if (perlConfig.sleepMS > 0) {
             this.perlReceiver = new PerformanceRecorderIdleSleep(periodicRecorder, channels, time, reportingIntervalMS,
-                    Math.min(perlConfig.sleepMS, reportingIntervalMS));
+                    Math.min(perlConfig.sleepMS, reportingIntervalMS), perlConfig.idleTimeoutSeconds);
         } else {
             this.perlReceiver = new PerformanceRecorderElasticWait(periodicRecorder, channels, time, reportingIntervalMS,
-                    Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS));
+                    Math.max(PerlConfig.MIN_IDLE_NS, perlConfig.idleNS), perlConfig.idleTimeoutSeconds);
         }
     }
 
@@ -108,34 +118,76 @@ final public class CQueuePerl implements Perl {
     }
 
     @Synchronized
-    private void shutdown(Throwable ex) {
+    private void shutdown(Throwable ex, BenchmarkTermination requestedTermination) {
         if (state != State.END) {
             state = State.END;
+            Throwable terminalFailure = unwrapCompletionFailure(ex);
+            InterruptedException interruption = null;
             if (qFuture != null) {
                 if (!qFuture.isDone()) {
-                    long endTime = time.getCurrentTime();
+                    final long endTime = time.getCurrentTime();
                     for (Channel ch : channels) {
                         ch.sendEndTime(endTime);
                     }
+                }
+                boolean receiverCompleted = false;
+                while (!receiverCompleted) {
                     try {
                         qFuture.get();
-                    } catch (ExecutionException | InterruptedException e) {
-                        e.printStackTrace();
+                        receiverCompleted = true;
+                    } catch (ExecutionException failure) {
+                        terminalFailure = retainFailure(terminalFailure, failure.getCause());
+                        receiverCompleted = true;
+                    } catch (InterruptedException interrupted) {
+                        if (interruption == null) {
+                            interruption = interrupted;
+                        }
                     }
-                    for (Channel ch : channels) {
-                        ch.clear();
-                    }
+                }
+                for (Channel ch : channels) {
+                    ch.clear();
                 }
                 qFuture = null;
             }
-            if (ex != null) {
-                PerlPrinter.log.warn("CQueuePerl Shutdown with Exception:" + ex);
-                retFuture.completeExceptionally(ex);
+            terminalFailure = retainFailure(terminalFailure, interruption);
+            if (interruption != null) {
+                Thread.currentThread().interrupt();
+            }
+            if (terminalFailure != null) {
+                final BenchmarkTermination termination = BenchmarkTermination.resolve(
+                        requestedTermination, terminalFailure);
+                PerlPrinter.log.warn("PerL Shutdown: {}", termination.describe(
+                        secondsToRun, recordsCount, idleTimeoutSeconds, terminalFailure), terminalFailure);
+                retFuture.completeExceptionally(terminalFailure);
             } else {
-                PerlPrinter.log.info("CQueuePerl Shutdown");
+                PerlPrinter.log.info("PerL Shutdown: {}", requestedTermination.describe(
+                        secondsToRun, recordsCount, idleTimeoutSeconds, null));
                 retFuture.complete(null);
             }
         }
+    }
+
+    private static Throwable retainFailure(Throwable currentFailure, Throwable additionalFailure) {
+        final Throwable normalizedFailure = unwrapCompletionFailure(additionalFailure);
+        if (normalizedFailure == null) {
+            return currentFailure;
+        }
+        if (currentFailure == null) {
+            return normalizedFailure;
+        }
+        if (currentFailure != normalizedFailure) {
+            currentFailure.addSuppressed(normalizedFailure);
+        }
+        return currentFailure;
+    }
+
+    private static Throwable unwrapCompletionFailure(Throwable failure) {
+        Throwable unwrapped = failure;
+        while ((unwrapped instanceof CompletionException || unwrapped instanceof ExecutionException)
+                && unwrapped.getCause() != null) {
+            unwrapped = unwrapped.getCause();
+        }
+        return unwrapped;
     }
 
     /**
@@ -151,11 +203,13 @@ final public class CQueuePerl implements Perl {
     public CompletableFuture<Void> run(long secondsToRun, long recordsCount) {
         if (state == State.BEGIN) {
             state = State.RUN;
+            this.secondsToRun = secondsToRun;
+            this.recordsCount = recordsCount;
             PerlPrinter.log.info("CQueuePerl Start");
             qFuture = CompletableFuture.runAsync(() -> perlReceiver.run(secondsToRun, recordsCount),
                     executor);
             qFuture.whenComplete((ret, ex) -> {
-                shutdown(ex);
+                shutdown(ex, BenchmarkTermination.configured(secondsToRun, recordsCount));
             });
         }
         return retFuture.toCompletableFuture();
@@ -166,7 +220,12 @@ final public class CQueuePerl implements Perl {
      */
     @Override
     public void stop() {
-        shutdown(null);
+        shutdown(null, BenchmarkTermination.STOP_REQUESTED);
+    }
+
+    @Override
+    public void stop(BenchmarkTermination termination) {
+        shutdown(null, termination);
     }
 
     interface Throw {
@@ -330,7 +389,7 @@ final public class CQueuePerl implements Perl {
 
     final private class OnError implements Throw {
         public void onException(Throwable ex) {
-            shutdown(ex);
+            shutdown(ex, BenchmarkTermination.INTERNAL_FAILURE);
         }
     }
 }

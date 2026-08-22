@@ -11,16 +11,17 @@
 package io.gem.api.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.gem.api.SshResponse;
-import io.gem.api.SshCommandException;
-import io.gem.api.SshSession;
-import io.gem.config.GemConfig;
+import io.gem.api.ConnectionConfig;
 import io.gem.api.GemBenchmark;
 import io.gem.api.RemoteExecutionStatus;
 import io.gem.api.RemoteExitCode;
 import io.gem.api.RemoteResponse;
-import io.gem.api.ConnectionConfig;
+import io.gem.api.SshCommandException;
+import io.gem.api.SshResponse;
+import io.gem.api.SshSession;
+import io.gem.config.GemConfig;
 import io.gem.params.GemParameters;
+import io.perl.api.BenchmarkTermination;
 import io.perl.config.PerlConfig;
 import io.sbk.config.ExitCode;
 import io.sbk.system.Printer;
@@ -139,7 +140,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         try {
             return startPreparedBenchmark();
         } catch (IOException | InterruptedException | ExecutionException | RuntimeException ex) {
-            shutdown(ex);
+            shutdown(ex, BenchmarkTermination.INTERNAL_FAILURE);
             throw ex;
         }
     }
@@ -196,6 +197,14 @@ final public class SbkGemBenchmark implements GemBenchmark {
             sbmStarted = true;
         }
         sbmCompletion = sbmBenchmark.start();
+        sbmCompletion.whenComplete((ignored, failure) -> {
+            if (failure != null) {
+                final Throwable cause = unwrapCompletionFailure(failure);
+                Printer.log.warn("SBK-GEM: Embedded SBM terminated with a benchmark failure: {}",
+                        cause.getMessage());
+                shutdown(cause, BenchmarkTermination.INTERNAL_FAILURE);
+            }
+        });
 
         // Start remote SBK instances
         for (int i = 0; i < nodes.length; i++) {
@@ -289,11 +298,12 @@ final public class SbkGemBenchmark implements GemBenchmark {
             remoteCommandsCompleted = true;
             final IOException remoteFailure = remoteCommandFailure(remoteResults);
             if (remoteFailure != null) {
-                shutdown(remoteFailure);
+                shutdown(remoteFailure, BenchmarkTermination.INTERNAL_FAILURE);
             } else if (failure != null) {
-                shutdown(unwrapCompletionFailure(failure));
+                shutdown(unwrapCompletionFailure(failure), BenchmarkTermination.INTERNAL_FAILURE);
             } else {
-                shutdown(null);
+                shutdown(null, BenchmarkTermination.configured(
+                        params.getTotalSecondsToRun(), params.getTotalRecords()));
             }
         });
 
@@ -785,6 +795,9 @@ final public class SbkGemBenchmark implements GemBenchmark {
         if (future == null) {
             return null;
         }
+        if (!future.isDone()) {
+            return new IllegalStateException("Embedded SBM completion remained pending during SBK-GEM shutdown");
+        }
         try {
             future.join();
             return null;
@@ -794,6 +807,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
     }
 
     static Throwable combineTerminalFailures(Throwable primary, Throwable additional) {
+        primary = unwrapCompletionFailure(primary);
+        additional = unwrapCompletionFailure(additional);
         if (primary == null) {
             return additional;
         }
@@ -914,12 +929,13 @@ final public class SbkGemBenchmark implements GemBenchmark {
      * closes the storage device/client.
      *
      * @param ex Throwable exception
+     * @param requestedTermination lifecycle completion expected by the caller
      */
     @Synchronized
-    private void shutdown(Throwable ex) {
+    private void shutdown(Throwable ex, BenchmarkTermination requestedTermination) {
         if (state != State.END) {
             state = State.END;
-            Throwable terminalFailure = ex;
+            Throwable terminalFailure = unwrapCompletionFailure(ex);
             int maximumRegisteredClients = -1;
             if (params.isDeleteAfter()) {
                 try {
@@ -927,16 +943,35 @@ final public class SbkGemBenchmark implements GemBenchmark {
                     Arrays.fill(deleteTargets, true);
                     remoteDirectoryDelete(deleteTargets);
                 } catch (InterruptedException | ConnectException | ExecutionException rmEx) {
-                    rmEx.printStackTrace();
+                    terminalFailure = combineTerminalFailures(terminalFailure, rmEx);
+                    if (rmEx instanceof InterruptedException) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
             for (SshSession node : nodes) {
-                node.stop();
+                try {
+                    node.stop();
+                } catch (RuntimeException stopFailure) {
+                    terminalFailure = combineTerminalFailures(terminalFailure, stopFailure);
+                }
             }
             if (sbmStarted) {
-                maximumRegisteredClients = sbmBenchmark.getMaximumRegisteredClients();
-                sbmBenchmark.abortPendingRegistrations("SBK-GEM: Distributed benchmark is shutting down");
-                sbmBenchmark.stop();
+                try {
+                    maximumRegisteredClients = sbmBenchmark.getMaximumRegisteredClients();
+                    sbmBenchmark.abortPendingRegistrations("SBK-GEM: Distributed benchmark is shutting down");
+                    if (sbmCompletion == null || !sbmCompletion.isDone()) {
+                        if (terminalFailure == null && remoteCommandsCompleted
+                                && requestedTermination.isSuccessfulCompletion()) {
+                            sbmBenchmark.completeSuccessfully(
+                                    params.getTotalSecondsToRun(), params.getTotalRecords());
+                        } else {
+                            sbmBenchmark.stop();
+                        }
+                    }
+                } catch (RuntimeException sbmShutdownFailure) {
+                    terminalFailure = combineTerminalFailures(terminalFailure, sbmShutdownFailure);
+                }
                 terminalFailure = combineTerminalFailures(terminalFailure,
                         completedFutureFailure(sbmCompletion));
                 sbmStarted = false;
@@ -951,11 +986,17 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 SbkGem.printRemoteResults(remoteResults, false, maximumRegisteredClients);
             }
             executor.shutdown();
+            final BenchmarkTermination termination = BenchmarkTermination.resolve(
+                    requestedTermination, terminalFailure);
             if (terminalFailure != null) {
-                Printer.log.warn("SBK GEM Benchmark Shutdown with Exception " + terminalFailure);
+                Printer.log.warn("SBK-GEM Benchmark Shutdown: {}", termination.describe(
+                        params.getTotalSecondsToRun(), params.getTotalRecords(),
+                        params.getIdleTimeoutSeconds(), terminalFailure), terminalFailure);
                 retFuture.completeExceptionally(terminalFailure);
             } else {
-                Printer.log.info("SBK GEM Benchmark Shutdown");
+                Printer.log.info("SBK-GEM Benchmark Shutdown: {}", termination.describe(
+                        params.getTotalSecondsToRun(), params.getTotalRecords(),
+                        params.getIdleTimeoutSeconds(), null));
                 retFuture.complete(remoteResults);
             }
         }
@@ -963,7 +1004,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
     @Override
     public void stop() {
-        shutdown(null);
+        shutdown(null, BenchmarkTermination.STOP_REQUESTED);
     }
 
     private static IOException remoteSessionFailure(Throwable failure) {

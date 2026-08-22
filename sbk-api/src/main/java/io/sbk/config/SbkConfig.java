@@ -76,18 +76,34 @@ public final class SbkConfig {
         return perlConfig;
     }
 
+    /**
+     * Loads a fresh validated copy of the bundled PerL settings.
+     *
+     * <p>Callers may safely apply benchmark-specific command-line overrides to
+     * the returned object without mutating the shared {@link #get()} defaults.
+     *
+     * @return independently mutable validated PerL configuration
+     * @throws IOException if the bundled PerL properties are missing or invalid
+     * @throws IllegalArgumentException if a bundled PerL value violates SBK constraints
+     */
+    public static PerlConfig loadPerlConfig() throws IOException {
+        try (InputStream input = SbkConfig.class.getClassLoader().getResourceAsStream(PERL_CONFIG_FILE)) {
+            if (input == null) {
+                throw new IOException("Missing " + PERL_CONFIG_FILE);
+            }
+            final PerlConfig config = PerlConfig.build(input);
+            validatePerlConfig(config);
+            return config;
+        }
+    }
+
     private static SbkConfig loadConfig() {
         try (InputStream input = SbkConfig.class.getClassLoader().getResourceAsStream(CONFIG_FILE)) {
             if (input == null) {
                 throw new IOException("Missing " + CONFIG_FILE);
             }
             final SbkConfig config = new ObjectMapper(new JavaPropsFactory()).readValue(input, SbkConfig.class);
-            try (InputStream perlInput = SbkConfig.class.getClassLoader().getResourceAsStream(PERL_CONFIG_FILE)) {
-                if (perlInput == null) {
-                    throw new IOException("Missing " + PERL_CONFIG_FILE);
-                }
-                config.perlConfig = PerlConfig.build(perlInput);
-            }
+            config.perlConfig = loadPerlConfig();
             config.validate();
             return config;
         } catch (IOException exception) {
@@ -100,9 +116,15 @@ public final class SbkConfig {
                 || defaultSyncRecords < 0 || defaultWriterStep < 1 || defaultWriterStepSeconds < 0
                 || defaultReaderStep < 1 || defaultReaderStepSeconds < 0 || defaultIdleSleepMillis < 0
                 || defaultThreadType == null || !defaultThreadType.matches("(?i)[pfv]")
-                || !Double.isFinite(defaultThroughput) || defaultThroughput < -1
-                || perlConfig.qPerWorker < PerlConfig.MIN_Q_PER_WORKER || perlConfig.maxQs < 0) {
+                || !Double.isFinite(defaultThroughput) || defaultThroughput < -1) {
             throw new IllegalArgumentException("Invalid SBK defaults in " + CONFIG_FILE);
+        }
+    }
+
+    private static void validatePerlConfig(PerlConfig config) {
+        if (config.qPerWorker < PerlConfig.MIN_Q_PER_WORKER || config.maxQs < 0
+                || config.idleTimeoutSeconds < 1) {
+            throw new IllegalArgumentException("Invalid PerL defaults in " + PERL_CONFIG_FILE);
         }
     }
 }

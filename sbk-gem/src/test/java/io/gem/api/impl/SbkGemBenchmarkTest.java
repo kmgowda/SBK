@@ -22,6 +22,7 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -174,6 +175,19 @@ final class SbkGemBenchmarkTest {
         final IOException sbmFailure = new IOException("SBM client reported terminal failure");
 
         final Throwable failure = SbkGemBenchmark.combineTerminalFailures(remoteFailure, sbmFailure);
+
+        assertSame(remoteFailure, failure);
+        assertEquals(1, failure.getSuppressed().length);
+        assertSame(sbmFailure, failure.getSuppressed()[0]);
+    }
+
+    @Test
+    void unwrapsPrimaryAndAdditionalLifecycleFailures() {
+        final IOException remoteFailure = new IOException("remote command failed");
+        final IOException sbmFailure = new IOException("SBM client reported terminal failure");
+
+        final Throwable failure = SbkGemBenchmark.combineTerminalFailures(
+                new CompletionException(remoteFailure), new CompletionException(sbmFailure));
 
         assertSame(remoteFailure, failure);
         assertEquals(1, failure.getSuppressed().length);

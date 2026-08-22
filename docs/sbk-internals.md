@@ -2206,6 +2206,41 @@ is a major efficiency property, but also an explicit scaling boundary: if one
 recorder cannot drain its queues at the generated event rate, adding workers
 will increase backlog rather than useful benchmark throughput.
 
+#### Hot-path review budget
+
+The latency-critical budget covers `sbk-api` writer/reader operations and
+measurement submission, PerL enqueue/dequeue/window recording, and SBM batch
+ingestion/aggregation. A successful iteration should contain only the state,
+loads, calls, and memory-ordering operations required by that mode:
+
+- no application mutex, monitor, `synchronized` block, conditional wait, or
+  blocking queue operation;
+- no new atomic, `VarHandle`, fence, or volatile coordination operation;
+- no redundant mode branch, counter, flag, getter, conversion, clock read,
+  allocation, or copied value; and
+- no avoidable polymorphic dispatch, callback, lambda, or helper layer that
+  remains a call after JIT compilation.
+
+Mode-dependent behavior should normally be selected once at startup. Separate
+duration/fixed-record or controlled/unlimited implementations are justified
+only when a focused benchmark demonstrates that specialization removes work
+from the compiled loop. Activity, EOF, timeout, error, and shutdown decisions
+belong in existing empty-queue or lifecycle slow paths wherever possible.
+
+This is an operation budget, not a source-code style rule. Primitive locals and
+small monomorphic methods are commonly optimized away or inlined; deleting
+them mechanically may not change generated code and can obscure correctness.
+Conversely, hiding a branch or allocation in a helper does not remove its
+cost. Review must use JMH for the isolated operation plus a representative
+SBK/PerlBench run for throughput, latency, allocation, and variance.
+
+The rule also does not permit removing concurrency primitives required by the
+algorithm. PerL's MPSC producer publication uses an existing `VarHandle`/CAS
+and acquire/release protocol; changing it requires a Java Memory Model proof
+and queue stress, Lincheck, jcstress, GC, and performance evidence. SBK-GEM is
+outside this budget because it orchestrates SSH processes rather than handling
+each measurement; the SBK and PerL processes it launches remain inside it.
+
 ### 8.5 Use available memory deliberately
 
 PerL's storage strategy turns heap capacity into a tunable measurement
@@ -3096,14 +3131,14 @@ your "Experimental Setup" section makes the study fully reproducible:
 1. **SBK version and commit hash** from the exact build under test.
 2. **Driver** used (e.g. `minio`, `cassandra`, `kafka`).
 3. **PerL configuration**: effective `-mpscqueue` selection,
-   `qPerWorker`, `maxQs`, `idleNS`, `maxArraySizeMB`, `maxHashMapSizeMB`, and
+   `-idletimeoutseconds`, `qPerWorker`, `maxQs`, `idleNS`, `maxArraySizeMB`, `maxHashMapSizeMB`, and
    `histogram` (yes/no). SBK defaults are in
    [`sbk.properties`](../sbk-api/src/main/resources/sbk.properties);
    standalone PerL defaults are in
    [perl.properties](../perl/src/main/resources/perl.properties).
 4. **Workload**: `-writers`, `-readers`, `-size`, `-seconds` or
    `-records`, SBK-GEM `-totalrecords` when used, `-throughput`, SBK-GEM
-   `-totalthroughput` when used, and any
+   `-totalthroughput` when used, `-idletimeoutseconds`, and any
    driver-specific flags.
 5. **Storage configuration** (cluster size, replication, region,
    storage class, etc.).

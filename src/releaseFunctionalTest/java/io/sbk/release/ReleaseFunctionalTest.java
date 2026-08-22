@@ -111,6 +111,9 @@ class ReleaseFunctionalTest {
         caseRun("sbk-eof-prepare", this::prepareEofFile);
         caseRun("sbk-eof-reader", this::readEofFile);
         caseRun("eof-lifecycle", this::verifyEofLifecycle);
+        caseRun("sbk-idle-timeout", this::sbkIdleTimeout);
+        caseRun("sbk-timed-idle-disabled", this::sbkTimedIdleDisabled);
+        caseRun("sbm-idle-timeout", this::sbmIdleTimeout);
         caseRun("prometheus-endpoint", this::prometheusEndpoint);
         caseRun("sbk-PrometheusLogger", this::prometheusLifecycle);
         caseRun("web-console-contract", this::webConsoleContract);
@@ -144,7 +147,9 @@ class ReleaseFunctionalTest {
     }
 
     private void fileLogger(final String logger) throws Exception {
-        expect(config.sbk, "Total File Writing|SBK Benchmark Shutdown",
+        expect(config.sbk, "(?s)PerL Shutdown: completed successfully in -records " + config.records
+                        + " mode.*SBK Benchmark Shutdown: completed successfully in -records "
+                        + config.records + " mode",
                 "-class", "file", "-file", config.workDir.resolve("sbk-" + logger + ".dat").toString(),
                 "-writers", "1", "-size", config.recordSize, "-records", config.records, "-out", logger);
     }
@@ -173,6 +178,25 @@ class ReleaseFunctionalTest {
         readEofFile();
         long elapsed = Duration.ofNanos(System.nanoTime() - start).toSeconds();
         require(elapsed < config.eofMaximumSeconds, "reader took " + elapsed + "s after EOF");
+    }
+
+    private void sbkIdleTimeout() throws Exception {
+        reject(config.sbk, "SBK Benchmark Shutdown: exited due to -idletimeoutseconds 6",
+                "-class", "null", "-readers", "1", "-size", config.recordSize,
+                "-records", config.records, "-idletimeoutseconds", "6");
+    }
+
+    private void sbmIdleTimeout() throws Exception {
+        reject(config.sbm, "SBM Shutdown: exited due to -idletimeoutseconds 6",
+                "-class", "File", "-port", Integer.toString(freePort()),
+                "-records", config.records, "-idletimeoutseconds", "6");
+    }
+
+    private void sbkTimedIdleDisabled() throws Exception {
+        expect(config.sbk, "(?s)PerL Shutdown: completed successfully in -seconds 7 mode"
+                        + ".*SBK Benchmark Shutdown: completed successfully in -seconds 7 mode",
+                "-class", "null", "-readers", "1", "-size", config.recordSize,
+                "-seconds", "7", "-idletimeoutseconds", "6");
     }
 
     private void prometheusEndpoint() throws Exception {

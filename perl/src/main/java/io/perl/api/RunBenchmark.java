@@ -28,8 +28,11 @@ public interface RunBenchmark {
      * number of seconds and then stop; if {@code secondsToRun} == 0 the
      * benchmark should run until {@code recordsCount} records are processed.
      *
-     * The returned {@link CompletableFuture} completes when the benchmark
-     * finishes. The future completes exceptionally if an error occurs.
+     * The returned {@link CompletableFuture} completes normally when the
+     * requested duration elapses or record target is reached. An explicit
+     * successful stop also completes it normally. Idle-timeout failures,
+     * producer failures, recorder failures, and final-flush failures complete
+     * the future exceptionally with the terminal cause.
      *
      * @param secondsToRun Number of seconds to run; when > 0 this takes precedence
      *                     over {@code recordsCount}

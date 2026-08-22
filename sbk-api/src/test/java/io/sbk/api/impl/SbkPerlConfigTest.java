@@ -21,6 +21,7 @@ import java.io.InputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -46,6 +47,7 @@ public class SbkPerlConfigTest {
         assertEquals(0, config.defaultReaderStepSeconds);
         assertEquals(0, config.defaultIdleSleepMillis);
         assertEquals("v", config.defaultThreadType);
+        assertEquals(600, config.getPerlConfig().idleTimeoutSeconds);
     }
 
     /**
@@ -88,6 +90,7 @@ public class SbkPerlConfigTest {
         assertEquals(expected.qPerWorker, config.qPerWorker);
         assertEquals("ConcurrentLinkedQueue (JDK)",
                 config.getTimestampQueueName());
+        assertEquals(600, config.idleTimeoutSeconds);
     }
 
     /**
@@ -111,5 +114,31 @@ public class SbkPerlConfigTest {
         assertEquals(expected.mpscQueueEnable, actual.mpscQueueEnable);
         assertEquals(expected.maxQs, actual.maxQs);
         assertEquals(expected.qPerWorker, actual.qPerWorker);
+        assertEquals(600, actual.idleTimeoutSeconds);
+    }
+
+    /** Verifies that the CLI idle deadline reaches the effective PerL configuration. */
+    @Test
+    public void commandLineOverridesIdleTimeout() throws Exception {
+        final SbkParameters parameters = new SbkParameters("idle-timeout-test");
+        parameters.parseArgs(new String[]{
+                "-writers", "1", "-size", "1",
+                "-idletimeoutseconds", "17"
+        });
+
+        assertEquals(17, parameters.getIdleTimeoutSeconds());
+        assertEquals(17, SbkBenchmark.buildPerlConfig(parameters).idleTimeoutSeconds);
+    }
+
+    /** Verifies that benchmark overrides cannot mutate the validated singleton defaults. */
+    @Test
+    public void eachBenchmarkLoadsAnIndependentPerlConfiguration() throws Exception {
+        final PerlConfig first = SbkParameters.loadPerlConfig();
+        final PerlConfig second = SbkParameters.loadPerlConfig();
+
+        assertNotSame(first, second);
+        first.idleTimeoutSeconds = 17;
+        assertEquals(600, second.idleTimeoutSeconds);
+        assertEquals(600, SbkConfig.get().getPerlConfig().idleTimeoutSeconds);
     }
 }

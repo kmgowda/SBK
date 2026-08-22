@@ -62,7 +62,8 @@ private GEM inventory.
 Use this command for a clean local checkout. It runs all builds, enabled-driver
 checks, concurrency tests, packaging, documentation checks, and local
 functional tests. It does not run the remote GEM or release-only performance
-tests.
+tests. The functional inventory verifies both fixed-record idle termination and
+that timed runs ignore the fixed-record idle deadline.
 
 ```bash
 ./gradlew clean releasecheck \
@@ -251,6 +252,7 @@ checks:
 - CSV header/total output, Prometheus HTTP metrics, Web Console health/run
   registration, default board naming, and logger lifecycle messages;
 - File EOF termination before the configured duration;
+- fixed-record SBK and standalone SBM failure after a one-second performance-event idle deadline;
 - invalid storage, missing gRPC host, missing YML, and malformed YML failures;
 - SBK-YAL argument mapping and logger overrides;
 - real `GrpcLogger` clients against child SBM processes using both

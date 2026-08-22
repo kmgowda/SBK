@@ -58,6 +58,20 @@ final class AbstractCallbackReaderTest {
         verifyDuration(new NanoSeconds(), Time.NS_PER_SEC);
     }
 
+    @Test
+    void durationModeRecordsBatchesWithoutCountBasedCompletion() throws Exception {
+        final CapturingChannel channel = new CapturingChannel();
+        final TestCallbackReader reader = new TestCallbackReader();
+        final Time time = new NanoSeconds();
+        reader.initialize(new TestWorker(channel), 60, 0,
+                new ByteArray(), time, data -> { });
+        final long currentTime = time.getCurrentTime();
+
+        reader.recordBenchmark(currentTime, currentTime + 1, 10, 7);
+
+        assertEquals(7, channel.records.get());
+    }
+
     private static void verifyDuration(Time time, long unitsPerSecond)
             throws Exception {
         CapturingChannel channel = new CapturingChannel();

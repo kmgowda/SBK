@@ -68,10 +68,14 @@ loadScripts(document, 'script');</script>
 <li><a href="#RecordsWriter(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)" tabindex="0">RecordsWriter(Worker, long, DataType, T, int, Time, WriteRequestsLogger)</a></li>
 <li><a href="#RecordsWriterSync(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.RateController)" tabindex="0">RecordsWriterSync(Worker, long, DataType, T, int, Time, RateController)</a></li>
 <li><a href="#RecordsWriterSync(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.RateController,io.sbk.logger.WriteRequestsLogger)" tabindex="0">RecordsWriterSync(Worker, long, DataType, T, int, Time, RateController, WriteRequestsLogger)</a></li>
+<li><a href="#RecordsWriterBatch(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)" tabindex="0">RecordsWriterBatch(Worker, long, DataType, T, int, Time)</a></li>
+<li><a href="#RecordsWriterBatch(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)" tabindex="0">RecordsWriterBatch(Worker, long, DataType, T, int, Time, WriteRequestsLogger)</a></li>
 <li><a href="#RecordsWriterTime(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)" tabindex="0">RecordsWriterTime(Worker, long, DataType, T, int, Time)</a></li>
 <li><a href="#RecordsWriterTime(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)" tabindex="0">RecordsWriterTime(Worker, long, DataType, T, int, Time, WriteRequestsLogger)</a></li>
 <li><a href="#RecordsWriterTimeSync(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.RateController)" tabindex="0">RecordsWriterTimeSync(Worker, long, DataType, T, int, Time, RateController)</a></li>
 <li><a href="#RecordsWriterTimeSync(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.RateController,io.sbk.logger.WriteRequestsLogger)" tabindex="0">RecordsWriterTimeSync(Worker, long, DataType, T, int, Time, RateController, WriteRequestsLogger)</a></li>
+<li><a href="#RecordsWriterTimeBatch(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)" tabindex="0">RecordsWriterTimeBatch(Worker, long, DataType, T, int, Time)</a></li>
+<li><a href="#RecordsWriterTimeBatch(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)" tabindex="0">RecordsWriterTimeBatch(Worker, long, DataType, T, int, Time, WriteRequestsLogger)</a></li>
 <li><a href="#RecordsWriterRW(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.RateController)" tabindex="0">RecordsWriterRW(Worker, long, DataType, T, int, Time, RateController)</a></li>
 <li><a href="#RecordsWriterRW(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.RateController,io.sbk.logger.WriteRequestsLogger)" tabindex="0">RecordsWriterRW(Worker, long, DataType, T, int, Time, RateController, WriteRequestsLogger)</a></li>
 <li><a href="#RecordsWriterTimeRW(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.RateController)" tabindex="0">RecordsWriterTimeRW(Worker, long, DataType, T, int, Time, RateController)</a></li>
@@ -80,6 +84,14 @@ loadScripts(document, 'script');</script>
 <li><a href="#RecordsWriterRO(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.RateController,io.sbk.logger.WriteRequestsLogger)" tabindex="0">RecordsWriterRO(Worker, long, DataType, T, int, Time, RateController, WriteRequestsLogger)</a></li>
 <li><a href="#RecordsWriterTimeRO(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.RateController)" tabindex="0">RecordsWriterTimeRO(Worker, long, DataType, T, int, Time, RateController)</a></li>
 <li><a href="#RecordsWriterTimeRO(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.RateController,io.sbk.logger.WriteRequestsLogger)" tabindex="0">RecordsWriterTimeRO(Worker, long, DataType, T, int, Time, RateController, WriteRequestsLogger)</a></li>
+<li><a href="#RecordsWriterRWNoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)" tabindex="0">RecordsWriterRWNoRate(Worker, long, DataType, T, int, Time)</a></li>
+<li><a href="#RecordsWriterRWNoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)" tabindex="0">RecordsWriterRWNoRate(Worker, long, DataType, T, int, Time, WriteRequestsLogger)</a></li>
+<li><a href="#RecordsWriterTimeRWNoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)" tabindex="0">RecordsWriterTimeRWNoRate(Worker, long, DataType, T, int, Time)</a></li>
+<li><a href="#RecordsWriterTimeRWNoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)" tabindex="0">RecordsWriterTimeRWNoRate(Worker, long, DataType, T, int, Time, WriteRequestsLogger)</a></li>
+<li><a href="#RecordsWriterRONoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)" tabindex="0">RecordsWriterRONoRate(Worker, long, DataType, T, int, Time)</a></li>
+<li><a href="#RecordsWriterRONoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)" tabindex="0">RecordsWriterRONoRate(Worker, long, DataType, T, int, Time, WriteRequestsLogger)</a></li>
+<li><a href="#RecordsWriterTimeRONoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)" tabindex="0">RecordsWriterTimeRONoRate(Worker, long, DataType, T, int, Time)</a></li>
+<li><a href="#RecordsWriterTimeRONoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)" tabindex="0">RecordsWriterTimeRONoRate(Worker, long, DataType, T, int, Time, WriteRequestsLogger)</a></li>
 </ol>
 </li>
 </ol>
@@ -171,6 +183,27 @@ duplicating common harness logic in drivers.
 <div class="block">Default implementation for writer benchmarking by writing given number of records.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterBatch(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)" class="member-name-link">RecordsWriterBatch</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;recordsCount,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Writes a fixed number of records with periodic sync and no throughput controller.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterBatch(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)" class="member-name-link">RecordsWriterBatch</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;recordsCount,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time,
+ <a href="../logger/WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a>&nbsp;logger)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Writes a fixed number of records with request logging, periodic sync, and no throughput controller.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterRO(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.RateController)" class="member-name-link">RecordsWriterRO</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
  long&nbsp;recordsCount,
  <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
@@ -194,6 +227,27 @@ duplicating common harness logic in drivers.
 <div class="block">Default implementation for writing given number of records.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterRONoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)" class="member-name-link">RecordsWriterRONoRate</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;recordsCount,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Writes records without measurement or throughput control.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterRONoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)" class="member-name-link">RecordsWriterRONoRate</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;recordsCount,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time,
+ <a href="../logger/WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a>&nbsp;logger)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Writes records with request logging and without measurement or throughput control.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterRW(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.RateController)" class="member-name-link">RecordsWriterRW</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
  long&nbsp;recordsCount,
  <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
@@ -215,6 +269,27 @@ duplicating common harness logic in drivers.
  <a href="../logger/WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a>&nbsp;logger)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
 <div class="block">Default implementation for writing given number of records.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterRWNoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)" class="member-name-link">RecordsWriterRWNoRate</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;recordsCount,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Writes unmeasured records for a concurrent reader without throughput control.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterRWNoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)" class="member-name-link">RecordsWriterRWNoRate</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;recordsCount,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time,
+ <a href="../logger/WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a>&nbsp;logger)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Writes unmeasured records with request logging for a concurrent reader without throughput control.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterSync(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.RateController)" class="member-name-link">RecordsWriterSync</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
@@ -261,6 +336,27 @@ duplicating common harness logic in drivers.
 <div class="block">Default implementation for writer benchmarking by continuously writing data records for specific time duration.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterTimeBatch(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)" class="member-name-link">RecordsWriterTimeBatch</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;secondsToRun,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Writes for a duration with periodic sync and no throughput controller.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterTimeBatch(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)" class="member-name-link">RecordsWriterTimeBatch</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;secondsToRun,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time,
+ <a href="../logger/WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a>&nbsp;logger)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Writes for a duration with request logging, periodic sync, and no throughput controller.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterTimeRO(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.RateController)" class="member-name-link">RecordsWriterTimeRO</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
  long&nbsp;secondsToRun,
  <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
@@ -284,6 +380,27 @@ duplicating common harness logic in drivers.
 <div class="block">Default implementation for writing data records for specific time duration.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterTimeRONoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)" class="member-name-link">RecordsWriterTimeRONoRate</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;secondsToRun,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Writes records without measurement or throughput control for a duration.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterTimeRONoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)" class="member-name-link">RecordsWriterTimeRONoRate</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;secondsToRun,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time,
+ <a href="../logger/WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a>&nbsp;logger)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Writes records with request logging and without measurement or throughput control for a duration.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterTimeRW(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.RateController)" class="member-name-link">RecordsWriterTimeRW</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
  long&nbsp;secondsToRun,
  <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
@@ -305,6 +422,27 @@ duplicating common harness logic in drivers.
  <a href="../logger/WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a>&nbsp;logger)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
 <div class="block">Default implementation for writing data records for specific time duration.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterTimeRWNoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)" class="member-name-link">RecordsWriterTimeRWNoRate</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;secondsToRun,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Writes unmeasured records for a duration without throughput control.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterTimeRWNoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)" class="member-name-link">RecordsWriterTimeRWNoRate</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;secondsToRun,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time,
+ <a href="../logger/WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a>&nbsp;logger)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Writes unmeasured records with request logging for a duration without throughput control.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#RecordsWriterTimeSync(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.api.RateController)" class="member-name-link">RecordsWriterTimeSync</a><wbr>(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
@@ -720,6 +858,60 @@ sync is invoked after writing given set of records.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="RecordsWriterBatch(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)">
+<h3 id="RecordsWriterBatch(io.sbk.api.Worker,long,io.sbk.data.DataType,java.lang.Object,int,io.time.Time)">RecordsWriterBatch</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">RecordsWriterBatch</span><wbr><span class="parameters">(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;recordsCount,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time)</span>
+                         throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Writes a fixed number of records with periodic sync and no throughput controller.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>writer</code> - writer descriptor</dd>
+<dd><code>recordsCount</code> - record count</dd>
+<dd><code>dType</code> - data type</dd>
+<dd><code>data</code> - payload</dd>
+<dd><code>size</code> - payload size</dd>
+<dd><code>time</code> - benchmark clock</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if writing or syncing fails</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RecordsWriterBatch(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)">
+<h3 id="RecordsWriterBatch(io.sbk.api.Worker,long,io.sbk.data.DataType,java.lang.Object,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)">RecordsWriterBatch</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">RecordsWriterBatch</span><wbr><span class="parameters">(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;recordsCount,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time,
+ <a href="../logger/WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a>&nbsp;logger)</span>
+                         throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Writes a fixed number of records with request logging, periodic sync, and no throughput controller.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>writer</code> - writer descriptor</dd>
+<dd><code>recordsCount</code> - record count</dd>
+<dd><code>dType</code> - data type</dd>
+<dd><code>data</code> - payload</dd>
+<dd><code>size</code> - payload size</dd>
+<dd><code>time</code> - benchmark clock</dd>
+<dd><code>logger</code> - request logger</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if writing or syncing fails</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="RecordsWriterTime(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)">
 <h3 id="RecordsWriterTime(io.sbk.api.Worker,long,io.sbk.data.DataType,java.lang.Object,int,io.time.Time)">RecordsWriterTime</h3>
 <div class="horizontal-scroll">
@@ -843,6 +1035,60 @@ sync is invoked after writing given set of records.</div>
 <dd><code>logger</code> - log write requests</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - If an exception occurred.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RecordsWriterTimeBatch(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)">
+<h3 id="RecordsWriterTimeBatch(io.sbk.api.Worker,long,io.sbk.data.DataType,java.lang.Object,int,io.time.Time)">RecordsWriterTimeBatch</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">RecordsWriterTimeBatch</span><wbr><span class="parameters">(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;secondsToRun,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time)</span>
+                             throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Writes for a duration with periodic sync and no throughput controller.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>writer</code> - writer descriptor</dd>
+<dd><code>secondsToRun</code> - duration in seconds</dd>
+<dd><code>dType</code> - data type</dd>
+<dd><code>data</code> - payload</dd>
+<dd><code>size</code> - payload size</dd>
+<dd><code>time</code> - benchmark clock</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if writing or syncing fails</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RecordsWriterTimeBatch(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)">
+<h3 id="RecordsWriterTimeBatch(io.sbk.api.Worker,long,io.sbk.data.DataType,java.lang.Object,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)">RecordsWriterTimeBatch</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">RecordsWriterTimeBatch</span><wbr><span class="parameters">(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;secondsToRun,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time,
+ <a href="../logger/WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a>&nbsp;logger)</span>
+                             throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Writes for a duration with request logging, periodic sync, and no throughput controller.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>writer</code> - writer descriptor</dd>
+<dd><code>secondsToRun</code> - duration in seconds</dd>
+<dd><code>dType</code> - data type</dd>
+<dd><code>data</code> - payload</dd>
+<dd><code>size</code> - payload size</dd>
+<dd><code>time</code> - benchmark clock</dd>
+<dd><code>logger</code> - request logger</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if writing or syncing fails</dd>
 </dl>
 </div>
 </section>
@@ -1107,6 +1353,222 @@ sync is invoked after writing given set of records.</div>
 <dd><code>logger</code> - log write requests</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - If an exception occurred.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RecordsWriterRWNoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)">
+<h3 id="RecordsWriterRWNoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,java.lang.Object,int,io.time.Time)">RecordsWriterRWNoRate</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">RecordsWriterRWNoRate</span><wbr><span class="parameters">(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;recordsCount,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time)</span>
+                            throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Writes unmeasured records for a concurrent reader without throughput control.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>writer</code> - writer descriptor</dd>
+<dd><code>recordsCount</code> - record count</dd>
+<dd><code>dType</code> - data type</dd>
+<dd><code>data</code> - payload</dd>
+<dd><code>size</code> - payload size</dd>
+<dd><code>time</code> - benchmark clock</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if writing or syncing fails</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RecordsWriterRWNoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)">
+<h3 id="RecordsWriterRWNoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,java.lang.Object,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)">RecordsWriterRWNoRate</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">RecordsWriterRWNoRate</span><wbr><span class="parameters">(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;recordsCount,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time,
+ <a href="../logger/WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a>&nbsp;logger)</span>
+                            throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Writes unmeasured records with request logging for a concurrent reader without throughput control.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>writer</code> - writer descriptor</dd>
+<dd><code>recordsCount</code> - record count</dd>
+<dd><code>dType</code> - data type</dd>
+<dd><code>data</code> - payload</dd>
+<dd><code>size</code> - payload size</dd>
+<dd><code>time</code> - benchmark clock</dd>
+<dd><code>logger</code> - request logger</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if writing or syncing fails</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RecordsWriterTimeRWNoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)">
+<h3 id="RecordsWriterTimeRWNoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,java.lang.Object,int,io.time.Time)">RecordsWriterTimeRWNoRate</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">RecordsWriterTimeRWNoRate</span><wbr><span class="parameters">(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;secondsToRun,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time)</span>
+                                throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Writes unmeasured records for a duration without throughput control.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>writer</code> - writer descriptor</dd>
+<dd><code>secondsToRun</code> - duration in seconds</dd>
+<dd><code>dType</code> - data type</dd>
+<dd><code>data</code> - payload</dd>
+<dd><code>size</code> - payload size</dd>
+<dd><code>time</code> - benchmark clock</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if writing or syncing fails</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RecordsWriterTimeRWNoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)">
+<h3 id="RecordsWriterTimeRWNoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,java.lang.Object,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)">RecordsWriterTimeRWNoRate</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">RecordsWriterTimeRWNoRate</span><wbr><span class="parameters">(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;secondsToRun,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time,
+ <a href="../logger/WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a>&nbsp;logger)</span>
+                                throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Writes unmeasured records with request logging for a duration without throughput control.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>writer</code> - writer descriptor</dd>
+<dd><code>secondsToRun</code> - duration in seconds</dd>
+<dd><code>dType</code> - data type</dd>
+<dd><code>data</code> - payload</dd>
+<dd><code>size</code> - payload size</dd>
+<dd><code>time</code> - benchmark clock</dd>
+<dd><code>logger</code> - request logger</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if writing or syncing fails</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RecordsWriterRONoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)">
+<h3 id="RecordsWriterRONoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,java.lang.Object,int,io.time.Time)">RecordsWriterRONoRate</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">RecordsWriterRONoRate</span><wbr><span class="parameters">(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;recordsCount,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time)</span>
+                            throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Writes records without measurement or throughput control.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>writer</code> - writer descriptor</dd>
+<dd><code>recordsCount</code> - record count</dd>
+<dd><code>dType</code> - data type</dd>
+<dd><code>data</code> - payload</dd>
+<dd><code>size</code> - payload size</dd>
+<dd><code>time</code> - benchmark clock</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if writing or syncing fails</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RecordsWriterRONoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)">
+<h3 id="RecordsWriterRONoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,java.lang.Object,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)">RecordsWriterRONoRate</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">RecordsWriterRONoRate</span><wbr><span class="parameters">(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;recordsCount,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time,
+ <a href="../logger/WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a>&nbsp;logger)</span>
+                            throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Writes records with request logging and without measurement or throughput control.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>writer</code> - writer descriptor</dd>
+<dd><code>recordsCount</code> - record count</dd>
+<dd><code>dType</code> - data type</dd>
+<dd><code>data</code> - payload</dd>
+<dd><code>size</code> - payload size</dd>
+<dd><code>time</code> - benchmark clock</dd>
+<dd><code>logger</code> - request logger</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if writing or syncing fails</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RecordsWriterTimeRONoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time)">
+<h3 id="RecordsWriterTimeRONoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,java.lang.Object,int,io.time.Time)">RecordsWriterTimeRONoRate</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">RecordsWriterTimeRONoRate</span><wbr><span class="parameters">(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;secondsToRun,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time)</span>
+                                throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Writes records without measurement or throughput control for a duration.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>writer</code> - writer descriptor</dd>
+<dd><code>secondsToRun</code> - duration in seconds</dd>
+<dd><code>dType</code> - data type</dd>
+<dd><code>data</code> - payload</dd>
+<dd><code>size</code> - payload size</dd>
+<dd><code>time</code> - benchmark clock</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if writing or syncing fails</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RecordsWriterTimeRONoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,T,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)">
+<h3 id="RecordsWriterTimeRONoRate(io.sbk.api.Worker,long,io.sbk.data.DataType,java.lang.Object,int,io.time.Time,io.sbk.logger.WriteRequestsLogger)">RecordsWriterTimeRONoRate</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">RecordsWriterTimeRONoRate</span><wbr><span class="parameters">(<a href="Worker.html" title="class in io.sbk.api">Worker</a>&nbsp;writer,
+ long&nbsp;secondsToRun,
+ <a href="../data/DataType.html" title="interface in io.sbk.data">DataType</a>&lt;<a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&gt;&nbsp;dType,
+ <a href="#type-param-T" title="type parameter in DataRecordsWriter">T</a>&nbsp;data,
+ int&nbsp;size,
+ io.time.Time&nbsp;time,
+ <a href="../logger/WriteRequestsLogger.html" title="interface in io.sbk.logger">WriteRequestsLogger</a>&nbsp;logger)</span>
+                                throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Writes records with request logging and without measurement or throughput control for a duration.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>writer</code> - writer descriptor</dd>
+<dd><code>secondsToRun</code> - duration in seconds</dd>
+<dd><code>dType</code> - data type</dd>
+<dd><code>data</code> - payload</dd>
+<dd><code>size</code> - payload size</dd>
+<dd><code>time</code> - benchmark clock</dd>
+<dd><code>logger</code> - request logger</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - if writing or syncing fails</dd>
 </dl>
 </div>
 </section>

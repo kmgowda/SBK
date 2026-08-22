@@ -57,6 +57,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#stop()" tabindex="0">stop()</a></li>
+<li><a href="#stop(io.perl.api.BenchmarkTermination)" tabindex="0">stop(BenchmarkTermination)</a></li>
 </ol>
 </li>
 </ol>
@@ -120,7 +121,7 @@ perl.stop();
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab3" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab3', 3)" class="table-tab">Abstract Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab3" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab3', 3)" class="table-tab">Abstract Methods</button><button id="method-summary-table-tab5" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab5', 3)" class="table-tab">Default Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
@@ -130,6 +131,12 @@ perl.stop();
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#stop()" class="member-name-link">stop</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Stop and shutdown the benchmark.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#stop(io.perl.api.BenchmarkTermination)" class="member-name-link">stop</a><wbr>(<a href="BenchmarkTermination.html" title="enum class in io.perl.api">BenchmarkTermination</a>&nbsp;termination)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Stops the benchmark while preserving an orchestrator-provided successful
+completion reason in the final lifecycle log.</div>
 </div>
 </div>
 </div>
@@ -157,7 +164,26 @@ perl.stop();
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">stop</span>()</div>
 <div class="block">Stop and shutdown the benchmark. Implementations should ensure all
-pending metrics are flushed and any background threads are terminated.</div>
+pending metrics are flushed and any background threads are terminated.
+A failure encountered during that flush is reported through the future
+previously returned by <a href="RunBenchmark.html#run(long,long)"><code>RunBenchmark.run(long, long)</code></a>.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="stop(io.perl.api.BenchmarkTermination)">
+<h3>stop</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">stop</span><wbr><span class="parameters">(<a href="BenchmarkTermination.html" title="enum class in io.perl.api">BenchmarkTermination</a>&nbsp;termination)</span></div>
+<div class="block">Stops the benchmark while preserving an orchestrator-provided successful
+completion reason in the final lifecycle log.
+
+<p>The default implementation retains compatibility with alternate PerL
+implementations by delegating to <a href="#stop()"><code>stop()</code></a>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>termination</code> - successful duration/record completion or an explicit stop</dd>
+</dl>
 </div>
 </section>
 </li>

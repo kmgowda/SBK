@@ -66,6 +66,21 @@ Start with defaults:
 ./sbm/build/install/sbm/bin/sbm
 ```
 
+When a positive `-records N` is supplied to identify a fixed-record run, SBM
+exits with a failed benchmark if no SBK performance batch arrives for
+`-idletimeoutseconds N`; the default is 600 seconds. Without `-records`, the
+deadline is disabled. The check runs only while the ingestion queues are empty.
+Every SBP batch containing completed records renews the complete deadline; an
+empty periodic batch is still printable but does not represent progress. The
+idle timeout must be strictly greater than the selected logger's reporting
+interval.
+
+SBM's final lifecycle log distinguishes an orchestrated successful `-seconds`
+or `-records` completion from an explicit stop, idle timeout, or local/remote
+internal failure. Failures reported by remote SBK clients and failures raised
+while draining the final aggregation window remain visible in the returned
+completion and terminal log.
+
 Start the aggregate Prometheus exporter explicitly:
 
 ```bash

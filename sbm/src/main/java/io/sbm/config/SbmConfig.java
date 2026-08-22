@@ -11,6 +11,7 @@
 package io.sbm.config;
 
 import io.perl.config.LatencyConfig;
+import io.perl.config.PerlConfig;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 
@@ -56,6 +57,8 @@ final public class SbmConfig extends LatencyConfig {
      * <code>int idleMS</code>.
      */
     public int idleMS;
+    /** Maximum interval without an SBK performance batch, in seconds. */
+    public int idleTimeoutSeconds = PerlConfig.DEFAULT_IDLE_TIMEOUT_SECONDS;
     /**
      * Maximum inbound SBP latency-record size in MiB.
      */
@@ -94,6 +97,7 @@ final public class SbmConfig extends LatencyConfig {
 
     private void validate() {
         if (port < MIN_PORT || port > MAX_PORT || maxConnections < 1 || maxQueues < 1 || idleMS < 0
+                || idleTimeoutSeconds < 1
                 || maxRecordSizeMB < 1 || maxArraySizeMB < 1 || maxHashMapSizeMB < 1
                 || totalMaxHashMapSizeMB < 1 || defaultAction == null
                 || !defaultAction.matches("(?i)(r|w|wr|wro|rw|rwo)")) {

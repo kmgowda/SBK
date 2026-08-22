@@ -82,6 +82,26 @@ public sealed interface Time permits MilliSeconds, MicroSeconds, NanoSeconds {
     }
 
     /**
+     * Convert a duration in seconds to this clock's native unit.
+     *
+     * <p>The conversion is intended for benchmark-loop setup so duration
+     * checks can use integer subtraction without a per-operation floating
+     * point conversion.</p>
+     *
+     * @param seconds duration in seconds
+     * @return duration expressed in this clock's native unit
+     * @throws ArithmeticException if the converted duration overflows a long
+     */
+    default long secondsToTimeUnits(long seconds) {
+        final long unitsPerSecond = switch (getTimeUnit()) {
+            case ms -> MS_PER_SEC;
+            case mcs -> MICROS_PER_SEC;
+            case ns -> NS_PER_SEC;
+        };
+        return Math.multiplyExact(seconds, unitsPerSecond);
+    }
+
+    /**
      * get the elapsed Time in milliseconds.
      *
      * @param h time stamp
@@ -124,4 +144,3 @@ public sealed interface Time permits MilliSeconds, MicroSeconds, NanoSeconds {
     double convertToMilliSeconds(double t);
 
 }
-

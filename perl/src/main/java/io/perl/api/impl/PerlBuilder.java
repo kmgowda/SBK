@@ -107,9 +107,9 @@ public final class PerlBuilder {
      * @return a new PeriodicRecorder instance
      */
     @Contract("_, _, _ -> new")
-    private static @NotNull PeriodicRecorder buildPeriodicLogger(Time time,
-                                                                 LatencyConfig config,
-                                                                 @NotNull PerformanceLogger logger) {
+    static @NotNull PeriodicRecorder buildPeriodicLogger(Time time,
+                                                         LatencyConfig config,
+                                                         @NotNull PerformanceLogger logger) {
         final long minLatency = logger.getMinLatency();
         final long maxLatency = logger.getMaxLatency();
         final double[] percentiles = logger.getPercentiles();
@@ -150,8 +150,20 @@ public final class PerlBuilder {
             PerlPrinter.log.info("Total Window Extension: None, Size: 0 MB");
         }
 
-        return new TotalWindowLatencyPeriodicRecorder(window, totalWindowExtension, logger, logger::printTotal,
-                logger::recordLatency, time);
+        if (window instanceof ArrayLatencyRecorder arrayWindow) {
+            if (logger.recordsIndividualLatencies()) {
+                return new ArrayWindowLatencyPeriodicRecorder(arrayWindow,
+                        totalWindowExtension, logger, logger::printTotal,
+                        logger::recordLatency, time);
+            }
+            return new ArrayWindowPeriodicRecorder(arrayWindow,
+                    totalWindowExtension, logger, logger::printTotal, time);
+        }
+        if (logger.recordsIndividualLatencies()) {
+            return new TotalWindowLatencyPeriodicRecorder(window, totalWindowExtension, logger, logger::printTotal,
+                    logger::recordLatency, time);
+        }
+        return new TotalWindowPeriodicRecorder(window, totalWindowExtension, logger, logger::printTotal, time);
     }
 
     /**

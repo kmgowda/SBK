@@ -66,11 +66,12 @@ loadScripts(document, 'script');</script>
 </li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(io.perl.api.PeriodicRecorder,io.perl.api.Channel%5B%5D,io.time.Time,int)" tabindex="0">PerformanceRecorder(PeriodicRecorder, Channel[], Time, int)</a></li>
+<li><a href="#%3Cinit%3E(io.perl.api.PeriodicRecorder,io.perl.api.Channel%5B%5D,io.time.Time,int,int)" tabindex="0">PerformanceRecorder(PeriodicRecorder, Channel[], Time, int, int)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
+<li><a href="#checkIdleTimeout(long,long)" tabindex="0">checkIdleTimeout(long, long)</a></li>
 <li><a href="#run(long,long)" tabindex="0">run(long, long)</a></li>
 </ol>
 </li>
@@ -141,10 +142,11 @@ loop in <a href="#run(long,long)"><code>run(long, long)</code></a> and manage ch
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(io.perl.api.PeriodicRecorder,io.perl.api.Channel%5B%5D,io.time.Time,int)" class="member-name-link">PerformanceRecorder</a><wbr>(<a href="PeriodicRecorder.html" title="interface in io.perl.api">PeriodicRecorder</a>&nbsp;periodicRecorder,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(io.perl.api.PeriodicRecorder,io.perl.api.Channel%5B%5D,io.time.Time,int,int)" class="member-name-link">PerformanceRecorder</a><wbr>(<a href="PeriodicRecorder.html" title="interface in io.perl.api">PeriodicRecorder</a>&nbsp;periodicRecorder,
  <a href="Channel.html" title="interface in io.perl.api">Channel</a>[]&nbsp;channels,
  <a href="../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time,
- int&nbsp;reportingIntervalMS)</code></div>
+ int&nbsp;reportingIntervalMS,
+ int&nbsp;idleTimeoutSeconds)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Constructor to initialize performance recorder.</div>
 </div>
@@ -156,16 +158,22 @@ loop in <a href="#run(long,long)"><code>run(long, long)</code></a> and manage ch
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab3" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab3', 3)" class="table-tab">Abstract Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab3" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab3', 3)" class="table-tab">Abstract Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#run(long,long)" class="member-name-link">run</a><wbr>(long&nbsp;secondsToRun,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected final void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#checkIdleTimeout(long,long)" class="member-name-link">checkIdleTimeout</a><wbr>(long&nbsp;currentTime,
+ long&nbsp;lastEventTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Fails an idle consumer after the configured interval.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#run(long,long)" class="member-name-link">run</a><wbr>(long&nbsp;secondsToRun,
  long&nbsp;totalRecords)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Main loop that consumes channel events and updates periodic recorders.</div>
 </div>
 </div>
@@ -230,14 +238,15 @@ loop in <a href="#run(long,long)"><code>run(long, long)</code></a> and manage ch
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(io.perl.api.PeriodicRecorder,io.perl.api.Channel[],io.time.Time,int)">
+<section class="detail" id="&lt;init&gt;(io.perl.api.PeriodicRecorder,io.perl.api.Channel[],io.time.Time,int,int)">
 <h3>PerformanceRecorder</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">PerformanceRecorder</span><wbr><span class="parameters">(<a href="PeriodicRecorder.html" title="interface in io.perl.api">PeriodicRecorder</a>&nbsp;periodicRecorder,
  @Nonnull
  <a href="Channel.html" title="interface in io.perl.api">Channel</a>[]&nbsp;channels,
  <a href="../../time/Time.html" title="interface in io.time">Time</a>&nbsp;time,
- int&nbsp;reportingIntervalMS)</span></div>
+ int&nbsp;reportingIntervalMS,
+ int&nbsp;idleTimeoutSeconds)</span></div>
 <div class="block">Constructor to initialize performance recorder.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -245,6 +254,9 @@ loop in <a href="#run(long,long)"><code>run(long, long)</code></a> and manage ch
 <dd><code>channels</code> - array of channels (one per worker/thread)</dd>
 <dd><code>time</code> - time helper for conversions</dd>
 <dd><code>reportingIntervalMS</code> - reporting interval in milliseconds</dd>
+<dd><code>idleTimeoutSeconds</code> - maximum interval without a performance event</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - when the idle timeout is not positive or does not exceed the reporting interval</dd>
 </dl>
 </div>
 </section>
@@ -257,6 +269,26 @@ loop in <a href="#run(long,long)"><code>run(long, long)</code></a> and manage ch
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="checkIdleTimeout(long,long)">
+<h3>checkIdleTimeout</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">protected final</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">checkIdleTimeout</span><wbr><span class="parameters">(long&nbsp;currentTime,
+ long&nbsp;lastEventTime)</span></div>
+<div class="block">Fails an idle consumer after the configured interval.
+
+<p>This method is called only from an implementation's existing empty-channel slow path.
+It is never called for a successful queue dequeue or latency-window update.</p></div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>currentTime</code> - current benchmark time</dd>
+<dd><code>lastEventTime</code> - time of the most recently consumed performance event</dd>
+<dt>Throws:</dt>
+<dd><code><a href="../exception/BenchmarkIdleTimeoutException.html" title="class in io.perl.exception">BenchmarkIdleTimeoutException</a></code> - when the configured idle interval has elapsed</dd>
+</dl>
+</div>
+</section>
+</li>
 <li>
 <section class="detail" id="run(long,long)">
 <h3>run</h3>

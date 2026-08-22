@@ -265,6 +265,61 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
     }
 
     /**
+     * Writes a fixed number of records with periodic sync and no throughput controller.
+     *
+     * @param writer writer descriptor
+     * @param recordsCount record count
+     * @param dType data type
+     * @param data payload
+     * @param size payload size
+     * @param time benchmark clock
+     * @throws IOException if writing or syncing fails
+     */
+    default void RecordsWriterBatch(Worker writer, long recordsCount, DataType<T> dType, T data, int size,
+                                    Time time) throws IOException {
+        final Status status = new Status();
+        long count = 0;
+        while (count < recordsCount) {
+            final long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - count);
+            long loopCount = 0;
+            while (loopCount < loopMax) {
+                recordWrite(dType, data, size, time, status, writer.perlChannel);
+                loopCount += status.records;
+                count += status.records;
+            }
+            sync();
+        }
+    }
+
+    /**
+     * Writes a fixed number of records with request logging, periodic sync, and no throughput controller.
+     *
+     * @param writer writer descriptor
+     * @param recordsCount record count
+     * @param dType data type
+     * @param data payload
+     * @param size payload size
+     * @param time benchmark clock
+     * @param logger request logger
+     * @throws IOException if writing or syncing fails
+     */
+    default void RecordsWriterBatch(Worker writer, long recordsCount, DataType<T> dType, T data, int size,
+                                    Time time, WriteRequestsLogger logger) throws IOException {
+        final Status status = new Status();
+        long count = 0;
+        while (count < recordsCount) {
+            final long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - count);
+            long loopCount = 0;
+            while (loopCount < loopMax) {
+                recordWrite(dType, data, size, time, status, writer.perlChannel, writer.id, logger);
+                loopCount += status.records;
+                count += status.records;
+            }
+            sync();
+        }
+    }
+
+    /**
      * Default implementation for writer benchmarking by continuously writing data records for specific time duration.
      * Write is performed using {@link io.sbk.api.DataRecordsWriter#recordWrite(DataType, Object, int, Time, Status, PerlChannel)}
      * sync is invoked after writing records for given time.
@@ -280,13 +335,13 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
     default void RecordsWriterTime(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
                                    Time time) throws IOException {
         final Status status = new Status();
-        final long msToRun = secondsToRun * Time.MS_PER_SEC;
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
         long startTime = time.getCurrentTime();
         status.startTime = startTime;
-        long msElapsed = 0;
-        while (msElapsed < msToRun) {
+        long elapsedTimeUnits = 0;
+        while (elapsedTimeUnits < timeUnitsToRun) {
             recordWrite(dType, data, size, time, status, writer.perlChannel);
-            msElapsed = (long) time.elapsedMilliSeconds(status.startTime, startTime);
+            elapsedTimeUnits = time.elapsed(status.startTime, startTime);
         }
         sync();
     }
@@ -309,13 +364,13 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
     default void RecordsWriterTime(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
                                    Time time, WriteRequestsLogger logger) throws IOException {
         final Status status = new Status();
-        final long msToRun = secondsToRun * Time.MS_PER_SEC;
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
         long startTime = time.getCurrentTime();
         status.startTime = startTime;
-        long msElapsed = 0;
-        while (msElapsed < msToRun) {
+        long elapsedTimeUnits = 0;
+        while (elapsedTimeUnits < timeUnitsToRun) {
             recordWrite(dType, data, size, time, status, writer.perlChannel, writer.id, logger);
-            msElapsed = (long) time.elapsedMilliSeconds(status.startTime, startTime);
+            elapsedTimeUnits = time.elapsed(status.startTime, startTime);
         }
         sync();
     }
@@ -339,18 +394,19 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
                                        Time time, RateController rController) throws IOException {
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
         int cnt = 0;
-        long secondsElapsed = 0;
+        long elapsedTimeUnits = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
-        while (secondsElapsed < secondsToRun) {
+        while (elapsedTimeUnits < timeUnitsToRun) {
             int i = 0;
-            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
+            while (elapsedTimeUnits < timeUnitsToRun && i < writer.params.getRecordsPerSync()) {
                 recordWrite(dType, data, size, time, status, writer.perlChannel);
                 i += status.records;
                 cnt += status.records;
-                secondsElapsed = (long) time.elapsedSeconds(status.startTime, loopStartTime);
-                rController.control(cnt, secondsElapsed);
+                elapsedTimeUnits = time.elapsed(status.startTime, loopStartTime);
+                rController.control(cnt, time.elapsedSeconds(status.startTime, loopStartTime));
             }
             sync();
         }
@@ -376,18 +432,78 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
                                        Time time, RateController rController, WriteRequestsLogger logger) throws IOException {
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
         int cnt = 0;
-        long secondsElapsed = 0;
+        long elapsedTimeUnits = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
-        while (secondsElapsed < secondsToRun) {
+        while (elapsedTimeUnits < timeUnitsToRun) {
             int i = 0;
-            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
+            while (elapsedTimeUnits < timeUnitsToRun && i < writer.params.getRecordsPerSync()) {
                 recordWrite(dType, data, size, time, status, writer.perlChannel, writer.id, logger);
                 i += status.records;
                 cnt += status.records;
-                secondsElapsed = (long) time.elapsedSeconds(status.startTime, loopStartTime);
-                rController.control(cnt, secondsElapsed);
+                elapsedTimeUnits = time.elapsed(status.startTime, loopStartTime);
+                rController.control(cnt, time.elapsedSeconds(status.startTime, loopStartTime));
+            }
+            sync();
+        }
+    }
+
+    /**
+     * Writes for a duration with periodic sync and no throughput controller.
+     *
+     * @param writer writer descriptor
+     * @param secondsToRun duration in seconds
+     * @param dType data type
+     * @param data payload
+     * @param size payload size
+     * @param time benchmark clock
+     * @throws IOException if writing or syncing fails
+     */
+    default void RecordsWriterTimeBatch(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
+                                        Time time) throws IOException {
+        final Status status = new Status();
+        final long startTime = time.getCurrentTime();
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
+        long elapsedTimeUnits = 0;
+        status.startTime = startTime;
+        while (elapsedTimeUnits < timeUnitsToRun) {
+            long loopCount = 0;
+            while (elapsedTimeUnits < timeUnitsToRun && loopCount < writer.params.getRecordsPerSync()) {
+                recordWrite(dType, data, size, time, status, writer.perlChannel);
+                loopCount += status.records;
+                elapsedTimeUnits = time.elapsed(status.startTime, startTime);
+            }
+            sync();
+        }
+    }
+
+    /**
+     * Writes for a duration with request logging, periodic sync, and no throughput controller.
+     *
+     * @param writer writer descriptor
+     * @param secondsToRun duration in seconds
+     * @param dType data type
+     * @param data payload
+     * @param size payload size
+     * @param time benchmark clock
+     * @param logger request logger
+     * @throws IOException if writing or syncing fails
+     */
+    default void RecordsWriterTimeBatch(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
+                                        Time time, WriteRequestsLogger logger) throws IOException {
+        final Status status = new Status();
+        final long startTime = time.getCurrentTime();
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
+        long elapsedTimeUnits = 0;
+        status.startTime = startTime;
+        while (elapsedTimeUnits < timeUnitsToRun) {
+            long loopCount = 0;
+            while (elapsedTimeUnits < timeUnitsToRun && loopCount < writer.params.getRecordsPerSync()) {
+                recordWrite(dType, data, size, time, status, writer.perlChannel, writer.id, logger);
+                loopCount += status.records;
+                elapsedTimeUnits = time.elapsed(status.startTime, startTime);
             }
             sync();
         }
@@ -478,18 +594,19 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
                                      Time time, RateController rController) throws IOException {
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
         long cnt = 0;
-        long secondsElapsed = 0;
+        long elapsedTimeUnits = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
-        while (secondsElapsed < secondsToRun) {
+        while (elapsedTimeUnits < timeUnitsToRun) {
             long i = 0;
-            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
+            while (elapsedTimeUnits < timeUnitsToRun && i < writer.params.getRecordsPerSync()) {
                 writeSetTime(dType, data, size, time, status);
                 i += status.records;
                 cnt += status.records;
-                secondsElapsed = (long) time.elapsedSeconds(status.startTime, loopStartTime);
-                rController.control(cnt, secondsElapsed);
+                elapsedTimeUnits = time.elapsed(status.startTime, loopStartTime);
+                rController.control(cnt, time.elapsedSeconds(status.startTime, loopStartTime));
             }
             sync();
         }
@@ -514,18 +631,19 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
                                      Time time, RateController rController, WriteRequestsLogger logger) throws IOException {
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
         long cnt = 0;
-        long secondsElapsed = 0;
+        long elapsedTimeUnits = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
-        while (secondsElapsed < secondsToRun) {
+        while (elapsedTimeUnits < timeUnitsToRun) {
             long i = 0;
-            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
+            while (elapsedTimeUnits < timeUnitsToRun && i < writer.params.getRecordsPerSync()) {
                 writeSetTime(dType, data, size, time, status, writer.id, logger);
                 i += status.records;
                 cnt += status.records;
-                secondsElapsed = (long) time.elapsedSeconds(status.startTime, loopStartTime);
-                rController.control(cnt, secondsElapsed);
+                elapsedTimeUnits = time.elapsed(status.startTime, loopStartTime);
+                rController.control(cnt, time.elapsedSeconds(status.startTime, loopStartTime));
             }
             sync();
         }
@@ -617,18 +735,19 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
                                      Time time, RateController rController) throws IOException {
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
         long cnt = 0;
-        long secondsElapsed = 0;
+        long elapsedTimeUnits = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
-        while (secondsElapsed < secondsToRun) {
+        while (elapsedTimeUnits < timeUnitsToRun) {
             long i = 0;
-            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
+            while (elapsedTimeUnits < timeUnitsToRun && i < writer.params.getRecordsPerSync()) {
                 write(dType, data, size, time, status);
                 i += status.records;
                 cnt += status.records;
-                secondsElapsed = (long) time.elapsedSeconds(status.startTime, loopStartTime);
-                rController.control(cnt, secondsElapsed);
+                elapsedTimeUnits = time.elapsed(status.startTime, loopStartTime);
+                rController.control(cnt, time.elapsedSeconds(status.startTime, loopStartTime));
             }
             sync();
         }
@@ -654,18 +773,247 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
                                      Time time, RateController rController, WriteRequestsLogger logger) throws IOException {
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
         long cnt = 0;
-        long secondsElapsed = 0;
+        long elapsedTimeUnits = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
-        while (secondsElapsed < secondsToRun) {
+        while (elapsedTimeUnits < timeUnitsToRun) {
             long i = 0;
-            while ((secondsElapsed < secondsToRun) && (i < writer.params.getRecordsPerSync())) {
+            while (elapsedTimeUnits < timeUnitsToRun && i < writer.params.getRecordsPerSync()) {
                 write(dType, data, size, time, status, writer.id, logger);
                 i += status.records;
                 cnt += status.records;
-                secondsElapsed = (long) time.elapsedSeconds(status.startTime, loopStartTime);
-                rController.control(cnt, secondsElapsed);
+                elapsedTimeUnits = time.elapsed(status.startTime, loopStartTime);
+                rController.control(cnt, time.elapsedSeconds(status.startTime, loopStartTime));
+            }
+            sync();
+        }
+    }
+
+    /**
+     * Writes unmeasured records for a concurrent reader without throughput control.
+     *
+     * @param writer writer descriptor
+     * @param recordsCount record count
+     * @param dType data type
+     * @param data payload
+     * @param size payload size
+     * @param time benchmark clock
+     * @throws IOException if writing or syncing fails
+     */
+    default void RecordsWriterRWNoRate(Worker writer, long recordsCount, DataType<T> dType, T data, int size,
+                                       Time time) throws IOException {
+        final Status status = new Status();
+        long count = 0;
+        while (count < recordsCount) {
+            final long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - count);
+            long loopCount = 0;
+            while (loopCount < loopMax) {
+                writeSetTime(dType, data, size, time, status);
+                loopCount += status.records;
+                count += status.records;
+            }
+            sync();
+        }
+    }
+
+    /**
+     * Writes unmeasured records with request logging for a concurrent reader without throughput control.
+     *
+     * @param writer writer descriptor
+     * @param recordsCount record count
+     * @param dType data type
+     * @param data payload
+     * @param size payload size
+     * @param time benchmark clock
+     * @param logger request logger
+     * @throws IOException if writing or syncing fails
+     */
+    default void RecordsWriterRWNoRate(Worker writer, long recordsCount, DataType<T> dType, T data, int size,
+                                       Time time, WriteRequestsLogger logger) throws IOException {
+        final Status status = new Status();
+        long count = 0;
+        while (count < recordsCount) {
+            final long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - count);
+            long loopCount = 0;
+            while (loopCount < loopMax) {
+                writeSetTime(dType, data, size, time, status, writer.id, logger);
+                loopCount += status.records;
+                count += status.records;
+            }
+            sync();
+        }
+    }
+
+    /**
+     * Writes unmeasured records for a duration without throughput control.
+     *
+     * @param writer writer descriptor
+     * @param secondsToRun duration in seconds
+     * @param dType data type
+     * @param data payload
+     * @param size payload size
+     * @param time benchmark clock
+     * @throws IOException if writing or syncing fails
+     */
+    default void RecordsWriterTimeRWNoRate(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
+                                           Time time) throws IOException {
+        final Status status = new Status();
+        final long startTime = time.getCurrentTime();
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
+        long elapsedTimeUnits = 0;
+        status.startTime = startTime;
+        while (elapsedTimeUnits < timeUnitsToRun) {
+            long loopCount = 0;
+            while (elapsedTimeUnits < timeUnitsToRun && loopCount < writer.params.getRecordsPerSync()) {
+                writeSetTime(dType, data, size, time, status);
+                loopCount += status.records;
+                elapsedTimeUnits = time.elapsed(status.startTime, startTime);
+            }
+            sync();
+        }
+    }
+
+    /**
+     * Writes unmeasured records with request logging for a duration without throughput control.
+     *
+     * @param writer writer descriptor
+     * @param secondsToRun duration in seconds
+     * @param dType data type
+     * @param data payload
+     * @param size payload size
+     * @param time benchmark clock
+     * @param logger request logger
+     * @throws IOException if writing or syncing fails
+     */
+    default void RecordsWriterTimeRWNoRate(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
+                                           Time time, WriteRequestsLogger logger) throws IOException {
+        final Status status = new Status();
+        final long startTime = time.getCurrentTime();
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
+        long elapsedTimeUnits = 0;
+        status.startTime = startTime;
+        while (elapsedTimeUnits < timeUnitsToRun) {
+            long loopCount = 0;
+            while (elapsedTimeUnits < timeUnitsToRun && loopCount < writer.params.getRecordsPerSync()) {
+                writeSetTime(dType, data, size, time, status, writer.id, logger);
+                loopCount += status.records;
+                elapsedTimeUnits = time.elapsed(status.startTime, startTime);
+            }
+            sync();
+        }
+    }
+
+    /**
+     * Writes records without measurement or throughput control.
+     *
+     * @param writer writer descriptor
+     * @param recordsCount record count
+     * @param dType data type
+     * @param data payload
+     * @param size payload size
+     * @param time benchmark clock
+     * @throws IOException if writing or syncing fails
+     */
+    default void RecordsWriterRONoRate(Worker writer, long recordsCount, DataType<T> dType, T data, int size,
+                                       Time time) throws IOException {
+        final Status status = new Status();
+        long count = 0;
+        while (count < recordsCount) {
+            final long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - count);
+            long loopCount = 0;
+            while (loopCount < loopMax) {
+                write(dType, data, size, time, status);
+                loopCount += status.records;
+                count += status.records;
+            }
+            sync();
+        }
+    }
+
+    /**
+     * Writes records with request logging and without measurement or throughput control.
+     *
+     * @param writer writer descriptor
+     * @param recordsCount record count
+     * @param dType data type
+     * @param data payload
+     * @param size payload size
+     * @param time benchmark clock
+     * @param logger request logger
+     * @throws IOException if writing or syncing fails
+     */
+    default void RecordsWriterRONoRate(Worker writer, long recordsCount, DataType<T> dType, T data, int size,
+                                       Time time, WriteRequestsLogger logger) throws IOException {
+        final Status status = new Status();
+        long count = 0;
+        while (count < recordsCount) {
+            final long loopMax = Math.min(writer.params.getRecordsPerSync(), recordsCount - count);
+            long loopCount = 0;
+            while (loopCount < loopMax) {
+                write(dType, data, size, time, status, writer.id, logger);
+                loopCount += status.records;
+                count += status.records;
+            }
+            sync();
+        }
+    }
+
+    /**
+     * Writes records without measurement or throughput control for a duration.
+     *
+     * @param writer writer descriptor
+     * @param secondsToRun duration in seconds
+     * @param dType data type
+     * @param data payload
+     * @param size payload size
+     * @param time benchmark clock
+     * @throws IOException if writing or syncing fails
+     */
+    default void RecordsWriterTimeRONoRate(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
+                                           Time time) throws IOException {
+        final Status status = new Status();
+        final long startTime = time.getCurrentTime();
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
+        long elapsedTimeUnits = 0;
+        status.startTime = startTime;
+        while (elapsedTimeUnits < timeUnitsToRun) {
+            long loopCount = 0;
+            while (elapsedTimeUnits < timeUnitsToRun && loopCount < writer.params.getRecordsPerSync()) {
+                write(dType, data, size, time, status);
+                loopCount += status.records;
+                elapsedTimeUnits = time.elapsed(status.startTime, startTime);
+            }
+            sync();
+        }
+    }
+
+    /**
+     * Writes records with request logging and without measurement or throughput control for a duration.
+     *
+     * @param writer writer descriptor
+     * @param secondsToRun duration in seconds
+     * @param dType data type
+     * @param data payload
+     * @param size payload size
+     * @param time benchmark clock
+     * @param logger request logger
+     * @throws IOException if writing or syncing fails
+     */
+    default void RecordsWriterTimeRONoRate(Worker writer, long secondsToRun, DataType<T> dType, T data, int size,
+                                           Time time, WriteRequestsLogger logger) throws IOException {
+        final Status status = new Status();
+        final long startTime = time.getCurrentTime();
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
+        long elapsedTimeUnits = 0;
+        status.startTime = startTime;
+        while (elapsedTimeUnits < timeUnitsToRun) {
+            long loopCount = 0;
+            while (elapsedTimeUnits < timeUnitsToRun && loopCount < writer.params.getRecordsPerSync()) {
+                write(dType, data, size, time, status, writer.id, logger);
+                loopCount += status.records;
+                elapsedTimeUnits = time.elapsed(status.startTime, startTime);
             }
             sync();
         }

@@ -65,6 +65,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#getPerlChannel()" tabindex="0">getPerlChannel()</a></li>
 <li><a href="#run(long,long)" tabindex="0">run(long, long)</a></li>
 <li><a href="#stop()" tabindex="0">stop()</a></li>
+<li><a href="#stop(io.perl.api.BenchmarkTermination)" tabindex="0">stop(BenchmarkTermination)</a></li>
 </ol>
 </li>
 </ol>
@@ -137,6 +138,12 @@ implements <a href="../Perl.html" title="interface in io.perl.api">Perl</a></spa
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stop()" class="member-name-link">stop</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Stop the CQ Perl.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stop(io.perl.api.BenchmarkTermination)" class="member-name-link">stop</a><wbr>(<a href="../BenchmarkTermination.html" title="enum class in io.perl.api">BenchmarkTermination</a>&nbsp;termination)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Stops the benchmark while preserving an orchestrator-provided successful
+completion reason in the final lifecycle log.</div>
 </div>
 </div>
 </div>
@@ -229,6 +236,26 @@ implements <a href="../Perl.html" title="interface in io.perl.api">Perl</a></spa
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../Perl.html#stop()">stop</a></code>&nbsp;in interface&nbsp;<code><a href="../Perl.html" title="interface in io.perl.api">Perl</a></code></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="stop(io.perl.api.BenchmarkTermination)">
+<h3>stop</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">stop</span><wbr><span class="parameters">(<a href="../BenchmarkTermination.html" title="enum class in io.perl.api">BenchmarkTermination</a>&nbsp;termination)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Perl.html#stop(io.perl.api.BenchmarkTermination)">Perl</a></code></span></div>
+<div class="block">Stops the benchmark while preserving an orchestrator-provided successful
+completion reason in the final lifecycle log.
+
+<p>The default implementation retains compatibility with alternate PerL
+implementations by delegating to <a href="../Perl.html#stop()"><code>Perl.stop()</code></a>.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../Perl.html#stop(io.perl.api.BenchmarkTermination)">stop</a></code>&nbsp;in interface&nbsp;<code><a href="../Perl.html" title="interface in io.perl.api">Perl</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>termination</code> - successful duration/record completion or an explicit stop</dd>
 </dl>
 </div>
 </section>

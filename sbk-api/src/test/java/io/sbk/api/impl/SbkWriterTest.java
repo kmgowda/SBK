@@ -63,6 +63,29 @@ final class SbkWriterTest {
         }
     }
 
+    @Test
+    void batchesUnlimitedWritesWithoutRateControl() throws Exception {
+        final AtomicInteger writeCalls = new AtomicInteger();
+        final AtomicInteger syncCalls = new AtomicInteger();
+        final Writer<Object> driver = countingWriter(writeCalls, syncCalls);
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final TestSystemLogger logger = new TestSystemLogger();
+
+        try {
+            final SbkParameters params = new SbkParameters("writer-batch-test");
+            params.parseArgs(new String[]{"-writers", "1", "-size", "10", "-records", "5", "-sync", "2"});
+            final SbkWriter writer = new SbkWriter(0, params, CHANNEL,
+                    new ObjectDataType(), new NanoSeconds(), driver, logger, null, executor);
+
+            writer.run(0, 5).get(2, TimeUnit.SECONDS);
+
+            assertEquals(5, writeCalls.get());
+            assertEquals(3, syncCalls.get());
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
     private static SbkWriter createWriter(Writer<Object> writer, SystemLogger logger,
                                           ExecutorService executor) throws Exception {
         final SbkParameters params = new SbkParameters("writer-completion-test");
@@ -77,6 +100,25 @@ final class SbkWriterTest {
             public CompletableFuture<?> writeAsync(Object data) throws IOException {
                 writeCalls.incrementAndGet();
                 throw new IOException("Disk I/O error");
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+    }
+
+    private static Writer<Object> countingWriter(AtomicInteger writeCalls, AtomicInteger syncCalls) {
+        return new Writer<>() {
+            @Override
+            public CompletableFuture<?> writeAsync(Object data) {
+                writeCalls.incrementAndGet();
+                return null;
+            }
+
+            @Override
+            public void sync() {
+                syncCalls.incrementAndGet();
             }
 
             @Override

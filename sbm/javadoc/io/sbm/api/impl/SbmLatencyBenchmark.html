@@ -58,7 +58,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(int,int,io.time.Time,io.sbm.api.SbmPeriodicRecorder,int)" tabindex="0">SbmLatencyBenchmark(int, int, Time, SbmPeriodicRecorder, int)</a></li>
+<li><a href="#%3Cinit%3E(int,int,io.time.Time,io.sbm.api.SbmPeriodicRecorder,int,int)" tabindex="0">SbmLatencyBenchmark(int, int, Time, SbmPeriodicRecorder, int, int)</a></li>
+<li><a href="#%3Cinit%3E(int,int,io.time.Time,io.sbm.api.SbmPeriodicRecorder,int,int,boolean)" tabindex="0">SbmLatencyBenchmark(int, int, Time, SbmPeriodicRecorder, int, int, boolean)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -117,13 +118,24 @@ on stop prints total results.</div>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,int,io.time.Time,io.sbm.api.SbmPeriodicRecorder,int)" class="member-name-link">SbmLatencyBenchmark</a><wbr>(int&nbsp;maxQs,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,int,io.time.Time,io.sbm.api.SbmPeriodicRecorder,int,int)" class="member-name-link">SbmLatencyBenchmark</a><wbr>(int&nbsp;maxQs,
  int&nbsp;idleMS,
  io.time.Time&nbsp;time,
  <a href="../SbmPeriodicRecorder.html" title="interface in io.sbm.api">SbmPeriodicRecorder</a>&nbsp;window,
- int&nbsp;reportingIntervalMS)</code></div>
+ int&nbsp;reportingIntervalMS,
+ int&nbsp;idleTimeoutSeconds)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Constructor RamBenchmark initializing all values.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(int,int,io.time.Time,io.sbm.api.SbmPeriodicRecorder,int,int,boolean)" class="member-name-link">SbmLatencyBenchmark</a><wbr>(int&nbsp;maxQs,
+ int&nbsp;idleMS,
+ io.time.Time&nbsp;time,
+ <a href="../SbmPeriodicRecorder.html" title="interface in io.sbm.api">SbmPeriodicRecorder</a>&nbsp;window,
+ int&nbsp;reportingIntervalMS,
+ int&nbsp;idleTimeoutSeconds,
+ boolean&nbsp;idleTimeoutEnabled)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates the latency consumer with an optional fixed-record idle deadline.</div>
 </div>
 </div>
 </section>
@@ -178,14 +190,15 @@ on stop prints total results.</div>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(int,int,io.time.Time,io.sbm.api.SbmPeriodicRecorder,int)">
+<section class="detail" id="&lt;init&gt;(int,int,io.time.Time,io.sbm.api.SbmPeriodicRecorder,int,int)">
 <h3>SbmLatencyBenchmark</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">SbmLatencyBenchmark</span><wbr><span class="parameters">(int&nbsp;maxQs,
  int&nbsp;idleMS,
  io.time.Time&nbsp;time,
  <a href="../SbmPeriodicRecorder.html" title="interface in io.sbm.api">SbmPeriodicRecorder</a>&nbsp;window,
- int&nbsp;reportingIntervalMS)</span></div>
+ int&nbsp;reportingIntervalMS,
+ int&nbsp;idleTimeoutSeconds)</span></div>
 <div class="block">Constructor RamBenchmark initializing all values.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -194,6 +207,36 @@ on stop prints total results.</div>
 <dd><code>time</code> - time source</dd>
 <dd><code>window</code> - periodic/total latency recorder</dd>
 <dd><code>reportingIntervalMS</code> - interval in ms between periodic window prints</dd>
+<dd><code>idleTimeoutSeconds</code> - maximum interval without an SBK performance batch</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - when the idle timeout is not positive or does not exceed the reporting interval</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(int,int,io.time.Time,io.sbm.api.SbmPeriodicRecorder,int,int,boolean)">
+<h3>SbmLatencyBenchmark</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">SbmLatencyBenchmark</span><wbr><span class="parameters">(int&nbsp;maxQs,
+ int&nbsp;idleMS,
+ io.time.Time&nbsp;time,
+ <a href="../SbmPeriodicRecorder.html" title="interface in io.sbm.api">SbmPeriodicRecorder</a>&nbsp;window,
+ int&nbsp;reportingIntervalMS,
+ int&nbsp;idleTimeoutSeconds,
+ boolean&nbsp;idleTimeoutEnabled)</span></div>
+<div class="block">Creates the latency consumer with an optional fixed-record idle deadline.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>maxQs</code> - maximum number of client queues</dd>
+<dd><code>idleMS</code> - empty-queue sleep interval in milliseconds</dd>
+<dd><code>time</code> - time source</dd>
+<dd><code>window</code> - periodic/total latency recorder</dd>
+<dd><code>reportingIntervalMS</code> - interval in ms between periodic window prints</dd>
+<dd><code>idleTimeoutSeconds</code> - maximum interval without an SBK performance batch</dd>
+<dd><code>idleTimeoutEnabled</code> - whether fixed-record idle enforcement is enabled</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - when the idle timeout is not positive or does not exceed the reporting interval</dd>
 </dl>
 </div>
 </section>

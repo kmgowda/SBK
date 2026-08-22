@@ -49,7 +49,10 @@ dependencies {
 
 jmh {
     jvmArgs = ["-Djmh.blackhole.autoDetect=false"]
-    includes = ['io.sbk.logger.impl.GrpcLatencyAccumulatorBenchmark.*']
+    includes = [
+            'io.sbk.api.CoreHotPathBenchmark.*',
+            'io.sbk.logger.impl.GrpcLatencyAccumulatorBenchmark.*'
+    ]
 }
 
 def grpcLoggerPerformanceReport = layout.buildDirectory.file(
@@ -112,6 +115,63 @@ tasks.register('grpcLoggerPerformanceTest') {
         println String.format(
                 "SBP 4 packed encoding    : %,.3f %s; %,.3f B/op",
                 packed.primaryMetric.score, packed.primaryMetric.scoreUnit, allocation(packed))
+    }
+}
+
+def coreHotPathPerformanceReport = layout.buildDirectory.file(
+        "reports/jmh/core-hot-path-performance.json")
+
+tasks.register('coreHotPathPerformanceTest', JavaExec) {
+    group = 'verification'
+    description = 'Benchmarks native duration checks and callback-reader mode specialization.'
+    mustRunAfter ':perl:periodicRecorderPerformanceTest'
+    dependsOn tasks.named('jmhJar')
+    classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
+    mainClass = 'org.openjdk.jmh.Main'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
+    }
+    jvmArgs rootProject.ext.sbkRuntimeJvmArgs
+    args 'io.sbk.api.CoreHotPathBenchmark.*',
+            '-prof', 'gc',
+            '-jvmArgs', (rootProject.ext.sbkRuntimeJvmArgs
+                    + ['-Djmh.blackhole.autoDetect=false']).join(' '),
+            '-rf', 'json',
+            '-rff', coreHotPathPerformanceReport.get().asFile.absolutePath
+    outputs.file(coreHotPathPerformanceReport)
+    outputs.upToDateWhen { false }
+    doFirst {
+        coreHotPathPerformanceReport.get().asFile.parentFile.mkdirs()
+        delete coreHotPathPerformanceReport
+    }
+    doLast {
+        def results = new groovy.json.JsonSlurper().parse(
+                coreHotPathPerformanceReport.get().asFile)
+        def byName = results.collectEntries {
+            [(it.benchmark.tokenize('.').last()): it.primaryMetric]
+        }
+        def verifyLower = { String optimizedName, String referenceName ->
+            def optimized = byName[optimizedName]
+            def reference = byName[referenceName]
+            if (optimized == null || reference == null) {
+                throw new GradleException(
+                        "Missing core hot-path JMH comparison: ${optimizedName}/${referenceName}")
+            }
+            if (optimized.scoreConfidence[1] >= reference.scoreConfidence[0]) {
+                throw new GradleException(String.format(
+                        '%s JMH 99.9%% CI [%f, %f] does not remain below %s [%f, %f]',
+                        optimizedName, optimized.scoreConfidence[0],
+                        optimized.scoreConfidence[1], referenceName,
+                        reference.scoreConfidence[0], reference.scoreConfidence[1]))
+            }
+            logger.lifecycle(String.format(
+                    '%s: %.2f%% lower mean latency than %s (%.3f vs %.3f ns/op)',
+                    optimizedName,
+                    (reference.score - optimized.score) * 100.0d / reference.score,
+                    referenceName, optimized.score, reference.score))
+        }
+        verifyLower('nativeDurationCheck', 'millisecondDurationCheck')
+        verifyLower('durationCallback', 'legacyDurationCallback')
     }
 }
 

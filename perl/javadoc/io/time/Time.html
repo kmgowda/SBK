@@ -72,6 +72,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#getTimeUnit()" tabindex="0">getTimeUnit()</a></li>
 <li><a href="#getCurrentTime()" tabindex="0">getCurrentTime()</a></li>
 <li><a href="#elapsed(long,long)" tabindex="0">elapsed(long, long)</a></li>
+<li><a href="#secondsToTimeUnits(long)" tabindex="0">secondsToTimeUnits(long)</a></li>
 <li><a href="#elapsedMilliSeconds(long,long)" tabindex="0">elapsedMilliSeconds(long, long)</a></li>
 <li><a href="#elapsedSeconds(long,long)" tabindex="0">elapsedSeconds(long, long)</a></li>
 <li><a href="#convertToNanoSeconds(double)" tabindex="0">convertToNanoSeconds(double)</a></li>
@@ -205,6 +206,11 @@ loadScripts(document, 'script');</script>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getTimeUnit()" class="member-name-link">getTimeUnit</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">get the Time Unit.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default long</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#secondsToTimeUnits(long)" class="member-name-link">secondsToTimeUnits</a><wbr>(long&nbsp;seconds)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Convert a duration in seconds to this clock's native unit.</div>
 </div>
 </div>
 </div>
@@ -403,6 +409,27 @@ loadScripts(document, 'script');</script>
 <dd><code>l</code> - time stamp, the l should be less than h</dd>
 <dt>Returns:</dt>
 <dd>elapsed time.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="secondsToTimeUnits(long)">
+<h3>secondsToTimeUnits</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">secondsToTimeUnits</span><wbr><span class="parameters">(long&nbsp;seconds)</span></div>
+<div class="block">Convert a duration in seconds to this clock's native unit.
+
+<p>The conversion is intended for benchmark-loop setup so duration
+checks can use integer subtraction without a per-operation floating
+point conversion.</p></div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>seconds</code> - duration in seconds</dd>
+<dt>Returns:</dt>
+<dd>duration expressed in this clock's native unit</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/ArithmeticException.html" title="class or interface in java.lang" class="external-link">ArithmeticException</a></code> - if the converted duration overflows a long</dd>
 </dl>
 </div>
 </section>
