@@ -274,6 +274,16 @@ public class PerlTest {
         assertInstanceOf(BenchmarkIdleTimeoutException.class, failure.getCause());
     }
 
+    /** Verifies that the fixed-record idle deadline is disabled for timed runs. */
+    @Test
+    public void testTimedRunDoesNotApplyIdleTimeout() throws Exception {
+        final PerlConfig config = PerlConfig.build();
+        config.idleTimeoutSeconds = 1;
+        final Perl perl = PerlBuilder.build(new TestLogger(), null, config, null);
+
+        perl.run(2, Long.MAX_VALUE).get(4, TimeUnit.SECONDS);
+    }
+
     private void assertIdleTimeout(int sleepMS) throws Exception {
         final PerlConfig config = PerlConfig.build();
         config.sleepMS = sleepMS;

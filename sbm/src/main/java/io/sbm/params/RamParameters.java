@@ -51,4 +51,11 @@ public sealed interface RamParameters extends ActionParameter permits RamParamet
      * @return idle timeout in seconds
      */
     int getIdleTimeoutSeconds();
+
+    /**
+     * Reports whether SBM is aggregating a fixed-record benchmark.
+     *
+     * @return {@code true} only when a positive {@code -records} option was supplied
+     */
+    boolean isFixedRecordMode();
 }

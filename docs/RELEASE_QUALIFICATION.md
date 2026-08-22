@@ -62,7 +62,8 @@ private GEM inventory.
 Use this command for a clean local checkout. It runs all builds, enabled-driver
 checks, concurrency tests, packaging, documentation checks, and local
 functional tests. It does not run the remote GEM or release-only performance
-tests.
+tests. The functional inventory verifies both fixed-record idle termination and
+that timed runs ignore the fixed-record idle deadline.
 
 ```bash
 ./gradlew clean releasecheck \

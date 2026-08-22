@@ -52,6 +52,9 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
     @Getter
     private int idleTimeoutSeconds;
 
+    @Getter
+    private boolean fixedRecordMode;
+
     final private String[] loggerNames;
     /**
      * Construct parameter parser and register SBM options.
@@ -86,7 +89,9 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
         addOption("max", true, "Maximum number of connections; default: " + this.maxConnections);
         addOption("millisecsleep", true, "Idle sleep in milliseconds; default: " + this.idleSleepMilliSeconds + " ms");
         addOption(PerlConfig.IDLE_TIMEOUT_OPTION, true,
-                "Maximum seconds without an SBK performance batch; default: " + this.idleTimeoutSeconds);
+                "Maximum seconds without an SBK performance batch in fixed-record mode; default: "
+                        + this.idleTimeoutSeconds);
+        addOption("records", true, "Fixed-record benchmark count; enables the idle timeout");
     }
 
 
@@ -124,6 +129,11 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
                 Integer.toString(idleTimeoutSeconds)));
         if (idleTimeoutSeconds <= 0) {
             throw new IllegalArgumentException("The SBM idle timeout seconds must be greater than zero");
+        }
+        final String recordsValue = getOptionValue("records", null);
+        fixedRecordMode = recordsValue != null;
+        if (fixedRecordMode && Long.parseLong(recordsValue) <= 0) {
+            throw new IllegalArgumentException("The SBM records value must be greater than zero");
         }
     }
 }

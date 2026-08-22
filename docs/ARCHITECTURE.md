@@ -147,9 +147,9 @@ At `start()` it:
 6. Distributes count-based records across workers, preserving the remainder on the last worker.
 7. Starts workers in configured steps and optionally delays between steps.
 8. Schedules `stop()` for timed runs, applies the PerL performance-event idle
-   deadline, and also chains shutdown after worker completion.
+   deadline only to fixed-record runs, and also chains shutdown after worker completion.
 
-At shutdown it stops new work, closes driver readers and writers, closes the storage and logger, shuts down executors, and completes the benchmark future. Duration-based shutdown can interrupt an SDK call, so drivers must tolerate interruption-related exceptions during normal teardown. The shared `-idletimeoutseconds` option defaults to 600 seconds. It is evaluated by PerL only while its queues are empty and by SBM only while its ingestion queues are empty; SBK-GEM forwards it to remote SBK clients and its embedded SBM.
+At shutdown it stops new work, closes driver readers and writers, closes the storage and logger, shuts down executors, and completes the benchmark future. Duration-based shutdown can interrupt an SDK call, so drivers must tolerate interruption-related exceptions during normal teardown. The shared `-idletimeoutseconds` option defaults to 600 seconds and applies only when a positive `-records` target is used without `-seconds`. It is evaluated by PerL only while its queues are empty and by SBM only while fixed-record mode is selected and its ingestion queues are empty; each positive result renews the full deadline. SBK-GEM forwards the mode and value to remote SBK clients and its embedded SBM.
 
 Primary source: `sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java`.
 

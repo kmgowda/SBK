@@ -46,6 +46,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
     private final int reportingIntervalMS;
     private final long idleTimeoutMS;
     private final int idleTimeoutSeconds;
+    private final boolean idleTimeoutEnabled;
     private final SbmPeriodicRecorder window;
     private final AtomicLong counter;
     private final CompletableFuture<Void> retFuture;
@@ -70,6 +71,23 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
      */
     public SbmLatencyBenchmark(int maxQs, int idleMS, Time time, SbmPeriodicRecorder window, int reportingIntervalMS,
                                int idleTimeoutSeconds) {
+        this(maxQs, idleMS, time, window, reportingIntervalMS, idleTimeoutSeconds, false);
+    }
+
+    /**
+     * Creates the latency consumer with an optional fixed-record idle deadline.
+     *
+     * @param maxQs maximum number of client queues
+     * @param idleMS empty-queue sleep interval in milliseconds
+     * @param time time source
+     * @param window periodic/total latency recorder
+     * @param reportingIntervalMS interval in ms between periodic window prints
+     * @param idleTimeoutSeconds maximum interval without an SBK performance batch
+     * @param idleTimeoutEnabled whether fixed-record idle enforcement is enabled
+     * @throws IllegalArgumentException when the idle timeout is not positive
+     */
+    public SbmLatencyBenchmark(int maxQs, int idleMS, Time time, SbmPeriodicRecorder window, int reportingIntervalMS,
+                               int idleTimeoutSeconds, boolean idleTimeoutEnabled) {
         super(maxQs);
         if (idleTimeoutSeconds <= 0) {
             throw new IllegalArgumentException("SBM idle timeout seconds must be greater than zero");
@@ -81,6 +99,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
         this.reportingIntervalMS = reportingIntervalMS;
         this.idleTimeoutSeconds = idleTimeoutSeconds;
         this.idleTimeoutMS = Math.multiplyExact((long) idleTimeoutSeconds, Time.MS_PER_SEC);
+        this.idleTimeoutEnabled = idleTimeoutEnabled;
         this.counter = new AtomicLong(BASE_CLIENT_ID_VALUE);
         this.retFuture = new CompletableFuture<>();
         this.executor = Executors.newSingleThreadExecutor(
@@ -133,7 +152,8 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
             if (notFound) {
                 Thread.sleep(idleMS);
                 final long idleCurrentTime = time.getCurrentTime();
-                if (time.elapsedMilliSeconds(idleCurrentTime, lastEventTime) >= idleTimeoutMS) {
+                if (idleTimeoutEnabled
+                        && time.elapsedMilliSeconds(idleCurrentTime, lastEventTime) >= idleTimeoutMS) {
                     throw new BenchmarkIdleTimeoutException(idleTimeoutSeconds);
                 }
             }

@@ -112,6 +112,7 @@ class ReleaseFunctionalTest {
         caseRun("sbk-eof-reader", this::readEofFile);
         caseRun("eof-lifecycle", this::verifyEofLifecycle);
         caseRun("sbk-idle-timeout", this::sbkIdleTimeout);
+        caseRun("sbk-timed-idle-disabled", this::sbkTimedIdleDisabled);
         caseRun("sbm-idle-timeout", this::sbmIdleTimeout);
         caseRun("prometheus-endpoint", this::prometheusEndpoint);
         caseRun("sbk-PrometheusLogger", this::prometheusLifecycle);
@@ -186,7 +187,13 @@ class ReleaseFunctionalTest {
     private void sbmIdleTimeout() throws Exception {
         reject(config.sbm, "No performance benchmarking event was received for 1 seconds",
                 "-class", "File", "-port", Integer.toString(freePort()),
-                "-idletimeoutseconds", "1");
+                "-records", config.records, "-idletimeoutseconds", "1");
+    }
+
+    private void sbkTimedIdleDisabled() throws Exception {
+        expect(config.sbk, "SBK Benchmark Shutdown",
+                "-class", "null", "-readers", "1", "-size", config.recordSize,
+                "-seconds", "2", "-idletimeoutseconds", "1");
     }
 
     private void prometheusEndpoint() throws Exception {

@@ -88,10 +88,12 @@ SBK-GEM accepts GEM-specific options and forwards an SBK argument set to remote 
 
 `-idletimeoutseconds N` is a shared lifecycle option with a default of 600
 seconds. GEM forwards it to every remote SBK process and configures its embedded
-SBM with the same value. A remote PerL idle failure therefore terminates that
-SBK process and becomes a host-tagged GEM failure; an embedded SBM idle failure
-also terminates GEM immediately rather than leaving orchestration waiting for
-fixed-record commands indefinitely.
+SBM with the same value. The deadline is enabled only for fixed-record runs
+(`-records` or fixed-mode `-totalrecords`) and is disabled whenever `-seconds`
+is used. Each positive performance result restarts the full interval. A remote
+PerL idle failure therefore terminates that SBK process and becomes a
+host-tagged GEM failure; an embedded SBM idle failure also terminates GEM
+immediately rather than leaving fixed-record orchestration waiting indefinitely.
 
 ### Node SSH endpoints
 

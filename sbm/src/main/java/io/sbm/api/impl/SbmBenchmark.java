@@ -113,7 +113,8 @@ final public class SbmBenchmark implements Benchmark {
 
         latencyRecorder = createLatencyRecorder();
         benchmark = new SbmLatencyBenchmark(sbmConfig.maxQueues, params.getIdleSleepMilliSeconds(), time, latencyRecorder,
-                logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC, params.getIdleTimeoutSeconds());
+                logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC, params.getIdleTimeoutSeconds(),
+                params.isFixedRecordMode());
         final int maxRecordSizeBytes = Math.multiplyExact(sbmConfig.maxRecordSizeMB, Bytes.BYTES_PER_MB);
         service = new SbmGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, benchmark,
                 coordinatedStart, maxRecordSizeBytes);

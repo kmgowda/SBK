@@ -460,6 +460,10 @@ final public class SbkGem {
         ramArgsList.add(Integer.toString(params.getSbmIdleSleepMilliSeconds()));
         ramArgsList.add("-" + PerlConfig.IDLE_TIMEOUT_OPTION);
         ramArgsList.add(Integer.toString(params.getIdleTimeoutSeconds()));
+        if (params.getTotalSecondsToRun() == 0 && params.getTotalRecords() > 0) {
+            ramArgsList.add("-records");
+            ramArgsList.add(Long.toString(params.getTotalRecords()));
+        }
 
         final String[] ramArgs = ramArgsList.toArray(new String[0]);
         Printer.log.info("Arguments to SBM: " + Arrays.toString(ramArgs));

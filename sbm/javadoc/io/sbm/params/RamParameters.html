@@ -61,6 +61,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#getMaxConnections()" tabindex="0">getMaxConnections()</a></li>
 <li><a href="#getIdleSleepMilliSeconds()" tabindex="0">getIdleSleepMilliSeconds()</a></li>
 <li><a href="#getIdleTimeoutSeconds()" tabindex="0">getIdleTimeoutSeconds()</a></li>
+<li><a href="#isFixedRecordMode()" tabindex="0">isFixedRecordMode()</a></li>
 </ol>
 </li>
 </ol>
@@ -128,6 +129,11 @@ extends io.sbk.params.ActionParameter</span>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getStorageName()" class="member-name-link">getStorageName</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get Storage Name.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isFixedRecordMode()" class="member-name-link">isFixedRecordMode</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Reports whether SBM is aggregating a fixed-record benchmark.</div>
 </div>
 </div>
 </div>
@@ -207,6 +213,19 @@ extends io.sbk.params.ActionParameter</span>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>idle timeout in seconds</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isFixedRecordMode()">
+<h3>isFixedRecordMode</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type">boolean</span>&nbsp;<span class="element-name">isFixedRecordMode</span>()</div>
+<div class="block">Reports whether SBM is aggregating a fixed-record benchmark.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><code>true</code> only when a positive <code>-records</code> option was supplied</dd>
 </dl>
 </div>
 </section>

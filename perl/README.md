@@ -128,7 +128,8 @@ For SBK:
 
 - `-mpscqueue true|false` overrides only `MpscQueueEnable`;
 - `-idletimeoutseconds N` overrides `idleTimeoutSeconds`; the property default
-  is 600 seconds for both standalone PerL and SBK;
+  is 600 seconds for both standalone PerL and SBK and is used only by
+  fixed-record runs;
 - `qPerWorker` and `maxQs` determine queue topology and remain property-backed;
 - invalid negative `maxQs` or `qPerWorker` below the supported minimum is
   rejected while common parameters are constructed;
@@ -178,8 +179,10 @@ enforced minimum is 1 µs. Neither setting changes the operation latency
 already captured by the worker, but a longer idle delay can temporarily grow
 the queue backlog after new data arrives.
 
-PerL also enforces `idleTimeoutSeconds` while every timestamp channel remains
-empty. The single consumer retains the last event time as ordinary local state;
+For `run(0, records)` with a positive record target, PerL enforces
+`idleTimeoutSeconds` while every timestamp channel remains empty. Each positive
+event restarts the complete deadline; `run(seconds, ...)` and unbounded
+`run(0, 0)` calls do not use it. The single consumer retains the last event time as ordinary local state;
 no lock, atomic variable, volatile coordination, or producer-side check is
 added. The deadline comparison runs only from the existing empty-channel slow
 path. Expiration completes the PerL future exceptionally with

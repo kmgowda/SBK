@@ -96,7 +96,9 @@ public class PerformanceRecorderIdleSleep extends PerformanceRecorder {
                         PerlPrinter.log.warn("PerformanceRecorderIdleSleep : {}", e.getMessage());
                     }
                     ctime = time.getCurrentTime();
-                    checkIdleTimeout(ctime, lastEventTime);
+                    if (secondsToRun == 0 && totalRecords > 0) {
+                        checkIdleTimeout(ctime, lastEventTime);
+                    }
                     final long diffTime = periodicRecorder.elapsedMilliSecondsWindow(ctime);
                     if (diffTime > windowIntervalMS) {
                         periodicRecorder.stopWindow(ctime);

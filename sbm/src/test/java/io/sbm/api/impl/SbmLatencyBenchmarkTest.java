@@ -140,7 +140,7 @@ final class SbmLatencyBenchmarkTest {
     void failsWhenNoPerformanceBatchArrivesBeforeIdleTimeout() throws Exception {
         final CapturingWindow window = new CapturingWindow();
         final SbmLatencyBenchmark benchmark = new SbmLatencyBenchmark(
-                1, 1, new MilliSeconds(), window, 5_000, 1);
+                1, 1, new MilliSeconds(), window, 5_000, 1, true);
 
         benchmark.enQueue(MessageLatenciesRecord.newBuilder()
                 .setSequenceNumber(1)
@@ -153,6 +153,28 @@ final class SbmLatencyBenchmarkTest {
         assertInstanceOf(BenchmarkIdleTimeoutException.class, failure.getCause());
         assertEquals("No performance benchmarking event was received for 1 seconds",
                 failure.getCause().getMessage());
+    }
+
+    /**
+     * Verifies that inactivity does not terminate SBM unless fixed-record mode was selected.
+     *
+     * @throws Exception if consumer startup or shutdown times out
+     */
+    @Test
+    void doesNotApplyIdleTimeoutOutsideFixedRecordMode() throws Exception {
+        final CapturingWindow window = new CapturingWindow();
+        final SbmLatencyBenchmark benchmark = new SbmLatencyBenchmark(
+                1, 1, new MilliSeconds(), window, 5_000, 1, false);
+        final CompletableFuture<Void> completion = benchmark.start();
+
+        try {
+            assertTrue(window.started.await(2, TimeUnit.SECONDS));
+            Thread.sleep(1_250);
+            assertFalse(completion.isDone());
+        } finally {
+            assertTimeoutPreemptively(Duration.ofSeconds(2), benchmark::stop);
+        }
+        completion.get(2, TimeUnit.SECONDS);
     }
 
     private void awaitThreadExit(Thread thread) throws InterruptedException {
