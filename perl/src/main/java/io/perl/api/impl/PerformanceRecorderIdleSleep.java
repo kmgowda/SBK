@@ -155,16 +155,16 @@ public class PerformanceRecorderIdleSleep extends PerformanceRecorder {
                 }
             }
             if (doWork && notFound) {
+                if (recordsCnt > observedRecordsCnt) {
+                    observedRecordsCnt = recordsCnt;
+                    lastEventTime = ctime;
+                }
                 try {
                     Thread.sleep(this.sleepMS);
                 } catch (InterruptedException e) {
                     PerlPrinter.log.warn("PerformanceRecorderIdleSleep : {}", e.getMessage());
                 }
                 ctime = time.getCurrentTime();
-                if (recordsCnt > observedRecordsCnt) {
-                    observedRecordsCnt = recordsCnt;
-                    lastEventTime = ctime;
-                }
                 checkIdleTimeout(ctime, lastEventTime);
                 final long diffTime = periodicRecorder.elapsedMilliSecondsWindow(ctime);
                 if (diffTime > windowIntervalMS) {

@@ -188,6 +188,8 @@ public non-sealed interface Reader<T> extends DataRecordsReader<T> {
     default void recordReadTime(DataType<T> dType, int size, Time time, Status status, PerlChannel perlChannel,
                                 int id, ReadRequestsLogger logger)
             throws EOFException, IOException {
+        // Request diagnostics use submission time. Successful read latency intentionally uses the timestamp
+        // embedded in the returned record so it measures the writer-to-reader interval.
         status.startTime = time.getCurrentTime();
         logger.recordReadRequests(id,  status.startTime, size, 1);
         final T ret = read();

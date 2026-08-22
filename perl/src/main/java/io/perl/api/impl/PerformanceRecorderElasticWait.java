@@ -184,12 +184,12 @@ public final class PerformanceRecorderElasticWait extends PerformanceRecorder {
                     idleWait.startIdle(periodicRecorder.elapsedMilliSecondsWindow(ctime));
                     dataSinceIdle = false;
                 }
+                if (recordsCnt > observedRecordsCnt) {
+                    observedRecordsCnt = recordsCnt;
+                    lastEventTime = ctime;
+                }
                 if (idleWait.waitAndCheck()) {
                     ctime = time.getCurrentTime();
-                    if (recordsCnt > observedRecordsCnt) {
-                        observedRecordsCnt = recordsCnt;
-                        lastEventTime = ctime;
-                    }
                     checkIdleTimeout(ctime, lastEventTime);
                     final long diffTime = periodicRecorder.elapsedMilliSecondsWindow(ctime);
                     if (diffTime >= windowIntervalMS) {
