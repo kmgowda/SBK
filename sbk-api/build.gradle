@@ -144,6 +144,35 @@ tasks.register('coreHotPathPerformanceTest', JavaExec) {
         coreHotPathPerformanceReport.get().asFile.parentFile.mkdirs()
         delete coreHotPathPerformanceReport
     }
+    doLast {
+        def results = new groovy.json.JsonSlurper().parse(
+                coreHotPathPerformanceReport.get().asFile)
+        def byName = results.collectEntries {
+            [(it.benchmark.tokenize('.').last()): it.primaryMetric]
+        }
+        def verifyLower = { String optimizedName, String referenceName ->
+            def optimized = byName[optimizedName]
+            def reference = byName[referenceName]
+            if (optimized == null || reference == null) {
+                throw new GradleException(
+                        "Missing core hot-path JMH comparison: ${optimizedName}/${referenceName}")
+            }
+            if (optimized.scoreConfidence[1] >= reference.scoreConfidence[0]) {
+                throw new GradleException(String.format(
+                        '%s JMH 99.9%% CI [%f, %f] does not remain below %s [%f, %f]',
+                        optimizedName, optimized.scoreConfidence[0],
+                        optimized.scoreConfidence[1], referenceName,
+                        reference.scoreConfidence[0], reference.scoreConfidence[1]))
+            }
+            logger.lifecycle(String.format(
+                    '%s: %.2f%% lower mean latency than %s (%.3f vs %.3f ns/op)',
+                    optimizedName,
+                    (reference.score - optimized.score) * 100.0d / reference.score,
+                    referenceName, optimized.score, reference.score))
+        }
+        verifyLower('nativeDurationCheck', 'millisecondDurationCheck')
+        verifyLower('durationCallback', 'legacyDurationCallback')
+    }
 }
 
 generateJavadoc {

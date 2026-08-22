@@ -165,6 +165,8 @@ tasks.register('releasePerformance') {
         dependsOn ':perl:timeStampQueuePerformanceTest'
         dependsOn ':perl:latencyMapPerformanceTest'
         dependsOn ':perl:cqueuePerformanceTest'
+        dependsOn ':perl:periodicRecorderPerformanceTest'
+        dependsOn ':sbk-api:coreHotPathPerformanceTest'
         dependsOn ':sbk-api:grpcLoggerPerformanceTest'
     } else {
         doLast {

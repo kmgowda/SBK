@@ -9,9 +9,10 @@
  */
 package io.perl.benchmark;
 
-import io.perl.api.LatencyRecordWindow;
 import io.perl.api.PeriodicRecorder;
 import io.perl.api.impl.ArrayLatencyRecorder;
+import io.perl.api.impl.ArrayWindowLatencyPeriodicRecorder;
+import io.perl.api.impl.ArrayWindowPeriodicRecorder;
 import io.perl.api.impl.TotalWindowLatencyPeriodicRecorder;
 import io.perl.api.impl.TotalWindowPeriodicRecorder;
 import io.perl.logger.impl.DefaultLogger;
@@ -45,7 +46,9 @@ public class PeriodicRecorderCallbackBenchmark {
         private static final long MAX_LATENCY = 4_095;
         private final Time time = new NanoSeconds();
         private PeriodicRecorder callbackRecorder;
+        private PeriodicRecorder arrayCallbackRecorder;
         private PeriodicRecorder noCallbackRecorder;
+        private PeriodicRecorder arrayRecorder;
         private long timestamp;
 
         /** Creates equivalent callback and callback-free recorders. */
@@ -55,12 +58,17 @@ public class PeriodicRecorderCallbackBenchmark {
             callbackRecorder = new TotalWindowLatencyPeriodicRecorder(
                     newWindow(), newWindow(), logger, logger::printTotal,
                     logger::recordLatency, time);
+            arrayCallbackRecorder = new ArrayWindowLatencyPeriodicRecorder(
+                    newWindow(), newWindow(), logger, logger::printTotal,
+                    logger::recordLatency, time);
             noCallbackRecorder = new TotalWindowPeriodicRecorder(
+                    newWindow(), newWindow(), logger, logger::printTotal, time);
+            arrayRecorder = new ArrayWindowPeriodicRecorder(
                     newWindow(), newWindow(), logger, logger::printTotal, time);
             timestamp = 1;
         }
 
-        private LatencyRecordWindow newWindow() {
+        private ArrayLatencyRecorder newWindow() {
             return new ArrayLatencyRecorder(0, MAX_LATENCY, Long.MAX_VALUE,
                     Long.MAX_VALUE, Long.MAX_VALUE, new double[]{0.5, 0.99}, time);
         }
@@ -82,6 +90,17 @@ public class PeriodicRecorderCallbackBenchmark {
     }
 
     /**
+     * Measures the specialized array recorder with a no-op callback.
+     *
+     * @param state recorder state
+     */
+    @Benchmark
+    public void arrayWithNoOpCallback(RecorderState state) {
+        final long startTime = state.nextTimestamp();
+        state.arrayCallbackRecorder.record(startTime, startTime + 100, 1, 100);
+    }
+
+    /**
      * Measures the callback-free recorder selected for standard loggers.
      *
      * @param state recorder state
@@ -90,5 +109,16 @@ public class PeriodicRecorderCallbackBenchmark {
     public void withoutCallback(RecorderState state) {
         final long startTime = state.nextTimestamp();
         state.noCallbackRecorder.record(startTime, startTime + 100, 1, 100);
+    }
+
+    /**
+     * Measures the array-window write without the periodic overflow check.
+     *
+     * @param state recorder state
+     */
+    @Benchmark
+    public void arrayWithoutCallback(RecorderState state) {
+        final long startTime = state.nextTimestamp();
+        state.arrayRecorder.record(startTime, startTime + 100, 1, 100);
     }
 }

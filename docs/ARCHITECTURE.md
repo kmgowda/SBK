@@ -258,7 +258,7 @@ timestamp while retaining that learned rate. This prevents active time from
 diluting calibration and adds no new clock read. Setting `sleepMS > 0`
 selects the simpler sleeping recorder and bypasses `ElasticWait`.
 
-The phrase “lock-free hot path” applies to harness measurement transport. It does not promise that a vendor SDK, filesystem, JVM scheduler, allocator, or backend is lock-free. Driver wrappers should avoid adding their own locks to the per-operation path.
+The phrase “lock-free hot path” applies to harness measurement transport. It does not promise that a vendor SDK, filesystem, JVM scheduler, allocator, or backend is lock-free. Driver wrappers should avoid adding their own locks to the per-operation path. In `sbk-api`, PerL, and SBM, keep per-operation branches, live bookkeeping state, conversions, clock reads, allocation, dynamic dispatch, and non-inlined call depth to the measured minimum; choose mode-specific implementations during startup where benchmarks justify specialization. Do not add atomic, `VarHandle`, fence, volatile, mutex, monitor, or conditional-wait operations. Existing PerL queue publication primitives are part of its proven MPSC memory-ordering protocol and must not be removed without a correctness proof plus stress and performance evidence. SBK-GEM is lifecycle orchestration, not a per-record measurement hot path.
 
 Primary sources:
 

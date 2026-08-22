@@ -192,30 +192,70 @@ The following are latency-critical hot paths:
 - SBM measurement ingestion, latency/count aggregation, and forwarding paths
   executed for each record or measurement batch.
 
-**Do not add any new per-operation conditional or synchronization work to
-these hot paths.** In particular, do not add:
+`sbk-gem` is orchestration and lifecycle code; it does not execute the
+per-record measurement path. Optimize its bounded startup, SSH, diagnostics,
+and shutdown behavior for reliability, but do not describe those paths as
+measurement hot paths. The remote SBK processes launched by SBK-GEM remain
+subject to the `sbk-api` and PerL rules above.
+
+**Keep the successful-operation path to the minimum work required to submit,
+transport, aggregate, and record the measurement. Do not add new or redundant
+per-operation conditional, coordination, state, or dispatch work to these hot
+paths.** In particular, do not add:
 
 - `if`, `switch`, ternary, short-circuit, state-polling, or other conditional
   branches, including extra conditions in an existing hot loop;
 - atomic variables, atomic reads/writes, compare-and-set operations, or new
   `volatile` coordination fields;
+- `VarHandle`, memory-fence, acquire/release, or other explicit memory-ordering
+  operations;
 - mutexes, monitors, `synchronized`, `Lock`, semaphore, or other contended
   coordination; or
 - blocking or conditional waits such as `wait`, `await`, `sleep`, `park`, or
   blocking-queue operations.
+
+Also minimize the non-coordination cost of every hot iteration:
+
+- keep the live local/field state small; do not add redundant counters, flags,
+  copied values, wrapper objects, temporary collections, or bookkeeping;
+- avoid repeated getters, conversions, clock reads, bounds calculations, and
+  values that can be computed once during startup or once per outer sweep;
+- avoid new polymorphic/interface dispatch, lambda/callback indirection, and
+  helper-call layers in per-record code; select specialized implementations at
+  startup when modes have different requirements; and
+- keep allocations and data movement at the minimum required by the existing
+  SPI and transport contract.
+
+Java source-level method count alone is not a performance metric: the JIT can
+inline small monomorphic methods and eliminate locals. Agents must inspect the
+actual call site and measure it rather than mechanically merging methods or
+removing useful locals. The concern is additional work that remains in the
+compiled hot path, especially dynamic dispatch, failed inlining, duplicated
+loads, conversions, allocation, and enlarged live state.
+
+Existing concurrency primitives that are required by a proven algorithm are
+not authorization to add more, and must not be removed mechanically. For
+example, PerL's multi-producer queue requires its existing publication
+`VarHandle`/CAS and memory-ordering protocol. Changing such a primitive requires
+a memory-model correctness argument plus queue stress, Lincheck, jcstress, GC,
+and before/after performance evidence.
 
 Keep EOF, disk-full, error handling, shutdown, lifecycle coordination, logging,
 and configuration decisions outside the per-record measurement and queue
 paths. Prefer existing exception propagation and worker/future lifecycle
 boundaries. Moving a check into a helper does not make it acceptable if the
 helper is still invoked for every record, enqueue, dequeue, or measurement.
+Prefer startup specialization, separate duration/fixed-record implementations,
+and existing empty-queue or lifecycle slow paths over a mode check in every
+iteration. Do not duplicate a hot loop merely on intuition: require a focused
+benchmark showing that specialization removes measurable compiled-path cost.
 
 An exception to this rule requires **explicit confirmation from a human
 developer before editing the hot path**. Before requesting confirmation, the
 agent must:
 
-1. identify the exact hot-path method and proposed branch, atomic operation,
-   mutex, or wait;
+1. identify the exact hot-path method and proposed branch, atomic/`VarHandle`
+   operation, mutex, wait, allocation, state, or non-inlined invocation;
 2. warn that the change can increase latency, jitter, contention, or reduce
    throughput;
 3. explain why the behavior cannot be implemented outside the hot path; and
@@ -225,7 +265,9 @@ agent must:
 A general request to implement a feature is not confirmation for hot-path
 overhead. After explicit approval, keep the addition minimal, document the
 reason in code, run the agreed performance comparison, and report the measured
-delta. Passing functional tests alone is not sufficient verification.
+delta. Use JMH for isolated costs and a representative SBK/PerlBench workload
+for end-to-end throughput and latency; report allocation and variance where
+applicable. Passing functional tests alone is not sufficient verification.
 
 ### Style
 
@@ -403,9 +445,10 @@ specific action** (not blanket approval):
   `perl/`, `sbm/`, etc.). New *drivers* under `drivers/` are fine.
 - Re-enabling `halodb` (see §4.1).
 - Upgrading the MinIO SDK from 8.5.17 (see §4.3).
-- Adding a branch, atomic operation, mutex, or wait to an `sbk-api`, PerL, SBM,
-  or driver hot path. The agent must first give the latency warning and obtain
-  the specific developer confirmation required by §3.
+- Adding a branch, atomic/`VarHandle` operation, mutex, wait, allocation,
+  bookkeeping state, or non-inlined dispatch to an `sbk-api`, PerL, SBM, or
+  driver hot path. The agent must first give the latency warning and obtain the
+  specific developer confirmation required by §3.
 - Force-pushing, rewriting history, or deleting branches.
 
 For everything else inside `drivers/`, `sbk-web-console/`, `sbk-api/`, `perl/`, `sbm/`,
@@ -431,9 +474,11 @@ should re-read this file and the relevant linked docs.
    [docs/sbk-internals.md](docs/sbk-internals.md) §8 my
    change must preserve (lock-free hot path, no sampling, no
    `synchronized` blocks, etc.)?
-7. Does the change add any branch, atomic operation, mutex, or wait to a
-   writer, reader, measurement, enqueue, dequeue, PerL, or SBM hot path? If so,
-   stop, warn the developer, and obtain explicit confirmation before editing.
+7. Does the change add any branch, atomic/`VarHandle` operation, mutex, wait,
+   allocation, bookkeeping variable, conversion, clock read, or dynamic method
+   invocation to a writer, reader, measurement, enqueue, dequeue, PerL, or SBM
+   hot path? If so, stop, warn the developer, and obtain explicit confirmation
+   before editing.
 
 When in doubt, **prefer reading existing code over making assumptions**.
 This codebase has more than 50 driver implementations; any specific pattern you need has almost
