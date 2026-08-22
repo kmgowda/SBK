@@ -89,6 +89,7 @@ plugins.withId('java') {
                 "-Xlint:finally",
                 "-Xlint:overrides"
         ])
+        options.forkOptions.jvmArgs.add("-J--sun-misc-unsafe-memory-access=allow")
     }
 
     // Driver configuration fields are commonly documented in their properties
