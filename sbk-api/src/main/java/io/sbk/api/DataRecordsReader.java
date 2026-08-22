@@ -251,8 +251,8 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         final long startTime = time.getCurrentTime();
         final int size = reader.params.getRecordSize();
         final Status status = new Status();
-        final long msToRun = secondsToRun * Time.MS_PER_SEC;
-        while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
+        while (time.elapsed(status.endTime, startTime) < timeUnitsToRun) {
             recordTime.recordRead(dType, size, time, status, reader.perlChannel);
         }
     }
@@ -276,8 +276,8 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         final long startTime = time.getCurrentTime();
         final int size = reader.params.getRecordSize();
         final Status status = new Status();
-        final long msToRun = secondsToRun * Time.MS_PER_SEC;
-        while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
+        while (time.elapsed(status.endTime, startTime) < timeUnitsToRun) {
             recordTime.recordRead(dType, size, time, status, reader.perlChannel, reader.id, logger);
         }
     }
@@ -496,12 +496,12 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         final long startTime = time.getCurrentTime();
         final int size = reader.params.getRecordSize();
         final Status status = new Status();
-        final long msToRun = secondsToRun * Time.MS_PER_SEC;
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
         final long loopStartTime = time.getCurrentTime();
         double secondsElapsed = 0;
         long cnt = 0;
         rController.start(reader.params.getRecordsPerSec());
-        while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
+        while (time.elapsed(status.endTime, startTime) < timeUnitsToRun) {
             recordTime.recordRead(dType, size, time, status, reader.perlChannel);
             cnt += status.records;
             secondsElapsed = time.elapsedSeconds(status.endTime, loopStartTime);
@@ -529,12 +529,12 @@ public sealed interface DataRecordsReader<T> extends DataReader<T> permits Async
         final long startTime = time.getCurrentTime();
         final int size = reader.params.getRecordSize();
         final Status status = new Status();
-        final long msToRun = secondsToRun * Time.MS_PER_SEC;
+        final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
         final long loopStartTime = time.getCurrentTime();
         double secondsElapsed = 0;
         long cnt = 0;
         rController.start(reader.params.getRecordsPerSec());
-        while (time.elapsedMilliSeconds(status.endTime, startTime) < msToRun) {
+        while (time.elapsed(status.endTime, startTime) < timeUnitsToRun) {
             recordTime.recordRead(dType, size, time, status, reader.perlChannel, reader.id, logger);
             cnt += status.records;
             secondsElapsed = time.elapsedSeconds(status.endTime, loopStartTime);

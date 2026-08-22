@@ -38,4 +38,9 @@ public class SystemLogger extends AbstractSystemLogger {
     @Override
     public final void recordLatency(long startTime, int events, int bytes, long latency) {
     }
+
+    @Override
+    public final boolean recordsIndividualLatencies() {
+        return false;
+    }
 }

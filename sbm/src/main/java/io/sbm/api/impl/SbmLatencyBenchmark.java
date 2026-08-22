@@ -125,19 +125,24 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
      * @throws BenchmarkIdleTimeoutException when no performance batch arrives before the idle deadline
      */
     void run() throws InterruptedException {
+        Printer.log.info("SbmLatencyBenchmark Started : {} milliseconds idle sleep", this.idleMS);
+        if (idleTimeoutEnabled) {
+            runWithIdleTimeout();
+        } else {
+            runWithoutIdleTimeout();
+        }
+    }
+
+    private void runWithoutIdleTimeout() throws InterruptedException {
         MessageLatenciesRecord record;
         boolean doWork = true;
         boolean notFound;
         boolean receivedBatchInWindow = false;
-        long positiveRecordsInSweep;
-        Printer.log.info("SbmLatencyBenchmark Started : {} milliseconds idle sleep", this.idleMS);
         long currentTime = time.getCurrentTime();
-        long lastEventTime = currentTime;
         window.start(currentTime);
         window.startWindow(currentTime);
         while (doWork) {
             notFound = true;
-            positiveRecordsInSweep = 0;
             for (int qIndex = 0; qIndex < maxQs; qIndex++) {
                 record = poll(qIndex);
                 if (record != null) {
@@ -149,8 +154,6 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
                             throw new IllegalStateException("SBM failed to aggregate latency batch for client "
                                     + record.getClientID() + " at sequence " + record.getSequenceNumber(), exception);
                         }
-                        positiveRecordsInSweep = Math.max(
-                                positiveRecordsInSweep, record.getTotalRecords());
                         receivedBatchInWindow = true;
                     } else {
                         doWork = false;
@@ -159,17 +162,9 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
             }
             if (notFound) {
                 Thread.sleep(idleMS);
-                final long idleCurrentTime = time.getCurrentTime();
-                if (idleTimeoutEnabled
-                        && time.elapsedMilliSeconds(idleCurrentTime, lastEventTime) >= idleTimeoutMS) {
-                    throw new BenchmarkIdleTimeoutException(idleTimeoutSeconds);
-                }
             }
 
             currentTime = time.getCurrentTime();
-            if (positiveRecordsInSweep > 0) {
-                lastEventTime = currentTime;
-            }
             if (window.elapsedMilliSecondsWindow(currentTime) > reportingIntervalMS) {
                 /*
                  * SBM starts before remote SBK processes and can remain alive after
@@ -177,6 +172,60 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
                  * client supplied a regular SBK reporting batch. A received batch
                  * is still printed even when it legitimately contains zero records.
                  */
+                if (receivedBatchInWindow) {
+                    window.stopWindow(currentTime);
+                }
+                window.startWindow(currentTime);
+                receivedBatchInWindow = false;
+            }
+        }
+        window.stop(currentTime);
+    }
+
+    private void runWithIdleTimeout() throws InterruptedException {
+        MessageLatenciesRecord record;
+        boolean doWork = true;
+        boolean notFound;
+        boolean receivedBatchInWindow = false;
+        long recordsInSweep;
+        long currentTime = time.getCurrentTime();
+        long lastEventTime = currentTime;
+        window.start(currentTime);
+        window.startWindow(currentTime);
+        while (doWork) {
+            notFound = true;
+            recordsInSweep = 0;
+            for (int qIndex = 0; qIndex < maxQs; qIndex++) {
+                record = poll(qIndex);
+                if (record != null) {
+                    notFound = false;
+                    if (record.getSequenceNumber() > 0) {
+                        try {
+                            window.record(currentTime, record);
+                        } catch (RuntimeException exception) {
+                            throw new IllegalStateException("SBM failed to aggregate latency batch for client "
+                                    + record.getClientID() + " at sequence " + record.getSequenceNumber(), exception);
+                        }
+                        recordsInSweep |= record.getTotalRecords();
+                        receivedBatchInWindow = true;
+                    } else {
+                        doWork = false;
+                    }
+                }
+            }
+            if (notFound) {
+                Thread.sleep(idleMS);
+                currentTime = time.getCurrentTime();
+                if (time.elapsedMilliSeconds(currentTime, lastEventTime) >= idleTimeoutMS) {
+                    throw new BenchmarkIdleTimeoutException(idleTimeoutSeconds);
+                }
+            } else {
+                currentTime = time.getCurrentTime();
+            }
+            if (recordsInSweep > 0) {
+                lastEventTime = currentTime;
+            }
+            if (window.elapsedMilliSecondsWindow(currentTime) > reportingIntervalMS) {
                 if (receivedBatchInWindow) {
                     window.stopWindow(currentTime);
                 }

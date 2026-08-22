@@ -35,11 +35,8 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
     private DataType<T> dataType;
     private Time time;
     private CompletableFuture<Void> ret;
-    private AtomicLong readCnt;
-    private long beginTime;
     private Worker reader;
-    private long timeUnitsToRun;
-    private long recordsCount;
+    private BenchmarkRecorder benchmarkRecorder;
 
     /**
      * Creates a callback-based reader whose runtime state is supplied by
@@ -85,13 +82,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
      * @param events        int
      */
     public void recordBenchmark(long startTime, long endTime, int dataSize, int events) {
-        final long cnt = readCnt.addAndGet(events);
-        reader.perlChannel.send(startTime, endTime, events, dataSize);
-        if (this.timeUnitsToRun > 0 && time.elapsed(endTime, beginTime) >= this.timeUnitsToRun) {
-            complete();
-        } else if (this.recordsCount > 0 && cnt >= this.recordsCount) {
-            complete();
-        }
+        benchmarkRecorder.record(startTime, endTime, dataSize, events);
     }
 
     /**
@@ -111,14 +102,14 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
         this.reader = reader;
         this.dataType = dType;
         this.time = time;
-        this.readCnt = new AtomicLong(0);
-        this.beginTime = time.getCurrentTime();
-        this.timeUnitsToRun = switch (time.getTimeUnit()) {
-            case ms -> secondsToRun * Time.MS_PER_SEC;
-            case mcs -> secondsToRun * Time.MICROS_PER_SEC;
-            case ns -> secondsToRun * Time.NS_PER_SEC;
-        };
-        this.recordsCount = recordsCount;
+        if (secondsToRun > 0) {
+            benchmarkRecorder = new DurationBenchmarkRecorder(
+                    time, time.getCurrentTime(), time.secondsToTimeUnits(secondsToRun));
+        } else if (recordsCount > 0) {
+            benchmarkRecorder = new RecordsBenchmarkRecorder(recordsCount);
+        } else {
+            benchmarkRecorder = new UnboundedBenchmarkRecorder();
+        }
         this.ret = new CompletableFuture<>();
         start(callback);
     }
@@ -162,6 +153,55 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
                     Callback<T> callback) throws IOException {
         initialize(reader, secondsToRun, recordsCount, dType, time, callback);
         waitToComplete();
+    }
+
+    private interface BenchmarkRecorder {
+        void record(long startTime, long endTime, int dataSize, int events);
+    }
+
+    private final class DurationBenchmarkRecorder implements BenchmarkRecorder {
+        private final Time time;
+        private final long beginTime;
+        private final long timeUnitsToRun;
+
+        private DurationBenchmarkRecorder(Time time, long beginTime, long timeUnitsToRun) {
+            this.time = time;
+            this.beginTime = beginTime;
+            this.timeUnitsToRun = timeUnitsToRun;
+        }
+
+        @Override
+        public void record(long startTime, long endTime, int dataSize, int events) {
+            reader.perlChannel.send(startTime, endTime, events, dataSize);
+            if (time.elapsed(endTime, beginTime) >= timeUnitsToRun) {
+                complete();
+            }
+        }
+    }
+
+    private final class RecordsBenchmarkRecorder implements BenchmarkRecorder {
+        private final AtomicLong readCount = new AtomicLong();
+        private final long recordsCount;
+
+        private RecordsBenchmarkRecorder(long recordsCount) {
+            this.recordsCount = recordsCount;
+        }
+
+        @Override
+        public void record(long startTime, long endTime, int dataSize, int events) {
+            final long count = readCount.addAndGet(events);
+            reader.perlChannel.send(startTime, endTime, events, dataSize);
+            if (count >= recordsCount) {
+                complete();
+            }
+        }
+    }
+
+    private final class UnboundedBenchmarkRecorder implements BenchmarkRecorder {
+        @Override
+        public void record(long startTime, long endTime, int dataSize, int events) {
+            reader.perlChannel.send(startTime, endTime, events, dataSize);
+        }
     }
 
     /**

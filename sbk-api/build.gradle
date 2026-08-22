@@ -49,7 +49,10 @@ dependencies {
 
 jmh {
     jvmArgs = ["-Djmh.blackhole.autoDetect=false"]
-    includes = ['io.sbk.logger.impl.GrpcLatencyAccumulatorBenchmark.*']
+    includes = [
+            'io.sbk.api.CoreHotPathBenchmark.*',
+            'io.sbk.logger.impl.GrpcLatencyAccumulatorBenchmark.*'
+    ]
 }
 
 def grpcLoggerPerformanceReport = layout.buildDirectory.file(
@@ -112,6 +115,34 @@ tasks.register('grpcLoggerPerformanceTest') {
         println String.format(
                 "SBP 4 packed encoding    : %,.3f %s; %,.3f B/op",
                 packed.primaryMetric.score, packed.primaryMetric.scoreUnit, allocation(packed))
+    }
+}
+
+def coreHotPathPerformanceReport = layout.buildDirectory.file(
+        "reports/jmh/core-hot-path-performance.json")
+
+tasks.register('coreHotPathPerformanceTest', JavaExec) {
+    group = 'verification'
+    description = 'Benchmarks native duration checks and callback-reader mode specialization.'
+    mustRunAfter ':perl:periodicRecorderPerformanceTest'
+    dependsOn tasks.named('jmhJar')
+    classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
+    mainClass = 'org.openjdk.jmh.Main'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
+    }
+    jvmArgs rootProject.ext.sbkRuntimeJvmArgs
+    args 'io.sbk.api.CoreHotPathBenchmark.*',
+            '-prof', 'gc',
+            '-jvmArgs', (rootProject.ext.sbkRuntimeJvmArgs
+                    + ['-Djmh.blackhole.autoDetect=false']).join(' '),
+            '-rf', 'json',
+            '-rff', coreHotPathPerformanceReport.get().asFile.absolutePath
+    outputs.file(coreHotPathPerformanceReport)
+    outputs.upToDateWhen { false }
+    doFirst {
+        coreHotPathPerformanceReport.get().asFile.parentFile.mkdirs()
+        delete coreHotPathPerformanceReport
     }
 }
 

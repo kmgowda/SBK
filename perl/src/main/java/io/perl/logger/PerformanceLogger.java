@@ -87,6 +87,20 @@ public interface PerformanceLogger extends Print, ReportLatency {
     }
 
     /**
+     * Indicates whether this logger consumes every individual latency value.
+     *
+     * <p>The default preserves compatibility for custom loggers. Loggers with
+     * a final no-op {@link #recordLatency(long, int, int, long)} implementation
+     * should return {@code false}, allowing PerL to omit the callback from its
+     * single-threaded measurement path.</p>
+     *
+     * @return true when PerL must invoke {@code recordLatency} for every event
+     */
+    default boolean recordsIndividualLatencies() {
+        return true;
+    }
+
+    /**
      * Reporting interval in seconds (default from {@link PerlConfig}).
      *
      * @return reporting interval in seconds

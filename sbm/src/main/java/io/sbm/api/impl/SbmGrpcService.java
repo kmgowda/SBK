@@ -367,18 +367,20 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
                 if (terminated) {
                     return;
                 }
+                final long recordClientId = record.getClientID();
+                final long sequenceNumber = record.getSequenceNumber();
                 if (clientId < 0) {
-                    clientId = record.getClientID();
+                    clientId = recordClientId;
                 }
-                if (record.getClientID() != clientId) {
+                if (recordClientId != clientId) {
                     fail(Status.INVALID_ARGUMENT.withDescription(
                             "SBM latency stream changed client ID from " + clientId
-                                    + " to " + record.getClientID()));
-                } else if (record.getSequenceNumber() != expectedSequence) {
+                                    + " to " + recordClientId));
+                } else if (sequenceNumber != expectedSequence) {
                     fail(Status.DATA_LOSS.withDescription(
                             "SBM latency stream sequence mismatch for client " + clientId
                                     + ": expected " + expectedSequence + " but received "
-                                    + record.getSequenceNumber()));
+                                    + sequenceNumber));
                 } else {
                     try {
                         validateLatencyFields(record);
@@ -418,9 +420,11 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     }
 
     private static void validateLatencyFields(MessageLatenciesRecord record) {
-        if (record.getLatencyValuesCount() != record.getLatencyCountsCount()) {
+        final int latencyValuesCount = record.getLatencyValuesCount();
+        final int latencyCountsCount = record.getLatencyCountsCount();
+        if (latencyValuesCount != latencyCountsCount) {
             throw new IllegalArgumentException("SBM packed latency values/counts have different lengths: "
-                    + record.getLatencyValuesCount() + " and " + record.getLatencyCountsCount());
+                    + latencyValuesCount + " and " + latencyCountsCount);
         }
     }
 

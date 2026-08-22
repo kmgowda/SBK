@@ -120,6 +120,7 @@ public class PerlTest {
     public void defaultLoggerLatencyCallbackIsFinal() throws NoSuchMethodException {
         assertTrue(Modifier.isFinal(DefaultLogger.class.getMethod("recordLatency",
                 long.class, int.class, int.class, long.class).getModifiers()));
+        assertFalse(new DefaultLogger().recordsIndividualLatencies());
     }
 
 

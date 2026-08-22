@@ -1216,6 +1216,8 @@ using an embedded <a href="io/perl/logger/impl/PrometheusServer.html" title="cla
 </dd>
 <dt><a href="io/perl/api/impl/TotalWindowLatencyPeriodicRecorder.html#record(long,long,int,int)" class="member-name-link">record(long, long, int, int)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/TotalWindowLatencyPeriodicRecorder.html" title="class in io.perl.api.impl">TotalWindowLatencyPeriodicRecorder</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/perl/api/impl/TotalWindowPeriodicRecorder.html#record(long,long,int,int)" class="member-name-link">record(long, long, int, int)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/TotalWindowPeriodicRecorder.html" title="class in io.perl.api.impl">TotalWindowPeriodicRecorder</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/perl/api/PeriodicRecorder.html#record(long,long,int,int)" class="member-name-link">record(long, long, int, int)</a> - Method in interface io.perl.api.<a href="io/perl/api/PeriodicRecorder.html" title="interface in io.perl.api">PeriodicRecorder</a></dt>
 <dd>
 <div class="block">Record the Event/record.</div>
@@ -1261,6 +1263,12 @@ using an embedded <a href="io/perl/logger/impl/PrometheusServer.html" title="cla
 <dt><a href="io/perl/api/BenchmarkTermination.html#RECORDS_COMPLETED" class="member-name-link">RECORDS_COMPLETED</a> - Enum constant in enum class io.perl.api.<a href="io/perl/api/BenchmarkTermination.html" title="enum class in io.perl.api">BenchmarkTermination</a></dt>
 <dd>
 <div class="block">The configured <code>-records</code> work completed successfully.</div>
+</dd>
+<dt><a href="io/perl/logger/impl/DefaultLogger.html#recordsIndividualLatencies()" class="member-name-link">recordsIndividualLatencies()</a> - Method in class io.perl.logger.impl.<a href="io/perl/logger/impl/DefaultLogger.html" title="class in io.perl.logger.impl">DefaultLogger</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/perl/logger/PerformanceLogger.html#recordsIndividualLatencies()" class="member-name-link">recordsIndividualLatencies()</a> - Method in interface io.perl.logger.<a href="io/perl/logger/PerformanceLogger.html" title="interface in io.perl.logger">PerformanceLogger</a></dt>
+<dd>
+<div class="block">Indicates whether this logger consumes every individual latency value.</div>
 </dd>
 <dt><a href="io/perl/logger/impl/Metrics.html#recordsName" class="member-name-link">recordsName</a> - Variable in class io.perl.logger.impl.<a href="io/perl/logger/impl/Metrics.html" title="class in io.perl.logger.impl">Metrics</a></dt>
 <dd>
@@ -1396,6 +1404,10 @@ records count.</div>
 <dt><a href="io/time/Time.html#SECONDS_PER_MIN" class="member-name-link">SECONDS_PER_MIN</a> - Static variable in interface io.time.<a href="io/time/Time.html" title="interface in io.time">Time</a></dt>
 <dd>
 <div class="block">Number of seconds per minute.</div>
+</dd>
+<dt><a href="io/time/Time.html#secondsToTimeUnits(long)" class="member-name-link">secondsToTimeUnits(long)</a> - Method in interface io.time.<a href="io/time/Time.html" title="interface in io.time">Time</a></dt>
+<dd>
+<div class="block">Convert a duration in seconds to this clock's native unit.</div>
 </dd>
 <dt><a href="io/perl/api/PerlChannel.html#send(long,long,int,int)" class="member-name-link">send(long, long, int, int)</a> - Method in interface io.perl.api.<a href="io/perl/api/PerlChannel.html" title="interface in io.perl.api">PerlChannel</a></dt>
 <dd>
@@ -1673,6 +1685,14 @@ checks whether the window storage is full to trigger periodic resets.</div>
 <dt><a href="io/perl/api/impl/TotalWindowLatencyRecorder.html#%3Cinit%3E(io.perl.api.LatencyRecordWindow,io.perl.api.LatencyRecordWindow,io.perl.logger.Print,io.perl.logger.Print)" class="member-name-link">TotalWindowLatencyRecorder(LatencyRecordWindow, LatencyRecordWindow, Print, Print)</a> - Constructor for class io.perl.api.impl.<a href="io/perl/api/impl/TotalWindowLatencyRecorder.html" title="class in io.perl.api.impl">TotalWindowLatencyRecorder</a></dt>
 <dd>
 <div class="block">Construct recorder with per-window and total storage plus loggers.</div>
+</dd>
+<dt><a href="io/perl/api/impl/TotalWindowPeriodicRecorder.html" class="type-name-link" title="class in io.perl.api.impl">TotalWindowPeriodicRecorder</a> - Class in <a href="io/perl/api/impl/package-summary.html">io.perl.api.impl</a></dt>
+<dd>
+<div class="block">Periodic recorder for loggers that do not consume individual latency values.</div>
+</dd>
+<dt><a href="io/perl/api/impl/TotalWindowPeriodicRecorder.html#%3Cinit%3E(io.perl.api.LatencyRecordWindow,io.perl.api.LatencyRecordWindow,io.perl.logger.Print,io.perl.logger.Print,io.time.Time)" class="member-name-link">TotalWindowPeriodicRecorder(LatencyRecordWindow, LatencyRecordWindow, Print, Print, Time)</a> - Constructor for class io.perl.api.impl.<a href="io/perl/api/impl/TotalWindowPeriodicRecorder.html" title="class in io.perl.api.impl">TotalWindowPeriodicRecorder</a></dt>
+<dd>
+<div class="block">Creates a periodic recorder without a per-event logger callback.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:U">U</h2>

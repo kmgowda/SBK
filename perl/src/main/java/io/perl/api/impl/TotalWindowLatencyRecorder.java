@@ -21,7 +21,7 @@ import io.perl.logger.ReportLatency;
  * reporting.
  */
 public sealed class TotalWindowLatencyRecorder extends TotalLatencyRecordWindow
-        implements ReportLatency permits TotalWindowLatencyPeriodicRecorder {
+        implements ReportLatency permits TotalWindowLatencyPeriodicRecorder, TotalWindowPeriodicRecorder {
 
     /**
      * Construct recorder with per-window and total storage plus loggers.
