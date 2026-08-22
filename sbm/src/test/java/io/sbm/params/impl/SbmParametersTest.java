@@ -45,4 +45,15 @@ final class SbmParametersTest {
 
         assertEquals("MinIO", parameters.getStorageName());
     }
+
+    @Test
+    void parsesIdleTimeoutAndPreservesItsDefault() throws Exception {
+        final SbmParameters defaults = new SbmParameters("test", 9717, 1, 0, null);
+        defaults.parseArgs(new String[]{"-class", "File"});
+        assertEquals(600, defaults.getIdleTimeoutSeconds());
+
+        final SbmParameters override = new SbmParameters("test", 9717, 1, 0, null);
+        override.parseArgs(new String[]{"-class", "File", "-idletimeoutseconds", "23"});
+        assertEquals(23, override.getIdleTimeoutSeconds());
+    }
 }

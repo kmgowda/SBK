@@ -39,10 +39,11 @@ public final class PerformanceRecorderElasticWait extends PerformanceRecorder {
      * @param time benchmark clock
      * @param reportingIntervalMS reporting-window duration in milliseconds
      * @param idleNS duration of each empty-channel park in nanoseconds
+     * @param idleTimeoutSeconds maximum interval without a performance event
      */
     public PerformanceRecorderElasticWait(PeriodicRecorder periodicRecorder, @Nonnull Channel[] channels, Time time,
-                                          int reportingIntervalMS, int idleNS) {
-        super(periodicRecorder, channels, time, reportingIntervalMS);
+                                          int reportingIntervalMS, int idleNS, int idleTimeoutSeconds) {
+        super(periodicRecorder, channels, time, reportingIntervalMS, idleTimeoutSeconds);
         this.idleNS = idleNS;
     }
 
@@ -55,10 +56,12 @@ public final class PerformanceRecorderElasticWait extends PerformanceRecorder {
     public void run(final long secondsToRun, final long totalRecords) {
         final long msToRun = secondsToRun * Time.MS_PER_SEC;
         final ElasticWait idleWait = new ElasticWait(idleNS, windowIntervalMS,
-                Math.min(windowIntervalMS, PerlConfig.DEFAULT_TIMEOUT_MS));
+                Math.min(windowIntervalMS, PerlConfig.DEFAULT_TIMEOUT_MS),
+                idleTimeoutCheckIntervalMS());
         final long startTime = time.getCurrentTime();
         boolean doWork = true;
         long ctime = startTime;
+        long lastEventTime = startTime;
         long recordsCnt = 0;
         boolean notFound;
         boolean dataSinceIdle = false;
@@ -78,6 +81,9 @@ public final class PerformanceRecorderElasticWait extends PerformanceRecorder {
                     if (t.isEnd()) {
                         doWork = false;
                     } else {
+                        if (t.records > 0) {
+                            lastEventTime = Math.max(lastEventTime, t.endTime);
+                        }
                         recordsCnt += t.records;
                         periodicRecorder.record(t.startTime, t.endTime, t.records, t.bytes);
                         if (msToRun > 0) {
@@ -106,6 +112,7 @@ public final class PerformanceRecorderElasticWait extends PerformanceRecorder {
                     }
                     if (idleWait.waitAndCheck()) {
                         ctime = time.getCurrentTime();
+                        checkIdleTimeout(ctime, lastEventTime);
                         final long diffTime = periodicRecorder.elapsedMilliSecondsWindow(ctime);
                         if (diffTime >= windowIntervalMS) {
                             periodicRecorder.stopWindow(ctime);

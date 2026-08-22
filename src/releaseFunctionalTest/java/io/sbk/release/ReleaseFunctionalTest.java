@@ -111,6 +111,8 @@ class ReleaseFunctionalTest {
         caseRun("sbk-eof-prepare", this::prepareEofFile);
         caseRun("sbk-eof-reader", this::readEofFile);
         caseRun("eof-lifecycle", this::verifyEofLifecycle);
+        caseRun("sbk-idle-timeout", this::sbkIdleTimeout);
+        caseRun("sbm-idle-timeout", this::sbmIdleTimeout);
         caseRun("prometheus-endpoint", this::prometheusEndpoint);
         caseRun("sbk-PrometheusLogger", this::prometheusLifecycle);
         caseRun("web-console-contract", this::webConsoleContract);
@@ -173,6 +175,18 @@ class ReleaseFunctionalTest {
         readEofFile();
         long elapsed = Duration.ofNanos(System.nanoTime() - start).toSeconds();
         require(elapsed < config.eofMaximumSeconds, "reader took " + elapsed + "s after EOF");
+    }
+
+    private void sbkIdleTimeout() throws Exception {
+        reject(config.sbk, "No performance benchmarking event was received for 1 seconds",
+                "-class", "null", "-readers", "1", "-size", config.recordSize,
+                "-records", config.records, "-idletimeoutseconds", "1");
+    }
+
+    private void sbmIdleTimeout() throws Exception {
+        reject(config.sbm, "No performance benchmarking event was received for 1 seconds",
+                "-class", "File", "-port", Integer.toString(freePort()),
+                "-idletimeoutseconds", "1");
     }
 
     private void prometheusEndpoint() throws Exception {

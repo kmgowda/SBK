@@ -65,6 +65,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#maxConnections" tabindex="0">maxConnections</a></li>
 <li><a href="#maxQueues" tabindex="0">maxQueues</a></li>
 <li><a href="#idleMS" tabindex="0">idleMS</a></li>
+<li><a href="#idleTimeoutSeconds" tabindex="0">idleTimeoutSeconds</a></li>
 <li><a href="#maxRecordSizeMB" tabindex="0">maxRecordSizeMB</a></li>
 <li><a href="#defaultAction" tabindex="0">defaultAction</a></li>
 </ol>
@@ -126,33 +127,38 @@ loadScripts(document, 'script');</script>
 <div class="block"><code>int idleMS</code>.</div>
 </div>
 <div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#maxConnections" class="member-name-link">maxConnections</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#idleTimeoutSeconds" class="member-name-link">idleTimeoutSeconds</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block"><code>int maxConnections</code>.</div>
+<div class="block">Maximum interval without an SBK performance batch, in seconds.</div>
 </div>
 <div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#maxQueues" class="member-name-link">maxQueues</a></code></div>
+<div class="col-second even-row-color"><code><a href="#maxConnections" class="member-name-link">maxConnections</a></code></div>
 <div class="col-last even-row-color">
+<div class="block"><code>int maxConnections</code>.</div>
+</div>
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#maxQueues" class="member-name-link">maxQueues</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block"><code>int maxQueues</code>.</div>
 </div>
-<div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#maxRecordSizeMB" class="member-name-link">maxRecordSizeMB</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#maxRecordSizeMB" class="member-name-link">maxRecordSizeMB</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Maximum inbound SBP latency-record size in MiB.</div>
 </div>
-<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#NAME" class="member-name-link">NAME</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#NAME" class="member-name-link">NAME</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block"><code>String NAME = "sbm"</code>.</div>
 </div>
-<div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#port" class="member-name-link">port</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#port" class="member-name-link">port</a></code></div>
+<div class="col-last even-row-color">
 <div class="block"><code>int port</code>.</div>
 </div>
-<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#SBM_LOGGER_PACKAGE_NAME" class="member-name-link">SBM_LOGGER_PACKAGE_NAME</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#SBM_LOGGER_PACKAGE_NAME" class="member-name-link">SBM_LOGGER_PACKAGE_NAME</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block"><code>SBM_LOGGER_PACKAGE_NAME = "io.sbm.logger";</code>.</div>
 </div>
 </div>
@@ -293,6 +299,15 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">idleMS</span></div>
 <div class="block"><code>int idleMS</code>.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="idleTimeoutSeconds">
+<h3>idleTimeoutSeconds</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">idleTimeoutSeconds</span></div>
+<div class="block">Maximum interval without an SBK performance batch, in seconds.</div>
 </div>
 </section>
 </li>

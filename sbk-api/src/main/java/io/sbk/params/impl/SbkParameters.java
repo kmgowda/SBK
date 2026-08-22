@@ -92,6 +92,9 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
     private int idleSleepMilliSeconds;
 
     @Getter
+    private int idleTimeoutSeconds;
+
+    @Getter
     private boolean mpscQueueEnabled;
 
     /**
@@ -107,6 +110,7 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         this.action = Action.Reading;
         final SbkConfig defaults = SbkConfig.get();
         this.mpscQueueEnabled = defaults.getPerlConfig().mpscQueueEnable;
+        this.idleTimeoutSeconds = defaults.getPerlConfig().idleTimeoutSeconds;
 
         addOption("writers", true, "Number of writers");
         addOption("readers", true, "Number of readers");
@@ -144,6 +148,9 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
                         + defaults.defaultReadOnly);
         addOption("millisecsleep", true, "Idle sleep in milliseconds; default: "
                 + defaults.defaultIdleSleepMillis + " ms");
+        addOption(PerlConfig.IDLE_TIMEOUT_OPTION, true,
+                "Maximum seconds without a performance benchmarking event; default: "
+                        + this.idleTimeoutSeconds);
         addOption("thread", true,
                 "Thread Type [p: platform, f: fork-join, v: virtual], default: " + defaults.defaultThreadType);
         addOption(MPSC_QUEUE_OPTION, true,
@@ -220,6 +227,11 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
                 Integer.toString(defaults.defaultReaderStepSeconds)));
         idleSleepMilliSeconds = Integer.parseInt(getOptionValue("millisecsleep",
                 Integer.toString(defaults.defaultIdleSleepMillis)));
+        idleTimeoutSeconds = Integer.parseInt(getOptionValue(PerlConfig.IDLE_TIMEOUT_OPTION,
+                Integer.toString(idleTimeoutSeconds)));
+        if (idleTimeoutSeconds <= 0) {
+            throw new IllegalArgumentException("Error: The idle timeout seconds must be greater than zero");
+        }
         parseMpscQueueOption();
 
         int workersCnt = writersCount;
@@ -276,6 +288,11 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
      * @throws IOException if {@code sbk.properties} is missing or invalid
      */
     public static PerlConfig loadPerlConfig() throws IOException {
-        return SbkConfig.get().getPerlConfig();
+        try (var input = SbkParameters.class.getClassLoader().getResourceAsStream("sbk.properties")) {
+            if (input == null) {
+                throw new IOException("Missing sbk.properties");
+            }
+            return PerlConfig.build(input);
+        }
     }
 }

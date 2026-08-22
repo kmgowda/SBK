@@ -458,6 +458,8 @@ final public class SbkGem {
         ramArgsList.add(Integer.toString(params.getConnections().length));
         ramArgsList.add("-millisecsleep");
         ramArgsList.add(Integer.toString(params.getSbmIdleSleepMilliSeconds()));
+        ramArgsList.add("-" + PerlConfig.IDLE_TIMEOUT_OPTION);
+        ramArgsList.add(Integer.toString(params.getIdleTimeoutSeconds()));
 
         final String[] ramArgs = ramArgsList.toArray(new String[0]);
         Printer.log.info("Arguments to SBM: " + Arrays.toString(ramArgs));

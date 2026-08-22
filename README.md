@@ -246,6 +246,7 @@ Driver-specific options are added after SBK discovers `-class`. Use the selected
 | `-seconds N` | Time-based run duration |
 | `-records N` | Total records in count mode, or the per-second target in timed mode |
 | `-throughput MBPS` | Throughput target; `-1` requests maximum throughput |
+| `-idletimeoutseconds N` | Fail when no performance event is produced for `N` seconds; default: `600` |
 | `-mpscqueue true\|false` | Select intrusive `TimeStampMpscQueue` or the JDK `ConcurrentLinkedQueue` fallback; default comes from `sbk.properties` |
 | `-sync N` | Records per flush/sync or transaction |
 | `-ro true` | With readers and writers configured, read without writing new records |
@@ -253,6 +254,13 @@ Driver-specific options are added after SBK discovers `-class`. Use the selected
 | `-out NAME` | Output logger, such as `SystemLogger`, `CSVLogger`, `WebLogger`, `PrometheusLogger`, or `GrpcLogger` |
 
 Always treat `-help` as authoritative because drivers and loggers add their own options at runtime.
+
+The idle timeout is independent of `-seconds`. It primarily bounds fixed-record
+benchmarks that would otherwise wait forever when a driver, live queue, or
+distributed client stops producing results. PerL raises the terminal failure,
+SBK performs bounded cleanup, and SBM uses the same option for missing gRPC
+performance batches. SBK-GEM forwards the value to every remote SBK process and
+applies it to its embedded SBM.
 
 ## Modules
 

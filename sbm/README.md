@@ -66,6 +66,12 @@ Start with defaults:
 ./sbm/build/install/sbm/bin/sbm
 ```
 
+SBM exits with a failed benchmark when no SBK performance batch arrives for
+`-idletimeoutseconds N`; the default is 600 seconds. The check runs only while
+the ingestion queues are empty. Every received positive-sequence SBP batch
+containing completed records renews the deadline; an empty periodic batch is
+still printable but does not represent benchmark progress.
+
 Start the aggregate Prometheus exporter explicitly:
 
 ```bash

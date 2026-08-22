@@ -49,7 +49,7 @@ loadScripts(document, 'script');</script>
 <div class="header">
 <h1>Index</h1>
 </div>
-<a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:Q">Q</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a>
+<a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:Q">Q</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a>
 <h2 class="title" id="I:A">A</h2>
 <dl class="index">
 <dt><a href="io/perl/api/impl/TimeStampMpscQueueArray.html#add(int,io.perl.api.TimeStamp)" class="member-name-link">add(int, TimeStamp)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/TimeStampMpscQueueArray.html" title="class in io.perl.api.impl">TimeStampMpscQueueArray</a></dt>
@@ -117,6 +117,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block"><code>BEGIN = 0</code>.</div>
 </dd>
+<dt><a href="io/perl/exception/BenchmarkIdleTimeoutException.html" class="type-name-link" title="class in io.perl.exception">BenchmarkIdleTimeoutException</a> - Exception Class in <a href="io/perl/exception/package-summary.html">io.perl.exception</a></dt>
+<dd>
+<div class="block">Signals that a benchmark produced no performance events within its configured idle deadline.</div>
+</dd>
+<dt><a href="io/perl/exception/BenchmarkIdleTimeoutException.html#%3Cinit%3E(long)" class="member-name-link">BenchmarkIdleTimeoutException(long)</a> - Constructor for exception class io.perl.exception.<a href="io/perl/exception/BenchmarkIdleTimeoutException.html" title="class in io.perl.exception">BenchmarkIdleTimeoutException</a></dt>
+<dd>
+<div class="block">Creates an idle-timeout failure with a stable operator-facing diagnostic.</div>
+</dd>
 <dt><a href="io/perl/config/PerlConfig.html#build()" class="member-name-link">build()</a> - Static method in class io.perl.config.<a href="io/perl/config/PerlConfig.html" title="class in io.perl.config">PerlConfig</a></dt>
 <dd>
 <div class="block">Build configuration by loading the default <code>perl.properties</code> from the classpath.</div>
@@ -177,6 +185,10 @@ for the PerL internals.</div>
 <dt><a href="io/perl/api/PerformanceRecorder.html#channels" class="member-name-link">channels</a> - Variable in class io.perl.api.<a href="io/perl/api/PerformanceRecorder.html" title="class in io.perl.api">PerformanceRecorder</a></dt>
 <dd>
 <div class="block">Producer channels consumed by this recorder.</div>
+</dd>
+<dt><a href="io/perl/api/PerformanceRecorder.html#checkIdleTimeout(long,long)" class="member-name-link">checkIdleTimeout(long, long)</a> - Method in class io.perl.api.<a href="io/perl/api/PerformanceRecorder.html" title="class in io.perl.api">PerformanceRecorder</a></dt>
+<dd>
+<div class="block">Fails an idle consumer after the configured interval.</div>
 </dd>
 <dt><a href="io/perl/api/impl/TotalLatencyRecordWindow.html#checkTotalWindowFullAndReset(long)" class="member-name-link">checkTotalWindowFullAndReset(long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/TotalLatencyRecordWindow.html" title="class in io.perl.api.impl">TotalLatencyRecordWindow</a></dt>
 <dd>
@@ -361,6 +373,10 @@ and initialize <code>CSVExtendedLatencyRecorder.latencyBuffer</code> and <code>C
 </dl>
 <h2 class="title" id="I:D">D</h2>
 <dl class="index">
+<dt><a href="io/perl/config/PerlConfig.html#DEFAULT_IDLE_TIMEOUT_SECONDS" class="member-name-link">DEFAULT_IDLE_TIMEOUT_SECONDS</a> - Static variable in class io.perl.config.<a href="io/perl/config/PerlConfig.html" title="class in io.perl.config">PerlConfig</a></dt>
+<dd>
+<div class="block">Default maximum interval without a performance event, in seconds.</div>
+</dd>
 <dt><a href="io/perl/config/LatencyConfig.html#DEFAULT_MAX_LATENCY" class="member-name-link">DEFAULT_MAX_LATENCY</a> - Static variable in class io.perl.config.<a href="io/perl/config/LatencyConfig.html" title="class in io.perl.config">LatencyConfig</a></dt>
 <dd>
 <div class="block">Default maximum latency expected (in milliseconds).</div>
@@ -459,6 +475,10 @@ and the window start time.</div>
 <dd>
 <div class="block">Constructor ElasticWait initialize all values.</div>
 </dd>
+<dt><a href="io/perl/api/impl/ElasticWait.html#%3Cinit%3E(int,int,int,int)" class="member-name-link">ElasticWait(int, int, int, int)</a> - Constructor for class io.perl.api.impl.<a href="io/perl/api/impl/ElasticWait.html" title="class in io.perl.api.impl">ElasticWait</a></dt>
+<dd>
+<div class="block">Creates an adaptive idle strategy with a bounded wall-clock check interval.</div>
+</dd>
 <dt><a href="io/state/State.html#END" class="member-name-link">END</a> - Enum constant in enum class io.state.<a href="io/state/State.html" title="enum class in io.state">State</a></dt>
 <dd>
 <div class="block"><code>END = 2</code>.</div>
@@ -475,6 +495,10 @@ caller code.</div>
 </dl>
 <h2 class="title" id="I:F">F</h2>
 <dl class="index">
+<dt><a href="io/perl/exception/BenchmarkIdleTimeoutException.html#find(java.lang.Throwable)" class="member-name-link">find(Throwable)</a> - Static method in exception class io.perl.exception.<a href="io/perl/exception/BenchmarkIdleTimeoutException.html" title="class in io.perl.exception">BenchmarkIdleTimeoutException</a></dt>
+<dd>
+<div class="block">Finds an idle-timeout failure in an asynchronous completion cause chain.</div>
+</dd>
 <dt><a href="io/perl/api/LatencyPercentiles.html#fractions" class="member-name-link">fractions</a> - Variable in class io.perl.api.<a href="io/perl/api/LatencyPercentiles.html" title="class in io.perl.api">LatencyPercentiles</a></dt>
 <dd>
 <div class="block">Percentile fractions (e.g.</div>
@@ -632,9 +656,21 @@ benchmarking events.</div>
 </dl>
 <h2 class="title" id="I:I">I</h2>
 <dl class="index">
+<dt><a href="io/perl/config/PerlConfig.html#IDLE_TIMEOUT_OPTION" class="member-name-link">IDLE_TIMEOUT_OPTION</a> - Static variable in class io.perl.config.<a href="io/perl/config/PerlConfig.html" title="class in io.perl.config">PerlConfig</a></dt>
+<dd>
+<div class="block">CLI option controlling the maximum interval without a performance event.</div>
+</dd>
 <dt><a href="io/perl/config/PerlConfig.html#idleNS" class="member-name-link">idleNS</a> - Variable in class io.perl.config.<a href="io/perl/config/PerlConfig.html" title="class in io.perl.config">PerlConfig</a></dt>
 <dd>
 <div class="block">Idle time between operations (in nanoseconds).</div>
+</dd>
+<dt><a href="io/perl/api/PerformanceRecorder.html#idleTimeoutCheckIntervalMS()" class="member-name-link">idleTimeoutCheckIntervalMS()</a> - Method in class io.perl.api.<a href="io/perl/api/PerformanceRecorder.html" title="class in io.perl.api">PerformanceRecorder</a></dt>
+<dd>
+<div class="block">Returns a bounded clock-check interval for idle-only polling.</div>
+</dd>
+<dt><a href="io/perl/config/PerlConfig.html#idleTimeoutSeconds" class="member-name-link">idleTimeoutSeconds</a> - Variable in class io.perl.config.<a href="io/perl/config/PerlConfig.html" title="class in io.perl.config">PerlConfig</a></dt>
+<dd>
+<div class="block">Maximum interval without a performance event before the benchmark fails, in seconds.</div>
 </dd>
 <dt><a href="io/perl/api/LatencyRecord.html#invalidLatencyRecords" class="member-name-link">invalidLatencyRecords</a> - Variable in class io.perl.api.<a href="io/perl/api/LatencyRecord.html" title="class in io.perl.api">LatencyRecord</a></dt>
 <dd>
@@ -988,7 +1024,7 @@ metrics.</div>
 <div class="block">Base class for implementations that collect events from multiple channels
 and drive periodic recorders.</div>
 </dd>
-<dt><a href="io/perl/api/PerformanceRecorder.html#%3Cinit%3E(io.perl.api.PeriodicRecorder,io.perl.api.Channel%5B%5D,io.time.Time,int)" class="member-name-link">PerformanceRecorder(PeriodicRecorder, Channel[], Time, int)</a> - Constructor for class io.perl.api.<a href="io/perl/api/PerformanceRecorder.html" title="class in io.perl.api">PerformanceRecorder</a></dt>
+<dt><a href="io/perl/api/PerformanceRecorder.html#%3Cinit%3E(io.perl.api.PeriodicRecorder,io.perl.api.Channel%5B%5D,io.time.Time,int,int)" class="member-name-link">PerformanceRecorder(PeriodicRecorder, Channel[], Time, int, int)</a> - Constructor for class io.perl.api.<a href="io/perl/api/PerformanceRecorder.html" title="class in io.perl.api">PerformanceRecorder</a></dt>
 <dd>
 <div class="block">Constructor to initialize performance recorder.</div>
 </dd>
@@ -996,7 +1032,7 @@ and drive periodic recorders.</div>
 <dd>
 <div class="block">Single-consumer performance recorder with adaptive idle parking.</div>
 </dd>
-<dt><a href="io/perl/api/impl/PerformanceRecorderElasticWait.html#%3Cinit%3E(io.perl.api.PeriodicRecorder,io.perl.api.Channel%5B%5D,io.time.Time,int,int)" class="member-name-link">PerformanceRecorderElasticWait(PeriodicRecorder, Channel[], Time, int, int)</a> - Constructor for class io.perl.api.impl.<a href="io/perl/api/impl/PerformanceRecorderElasticWait.html" title="class in io.perl.api.impl">PerformanceRecorderElasticWait</a></dt>
+<dt><a href="io/perl/api/impl/PerformanceRecorderElasticWait.html#%3Cinit%3E(io.perl.api.PeriodicRecorder,io.perl.api.Channel%5B%5D,io.time.Time,int,int,int)" class="member-name-link">PerformanceRecorderElasticWait(PeriodicRecorder, Channel[], Time, int, int, int)</a> - Constructor for class io.perl.api.impl.<a href="io/perl/api/impl/PerformanceRecorderElasticWait.html" title="class in io.perl.api.impl">PerformanceRecorderElasticWait</a></dt>
 <dd>
 <div class="block">Creates an elastic-wait performance recorder.</div>
 </dd>
@@ -1004,7 +1040,7 @@ and drive periodic recorders.</div>
 <dd>
 <div class="block">Performance recorder that sleeps briefly when no channel has data.</div>
 </dd>
-<dt><a href="io/perl/api/impl/PerformanceRecorderIdleSleep.html#%3Cinit%3E(io.perl.api.PeriodicRecorder,io.perl.api.Channel%5B%5D,io.time.Time,int,int)" class="member-name-link">PerformanceRecorderIdleSleep(PeriodicRecorder, Channel[], Time, int, int)</a> - Constructor for class io.perl.api.impl.<a href="io/perl/api/impl/PerformanceRecorderIdleSleep.html" title="class in io.perl.api.impl">PerformanceRecorderIdleSleep</a></dt>
+<dt><a href="io/perl/api/impl/PerformanceRecorderIdleSleep.html#%3Cinit%3E(io.perl.api.PeriodicRecorder,io.perl.api.Channel%5B%5D,io.time.Time,int,int,int)" class="member-name-link">PerformanceRecorderIdleSleep(PeriodicRecorder, Channel[], Time, int, int, int)</a> - Constructor for class io.perl.api.impl.<a href="io/perl/api/impl/PerformanceRecorderIdleSleep.html" title="class in io.perl.api.impl">PerformanceRecorderIdleSleep</a></dt>
 <dd>
 <div class="block">Constructor to initialize values.</div>
 </dd>
@@ -1669,7 +1705,7 @@ the order they are declared.</div>
 <div class="block">Number of worker threads to run.</div>
 </dd>
 </dl>
-<a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:Q">Q</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a></main>
+<a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:Q">Q</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a></main>
 </div>
 </body>
 </html>

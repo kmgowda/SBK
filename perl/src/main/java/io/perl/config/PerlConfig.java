@@ -28,6 +28,12 @@ import java.util.Objects;
  */
 final public class PerlConfig extends LatencyConfig {
 
+    /** CLI option controlling the maximum interval without a performance event. */
+    public static final String IDLE_TIMEOUT_OPTION = "idletimeoutseconds";
+
+    /** Default maximum interval without a performance event, in seconds. */
+    public static final int DEFAULT_IDLE_TIMEOUT_SECONDS = 600;
+
     /**
      * <code>String NAME = "PerL"</code>.
      */
@@ -98,6 +104,11 @@ final public class PerlConfig extends LatencyConfig {
      * <code>int sleepMS</code>.
      */
     public int sleepMS;
+
+    /**
+     * Maximum interval without a performance event before the benchmark fails, in seconds.
+     */
+    public int idleTimeoutSeconds = DEFAULT_IDLE_TIMEOUT_SECONDS;
 
     /**
      * Maximum number of queues allowed.

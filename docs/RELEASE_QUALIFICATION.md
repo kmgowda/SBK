@@ -251,6 +251,7 @@ checks:
 - CSV header/total output, Prometheus HTTP metrics, Web Console health/run
   registration, default board naming, and logger lifecycle messages;
 - File EOF termination before the configured duration;
+- fixed-record SBK and standalone SBM failure after a one-second performance-event idle deadline;
 - invalid storage, missing gRPC host, missing YML, and malformed YML failures;
 - SBK-YAL argument mapping and logger overrides;
 - real `GrpcLogger` clients against child SBM processes using both

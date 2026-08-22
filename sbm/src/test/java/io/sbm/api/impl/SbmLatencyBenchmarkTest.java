@@ -9,6 +9,7 @@
 package io.sbm.api.impl;
 
 import io.perl.config.PerlConfig;
+import io.perl.exception.BenchmarkIdleTimeoutException;
 import io.sbm.api.SbmPeriodicRecorder;
 import io.sbp.grpc.MessageLatenciesRecord;
 import io.time.MilliSeconds;
@@ -27,6 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -47,7 +49,7 @@ final class SbmLatencyBenchmarkTest {
         final CapturingWindow window = new CapturingWindow();
         final SbmLatencyBenchmark benchmark = new SbmLatencyBenchmark(
                 1, 1, new MilliSeconds(), window,
-                PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS * Time.MS_PER_SEC);
+                PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS * Time.MS_PER_SEC, 600);
 
         final CompletableFuture<Void> completion = benchmark.start();
         Thread consumer = null;
@@ -79,7 +81,7 @@ final class SbmLatencyBenchmarkTest {
     void printsOnlyWindowsContainingARemoteSbkBatch() throws Exception {
         final CapturingWindow window = new CapturingWindow(true);
         final SbmLatencyBenchmark benchmark = new SbmLatencyBenchmark(
-                1, 1, new MilliSeconds(), window, 0);
+                1, 1, new MilliSeconds(), window, 0, 600);
         final CompletableFuture<Void> completion = benchmark.start();
 
         try {
@@ -110,7 +112,7 @@ final class SbmLatencyBenchmarkTest {
         final FailingWindow window = new FailingWindow();
         final SbmLatencyBenchmark benchmark = new SbmLatencyBenchmark(
                 1, 1, new MilliSeconds(), window,
-                PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS * Time.MS_PER_SEC);
+                PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS * Time.MS_PER_SEC, 600);
         final CompletableFuture<Void> completion = benchmark.start();
 
         try {
@@ -127,6 +129,30 @@ final class SbmLatencyBenchmarkTest {
         } finally {
             assertTimeoutPreemptively(Duration.ofSeconds(2), benchmark::stop);
         }
+    }
+
+    /**
+     * Verifies that an empty SBM input queue terminates with the shared idle-timeout diagnostic.
+     *
+     * @throws Exception if consumer startup or failure propagation times out
+     */
+    @Test
+    void failsWhenNoPerformanceBatchArrivesBeforeIdleTimeout() throws Exception {
+        final CapturingWindow window = new CapturingWindow();
+        final SbmLatencyBenchmark benchmark = new SbmLatencyBenchmark(
+                1, 1, new MilliSeconds(), window, 5_000, 1);
+
+        benchmark.enQueue(MessageLatenciesRecord.newBuilder()
+                .setSequenceNumber(1)
+                .setTotalRecords(0)
+                .build());
+
+        final ExecutionException failure = assertThrows(ExecutionException.class,
+                () -> benchmark.start().get(4, TimeUnit.SECONDS));
+
+        assertInstanceOf(BenchmarkIdleTimeoutException.class, failure.getCause());
+        assertEquals("No performance benchmarking event was received for 1 seconds",
+                failure.getCause().getMessage());
     }
 
     private void awaitThreadExit(Thread thread) throws InterruptedException {

@@ -11,6 +11,7 @@
 package io.sbm.api.impl;
 
 import io.perl.api.impl.ConcurrentLinkedQueueArray;
+import io.perl.exception.BenchmarkIdleTimeoutException;
 import io.sbk.api.Benchmark;
 import io.sbm.api.SbmPeriodicRecorder;
 import io.sbp.grpc.MessageLatenciesRecord;
@@ -43,6 +44,8 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
     private final int idleMS;
     private final Time time;
     private final int reportingIntervalMS;
+    private final long idleTimeoutMS;
+    private final int idleTimeoutSeconds;
     private final SbmPeriodicRecorder window;
     private final AtomicLong counter;
     private final CompletableFuture<Void> retFuture;
@@ -62,14 +65,22 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
      * @param time                time source
      * @param window              periodic/total latency recorder
      * @param reportingIntervalMS interval in ms between periodic window prints
+     * @param idleTimeoutSeconds maximum interval without an SBK performance batch
+     * @throws IllegalArgumentException when the idle timeout is not positive
      */
-    public SbmLatencyBenchmark(int maxQs, int idleMS, Time time, SbmPeriodicRecorder window, int reportingIntervalMS) {
+    public SbmLatencyBenchmark(int maxQs, int idleMS, Time time, SbmPeriodicRecorder window, int reportingIntervalMS,
+                               int idleTimeoutSeconds) {
         super(maxQs);
+        if (idleTimeoutSeconds <= 0) {
+            throw new IllegalArgumentException("SBM idle timeout seconds must be greater than zero");
+        }
         this.maxQs = maxQs;
         this.idleMS = idleMS;
         this.window = window;
         this.time = time;
         this.reportingIntervalMS = reportingIntervalMS;
+        this.idleTimeoutSeconds = idleTimeoutSeconds;
+        this.idleTimeoutMS = Math.multiplyExact((long) idleTimeoutSeconds, Time.MS_PER_SEC);
         this.counter = new AtomicLong(BASE_CLIENT_ID_VALUE);
         this.retFuture = new CompletableFuture<>();
         this.executor = Executors.newSingleThreadExecutor(
@@ -85,6 +96,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
      *
      * @throws InterruptedException if the thread sleep or processing is interrupted
      * @throws IllegalStateException if a latency batch cannot be aggregated
+     * @throws BenchmarkIdleTimeoutException when no performance batch arrives before the idle deadline
      */
     void run() throws InterruptedException {
         MessageLatenciesRecord record;
@@ -93,6 +105,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
         boolean receivedBatchInWindow = false;
         Printer.log.info("SbmLatencyBenchmark Started : {} milliseconds idle sleep", this.idleMS);
         long currentTime = time.getCurrentTime();
+        long lastEventTime = currentTime;
         window.start(currentTime);
         window.startWindow(currentTime);
         while (doWork) {
@@ -108,6 +121,9 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
                             throw new IllegalStateException("SBM failed to aggregate latency batch for client "
                                     + record.getClientID() + " at sequence " + record.getSequenceNumber(), exception);
                         }
+                        if (record.getTotalRecords() > 0) {
+                            lastEventTime = currentTime;
+                        }
                         receivedBatchInWindow = true;
                     } else {
                         doWork = false;
@@ -116,6 +132,10 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
             }
             if (notFound) {
                 Thread.sleep(idleMS);
+                final long idleCurrentTime = time.getCurrentTime();
+                if (time.elapsedMilliSeconds(idleCurrentTime, lastEventTime) >= idleTimeoutMS) {
+                    throw new BenchmarkIdleTimeoutException(idleTimeoutSeconds);
+                }
             }
 
             currentTime = time.getCurrentTime();

@@ -196,6 +196,14 @@ final public class SbkGemBenchmark implements GemBenchmark {
             sbmStarted = true;
         }
         sbmCompletion = sbmBenchmark.start();
+        sbmCompletion.whenComplete((ignored, failure) -> {
+            if (failure != null) {
+                final Throwable cause = unwrapCompletionFailure(failure);
+                Printer.log.warn("SBK-GEM: Embedded SBM terminated with a benchmark failure: {}",
+                        cause.getMessage());
+                shutdown(cause);
+            }
+        });
 
         // Start remote SBK instances
         for (int i = 0; i < nodes.length; i++) {
@@ -936,7 +944,9 @@ final public class SbkGemBenchmark implements GemBenchmark {
             if (sbmStarted) {
                 maximumRegisteredClients = sbmBenchmark.getMaximumRegisteredClients();
                 sbmBenchmark.abortPendingRegistrations("SBK-GEM: Distributed benchmark is shutting down");
-                sbmBenchmark.stop();
+                if (sbmCompletion == null || !sbmCompletion.isDone()) {
+                    sbmBenchmark.stop();
+                }
                 terminalFailure = combineTerminalFailures(terminalFailure,
                         completedFutureFailure(sbmCompletion));
                 sbmStarted = false;

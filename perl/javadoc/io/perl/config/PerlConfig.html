@@ -58,6 +58,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#field-detail" tabindex="0">Field Details</a>
 <ol class="toc-list">
+<li><a href="#IDLE_TIMEOUT_OPTION" tabindex="0">IDLE_TIMEOUT_OPTION</a></li>
+<li><a href="#DEFAULT_IDLE_TIMEOUT_SECONDS" tabindex="0">DEFAULT_IDLE_TIMEOUT_SECONDS</a></li>
 <li><a href="#NAME" tabindex="0">NAME</a></li>
 <li><a href="#DEFAULT_PRINTING_INTERVAL_SECONDS" tabindex="0">DEFAULT_PRINTING_INTERVAL_SECONDS</a></li>
 <li><a href="#DEFAULT_TIMEOUT_MS" tabindex="0">DEFAULT_TIMEOUT_MS</a></li>
@@ -69,6 +71,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#qPerWorker" tabindex="0">qPerWorker</a></li>
 <li><a href="#idleNS" tabindex="0">idleNS</a></li>
 <li><a href="#sleepMS" tabindex="0">sleepMS</a></li>
+<li><a href="#idleTimeoutSeconds" tabindex="0">idleTimeoutSeconds</a></li>
 <li><a href="#maxQs" tabindex="0">maxQs</a></li>
 <li><a href="#mpscQueueEnable" tabindex="0">mpscQueueEnable</a></li>
 </ol>
@@ -122,19 +125,29 @@ the static <a href="#build()"><code>build()</code></a> helpers.</div>
 <div class="table-header col-second">Field</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>static final int</code></div>
-<div class="col-second even-row-color"><code><a href="#DEFAULT_PRINTING_INTERVAL_SECONDS" class="member-name-link">DEFAULT_PRINTING_INTERVAL_SECONDS</a></code></div>
+<div class="col-second even-row-color"><code><a href="#DEFAULT_IDLE_TIMEOUT_SECONDS" class="member-name-link">DEFAULT_IDLE_TIMEOUT_SECONDS</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Default maximum interval without a performance event, in seconds.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final int</code></div>
+<div class="col-second odd-row-color"><code><a href="#DEFAULT_PRINTING_INTERVAL_SECONDS" class="member-name-link">DEFAULT_PRINTING_INTERVAL_SECONDS</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Default interval (in seconds) between periodic status/metrics prints.</div>
 </div>
-<div class="col-first odd-row-color"><code>static final long</code></div>
-<div class="col-second odd-row-color"><code><a href="#DEFAULT_RUNTIME_SECONDS" class="member-name-link">DEFAULT_RUNTIME_SECONDS</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>static final long</code></div>
+<div class="col-second even-row-color"><code><a href="#DEFAULT_RUNTIME_SECONDS" class="member-name-link">DEFAULT_RUNTIME_SECONDS</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Default maximum runtime (in seconds) if not otherwise limited.</div>
 </div>
-<div class="col-first even-row-color"><code>static final int</code></div>
-<div class="col-second even-row-color"><code><a href="#DEFAULT_TIMEOUT_MS" class="member-name-link">DEFAULT_TIMEOUT_MS</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>static final int</code></div>
+<div class="col-second odd-row-color"><code><a href="#DEFAULT_TIMEOUT_MS" class="member-name-link">DEFAULT_TIMEOUT_MS</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Default timeout (in milliseconds) for internal operations.</div>
+</div>
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#IDLE_TIMEOUT_OPTION" class="member-name-link">IDLE_TIMEOUT_OPTION</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">CLI option controlling the maximum interval without a performance event.</div>
 </div>
 <div class="col-first odd-row-color"><code>int</code></div>
 <div class="col-second odd-row-color"><code><a href="#idleNS" class="member-name-link">idleNS</a></code></div>
@@ -142,48 +155,53 @@ the static <a href="#build()"><code>build()</code></a> helpers.</div>
 <div class="block">Idle time between operations (in nanoseconds).</div>
 </div>
 <div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#maxQs" class="member-name-link">maxQs</a></code></div>
+<div class="col-second even-row-color"><code><a href="#idleTimeoutSeconds" class="member-name-link">idleTimeoutSeconds</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Maximum number of queues allowed.</div>
-</div>
-<div class="col-first odd-row-color"><code>static final int</code></div>
-<div class="col-second odd-row-color"><code><a href="#MIN_IDLE_NS" class="member-name-link">MIN_IDLE_NS</a></code></div>
-<div class="col-last odd-row-color">
-<div class="block">Minimum idle time (in nanoseconds) used to yield between operations.</div>
-</div>
-<div class="col-first even-row-color"><code>static final int</code></div>
-<div class="col-second even-row-color"><code><a href="#MIN_Q_PER_WORKER" class="member-name-link">MIN_Q_PER_WORKER</a></code></div>
-<div class="col-last even-row-color">
-<div class="block">Minimum number of queues per worker.</div>
-</div>
-<div class="col-first odd-row-color"><code>static final int</code></div>
-<div class="col-second odd-row-color"><code><a href="#MIN_WORKERS" class="member-name-link">MIN_WORKERS</a></code></div>
-<div class="col-last odd-row-color">
-<div class="block">Minimum number of worker threads allowed.</div>
-</div>
-<div class="col-first even-row-color"><code>boolean</code></div>
-<div class="col-second even-row-color"><code><a href="#mpscQueueEnable" class="member-name-link">mpscQueueEnable</a></code></div>
-<div class="col-last even-row-color">
-<div class="block">Enables the intrusive, allocation-efficient MPSC timestamp queue.</div>
-</div>
-<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#NAME" class="member-name-link">NAME</a></code></div>
-<div class="col-last odd-row-color">
-<div class="block"><code>String NAME = "PerL"</code>.</div>
-</div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#qPerWorker" class="member-name-link">qPerWorker</a></code></div>
-<div class="col-last even-row-color">
-<div class="block">Number of queues assigned per worker.</div>
+<div class="block">Maximum interval without a performance event before the benchmark fails, in seconds.</div>
 </div>
 <div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#sleepMS" class="member-name-link">sleepMS</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#maxQs" class="member-name-link">maxQs</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">Sleep interval between loops (in milliseconds), when applicable.</div>
+<div class="block">Maximum number of queues allowed.</div>
+</div>
+<div class="col-first even-row-color"><code>static final int</code></div>
+<div class="col-second even-row-color"><code><a href="#MIN_IDLE_NS" class="member-name-link">MIN_IDLE_NS</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Minimum idle time (in nanoseconds) used to yield between operations.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final int</code></div>
+<div class="col-second odd-row-color"><code><a href="#MIN_Q_PER_WORKER" class="member-name-link">MIN_Q_PER_WORKER</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Minimum number of queues per worker.</div>
+</div>
+<div class="col-first even-row-color"><code>static final int</code></div>
+<div class="col-second even-row-color"><code><a href="#MIN_WORKERS" class="member-name-link">MIN_WORKERS</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Minimum number of worker threads allowed.</div>
+</div>
+<div class="col-first odd-row-color"><code>boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#mpscQueueEnable" class="member-name-link">mpscQueueEnable</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Enables the intrusive, allocation-efficient MPSC timestamp queue.</div>
+</div>
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#NAME" class="member-name-link">NAME</a></code></div>
+<div class="col-last even-row-color">
+<div class="block"><code>String NAME = "PerL"</code>.</div>
+</div>
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#qPerWorker" class="member-name-link">qPerWorker</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Number of queues assigned per worker.</div>
 </div>
 <div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#workers" class="member-name-link">workers</a></code></div>
+<div class="col-second even-row-color"><code><a href="#sleepMS" class="member-name-link">sleepMS</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Sleep interval between loops (in milliseconds), when applicable.</div>
+</div>
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#workers" class="member-name-link">workers</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Number of worker threads to run.</div>
 </div>
 </div>
@@ -250,6 +268,40 @@ the static <a href="#build()"><code>build()</code></a> helpers.</div>
 <section class="field-details" id="field-detail">
 <h2>Field Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="IDLE_TIMEOUT_OPTION">
+<h3>IDLE_TIMEOUT_OPTION</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">IDLE_TIMEOUT_OPTION</span></div>
+<div class="block">CLI option controlling the maximum interval without a performance event.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.perl.config.PerlConfig.IDLE_TIMEOUT_OPTION">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="DEFAULT_IDLE_TIMEOUT_SECONDS">
+<h3>DEFAULT_IDLE_TIMEOUT_SECONDS</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">DEFAULT_IDLE_TIMEOUT_SECONDS</span></div>
+<div class="block">Default maximum interval without a performance event, in seconds.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.perl.config.PerlConfig.DEFAULT_IDLE_TIMEOUT_SECONDS">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
 <li>
 <section class="detail" id="NAME">
 <h3>NAME</h3>
@@ -412,6 +464,15 @@ the static <a href="#build()"><code>build()</code></a> helpers.</div>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">sleepMS</span></div>
 <div class="block">Sleep interval between loops (in milliseconds), when applicable.
 <code>int sleepMS</code>.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="idleTimeoutSeconds">
+<h3>idleTimeoutSeconds</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">idleTimeoutSeconds</span></div>
+<div class="block">Maximum interval without a performance event before the benchmark fails, in seconds.</div>
 </div>
 </section>
 </li>

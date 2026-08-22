@@ -44,4 +44,11 @@ public sealed interface RamParameters extends ActionParameter permits RamParamet
      * @return get idle sleep in milliseconds .
      */
     int getIdleSleepMilliSeconds();
+
+    /**
+     * Get the maximum interval without an SBK performance batch.
+     *
+     * @return idle timeout in seconds
+     */
+    int getIdleTimeoutSeconds();
 }

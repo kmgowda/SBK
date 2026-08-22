@@ -14,6 +14,7 @@ import io.perl.api.Perl;
 import io.perl.api.PerlChannel;
 import io.perl.api.impl.PerlBuilder;
 import io.perl.config.PerlConfig;
+import io.perl.exception.BenchmarkIdleTimeoutException;
 import io.perl.logger.impl.DefaultLogger;
 import io.perl.logger.impl.ResultsLogger;
 import io.perl.system.PerlPrinter;
@@ -23,6 +24,7 @@ import io.time.Time;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -115,8 +117,11 @@ public class PerlTest {
             }
             int finalCh = ch++;
             int finalRecords = records;
-            CompletableFuture.runAsync(() -> channels[finalCh].send(finalCh, PERL_THREADS + finalCh,
-                    Math.min(finalRecords, PERL_RECORDS_PER_THREAD), PERL_RECORD_SIZE));
+            CompletableFuture.runAsync(() -> {
+                final long startTime = System.currentTimeMillis();
+                channels[finalCh].send(startTime, startTime + 1,
+                        Math.min(finalRecords, PERL_RECORDS_PER_THREAD), PERL_RECORD_SIZE);
+            });
             records -= PERL_RECORDS_PER_THREAD;
         }
         ret.get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
@@ -237,6 +242,50 @@ public class PerlTest {
             ret.get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         });
         assertEquals(0, logger.latencyReporterCnt.get());
+        perl.stop();
+    }
+
+    /** Verifies idle termination with the default elastic-wait consumer. */
+    @Test
+    public void testElasticWaitIdleTimeout() throws Exception {
+        assertIdleTimeout(0);
+    }
+
+    /** Verifies idle termination with the configured sleeping consumer. */
+    @Test
+    public void testIdleSleepIdleTimeout() throws Exception {
+        assertIdleTimeout(10);
+    }
+
+    /** Verifies that a zero-record timestamp does not count as benchmark progress. */
+    @Test
+    public void testZeroRecordTimestampDoesNotRenewIdleTimeout() throws Exception {
+        final PerlConfig config = PerlConfig.build();
+        config.idleTimeoutSeconds = 1;
+        final Perl perl = PerlBuilder.build(new TestLogger(), null, config, null);
+        final PerlChannel channel = perl.getPerlChannel();
+        final CompletableFuture<Void> completion = perl.run(0, Long.MAX_VALUE);
+        final long now = System.currentTimeMillis();
+        channel.send(now, now, 0, 0);
+
+        final ExecutionException failure = assertThrows(ExecutionException.class,
+                () -> completion.get(4, TimeUnit.SECONDS));
+
+        assertInstanceOf(BenchmarkIdleTimeoutException.class, failure.getCause());
+    }
+
+    private void assertIdleTimeout(int sleepMS) throws Exception {
+        final PerlConfig config = PerlConfig.build();
+        config.sleepMS = sleepMS;
+        config.idleTimeoutSeconds = 1;
+        final Perl perl = PerlBuilder.build(new TestLogger(), null, config, null);
+
+        final ExecutionException failure = assertThrows(ExecutionException.class,
+                () -> perl.run(0, Long.MAX_VALUE).get(4, TimeUnit.SECONDS));
+
+        assertInstanceOf(BenchmarkIdleTimeoutException.class, failure.getCause());
+        assertEquals("No performance benchmarking event was received for 1 seconds",
+                failure.getCause().getMessage());
     }
 
     @Test

@@ -60,6 +60,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#getPort()" tabindex="0">getPort()</a></li>
 <li><a href="#getMaxConnections()" tabindex="0">getMaxConnections()</a></li>
 <li><a href="#getIdleSleepMilliSeconds()" tabindex="0">getIdleSleepMilliSeconds()</a></li>
+<li><a href="#getIdleTimeoutSeconds()" tabindex="0">getIdleTimeoutSeconds()</a></li>
 </ol>
 </li>
 </ol>
@@ -109,18 +110,23 @@ extends io.sbk.params.ActionParameter</span>
 <div class="block">get duration idle sleep in Milliseconds.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMaxConnections()" class="member-name-link">getMaxConnections</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getIdleTimeoutSeconds()" class="member-name-link">getIdleTimeoutSeconds</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">get Max Connections.</div>
+<div class="block">Get the maximum interval without an SBK performance batch.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>int</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getPort()" class="member-name-link">getPort</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMaxConnections()" class="member-name-link">getMaxConnections</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">get Max Connections.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getPort()" class="member-name-link">getPort</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the Port number to user.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getStorageName()" class="member-name-link">getStorageName</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getStorageName()" class="member-name-link">getStorageName</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get Storage Name.</div>
 </div>
 </div>
@@ -188,6 +194,19 @@ extends io.sbk.params.ActionParameter</span>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>get idle sleep in milliseconds .</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getIdleTimeoutSeconds()">
+<h3>getIdleTimeoutSeconds</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type">int</span>&nbsp;<span class="element-name">getIdleTimeoutSeconds</span>()</div>
+<div class="block">Get the maximum interval without an SBK performance batch.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>idle timeout in seconds</dd>
 </dl>
 </div>
 </section>

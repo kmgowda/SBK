@@ -127,6 +127,8 @@ equivalent queue, idle, latency-storage, and histogram defaults.
 For SBK:
 
 - `-mpscqueue true|false` overrides only `MpscQueueEnable`;
+- `-idletimeoutseconds N` overrides `idleTimeoutSeconds`; the property default
+  is 600 seconds for both standalone PerL and SBK;
 - `qPerWorker` and `maxQs` determine queue topology and remain property-backed;
 - invalid negative `maxQs` or `qPerWorker` below the supported minimum is
   rejected while common parameters are constructed;
@@ -175,6 +177,14 @@ controls the responsiveness/idle-CPU tradeoff; its SBK default is 1 ms and its
 enforced minimum is 1 µs. Neither setting changes the operation latency
 already captured by the worker, but a longer idle delay can temporarily grow
 the queue backlog after new data arrives.
+
+PerL also enforces `idleTimeoutSeconds` while every timestamp channel remains
+empty. The single consumer retains the last event time as ordinary local state;
+no lock, atomic variable, volatile coordination, or producer-side check is
+added. The deadline comparison runs only from the existing empty-channel slow
+path. Expiration completes the PerL future exceptionally with
+`BenchmarkIdleTimeoutException`, allowing SBK or another embedding application
+to stop its workers and report a failed benchmark instead of waiting forever.
 
 The complete recorder state and timing diagrams are in
 [the internal design guide](../docs/sbk-internals.md#pillar-3--elasticwait-amortising-clock-queries).

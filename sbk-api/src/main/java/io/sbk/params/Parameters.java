@@ -115,6 +115,13 @@ public interface Parameters extends ActionParameter, ThreadTypeParameter {
     int getIdleSleepMilliSeconds();
 
     /**
+     * Get the maximum interval without a performance benchmarking event.
+     *
+     * @return idle timeout in seconds
+     */
+    int getIdleTimeoutSeconds();
+
+    /**
      * Return whether PerL uses the intrusive timestamp MPSC queue.
      *
      * @return {@code true} for {@code TimeStampMpscQueue}; {@code false}

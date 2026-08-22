@@ -3096,14 +3096,14 @@ your "Experimental Setup" section makes the study fully reproducible:
 1. **SBK version and commit hash** from the exact build under test.
 2. **Driver** used (e.g. `minio`, `cassandra`, `kafka`).
 3. **PerL configuration**: effective `-mpscqueue` selection,
-   `qPerWorker`, `maxQs`, `idleNS`, `maxArraySizeMB`, `maxHashMapSizeMB`, and
+   `-idletimeoutseconds`, `qPerWorker`, `maxQs`, `idleNS`, `maxArraySizeMB`, `maxHashMapSizeMB`, and
    `histogram` (yes/no). SBK defaults are in
    [`sbk.properties`](../sbk-api/src/main/resources/sbk.properties);
    standalone PerL defaults are in
    [perl.properties](../perl/src/main/resources/perl.properties).
 4. **Workload**: `-writers`, `-readers`, `-size`, `-seconds` or
    `-records`, SBK-GEM `-totalrecords` when used, `-throughput`, SBK-GEM
-   `-totalthroughput` when used, and any
+   `-totalthroughput` when used, `-idletimeoutseconds`, and any
    driver-specific flags.
 5. **Storage configuration** (cluster size, replication, region,
    storage class, etc.).

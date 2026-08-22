@@ -12,6 +12,7 @@ package io.sbk.api.impl;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.perl.api.Perl;
 import io.perl.config.PerlConfig;
+import io.perl.exception.BenchmarkIdleTimeoutException;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.action.Action;
 import io.sbk.config.SbkRuntimeConfig;
@@ -178,6 +179,7 @@ final public class SbkBenchmark implements Benchmark {
     static void applyMpscQueueOption(ParameterOptions params,
                                      PerlConfig config) {
         config.mpscQueueEnable = params.isMpscQueueEnabled();
+        config.idleTimeoutSeconds = params.getIdleTimeoutSeconds();
     }
 
     /**
@@ -469,6 +471,12 @@ final public class SbkBenchmark implements Benchmark {
             return;
         }
         shutdownRequested = true;
+        final BenchmarkIdleTimeoutException idleTimeout = BenchmarkIdleTimeoutException.find(ex);
+        if (idleTimeout != null) {
+            Printer.log.warn("SBK benchmark idle timeout: {}", idleTimeout.getMessage());
+            timeoutExecutor.schedule(() -> forceIdleCompletion(idleTimeout),
+                    RUNTIME_CONFIG.forcedShutdownGraceSeconds, TimeUnit.SECONDS);
+        }
         lifecycleExecutor.execute(() -> shutdown(ex));
     }
 
@@ -489,6 +497,22 @@ final public class SbkBenchmark implements Benchmark {
     private void forceTimedCompletion() {
         if (retFuture.complete(null)) {
             Printer.log.warn("SBK timed benchmark cleanup exceeded "
+                    + RUNTIME_CONFIG.forcedShutdownGraceSeconds
+                    + " seconds; forcing application exit");
+            executor.shutdownNow();
+            perlExecutor.shutdownNow();
+            lifecycleExecutor.shutdownNow();
+        }
+    }
+
+    /**
+     * Releases the application if idle-timeout cleanup is blocked in a driver or SDK.
+     *
+     * @param idleTimeout terminal idle-timeout failure
+     */
+    private void forceIdleCompletion(BenchmarkIdleTimeoutException idleTimeout) {
+        if (retFuture.completeExceptionally(idleTimeout)) {
+            Printer.log.warn("SBK idle-timeout cleanup exceeded "
                     + RUNTIME_CONFIG.forcedShutdownGraceSeconds
                     + " seconds; forcing application exit");
             executor.shutdownNow();

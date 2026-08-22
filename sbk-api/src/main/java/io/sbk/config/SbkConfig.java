@@ -101,7 +101,8 @@ public final class SbkConfig {
                 || defaultReaderStep < 1 || defaultReaderStepSeconds < 0 || defaultIdleSleepMillis < 0
                 || defaultThreadType == null || !defaultThreadType.matches("(?i)[pfv]")
                 || !Double.isFinite(defaultThroughput) || defaultThroughput < -1
-                || perlConfig.qPerWorker < PerlConfig.MIN_Q_PER_WORKER || perlConfig.maxQs < 0) {
+                || perlConfig.qPerWorker < PerlConfig.MIN_Q_PER_WORKER || perlConfig.maxQs < 0
+                || perlConfig.idleTimeoutSeconds < 1) {
             throw new IllegalArgumentException("Invalid SBK defaults in " + CONFIG_FILE);
         }
     }

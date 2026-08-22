@@ -86,6 +86,13 @@ Display the current connection, remote-installation, SBM, and benchmark options:
 
 SBK-GEM accepts GEM-specific options and forwards an SBK argument set to remote processes. Because authentication and connection-file formats are security-sensitive and evolve independently of a sample environment, use generated help and the checked-in example configuration files as the authority.
 
+`-idletimeoutseconds N` is a shared lifecycle option with a default of 600
+seconds. GEM forwards it to every remote SBK process and configures its embedded
+SBM with the same value. A remote PerL idle failure therefore terminates that
+SBK process and becomes a host-tagged GEM failure; an embedded SBM idle failure
+also terminates GEM immediately rather than leaving orchestration waiting for
+fixed-record commands indefinitely.
+
 ### Node SSH endpoints
 
 `-gemport` remains the default SSH port for every entry in `-nodes`. A node can

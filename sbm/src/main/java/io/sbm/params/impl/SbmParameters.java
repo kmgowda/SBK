@@ -9,6 +9,7 @@
  */
 package io.sbm.params.impl;
 
+import io.perl.config.PerlConfig;
 import io.sbk.action.Action;
 import io.sbk.config.Config;
 import io.sbm.config.SbmConfig;
@@ -48,6 +49,9 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
     @Getter
     private int idleSleepMilliSeconds;
 
+    @Getter
+    private int idleTimeoutSeconds;
+
     final private String[] loggerNames;
     /**
      * Construct parameter parser and register SBM options.
@@ -63,6 +67,7 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
         this.maxConnections = maxConnections;
         this.port = port;
         this.idleSleepMilliSeconds = idleMS;
+        this.idleTimeoutSeconds = SbmConfig.get().idleTimeoutSeconds;
         if (loggerNames != null && loggerNames.length > 0) {
             this.loggerNames = loggerNames.clone();
         } else {
@@ -80,6 +85,8 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
         addOption("port", true, "SBM port number; default: " + this.port);
         addOption("max", true, "Maximum number of connections; default: " + this.maxConnections);
         addOption("millisecsleep", true, "Idle sleep in milliseconds; default: " + this.idleSleepMilliSeconds + " ms");
+        addOption(PerlConfig.IDLE_TIMEOUT_OPTION, true,
+                "Maximum seconds without an SBK performance batch; default: " + this.idleTimeoutSeconds);
     }
 
 
@@ -113,5 +120,10 @@ final public class SbmParameters extends SbkInputOptions implements RamParameter
         maxConnections = Integer.parseInt(getOptionValue("max", Integer.toString(maxConnections)));
         port = Integer.parseInt(getOptionValue("port", Integer.toString(port)));
         idleSleepMilliSeconds = Integer.parseInt(getOptionValue("millisecsleep", Integer.toString(idleSleepMilliSeconds)));
+        idleTimeoutSeconds = Integer.parseInt(getOptionValue(PerlConfig.IDLE_TIMEOUT_OPTION,
+                Integer.toString(idleTimeoutSeconds)));
+        if (idleTimeoutSeconds <= 0) {
+            throw new IllegalArgumentException("The SBM idle timeout seconds must be greater than zero");
+        }
     }
 }

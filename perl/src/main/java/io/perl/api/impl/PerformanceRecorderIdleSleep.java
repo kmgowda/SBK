@@ -32,10 +32,11 @@ public class PerformanceRecorderIdleSleep extends PerformanceRecorder {
      * @param time                Time
      * @param reportingIntervalMS int
      * @param sleepMS             int
+     * @param idleTimeoutSeconds  maximum interval without a performance event
      */
     public PerformanceRecorderIdleSleep(PeriodicRecorder periodicRecorder, @Nonnull Channel[] channels, Time time,
-                                        int reportingIntervalMS, int sleepMS) {
-        super(periodicRecorder, channels, time, reportingIntervalMS);
+                                        int reportingIntervalMS, int sleepMS, int idleTimeoutSeconds) {
+        super(periodicRecorder, channels, time, reportingIntervalMS, idleTimeoutSeconds);
         this.sleepMS = sleepMS;
     }
 
@@ -50,6 +51,7 @@ public class PerformanceRecorderIdleSleep extends PerformanceRecorder {
         final long startTime = time.getCurrentTime();
         boolean doWork = true;
         long ctime = startTime;
+        long lastEventTime = startTime;
         long recordsCnt = 0;
         boolean notFound;
         TimeStamp t;
@@ -67,6 +69,9 @@ public class PerformanceRecorderIdleSleep extends PerformanceRecorder {
                     if (t.isEnd()) {
                         doWork = false;
                     } else {
+                        if (t.records > 0) {
+                            lastEventTime = Math.max(lastEventTime, t.endTime);
+                        }
                         recordsCnt += t.records;
                         periodicRecorder.record(t.startTime, t.endTime, t.records, t.bytes);
                         if (msToRun > 0) {
@@ -91,6 +96,7 @@ public class PerformanceRecorderIdleSleep extends PerformanceRecorder {
                         PerlPrinter.log.warn("PerformanceRecorderIdleSleep : {}", e.getMessage());
                     }
                     ctime = time.getCurrentTime();
+                    checkIdleTimeout(ctime, lastEventTime);
                     final long diffTime = periodicRecorder.elapsedMilliSecondsWindow(ctime);
                     if (diffTime > windowIntervalMS) {
                         periodicRecorder.stopWindow(ctime);

@@ -14,6 +14,7 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.perl.data.Bytes;
 import io.perl.config.LatencyConfig;
+import io.perl.exception.BenchmarkIdleTimeoutException;
 import io.perl.api.LatencyRecordWindow;
 import io.perl.api.impl.CSVExtendedLatencyRecorder;
 import io.perl.api.impl.LongHashMapLatencyRecorder;
@@ -21,6 +22,7 @@ import io.perl.api.impl.HdrExtendedLatencyRecorder;
 import io.perl.api.impl.PerlBuilder;
 import io.sbk.api.Benchmark;
 import io.sbk.config.Config;
+import io.sbk.config.SbkRuntimeConfig;
 import io.sbm.config.SbmConfig;
 import io.sbm.logger.RamLogger;
 import io.sbm.api.SbmPeriodicRecorder;
@@ -38,6 +40,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 
@@ -62,6 +66,7 @@ final public class SbmBenchmark implements Benchmark {
     final private SbmLatencyBenchmark benchmark;
     final private double[] percentileFractions;
     final private CompletableFuture<Void> retFuture;
+    final private ScheduledExecutorService deadlineExecutor;
 
 
     @GuardedBy("this")
@@ -108,13 +113,15 @@ final public class SbmBenchmark implements Benchmark {
 
         latencyRecorder = createLatencyRecorder();
         benchmark = new SbmLatencyBenchmark(sbmConfig.maxQueues, params.getIdleSleepMilliSeconds(), time, latencyRecorder,
-                logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC);
+                logger.getPrintingIntervalSeconds() * Time.MS_PER_SEC, params.getIdleTimeoutSeconds());
         final int maxRecordSizeBytes = Math.multiplyExact(sbmConfig.maxRecordSizeMB, Bytes.BYTES_PER_MB);
         service = new SbmGrpcService(params, time, logger.getMinLatency(), logger.getMaxLatency(), logger, benchmark,
                 coordinatedStart, maxRecordSizeBytes);
         server = ServerBuilder.forPort(params.getPort()).maxInboundMessageSize(maxRecordSizeBytes)
                 .addService(service).directExecutor().build();
         retFuture = new CompletableFuture<>();
+        deadlineExecutor = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
+                .name("sbm-benchmark-deadline").daemon(true).factory());
         state = State.BEGIN;
         serverStarted = false;
     }
@@ -190,6 +197,11 @@ final public class SbmBenchmark implements Benchmark {
         final CompletableFuture<Void> latencyFuture = benchmark.start();
         latencyFuture.whenComplete((ignored, failure) -> {
             if (failure != null) {
+                final BenchmarkIdleTimeoutException idleTimeout = BenchmarkIdleTimeoutException.find(failure);
+                if (idleTimeout != null) {
+                    deadlineExecutor.schedule(() -> forceIdleCompletion(idleTimeout),
+                            SbkRuntimeConfig.get().forcedShutdownGraceSeconds, TimeUnit.SECONDS);
+                }
                 shutdown(failure);
             }
         });
@@ -240,9 +252,22 @@ final public class SbmBenchmark implements Benchmark {
             if (terminalFailure == null) {
                 retFuture.complete(null);
             } else {
-                Printer.log.error("SBM benchmark failed", terminalFailure);
+                final BenchmarkIdleTimeoutException idleTimeout = BenchmarkIdleTimeoutException.find(terminalFailure);
+                if (idleTimeout != null) {
+                    Printer.log.warn("SBM benchmark idle timeout: {}", idleTimeout.getMessage());
+                } else {
+                    Printer.log.error("SBM benchmark failed", terminalFailure);
+                }
                 retFuture.completeExceptionally(terminalFailure);
             }
+            deadlineExecutor.shutdownNow();
+        }
+    }
+
+    private void forceIdleCompletion(BenchmarkIdleTimeoutException idleTimeout) {
+        if (retFuture.completeExceptionally(idleTimeout)) {
+            Printer.log.warn("SBM idle-timeout cleanup exceeded {} seconds; forcing application exit",
+                    SbkRuntimeConfig.get().forcedShutdownGraceSeconds);
         }
     }
 

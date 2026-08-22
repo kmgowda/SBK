@@ -46,6 +46,7 @@ public class SbkPerlConfigTest {
         assertEquals(0, config.defaultReaderStepSeconds);
         assertEquals(0, config.defaultIdleSleepMillis);
         assertEquals("v", config.defaultThreadType);
+        assertEquals(600, config.getPerlConfig().idleTimeoutSeconds);
     }
 
     /**
@@ -88,6 +89,7 @@ public class SbkPerlConfigTest {
         assertEquals(expected.qPerWorker, config.qPerWorker);
         assertEquals("ConcurrentLinkedQueue (JDK)",
                 config.getTimestampQueueName());
+        assertEquals(600, config.idleTimeoutSeconds);
     }
 
     /**
@@ -111,5 +113,19 @@ public class SbkPerlConfigTest {
         assertEquals(expected.mpscQueueEnable, actual.mpscQueueEnable);
         assertEquals(expected.maxQs, actual.maxQs);
         assertEquals(expected.qPerWorker, actual.qPerWorker);
+        assertEquals(600, actual.idleTimeoutSeconds);
+    }
+
+    /** Verifies that the CLI idle deadline reaches the effective PerL configuration. */
+    @Test
+    public void commandLineOverridesIdleTimeout() throws Exception {
+        final SbkParameters parameters = new SbkParameters("idle-timeout-test");
+        parameters.parseArgs(new String[]{
+                "-writers", "1", "-size", "1",
+                "-idletimeoutseconds", "17"
+        });
+
+        assertEquals(17, parameters.getIdleTimeoutSeconds());
+        assertEquals(17, SbkBenchmark.buildPerlConfig(parameters).idleTimeoutSeconds);
     }
 }
