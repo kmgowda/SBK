@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
@@ -111,31 +112,69 @@ final public class CQueuePerl implements Perl {
     private void shutdown(Throwable ex) {
         if (state != State.END) {
             state = State.END;
+            Throwable terminalFailure = unwrapCompletionFailure(ex);
+            InterruptedException interruption = null;
             if (qFuture != null) {
                 if (!qFuture.isDone()) {
-                    long endTime = time.getCurrentTime();
+                    final long endTime = time.getCurrentTime();
                     for (Channel ch : channels) {
                         ch.sendEndTime(endTime);
                     }
+                }
+                boolean receiverCompleted = false;
+                while (!receiverCompleted) {
                     try {
                         qFuture.get();
-                    } catch (ExecutionException | InterruptedException e) {
-                        e.printStackTrace();
+                        receiverCompleted = true;
+                    } catch (ExecutionException failure) {
+                        terminalFailure = retainFailure(terminalFailure, failure.getCause());
+                        receiverCompleted = true;
+                    } catch (InterruptedException interrupted) {
+                        if (interruption == null) {
+                            interruption = interrupted;
+                        }
                     }
-                    for (Channel ch : channels) {
-                        ch.clear();
-                    }
+                }
+                for (Channel ch : channels) {
+                    ch.clear();
                 }
                 qFuture = null;
             }
-            if (ex != null) {
-                PerlPrinter.log.warn("CQueuePerl Shutdown with Exception:" + ex);
-                retFuture.completeExceptionally(ex);
+            terminalFailure = retainFailure(terminalFailure, interruption);
+            if (interruption != null) {
+                Thread.currentThread().interrupt();
+            }
+            if (terminalFailure != null) {
+                PerlPrinter.log.warn("CQueuePerl Shutdown with Exception", terminalFailure);
+                retFuture.completeExceptionally(terminalFailure);
             } else {
                 PerlPrinter.log.info("CQueuePerl Shutdown");
                 retFuture.complete(null);
             }
         }
+    }
+
+    private static Throwable retainFailure(Throwable currentFailure, Throwable additionalFailure) {
+        final Throwable normalizedFailure = unwrapCompletionFailure(additionalFailure);
+        if (normalizedFailure == null) {
+            return currentFailure;
+        }
+        if (currentFailure == null) {
+            return normalizedFailure;
+        }
+        if (currentFailure != normalizedFailure) {
+            currentFailure.addSuppressed(normalizedFailure);
+        }
+        return currentFailure;
+    }
+
+    private static Throwable unwrapCompletionFailure(Throwable failure) {
+        Throwable unwrapped = failure;
+        while ((unwrapped instanceof CompletionException || unwrapped instanceof ExecutionException)
+                && unwrapped.getCause() != null) {
+            unwrapped = unwrapped.getCause();
+        }
+        return unwrapped;
     }
 
     /**

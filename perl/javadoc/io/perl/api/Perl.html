@@ -157,7 +157,9 @@ perl.stop();
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">stop</span>()</div>
 <div class="block">Stop and shutdown the benchmark. Implementations should ensure all
-pending metrics are flushed and any background threads are terminated.</div>
+pending metrics are flushed and any background threads are terminated.
+A failure encountered during that flush is reported through the future
+previously returned by <a href="RunBenchmark.html#run(long,long)"><code>RunBenchmark.run(long, long)</code></a>.</div>
 </div>
 </section>
 </li>

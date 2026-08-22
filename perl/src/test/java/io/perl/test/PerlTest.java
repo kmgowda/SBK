@@ -102,6 +102,20 @@ public class PerlTest {
         }
     }
 
+    /** Logger that fails while PerL flushes the final aggregate. */
+    public static final class FailingTotalTestLogger extends TestLogger {
+        private final IllegalStateException failure =
+                new IllegalStateException("final PerL flush failed");
+
+        @Override
+        public void printTotal(double seconds, long bytes, long records, double recsPerSec, double mbPerSec,
+                               double avgLatency, long minLatency, long maxLatency, long invalid, long lowerDiscard,
+                               long higherDiscard, long slc1, long slc2, long[] percentileLatencies,
+                               long[] percentileLatenciesCount) {
+            throw failure;
+        }
+    }
+
     @Test
     public void defaultLoggerLatencyCallbackIsFinal() throws NoSuchMethodException {
         assertTrue(Modifier.isFinal(DefaultLogger.class.getMethod("recordLatency",
@@ -251,6 +265,36 @@ public class PerlTest {
         });
         assertEquals(0, logger.latencyReporterCnt.get());
         perl.stop();
+        ret.get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+    }
+
+    /** Verifies that a recorder failure during explicit stop reaches the run future. */
+    @Test
+    public void testStopPropagatesFinalRecorderFailure() throws Exception {
+        final FailingTotalTestLogger logger = new FailingTotalTestLogger();
+        final Perl perl = PerlBuilder.build(logger, null, null, null);
+        final CompletableFuture<Void> completion = perl.run(0, 0);
+
+        perl.stop();
+
+        final ExecutionException failure = assertThrows(ExecutionException.class,
+                () -> completion.get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS));
+        assertEquals(logger.failure, failure.getCause());
+    }
+
+    /** Verifies that an exception reported by a producer reaches the run future unchanged. */
+    @Test
+    public void testProducerFailurePropagatesToCaller() throws Exception {
+        final Perl perl = PerlBuilder.build(new TestLogger(), null, null, null);
+        final PerlChannel channel = perl.getPerlChannel();
+        final CompletableFuture<Void> completion = perl.run(0, 0);
+        final IllegalStateException expected = new IllegalStateException("producer failed");
+
+        channel.throwException(expected);
+
+        final ExecutionException failure = assertThrows(ExecutionException.class,
+                () -> completion.get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS));
+        assertEquals(expected, failure.getCause());
     }
 
     /** Verifies idle termination with the default elastic-wait consumer. */

@@ -48,6 +48,8 @@ public non-sealed interface Perl extends RunBenchmark, GetPerlChannel {
     /**
      * Stop and shutdown the benchmark. Implementations should ensure all
      * pending metrics are flushed and any background threads are terminated.
+     * A failure encountered during that flush is reported through the future
+     * previously returned by {@link #run(long, long)}.
      */
     void stop();
 }

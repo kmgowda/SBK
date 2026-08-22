@@ -141,6 +141,13 @@ Use `SbkParameters.loadPerlConfig()` and
 Use `PerlBuilder` as the source-level entry point for standalone PerL
 construction.
 
+The future returned by `Perl.run(...)` completes normally only when the
+configured duration elapses, the fixed record target is reached, or an
+explicit stop completes its final flush successfully. Idle timeout, producer,
+recorder, and final-flush failures complete that future exceptionally with the
+terminal cause. Callers must observe the returned future; `Perl.stop()` remains
+a lifecycle request and reports any shutdown failure through that same future.
+
 ## Elastic idle waiting
 
 With the default `sleepMS=0`, `PerformanceRecorderElasticWait` is the sole

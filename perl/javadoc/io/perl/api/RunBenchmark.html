@@ -131,8 +131,11 @@ error).</div>
 number of seconds and then stop; if <code>secondsToRun</code> == 0 the
 benchmark should run until <code>recordsCount</code> records are processed.
 
-The returned <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html" title="class or interface in java.util.concurrent" class="external-link"><code>CompletableFuture</code></a> completes when the benchmark
-finishes. The future completes exceptionally if an error occurs.</div>
+The returned <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html" title="class or interface in java.util.concurrent" class="external-link"><code>CompletableFuture</code></a> completes normally when the
+requested duration elapses or record target is reached. An explicit
+successful stop also completes it normally. Idle-timeout failures,
+producer failures, recorder failures, and final-flush failures complete
+the future exceptionally with the terminal cause.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>secondsToRun</code> - Number of seconds to run; when &gt; 0 this takes precedence
