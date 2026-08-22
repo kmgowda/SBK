@@ -157,7 +157,7 @@ evidence. A valid release result ends with output similar to:
 PASS: sbk-gem-GemPrometheusLogger
 PASS: sbk-gem-GemWebLogger
 PASS: sbk-gem-yal-release
-SBK 10.5 release qualification: QUALIFIED
+SBK 10.6 release qualification: QUALIFIED
 BUILD SUCCESSFUL
 ```
 

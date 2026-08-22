@@ -10,7 +10,7 @@ spec:
       containers:
         - name: sbk
           # SBK Image.
-          image: kmgowda/sbk:10.5
+          image: kmgowda/sbk:10.6
           imagePullPolicy: Always
           resources:
             limits:
