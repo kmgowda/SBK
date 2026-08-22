@@ -10,6 +10,7 @@
 package io.perl.api.impl;
 
 import io.perl.api.Channel;
+import io.perl.api.BenchmarkTermination;
 import io.perl.api.PerformanceRecorder;
 import io.perl.api.PeriodicRecorder;
 import io.perl.api.Perl;
@@ -40,6 +41,7 @@ final public class CQueuePerl implements Perl {
     final private Time time;
     final private ExecutorService executor;
     final private CompletableFuture<Void> retFuture;
+    final private int idleTimeoutSeconds;
 
     @GuardedBy("this")
     private int index;
@@ -49,6 +51,12 @@ final public class CQueuePerl implements Perl {
 
     @GuardedBy("this")
     private CompletableFuture<Void> qFuture;
+
+    @GuardedBy("this")
+    private long secondsToRun;
+
+    @GuardedBy("this")
+    private long recordsCount;
 
 
     /**
@@ -66,6 +74,7 @@ final public class CQueuePerl implements Perl {
         this.time = time;
         this.executor = executor;
         this.retFuture = new CompletableFuture<>();
+        this.idleTimeoutSeconds = perlConfig.idleTimeoutSeconds;
         this.state = State.BEGIN;
         if (perlConfig.maxQs > 0) {
             maxQs = perlConfig.maxQs;
@@ -109,7 +118,7 @@ final public class CQueuePerl implements Perl {
     }
 
     @Synchronized
-    private void shutdown(Throwable ex) {
+    private void shutdown(Throwable ex, BenchmarkTermination requestedTermination) {
         if (state != State.END) {
             state = State.END;
             Throwable terminalFailure = unwrapCompletionFailure(ex);
@@ -145,10 +154,14 @@ final public class CQueuePerl implements Perl {
                 Thread.currentThread().interrupt();
             }
             if (terminalFailure != null) {
-                PerlPrinter.log.warn("CQueuePerl Shutdown with Exception", terminalFailure);
+                final BenchmarkTermination termination = BenchmarkTermination.resolve(
+                        requestedTermination, terminalFailure);
+                PerlPrinter.log.warn("PerL Shutdown: {}", termination.describe(
+                        secondsToRun, recordsCount, idleTimeoutSeconds, terminalFailure), terminalFailure);
                 retFuture.completeExceptionally(terminalFailure);
             } else {
-                PerlPrinter.log.info("CQueuePerl Shutdown");
+                PerlPrinter.log.info("PerL Shutdown: {}", requestedTermination.describe(
+                        secondsToRun, recordsCount, idleTimeoutSeconds, null));
                 retFuture.complete(null);
             }
         }
@@ -190,11 +203,13 @@ final public class CQueuePerl implements Perl {
     public CompletableFuture<Void> run(long secondsToRun, long recordsCount) {
         if (state == State.BEGIN) {
             state = State.RUN;
+            this.secondsToRun = secondsToRun;
+            this.recordsCount = recordsCount;
             PerlPrinter.log.info("CQueuePerl Start");
             qFuture = CompletableFuture.runAsync(() -> perlReceiver.run(secondsToRun, recordsCount),
                     executor);
             qFuture.whenComplete((ret, ex) -> {
-                shutdown(ex);
+                shutdown(ex, BenchmarkTermination.configured(secondsToRun, recordsCount));
             });
         }
         return retFuture.toCompletableFuture();
@@ -205,7 +220,12 @@ final public class CQueuePerl implements Perl {
      */
     @Override
     public void stop() {
-        shutdown(null);
+        shutdown(null, BenchmarkTermination.STOP_REQUESTED);
+    }
+
+    @Override
+    public void stop(BenchmarkTermination termination) {
+        shutdown(null, termination);
     }
 
     interface Throw {
@@ -369,7 +389,7 @@ final public class CQueuePerl implements Perl {
 
     final private class OnError implements Throw {
         public void onException(Throwable ex) {
-            shutdown(ex);
+            shutdown(ex, BenchmarkTermination.INTERNAL_FAILURE);
         }
     }
 }

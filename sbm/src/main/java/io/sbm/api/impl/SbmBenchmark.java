@@ -12,6 +12,7 @@ package io.sbm.api.impl;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.perl.api.BenchmarkTermination;
 import io.perl.data.Bytes;
 import io.perl.config.LatencyConfig;
 import io.perl.exception.BenchmarkIdleTimeoutException;
@@ -39,6 +40,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -73,6 +76,15 @@ final public class SbmBenchmark implements Benchmark {
     private State state;
     @GuardedBy("this")
     private boolean serverStarted;
+
+    @GuardedBy("this")
+    private CompletableFuture<Void> latencyCompletion;
+
+    @GuardedBy("this")
+    private long completionSeconds;
+
+    @GuardedBy("this")
+    private long completionRecords;
 
     /**
      * Create SBK Server Benchmark.
@@ -125,6 +137,9 @@ final public class SbmBenchmark implements Benchmark {
                 .name("sbm-benchmark-deadline").daemon(true).factory());
         state = State.BEGIN;
         serverStarted = false;
+        latencyCompletion = null;
+        completionSeconds = 0;
+        completionRecords = 0;
     }
 
     @Contract(" -> new")
@@ -196,6 +211,7 @@ final public class SbmBenchmark implements Benchmark {
         Printer.log.info("SBM Started");
         logger.open(params, params.getStorageName(), params.getAction(), time);
         final CompletableFuture<Void> latencyFuture = benchmark.start();
+        latencyCompletion = latencyFuture;
         latencyFuture.whenComplete((ignored, failure) -> {
             if (failure != null) {
                 final BenchmarkIdleTimeoutException idleTimeout = BenchmarkIdleTimeoutException.find(failure);
@@ -203,14 +219,14 @@ final public class SbmBenchmark implements Benchmark {
                     deadlineExecutor.schedule(() -> forceIdleCompletion(idleTimeout),
                             SbkRuntimeConfig.get().forcedShutdownGraceSeconds, TimeUnit.SECONDS);
                 }
-                shutdown(failure);
+                shutdown(failure, BenchmarkTermination.INTERNAL_FAILURE);
             }
         });
         if (latencyFuture.isCompletedExceptionally()) {
             try {
                 latencyFuture.get();
             } catch (ExecutionException exception) {
-                shutdown(exception.getCause());
+                shutdown(exception.getCause(), BenchmarkTermination.INTERNAL_FAILURE);
                 throw exception;
             }
         }
@@ -219,7 +235,7 @@ final public class SbmBenchmark implements Benchmark {
                 server.start();
                 serverStarted = true;
             } catch (IOException exception) {
-                shutdown(exception);
+                shutdown(exception, BenchmarkTermination.INTERNAL_FAILURE);
                 throw exception;
             }
         }
@@ -228,41 +244,76 @@ final public class SbmBenchmark implements Benchmark {
 
     /**
      * Shutdown SBM benchmark: stop gRPC server, stop latency benchmark, and close logger.
+     *
+     * @param failure terminal failure, or {@code null} for an orderly completion
+     * @param requestedTermination lifecycle completion expected by the caller
      */
     @Synchronized
-    private void shutdown() {
-        shutdown(null);
-    }
-
-    @Synchronized
-    private void shutdown(Throwable failure) {
+    private void shutdown(Throwable failure, BenchmarkTermination requestedTermination) {
         if (state != State.END) {
             state = State.END;
-            try {
-                if (serverStarted) {
-                    server.shutdown();
-                    serverStarted = false;
-                }
-                benchmark.stop();
-                logger.close(params);
-            } catch (IOException e) {
-                e.printStackTrace();
+            Throwable lifecycleFailure = failure;
+            if (serverStarted) {
+                server.shutdown();
+                serverStarted = false;
             }
-            final Throwable terminalFailure = terminalFailure(failure, service.getClientFailures());
-            Printer.log.info("SBM Shutdown");
+            try {
+                benchmark.stop();
+            } catch (RuntimeException e) {
+                lifecycleFailure = retainFailure(lifecycleFailure, e);
+            }
+            try {
+                logger.close(params);
+            } catch (IOException | RuntimeException e) {
+                lifecycleFailure = retainFailure(lifecycleFailure, e);
+            }
+            lifecycleFailure = retainFailure(lifecycleFailure, completedFutureFailure(latencyCompletion));
+            final Throwable terminalFailure = terminalFailure(lifecycleFailure, service.getClientFailures());
+            final BenchmarkTermination termination = BenchmarkTermination.resolve(
+                    requestedTermination, terminalFailure);
             if (terminalFailure == null) {
+                Printer.log.info("SBM Shutdown: {}", termination.describe(
+                        completionSeconds, completionRecords, params.getIdleTimeoutSeconds(), null));
                 retFuture.complete(null);
             } else {
                 final BenchmarkIdleTimeoutException idleTimeout = BenchmarkIdleTimeoutException.find(terminalFailure);
                 if (idleTimeout != null) {
-                    Printer.log.warn("SBM benchmark idle timeout: {}", idleTimeout.getMessage());
+                    Printer.log.warn("SBM Shutdown: {}", termination.describe(
+                            completionSeconds, completionRecords, params.getIdleTimeoutSeconds(), terminalFailure));
                 } else {
-                    Printer.log.error("SBM benchmark failed", terminalFailure);
+                    Printer.log.error("SBM Shutdown: {}", termination.describe(
+                            completionSeconds, completionRecords, params.getIdleTimeoutSeconds(), terminalFailure),
+                            terminalFailure);
                 }
                 retFuture.completeExceptionally(terminalFailure);
             }
             deadlineExecutor.shutdownNow();
         }
+    }
+
+    private static Throwable completedFutureFailure(CompletableFuture<?> future) {
+        if (future == null) {
+            return null;
+        }
+        if (!future.isDone()) {
+            return new IllegalStateException("SBM latency completion remained pending during shutdown");
+        }
+        try {
+            future.join();
+            return null;
+        } catch (CompletionException | CancellationException exception) {
+            return exception.getCause() == null ? exception : exception.getCause();
+        }
+    }
+
+    private static Throwable retainFailure(Throwable primary, Throwable additional) {
+        if (primary == null) {
+            return additional;
+        }
+        if (additional != null && additional != primary) {
+            primary.addSuppressed(additional);
+        }
+        return primary;
     }
 
     private void forceIdleCompletion(BenchmarkIdleTimeoutException idleTimeout) {
@@ -306,7 +357,25 @@ final public class SbmBenchmark implements Benchmark {
      */
     @Override
     public void stop() {
-        shutdown();
+        shutdown(null, BenchmarkTermination.STOP_REQUESTED);
+    }
+
+    /**
+     * Completes an orchestrated SBM run after every remote benchmark exits successfully.
+     *
+     * @param secondsToRun completed remote benchmark duration
+     * @param recordsCount completed remote benchmark record target
+     * @throws IllegalArgumentException when neither duration nor records identify successful completion
+     */
+    @Synchronized
+    public void completeSuccessfully(long secondsToRun, long recordsCount) {
+        final BenchmarkTermination termination = BenchmarkTermination.configured(secondsToRun, recordsCount);
+        if (!termination.isSuccessfulCompletion()) {
+            throw new IllegalArgumentException("SBM successful completion requires a duration or record reason");
+        }
+        completionSeconds = secondsToRun;
+        completionRecords = recordsCount;
+        shutdown(null, termination);
     }
 
     /**

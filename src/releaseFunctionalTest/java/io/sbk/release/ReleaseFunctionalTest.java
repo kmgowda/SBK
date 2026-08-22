@@ -147,7 +147,9 @@ class ReleaseFunctionalTest {
     }
 
     private void fileLogger(final String logger) throws Exception {
-        expect(config.sbk, "Total File Writing|SBK Benchmark Shutdown",
+        expect(config.sbk, "(?s)PerL Shutdown: completed successfully in -records " + config.records
+                        + " mode.*SBK Benchmark Shutdown: completed successfully in -records "
+                        + config.records + " mode",
                 "-class", "file", "-file", config.workDir.resolve("sbk-" + logger + ".dat").toString(),
                 "-writers", "1", "-size", config.recordSize, "-records", config.records, "-out", logger);
     }
@@ -179,19 +181,20 @@ class ReleaseFunctionalTest {
     }
 
     private void sbkIdleTimeout() throws Exception {
-        reject(config.sbk, "No performance benchmarking event was received for 6 seconds",
+        reject(config.sbk, "SBK Benchmark Shutdown: exited due to -idletimeoutseconds 6",
                 "-class", "null", "-readers", "1", "-size", config.recordSize,
                 "-records", config.records, "-idletimeoutseconds", "6");
     }
 
     private void sbmIdleTimeout() throws Exception {
-        reject(config.sbm, "No performance benchmarking event was received for 6 seconds",
+        reject(config.sbm, "SBM Shutdown: exited due to -idletimeoutseconds 6",
                 "-class", "File", "-port", Integer.toString(freePort()),
                 "-records", config.records, "-idletimeoutseconds", "6");
     }
 
     private void sbkTimedIdleDisabled() throws Exception {
-        expect(config.sbk, "SBK Benchmark Shutdown",
+        expect(config.sbk, "(?s)PerL Shutdown: completed successfully in -seconds 7 mode"
+                        + ".*SBK Benchmark Shutdown: completed successfully in -seconds 7 mode",
                 "-class", "null", "-readers", "1", "-size", config.recordSize,
                 "-seconds", "7", "-idletimeoutseconds", "6");
     }

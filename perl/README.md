@@ -141,6 +141,11 @@ Use `SbkParameters.loadPerlConfig()` and
 Use `PerlBuilder` as the source-level entry point for standalone PerL
 construction.
 
+PerL's final lifecycle log identifies whether the run completed successfully in
+`-seconds` or `-records` mode, was explicitly stopped, exceeded
+`-idletimeoutseconds`, or failed with an internal exception. Final recorder and
+producer failures are propagated to the returned completion future.
+
 The future returned by `Perl.run(...)` completes normally only when the
 configured duration elapses, the fixed record target is reached, or an
 explicit stop completes its final flush successfully. Idle timeout, producer,

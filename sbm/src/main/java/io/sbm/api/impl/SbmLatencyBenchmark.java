@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -204,37 +205,65 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
     private void shutdown(Throwable ex) {
         if (state != State.END) {
             state = State.END;
-            boolean interrupted = false;
+            Throwable terminalFailure = unwrapCompletionFailure(ex);
+            InterruptedException interruption = null;
             if (qFuture != null) {
                 if (!qFuture.isDone()) {
-                    try {
-                        add(0, MessageLatenciesRecord.newBuilder().setSequenceNumber(-1).build());
-                        while (!qFuture.isDone()) {
-                            try {
-                                qFuture.get();
-                            } catch (InterruptedException e) {
-                                interrupted = true;
-                            }
-                        }
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                    clear();
+                    add(0, MessageLatenciesRecord.newBuilder().setSequenceNumber(-1).build());
                 }
+                boolean receiverCompleted = false;
+                while (!receiverCompleted) {
+                    try {
+                        qFuture.get();
+                        receiverCompleted = true;
+                    } catch (ExecutionException failure) {
+                        terminalFailure = retainFailure(terminalFailure, failure.getCause());
+                        receiverCompleted = true;
+                    } catch (InterruptedException interrupted) {
+                        if (interruption == null) {
+                            interruption = interrupted;
+                        }
+                    }
+                }
+                clear();
                 qFuture = null;
             }
             executor.shutdown();
-            if (interrupted) {
+            terminalFailure = retainFailure(terminalFailure, interruption);
+            if (interruption != null) {
                 Thread.currentThread().interrupt();
             }
-            if (ex != null) {
-                Printer.log.warn("SbmLatencyBenchmark with Exception:" + ex);
-                retFuture.completeExceptionally(ex);
+            if (terminalFailure != null) {
+                Printer.log.warn("SbmLatencyBenchmark exited due to internal exception", terminalFailure);
+                retFuture.completeExceptionally(terminalFailure);
             } else {
                 Printer.log.info("SbmLatencyBenchmark Shutdown");
                 retFuture.complete(null);
             }
         }
+    }
+
+    private static Throwable retainFailure(Throwable currentFailure, Throwable additionalFailure) {
+        final Throwable normalizedFailure = unwrapCompletionFailure(additionalFailure);
+        if (normalizedFailure == null) {
+            return currentFailure;
+        }
+        if (currentFailure == null) {
+            return normalizedFailure;
+        }
+        if (currentFailure != normalizedFailure) {
+            currentFailure.addSuppressed(normalizedFailure);
+        }
+        return currentFailure;
+    }
+
+    private static Throwable unwrapCompletionFailure(Throwable failure) {
+        Throwable unwrapped = failure;
+        while ((unwrapped instanceof CompletionException || unwrapped instanceof ExecutionException)
+                && unwrapped.getCause() != null) {
+            unwrapped = unwrapped.getCause();
+        }
+        return unwrapped;
     }
 
 
@@ -254,7 +283,8 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
                 try {
                     run();
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Thread.currentThread().interrupt();
+                    throw new CompletionException(e);
                 }
             }, executor);
             qFuture.whenComplete((ret, ex) -> {

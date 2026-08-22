@@ -79,97 +79,101 @@ loadScripts(document, 'script');</script>
 </li>
 <li>
 <div id="class-summary">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="class-summary-tab0" role="tab" aria-selected="true" aria-controls="class-summary.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="class-summary-tab1" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab1', 2)" class="table-tab">Interfaces</button><button id="class-summary-tab2" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab2', 2)" class="table-tab">Classes</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="class-summary-tab0" role="tab" aria-selected="true" aria-controls="class-summary.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="class-summary-tab1" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab1', 2)" class="table-tab">Interfaces</button><button id="class-summary-tab2" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab2', 2)" class="table-tab">Classes</button><button id="class-summary-tab3" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab3', 2)" class="table-tab">Enum Classes</button></div>
 <div id="class-summary.tabpanel" role="tabpanel" aria-labelledby="class-summary-tab0">
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Class</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color class-summary class-summary-tab1"><a href="Channel.html" title="interface in io.perl.api">Channel</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab1">
+<div class="col-first even-row-color class-summary class-summary-tab3"><a href="BenchmarkTermination.html" title="enum class in io.perl.api">BenchmarkTermination</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab3">
+<div class="block">Describes why a benchmark lifecycle ended.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="Channel.html" title="interface in io.perl.api">Channel</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab1">
 <div class="block">Channel is a combined API that exposes both producer and consumer behavior
 for the PerL internals.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="GetPerlChannel.html" title="interface in io.perl.api">GetPerlChannel</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab1">
+<div class="col-first even-row-color class-summary class-summary-tab1"><a href="GetPerlChannel.html" title="interface in io.perl.api">GetPerlChannel</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab1">
 <div class="block">Capability interface for obtaining a dedicated <a href="PerlChannel.html" title="interface in io.perl.api"><code>PerlChannel</code></a>.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="LatencyPercentiles.html" title="class in io.perl.api">LatencyPercentiles</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="LatencyPercentiles.html" title="class in io.perl.api">LatencyPercentiles</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Helper that holds the configured percentile fractions and computed percentile
 latency results.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="LatencyRecord.html" title="class in io.perl.api">LatencyRecord</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="LatencyRecord.html" title="class in io.perl.api">LatencyRecord</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">Base class that holds aggregated latency and count statistics for a
 measurement window or total aggregation.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="LatencyRecorder.html" title="class in io.perl.api">LatencyRecorder</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="LatencyRecorder.html" title="class in io.perl.api">LatencyRecorder</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Recorder that accumulates latency statistics and enforces configured bounds
 (min/max latencies and total thresholds).</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="LatencyRecordWindow.html" title="class in io.perl.api">LatencyRecordWindow</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="LatencyRecordWindow.html" title="class in io.perl.api">LatencyRecordWindow</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">Concrete extension of <a href="LatencyWindow.html" title="class in io.perl.api"><code>LatencyWindow</code></a> that implements reporting
 interfaces to receive both per-latency and aggregated latency records.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="LatencyWindow.html" title="class in io.perl.api">LatencyWindow</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="LatencyWindow.html" title="class in io.perl.api">LatencyWindow</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">LatencyWindow aggregates latency and throughput data.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="PerformanceRecorder.html" title="class in io.perl.api">PerformanceRecorder</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="PerformanceRecorder.html" title="class in io.perl.api">PerformanceRecorder</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">Base class for implementations that collect events from multiple channels
 and drive periodic recorders.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab1"><a href="PeriodicRecorder.html" title="interface in io.perl.api">PeriodicRecorder</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab1">
+<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="PeriodicRecorder.html" title="interface in io.perl.api">PeriodicRecorder</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab1">
 <div class="block">Recorder that receives individual events and aggregates them into periodic
 windows and a total aggregation.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="PeriodicWindow.html" title="interface in io.perl.api">PeriodicWindow</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab1">
+<div class="col-first even-row-color class-summary class-summary-tab1"><a href="PeriodicWindow.html" title="interface in io.perl.api">PeriodicWindow</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab1">
 <div class="block">Interface representing a periodic aggregation window used by recorders to
 group events between calls to <a href="PeriodicWindow.html#startWindow(long)"><code>PeriodicWindow.startWindow(long)</code></a> and
 <a href="PeriodicWindow.html#stopWindow(long)"><code>PeriodicWindow.stopWindow(long)</code></a>.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab1"><a href="Perl.html" title="interface in io.perl.api">Perl</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab1">
+<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="Perl.html" title="interface in io.perl.api">Perl</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab1">
 <div class="block">Core PerL public interface representing a running performance benchmark
 instance.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="PerlChannel.html" title="interface in io.perl.api">PerlChannel</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab1">
+<div class="col-first even-row-color class-summary class-summary-tab1"><a href="PerlChannel.html" title="interface in io.perl.api">PerlChannel</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab1">
 <div class="block">A dedicated channel used by a single thread to submit benchmarking events to
 a PerL instance.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab1"><a href="Queue.html" title="interface in io.perl.api">Queue</a>&lt;T&gt;</div>
-<div class="col-last even-row-color class-summary class-summary-tab1">
+<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="Queue.html" title="interface in io.perl.api">Queue</a>&lt;T&gt;</div>
+<div class="col-last odd-row-color class-summary class-summary-tab1">
 <div class="block">A minimal queue abstraction used by PerL to decouple producers and consumers.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="QueueArray.html" title="interface in io.perl.api">QueueArray</a>&lt;T&gt;</div>
-<div class="col-last odd-row-color class-summary class-summary-tab1">
+<div class="col-first even-row-color class-summary class-summary-tab1"><a href="QueueArray.html" title="interface in io.perl.api">QueueArray</a>&lt;T&gt;</div>
+<div class="col-last even-row-color class-summary class-summary-tab1">
 <div class="block">Represents an array of <a href="Queue.html" title="interface in io.perl.api"><code>Queue</code></a> instances.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab1"><a href="ReportLatencies.html" title="interface in io.perl.api">ReportLatencies</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab1">
+<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="ReportLatencies.html" title="interface in io.perl.api">ReportLatencies</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab1">
 <div class="block">Interface used by latency windows to retrieve percentile values from a
 backing latency store.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="RunBenchmark.html" title="interface in io.perl.api">RunBenchmark</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab1">
+<div class="col-first even-row-color class-summary class-summary-tab1"><a href="RunBenchmark.html" title="interface in io.perl.api">RunBenchmark</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab1">
 <div class="block">Contract for starting a benchmark run.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="TimeStamp.html" title="class in io.perl.api">TimeStamp</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="TimeStamp.html" title="class in io.perl.api">TimeStamp</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Immutable container representing a benchmarking event timestamp.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="TimeStampNode.html" title="class in io.perl.api">TimeStampNode</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="TimeStampNode.html" title="class in io.perl.api">TimeStampNode</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">Intrusive queue node that is also the PerL timestamp payload.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab1"><a href="TotalPeriodicWindow.html" title="interface in io.perl.api">TotalPeriodicWindow</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab1">
+<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="TotalPeriodicWindow.html" title="interface in io.perl.api">TotalPeriodicWindow</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab1">
 <div class="block">Interface that extends <a href="PeriodicWindow.html" title="interface in io.perl.api"><code>PeriodicWindow</code></a> with lifecycle methods for a
 total aggregation window.</div>
 </div>

@@ -75,6 +75,12 @@ empty periodic batch is still printable but does not represent progress. The
 idle timeout must be strictly greater than the selected logger's reporting
 interval.
 
+SBM's final lifecycle log distinguishes an orchestrated successful `-seconds`
+or `-records` completion from an explicit stop, idle timeout, or local/remote
+internal failure. Failures reported by remote SBK clients and failures raised
+while draining the final aggregation window remain visible in the returned
+completion and terminal log.
+
 Start the aggregate Prometheus exporter explicitly:
 
 ```bash

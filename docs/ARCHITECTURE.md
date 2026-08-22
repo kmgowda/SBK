@@ -151,6 +151,8 @@ At `start()` it:
 
 At shutdown it stops new work, closes driver readers and writers, closes the storage and logger, shuts down executors, and completes the benchmark future. Duration-based shutdown can interrupt an SDK call, so drivers must tolerate interruption-related exceptions during normal teardown. The shared `-idletimeoutseconds` option defaults to 600 seconds and applies only when a positive `-records` target is used without `-seconds`. It must be strictly greater than the active logger reporting interval. It is evaluated by PerL only while its queues are empty and by SBM only while fixed-record mode is selected and its ingestion queues are empty; each positive result renews the full deadline. SBK-GEM forwards the mode and value to remote SBK clients and its embedded SBM.
 
+PerL, SBK, SBM, and SBK-GEM use the same terminal lifecycle vocabulary. Their final log message identifies successful `-seconds` or `-records` mode completion, an explicit lifecycle stop, an `-idletimeoutseconds` exit, or an internal exception. A failure remains authoritative during cleanup: later recorder, logger, storage, SSH-session, or embedded-SBM failures are retained as suppressed causes and prevent a misleading successful completion message.
+
 Primary source: `sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java`.
 
 ## Operation path and timing

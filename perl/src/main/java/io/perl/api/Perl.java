@@ -52,4 +52,17 @@ public non-sealed interface Perl extends RunBenchmark, GetPerlChannel {
      * previously returned by {@link #run(long, long)}.
      */
     void stop();
+
+    /**
+     * Stops the benchmark while preserving an orchestrator-provided successful
+     * completion reason in the final lifecycle log.
+     *
+     * <p>The default implementation retains compatibility with alternate PerL
+     * implementations by delegating to {@link #stop()}.
+     *
+     * @param termination successful duration/record completion or an explicit stop
+     */
+    default void stop(BenchmarkTermination termination) {
+        stop();
+    }
 }

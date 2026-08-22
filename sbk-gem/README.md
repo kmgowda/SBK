@@ -97,6 +97,12 @@ immediately rather than leaving fixed-record orchestration waiting indefinitely.
 The value must be strictly greater than the reporting interval used by the
 remote SBK loggers and embedded SBM logger.
 
+The final SBK-GEM lifecycle message reports successful `-seconds` or `-records`
+mode completion, an explicit stop, an idle-timeout exit, or an internal remote,
+SSH, cleanup, or embedded-SBM exception. When several failures occur, the first
+failure remains authoritative and later failures are retained as suppressed
+causes.
+
 ### Node SSH endpoints
 
 `-gemport` remains the default SSH port for every entry in `-nodes`. A node can
