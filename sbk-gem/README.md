@@ -24,8 +24,8 @@ SBK-GEM runs one SBK workload across multiple hosts. It uses Apache MINA SSHD to
 flowchart TB
     OP[Operator] --> GEM[SBK-GEM]
     GEM --> SBM[Embedded SBM]
-    GEM -->|SSH, version check, conditional copy| A[Remote host A / SBK]
-    GEM -->|SSH, version check, conditional copy| B[Remote host B / SBK]
+    GEM -->|SSH, verified runtime bundle| A[Remote host A / SBK plus Java]
+    GEM -->|SSH, verified runtime bundle| B[Remote host B / SBK plus Java]
     A --> STORAGE[Target storage]
     B --> STORAGE
     A -->|GrpcLogger| SBM
@@ -36,12 +36,18 @@ SBK-GEM owns remote launch and aggregate lifecycle. The remote SBK processes sti
 
 ## Prerequisites
 
-- JDK 25 on the local GEM host. Remote hosts need either a compatible Java runtime or enough writable disk space and permission for `javacopy` provisioning.
+- JDK 25 on the local GEM host. With the default `-javacopy true`, remote
+  hosts do not need Java installed; the controller JDK is part of the verified
+  runtime bundle. With `-javacopy false`, every remote host must already have
+  the requested JDK, including both `bin/java` and `bin/javac`.
 - SSH reachability, a trusted `known_hosts` entry, and authentication for every target.
 - A writable remote installation/work directory.
 - Network reachability from remote SBK clients back to the GEM/SBM host, normally on port `9717`.
 - Network reachability from remote hosts to the target storage system.
-- Consistent SBK distribution and driver dependencies on every host.
+- A homogeneous native cluster: controller and all remote nodes must use the
+  same supported operating system (`Linux` or `macOS`) and CPU architecture
+  (`amd64` or `arm64`). Windows and mixed OS/architecture runs are rejected.
+- POSIX `tar` plus either `sha256sum` or `shasum` on every remote host.
 
 Use dedicated benchmark hosts and least-privilege SSH credentials. Do not put passwords or private keys in committed files.
 
@@ -176,19 +182,75 @@ rates. The option is also supported by SBK-GEM-YAL as `totalthroughput`.
 Mixed writer/reader runs require equal writer and reader counts because SBK
 uses one shared per-worker rate for both directions.
 
-By default, SBK-GEM runs `<remote-sbk-command> -version` on every node. A node is left unchanged when that command exists, succeeds, and reports the exact expected version. The three deployment lifecycle options are independent:
+### Immutable runtime deployment
 
-- `-copy true|false` permits SBK-GEM to copy SBK when it is missing or mismatched; the default is `true`. With `false`, a missing or mismatched installation is reported as an error.
-- `-delete true|false` controls whether an existing mismatched installation is removed before replacement; the default is `true`. A missing installation never needs pre-copy deletion.
-- `-deleteafter true|false` controls whether the remote deployment is removed after benchmarking; the default is `false`, allowing the verified installation to be reused.
+Before connecting to storage, SBK-GEM validates the local `installDist`
+layout, including the pathing JAR and every dependency named by its manifest.
+It packages the complete distribution and, by default, the controller JDK into
+one content-addressed `tar.gz` archive. The identity covers every file,
+contained relative symbolic link, and normalized file mode, so two builds
+carrying the same SBK version but different dependencies cannot be mistaken
+for one another. Links escaping the SBK or JDK source tree are rejected;
+directory modes are normalized to `0755` in both the identity and archive.
 
-After any copy, SBK-GEM verifies the copied version. It then resolves and checks the exact absolute executable path independently on every node before starting SBM or launching a benchmark.
+The archive contains a platform descriptor and per-file SHA-256 manifest.
+Every remote node must pass the homogeneous platform/tool preflight. GEM then
+automatically uploads only a missing content identity, verifies the archive SHA-256, extracts
+to a unique staging directory, verifies every regular file, and atomically
+renames the verified runtime into place. A partially copied or failed staging
+directory is never used to launch SBK. Subsequent runs reuse the exact verified
+content without copying it again. Local archives are cached under
+`~/.sbk/cache/sbk-gem` by default; `runtimeCacheDirectory` in
+`gem.properties` changes that location. A per-identity file lock serializes
+cache writers across GEM processes, and a separately published SHA-256 sidecar
+causes incomplete or corrupted cached archives to be rebuilt before use. With
+`runtimecleanup=true`, the controller retains only the selected cached bundle;
+a non-current archive being transferred by another GEM process is protected by
+its cache lock and is removed after it becomes inactive.
 
-SBK-GEM also reconciles Java independently on every node:
+The deployment lifecycle is automatic: an exact verified SBK-plus-JDK identity
+is reused, while missing content is uploaded, verified, and activated without a
+separate copy switch. The current identity is retained after benchmarking.
+Remote PID leases protect runtimes used by concurrent GEM executions; therefore
+an active non-current identity may coexist temporarily and is removed after its
+final lease exits. Cleanup compares immutable identities, not version numbers,
+so both lower and higher inactive SBK versions are removed.
+
+The deployment lifecycle options are:
+
+- `-sbkdir <directory>` selects the complete local SBK installation to bundle.
+  SBK-GEM always validates and executes its standard `bin/sbk` launcher; the
+  launcher path is not configurable.
+- `-delete true|false` permits replacement only when the exact content-addressed destination exists but fails validation; the default is `true`.
+- `-runtimecleanup true|false` removes every inactive non-current remote
+  SBK-GEM-managed runtime identity and controller-side cached bundle after
+  verified activation and lease/transfer release, regardless of whether its
+  SBK version is lower or higher; the default is
+  `true`. It never deletes the current identity, a live leased identity, an
+  unmanaged directory, or an external JDK selected with `-javacopy false`.
+
+The rule applies to every deployment target in `-nodes`, including the
+controller host when it is selected as a node. It does not scan or delete
+arbitrary SBK/JDK installations outside the SBK-GEM-managed deployment parent;
+doing so would risk deleting user-owned software.
+
+The former `-copy`, `-deleteafter`, and `-sbkcommand` options are rejected with
+migration guidance. This prevents disabling required provisioning, deleting
+the newly verified runtime at benchmark shutdown, or bypassing the verified
+standard launcher contract.
+
+SBK-GEM selects Java as follows:
 
 - `-javaversion <major>` selects the required Java major version; the default is `25`.
-- `-javacopy true|false` controls whether SBK-GEM may copy the JVM running SBK-GEM when the required remote Java is unavailable; the default is `true`.
-- `-javadir <home>` optionally identifies a remote Java home containing `bin/java`. When omitted, SBK-GEM discovers Java from the remote `PATH`. If a copy is necessary without `javadir`, it installs Java in a reusable `sbk-java-<major>` directory beside the GEM working directory.
+- `-javacopy true|false` controls bundle composition. The default `true`
+  always includes and uses the complete JDK running SBK-GEM. `false` excludes
+  Java and requires a matching remote JDK.
+- `-javadir <home>` optionally identifies the required remote JDK when
+  `-javacopy false`; otherwise GEM discovers it from `PATH`.
+
+PATH discovery resolves Java symlinks with `realpath` when available, GNU
+`readlink -f` when supported, and a POSIX shell symlink walk otherwise. This
+keeps `-javacopy false` usable on both Linux and macOS.
 
 For each remote launch, GEM exports the selected node-specific `SBK_JAVA_HOME` and prepends `$SBK_JAVA_HOME/bin` to `PATH`. SBK’s generated launcher therefore uses the verified runtime. Automatic copying is rejected when the local JVM major version differs from `-javaversion`, because copying that JVM could not satisfy the request.
 
@@ -209,7 +271,8 @@ Before a multi-host run:
 3. GEM adds the common `GrpcLogger`, SBM callback host, and SBM port arguments.
 4. It distributes `-totalrecords` and `-totalthroughput` when requested, creating node-specific `-records` and `-throughput` argument lists.
 5. It constructs the embedded `SbmBenchmark` and `SbkGemBenchmark`.
-6. `SbkGemBenchmark` establishes SSH sessions, discovers or provisions Java, and reconciles the SBK version on every node.
+6. `SbkGemBenchmark` establishes SSH sessions, enforces homogeneous platform
+   compatibility, and verifies or atomically deploys the exact SBK/Java runtime bundle.
 7. It starts SBM and launches every remote SBK process with its node-specific arguments.
 8. Measurements return to embedded SBM and are reported as aggregate windows and totals.
 9. GEM collects remote responses and shuts down sessions and SBM.
@@ -287,8 +350,8 @@ Diagnose distributed failures by boundary:
 | Cannot connect | DNS, route, SSH port, account, `SSH_AUTH_SOCK`, identity-file permissions, and `known_hosts` |
 | Authentication rejected | Remote `authorized_keys`, requested user, agent contents, configured identity files, or optional password |
 | Host key rejected | Missing or changed entry in the SBK-GEM user's `~/.ssh/known_hosts`; verify the key out of band before updating it |
-| Copy/install fails | Remote permissions, disk space, path, archive integrity |
-| Remote Java failure | Java 25 compatibility, `JAVA_HOME`, executable permissions |
+| Copy/install fails | Remote permissions, disk space, `tar`, SHA-256 tool, archive or file-manifest diagnostic |
+| Remote Java failure | Homogeneous OS/architecture, Java 25 compatibility, executable `java` and `javac` |
 | Driver not found | Same distribution on all hosts, both driver registration files, pathing JAR |
 | No aggregate records | Remote command includes `GrpcLogger`; callback host/port reachable |
 | Some clients disappear | Remote stderr, SBM connection metrics, firewall/NAT timeouts |

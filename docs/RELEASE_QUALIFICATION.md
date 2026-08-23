@@ -110,10 +110,14 @@ out beneath a long directory name. The gate:
 3. starts two non-root SSH nodes on `127.0.0.1`, each with an independently
    assigned ephemeral host port, so macOS does not require extra loopback
    aliases;
-4. verifies both generated `known_hosts` entries and remote Java runtimes;
+4. verifies both generated `known_hosts` entries and the homogeneous remote
+   platform/tool preflight;
 5. runs `GemPrometheusLogger`, `GemWebLogger`, and SBK-GEM-YAL through the
-   normal copy, two-client coordinated launch, SBM callback, aggregation, and
-   cleanup paths, requiring two successful nodes and two SBM registrations;
+   immutable SBK-plus-JDK archive creation, SHA-256 verified copy, atomic
+   activation/reuse, managed-runtime lease and inactive-version cleanup,
+   cache integrity, two-client coordinated launch, SBM callback, aggregation,
+   and cleanup paths, requiring two successful nodes
+   and two SBM registrations;
    the timed Prometheus case uses `-totalrecords`, the Web case combines
    per-client `-records` with `-totalthroughput`, and the fixed-count YAL case
    combines `totalrecords` with `totalthroughput`;
@@ -176,7 +180,7 @@ gem.knownHosts=/secure/sbk-release-known-hosts
 `gem.knownHosts` is a path on the qualification runner, not the file contents.
 The nodes must permit non-interactive SSH, reach the selected backend, and
 connect back to the embedded SBM endpoint. SBK-GEM performs its normal version,
-copy, Java, execution, aggregation, and cleanup checks.
+content-addressed SBK/Java deployment, execution, aggregation, and cleanup checks.
 
 ### Single-host GEM qualification
 

@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -98,7 +99,29 @@ final class RemoteJavaDeploymentTest {
         final String command = RemoteJavaDeployment.homeProbeCommand("/opt/SBK Java");
 
         assertTrue(command.contains("[ -x '/opt/SBK Java/bin/java' ]"));
+        assertTrue(command.contains("[ -x '/opt/SBK Java/bin/javac' ]"));
         assertTrue(command.contains("SBK_JAVA_HOME=%s"));
+    }
+
+    @Test
+    void discoversPathJavaWithPortableSymlinkResolution() {
+        final String command = RemoteJavaDeployment.pathProbeCommand();
+
+        assertTrue(command.contains("command -v realpath"));
+        assertTrue(command.contains("elif readlink -f"));
+        assertTrue(command.contains("while [ -L \"$JAVA_BIN\" ]"));
+        assertTrue(command.contains("CDPATH= cd -P"));
+    }
+
+    @Test
+    void discoversCurrentPathJava() throws IOException, InterruptedException {
+        final Process process = new ProcessBuilder("sh", "-c", RemoteJavaDeployment.pathProbeCommand())
+                .redirectErrorStream(true).start();
+        assertTrue(process.waitFor(10, TimeUnit.SECONDS));
+        final String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+
+        assertEquals(0, process.exitValue(), output);
+        assertTrue(output.contains("SBK_JAVA_HOME=/"), output);
     }
 
     @Test

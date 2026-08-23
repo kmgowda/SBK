@@ -94,17 +94,13 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Create a connection configuration.</div>
 </dd>
-<dt><a href="io/gem/config/GemConfig.html#copy" class="member-name-link">copy</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dt><a href="io/gem/api/SshUtils.html#copyFile(org.apache.sshd.client.session.ClientSession,java.lang.String,java.lang.String)" class="member-name-link">copyFile(ClientSession, String, String)</a> - Static method in class io.gem.api.<a href="io/gem/api/SshUtils.html" title="class in io.gem.api">SshUtils</a></dt>
 <dd>
-<div class="block">Whether SBK-GEM may copy missing or mismatched SBK installations to remote nodes.</div>
+<div class="block">Copy one local file to an exact remote path using SCP.</div>
 </dd>
-<dt><a href="io/gem/api/SshUtils.html#copyDirectory(org.apache.sshd.client.session.ClientSession,java.lang.String,java.lang.String)" class="member-name-link">copyDirectory(ClientSession, String, String)</a> - Static method in class io.gem.api.<a href="io/gem/api/SshUtils.html" title="class in io.gem.api">SshUtils</a></dt>
+<dt><a href="io/gem/api/SshSession.html#copyFileAsync(java.lang.String,java.lang.String,long)" class="member-name-link">copyFileAsync(String, String, long)</a> - Method in class io.gem.api.<a href="io/gem/api/SshSession.html" title="class in io.gem.api">SshSession</a></dt>
 <dd>
-<div class="block">Recursively copy a directory to a remote path using SCP.</div>
-</dd>
-<dt><a href="io/gem/api/SshSession.html#copyDirectoryAsync(java.lang.String,java.lang.String,long)" class="member-name-link">copyDirectoryAsync(String, String, long)</a> - Method in class io.gem.api.<a href="io/gem/api/SshSession.html" title="class in io.gem.api">SshSession</a></dt>
-<dd>
-<div class="block">It copies directory of sessions but throws ConnectException if it occurs.</div>
+<div class="block">Copy one local file to an exact remote path asynchronously.</div>
 </dd>
 <dt><a href="io/gem/api/SshUtils.html#createClient(io.gem.api.ConnectionConfig)" class="member-name-link">createClient(ConnectionConfig)</a> - Static method in class io.gem.api.<a href="io/gem/api/SshUtils.html" title="class in io.gem.api">SshUtils</a></dt>
 <dd>
@@ -129,9 +125,9 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Whether to delete an existing mismatched SBK installation before copying.</div>
 </dd>
-<dt><a href="io/gem/config/GemConfig.html#deleteafter" class="member-name-link">deleteafter</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dt><a href="io/gem/config/GemConfig.html#deploymentTimeoutSeconds" class="member-name-link">deploymentTimeoutSeconds</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
-<div class="block">Whether to delete the remote SBK deployment after the benchmark.</div>
+<div class="block">Maximum runtime bundle creation, transfer, and activation duration in seconds.</div>
 </dd>
 <dt><a href="io/gem/config/GemConfig.html#DESC" class="member-name-link">DESC</a> - Static variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
@@ -305,12 +301,6 @@ remote SBK command line.</div>
 <dd>
 <div class="block">Return partial bounded command output.</div>
 </dd>
-<dt><a href="io/gem/params/GemParameters.html#getSbkCommand()" class="member-name-link">getSbkCommand()</a> - Method in interface io.gem.params.<a href="io/gem/params/GemParameters.html" title="interface in io.gem.params">GemParameters</a></dt>
-<dd>
-<div class="block">to get sbk commands.</div>
-</dd>
-<dt><a href="io/gem/params/impl/SbkGemParameters.html#getSbkCommand()" class="member-name-link">getSbkCommand()</a> - Method in class io.gem.params.impl.<a href="io/gem/params/impl/SbkGemParameters.html" title="class in io.gem.params.impl">SbkGemParameters</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="io/gem/params/GemParameters.html#getSbkDir()" class="member-name-link">getSbkDir()</a> - Method in interface io.gem.params.<a href="io/gem/params/GemParameters.html" title="interface in io.gem.params">GemParameters</a></dt>
 <dd>
 <div class="block">to get Sbk directory.</div>
@@ -373,31 +363,23 @@ remote SBK command line.</div>
 <dd>&nbsp;</dd>
 <dt><a href="io/gem/params/impl/package-summary.html">io.gem.params.impl</a> - package io.gem.params.impl</dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/gem/params/GemParameters.html#isCopy()" class="member-name-link">isCopy()</a> - Method in interface io.gem.params.<a href="io/gem/params/GemParameters.html" title="interface in io.gem.params">GemParameters</a></dt>
-<dd>
-<div class="block">Check whether copying missing or mismatched SBK installations is enabled.</div>
-</dd>
-<dt><a href="io/gem/params/impl/SbkGemParameters.html#isCopy()" class="member-name-link">isCopy()</a> - Method in class io.gem.params.impl.<a href="io/gem/params/impl/SbkGemParameters.html" title="class in io.gem.params.impl">SbkGemParameters</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="io/gem/params/GemParameters.html#isDelete()" class="member-name-link">isDelete()</a> - Method in interface io.gem.params.<a href="io/gem/params/GemParameters.html" title="interface in io.gem.params">GemParameters</a></dt>
 <dd>
 <div class="block">Check whether a mismatched SBK installation may be deleted before replacement.</div>
 </dd>
 <dt><a href="io/gem/params/impl/SbkGemParameters.html#isDelete()" class="member-name-link">isDelete()</a> - Method in class io.gem.params.impl.<a href="io/gem/params/impl/SbkGemParameters.html" title="class in io.gem.params.impl">SbkGemParameters</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/gem/params/GemParameters.html#isDeleteAfter()" class="member-name-link">isDeleteAfter()</a> - Method in interface io.gem.params.<a href="io/gem/params/GemParameters.html" title="interface in io.gem.params">GemParameters</a></dt>
-<dd>
-<div class="block">Check whether remote SBK deployments should be deleted after benchmarking.</div>
-</dd>
-<dt><a href="io/gem/params/impl/SbkGemParameters.html#isDeleteAfter()" class="member-name-link">isDeleteAfter()</a> - Method in class io.gem.params.impl.<a href="io/gem/params/impl/SbkGemParameters.html" title="class in io.gem.params.impl">SbkGemParameters</a></dt>
-<dd>
-<div class="block">Check whether remote SBK deployments are deleted after benchmarking.</div>
-</dd>
 <dt><a href="io/gem/params/GemParameters.html#isJavaCopy()" class="member-name-link">isJavaCopy()</a> - Method in interface io.gem.params.<a href="io/gem/params/GemParameters.html" title="interface in io.gem.params">GemParameters</a></dt>
 <dd>
 <div class="block">Check whether SBK-GEM may copy its Java runtime to remote nodes.</div>
 </dd>
 <dt><a href="io/gem/params/impl/SbkGemParameters.html#isJavaCopy()" class="member-name-link">isJavaCopy()</a> - Method in class io.gem.params.impl.<a href="io/gem/params/impl/SbkGemParameters.html" title="class in io.gem.params.impl">SbkGemParameters</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/gem/params/GemParameters.html#isRuntimeCleanup()" class="member-name-link">isRuntimeCleanup()</a> - Method in interface io.gem.params.<a href="io/gem/params/GemParameters.html" title="interface in io.gem.params">GemParameters</a></dt>
+<dd>
+<div class="block">Check whether every inactive non-current SBK-GEM-managed runtime and local cached bundle should be removed.</div>
+</dd>
+<dt><a href="io/gem/params/impl/SbkGemParameters.html#isRuntimeCleanup()" class="member-name-link">isRuntimeCleanup()</a> - Method in class io.gem.params.impl.<a href="io/gem/params/impl/SbkGemParameters.html" title="class in io.gem.params.impl">SbkGemParameters</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/gem/api/SshCommandException.html#isTimeout()" class="member-name-link">isTimeout()</a> - Method in exception class io.gem.api.<a href="io/gem/api/SshCommandException.html" title="class in io.gem.api">SshCommandException</a></dt>
 <dd>
@@ -552,9 +534,33 @@ remote SBK command line.</div>
 <dd>
 <div class="block">This method is responsible for running commands but throws ConnectException if it occurs.</div>
 </dd>
+<dt><a href="io/gem/config/GemConfig.html#runtimeCacheDirectory" class="member-name-link">runtimeCacheDirectory</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Local content-addressed runtime bundle cache directory, absolute or relative to the user's home.</div>
+</dd>
+<dt><a href="io/gem/config/GemConfig.html#runtimecleanup" class="member-name-link">runtimecleanup</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Whether inactive non-current managed runtimes and local cached bundles are removed automatically.</div>
+</dd>
+<dt><a href="io/gem/config/GemConfig.html#runtimeLeaseReservationSeconds" class="member-name-link">runtimeLeaseReservationSeconds</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Age after which an unlaunched runtime lease reservation may be reclaimed.</div>
+</dd>
+<dt><a href="io/gem/config/GemConfig.html#runtimeManagementLockStaleSeconds" class="member-name-link">runtimeManagementLockStaleSeconds</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Age after which an abandoned remote managed-runtime lifecycle lock may be reclaimed.</div>
+</dd>
+<dt><a href="io/gem/config/GemConfig.html#runtimeManagementLockTimeoutSeconds" class="member-name-link">runtimeManagementLockTimeoutSeconds</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Maximum wait for the remote managed-runtime lifecycle lock.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:S">S</h2>
 <dl class="index">
+<dt><a href="io/gem/config/GemConfig.html#SBK_COMMAND" class="member-name-link">SBK_COMMAND</a> - Static variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Standard SBK launcher relative to an installed distribution.</div>
+</dd>
 <dt><a href="io/gem/config/GemConfig.html#SBK_GEM_APP_NAME" class="member-name-link">SBK_GEM_APP_NAME</a> - Static variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
 <div class="block"><code>String SBK_GEM_APP_NAME = "sbk.gem.applicationName</code>.</div>
@@ -566,10 +572,6 @@ remote SBK command line.</div>
 <dt><a href="io/gem/config/GemConfig.html#SBK_GEM_SSH_PASSWD" class="member-name-link">SBK_GEM_SSH_PASSWD</a> - Static variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
 <div class="block">Environment variable name from which to read the SSH password if not provided in properties.</div>
-</dd>
-<dt><a href="io/gem/config/GemConfig.html#sbkcommand" class="member-name-link">sbkcommand</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
-<dd>
-<div class="block">SBK launcher command relative to <a href="io/gem/config/GemConfig.html#sbkdir"><code>GemConfig.sbkdir</code></a>.</div>
 </dd>
 <dt><a href="io/gem/config/GemConfig.html#sbkdir" class="member-name-link">sbkdir</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>

@@ -54,7 +54,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
@@ -177,7 +176,6 @@ final public class SbkGem {
         final String appName = StringUtils.isNotEmpty(applicationName) ? applicationName :
                 StringUtils.isNotEmpty(sbkGemAppName) ? sbkGemAppName : GemConfig.NAME;
         final String sbkAppName = System.getProperty(Config.SBK_APP_NAME);
-        final String sbkCommand = StringUtils.isNotEmpty(sbkAppName) ? sbkAppName : Config.NAME;
         final String sbkClassName = System.getProperty(Config.SBK_CLASS_NAME);
         final String sbkAppHome = System.getProperty(Config.SBK_APP_HOME);
         final String argsClassName = SbkUtils.getClassName(args);
@@ -270,10 +268,6 @@ final public class SbkGem {
         nextArgs = SbkUtils.removeOptionArgsAndValues(args,
                             new String[]{Config.CLASS_OPTION_ARG, Config.LOGGER_OPTION_ARG});
 
-        if (StringUtils.isNotEmpty(sbkCommand)) {
-            gemConfig.sbkcommand = GemConfig.BIN_DIR + File.separator + sbkCommand;
-        }
-
         if (StringUtils.isNotEmpty(sbkAppHome)) {
             gemConfig.sbkdir = sbkAppHome;
         }
@@ -311,18 +305,14 @@ final public class SbkGem {
 
         final String requestedSbkDir = firstNonEmpty(SbkUtils.getArgValue(nextArgs, "-sbkdir"),
                 SbkUtils.getArgValue(nextArgs, "--sbkdir"));
-        final String requestedSbkCommand = firstNonEmpty(SbkUtils.getArgValue(nextArgs, "-sbkcommand"),
-                SbkUtils.getArgValue(nextArgs, "--sbkcommand"));
         if (StringUtils.isNotEmpty(requestedSbkDir)) {
             gemConfig.sbkdir = requestedSbkDir;
         }
-        if (StringUtils.isNotEmpty(requestedSbkCommand)) {
-            gemConfig.sbkcommand = requestedSbkCommand;
+        if (StringUtils.isEmpty(gemConfig.sbkdir)) {
+            throw new IOException("The local SBK directory is required for version discovery");
         }
-        if (StringUtils.isEmpty(gemConfig.sbkdir) || StringUtils.isEmpty(gemConfig.sbkcommand)) {
-            throw new IOException("The local SBK directory and command are required for version discovery");
-        }
-        final Path localSbkCommand = Path.of(gemConfig.sbkdir, gemConfig.sbkcommand).toAbsolutePath().normalize();
+        final Path localSbkCommand = Path.of(gemConfig.sbkdir).resolve(GemConfig.SBK_COMMAND)
+                .toAbsolutePath().normalize();
         gemConfig.sbkVersion = LocalSbkDeployment.discoverVersion(localSbkCommand,
                 gemConfig.remoteTimeoutSeconds);
         gemConfig.remoteDir = appName + "-" + gemConfig.sbkVersion;
@@ -434,7 +424,7 @@ final public class SbkGem {
         }
 
         Printer.log.info("SBK dir: " + params.getSbkDir());
-        Printer.log.info("SBK command: " + params.getSbkCommand());
+        Printer.log.info("SBK command: " + GemConfig.SBK_COMMAND);
         Printer.log.info("Arguments to remote SBK command: "
                 + Arrays.toString(SbkUtils.redactSensitiveOptionValues(
                         sbkCommandArgs.toArray(String[]::new))));

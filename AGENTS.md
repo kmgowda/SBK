@@ -317,21 +317,23 @@ but `-class <name>` doesn't find it" issues.**
 RGW) reject with HTTP 400 *InvalidRequest*. The comment in the
 `build.gradle` explains.
 
-### 4.4 The pathing JAR can get stale after dependency changes
+### 4.4 The pathing JAR carries the runtime dependency graph
 
 The `bin/sbk` script puts only the versioned pathing JAR and main SBK JAR
 on the classpath; everything else (your driver's vendor SDK, transitive
-deps) is reached through the pathing jar's `Class-Path:` manifest. When
-you change dependencies (especially driver vendor SDK versions),
-Gradle's incremental build can leave a stale pathing manifest.
+deps) is reached through the pathing jar's `Class-Path:` manifest. The
+`pathingJar` task declares `runtimeClasspath` as an input, so dependency graph
+changes invalidate the manifest during incremental builds.
 
-**Fix:**
+If files under an existing distribution were manually changed or copied,
+regenerate it with:
 ```bash
 ./gradlew clean :pathingJar installDist --rerun-tasks
 ```
 
-Symptom you'd hit otherwise: `NoClassDefFoundError` on a class that is
-clearly present in `build/install/sbk/lib/`.
+The symptom of a manually inconsistent distribution is `NoClassDefFoundError`
+for a class whose JAR is present under `build/install/sbk/lib/` but absent from
+the pathing manifest.
 
 ### 4.5 Adding a new top-level dependency package requires updating
 `checkstyle/import-control.xml`

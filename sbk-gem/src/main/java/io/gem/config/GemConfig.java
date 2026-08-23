@@ -42,6 +42,8 @@ final public class GemConfig {
      * <code>String BIN_DIR = "bin"</code>.
      */
     final public static String BIN_DIR = "bin";
+    /** Standard SBK launcher relative to an installed distribution. */
+    final public static String SBK_COMMAND = BIN_DIR + "/sbk";
     /**
      * <code>String LOCAL_HOST = "localhost"</code>.
      */
@@ -93,14 +95,6 @@ final public class GemConfig {
      */
     public String sbkdir;
     /**
-     * SBK launcher command relative to {@link #sbkdir}.
-     */
-    public String sbkcommand;
-    /**
-     * Whether SBK-GEM may copy missing or mismatched SBK installations to remote nodes.
-     */
-    public boolean copy;
-    /**
      * Expected SBK version, discovered from the local SBK distribution selected by {@link #sbkdir}.
      */
     public String sbkVersion;
@@ -120,10 +114,8 @@ final public class GemConfig {
      * Whether to delete an existing mismatched SBK installation before copying.
      */
     public boolean delete;
-    /**
-     * Whether to delete the remote SBK deployment after the benchmark.
-     */
-    public boolean deleteafter;
+    /** Whether inactive non-current managed runtimes and local cached bundles are removed automatically. */
+    public boolean runtimecleanup;
 
 
     //override by props file
@@ -131,6 +123,16 @@ final public class GemConfig {
      * Timeout value used for remote operations (seconds).
      */
     public long remoteTimeoutSeconds;
+    /** Maximum runtime bundle creation, transfer, and activation duration in seconds. */
+    public long deploymentTimeoutSeconds;
+    /** Local content-addressed runtime bundle cache directory, absolute or relative to the user's home. */
+    public String runtimeCacheDirectory;
+    /** Maximum wait for the remote managed-runtime lifecycle lock. */
+    public long runtimeManagementLockTimeoutSeconds;
+    /** Age after which an abandoned remote managed-runtime lifecycle lock may be reclaimed. */
+    public long runtimeManagementLockStaleSeconds;
+    /** Age after which an unlaunched runtime lease reservation may be reclaimed. */
+    public long runtimeLeaseReservationSeconds;
     /**
      * Maximum time to wait for all remote SBK clients to register with SBM (seconds).
      */
@@ -186,7 +188,13 @@ final public class GemConfig {
     }
 
     void validate() {
-        if (executorThreadReserve < 1 || diagnosticBytes < 1 || maximumAgentResponseBytes < 1
+        if (remoteTimeoutSeconds < 1 || deploymentTimeoutSeconds < 1
+                || runtimeCacheDirectory == null || runtimeCacheDirectory.isBlank() || executorThreadReserve < 1
+                || runtimeManagementLockTimeoutSeconds < 1 || runtimeManagementLockStaleSeconds < 1
+                || runtimeManagementLockStaleSeconds <= deploymentTimeoutSeconds
+                || runtimeLeaseReservationSeconds
+                <= runtimeManagementLockTimeoutSeconds + remoteTimeoutSeconds
+                || diagnosticBytes < 1 || maximumAgentResponseBytes < 1
                 || maximumDiagnosticCharacters < 1 || diagnosticPrefixCharacters < 1
                 || maximumDiagnosticCharacters - diagnosticPrefixCharacters
                 <= DIAGNOSTIC_TRUNCATION_MARKER.length()) {

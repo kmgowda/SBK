@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Lifecycle wrapper around an SSH client/session for a single connection.
  *
- * <p>Encapsulates connect, command execution, SCP directory copy, and graceful shutdown,
+ * <p>Encapsulates connect, command execution, SCP file copy, and graceful shutdown,
  * exposing async methods returning {@link CompletableFuture}s and performing operations on a
  * provided {@link ExecutorService}. Thread-safe for public methods guarded via
  * {@link Synchronized} or internal synchronization.
@@ -170,22 +170,22 @@ final public class SshSession {
     }
 
     /**
-     * It copies directory of sessions but throws ConnectException if it occurs.
+     * Copy one local file to an exact remote path asynchronously.
      *
-     * @param srcPath   String
-     * @param dstPath   String
+     * @param srcPath local source file
+     * @param dstPath remote destination file
      * @param timeoutSeconds maximum copy duration in seconds
-     * @return CompletableFuture
-     * @throws ConnectException If connection exception occurs.
+     * @return copy completion
+     * @throws ConnectException when no SSH session is available
      */
-    public CompletableFuture<Void> copyDirectoryAsync(String srcPath, String dstPath, long timeoutSeconds)
+    public CompletableFuture<Void> copyFileAsync(String srcPath, String dstPath, long timeoutSeconds)
             throws ConnectException {
         final ClientSession sshSession = getSession();
         return CompletableFuture.runAsync(() -> {
             try {
-                SshUtils.copyDirectory(sshSession, srcPath, dstPath);
-            } catch (IOException e) {
-                throw new CompletionException(e);
+                SshUtils.copyFile(sshSession, srcPath, dstPath);
+            } catch (IOException exception) {
+                throw new CompletionException(exception);
             }
         }, executor).orTimeout(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS);
     }

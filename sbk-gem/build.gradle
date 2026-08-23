@@ -39,6 +39,7 @@ dependencies {
     implementation "org.apache.sshd:sshd-core:$sshdVersion"
     implementation "org.apache.sshd:sshd-scp:$sshdVersion"
     implementation "org.apache.sshd:sshd-mina:$sshdVersion"
+    implementation "org.apache.commons:commons-compress:$commonsCompressVersion"
 }
 
 

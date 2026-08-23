@@ -23,7 +23,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -38,15 +37,15 @@ import java.util.Objects;
  *
  * <p>Extends {@link SbkDriversParameters} to include SBK driver/logger help, and adds GEM-specific
  * options for remote orchestration (nodes, SSH creds/port, SBK and Java deployment,
- * copy/delete/deleteafter,
+ * automatic runtime deployment/cleanup,
  * local SBM host/port/idle sleep). Populates typed getters and constructs {@link ConnectionConfig}
  * instances for each target node.
  *
  * <p>Supported options (help text shows defaults from {@link GemConfig}):
  * - -nodes: comma/space/newline-separated hostnames or host:port endpoints
  * - -gemuser, -gempass, -gemport
- * - -sbkdir, -sbkcommand
- * - -copy, -delete, -deleteafter, -javacopy, -javaversion, -javadir
+ * - -sbkdir
+ * - -runtimecleanup, -delete, -javacopy, -javaversion, -javadir
  * - -localhost
  * - -sbmport, -sbmsleepms
  * - -totalrecords
@@ -126,17 +125,17 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("knownhosts", true, "Known-hosts file; an empty value uses ~/.ssh/known_hosts; default: " +
                 (StringUtils.isEmpty(config.knownhosts) ? "default" : config.knownhosts));
         addOption("gemport", true, "ssh port of the remote hosts, default: " + config.gemport);
-        addOption("sbkdir", true, "directory path of sbk application, default: " + config.sbkdir);
-        addOption("sbkcommand", true,
-                "remote sbk command; command path is relative to 'sbkdir', default: " + config.sbkcommand);
-        addOption("copy", true, "Copy SBK when missing or mismatched; default: " + config.copy);
-        addOption("javacopy", true, "Copy the local Java runtime when the expected remote Java is unavailable; " +
-                "default: " + config.javacopy);
+        addOption("sbkdir", true, "directory path of the SBK application containing the standard "
+                + GemConfig.SBK_COMMAND + " launcher; default: " + config.sbkdir);
+        addOption("javacopy", true, "Include and use the controller Java runtime in the immutable remote bundle; "
+                + "when false, require matching Java on every remote host; default: " + config.javacopy);
         addOption("javaversion", true, "Required remote Java major version; default: " + config.javaversion);
         addOption("javadir", true, "Remote Java home containing bin/java; default: " +
                 (StringUtils.isEmpty(config.javadir) ? "null" : config.javadir));
         addOption("delete", true, "Delete a mismatched remote SBK before copying; default: " + config.delete);
-        addOption("deleteafter", true, "Delete remote SBK after benchmarking; default: " + config.deleteafter);
+        addOption("runtimecleanup", true, "Remove every inactive non-current SBK-GEM-managed runtime and "
+                + "local cached bundle, regardless of version ordering, while retaining the current verified "
+                + "identity; default: " + config.runtimecleanup);
         addOption("localhost", true, "this local SBM host name, default: " + localHost);
         addOption("sbmport", true, "SBM port number; default: " + this.sbmPort);
         addOption("sbmsleepms", true, "SBM idle milliseconds to sleep; default: " + this.sbmIdleSleepMilliSeconds +
@@ -147,8 +146,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("totalthroughput", true, "Total throughput in MB/s across all remote SBK clients; mutually " +
                 "exclusive with -throughput");
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-hostkeycheck", "-knownhosts",
-                "-gemport", "-sbkdir", "-sbkcommand", "-copy", "-javacopy", "-javaversion", "-javadir",
-                "-delete", "-deleteafter", "-localhost", "-sbmport", "-sbmsleepms", "-totalrecords",
+                "-gemport", "-sbkdir", "-javacopy", "-javaversion", "-javadir",
+                "-delete", "-runtimecleanup", "-localhost", "-sbmport", "-sbmsleepms", "-totalrecords",
                 "--totalrecords", "-totalthroughput", "--totalthroughput"};
         this.parsedArgs = null;
         this.totalThroughput = BigDecimal.ZERO;
@@ -167,6 +166,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
      * @throws HelpException             if help text needs to be displayed by upstream handling
      */
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
+        rejectRemovedDeploymentOptions(args);
         totalRecordsOption = hasCommandLineOption(args, "totalrecords");
         totalThroughputOption = hasCommandLineOption(args, "totalthroughput");
         if (totalRecordsOption && hasCommandLineOption(args, "records")) {
@@ -188,9 +188,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         }
         super.parseArgs(normalizeAggregateOptions(args));
         final String nodeString = getOptionValue("nodes", config.nodes);
-        String[] nodes = nodeString.replace("[ ]+", " ")
-                .replace("[,] +", ",")
-                .split("[ ,\n]+");
+        String[] nodes = nodeString.split("[ ,\n]+");
         config.gemuser = getOptionValue("gemuser", config.gemuser);
         config.gempass = getOptionValue(GemConfig.GEM_PASS_OPTION, config.gempass);
         config.hostkeycheck = Boolean.parseBoolean(getOptionValue("hostkeycheck",
@@ -199,17 +197,15 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         config.gemport = Integer.parseInt(getOptionValue("gemport", Integer.toString(config.gemport)));
         validatePort(config.gemport, "-gemport");
         config.sbkdir = getOptionValue("sbkdir", config.sbkdir);
-        config.sbkcommand = getOptionValue("sbkcommand", config.sbkcommand);
         localHost = getOptionValue("localhost", localHost);
         sbmPort = Integer.parseInt(getOptionValue("sbmport", Integer.toString(sbmPort)));
         sbmIdleSleepMilliSeconds = Integer.parseInt(getOptionValue("sbmsleepms", Integer.toString(sbmIdleSleepMilliSeconds)));
-        config.copy = Boolean.parseBoolean(getOptionValue("copy", Boolean.toString(config.copy)));
         config.javacopy = Boolean.parseBoolean(getOptionValue("javacopy", Boolean.toString(config.javacopy)));
         config.javaversion = Integer.parseInt(getOptionValue("javaversion", Integer.toString(config.javaversion)));
         config.javadir = getOptionValue("javadir", Objects.requireNonNullElse(config.javadir, ""));
         config.delete = Boolean.parseBoolean(getOptionValue("delete", Boolean.toString(config.delete)));
-        config.deleteafter = Boolean.parseBoolean(getOptionValue("deleteafter",
-                Boolean.toString(config.deleteafter)));
+        config.runtimecleanup = Boolean.parseBoolean(getOptionValue("runtimecleanup",
+                Boolean.toString(config.runtimecleanup)));
 
         if (config.javaversion <= 0) {
             throw new IllegalArgumentException("The Java major version must be greater than zero");
@@ -218,10 +214,9 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.gemuser,
                 "-hostkeycheck", Boolean.toString(config.hostkeycheck), "-knownhosts", config.knownhosts,
                 "-gemport", Integer.toString(config.gemport), "-sbkdir", config.sbkdir,
-                "-sbkcommand", config.sbkcommand, "-copy", Boolean.toString(config.copy),
                 "-javacopy", Boolean.toString(config.javacopy), "-javaversion",
                 Integer.toString(config.javaversion), "-javadir", config.javadir, "-delete",
-                Boolean.toString(config.delete), "-deleteafter", Boolean.toString(config.deleteafter),
+                Boolean.toString(config.delete), "-runtimecleanup", Boolean.toString(config.runtimecleanup),
                 "-localhost", localHost, "-sbmport", Integer.toString(sbmPort)};
 
         connections = new ConnectionConfig[nodes.length];
@@ -245,23 +240,16 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
             throw new IllegalArgumentException(errMsg);
         }
 
-        if (StringUtils.isEmpty(config.sbkcommand)) {
-            String errMsg = "The SBK application/command not supplied!";
-            Printer.log.error(errMsg);
-            throw new IllegalArgumentException(errMsg);
-        }
-
-        final String sbkFullCommand = config.sbkdir + File.separator + config.sbkcommand;
-        Path sbkCommandPath = Paths.get(sbkFullCommand);
+        final Path sbkCommandPath = Paths.get(config.sbkdir).resolve(GemConfig.SBK_COMMAND);
 
         if (!Files.exists(sbkCommandPath)) {
-            String errMsg = "The sbk executable command: " + sbkFullCommand + " not found!";
+            String errMsg = "The SBK executable command: " + sbkCommandPath + " not found!";
             Printer.log.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }
 
         if (!Files.isExecutable(sbkCommandPath)) {
-            String errMsg = "The executable permissions are not found for command: " + sbkFullCommand;
+            String errMsg = "The executable permissions are not found for command: " + sbkCommandPath;
             Printer.log.error(errMsg);
             throw new IllegalArgumentException(errMsg);
         }
@@ -389,6 +377,21 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         return ("-" + option).equals(argument) || ("--" + option).equals(argument);
     }
 
+    private static void rejectRemovedDeploymentOptions(String[] args) {
+        if (hasCommandLineOption(args, "copy")) {
+            throw new IllegalArgumentException("The '-copy' option was removed: missing exact SBK/JDK runtime "
+                    + "content is now copied automatically; use '-runtimecleanup' to control stale versions");
+        }
+        if (hasCommandLineOption(args, "deleteafter")) {
+            throw new IllegalArgumentException("The '-deleteafter' option was removed: the current verified "
+                    + "runtime is retained and '-runtimecleanup' controls inactive non-current versions");
+        }
+        if (hasCommandLineOption(args, "sbkcommand")) {
+            throw new IllegalArgumentException("The '-sbkcommand' option was removed: SBK-GEM always validates "
+                    + "and deploys the standard '" + GemConfig.SBK_COMMAND + "' launcher under '-sbkdir'");
+        }
+    }
+
     private static NodeEndpoint parseNodeEndpoint(String value, int defaultPort) {
         if (value.startsWith("[")) {
             final int bracket = value.indexOf(']');
@@ -447,16 +450,6 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     }
 
     @Override
-    public String getSbkCommand() {
-        return config.sbkcommand;
-    }
-
-    @Override
-    public boolean isCopy() {
-        return config.copy;
-    }
-
-    @Override
     public boolean isJavaCopy() {
         return config.javacopy;
     }
@@ -476,13 +469,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         return config.delete;
     }
 
-    /**
-     * Check whether remote SBK deployments are deleted after benchmarking.
-     *
-     * @return true when post-benchmark deletion is enabled
-     */
     @Override
-    public boolean isDeleteAfter() {
-        return config.deleteafter;
+    public boolean isRuntimeCleanup() {
+        return config.runtimecleanup;
     }
 }

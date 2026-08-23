@@ -70,7 +70,7 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#createSessionAsync(long)" tabindex="0">createSessionAsync(long)</a></li>
 <li><a href="#runCommandAsync(java.lang.String,java.lang.Boolean,long)" tabindex="0">runCommandAsync(String, Boolean, long)</a></li>
-<li><a href="#copyDirectoryAsync(java.lang.String,java.lang.String,long)" tabindex="0">copyDirectoryAsync(String, String, long)</a></li>
+<li><a href="#copyFileAsync(java.lang.String,java.lang.String,long)" tabindex="0">copyFileAsync(String, String, long)</a></li>
 <li><a href="#stop()" tabindex="0">stop()</a></li>
 </ol>
 </li>
@@ -91,7 +91,7 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Lifecycle wrapper around an SSH client/session for a single connection.
 
-<p>Encapsulates connect, command execution, SCP directory copy, and graceful shutdown,
+<p>Encapsulates connect, command execution, SCP file copy, and graceful shutdown,
 exposing async methods returning <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html" title="class or interface in java.util.concurrent" class="external-link"><code>CompletableFuture</code></a>s and performing operations on a
 provided <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ExecutorService.html" title="class or interface in java.util.concurrent" class="external-link"><code>ExecutorService</code></a>. Thread-safe for public methods guarded via
 <code>Synchronized</code> or internal synchronization.</div>
@@ -144,11 +144,11 @@ provided <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/j
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html" title="class or interface in java.util.concurrent" class="external-link">CompletableFuture</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Void.html" title="class or interface in java.lang" class="external-link">Void</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#copyDirectoryAsync(java.lang.String,java.lang.String,long)" class="member-name-link">copyDirectoryAsync</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;srcPath,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#copyFileAsync(java.lang.String,java.lang.String,long)" class="member-name-link">copyFileAsync</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;srcPath,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;dstPath,
  long&nbsp;timeoutSeconds)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">It copies directory of sessions but throws ConnectException if it occurs.</div>
+<div class="block">Copy one local file to an exact remote path asynchronously.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html" title="class or interface in java.util.concurrent" class="external-link">CompletableFuture</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Void.html" title="class or interface in java.lang" class="external-link">Void</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#createSessionAsync(long)" class="member-name-link">createSessionAsync</a><wbr>(long&nbsp;timeoutSeconds)</code></div>
@@ -262,23 +262,23 @@ provided <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/j
 </section>
 </li>
 <li>
-<section class="detail" id="copyDirectoryAsync(java.lang.String,java.lang.String,long)">
-<h3>copyDirectoryAsync</h3>
+<section class="detail" id="copyFileAsync(java.lang.String,java.lang.String,long)">
+<h3>copyFileAsync</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html" title="class or interface in java.util.concurrent" class="external-link">CompletableFuture</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Void.html" title="class or interface in java.lang" class="external-link">Void</a>&gt;</span>&nbsp;<span class="element-name">copyDirectoryAsync</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;srcPath,
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html" title="class or interface in java.util.concurrent" class="external-link">CompletableFuture</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Void.html" title="class or interface in java.lang" class="external-link">Void</a>&gt;</span>&nbsp;<span class="element-name">copyFileAsync</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;srcPath,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;dstPath,
  long&nbsp;timeoutSeconds)</span>
-                                           throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/net/ConnectException.html" title="class or interface in java.net" class="external-link">ConnectException</a></span></div>
-<div class="block">It copies directory of sessions but throws ConnectException if it occurs.</div>
+                                      throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/net/ConnectException.html" title="class or interface in java.net" class="external-link">ConnectException</a></span></div>
+<div class="block">Copy one local file to an exact remote path asynchronously.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>srcPath</code> - String</dd>
-<dd><code>dstPath</code> - String</dd>
+<dd><code>srcPath</code> - local source file</dd>
+<dd><code>dstPath</code> - remote destination file</dd>
 <dd><code>timeoutSeconds</code> - maximum copy duration in seconds</dd>
 <dt>Returns:</dt>
-<dd>CompletableFuture</dd>
+<dd>copy completion</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/net/ConnectException.html" title="class or interface in java.net" class="external-link">ConnectException</a></code> - If connection exception occurs.</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/net/ConnectException.html" title="class or interface in java.net" class="external-link">ConnectException</a></code> - when no SSH session is available</dd>
 </dl>
 </div>
 </section>
