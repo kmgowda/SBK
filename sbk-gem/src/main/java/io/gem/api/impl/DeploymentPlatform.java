@@ -47,10 +47,10 @@ record DeploymentPlatform(String operatingSystem) {
      */
     static String probeCommand() {
         return "command -v tar >/dev/null 2>&1 || { printf '%s\\n' 'tar command is required' >&2; exit 127; }; "
-                + "if command -v sha256sum >/dev/null 2>&1; then SBK_SHA256=sha256sum; "
-                + "elif command -v shasum >/dev/null 2>&1; then SBK_SHA256=shasum; "
+                + "if command -v sha256sum >/dev/null 2>&1; then :; "
+                + "elif command -v shasum >/dev/null 2>&1; then :; "
                 + "else printf '%s\\n' 'sha256sum or shasum is required' >&2; exit 127; fi; "
-                + "printf 'SBK_OS=%s\\nSBK_SHA256=%s\\n' \"$(uname -s)\" \"$SBK_SHA256\"";
+                + "printf 'SBK_OS=%s\\n' \"$(uname -s)\"";
     }
 
     /**

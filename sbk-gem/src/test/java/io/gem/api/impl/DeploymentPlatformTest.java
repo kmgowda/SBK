@@ -25,14 +25,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 final class DeploymentPlatformTest {
     @Test
     void normalizesLinuxOperatingSystemWithoutArchitecture() throws IOException {
-        final SshResponse response = response(0, "SBK_OS=Linux\nSBK_ARCH=x86_64\nSBK_SHA256=sha256sum\n", "");
+        final SshResponse response = response(0, "SBK_OS=Linux\nSBK_ARCH=x86_64\n", "");
 
         assertEquals(new DeploymentPlatform("linux"), DeploymentPlatform.fromProbe(response));
     }
 
     @Test
     void normalizesMacOperatingSystemWithoutArchitecture() throws IOException {
-        final SshResponse response = response(0, "SBK_OS=Darwin\nSBK_ARCH=arm64\nSBK_SHA256=shasum\n", "");
+        final SshResponse response = response(0, "SBK_OS=Darwin\nSBK_ARCH=arm64\n", "");
 
         assertEquals(new DeploymentPlatform("macos"), DeploymentPlatform.fromProbe(response));
     }
@@ -52,6 +52,7 @@ final class DeploymentPlatformTest {
         assertTrue(command.contains("command -v shasum"));
         assertFalse(command.contains("uname -m"));
         assertFalse(command.contains("SBK_ARCH"));
+        assertFalse(command.contains("SBK_SHA256"));
     }
 
     private static SshResponse response(int returnCode, String output, String error) throws IOException {
