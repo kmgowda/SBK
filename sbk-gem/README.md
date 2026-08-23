@@ -218,6 +218,9 @@ so both lower and higher inactive SBK versions are removed.
 
 The deployment lifecycle options are:
 
+- `-sbkdir <directory>` selects the complete local SBK installation to bundle.
+  SBK-GEM always validates and executes its standard `bin/sbk` launcher; the
+  launcher path is not configurable.
 - `-delete true|false` permits replacement only when the exact content-addressed destination exists but fails validation; the default is `true`.
 - `-runtimecleanup true|false` removes every inactive non-current remote
   SBK-GEM-managed runtime identity and controller-side cached bundle after
@@ -231,9 +234,10 @@ controller host when it is selected as a node. It does not scan or delete
 arbitrary SBK/JDK installations outside the SBK-GEM-managed deployment parent;
 doing so would risk deleting user-owned software.
 
-The former `-copy` and `-deleteafter` options are rejected with migration
-guidance. This prevents disabling required provisioning or deleting the newly
-verified runtime at benchmark shutdown.
+The former `-copy`, `-deleteafter`, and `-sbkcommand` options are rejected with
+migration guidance. This prevents disabling required provisioning, deleting
+the newly verified runtime at benchmark shutdown, or bypassing the verified
+standard launcher contract.
 
 SBK-GEM selects Java as follows:
 

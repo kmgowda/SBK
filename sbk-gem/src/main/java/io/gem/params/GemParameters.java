@@ -35,13 +35,6 @@ public sealed interface GemParameters extends Parameters permits GemParameterOpt
     String getSbkDir();
 
     /**
-     * to get sbk commands.
-     *
-     * @return Sbk commands.
-     */
-    String getSbkCommand();
-
-    /**
      * to get local host.
      *
      * @return the local host.

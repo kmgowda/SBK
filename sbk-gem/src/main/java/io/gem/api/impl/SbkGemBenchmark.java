@@ -379,7 +379,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 : Paths.get(System.getProperty("user.home")).resolve(configuredCache);
         Printer.log.info("SBK-GEM: Preparing immutable runtime bundle for {}", platform.id());
         final SbkRuntimeBundle bundle = SbkRuntimeBundle.create(Paths.get(params.getSbkDir()),
-                params.getSbkCommand(), params.isJavaCopy() ? localJavaHome : null, config.sbkVersion,
+                GemConfig.SBK_COMMAND, params.isJavaCopy() ? localJavaHome : null, config.sbkVersion,
                 params.getJavaVersion(), platform, cacheDirectory);
         Printer.log.info("SBK-GEM: Runtime bundle {} content SHA-256 {} archive SHA-256 {}",
                 bundle.archive().getFileName(), bundle.contentDigest(), bundle.archiveDigest());

@@ -63,6 +63,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#NAME" tabindex="0">NAME</a></li>
 <li><a href="#DESC" tabindex="0">DESC</a></li>
 <li><a href="#BIN_DIR" tabindex="0">BIN_DIR</a></li>
+<li><a href="#SBK_COMMAND" tabindex="0">SBK_COMMAND</a></li>
 <li><a href="#LOCAL_HOST" tabindex="0">LOCAL_HOST</a></li>
 <li><a href="#SBK_GEM_LOGGER_PACKAGE_NAME" tabindex="0">SBK_GEM_LOGGER_PACKAGE_NAME</a></li>
 <li><a href="#SBK_GEM_SSH_PASSWD" tabindex="0">SBK_GEM_SSH_PASSWD</a></li>
@@ -74,7 +75,6 @@ loadScripts(document, 'script');</script>
 <li><a href="#knownhosts" tabindex="0">knownhosts</a></li>
 <li><a href="#gemport" tabindex="0">gemport</a></li>
 <li><a href="#sbkdir" tabindex="0">sbkdir</a></li>
-<li><a href="#sbkcommand" tabindex="0">sbkcommand</a></li>
 <li><a href="#sbkVersion" tabindex="0">sbkVersion</a></li>
 <li><a href="#javacopy" tabindex="0">javacopy</a></li>
 <li><a href="#javaversion" tabindex="0">javaversion</a></li>
@@ -298,24 +298,24 @@ management, and SBM coordination.</div>
 <div class="block">Maximum wait for the remote managed-runtime lifecycle lock.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#SBK_GEM_APP_NAME" class="member-name-link">SBK_GEM_APP_NAME</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#SBK_COMMAND" class="member-name-link">SBK_COMMAND</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block"><code>String SBK_GEM_APP_NAME = "sbk.gem.applicationName</code>.</div>
+<div class="block">Standard SBK launcher relative to an installed distribution.</div>
 </div>
 <div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#SBK_GEM_LOGGER_PACKAGE_NAME" class="member-name-link">SBK_GEM_LOGGER_PACKAGE_NAME</a></code></div>
+<div class="col-second even-row-color"><code><a href="#SBK_GEM_APP_NAME" class="member-name-link">SBK_GEM_APP_NAME</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Default logger package to scan for <code>GemLogger</code> implementations.</div>
+<div class="block"><code>String SBK_GEM_APP_NAME = "sbk.gem.applicationName</code>.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#SBK_GEM_SSH_PASSWD" class="member-name-link">SBK_GEM_SSH_PASSWD</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#SBK_GEM_LOGGER_PACKAGE_NAME" class="member-name-link">SBK_GEM_LOGGER_PACKAGE_NAME</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">Environment variable name from which to read the SSH password if not provided in properties.</div>
+<div class="block">Default logger package to scan for <code>GemLogger</code> implementations.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#sbkcommand" class="member-name-link">sbkcommand</a></code></div>
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#SBK_GEM_SSH_PASSWD" class="member-name-link">SBK_GEM_SSH_PASSWD</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">SBK launcher command relative to <a href="#sbkdir"><code>sbkdir</code></a>.</div>
+<div class="block">Environment variable name from which to read the SSH password if not provided in properties.</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#sbkdir" class="member-name-link">sbkdir</a></code></div>
@@ -474,6 +474,23 @@ management, and SBM coordination.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="SBK_COMMAND">
+<h3>SBK_COMMAND</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">SBK_COMMAND</span></div>
+<div class="block">Standard SBK launcher relative to an installed distribution.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.gem.config.GemConfig.SBK_COMMAND">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="LOCAL_HOST">
 <h3>LOCAL_HOST</h3>
 <div class="horizontal-scroll">
@@ -601,15 +618,6 @@ management, and SBM coordination.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">sbkdir</span></div>
 <div class="block">Local SBK application directory.</div>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="sbkcommand">
-<h3>sbkcommand</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">sbkcommand</span></div>
-<div class="block">SBK launcher command relative to <a href="#sbkdir"><code>sbkdir</code></a>.</div>
 </div>
 </section>
 </li>

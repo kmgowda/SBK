@@ -1947,7 +1947,7 @@ sequenceDiagram
     end
 
     GEM->>SBM: sbmBenchmark.start()<br/>(listen on :9717 locally)
-    GEM->>SSH: export SBK_JAVA_HOME and run sbkCommand on each node
+    GEM->>SSH: export SBK_JAVA_HOME and run verified bin/sbk on each node
     Note over SSH: remote command starts SBK with<br/>-out GrpcLogger -sbm localHost -sbmport 9717
 
     par remote SBK runs in parallel

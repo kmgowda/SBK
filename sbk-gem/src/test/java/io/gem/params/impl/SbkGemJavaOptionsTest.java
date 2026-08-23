@@ -76,23 +76,6 @@ final class SbkGemJavaOptionsTest {
     }
 
     @Test
-    void parsesSbkCommandCliOverride() throws Exception {
-        final Path customBinDirectory = temporaryDirectory.resolve("custom-bin");
-        final Path customCommand = customBinDirectory.resolve("custom-sbk");
-        Files.createDirectories(customBinDirectory);
-        Files.createFile(customCommand);
-        assertTrue(customCommand.toFile().setExecutable(true));
-
-        final GemConfig config = defaultConfig(temporaryDirectory);
-        final SbkGemParameters parameters = new SbkGemParameters("test", new String[0], new String[0], config,
-                9717, 10);
-        parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1",
-                "-sbkcommand", "custom-bin/custom-sbk"});
-
-        assertEquals("custom-bin/custom-sbk", parameters.getSbkCommand());
-    }
-
-    @Test
     void parsesSbkDeploymentLifecycleOverride() throws Exception {
         final Path binDirectory = temporaryDirectory.resolve("bin");
         final Path command = binDirectory.resolve("sbk");
@@ -111,7 +94,7 @@ final class SbkGemJavaOptionsTest {
     }
 
     @Test
-    void rejectsRemovedCopyAndDeleteAfterOptionsWithMigrationGuidance() throws Exception {
+    void rejectsRemovedDeploymentOptionsWithMigrationGuidance() throws Exception {
         createSbkCommand();
         final SbkGemParameters parameters = parameters();
 
@@ -122,6 +105,11 @@ final class SbkGemJavaOptionsTest {
         final IllegalArgumentException deleteFailure = assertThrows(IllegalArgumentException.class,
                 () -> parameters.parseArgs(new String[]{"-deleteafter", "true"}));
         assertTrue(deleteFailure.getMessage().contains("-runtimecleanup"));
+
+        final IllegalArgumentException commandFailure = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(new String[]{"-sbkcommand", "custom-bin/custom-sbk"}));
+        assertTrue(commandFailure.getMessage().contains(GemConfig.SBK_COMMAND));
+        assertFalse(parameters.getHelpText().contains("-sbkcommand"));
     }
 
     @Test
@@ -201,7 +189,6 @@ final class SbkGemJavaOptionsTest {
         config.hostkeycheck = true;
         config.knownhosts = "";
         config.sbkdir = sbkDirectory.toString();
-        config.sbkcommand = "bin/sbk";
         config.javacopy = true;
         config.javaversion = 25;
         config.javadir = "";

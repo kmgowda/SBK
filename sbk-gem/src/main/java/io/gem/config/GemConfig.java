@@ -42,6 +42,8 @@ final public class GemConfig {
      * <code>String BIN_DIR = "bin"</code>.
      */
     final public static String BIN_DIR = "bin";
+    /** Standard SBK launcher relative to an installed distribution. */
+    final public static String SBK_COMMAND = BIN_DIR + "/sbk";
     /**
      * <code>String LOCAL_HOST = "localhost"</code>.
      */
@@ -92,10 +94,6 @@ final public class GemConfig {
      * Local SBK application directory.
      */
     public String sbkdir;
-    /**
-     * SBK launcher command relative to {@link #sbkdir}.
-     */
-    public String sbkcommand;
     /**
      * Expected SBK version, discovered from the local SBK distribution selected by {@link #sbkdir}.
      */
