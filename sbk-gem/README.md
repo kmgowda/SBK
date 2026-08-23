@@ -203,22 +203,33 @@ content without copying it again. Local archives are cached under
 `~/.sbk/cache/sbk-gem` by default; `runtimeCacheDirectory` in
 `gem.properties` changes that location. A per-identity file lock serializes
 cache writers across GEM processes, and a separately published SHA-256 sidecar
-causes incomplete or corrupted cached archives to be rebuilt before use.
+causes incomplete or corrupted cached archives to be rebuilt before use. With
+`runtimecleanup=true`, the controller retains only the selected cached bundle;
+a non-current archive being transferred by another GEM process is protected by
+its cache lock and is removed after it becomes inactive.
 
 The deployment lifecycle is automatic: an exact verified SBK-plus-JDK identity
 is reused, while missing content is uploaded, verified, and activated without a
 separate copy switch. The current identity is retained after benchmarking.
 Remote PID leases protect runtimes used by concurrent GEM executions; therefore
-an older active identity may coexist temporarily and is removed after its final
-lease exits.
+an active non-current identity may coexist temporarily and is removed after its
+final lease exits. Cleanup compares immutable identities, not version numbers,
+so both lower and higher inactive SBK versions are removed.
 
 The deployment lifecycle options are:
 
 - `-delete true|false` permits replacement only when the exact content-addressed destination exists but fails validation; the default is `true`.
-- `-runtimecleanup true|false` removes inactive older SBK-GEM-managed runtime
-  identities after verified activation and lease release; the default is
+- `-runtimecleanup true|false` removes every inactive non-current remote
+  SBK-GEM-managed runtime identity and controller-side cached bundle after
+  verified activation and lease/transfer release, regardless of whether its
+  SBK version is lower or higher; the default is
   `true`. It never deletes the current identity, a live leased identity, an
   unmanaged directory, or an external JDK selected with `-javacopy false`.
+
+The rule applies to every deployment target in `-nodes`, including the
+controller host when it is selected as a node. It does not scan or delete
+arbitrary SBK/JDK installations outside the SBK-GEM-managed deployment parent;
+doing so would risk deleting user-owned software.
 
 The former `-copy` and `-deleteafter` options are rejected with migration
 guidance. This prevents disabling required provisioning or deleting the newly

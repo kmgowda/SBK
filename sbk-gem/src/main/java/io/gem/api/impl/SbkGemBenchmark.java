@@ -383,13 +383,21 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 params.getJavaVersion(), platform, cacheDirectory);
         Printer.log.info("SBK-GEM: Runtime bundle {} content SHA-256 {} archive SHA-256 {}",
                 bundle.archive().getFileName(), bundle.contentDigest(), bundle.archiveDigest());
-        return deployRuntimeBundle(bundle, absoluteConnectionDirs, externalJavaHomes, platform);
+        final RuntimeDeployment deployment = deployRuntimeBundle(bundle, absoluteConnectionDirs,
+                externalJavaHomes, platform);
+        if (params.isRuntimeCleanup()) {
+            final int removed = SbkRuntimeBundle.cleanupOtherCachedBundles(cacheDirectory,
+                    bundle.deploymentName());
+            Printer.log.info("SBK-GEM: Retained local runtime bundle {}; removed {} inactive non-current "
+                    + "cached bundle(s)", bundle.deploymentName(), removed);
+        }
+        return deployment;
     }
 
     @SuppressWarnings("unchecked")
     private RuntimeDeployment deployRuntimeBundle(SbkRuntimeBundle bundle, String[] absoluteConnectionDirs,
                                                   String[] externalJavaHomes, DeploymentPlatform platform)
-            throws ConnectException, InterruptedException, ExecutionException {
+            throws ConnectException, InterruptedException, ExecutionException, IOException {
         final String[] deploymentDirectories = new String[nodes.length];
         final String[] javaHomes = new String[nodes.length];
         final String[] sbkCommands = new String[nodes.length];
@@ -459,14 +467,14 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
         waitForDeployment(CompletableFuture.allOf(acquisitions), "runtime lease acquisition and cleanup");
         requireSuccessfulWithDiagnostics(acquisitions, selected, "Acquiring managed runtime leases");
-        Printer.log.info("SBK-GEM: Reserved runtime {} on {} node(s); inactive-version cleanup is {}",
+        Printer.log.info("SBK-GEM: Reserved runtime {} on {} node(s); inactive non-current runtime cleanup is {}",
                 bundle.deploymentName(), nodes.length, params.isRuntimeCleanup() ? "enabled" : "disabled");
     }
 
     @SuppressWarnings("unchecked")
     private void uploadAndActivateRuntime(SbkRuntimeBundle bundle, String[] deploymentDirectories,
                                           boolean[] copyTargets, DeploymentPlatform platform)
-            throws ConnectException, InterruptedException, ExecutionException {
+            throws ConnectException, InterruptedException, ExecutionException, IOException {
         final String transferId = Long.toUnsignedString(System.nanoTime());
         final String[] archivePaths = new String[nodes.length];
         final String[] stagingDirectories = new String[nodes.length];
@@ -488,18 +496,20 @@ final public class SbkGemBenchmark implements GemBenchmark {
         requireSuccessfulWithDiagnostics(prepareFutures, copyTargets,
                 "Preparing remote runtime deployment directories");
 
-        final CompletableFuture<?>[] uploads = new CompletableFuture[nodes.length];
-        consMap.reset();
-        for (int i = 0; i < nodes.length; i++) {
-            if (!copyTargets[i] || consMap.isVisited(nodes[i].connection)) {
-                uploads[i] = CompletableFuture.completedFuture(null);
-            } else {
-                consMap.visit(nodes[i].connection);
-                uploads[i] = nodes[i].copyFileAsync(bundle.archive().toString(), archivePaths[i],
-                        config.deploymentTimeoutSeconds);
+        try (SbkRuntimeBundle.ArchiveUse ignored = bundle.acquireArchiveUse()) {
+            final CompletableFuture<?>[] uploads = new CompletableFuture[nodes.length];
+            consMap.reset();
+            for (int i = 0; i < nodes.length; i++) {
+                if (!copyTargets[i] || consMap.isVisited(nodes[i].connection)) {
+                    uploads[i] = CompletableFuture.completedFuture(null);
+                } else {
+                    consMap.visit(nodes[i].connection);
+                    uploads[i] = nodes[i].copyFileAsync(bundle.archive().toString(), archivePaths[i],
+                            config.deploymentTimeoutSeconds);
+                }
             }
+            waitForDeployment(CompletableFuture.allOf(uploads), "runtime archive upload");
         }
-        waitForDeployment(CompletableFuture.allOf(uploads), "runtime archive upload");
 
         final CompletableFuture<SshResponse>[] activations = new CompletableFuture[nodes.length];
         consMap.reset();

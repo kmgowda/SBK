@@ -135,8 +135,9 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("javadir", true, "Remote Java home containing bin/java; default: " +
                 (StringUtils.isEmpty(config.javadir) ? "null" : config.javadir));
         addOption("delete", true, "Delete a mismatched remote SBK before copying; default: " + config.delete);
-        addOption("runtimecleanup", true, "Remove inactive older SBK-GEM-managed runtimes while retaining the "
-                + "current verified runtime; default: " + config.runtimecleanup);
+        addOption("runtimecleanup", true, "Remove every inactive non-current SBK-GEM-managed runtime and "
+                + "local cached bundle, regardless of version ordering, while retaining the current verified "
+                + "identity; default: " + config.runtimecleanup);
         addOption("localhost", true, "this local SBM host name, default: " + localHost);
         addOption("sbmport", true, "SBM port number; default: " + this.sbmPort);
         addOption("sbmsleepms", true, "SBM idle milliseconds to sleep; default: " + this.sbmIdleSleepMilliSeconds +
@@ -394,7 +395,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         }
         if (hasCommandLineOption(args, "deleteafter")) {
             throw new IllegalArgumentException("The '-deleteafter' option was removed: the current verified "
-                    + "runtime is retained and '-runtimecleanup' controls inactive older versions");
+                    + "runtime is retained and '-runtimecleanup' controls inactive non-current versions");
         }
     }
 

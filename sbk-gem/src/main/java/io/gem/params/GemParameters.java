@@ -114,7 +114,7 @@ public sealed interface GemParameters extends Parameters permits GemParameterOpt
     boolean isDelete();
 
     /**
-     * Check whether inactive older SBK-GEM-managed runtimes should be removed.
+     * Check whether every inactive non-current SBK-GEM-managed runtime and local cached bundle should be removed.
      *
      * @return true when managed runtime cleanup is enabled
      */

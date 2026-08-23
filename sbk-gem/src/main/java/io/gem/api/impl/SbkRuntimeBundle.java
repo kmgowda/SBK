@@ -10,6 +10,7 @@
 
 package io.gem.api.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.tar.TarConstants;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
@@ -69,6 +71,7 @@ final class SbkRuntimeBundle {
     private static final int BUNDLE_FORMAT_VERSION = 3;
     private static final String ARCHIVE_DIGEST_SUFFIX = ".sha256";
     private static final String CACHE_LOCK_SUFFIX = ".lock";
+    private static final String CACHE_MANAGEMENT_LOCK = ".sbk-runtime-cache-management.lock";
     private static final ConcurrentMap<Path, ReentrantLock> CACHE_LOCKS = new ConcurrentHashMap<>();
 
     private final Path archive;
@@ -77,15 +80,17 @@ final class SbkRuntimeBundle {
     private final String deploymentName;
     private final String sbkCommand;
     private final String javaHome;
+    private final Path cacheLockFile;
 
     private SbkRuntimeBundle(Path archive, String archiveDigest, String contentDigest,
-                             String deploymentName, String sbkCommand, String javaHome) {
+                             String deploymentName, String sbkCommand, String javaHome, Path cacheLockFile) {
         this.archive = archive;
         this.archiveDigest = archiveDigest;
         this.contentDigest = contentDigest;
         this.deploymentName = deploymentName;
         this.sbkCommand = sbkCommand;
         this.javaHome = javaHome;
+        this.cacheLockFile = cacheLockFile;
     }
 
     /**
@@ -126,22 +131,110 @@ final class SbkRuntimeBundle {
         final Path archive = cacheDirectory.resolve(deploymentName + ".tar.gz");
         final Path archiveDigestFile = cacheDirectory.resolve(deploymentName + ".tar.gz" + ARCHIVE_DIGEST_SUFFIX);
         final Path cacheLockFile = cacheDirectory.resolve(deploymentName + CACHE_LOCK_SUFFIX);
-        final ReentrantLock processLock = CACHE_LOCKS.computeIfAbsent(cacheLockFile, ignored -> new ReentrantLock());
-        processLock.lock();
-        try (FileChannel lockChannel = FileChannel.open(cacheLockFile, StandardOpenOption.CREATE,
-                StandardOpenOption.WRITE); FileLock ignored = lockChannel.lock()) {
-            String archiveDigest = cachedArchiveDigest(archive, archiveDigestFile);
-            if (archiveDigest == null) {
-                createArchive(archive, sbkVersion, javaVersion, platform, contentDigest, entries,
-                        normalizedJavaDirectory != null);
-                archiveDigest = sha256(archive);
-                writeAtomically(archiveDigestFile, archiveDigest + "\n");
+        final Path managementLockFile = cacheDirectory.resolve(CACHE_MANAGEMENT_LOCK);
+        final ReentrantLock managementLock = cacheLock(managementLockFile);
+        managementLock.lock();
+        try (FileChannel managementChannel = openLockChannel(managementLockFile);
+             FileLock ignoredManagement = managementChannel.lock()) {
+            final ReentrantLock processLock = cacheLock(cacheLockFile);
+            processLock.lock();
+            try (FileChannel lockChannel = openLockChannel(cacheLockFile);
+                 FileLock ignored = lockChannel.lock()) {
+                String archiveDigest = cachedArchiveDigest(archive, archiveDigestFile);
+                if (archiveDigest == null) {
+                    createArchive(archive, sbkVersion, javaVersion, platform, contentDigest, entries,
+                            normalizedJavaDirectory != null);
+                    archiveDigest = sha256(archive);
+                    writeAtomically(archiveDigestFile, archiveDigest + "\n");
+                }
+                return new SbkRuntimeBundle(archive, archiveDigest, contentDigest, deploymentName,
+                        SBK_DIRECTORY + "/" + normalizeRelativePath(relativeSbkCommand),
+                        normalizedJavaDirectory == null ? null : JAVA_DIRECTORY, cacheLockFile);
+            } finally {
+                processLock.unlock();
             }
-            return new SbkRuntimeBundle(archive, archiveDigest, contentDigest, deploymentName,
-                    SBK_DIRECTORY + "/" + normalizeRelativePath(relativeSbkCommand),
-                    normalizedJavaDirectory == null ? null : JAVA_DIRECTORY);
         } finally {
+            managementLock.unlock();
+        }
+    }
+
+    /**
+     * Prevent cleanup from deleting this archive while an asynchronous transfer uses it.
+     *
+     * @return archive-use lease
+     * @throws IOException when the cache lock cannot be acquired
+     */
+    @SuppressFBWarnings(value = "UL_UNRELEASED_LOCK",
+            justification = "Lock ownership is transferred to the returned AutoCloseable ArchiveUse")
+    ArchiveUse acquireArchiveUse() throws IOException {
+        final ReentrantLock processLock = cacheLock(cacheLockFile);
+        processLock.lock();
+        try {
+            final FileChannel channel = openLockChannel(cacheLockFile);
+            try {
+                return new ArchiveUse(processLock, channel, channel.lock());
+            } catch (IOException | RuntimeException exception) {
+                channel.close();
+                throw exception;
+            }
+        } catch (IOException | RuntimeException exception) {
             processLock.unlock();
+            throw exception;
+        }
+    }
+
+    /**
+     * Retain only the selected inactive local bundle cache identity.
+     *
+     * <p>An archive currently locked by another GEM deployment is retained and
+     * becomes eligible for removal after that deployment releases its lock.
+     * Lock metadata is intentionally retained so concurrent processes always
+     * coordinate through the same filesystem inode.</p>
+     *
+     * @param cacheDirectory local runtime bundle cache
+     * @param deploymentName selected deployment identity
+     * @return number of inactive cached bundle identities removed
+     * @throws IOException when the cache cannot be inspected
+     */
+    static int cleanupOtherCachedBundles(Path cacheDirectory, String deploymentName) throws IOException {
+        validateIdentifier(deploymentName);
+        Files.createDirectories(cacheDirectory);
+        final Path managementLockFile = cacheDirectory.resolve(CACHE_MANAGEMENT_LOCK);
+        final ReentrantLock managementLock = cacheLock(managementLockFile);
+        managementLock.lock();
+        try (FileChannel managementChannel = openLockChannel(managementLockFile);
+             FileLock ignoredManagement = managementChannel.lock();
+             Stream<Path> paths = Files.list(cacheDirectory)) {
+            int removed = 0;
+            for (Path archive : paths.filter(SbkRuntimeBundle::isBundleArchive).toList()) {
+                final String archiveName = fileName(archive);
+                final String candidateName = archiveName.substring(0,
+                        archiveName.length() - ".tar.gz".length());
+                if (candidateName.equals(deploymentName)) {
+                    continue;
+                }
+                final Path candidateLockFile = cacheDirectory.resolve(candidateName + CACHE_LOCK_SUFFIX);
+                final ReentrantLock candidateLock = cacheLock(candidateLockFile);
+                if (!candidateLock.tryLock()) {
+                    continue;
+                }
+                try (FileChannel candidateChannel = openLockChannel(candidateLockFile)) {
+                    final FileLock fileLock = tryFileLock(candidateChannel);
+                    if (fileLock == null) {
+                        continue;
+                    }
+                    try (fileLock) {
+                        Files.deleteIfExists(archive);
+                        Files.deleteIfExists(cacheDirectory.resolve(archiveName + ARCHIVE_DIGEST_SUFFIX));
+                        removed++;
+                    }
+                } finally {
+                    candidateLock.unlock();
+                }
+            }
+            return removed;
+        } finally {
+            managementLock.unlock();
         }
     }
 
@@ -167,6 +260,34 @@ final class SbkRuntimeBundle {
 
     String javaHome() {
         return javaHome;
+    }
+
+    private static ReentrantLock cacheLock(Path path) {
+        return CACHE_LOCKS.computeIfAbsent(path.toAbsolutePath().normalize(), ignored -> new ReentrantLock());
+    }
+
+    private static FileChannel openLockChannel(Path path) throws IOException {
+        return FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+    }
+
+    private static FileLock tryFileLock(FileChannel channel) throws IOException {
+        try {
+            return channel.tryLock();
+        } catch (OverlappingFileLockException ignored) {
+            return null;
+        }
+    }
+
+    private static boolean isBundleArchive(Path path) {
+        final String name = fileName(path);
+        return Files.isRegularFile(path) && name.startsWith("sbk-runtime-") && name.endsWith(".tar.gz");
+    }
+
+    private static void validateIdentifier(String value) {
+        if (value == null || !value.startsWith("sbk-runtime-") || value.indexOf('/') >= 0
+                || value.indexOf('\\') >= 0) {
+            throw new IllegalArgumentException("Invalid SBK runtime deployment name: " + value);
+        }
     }
 
     private static void validateSbkDistribution(Path directory, String relativeCommand) throws IOException {
@@ -447,5 +568,31 @@ final class SbkRuntimeBundle {
 
     private record BundleEntry(Path source, String relativePath, EntryType type, long size,
                                String digest, String linkTarget, int mode) {
+    }
+
+    /** Holds the cache lock while the archive is consumed by an asynchronous transfer. */
+    static final class ArchiveUse implements AutoCloseable {
+        private final ReentrantLock processLock;
+        private final FileChannel channel;
+        private final FileLock fileLock;
+
+        private ArchiveUse(ReentrantLock processLock, FileChannel channel, FileLock fileLock) {
+            this.processLock = processLock;
+            this.channel = channel;
+            this.fileLock = fileLock;
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                fileLock.close();
+            } finally {
+                try {
+                    channel.close();
+                } finally {
+                    processLock.unlock();
+                }
+            }
+        }
     }
 }

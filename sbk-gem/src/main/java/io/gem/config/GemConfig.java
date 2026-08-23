@@ -116,7 +116,7 @@ final public class GemConfig {
      * Whether to delete an existing mismatched SBK installation before copying.
      */
     public boolean delete;
-    /** Whether inactive SBK-GEM-managed runtime versions are removed automatically. */
+    /** Whether inactive non-current managed runtimes and local cached bundles are removed automatically. */
     public boolean runtimecleanup;
 
 
@@ -194,7 +194,8 @@ final public class GemConfig {
                 || runtimeCacheDirectory == null || runtimeCacheDirectory.isBlank() || executorThreadReserve < 1
                 || runtimeManagementLockTimeoutSeconds < 1 || runtimeManagementLockStaleSeconds < 1
                 || runtimeManagementLockStaleSeconds <= deploymentTimeoutSeconds
-                || runtimeLeaseReservationSeconds < 1
+                || runtimeLeaseReservationSeconds
+                <= runtimeManagementLockTimeoutSeconds + remoteTimeoutSeconds
                 || diagnosticBytes < 1 || maximumAgentResponseBytes < 1
                 || maximumDiagnosticCharacters < 1 || diagnosticPrefixCharacters < 1
                 || maximumDiagnosticCharacters - diagnosticPrefixCharacters

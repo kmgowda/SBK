@@ -30,6 +30,7 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -81,6 +82,47 @@ final class SbkRuntimeBundleTest {
 
         assertNotEquals(first.contentDigest(), changed.contentDigest());
         assertNotEquals(first.deploymentName(), changed.deploymentName());
+    }
+
+    @Test
+    void cleanupRetainsCurrentAndRemovesLowerAndHigherCachedVersions() throws IOException {
+        final Path sbk = createSbkDistribution();
+        final Path java = createJavaHome();
+        final Path cache = temporaryDirectory.resolve("cache");
+        final DeploymentPlatform platform = new DeploymentPlatform("linux", "amd64");
+        final SbkRuntimeBundle lower = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.5", 25,
+                platform, cache);
+        final SbkRuntimeBundle current = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.6", 25,
+                platform, cache);
+        final SbkRuntimeBundle higher = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.7", 25,
+                platform, cache);
+
+        assertEquals(2, SbkRuntimeBundle.cleanupOtherCachedBundles(cache, current.deploymentName()));
+
+        assertFalse(Files.exists(lower.archive()));
+        assertTrue(Files.exists(current.archive()));
+        assertFalse(Files.exists(higher.archive()));
+    }
+
+    @Test
+    void cleanupRetainsCachedBundleWhileAnotherDeploymentUsesItsArchive() throws IOException {
+        final Path sbk = createSbkDistribution();
+        final Path java = createJavaHome();
+        final Path cache = temporaryDirectory.resolve("cache");
+        final DeploymentPlatform platform = new DeploymentPlatform("linux", "amd64");
+        final SbkRuntimeBundle active = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.5", 25,
+                platform, cache);
+        final SbkRuntimeBundle current = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.6", 25,
+                platform, cache);
+
+        try (SbkRuntimeBundle.ArchiveUse ignored = active.acquireArchiveUse()) {
+            assertEquals(0, SbkRuntimeBundle.cleanupOtherCachedBundles(cache, current.deploymentName()));
+            assertTrue(Files.exists(active.archive()));
+        }
+
+        assertEquals(1, SbkRuntimeBundle.cleanupOtherCachedBundles(cache, current.deploymentName()));
+        assertFalse(Files.exists(active.archive()));
+        assertTrue(Files.exists(current.archive()));
     }
 
     @Test

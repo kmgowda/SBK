@@ -30,6 +30,19 @@ public final class GemConfigTest {
         assertDoesNotThrow(config::validate);
     }
 
+    /** Ensures an unlaunched reservation spans the bounded lock and SSH control intervals. */
+    @Test
+    public void validatesRuntimeLeaseReservationWindow() {
+        final GemConfig config = validConfig();
+        config.runtimeLeaseReservationSeconds = config.runtimeManagementLockTimeoutSeconds
+                + config.remoteTimeoutSeconds;
+
+        assertThrows(IllegalArgumentException.class, config::validate);
+
+        config.runtimeLeaseReservationSeconds++;
+        assertDoesNotThrow(config::validate);
+    }
+
     private static GemConfig validConfig() {
         final GemConfig config = new GemConfig();
         config.remoteTimeoutSeconds = 1;
@@ -37,7 +50,7 @@ public final class GemConfigTest {
         config.runtimeCacheDirectory = ".sbk/cache/sbk-gem";
         config.runtimeManagementLockTimeoutSeconds = 1;
         config.runtimeManagementLockStaleSeconds = 2;
-        config.runtimeLeaseReservationSeconds = 1;
+        config.runtimeLeaseReservationSeconds = 3;
         config.executorThreadReserve = 1;
         config.diagnosticBytes = 1;
         config.maximumAgentResponseBytes = 1;

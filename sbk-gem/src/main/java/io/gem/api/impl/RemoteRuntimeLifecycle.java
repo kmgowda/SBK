@@ -38,13 +38,13 @@ final class RemoteRuntimeLifecycle {
     }
 
     /**
-     * Reserve an exact verified runtime and optionally remove inactive older managed runtimes.
+     * Reserve an exact verified runtime and optionally remove every inactive non-current managed runtime.
      *
      * @param parentDirectory managed-runtime parent directory
      * @param deploymentName immutable runtime directory name
      * @param contentDigest expected content digest
      * @param leaseId unique benchmark-command lease identifier
-     * @param cleanupEnabled whether inactive older runtimes should be removed
+     * @param cleanupEnabled whether inactive non-current runtimes should be removed
      * @param lockTimeoutSeconds maximum lock wait
      * @param lockStaleSeconds abandoned-lock reclaim age
      * @param reservationSeconds unlaunched reservation reclaim age
@@ -78,7 +78,7 @@ final class RemoteRuntimeLifecycle {
      * @param parentDirectory managed-runtime parent directory
      * @param deploymentName immutable runtime directory name
      * @param leaseId unique benchmark-command lease identifier
-     * @param cleanupEnabled whether inactive older runtimes should be removed
+     * @param cleanupEnabled whether inactive non-current runtimes should be removed
      * @param lockTimeoutSeconds maximum lock wait
      * @param lockStaleSeconds abandoned-lock reclaim age
      * @param reservationSeconds unlaunched reservation reclaim age
@@ -155,6 +155,7 @@ final class RemoteRuntimeLifecycle {
                 + "test -f \"$candidate/" + SbkRuntimeBundle.DESCRIPTOR_FILE + "\" || continue; "
                 + "test -f \"$candidate/" + SbkRuntimeBundle.REMOTE_DIGEST_FILE + "\" || continue; "
                 + "candidate_leases=\"$parent/" + LEASE_DIRECTORY + "/$candidate_name\"; active=0; "
+                + "if test -d \"$candidate_leases\"; then "
                 + "for lease_entry in \"$candidate_leases\"/*; do test -f \"$lease_entry\" || continue; "
                 + "lease_value=$(cat \"$lease_entry\" 2>/dev/null || true); "
                 + "case \"$lease_value\" in pid:*) lease_pid=${lease_value#pid:}; "
@@ -165,7 +166,7 @@ final class RemoteRuntimeLifecycle {
                 + "case \"$reserved\" in ''|*[!0-9]*) rm -f \"$lease_entry\" ;; "
                 + "*) if test $((now-reserved)) -le " + reservationSeconds
                 + "; then active=1; else rm -f \"$lease_entry\"; fi ;; esac ;; "
-                + "*) rm -f \"$lease_entry\" ;; esac; done; "
+                + "*) rm -f \"$lease_entry\" ;; esac; done; fi; "
                 + "if test \"$active\" -eq 0; then rm -rf \"$candidate\" \"$candidate_leases\"; fi; done; ";
     }
 
