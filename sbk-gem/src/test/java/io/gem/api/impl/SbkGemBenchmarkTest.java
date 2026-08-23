@@ -42,7 +42,7 @@ final class SbkGemBenchmarkTest {
         final String[] hosts = {"node-a:22", "node-b:2202", null};
 
         assertEquals("1 of 2 transfer(s) finished; awaiting host(s): node-b:2202",
-                SbkGemBenchmark.transferProgress(uploads, hosts));
+                SbkGemBenchmark.futureProgress(uploads, hosts, "transfer(s)"));
     }
 
     @Test

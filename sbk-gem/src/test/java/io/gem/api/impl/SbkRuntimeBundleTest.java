@@ -88,6 +88,33 @@ final class SbkRuntimeBundleTest {
     }
 
     @Test
+    void localhostManagedRuntimeStateDoesNotContaminateBundleIdentity() throws IOException {
+        final Path sbk = createSbkDistribution();
+        final Path java = createJavaHome();
+        final Path cache = temporaryDirectory.resolve("cache");
+        final DeploymentPlatform platform = new DeploymentPlatform("macos");
+        final SbkRuntimeBundle clean = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.6", 25,
+                platform, cache);
+
+        final Path nestedRuntime = Files.createDirectories(sbk.resolve(
+                "sbk-runtime-10.5-macos-inactive/sbk/lib"));
+        Files.writeString(nestedRuntime.resolve("nested-runtime.jar"), "must not be bundled",
+                StandardCharsets.UTF_8);
+        Files.writeString(sbk.resolve(".sbk-runtime-current"), clean.deploymentName(), StandardCharsets.UTF_8);
+        Files.createDirectories(sbk.resolve(".sbk-runtime-leases").resolve(clean.deploymentName()));
+        Files.createDirectories(sbk.resolve(".sbk-runtime-management.lock"));
+        Files.writeString(sbk.resolve("sbk-runtime-transfer.tar.gz"), "partial", StandardCharsets.UTF_8);
+
+        final SbkRuntimeBundle withManagedState = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.6", 25,
+                platform, cache);
+
+        assertEquals(clean.contentDigest(), withManagedState.contentDigest());
+        assertEquals(clean.archive(), withManagedState.archive());
+        assertFalse(archiveEntries(withManagedState.archive()).stream()
+                .anyMatch(name -> name.contains("sbk-runtime-") || name.contains(".sbk-runtime-")));
+    }
+
+    @Test
     void cleanupRetainsCurrentAndRemovesLowerAndHigherCachedVersions() throws IOException {
         final Path sbk = createSbkDistribution();
         final Path java = createJavaHome();

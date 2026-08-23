@@ -24,6 +24,21 @@ final class RemoteRuntimeLifecycle {
     }
 
     /**
+     * Identify controller-side entries created by managed runtime deployment.
+     *
+     * <p>These names are reserved at the deployment-parent root and must never
+     * become input to a runtime bundle when localhost uses the SBK distribution
+     * itself as that parent.</p>
+     *
+     * @param name top-level entry name
+     * @return true for managed runtime directories, transfer artifacts, leases, markers, and locks
+     */
+    static boolean isManagedArtifact(String name) {
+        return name.startsWith(RUNTIME_PREFIX) || name.equals(CURRENT_FILE)
+                || name.equals(LEASE_DIRECTORY) || name.startsWith(LOCK_DIRECTORY);
+    }
+
+    /**
      * Return the lease file reserved for one remote benchmark command.
      *
      * @param parentDirectory managed-runtime parent directory

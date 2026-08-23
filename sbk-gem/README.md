@@ -213,9 +213,16 @@ Creating a new bundle hashes the complete SBK distribution and optional JDK,
 then writes a compressed archive. During this potentially long disk-intensive
 step, GEM emits an elapsed-time heartbeat every 5 seconds by default. Runtime
 archive copies report the archive size, unique transfer-target count, completed
-targets, and hosts still pending. Configure the shared bounded update interval
-with `runtimeProgressIntervalSeconds` in `gem.properties`; cached bundles and
-fast local-network copies normally complete without a heartbeat.
+targets, and hosts still pending. Runtime lease acquisition and inactive-runtime
+cleanup use the same per-host progress reporting. Configure the shared bounded
+update interval with `runtimeProgressIntervalSeconds` in `gem.properties`;
+cached bundles and fast local-network copies normally complete without a heartbeat.
+
+When the controller is also a selected SSH host, its deployment parent may be
+the local SBK distribution directory. GEM reserves `sbk-runtime-*` and
+`.sbk-runtime-*` top-level names for deployment state and excludes those trees
+from bundle input. This prevents old managed SBK+JDK trees, leases, locks, and
+transfer staging files from changing or recursively expanding the next bundle.
 
 The deployment lifecycle is automatic: an exact verified SBK-plus-JDK identity
 is reused, while missing content is uploaded, verified, and activated without a

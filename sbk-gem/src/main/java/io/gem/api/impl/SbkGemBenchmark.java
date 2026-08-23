@@ -495,8 +495,10 @@ final public class SbkGemBenchmark implements GemBenchmark {
             throws InterruptedException, ExecutionException {
         final CompletableFuture<SshResponse>[] acquisitions = new CompletableFuture[nodes.length];
         final boolean[] selected = new boolean[nodes.length];
+        final String[] targetHosts = new String[nodes.length];
         java.util.Arrays.fill(selected, true);
         for (int i = 0; i < nodes.length; i++) {
+            targetHosts[i] = nodes[i].connection.getHost() + ":" + nodes[i].connection.getPort();
             try {
                 acquisitions[i] = nodes[i].runCommandAsync(RemoteRuntimeLifecycle.acquireCommand(
                         parentDirectories[i], deploymentNames[i], bundle.contentDigest(), leaseIds[i],
@@ -507,10 +509,20 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 acquisitions[i] = CompletableFuture.failedFuture(exception);
             }
         }
-        waitForDeployment(CompletableFuture.allOf(acquisitions), "runtime lease acquisition and cleanup");
+        Printer.log.info("SBK-GEM: Reserving managed runtime {} on {} host(s); inactive runtime cleanup is {}; "
+                        + "progress every {} second(s)", bundle.deploymentName(), nodes.length,
+                params.isRuntimeCleanup() ? "enabled" : "disabled", config.runtimeProgressIntervalSeconds);
+        final long acquisitionSeconds;
+        try (LifecycleProgress progress = new LifecycleProgress("Runtime lease acquisition and cleanup",
+                config.runtimeProgressIntervalSeconds,
+                () -> futureProgress(acquisitions, targetHosts, "host operation(s)"))) {
+            waitForDeployment(CompletableFuture.allOf(acquisitions), "runtime lease acquisition and cleanup");
+            acquisitionSeconds = progress.elapsedSeconds();
+        }
         requireSuccessfulWithDiagnostics(acquisitions, selected, "Acquiring managed runtime leases");
-        Printer.log.info("SBK-GEM: Reserved runtime {} on {} node(s); inactive non-current runtime cleanup is {}",
-                bundle.deploymentName(), nodes.length, params.isRuntimeCleanup() ? "enabled" : "disabled");
+        Printer.log.info("SBK-GEM: Reserved runtime {} on {} host(s) in {} second(s); inactive non-current "
+                        + "runtime cleanup is {}", bundle.deploymentName(), nodes.length, acquisitionSeconds,
+                params.isRuntimeCleanup() ? "enabled" : "disabled");
     }
 
     @SuppressWarnings("unchecked")
@@ -560,7 +572,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
                     archiveBytes, transferCount, config.runtimeProgressIntervalSeconds);
             final long transferSeconds;
             try (LifecycleProgress progress = new LifecycleProgress("Immutable runtime archive copy",
-                    config.runtimeProgressIntervalSeconds, () -> transferProgress(uploads, transferHosts))) {
+                    config.runtimeProgressIntervalSeconds,
+                    () -> futureProgress(uploads, transferHosts, "transfer(s)"))) {
                 waitForDeployment(CompletableFuture.allOf(uploads), "runtime archive upload");
                 transferSeconds = progress.elapsedSeconds();
             }
@@ -586,21 +599,21 @@ final public class SbkGemBenchmark implements GemBenchmark {
         Printer.log.info("SBK-GEM: Immutable runtime archive verified and atomically activated");
     }
 
-    static String transferProgress(CompletableFuture<?>[] uploads, String[] transferHosts) {
+    static String futureProgress(CompletableFuture<?>[] futures, String[] targetHosts, String operationLabel) {
         int finished = 0;
         int total = 0;
         final List<String> pendingHosts = new ArrayList<>();
-        for (int i = 0; i < transferHosts.length; i++) {
-            if (transferHosts[i] != null) {
+        for (int i = 0; i < targetHosts.length; i++) {
+            if (targetHosts[i] != null) {
                 total++;
-                if (uploads[i].isDone()) {
+                if (futures[i].isDone()) {
                     finished++;
                 } else {
-                    pendingHosts.add(transferHosts[i]);
+                    pendingHosts.add(targetHosts[i]);
                 }
             }
         }
-        return finished + " of " + total + " transfer(s) finished; awaiting host(s): "
+        return finished + " of " + total + " " + operationLabel + " finished; awaiting host(s): "
                 + String.join(", ", pendingHosts);
     }
 

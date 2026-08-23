@@ -56,6 +56,25 @@ final class RemoteRuntimeLifecycleTest {
     }
 
     @Test
+    void acquisitionAndCleanupCompleteWithAvailableShells() throws Exception {
+        for (String shell : availableShells()) {
+            final String shellName = shell.substring(shell.lastIndexOf('/') + 1);
+            final Path parent = temporaryDirectory.resolve(shellName);
+            final String current = "sbk-runtime-10.6-macos-current";
+            final String inactive = "sbk-runtime-10.5-macos-inactive";
+            createRuntime(parent, current, DIGEST);
+            createRuntime(parent, inactive, "inactive-digest");
+
+            run(shell, RemoteRuntimeLifecycle.acquireCommand(parent.toString(), current, DIGEST,
+                    shellName + "-acquire", true, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS,
+                    TEST_RESERVATION_SECONDS));
+
+            assertTrue(Files.isDirectory(parent.resolve(current)), shell + " current runtime");
+            assertFalse(Files.exists(parent.resolve(inactive)), shell + " inactive runtime cleanup");
+        }
+    }
+
+    @Test
     void acquisitionPreservesANonCurrentRuntimeWithALiveProcessLease() throws Exception {
         final String current = "sbk-runtime-10.6-linux-amd64-current";
         final String active = "sbk-runtime-10.7-linux-amd64-active";
@@ -139,7 +158,11 @@ final class RemoteRuntimeLifecycleTest {
     }
 
     private void createRuntime(String name, String digest) throws IOException {
-        final Path runtime = temporaryDirectory.resolve(name);
+        createRuntime(temporaryDirectory, name, digest);
+    }
+
+    private static void createRuntime(Path parent, String name, String digest) throws IOException {
+        final Path runtime = parent.resolve(name);
         Files.createDirectories(runtime);
         Files.writeString(runtime.resolve(SbkRuntimeBundle.DESCRIPTOR_FILE),
                 "content.sha256=" + digest + "\n", StandardCharsets.UTF_8);
@@ -221,8 +244,13 @@ final class RemoteRuntimeLifecycleTest {
     }
 
     private static void run(String command) throws Exception {
-        final Process process = new ProcessBuilder("sh", "-c", command).redirectErrorStream(true).start();
+        run("sh", command);
+    }
+
+    private static void run(String shell, String command) throws Exception {
+        final Process process = new ProcessBuilder(shell, "-c", command).redirectErrorStream(true).start();
         final String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        assertEquals(0, process.waitFor(), output);
+        assertTrue(process.waitFor(TEST_TIMEOUT_SECONDS, TimeUnit.SECONDS), shell + " command did not exit");
+        assertEquals(0, process.exitValue(), output);
     }
 }

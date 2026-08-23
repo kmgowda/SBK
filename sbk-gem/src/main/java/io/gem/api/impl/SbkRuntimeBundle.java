@@ -118,9 +118,9 @@ final class SbkRuntimeBundle {
         }
 
         final List<BundleEntry> entries = new ArrayList<>();
-        collectEntries(normalizedSbkDirectory, SBK_DIRECTORY, entries);
+        collectEntries(normalizedSbkDirectory, SBK_DIRECTORY, entries, true);
         if (normalizedJavaDirectory != null) {
-            collectEntries(normalizedJavaDirectory, JAVA_DIRECTORY, entries);
+            collectEntries(normalizedJavaDirectory, JAVA_DIRECTORY, entries, false);
         }
         entries.sort(Comparator.comparing(BundleEntry::relativePath));
 
@@ -347,30 +347,42 @@ final class SbkRuntimeBundle {
         return resolved;
     }
 
-    private static void collectEntries(Path sourceRoot, String archiveRoot, List<BundleEntry> entries)
-            throws IOException {
+    private static void collectEntries(Path sourceRoot, String archiveRoot, List<BundleEntry> entries,
+                                       boolean excludeManagedArtifacts) throws IOException {
         final Path realSourceRoot = sourceRoot.toRealPath();
-        try (Stream<Path> paths = Files.walk(sourceRoot)) {
-            for (Path path : paths.toList()) {
-                final Path relative = sourceRoot.relativize(path);
-                final String archivePath = relative.getNameCount() == 0 ? archiveRoot
-                        : archiveRoot + "/" + normalizeRelativePath(relative.toString());
-                if (Files.isSymbolicLink(path)) {
-                    final Path symbolicTarget = Files.readSymbolicLink(path);
-                    validateContainedSymbolicLink(sourceRoot, realSourceRoot, path, symbolicTarget);
-                    final String linkTarget = symbolicTarget.toString();
-                    entries.add(new BundleEntry(path, archivePath, EntryType.SYMBOLIC_LINK, 0,
-                            sha256(linkTarget.getBytes(StandardCharsets.UTF_8)), linkTarget, SYMBOLIC_LINK_MODE));
-                } else if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
-                    entries.add(new BundleEntry(path, archivePath, EntryType.DIRECTORY, 0, "", "",
-                            DIRECTORY_MODE));
-                } else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
-                    entries.add(new BundleEntry(path, archivePath, EntryType.REGULAR_FILE, Files.size(path),
-                            sha256(path), "", Files.isExecutable(path) ? EXECUTABLE_FILE_MODE : REGULAR_FILE_MODE));
-                } else {
-                    throw new IOException("Unsupported runtime bundle filesystem entry: " + path);
+        addEntry(sourceRoot, sourceRoot, realSourceRoot, archiveRoot, entries);
+        try (Stream<Path> children = Files.list(sourceRoot)) {
+            for (Path child : children.toList()) {
+                if (excludeManagedArtifacts && RemoteRuntimeLifecycle.isManagedArtifact(fileName(child))) {
+                    continue;
+                }
+                try (Stream<Path> paths = Files.walk(child)) {
+                    for (Path path : paths.toList()) {
+                        addEntry(sourceRoot, path, realSourceRoot, archiveRoot, entries);
+                    }
                 }
             }
+        }
+    }
+
+    private static void addEntry(Path sourceRoot, Path path, Path realSourceRoot, String archiveRoot,
+                                 List<BundleEntry> entries) throws IOException {
+        final Path relative = sourceRoot.relativize(path);
+        final String archivePath = relative.getNameCount() == 0 ? archiveRoot
+                : archiveRoot + "/" + normalizeRelativePath(relative.toString());
+        if (Files.isSymbolicLink(path)) {
+            final Path symbolicTarget = Files.readSymbolicLink(path);
+            validateContainedSymbolicLink(sourceRoot, realSourceRoot, path, symbolicTarget);
+            final String linkTarget = symbolicTarget.toString();
+            entries.add(new BundleEntry(path, archivePath, EntryType.SYMBOLIC_LINK, 0,
+                    sha256(linkTarget.getBytes(StandardCharsets.UTF_8)), linkTarget, SYMBOLIC_LINK_MODE));
+        } else if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
+            entries.add(new BundleEntry(path, archivePath, EntryType.DIRECTORY, 0, "", "", DIRECTORY_MODE));
+        } else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
+            entries.add(new BundleEntry(path, archivePath, EntryType.REGULAR_FILE, Files.size(path),
+                    sha256(path), "", Files.isExecutable(path) ? EXECUTABLE_FILE_MODE : REGULAR_FILE_MODE));
+        } else {
+            throw new IOException("Unsupported runtime bundle filesystem entry: " + path);
         }
     }
 
