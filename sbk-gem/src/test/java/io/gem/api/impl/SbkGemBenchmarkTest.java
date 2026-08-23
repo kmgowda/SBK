@@ -22,6 +22,7 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,6 +35,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Tests distributed result classification independent of SSH transport.
  */
 final class SbkGemBenchmarkTest {
+    @Test
+    void reportsFinishedAndPendingRuntimeTransfers() {
+        final CompletableFuture<?>[] uploads = {CompletableFuture.completedFuture(null),
+                new CompletableFuture<>(), CompletableFuture.completedFuture(null)};
+        final String[] hosts = {"node-a:22", "node-b:2202", null};
+
+        assertEquals("1 of 2 transfer(s) finished; awaiting host(s): node-b:2202",
+                SbkGemBenchmark.transferProgress(uploads, hosts));
+    }
+
     @Test
     void acceptsOnlyWhenEveryRemoteSbkSucceeds() {
         final RemoteResponse[] results = {new RemoteResponse(0, "", "", "node-a"),

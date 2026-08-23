@@ -43,10 +43,23 @@ public final class GemConfigTest {
         assertDoesNotThrow(config::validate);
     }
 
+    /** Ensures runtime bundle progress reporting cannot be disabled accidentally. */
+    @Test
+    public void validatesRuntimeProgressInterval() {
+        final GemConfig config = validConfig();
+        config.runtimeProgressIntervalSeconds = 0;
+
+        assertThrows(IllegalArgumentException.class, config::validate);
+
+        config.runtimeProgressIntervalSeconds = 1;
+        assertDoesNotThrow(config::validate);
+    }
+
     private static GemConfig validConfig() {
         final GemConfig config = new GemConfig();
         config.remoteTimeoutSeconds = 1;
         config.deploymentTimeoutSeconds = 1;
+        config.runtimeProgressIntervalSeconds = 1;
         config.runtimeCacheDirectory = ".sbk/cache/sbk-gem";
         config.runtimeManagementLockTimeoutSeconds = 1;
         config.runtimeManagementLockStaleSeconds = 2;

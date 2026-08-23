@@ -47,8 +47,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 
 /**
  * Coordinates remote SBK execution and local SBM lifecycle.
@@ -377,12 +379,21 @@ final public class SbkGemBenchmark implements GemBenchmark {
         final Path configuredCache = Paths.get(config.runtimeCacheDirectory);
         final Path cacheDirectory = configuredCache.isAbsolute() ? configuredCache
                 : Paths.get(System.getProperty("user.home")).resolve(configuredCache);
-        Printer.log.info("SBK-GEM: Preparing immutable runtime bundle for {}", platform.id());
-        final SbkRuntimeBundle bundle = SbkRuntimeBundle.create(Paths.get(params.getSbkDir()),
-                GemConfig.SBK_COMMAND, params.isJavaCopy() ? localJavaHome : null, config.sbkVersion,
-                params.getJavaVersion(), platform, cacheDirectory);
-        Printer.log.info("SBK-GEM: Runtime bundle {} content SHA-256 {} archive SHA-256 {}",
-                bundle.archive().getFileName(), bundle.contentDigest(), bundle.archiveDigest());
+        Printer.log.info("SBK-GEM: Preparing immutable runtime bundle for {}; progress every {} second(s)",
+                platform.id(), config.runtimeProgressIntervalSeconds);
+        final SbkRuntimeBundle bundle;
+        final long bundlePreparationSeconds;
+        try (LifecycleProgress progress = new LifecycleProgress("Immutable runtime bundle preparation for "
+                + platform.id(), config.runtimeProgressIntervalSeconds,
+                () -> "validating, hashing, or compressing SBK/JDK files")) {
+            bundle = SbkRuntimeBundle.create(Paths.get(params.getSbkDir()), GemConfig.SBK_COMMAND,
+                    params.isJavaCopy() ? localJavaHome : null, config.sbkVersion, params.getJavaVersion(),
+                    platform, cacheDirectory);
+            bundlePreparationSeconds = progress.elapsedSeconds();
+        }
+        Printer.log.info("SBK-GEM: Runtime bundle {} prepared in {} second(s); content SHA-256 {}; "
+                        + "archive SHA-256 {}", bundle.archive().getFileName(), bundlePreparationSeconds,
+                bundle.contentDigest(), bundle.archiveDigest());
         final RuntimeDeployment deployment = deployRuntimeBundle(bundle, absoluteConnectionDirs,
                 externalJavaHomes, platform);
         if (params.isRuntimeCleanup()) {
@@ -392,6 +403,37 @@ final public class SbkGemBenchmark implements GemBenchmark {
                     + "cached bundle(s)", bundle.deploymentName(), removed);
         }
         return deployment;
+    }
+
+    /** Emits bounded lifecycle progress without logging every file or network buffer. */
+    private static final class LifecycleProgress implements AutoCloseable {
+        private final String operation;
+        private final Supplier<String> detail;
+        private final long startedNanos;
+        private final ScheduledExecutorService scheduler;
+
+        private LifecycleProgress(String operation, int intervalSeconds, Supplier<String> detail) {
+            this.operation = operation;
+            this.detail = detail;
+            this.startedNanos = System.nanoTime();
+            this.scheduler = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
+                    .name("sbk-gem-runtime-progress").daemon(true).factory());
+            scheduler.scheduleWithFixedDelay(this::logProgress, intervalSeconds, intervalSeconds, TimeUnit.SECONDS);
+        }
+
+        private void logProgress() {
+            Printer.log.info("SBK-GEM: {} is still running; elapsed {} second(s); {}",
+                    operation, elapsedSeconds(), detail.get());
+        }
+
+        private long elapsedSeconds() {
+            return TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startedNanos);
+        }
+
+        @Override
+        public void close() {
+            scheduler.shutdownNow();
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -498,17 +540,32 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
         try (SbkRuntimeBundle.ArchiveUse ignored = bundle.acquireArchiveUse()) {
             final CompletableFuture<?>[] uploads = new CompletableFuture[nodes.length];
+            final String[] transferHosts = new String[nodes.length];
+            int transferCount = 0;
             consMap.reset();
             for (int i = 0; i < nodes.length; i++) {
                 if (!copyTargets[i] || consMap.isVisited(nodes[i].connection)) {
                     uploads[i] = CompletableFuture.completedFuture(null);
                 } else {
                     consMap.visit(nodes[i].connection);
+                    transferHosts[i] = nodes[i].connection.getHost() + ":" + nodes[i].connection.getPort();
+                    transferCount++;
                     uploads[i] = nodes[i].copyFileAsync(bundle.archive().toString(), archivePaths[i],
                             config.deploymentTimeoutSeconds);
                 }
             }
-            waitForDeployment(CompletableFuture.allOf(uploads), "runtime archive upload");
+            final long archiveBytes = java.nio.file.Files.size(bundle.archive());
+            Printer.log.info("SBK-GEM: Copying immutable runtime archive {} ({} byte(s)) to {} unique "
+                            + "remote target(s); progress every {} second(s)", bundle.archive().getFileName(),
+                    archiveBytes, transferCount, config.runtimeProgressIntervalSeconds);
+            final long transferSeconds;
+            try (LifecycleProgress progress = new LifecycleProgress("Immutable runtime archive copy",
+                    config.runtimeProgressIntervalSeconds, () -> transferProgress(uploads, transferHosts))) {
+                waitForDeployment(CompletableFuture.allOf(uploads), "runtime archive upload");
+                transferSeconds = progress.elapsedSeconds();
+            }
+            Printer.log.info("SBK-GEM: Copied immutable runtime archive {} to {} unique remote target(s) "
+                            + "in {} second(s)", bundle.archive().getFileName(), transferCount, transferSeconds);
         }
 
         final CompletableFuture<SshResponse>[] activations = new CompletableFuture[nodes.length];
@@ -527,6 +584,24 @@ final public class SbkGemBenchmark implements GemBenchmark {
         waitForDeployment(CompletableFuture.allOf(activations), "runtime archive activation");
         requireSuccessfulWithDiagnostics(activations, copyTargets, "Activating immutable runtime");
         Printer.log.info("SBK-GEM: Immutable runtime archive verified and atomically activated");
+    }
+
+    static String transferProgress(CompletableFuture<?>[] uploads, String[] transferHosts) {
+        int finished = 0;
+        int total = 0;
+        final List<String> pendingHosts = new ArrayList<>();
+        for (int i = 0; i < transferHosts.length; i++) {
+            if (transferHosts[i] != null) {
+                total++;
+                if (uploads[i].isDone()) {
+                    finished++;
+                } else {
+                    pendingHosts.add(transferHosts[i]);
+                }
+            }
+        }
+        return finished + " of " + total + " transfer(s) finished; awaiting host(s): "
+                + String.join(", ", pendingHosts);
     }
 
     @SuppressWarnings("unchecked")

@@ -125,6 +125,8 @@ final public class GemConfig {
     public long remoteTimeoutSeconds;
     /** Maximum runtime bundle creation, transfer, and activation duration in seconds. */
     public long deploymentTimeoutSeconds;
+    /** Interval between runtime preparation and transfer progress messages. */
+    public int runtimeProgressIntervalSeconds;
     /** Local content-addressed runtime bundle cache directory, absolute or relative to the user's home. */
     public String runtimeCacheDirectory;
     /** Maximum wait for the remote managed-runtime lifecycle lock. */
@@ -189,6 +191,7 @@ final public class GemConfig {
 
     void validate() {
         if (remoteTimeoutSeconds < 1 || deploymentTimeoutSeconds < 1
+                || runtimeProgressIntervalSeconds < 1
                 || runtimeCacheDirectory == null || runtimeCacheDirectory.isBlank() || executorThreadReserve < 1
                 || runtimeManagementLockTimeoutSeconds < 1 || runtimeManagementLockStaleSeconds < 1
                 || runtimeManagementLockStaleSeconds <= deploymentTimeoutSeconds

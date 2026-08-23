@@ -209,6 +209,14 @@ causes incomplete or corrupted cached archives to be rebuilt before use. With
 a non-current archive being transferred by another GEM process is protected by
 its cache lock and is removed after it becomes inactive.
 
+Creating a new bundle hashes the complete SBK distribution and optional JDK,
+then writes a compressed archive. During this potentially long disk-intensive
+step, GEM emits an elapsed-time heartbeat every 5 seconds by default. Runtime
+archive copies report the archive size, unique transfer-target count, completed
+targets, and hosts still pending. Configure the shared bounded update interval
+with `runtimeProgressIntervalSeconds` in `gem.properties`; cached bundles and
+fast local-network copies normally complete without a heartbeat.
+
 The deployment lifecycle is automatic: an exact verified SBK-plus-JDK identity
 is reused, while missing content is uploaded, verified, and activated without a
 separate copy switch. The current identity is retained after benchmarking.
