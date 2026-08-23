@@ -19,12 +19,15 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -32,6 +35,9 @@ import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
@@ -53,12 +59,17 @@ final class SbkRuntimeBundle {
     static final String CHECKSUM_FILE = "deployment-files.sha256";
     static final String REMOTE_DIGEST_FILE = ".sbk-runtime.sha256";
     private static final String SHA_256 = "SHA-256";
+    private static final int SHA_256_HEX_LENGTH = 64;
     private static final int DIGEST_NAME_CHARACTERS = 24;
     private static final int BUFFER_SIZE = 64 * 1024;
     private static final int REGULAR_FILE_MODE = 0644;
     private static final int EXECUTABLE_FILE_MODE = 0755;
     private static final int DIRECTORY_MODE = 0755;
-    private static final int BUNDLE_FORMAT_VERSION = 2;
+    private static final int SYMBOLIC_LINK_MODE = 0777;
+    private static final int BUNDLE_FORMAT_VERSION = 3;
+    private static final String ARCHIVE_DIGEST_SUFFIX = ".sha256";
+    private static final String CACHE_LOCK_SUFFIX = ".lock";
+    private static final ConcurrentMap<Path, ReentrantLock> CACHE_LOCKS = new ConcurrentHashMap<>();
 
     private final Path archive;
     private final String archiveDigest;
@@ -113,13 +124,25 @@ final class SbkRuntimeBundle {
                 + contentDigest.substring(0, DIGEST_NAME_CHARACTERS);
         Files.createDirectories(cacheDirectory);
         final Path archive = cacheDirectory.resolve(deploymentName + ".tar.gz");
-        if (!Files.isRegularFile(archive)) {
-            createArchive(archive, sbkVersion, javaVersion, platform, contentDigest, entries,
-                    normalizedJavaDirectory != null);
+        final Path archiveDigestFile = cacheDirectory.resolve(deploymentName + ".tar.gz" + ARCHIVE_DIGEST_SUFFIX);
+        final Path cacheLockFile = cacheDirectory.resolve(deploymentName + CACHE_LOCK_SUFFIX);
+        final ReentrantLock processLock = CACHE_LOCKS.computeIfAbsent(cacheLockFile, ignored -> new ReentrantLock());
+        processLock.lock();
+        try (FileChannel lockChannel = FileChannel.open(cacheLockFile, StandardOpenOption.CREATE,
+                StandardOpenOption.WRITE); FileLock ignored = lockChannel.lock()) {
+            String archiveDigest = cachedArchiveDigest(archive, archiveDigestFile);
+            if (archiveDigest == null) {
+                createArchive(archive, sbkVersion, javaVersion, platform, contentDigest, entries,
+                        normalizedJavaDirectory != null);
+                archiveDigest = sha256(archive);
+                writeAtomically(archiveDigestFile, archiveDigest + "\n");
+            }
+            return new SbkRuntimeBundle(archive, archiveDigest, contentDigest, deploymentName,
+                    SBK_DIRECTORY + "/" + normalizeRelativePath(relativeSbkCommand),
+                    normalizedJavaDirectory == null ? null : JAVA_DIRECTORY);
+        } finally {
+            processLock.unlock();
         }
-        return new SbkRuntimeBundle(archive, sha256(archive), contentDigest, deploymentName,
-                SBK_DIRECTORY + "/" + normalizeRelativePath(relativeSbkCommand),
-                normalizedJavaDirectory == null ? null : JAVA_DIRECTORY);
     }
 
     Path archive() {
@@ -205,25 +228,42 @@ final class SbkRuntimeBundle {
 
     private static void collectEntries(Path sourceRoot, String archiveRoot, List<BundleEntry> entries)
             throws IOException {
+        final Path realSourceRoot = sourceRoot.toRealPath();
         try (Stream<Path> paths = Files.walk(sourceRoot)) {
             for (Path path : paths.toList()) {
                 final Path relative = sourceRoot.relativize(path);
                 final String archivePath = relative.getNameCount() == 0 ? archiveRoot
                         : archiveRoot + "/" + normalizeRelativePath(relative.toString());
                 if (Files.isSymbolicLink(path)) {
-                    final String linkTarget = Files.readSymbolicLink(path).toString();
+                    final Path symbolicTarget = Files.readSymbolicLink(path);
+                    validateContainedSymbolicLink(sourceRoot, realSourceRoot, path, symbolicTarget);
+                    final String linkTarget = symbolicTarget.toString();
                     entries.add(new BundleEntry(path, archivePath, EntryType.SYMBOLIC_LINK, 0,
-                            sha256(linkTarget.getBytes(StandardCharsets.UTF_8)), linkTarget, false));
+                            sha256(linkTarget.getBytes(StandardCharsets.UTF_8)), linkTarget, SYMBOLIC_LINK_MODE));
                 } else if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
                     entries.add(new BundleEntry(path, archivePath, EntryType.DIRECTORY, 0, "", "",
-                            Files.isExecutable(path)));
+                            DIRECTORY_MODE));
                 } else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
                     entries.add(new BundleEntry(path, archivePath, EntryType.REGULAR_FILE, Files.size(path),
-                            sha256(path), "", Files.isExecutable(path)));
+                            sha256(path), "", Files.isExecutable(path) ? EXECUTABLE_FILE_MODE : REGULAR_FILE_MODE));
                 } else {
                     throw new IOException("Unsupported runtime bundle filesystem entry: " + path);
                 }
             }
+        }
+    }
+
+    private static void validateContainedSymbolicLink(Path sourceRoot, Path realSourceRoot, Path link,
+                                                      Path linkTarget) throws IOException {
+        if (linkTarget.isAbsolute()) {
+            throw new IOException("Runtime bundle symbolic link must be relative: " + link + " -> " + linkTarget);
+        }
+        final Path linkParent = Objects.requireNonNull(link.getParent(),
+                "Runtime bundle symbolic link must have a parent directory");
+        final Path resolvedTarget = linkParent.resolve(linkTarget).normalize();
+        if (!resolvedTarget.startsWith(sourceRoot) || !resolvedTarget.toRealPath().startsWith(realSourceRoot)) {
+            throw new IOException("Runtime bundle symbolic link escapes its source tree: " + link + " -> "
+                    + linkTarget);
         }
     }
 
@@ -236,7 +276,7 @@ final class SbkRuntimeBundle {
         update(digest, "platform=" + platform.id() + "\n");
         for (BundleEntry entry : entries) {
             update(digest, entry.type() + "\t" + entry.relativePath() + "\t" + entry.size() + "\t"
-                    + entry.digest() + "\t" + entry.linkTarget() + "\t" + entry.executable() + "\n");
+                    + entry.digest() + "\t" + entry.linkTarget() + "\t" + entry.mode() + "\n");
         }
         return HexFormat.of().formatHex(digest.digest());
     }
@@ -277,14 +317,12 @@ final class SbkRuntimeBundle {
         if (bundleEntry.type() == EntryType.SYMBOLIC_LINK) {
             archiveEntry = new TarArchiveEntry(archiveName, TarConstants.LF_SYMLINK);
             archiveEntry.setLinkName(bundleEntry.linkTarget());
-            archiveEntry.setMode(0777);
             archiveEntry.setSize(0);
         } else {
             archiveEntry = new TarArchiveEntry(archiveName);
-            archiveEntry.setMode(bundleEntry.type() == EntryType.DIRECTORY ? DIRECTORY_MODE
-                    : bundleEntry.executable() ? EXECUTABLE_FILE_MODE : REGULAR_FILE_MODE);
             archiveEntry.setSize(bundleEntry.size());
         }
+        archiveEntry.setMode(bundleEntry.mode());
         output.putArchiveEntry(archiveEntry);
         if (bundleEntry.type() == EntryType.REGULAR_FILE) {
             try (BufferedInputStream input = new BufferedInputStream(Files.newInputStream(bundleEntry.source()),
@@ -335,9 +373,33 @@ final class SbkRuntimeBundle {
 
     private static void moveAtomically(Path source, Path target) throws IOException {
         try {
-            Files.move(source, target, StandardCopyOption.ATOMIC_MOVE);
+            Files.move(source, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
         } catch (AtomicMoveNotSupportedException ignored) {
             Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+    private static String cachedArchiveDigest(Path archive, Path digestFile) throws IOException {
+        if (!Files.isRegularFile(archive) || !Files.isRegularFile(digestFile)) {
+            return null;
+        }
+        final String expectedDigest = Files.readString(digestFile, StandardCharsets.UTF_8).trim();
+        if (expectedDigest.length() != SHA_256_HEX_LENGTH) {
+            return null;
+        }
+        final String actualDigest = sha256(archive);
+        return expectedDigest.equals(actualDigest) ? actualDigest : null;
+    }
+
+    private static void writeAtomically(Path target, String value) throws IOException {
+        final Path parent = Objects.requireNonNull(target.toAbsolutePath().getParent(),
+                "Runtime cache file must have a parent directory");
+        final Path temporaryFile = Files.createTempFile(parent, fileName(target), ".partial");
+        try {
+            Files.writeString(temporaryFile, value, StandardCharsets.UTF_8);
+            moveAtomically(temporaryFile, target);
+        } finally {
+            Files.deleteIfExists(temporaryFile);
         }
     }
 
@@ -384,6 +446,6 @@ final class SbkRuntimeBundle {
     }
 
     private record BundleEntry(Path source, String relativePath, EntryType type, long size,
-                               String digest, String linkTarget, boolean executable) {
+                               String digest, String linkTarget, int mode) {
     }
 }

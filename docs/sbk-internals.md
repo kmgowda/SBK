@@ -1929,7 +1929,7 @@ sequenceDiagram
     opt javacopy is true (default)
         GEM->>GEM: include controller JDK in runtime bundle
     end
-    GEM->>GEM: hash every file, link, and executable bit
+    GEM->>GEM: hash every file, contained link, and normalized mode
     par inspect exact runtime identity
         SSH->>N1: probe content marker, Java, and SBK
         SSH->>N2: probe content marker, Java, and SBK
@@ -1966,9 +1966,12 @@ GEM-->>User: printRemoteResults()
 
 The reconciliation identity is content, not only the displayed SBK version.
 GEM verifies the local pathing JAR dependency closure, hashes every file,
-symbolic link, and executable bit, and caches a deterministic platform-specific
-archive locally. All nodes are probed concurrently. A valid exact identity is
-reused, so the full distribution is not transferred on every run. Copy work is
+contained relative symbolic link, normalized directory mode, and executable
+file bit, and caches a content-addressed platform-specific archive locally.
+Absolute or escaping links are rejected. Cache creation is serialized by a
+per-identity file lock, and an archive SHA-256 sidecar makes interrupted or
+corrupted cache entries self-repairing. All nodes are probed concurrently. A
+valid exact identity is reused, so the full distribution is not transferred on every run. Copy work is
 deduplicated by `(host, remote directory)`, so repeated workload entries sharing
 one installation do not race to replace it.
 
@@ -1988,6 +1991,8 @@ does not need a preinstalled Java. With `javacopy=false`, Java is excluded and
 GEM requires a matching remote JDK with executable `bin/java` and `bin/javac`,
 discovered from `PATH` or `javadir`. The final SSH command exports the selected
 node-specific `SBK_JAVA_HOME` and prepends its `bin` directory to `PATH`.
+PATH discovery resolves symlinks using `realpath`, GNU `readlink -f`, or a
+portable POSIX shell fallback so the same flow works on Linux and macOS.
 
 ### 7.2 What SBK-GEM is and isn't
 

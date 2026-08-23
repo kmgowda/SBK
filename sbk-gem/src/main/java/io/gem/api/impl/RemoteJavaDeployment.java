@@ -40,7 +40,20 @@ final class RemoteJavaDeployment {
      */
     static String pathProbeCommand() {
         return "JAVA_BIN=$(command -v java) || exit " + RemoteExitCode.COMMAND_NOT_FOUND + "; " +
-                "JAVA_BIN=$(readlink -f \"$JAVA_BIN\" 2>/dev/null || printf '%s' \"$JAVA_BIN\"); " +
+                "if command -v realpath >/dev/null 2>&1; then " +
+                "JAVA_BIN=$(realpath \"$JAVA_BIN\") || exit " + RemoteExitCode.COMMAND_NOT_FOUND + "; " +
+                "elif readlink -f \"$JAVA_BIN\" >/dev/null 2>&1; then " +
+                "JAVA_BIN=$(readlink -f \"$JAVA_BIN\") || exit " + RemoteExitCode.COMMAND_NOT_FOUND + "; " +
+                "else while [ -L \"$JAVA_BIN\" ]; do " +
+                "JAVA_LINK=$(readlink \"$JAVA_BIN\") || exit " + RemoteExitCode.COMMAND_NOT_FOUND + "; " +
+                "case \"$JAVA_LINK\" in /*) JAVA_BIN=$JAVA_LINK ;; " +
+                "*) JAVA_BIN=$(dirname \"$JAVA_BIN\")/$JAVA_LINK ;; esac; " +
+                "JAVA_DIR=$(CDPATH= cd -P \"$(dirname \"$JAVA_BIN\")\" && pwd) || exit " +
+                RemoteExitCode.COMMAND_NOT_FOUND + "; " +
+                "JAVA_BIN=$JAVA_DIR/$(basename \"$JAVA_BIN\"); done; fi; " +
+                "JAVA_DIR=$(CDPATH= cd -P \"$(dirname \"$JAVA_BIN\")\" && pwd) || exit " +
+                RemoteExitCode.COMMAND_NOT_FOUND + "; " +
+                "JAVA_BIN=$JAVA_DIR/$(basename \"$JAVA_BIN\"); " +
                 "SBK_HOME=$(dirname \"$(dirname \"$JAVA_BIN\")\"); " +
                 "test -x \"$SBK_HOME/bin/javac\" || exit " + RemoteExitCode.COMMAND_NOT_FOUND + "; " +
                 "\"$JAVA_BIN\" -version; \"$SBK_HOME/bin/javac\" -version; " +

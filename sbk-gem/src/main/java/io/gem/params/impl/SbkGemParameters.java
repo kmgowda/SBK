@@ -188,9 +188,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         }
         super.parseArgs(normalizeAggregateOptions(args));
         final String nodeString = getOptionValue("nodes", config.nodes);
-        String[] nodes = nodeString.replace("[ ]+", " ")
-                .replace("[,] +", ",")
-                .split("[ ,\n]+");
+        String[] nodes = nodeString.split("[ ,\n]+");
         config.gemuser = getOptionValue("gemuser", config.gemuser);
         config.gempass = getOptionValue(GemConfig.GEM_PASS_OPTION, config.gempass);
         config.hostkeycheck = Boolean.parseBoolean(getOptionValue("hostkeycheck",

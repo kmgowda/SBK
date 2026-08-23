@@ -920,7 +920,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
 
         void reset() {
-            this.kMap.keySet().forEach(k -> this.kMap.put(k, false));
+            this.kMap.replaceAll((key, visited) -> false);
         }
 
         void visit(@NotNull ConnectionConfig conn) {

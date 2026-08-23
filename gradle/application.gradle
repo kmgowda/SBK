@@ -20,6 +20,13 @@ plugins.withId('application') {
     tasks.register('pathingJar', Jar) {
         archiveAppendix = 'pathing'
 
+        // The manifest is the runtime dependency graph. Declaring the classpath
+        // as an input prevents Gradle from reusing a stale pathing JAR after a
+        // dependency is added, removed, or changed.
+        inputs.files(configurations.runtimeClasspath)
+                .withPropertyName('runtimeClasspath')
+                .withPathSensitivity(PathSensitivity.NAME_ONLY)
+
         // Delay configuring the manifest to avoid resolving the configuration
         doFirst {
             manifest {

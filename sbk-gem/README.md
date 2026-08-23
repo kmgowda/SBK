@@ -188,8 +188,10 @@ Before connecting to storage, SBK-GEM validates the local `installDist`
 layout, including the pathing JAR and every dependency named by its manifest.
 It packages the complete distribution and, by default, the controller JDK into
 one content-addressed `tar.gz` archive. The identity covers every file,
-symbolic link, and executable bit, so two builds carrying the same SBK version
-but different dependencies cannot be mistaken for one another.
+contained relative symbolic link, and normalized file mode, so two builds
+carrying the same SBK version but different dependencies cannot be mistaken
+for one another. Links escaping the SBK or JDK source tree are rejected;
+directory modes are normalized to `0755` in both the identity and archive.
 
 The archive contains a platform descriptor and per-file SHA-256 manifest.
 Every remote node must pass the homogeneous platform/tool preflight. GEM then
@@ -199,7 +201,9 @@ renames the verified runtime into place. A partially copied or failed staging
 directory is never used to launch SBK. Subsequent runs reuse the exact verified
 content without copying it again. Local archives are cached under
 `~/.sbk/cache/sbk-gem` by default; `runtimeCacheDirectory` in
-`gem.properties` changes that location.
+`gem.properties` changes that location. A per-identity file lock serializes
+cache writers across GEM processes, and a separately published SHA-256 sidecar
+causes incomplete or corrupted cached archives to be rebuilt before use.
 
 The deployment lifecycle options are:
 
@@ -215,6 +219,10 @@ SBK-GEM selects Java as follows:
   Java and requires a matching remote JDK.
 - `-javadir <home>` optionally identifies the required remote JDK when
   `-javacopy false`; otherwise GEM discovers it from `PATH`.
+
+PATH discovery resolves Java symlinks with `realpath` when available, GNU
+`readlink -f` when supported, and a POSIX shell symlink walk otherwise. This
+keeps `-javacopy false` usable on both Linux and macOS.
 
 For each remote launch, GEM exports the selected node-specific `SBK_JAVA_HOME` and prepends `$SBK_JAVA_HOME/bin` to `PATH`. SBK’s generated launcher therefore uses the verified runtime. Automatic copying is rejected when the local JVM major version differs from `-javaversion`, because copying that JVM could not satisfy the request.
 
