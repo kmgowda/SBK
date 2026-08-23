@@ -477,7 +477,6 @@ final class SbkRuntimeBundle {
                 + "sbk.version=" + sbkVersion + "\n"
                 + "java.version=" + javaVersion + "\n"
                 + "platform.os=" + platform.operatingSystem() + "\n"
-                + "platform.arch=" + platform.architecture() + "\n"
                 + "content.sha256=" + contentDigest + "\n"
                 + "includes.java=" + includesJava + "\n";
     }

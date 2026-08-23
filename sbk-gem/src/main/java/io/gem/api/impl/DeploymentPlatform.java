@@ -18,18 +18,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Operating-system and processor architecture of an SBK-GEM deployment.
+ * Operating system of an SBK-GEM deployment.
  *
- * <p>SBK-GEM intentionally deploys one native Java runtime to a homogeneous
- * cluster. It therefore rejects a remote operating system or architecture
- * which differs from the controller before transferring the runtime bundle.
+ * <p>SBK-GEM requires the controller and deployment targets to use the same
+ * supported operating system. Processor architecture is intentionally not
+ * part of deployment compatibility, which also permits translated runtimes
+ * and containers whose reported architecture differs from their host.
  *
  * @param operatingSystem normalized operating system
- * @param architecture normalized processor architecture
  */
-record DeploymentPlatform(String operatingSystem, String architecture) {
+record DeploymentPlatform(String operatingSystem) {
     private static final Pattern OPERATING_SYSTEM_PATTERN = Pattern.compile("(?m)^SBK_OS=(\\S+)$");
-    private static final Pattern ARCHITECTURE_PATTERN = Pattern.compile("(?m)^SBK_ARCH=(\\S+)$");
 
     /**
      * Detect the controller platform.
@@ -38,8 +37,7 @@ record DeploymentPlatform(String operatingSystem, String architecture) {
      * @throws IllegalArgumentException when the controller platform is unsupported
      */
     static DeploymentPlatform local() {
-        return new DeploymentPlatform(normalizeOperatingSystem(System.getProperty("os.name")),
-                normalizeArchitecture(System.getProperty("os.arch")));
+        return new DeploymentPlatform(normalizeOperatingSystem(System.getProperty("os.name")));
     }
 
     /**
@@ -52,8 +50,7 @@ record DeploymentPlatform(String operatingSystem, String architecture) {
                 + "if command -v sha256sum >/dev/null 2>&1; then SBK_SHA256=sha256sum; "
                 + "elif command -v shasum >/dev/null 2>&1; then SBK_SHA256=shasum; "
                 + "else printf '%s\\n' 'sha256sum or shasum is required' >&2; exit 127; fi; "
-                + "printf 'SBK_OS=%s\\nSBK_ARCH=%s\\nSBK_SHA256=%s\\n' "
-                + "\"$(uname -s)\" \"$(uname -m)\" \"$SBK_SHA256\"";
+                + "printf 'SBK_OS=%s\\nSBK_SHA256=%s\\n' \"$(uname -s)\" \"$SBK_SHA256\"";
     }
 
     /**
@@ -68,13 +65,11 @@ record DeploymentPlatform(String operatingSystem, String architecture) {
         }
         final String output = response.stdOutputStream.toString();
         final Matcher osMatcher = OPERATING_SYSTEM_PATTERN.matcher(output);
-        final Matcher archMatcher = ARCHITECTURE_PATTERN.matcher(output);
-        if (!osMatcher.find() || !archMatcher.find()) {
+        if (!osMatcher.find()) {
             return null;
         }
         try {
-            return new DeploymentPlatform(normalizeOperatingSystem(osMatcher.group(1)),
-                    normalizeArchitecture(archMatcher.group(1)));
+            return new DeploymentPlatform(normalizeOperatingSystem(osMatcher.group(1)));
         } catch (IllegalArgumentException ignored) {
             return null;
         }
@@ -83,10 +78,10 @@ record DeploymentPlatform(String operatingSystem, String architecture) {
     /**
      * Return the stable platform identifier used in runtime bundle names.
      *
-     * @return operating-system and architecture identifier
+     * @return operating-system identifier
      */
     String id() {
-        return operatingSystem + "-" + architecture;
+        return operatingSystem;
     }
 
     private static String normalizeOperatingSystem(String value) {
@@ -103,14 +98,4 @@ record DeploymentPlatform(String operatingSystem, String architecture) {
         throw new IllegalArgumentException("Unsupported SBK-GEM operating system: " + value);
     }
 
-    private static String normalizeArchitecture(String value) {
-        if (value == null) {
-            throw new IllegalArgumentException("Missing processor architecture");
-        }
-        return switch (value.trim().toLowerCase(Locale.ROOT)) {
-            case "amd64", "x86_64" -> "amd64";
-            case "aarch64", "arm64" -> "arm64";
-            default -> throw new IllegalArgumentException("Unsupported SBK-GEM processor architecture: " + value);
-        };
-    }
 }

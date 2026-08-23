@@ -520,8 +520,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 consMap.visit(nodes[i].connection);
                 final String command = RemoteRuntimeDeployment.activateCommand(archivePaths[i],
                         bundle.archiveDigest(), bundle.contentDigest(), stagingDirectories[i],
-                        deploymentDirectories[i], platform.operatingSystem(), platform.architecture(),
-                        params.isDelete());
+                        deploymentDirectories[i], platform.operatingSystem(), params.isDelete());
                 activations[i] = nodes[i].runCommandAsync(command, true, config.deploymentTimeoutSeconds);
             }
         }

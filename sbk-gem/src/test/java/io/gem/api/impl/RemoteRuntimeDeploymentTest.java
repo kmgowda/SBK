@@ -12,6 +12,7 @@ package io.gem.api.impl;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Tests immutable runtime remote command construction. */
@@ -29,16 +30,16 @@ final class RemoteRuntimeDeploymentTest {
     }
 
     @Test
-    void activationVerifiesArchiveFilesPlatformAndUsesAtomicDirectoryMove() {
+    void activationVerifiesArchiveFilesOperatingSystemAndUsesAtomicDirectoryMove() {
         final String command = RemoteRuntimeDeployment.activateCommand("/srv/archive.tgz", "archive-sha",
-                "content-sha", "/srv/staging", "/srv/final", "linux", "amd64", false);
+                "content-sha", "/srv/staging", "/srv/final", "linux", false);
 
         assertTrue(command.contains("sha256sum"));
         assertTrue(command.contains("shasum -a 256"));
         assertTrue(command.contains("tar -xzf"));
         assertTrue(command.contains("deployment-files.sha256"));
         assertTrue(command.contains("platform.os=linux"));
-        assertTrue(command.contains("platform.arch=amd64"));
+        assertFalse(command.contains("platform.arch"));
         assertTrue(command.contains("else mv '/srv/staging/runtime' \"$final_dir\""));
         assertTrue(command.contains("trap cleanup EXIT HUP INT TERM"));
     }

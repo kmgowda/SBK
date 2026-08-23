@@ -17,23 +17,24 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Tests homogeneous deployment platform discovery. */
 final class DeploymentPlatformTest {
     @Test
-    void normalizesLinuxArchitectures() throws IOException {
+    void normalizesLinuxOperatingSystemWithoutArchitecture() throws IOException {
         final SshResponse response = response(0, "SBK_OS=Linux\nSBK_ARCH=x86_64\nSBK_SHA256=sha256sum\n", "");
 
-        assertEquals(new DeploymentPlatform("linux", "amd64"), DeploymentPlatform.fromProbe(response));
+        assertEquals(new DeploymentPlatform("linux"), DeploymentPlatform.fromProbe(response));
     }
 
     @Test
-    void normalizesMacArmArchitecture() throws IOException {
+    void normalizesMacOperatingSystemWithoutArchitecture() throws IOException {
         final SshResponse response = response(0, "SBK_OS=Darwin\nSBK_ARCH=arm64\nSBK_SHA256=shasum\n", "");
 
-        assertEquals(new DeploymentPlatform("macos", "arm64"), DeploymentPlatform.fromProbe(response));
+        assertEquals(new DeploymentPlatform("macos"), DeploymentPlatform.fromProbe(response));
     }
 
     @Test
@@ -49,6 +50,8 @@ final class DeploymentPlatformTest {
         assertTrue(command.contains("command -v tar"));
         assertTrue(command.contains("command -v sha256sum"));
         assertTrue(command.contains("command -v shasum"));
+        assertFalse(command.contains("uname -m"));
+        assertFalse(command.contains("SBK_ARCH"));
     }
 
     private static SshResponse response(int returnCode, String output, String error) throws IOException {
