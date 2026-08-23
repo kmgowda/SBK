@@ -1942,8 +1942,8 @@ sequenceDiagram
     GEM->>SSH: verify activated Java, SBK, and content identity
     GEM->>SSH: reserve per-command runtime leases
     opt runtimecleanup is true (default)
-        SSH->>N1: remove every inactive non-current managed runtime
-        SSH->>N2: remove every inactive non-current managed runtime
+        SSH->>N1: atomically retire inactive runtimes; delete detached
+        SSH->>N2: atomically retire inactive runtimes; delete detached
     end
 
     GEM->>SBM: sbmBenchmark.start()<br/>(listen on :9717 locally)
@@ -1990,8 +1990,12 @@ runtime is retained for subsequent benchmarks. With the default
 remove every non-current managed identity only after its PID/reservation leases
 are no longer active, regardless of whether its SBK version is lower or higher.
 Concurrent benchmarks may therefore retain two versions temporarily, but an
-active runtime is never removed. The rule also applies to the controller when
-it is selected as a deployment node. The controller-side managed bundle cache
+active runtime is never removed. Inactive runtime directories are atomically
+renamed out of the managed namespace while the lifecycle lock is held, then
+deleted by a detached process with closed standard streams. Large recursive
+deletions therefore do not block lease acquisition or benchmark startup. The
+rule also applies to the controller when it is selected as a deployment node.
+The controller-side managed bundle cache
 also retains only the current identity; per-archive locks protect bundles in
 concurrent transfer until they become inactive. Unmanaged directories and
 external JDKs used by `javacopy=false` are outside this cleanup boundary.

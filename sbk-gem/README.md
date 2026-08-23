@@ -230,7 +230,11 @@ separate copy switch. The current identity is retained after benchmarking.
 Remote PID leases protect runtimes used by concurrent GEM executions; therefore
 an active non-current identity may coexist temporarily and is removed after its
 final lease exits. Cleanup compares immutable identities, not version numbers,
-so both lower and higher inactive SBK versions are removed.
+so both lower and higher inactive SBK versions are removed. An inactive runtime
+is first atomically renamed out of the managed `sbk-runtime-*` namespace while
+the lifecycle lock is held. Its potentially large directory tree is then
+deleted by a detached process with closed standard streams, so recursive file
+deletion cannot block lease acquisition or remote benchmark startup.
 
 The deployment lifecycle options are:
 

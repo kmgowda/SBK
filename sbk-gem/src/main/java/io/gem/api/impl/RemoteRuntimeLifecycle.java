@@ -18,6 +18,7 @@ final class RemoteRuntimeLifecycle {
     private static final String CURRENT_FILE = ".sbk-runtime-current";
     private static final String LEASE_DIRECTORY = ".sbk-runtime-leases";
     private static final String LOCK_DIRECTORY = ".sbk-runtime-management.lock";
+    private static final String RETIRED_PREFIX = ".sbk-runtime-retired.";
     private static final Pattern SAFE_IDENTIFIER = Pattern.compile("[A-Za-z0-9._-]+");
 
     private RemoteRuntimeLifecycle() {
@@ -35,7 +36,8 @@ final class RemoteRuntimeLifecycle {
      */
     static boolean isManagedArtifact(String name) {
         return name.startsWith(RUNTIME_PREFIX) || name.equals(CURRENT_FILE)
-                || name.equals(LEASE_DIRECTORY) || name.startsWith(LOCK_DIRECTORY);
+                || name.equals(LEASE_DIRECTORY) || name.startsWith(LOCK_DIRECTORY)
+                || name.startsWith(RETIRED_PREFIX);
     }
 
     /**
@@ -182,7 +184,11 @@ final class RemoteRuntimeLifecycle {
                 + "*) if test $((now-reserved)) -le " + reservationSeconds
                 + "; then active=1; else rm -f \"$lease_entry\"; fi ;; esac ;; "
                 + "*) rm -f \"$lease_entry\" ;; esac; done; fi; "
-                + "if test \"$active\" -eq 0; then rm -rf \"$candidate\" \"$candidate_leases\"; fi; done; ";
+                + "if test \"$active\" -eq 0; then "
+                + "retired=\"$parent/" + RETIRED_PREFIX + "$candidate_name.$lease_id.$$\"; "
+                + "if mv \"$candidate\" \"$retired\"; then rm -rf \"$candidate_leases\"; fi; fi; done; "
+                + "nohup rm -rf \"$parent\"/" + RETIRED_PREFIX
+                + "* </dev/null >/dev/null 2>&1 & ";
     }
 
     private static void validateArguments(String deploymentName, String contentDigest, String leaseId,

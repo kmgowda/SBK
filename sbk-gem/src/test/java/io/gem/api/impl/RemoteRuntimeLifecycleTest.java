@@ -75,6 +75,34 @@ final class RemoteRuntimeLifecycleTest {
     }
 
     @Test
+    void inactiveRuntimeDeletionDoesNotBlockLeaseAcquisition() throws Exception {
+        final Path parent = temporaryDirectory.resolve("detached-cleanup");
+        final String current = "sbk-runtime-10.6-macos-current";
+        final String inactive = "sbk-runtime-10.5-macos-inactive";
+        createRuntime(parent, current, DIGEST);
+        createRuntime(parent, inactive, "inactive-digest");
+        final Path fakeBin = Files.createDirectories(temporaryDirectory.resolve("fake-bin"));
+        final Path slowRemove = fakeBin.resolve("rm");
+        Files.writeString(slowRemove, "#!/bin/sh\ncase \"$*\" in *.sbk-runtime-retired.*) sleep 3;; esac\n"
+                + "exec /bin/rm \"$@\"\n", StandardCharsets.UTF_8);
+        assertTrue(slowRemove.toFile().setExecutable(true));
+        final String command = "PATH=" + RemoteSbkDeployment.shellQuote(fakeBin.toString())
+                + ":$PATH; export PATH; " + RemoteRuntimeLifecycle.acquireCommand(parent.toString(), current,
+                DIGEST, "detached-acquire", true, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS,
+                TEST_RESERVATION_SECONDS);
+
+        final long startedNanos = System.nanoTime();
+        run(command);
+        final long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedNanos);
+
+        assertTrue(elapsedMillis < TimeUnit.SECONDS.toMillis(2),
+                "lease acquisition waited " + elapsedMillis + " ms for recursive deletion");
+        assertTrue(Files.isDirectory(parent.resolve(current)));
+        assertFalse(Files.exists(parent.resolve(inactive)));
+        waitForRetiredCleanup(parent);
+    }
+
+    @Test
     void acquisitionPreservesANonCurrentRuntimeWithALiveProcessLease() throws Exception {
         final String current = "sbk-runtime-10.6-linux-amd64-current";
         final String active = "sbk-runtime-10.7-linux-amd64-active";
@@ -241,6 +269,20 @@ final class RemoteRuntimeLifecycleTest {
             Thread.sleep(10);
         }
         throw new AssertionError("Timed out waiting for PID lease: " + lease);
+    }
+
+    private static void waitForRetiredCleanup(Path parent) throws Exception {
+        final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(TEST_TIMEOUT_SECONDS);
+        while (System.nanoTime() < deadline) {
+            try (var paths = Files.list(parent)) {
+                if (paths.noneMatch(path -> String.valueOf(path.getFileName())
+                        .startsWith(".sbk-runtime-retired."))) {
+                    return;
+                }
+            }
+            Thread.sleep(10);
+        }
+        throw new AssertionError("Timed out waiting for retired runtime cleanup under " + parent);
     }
 
     private static void run(String command) throws Exception {
