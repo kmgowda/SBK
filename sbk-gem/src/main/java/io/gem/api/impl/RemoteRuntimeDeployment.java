@@ -61,14 +61,13 @@ final class RemoteRuntimeDeployment {
      * @param stagingDirectory unique staging directory
      * @param deploymentDirectory final content-addressed directory
      * @param expectedOperatingSystem normalized expected operating system
-     * @param expectedArchitecture normalized expected architecture
      * @param replaceInvalid whether an invalid exact content-addressed destination may be replaced
      * @return remote activation command
      */
     static String activateCommand(String archivePath, String expectedArchiveDigest,
                                   String expectedContentDigest, String stagingDirectory,
                                   String deploymentDirectory, String expectedOperatingSystem,
-                                  String expectedArchitecture, boolean replaceInvalid) {
+                                  boolean replaceInvalid) {
         final String extractedRoot = stagingDirectory + "/" + SbkRuntimeBundle.ARCHIVE_ROOT;
         final String descriptor = extractedRoot + "/" + SbkRuntimeBundle.DESCRIPTOR_FILE;
         final String checksums = extractedRoot + "/" + SbkRuntimeBundle.CHECKSUM_FILE;
@@ -86,7 +85,6 @@ final class RemoteRuntimeDeployment {
                 + "test -f " + quote(descriptor) + "; test -f " + quote(checksums) + "; "
                 + "grep -Fqx " + quote("content.sha256=" + expectedContentDigest) + " " + quote(descriptor)
                 + "; grep -Fqx " + quote("platform.os=" + expectedOperatingSystem) + " " + quote(descriptor)
-                + "; grep -Fqx " + quote("platform.arch=" + expectedArchitecture) + " " + quote(descriptor)
                 + "; cd " + quote(extractedRoot) + "; "
                 + "if command -v sha256sum >/dev/null 2>&1; then sha256sum -c "
                 + quote(SbkRuntimeBundle.CHECKSUM_FILE) + "; else shasum -a 256 -c "

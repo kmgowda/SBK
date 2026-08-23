@@ -1923,8 +1923,8 @@ sequenceDiagram
         SSH->>N2: SSH + known_hosts + agent/key/password
     end
 
-    GEM->>SSH: probe OS, architecture, tar, and SHA-256 tool
-    Note over GEM: require one homogeneous Linux or macOS platform
+    GEM->>SSH: probe OS, tar, and SHA-256 tool
+    Note over GEM: require one homogeneous Linux or macOS operating system
     GEM->>GEM: validate installDist pathing JAR and dependencies
     opt javacopy is true (default)
         GEM->>GEM: include controller JDK in runtime bundle
@@ -1970,7 +1970,7 @@ GEM-->>User: printRemoteResults()
 The reconciliation identity is content, not only the displayed SBK version.
 GEM verifies the local pathing JAR dependency closure, hashes every file,
 contained relative symbolic link, normalized directory mode, and executable
-file bit, and caches a content-addressed platform-specific archive locally.
+file bit, and caches a content-addressed OS-specific archive locally.
 Absolute or escaping links are rejected. Cache creation is serialized by a
 per-identity file lock, and an archive SHA-256 sidecar makes interrupted or
 corrupted cache entries self-repairing. All nodes are probed concurrently. A
@@ -1979,7 +1979,7 @@ deduplicated by `(host, remote directory)`, so repeated workload entries sharing
 one installation do not race to replace it.
 
 Remote activation is transactional: the uploaded archive SHA-256 is checked,
-the archive is extracted to a unique staging directory, its OS/architecture
+the archive is extracted to a unique staging directory, its operating-system
 descriptor and every regular-file checksum are verified, and only then is the
 runtime atomically renamed into its final content-addressed directory. Failed
 or interrupted staging data is cleaned and cannot become a launch target.

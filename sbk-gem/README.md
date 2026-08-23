@@ -44,9 +44,10 @@ SBK-GEM owns remote launch and aggregate lifecycle. The remote SBK processes sti
 - A writable remote installation/work directory.
 - Network reachability from remote SBK clients back to the GEM/SBM host, normally on port `9717`.
 - Network reachability from remote hosts to the target storage system.
-- A homogeneous native cluster: controller and all remote nodes must use the
-  same supported operating system (`Linux` or `macOS`) and CPU architecture
-  (`amd64` or `arm64`). Windows and mixed OS/architecture runs are rejected.
+- A homogeneous operating-system cluster: controller, containers, and all
+  remote nodes must use the same supported operating system (`Linux` or
+  `macOS`). CPU architecture is not part of deployment compatibility. Windows
+  and mixed Linux/macOS runs are rejected.
 - POSIX `tar` plus either `sha256sum` or `shasum` on every remote host.
 
 Use dedicated benchmark hosts and least-privilege SSH credentials. Do not put passwords or private keys in committed files.
@@ -351,7 +352,7 @@ Diagnose distributed failures by boundary:
 | Authentication rejected | Remote `authorized_keys`, requested user, agent contents, configured identity files, or optional password |
 | Host key rejected | Missing or changed entry in the SBK-GEM user's `~/.ssh/known_hosts`; verify the key out of band before updating it |
 | Copy/install fails | Remote permissions, disk space, `tar`, SHA-256 tool, archive or file-manifest diagnostic |
-| Remote Java failure | Homogeneous OS/architecture, Java 25 compatibility, executable `java` and `javac` |
+| Remote Java failure | Homogeneous OS, Java 25 compatibility, executable `java` and `javac` |
 | Driver not found | Same distribution on all hosts, both driver registration files, pathing JAR |
 | No aggregate records | Remote command includes `GrpcLogger`; callback host/port reachable |
 | Some clients disappear | Remote stderr, SBM connection metrics, firewall/NAT timeouts |

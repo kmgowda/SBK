@@ -394,7 +394,7 @@ final class SbkRuntimeBundle {
         update(digest, "format=" + BUNDLE_FORMAT_VERSION + "\n");
         update(digest, "sbk.version=" + sbkVersion + "\n");
         update(digest, "java.version=" + javaVersion + "\n");
-        update(digest, "platform=" + platform.id() + "\n");
+        update(digest, "platform.os=" + platform.id() + "\n");
         for (BundleEntry entry : entries) {
             update(digest, entry.type() + "\t" + entry.relativePath() + "\t" + entry.size() + "\t"
                     + entry.digest() + "\t" + entry.linkTarget() + "\t" + entry.mode() + "\n");
@@ -477,7 +477,6 @@ final class SbkRuntimeBundle {
                 + "sbk.version=" + sbkVersion + "\n"
                 + "java.version=" + javaVersion + "\n"
                 + "platform.os=" + platform.operatingSystem() + "\n"
-                + "platform.arch=" + platform.architecture() + "\n"
                 + "content.sha256=" + contentDigest + "\n"
                 + "includes.java=" + includesJava + "\n";
     }
