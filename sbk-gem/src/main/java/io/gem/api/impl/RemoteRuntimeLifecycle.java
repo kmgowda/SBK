@@ -117,7 +117,7 @@ final class RemoteRuntimeLifecycle {
                 + "cleanup_runtime() { sh -c " + quote(releaseCommand)
                 + " || printf 'SBK-GEM: managed runtime lease cleanup failed\\n' >&2; }; "
                 + "trap 'exit 129' HUP; trap 'exit 130' INT; trap 'exit 143' TERM; "
-                + "trap 'status=$?; trap - EXIT; cleanup_runtime; exit $status' EXIT; "
+                + "trap 'sbk_exit_code=$?; trap - EXIT; cleanup_runtime; exit $sbk_exit_code' EXIT; "
                 + sbkCommand;
     }
 

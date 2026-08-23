@@ -91,17 +91,32 @@ final class RemoteRuntimeLifecycleTest {
     }
 
     @Test
-    void launchPreservesSignalExitCodesAndReleasesLeaseWithPosixAndBashShells() throws Exception {
+    void launchPreservesCommandExitCodesAndReleasesLeaseWithAvailableShells() throws Exception {
+        final String current = "sbk-runtime-10.6-linux-current";
+        createRuntime(current, DIGEST);
+        for (String shell : availableShells()) {
+            verifyExit(shell, current, "success", "true", 0);
+            verifyExit(shell, current, "failure", "exit 47", 47);
+        }
+    }
+
+    @Test
+    void launchPreservesSignalExitCodesAndReleasesLeaseWithAvailableShells() throws Exception {
         final String current = "sbk-runtime-10.6-linux-amd64-current";
         createRuntime(current, DIGEST);
-        for (String shell : List.of("/bin/sh", "/bin/bash")) {
-            if (!Files.isExecutable(Path.of(shell))) {
-                continue;
-            }
+        for (String shell : availableShells()) {
             verifySignal(shell, current, "HUP", 129);
             verifySignal(shell, current, "INT", 130);
             verifySignal(shell, current, "TERM", 143);
         }
+    }
+
+    @Test
+    void launchUsesShellPortableExitCodeVariable() {
+        final String command = RemoteRuntimeLifecycle.launchCommand("/tmp/lease", "true", "true");
+
+        assertTrue(command.contains("sbk_exit_code=$?"));
+        assertFalse(command.contains("status=$?"));
     }
 
     @Test
@@ -160,6 +175,38 @@ final class RemoteRuntimeLifecycleTest {
             process.destroyForcibly();
             process.waitFor();
         }
+    }
+
+    private void verifyExit(String shell, String deploymentName, String suffix, String command,
+                            int expectedExitCode) throws Exception {
+        final String shellName = shell.substring(shell.lastIndexOf('/') + 1);
+        final String leaseId = shellName + "-" + suffix;
+        run(RemoteRuntimeLifecycle.acquireCommand(temporaryDirectory.toString(), deploymentName, DIGEST,
+                leaseId, false, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS));
+        final String lease = RemoteRuntimeLifecycle.leasePath(temporaryDirectory.toString(), deploymentName,
+                leaseId);
+        final String release = RemoteRuntimeLifecycle.releaseCommand(temporaryDirectory.toString(),
+                deploymentName, leaseId, false, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS,
+                TEST_RESERVATION_SECONDS);
+        final Process process = new ProcessBuilder(shell, "-c",
+                RemoteRuntimeLifecycle.launchCommand(lease, release, command))
+                .redirectErrorStream(true)
+                .start();
+        try {
+            assertTrue(process.waitFor(TEST_TIMEOUT_SECONDS, TimeUnit.SECONDS), shell + " did not exit");
+            final String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            assertEquals(expectedExitCode, process.exitValue(), output);
+            assertFalse(Files.exists(Path.of(lease)), shell + " lease cleanup");
+        } finally {
+            process.destroyForcibly();
+            process.waitFor();
+        }
+    }
+
+    private static List<String> availableShells() {
+        return List.of("/bin/sh", "/bin/bash", "/bin/zsh").stream()
+                .filter(shell -> Files.isExecutable(Path.of(shell)))
+                .toList();
     }
 
     private static void waitForPidLease(Path lease) throws Exception {
