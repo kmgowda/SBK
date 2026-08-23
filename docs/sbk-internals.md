@@ -1930,6 +1930,7 @@ sequenceDiagram
         GEM->>GEM: include controller JDK in runtime bundle
     end
     GEM->>GEM: hash every file, contained link, and normalized mode
+    GEM->>SSH: reserve deployment identities through MINA SFTP
     par inspect exact runtime identity
         SSH->>N1: probe content marker, Java, and SBK
         SSH->>N2: probe content marker, Java, and SBK
@@ -1940,10 +1941,9 @@ sequenceDiagram
         SSH->>N2: verify archive and files, atomically activate
     end
     GEM->>SSH: verify activated Java, SBK, and content identity
-    GEM->>SSH: reserve per-command runtime leases
     opt runtimecleanup is true (default)
-        SSH->>N1: atomically retire inactive runtimes; delete detached
-        SSH->>N2: atomically retire inactive runtimes; delete detached
+        SSH->>N1: atomically retire inactive runtimes; delete through SFTP
+        SSH->>N2: atomically retire inactive runtimes; delete through SFTP
     end
 
     GEM->>SBM: sbmBenchmark.start()<br/>(listen on :9717 locally)
@@ -1986,14 +1986,22 @@ or interrupted staging data is cleaned and cannot become a launch target.
 Missing identities are uploaded automatically. `delete=true` permits repair of
 an invalid final directory bearing the expected identity. The current verified
 runtime is retained for subsequent benchmarks. With the default
-`runtimecleanup=true`, a per-host lifecycle lock and current-runtime marker
-remove every non-current managed identity only after its PID/reservation leases
-are no longer active, regardless of whether its SBK version is lower or higher.
+`runtimecleanup=true`, an Apache MINA SFTP lifecycle lock and current-runtime
+marker remove every non-current managed identity only after its controller-
+refreshed leases are no longer active, regardless of whether its SBK version is
+lower or higher. Each controller reserves its identity before probe, transfer,
+or activation, preventing overlapping GEM processes from retiring an identity
+another process is preparing.
 Concurrent benchmarks may therefore retain two versions temporarily, but an
 active runtime is never removed. Inactive runtime directories are atomically
 renamed out of the managed namespace while the lifecycle lock is held, then
-deleted by a detached process with closed standard streams. Large recursive
-deletions therefore do not block lease acquisition or benchmark startup. The
+deleted by a separate SFTP operation outside that lock. Large recursive
+deletions therefore do not block lease acquisition or benchmark startup. Apache
+MINA SFTP also resolves and creates the deployment directory. Login shells, zsh
+glob behavior, PID probes, and detached shell jobs are not used for the
+lifecycle. Shell commands remain only where SSH has no file API equivalent:
+remote OS/tool and executable-version probes, archive extraction and
+verification, and benchmark-process launch. The
 rule also applies to the controller when it is selected as a deployment node.
 The controller-side managed bundle cache
 also retains only the current identity; per-archive locks protect bundles in

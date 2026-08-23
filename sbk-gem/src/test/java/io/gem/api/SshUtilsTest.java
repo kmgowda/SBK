@@ -13,9 +13,11 @@ package io.gem.api;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.common.config.keys.PublicKeyEntry;
+import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.pubkey.KeySetPublickeyAuthenticator;
+import org.apache.sshd.sftp.server.SftpSubsystemFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,10 @@ import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -57,6 +63,10 @@ final class SshUtilsTest {
         server.setKeyPairProvider(KeyPairProvider.wrap(alternateHostKey, hostKey));
         server.setPublickeyAuthenticator(new KeySetPublickeyAuthenticator("sbk-test-keys",
                 List.of(userKey.getPublic())));
+        server.setPasswordAuthenticator((username, password, session) ->
+                USER.equals(username) && "sftp-password".equals(password));
+        server.setFileSystemFactory(new VirtualFileSystemFactory(temporaryDirectory));
+        server.setSubsystemFactories(List.of(new SftpSubsystemFactory.Builder().build()));
         server.start();
     }
 
@@ -89,6 +99,31 @@ final class SshUtilsTest {
             client.addPublicKeyIdentity(userKey);
             client.start();
             assertThrows(IOException.class, () -> SshUtils.createSession(client, config, 5));
+        }
+    }
+
+    @Test
+    void executesRemoteFileOperationsThroughApacheMinaSftp() throws Exception {
+        final Path knownHosts = writeKnownHosts(hostKey);
+        final ConnectionConfig config = new ConnectionConfig("127.0.0.1", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), true, knownHosts.toString());
+        final var executor = Executors.newFixedThreadPool(2);
+        final SshSession sshSession = new SshSession(config, executor);
+        try {
+            sshSession.createSessionAsync(5).get(5, TimeUnit.SECONDS);
+            final String result = sshSession.runRemoteFileOperationAsync(fileSystem -> {
+                final Path directory = fileSystem.getPath("/runtime-leases");
+                Files.createDirectories(directory);
+                final Path marker = directory.resolve("marker");
+                Files.writeString(marker, "active");
+                return Files.readString(marker);
+            }, 5).get(5, TimeUnit.SECONDS);
+
+            assertEquals("active", result);
+            assertEquals("active", Files.readString(temporaryDirectory.resolve("runtime-leases/marker")));
+        } finally {
+            sshSession.stop();
+            executor.shutdownNow();
         }
     }
 

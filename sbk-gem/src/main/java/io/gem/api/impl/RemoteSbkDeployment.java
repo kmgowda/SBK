@@ -10,9 +10,6 @@
 
 package io.gem.api.impl;
 
-import io.gem.api.SshResponse;
-import io.sbk.config.ExitCode;
-
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,40 +21,6 @@ final class RemoteSbkDeployment {
     private static final Pattern VERSION_PATTERN = Pattern.compile("(?m)^SBK Version:\\s*(\\S+)\\s*$");
 
     private RemoteSbkDeployment() {
-    }
-
-    /**
-     * Build a POSIX-shell command that resolves a remote directory to an
-     * absolute path. The target itself does not need to exist yet.
-     *
-     * @param remoteDirectory remote directory, absolute or relative to the SSH login directory
-     * @return remote shell command that prints the absolute directory
-     * @throws IllegalArgumentException when the directory is null or blank
-     */
-    static String directoryPathProbeCommand(String remoteDirectory) {
-        if (remoteDirectory == null || remoteDirectory.isBlank()) {
-            throw new IllegalArgumentException("Remote directory must not be blank");
-        }
-        final String quotedDirectory = shellQuote(remoteDirectory);
-        return "case " + quotedDirectory + " in /*) printf '%s\\n' " + quotedDirectory +
-                ";; *) printf '%s/%s\\n' \"$(pwd -P)\" " + quotedDirectory + ";; esac";
-    }
-
-    /**
-     * Extract a successfully resolved absolute directory from a remote response.
-     *
-     * @param response remote command response
-     * @return absolute directory, or null when resolution failed or returned invalid output
-     */
-    static String absoluteDirectoryPath(SshResponse response) {
-        if (response == null || response.returnCode != ExitCode.SUCCESS) {
-            return null;
-        }
-        final String path = response.stdOutputStream.toString().trim();
-        if (!path.startsWith("/") || path.contains("\n") || path.contains("\r")) {
-            return null;
-        }
-        return path;
     }
 
     /**

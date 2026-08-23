@@ -74,6 +74,10 @@ final public class SbkGemBenchmark implements GemBenchmark {
     private final ConnectionsMap consMap;
     private final String runtimeLeaseRunId;
     private final boolean[] runtimeLeaseLaunched;
+    private final boolean[] runtimeLeaseActive;
+    private final CompletableFuture<?>[] runtimeLeaseHeartbeats;
+    private final ScheduledExecutorService runtimeLeaseHeartbeatScheduler;
+    private final Object runtimeLeaseStateLock;
 
     @GuardedBy("this")
     private State state;
@@ -119,6 +123,11 @@ final public class SbkGemBenchmark implements GemBenchmark {
         this.remoteResults = new RemoteResponse[connections.length];
         this.nodes = new SshSession[connections.length];
         this.runtimeLeaseLaunched = new boolean[connections.length];
+        this.runtimeLeaseActive = new boolean[connections.length];
+        this.runtimeLeaseHeartbeats = new CompletableFuture<?>[connections.length];
+        this.runtimeLeaseStateLock = new Object();
+        this.runtimeLeaseHeartbeatScheduler = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
+                .name("sbk-gem-runtime-lease-heartbeat").daemon(true).factory());
         for (int i = 0; i < connections.length; i++) {
             nodes[i] = new SshSession(connections[i], executor);
         }
@@ -212,8 +221,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
             commandTokens.addAll(sbkArgs);
             final String command = RemoteJavaDeployment.launchCommand(javaHomes[i],
                     RemoteSbkDeployment.shellJoin(commandTokens));
-            final String managedCommand = RemoteRuntimeLifecycle.launchCommand(
-                    runtimeDeployment.leasePaths()[i], runtimeDeployment.releaseCommands()[i], command);
+            final String managedCommand = RemoteRuntimeLifecycle.launchCommand(command);
             final String redactedCommand = RemoteJavaDeployment.launchCommand(javaHomes[i],
                     RemoteSbkDeployment.shellJoin(List.of(
                             SbkUtils.redactSensitiveOptionValues(
@@ -231,8 +239,19 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 sbmBenchmark.abortPendingRegistrations(result.failureMessage);
                 continue;
             }
+            final int nodeIndex = i;
             cfResults[i] = commandFuture.handle((response, failure) ->
-                    remoteCommandResult(host, response, failure));
+                            remoteCommandResult(host, response, failure))
+                    .thenCompose(result -> releaseRuntimeLeaseAsync(nodeIndex)
+                            .handle((ignored, leaseFailure) -> {
+                                if (leaseFailure != null) {
+                                    Printer.log.warn("SBK-GEM: Unable to release managed runtime lease on host "
+                                                    + "'{}:{}'; the lease will expire automatically: {}", host,
+                                            nodes[nodeIndex].connection.getPort(),
+                                            unwrapCompletionFailure(leaseFailure).getMessage());
+                                }
+                                return result;
+                            }));
             cfResults[i].thenAccept(result -> {
                 if (result.status != RemoteExecutionStatus.SUCCESS) {
                     final int aborted = sbmBenchmark.abortPendingRegistrations(result.failureMessage);
@@ -446,8 +465,6 @@ final public class SbkGemBenchmark implements GemBenchmark {
         final String[] parentDirectories = new String[nodes.length];
         final String[] deploymentNames = new String[nodes.length];
         final String[] leaseIds = new String[nodes.length];
-        final String[] leasePaths = new String[nodes.length];
-        final String[] releaseCommands = new String[nodes.length];
         final boolean[] copyTargets = new boolean[nodes.length];
         final CompletableFuture<SshResponse>[] probes = new CompletableFuture[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
@@ -455,13 +472,15 @@ final public class SbkGemBenchmark implements GemBenchmark {
             parentDirectories[i] = absoluteConnectionDirs[i];
             deploymentNames[i] = bundle.deploymentName();
             leaseIds[i] = runtimeLeaseRunId + "-" + i;
-            leasePaths[i] = RemoteRuntimeLifecycle.leasePath(parentDirectories[i], deploymentNames[i], leaseIds[i]);
-            releaseCommands[i] = RemoteRuntimeLifecycle.releaseCommand(parentDirectories[i], deploymentNames[i],
-                    leaseIds[i], params.isRuntimeCleanup(), config.runtimeManagementLockTimeoutSeconds,
-                    config.runtimeManagementLockStaleSeconds, config.runtimeLeaseReservationSeconds);
             javaHomes[i] = bundle.javaHome() == null ? externalJavaHomes[i]
                     : remoteJoin(deploymentDirectories[i], bundle.javaHome());
             sbkCommands[i] = remoteJoin(deploymentDirectories[i], bundle.sbkCommand());
+        }
+        final RuntimeDeployment deployment = new RuntimeDeployment(javaHomes, sbkCommands,
+                parentDirectories, deploymentNames, leaseIds);
+        runtimeDeployment = deployment;
+        reserveRuntimeLeases(parentDirectories, deploymentNames, leaseIds);
+        for (int i = 0; i < nodes.length; i++) {
             probes[i] = nodes[i].runCommandAsync(RemoteRuntimeDeployment.probeCommand(
                     deploymentDirectories[i], bundle.contentDigest(), javaHomes[i], sbkCommands[i],
                     config.sbkVersion, params.getJavaVersion()), true, config.remoteTimeoutSeconds);
@@ -482,47 +501,190 @@ final public class SbkGemBenchmark implements GemBenchmark {
             Printer.log.info("SBK-GEM: Immutable runtime {} is already available on every host",
                     bundle.deploymentName());
         }
-        final RuntimeDeployment deployment = new RuntimeDeployment(javaHomes, sbkCommands,
-                leasePaths, releaseCommands);
-        runtimeDeployment = deployment;
         acquireRuntimeLeases(bundle, parentDirectories, deploymentNames, leaseIds);
         return deployment;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void reserveRuntimeLeases(String[] parentDirectories, String[] deploymentNames, String[] leaseIds)
+            throws InterruptedException, ExecutionException {
+        final CompletableFuture<Void>[] reservations = new CompletableFuture[nodes.length];
+        for (int i = 0; i < nodes.length; i++) {
+            final int nodeIndex = i;
+            try {
+                reservations[i] = nodes[i].runRemoteFileOperationAsync(fileSystem -> {
+                    RemoteRuntimeFiles.reserve(fileSystem.getPath(parentDirectories[nodeIndex]),
+                            deploymentNames[nodeIndex], leaseIds[nodeIndex],
+                            config.runtimeManagementLockTimeoutSeconds,
+                            config.runtimeManagementLockStaleSeconds);
+                    return null;
+                }, lifecycleOperationTimeoutSeconds()).thenRun(() -> activateRuntimeLease(nodeIndex));
+            } catch (ConnectException exception) {
+                reservations[i] = CompletableFuture.failedFuture(exception);
+            }
+        }
+        waitForDeployment(CompletableFuture.allOf(reservations), "runtime deployment reservation");
+        startRuntimeLeaseHeartbeats();
+        Printer.log.info("SBK-GEM: Reserved runtime deployment identities through Apache MINA SFTP on {} host(s)",
+                nodes.length);
     }
 
     @SuppressWarnings("unchecked")
     private void acquireRuntimeLeases(SbkRuntimeBundle bundle, String[] parentDirectories,
                                       String[] deploymentNames, String[] leaseIds)
             throws InterruptedException, ExecutionException {
-        final CompletableFuture<SshResponse>[] acquisitions = new CompletableFuture[nodes.length];
-        final boolean[] selected = new boolean[nodes.length];
+        final CompletableFuture<Void>[] acquisitions = new CompletableFuture[nodes.length];
         final String[] targetHosts = new String[nodes.length];
-        java.util.Arrays.fill(selected, true);
         for (int i = 0; i < nodes.length; i++) {
             targetHosts[i] = nodes[i].connection.getHost() + ":" + nodes[i].connection.getPort();
             try {
-                acquisitions[i] = nodes[i].runCommandAsync(RemoteRuntimeLifecycle.acquireCommand(
-                        parentDirectories[i], deploymentNames[i], bundle.contentDigest(), leaseIds[i],
-                        params.isRuntimeCleanup(), config.runtimeManagementLockTimeoutSeconds,
-                        config.runtimeManagementLockStaleSeconds, config.runtimeLeaseReservationSeconds),
-                        true, config.deploymentTimeoutSeconds);
+                final int nodeIndex = i;
+                acquisitions[i] = nodes[i].runRemoteFileOperationAsync(fileSystem -> {
+                    RemoteRuntimeFiles.acquire(fileSystem.getPath(parentDirectories[nodeIndex]),
+                            deploymentNames[nodeIndex], bundle.contentDigest(), leaseIds[nodeIndex],
+                            params.isRuntimeCleanup(), config.runtimeManagementLockTimeoutSeconds,
+                            config.runtimeManagementLockStaleSeconds, config.runtimeLeaseReservationSeconds);
+                    return null;
+                }, lifecycleOperationTimeoutSeconds());
             } catch (ConnectException exception) {
                 acquisitions[i] = CompletableFuture.failedFuture(exception);
             }
         }
-        Printer.log.info("SBK-GEM: Reserving managed runtime {} on {} host(s); inactive runtime cleanup is {}; "
+        Printer.log.info("SBK-GEM: Reserving managed runtime {} through Apache MINA SFTP on {} host(s); "
+                        + "inactive runtime retirement is {}; "
                         + "progress every {} second(s)", bundle.deploymentName(), nodes.length,
                 params.isRuntimeCleanup() ? "enabled" : "disabled", config.runtimeProgressIntervalSeconds);
         final long acquisitionSeconds;
-        try (LifecycleProgress progress = new LifecycleProgress("Runtime lease acquisition and cleanup",
+        try (LifecycleProgress progress = new LifecycleProgress("Runtime lease acquisition and retirement",
                 config.runtimeProgressIntervalSeconds,
                 () -> futureProgress(acquisitions, targetHosts, "host operation(s)"))) {
-            waitForDeployment(CompletableFuture.allOf(acquisitions), "runtime lease acquisition and cleanup");
+            waitForDeployment(CompletableFuture.allOf(acquisitions), "runtime lease acquisition and retirement");
             acquisitionSeconds = progress.elapsedSeconds();
         }
-        requireSuccessfulWithDiagnostics(acquisitions, selected, "Acquiring managed runtime leases");
+        startRetiredRuntimeCleanup(parentDirectories);
         Printer.log.info("SBK-GEM: Reserved runtime {} on {} host(s) in {} second(s); inactive non-current "
-                        + "runtime cleanup is {}", bundle.deploymentName(), nodes.length, acquisitionSeconds,
+                        + "runtime retirement is {}", bundle.deploymentName(), nodes.length, acquisitionSeconds,
                 params.isRuntimeCleanup() ? "enabled" : "disabled");
+    }
+
+    private void startRuntimeLeaseHeartbeats() {
+        final long intervalSeconds = Math.max(1, config.runtimeLeaseReservationSeconds / 3);
+        runtimeLeaseHeartbeatScheduler.scheduleWithFixedDelay(this::refreshRuntimeLeases,
+                intervalSeconds, intervalSeconds, TimeUnit.SECONDS);
+        Printer.log.info("SBK-GEM: Managed runtime leases will be refreshed through Apache MINA SFTP every "
+                + "{} second(s)", intervalSeconds);
+    }
+
+    private void refreshRuntimeLeases() {
+        final RuntimeDeployment deployment = runtimeDeployment;
+        if (deployment == null) {
+            return;
+        }
+        for (int i = 0; i < nodes.length; i++) {
+            if (!isRuntimeLeaseActive(i)
+                    || (runtimeLeaseHeartbeats[i] != null && !runtimeLeaseHeartbeats[i].isDone())) {
+                continue;
+            }
+            final int nodeIndex = i;
+            try {
+                runtimeLeaseHeartbeats[i] = nodes[i].runRemoteFileOperationAsync(fileSystem -> {
+                    RemoteRuntimeFiles.heartbeat(fileSystem.getPath(deployment.parentDirectories()[nodeIndex]),
+                            deployment.deploymentNames()[nodeIndex], deployment.leaseIds()[nodeIndex],
+                            config.runtimeManagementLockTimeoutSeconds,
+                            config.runtimeManagementLockStaleSeconds);
+                    return null;
+                }, lifecycleOperationTimeoutSeconds()).whenComplete((ignored, failure) -> {
+                    if (failure != null && isRuntimeLeaseActive(nodeIndex)) {
+                        Printer.log.warn("SBK-GEM: Managed runtime lease heartbeat failed on host '{}:{}': {}",
+                                nodes[nodeIndex].connection.getHost(), nodes[nodeIndex].connection.getPort(),
+                                unwrapCompletionFailure(failure).getMessage());
+                    }
+                });
+            } catch (ConnectException exception) {
+                Printer.log.warn("SBK-GEM: Unable to start managed runtime lease heartbeat on host '{}:{}': {}",
+                        nodes[i].connection.getHost(), nodes[i].connection.getPort(), exception.getMessage());
+            }
+        }
+    }
+
+    private void startRetiredRuntimeCleanup(String[] parentDirectories) {
+        if (!params.isRuntimeCleanup()) {
+            return;
+        }
+        consMap.reset();
+        for (int i = 0; i < nodes.length; i++) {
+            if (consMap.isVisited(nodes[i].connection)) {
+                continue;
+            }
+            consMap.visit(nodes[i].connection);
+            final int nodeIndex = i;
+            try {
+                nodes[i].runRemoteFileOperationAsync(fileSystem ->
+                                RemoteRuntimeFiles.deleteRetired(fileSystem.getPath(parentDirectories[nodeIndex])),
+                                config.deploymentTimeoutSeconds)
+                        .whenComplete((deleted, failure) -> {
+                            if (failure == null) {
+                                Printer.log.info("SBK-GEM: Removed {} retired runtime tree(s) from host '{}:{}'",
+                                        deleted, nodes[nodeIndex].connection.getHost(),
+                                        nodes[nodeIndex].connection.getPort());
+                            } else {
+                                Printer.log.warn("SBK-GEM: Retired runtime deletion failed on host '{}:{}'; "
+                                                + "a later run will retry: {}", nodes[nodeIndex].connection.getHost(),
+                                        nodes[nodeIndex].connection.getPort(),
+                                        unwrapCompletionFailure(failure).getMessage());
+                            }
+                        });
+            } catch (ConnectException exception) {
+                Printer.log.warn("SBK-GEM: Unable to start retired runtime deletion on host '{}:{}': {}",
+                        nodes[i].connection.getHost(), nodes[i].connection.getPort(), exception.getMessage());
+            }
+        }
+    }
+
+    private CompletableFuture<Void> releaseRuntimeLeaseAsync(int nodeIndex) {
+        if (!deactivateRuntimeLease(nodeIndex) || runtimeDeployment == null) {
+            return CompletableFuture.completedFuture(null);
+        }
+        final RuntimeDeployment deployment = runtimeDeployment;
+        try {
+            return nodes[nodeIndex].runRemoteFileOperationAsync(fileSystem -> {
+                RemoteRuntimeFiles.release(fileSystem.getPath(deployment.parentDirectories()[nodeIndex]),
+                        deployment.deploymentNames()[nodeIndex], deployment.leaseIds()[nodeIndex],
+                        params.isRuntimeCleanup(), config.runtimeManagementLockTimeoutSeconds,
+                        config.runtimeManagementLockStaleSeconds, config.runtimeLeaseReservationSeconds);
+                return null;
+            }, lifecycleOperationTimeoutSeconds());
+        } catch (ConnectException exception) {
+            return CompletableFuture.failedFuture(exception);
+        }
+    }
+
+    private long lifecycleOperationTimeoutSeconds() {
+        if (config.runtimeManagementLockTimeoutSeconds
+                >= Long.MAX_VALUE - config.remoteTimeoutSeconds) {
+            return Long.MAX_VALUE;
+        }
+        return config.runtimeManagementLockTimeoutSeconds + config.remoteTimeoutSeconds;
+    }
+
+    private void activateRuntimeLease(int nodeIndex) {
+        synchronized (runtimeLeaseStateLock) {
+            runtimeLeaseActive[nodeIndex] = true;
+        }
+    }
+
+    private boolean isRuntimeLeaseActive(int nodeIndex) {
+        synchronized (runtimeLeaseStateLock) {
+            return runtimeLeaseActive[nodeIndex];
+        }
+    }
+
+    private boolean deactivateRuntimeLease(int nodeIndex) {
+        synchronized (runtimeLeaseStateLock) {
+            final boolean active = runtimeLeaseActive[nodeIndex];
+            runtimeLeaseActive[nodeIndex] = false;
+            return active;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -532,23 +694,10 @@ final public class SbkGemBenchmark implements GemBenchmark {
         final String transferId = Long.toUnsignedString(System.nanoTime());
         final String[] archivePaths = new String[nodes.length];
         final String[] stagingDirectories = new String[nodes.length];
-        final CompletableFuture<SshResponse>[] prepareFutures = new CompletableFuture[nodes.length];
-        consMap.reset();
         for (int i = 0; i < nodes.length; i++) {
             archivePaths[i] = deploymentDirectories[i] + "." + transferId + ".tar.gz";
             stagingDirectories[i] = deploymentDirectories[i] + "." + transferId + ".staging";
-            if (!copyTargets[i] || consMap.isVisited(nodes[i].connection)) {
-                prepareFutures[i] = CompletableFuture.completedFuture(new SshResponse(true));
-            } else {
-                consMap.visit(nodes[i].connection);
-                final String command = "mkdir -p " + RemoteSbkDeployment.shellQuote(
-                        remoteParent(deploymentDirectories[i]));
-                prepareFutures[i] = nodes[i].runCommandAsync(command, true, config.remoteTimeoutSeconds);
-            }
         }
-        waitFor(CompletableFuture.allOf(prepareFutures), "runtime deployment directory preparation");
-        requireSuccessfulWithDiagnostics(prepareFutures, copyTargets,
-                "Preparing remote runtime deployment directories");
 
         try (SbkRuntimeBundle.ArchiveUse ignored = bundle.acquireArchiveUse()) {
             final CompletableFuture<?>[] uploads = new CompletableFuture[nodes.length];
@@ -712,27 +861,24 @@ final public class SbkGemBenchmark implements GemBenchmark {
     }
 
     @SuppressWarnings("unchecked")
-    private String[] resolveRemoteConnectionDirectories() throws ConnectException, InterruptedException,
-            ExecutionException {
-        final CompletableFuture<SshResponse>[] probes = new CompletableFuture[nodes.length];
+    private String[] resolveRemoteConnectionDirectories() throws InterruptedException, ExecutionException {
+        final CompletableFuture<String>[] resolutions = new CompletableFuture[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
-            probes[i] = nodes[i].runCommandAsync(RemoteSbkDeployment.directoryPathProbeCommand(
-                    nodes[i].connection.getDir()), true, config.remoteTimeoutSeconds);
+            final int nodeIndex = i;
+            try {
+                resolutions[i] = nodes[i].runRemoteFileOperationAsync(fileSystem ->
+                                RemoteRuntimeFiles.resolveDirectory(fileSystem,
+                                        nodes[nodeIndex].connection.getDir()),
+                        lifecycleOperationTimeoutSeconds());
+            } catch (ConnectException exception) {
+                resolutions[i] = CompletableFuture.failedFuture(exception);
+            }
         }
-        waitFor(CompletableFuture.allOf(probes), "remote working-directory discovery");
+        waitForDeployment(CompletableFuture.allOf(resolutions), "remote working-directory discovery");
 
         final String[] directories = new String[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
-            final SshResponse response = probes[i].get();
-            directories[i] = RemoteSbkDeployment.absoluteDirectoryPath(response);
-            if (directories[i] == null) {
-                final String remoteError = response.errOutputStream.toString().trim();
-                final String errMsg = "SBK-GEM: Unable to resolve remote directory '" +
-                        nodes[i].connection.getDir() + "' on host '" + nodes[i].connection.getHost() + "'" +
-                        (remoteError.isEmpty() ? "" : ": " + remoteError);
-                Printer.log.error(errMsg);
-                throw new InterruptedException(errMsg);
-            }
+            directories[i] = resolutions[i].get();
         }
         return directories;
     }
@@ -746,14 +892,6 @@ final public class SbkGemBenchmark implements GemBenchmark {
             normalized = normalized.substring(0, normalized.length() - 1);
         }
         return normalized;
-    }
-
-    private static String remoteParent(String path) {
-        final int separator = path.lastIndexOf('/');
-        if (separator < 0) {
-            return ".";
-        }
-        return separator == 0 ? "/" : path.substring(0, separator);
     }
 
     private static String remoteJoin(String parent, String child) {
@@ -928,26 +1066,18 @@ final public class SbkGemBenchmark implements GemBenchmark {
         if (runtimeDeployment == null) {
             return;
         }
-        final CompletableFuture<SshResponse>[] releases = new CompletableFuture[nodes.length];
-        final boolean[] selected = new boolean[nodes.length];
+        final CompletableFuture<Void>[] releases = new CompletableFuture[nodes.length];
         boolean releaseRequired = false;
         for (int i = 0; i < nodes.length; i++) {
-            selected[i] = !runtimeLeaseLaunched[i];
-            releaseRequired |= selected[i];
-            if (selected[i]) {
-                try {
-                    releases[i] = nodes[i].runCommandAsync(runtimeDeployment.releaseCommands()[i], true,
-                            config.deploymentTimeoutSeconds);
-                } catch (ConnectException exception) {
-                    releases[i] = CompletableFuture.failedFuture(exception);
-                }
+            if (isRuntimeLeaseActive(i) && !runtimeLeaseLaunched[i]) {
+                releaseRequired = true;
+                releases[i] = releaseRuntimeLeaseAsync(i);
             } else {
-                releases[i] = CompletableFuture.completedFuture(new SshResponse(true));
+                releases[i] = CompletableFuture.completedFuture(null);
             }
         }
         if (releaseRequired) {
             waitForDeployment(CompletableFuture.allOf(releases), "unlaunched runtime lease release");
-            requireSuccessfulWithDiagnostics(releases, selected, "Releasing unlaunched runtime leases");
         }
     }
 
@@ -966,6 +1096,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
             state = State.END;
             Throwable terminalFailure = unwrapCompletionFailure(ex);
             int maximumRegisteredClients = -1;
+            runtimeLeaseHeartbeatScheduler.shutdownNow();
             try {
                 releaseUnlaunchedRuntimeLeases();
             } catch (InterruptedException | ExecutionException releaseFailure) {
@@ -1045,7 +1176,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
     }
 
     private record RuntimeDeployment(String[] javaHomes, String[] sbkCommands,
-                                     String[] leasePaths, String[] releaseCommands) {
+                                     String[] parentDirectories, String[] deploymentNames,
+                                     String[] leaseIds) {
     }
 
     private record RemoteTarget(String host, int port, String path) {

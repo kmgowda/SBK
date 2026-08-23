@@ -10,11 +10,8 @@
 
 package io.gem.api.impl;
 
-import io.gem.api.SshResponse;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,22 +36,4 @@ final class RemoteSbkDeploymentTest {
         assertNull(RemoteSbkDeployment.parseVersion("SBK-GEM Version: 10.6\n"));
     }
 
-    @Test
-    void resolvesRemoteDirectoryToAbsolutePath() throws IOException {
-        final String probe = RemoteSbkDeployment.directoryPathProbeCommand("work dir");
-        final SshResponse response = response(0, "/home/user/work dir\n");
-
-        assertEquals("case 'work dir' in /*) printf '%s\\n' 'work dir';; *) printf '%s/%s\\n' " +
-                "\"$(pwd -P)\" 'work dir';; esac", probe);
-        assertEquals("/home/user/work dir", RemoteSbkDeployment.absoluteDirectoryPath(response));
-        assertNull(RemoteSbkDeployment.absoluteDirectoryPath(response(0, "relative/work dir\n")));
-        assertNull(RemoteSbkDeployment.absoluteDirectoryPath(response(1, "/home/user/work dir\n")));
-    }
-
-    private static SshResponse response(int returnCode, String standardOutput) throws IOException {
-        final SshResponse response = new SshResponse(true);
-        response.returnCode = returnCode;
-        response.stdOutputStream.write(standardOutput.getBytes(StandardCharsets.UTF_8));
-        return response;
-    }
 }

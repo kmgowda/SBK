@@ -214,7 +214,7 @@ then writes a compressed archive. During this potentially long disk-intensive
 step, GEM emits an elapsed-time heartbeat every 5 seconds by default. Runtime
 archive copies report the archive size, unique transfer-target count, completed
 targets, and hosts still pending. Runtime lease acquisition and inactive-runtime
-cleanup use the same per-host progress reporting. Configure the shared bounded
+retirement use the same per-host progress reporting. Configure the shared bounded
 update interval with `runtimeProgressIntervalSeconds` in `gem.properties`;
 cached bundles and fast local-network copies normally complete without a heartbeat.
 
@@ -227,14 +227,22 @@ transfer staging files from changing or recursively expanding the next bundle.
 The deployment lifecycle is automatic: an exact verified SBK-plus-JDK identity
 is reused, while missing content is uploaded, verified, and activated without a
 separate copy switch. The current identity is retained after benchmarking.
-Remote PID leases protect runtimes used by concurrent GEM executions; therefore
+Apache MINA SFTP leases protect runtimes used by concurrent GEM executions. A
+reservation is created before probe/copy/activation and refreshed by the
+controller during the benchmark, so overlapping GEM processes cannot retire an
+identity another process is preparing or using. Therefore
 an active non-current identity may coexist temporarily and is removed after its
 final lease exits. Cleanup compares immutable identities, not version numbers,
 so both lower and higher inactive SBK versions are removed. An inactive runtime
 is first atomically renamed out of the managed `sbk-runtime-*` namespace while
-the lifecycle lock is held. Its potentially large directory tree is then
-deleted by a detached process with closed standard streams, so recursive file
-deletion cannot block lease acquisition or remote benchmark startup.
+the SFTP lifecycle lock is held. Its potentially large directory tree is then
+deleted through a separate MINA SFTP operation, so recursive deletion cannot
+hold the lifecycle lock or block lease acquisition and remote benchmark startup.
+No login-shell, zsh, `nohup`, PID probe, or shell glob participates in lease
+management. Apache MINA SFTP also resolves and creates the remote deployment
+directory. Shell commands remain only where SSH has no file API equivalent:
+probing remote OS/tools or executable Java/SBK versions, extracting and
+verifying the archive, and launching the benchmark process.
 
 The deployment lifecycle options are:
 

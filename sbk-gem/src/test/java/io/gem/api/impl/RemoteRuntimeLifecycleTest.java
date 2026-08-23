@@ -18,14 +18,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** Tests managed remote runtime leases and non-current-version cleanup using the local POSIX shell. */
+/** Tests Apache MINA file-system leases, cleanup, concurrency, and the minimal launch shell wrapper. */
 final class RemoteRuntimeLifecycleTest {
     private static final long TEST_TIMEOUT_SECONDS = 5;
     private static final long TEST_STALE_SECONDS = 60;
@@ -36,6 +35,17 @@ final class RemoteRuntimeLifecycleTest {
     private Path temporaryDirectory;
 
     @Test
+    void resolvesAndCreatesDeploymentDirectoryWithoutRemoteShell() throws Exception {
+        final Path configured = temporaryDirectory.resolve("deployment parent");
+
+        final String resolved = RemoteRuntimeFiles.resolveDirectory(
+                configured.getFileSystem(), configured.toString());
+
+        assertEquals(configured.toRealPath().toString(), resolved);
+        assertTrue(Files.isDirectory(configured));
+    }
+
+    @Test
     void acquisitionRetainsCurrentRuntimeAndRemovesAllInactiveNonCurrentVersions() throws Exception {
         final String current = "sbk-runtime-10.6-linux-amd64-current";
         final String old = "sbk-runtime-10.5-linux-amd64-old";
@@ -44,62 +54,81 @@ final class RemoteRuntimeLifecycleTest {
         createRuntime(old, "old-digest");
         createRuntime(newer, "newer-digest");
 
-        run(RemoteRuntimeLifecycle.acquireCommand(temporaryDirectory.toString(), current, DIGEST,
-                "run-1", true, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS));
+        RemoteRuntimeFiles.acquire(temporaryDirectory, current, DIGEST, "run-1", true,
+                TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS);
 
         assertTrue(Files.isDirectory(temporaryDirectory.resolve(current)));
         assertFalse(Files.exists(temporaryDirectory.resolve(old)));
         assertFalse(Files.exists(temporaryDirectory.resolve(newer)));
         assertEquals(current, Files.readString(temporaryDirectory.resolve(".sbk-runtime-current")).trim());
         assertTrue(Files.readString(Path.of(RemoteRuntimeLifecycle.leasePath(
-                temporaryDirectory.toString(), current, "run-1"))).startsWith("reserved:"));
+                temporaryDirectory.toString(), current, "run-1"))).startsWith("active:"));
     }
 
     @Test
-    void acquisitionAndCleanupCompleteWithAvailableShells() throws Exception {
-        for (String shell : availableShells()) {
-            final String shellName = shell.substring(shell.lastIndexOf('/') + 1);
-            final Path parent = temporaryDirectory.resolve(shellName);
-            final String current = "sbk-runtime-10.6-macos-current";
-            final String inactive = "sbk-runtime-10.5-macos-inactive";
-            createRuntime(parent, current, DIGEST);
-            createRuntime(parent, inactive, "inactive-digest");
+    void concurrentAcquisitionsPreserveEveryActiveRuntime() throws Exception {
+        final String first = "sbk-runtime-10.6-macos-first";
+        final String second = "sbk-runtime-10.6-macos-second";
+        createRuntime(first, DIGEST);
+        createRuntime(second, "second-digest");
+        RemoteRuntimeFiles.reserve(temporaryDirectory, first, "first-run",
+                TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS);
+        RemoteRuntimeFiles.reserve(temporaryDirectory, second, "second-run",
+                TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS);
 
-            run(shell, RemoteRuntimeLifecycle.acquireCommand(parent.toString(), current, DIGEST,
-                    shellName + "-acquire", true, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS,
-                    TEST_RESERVATION_SECONDS));
+        final var firstAcquire = java.util.concurrent.CompletableFuture.runAsync(() ->
+                acquireUnchecked(first, DIGEST, "first-run"));
+        final var secondAcquire = java.util.concurrent.CompletableFuture.runAsync(() ->
+                acquireUnchecked(second, "second-digest", "second-run"));
+        java.util.concurrent.CompletableFuture.allOf(firstAcquire, secondAcquire).get(
+                TEST_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
-            assertTrue(Files.isDirectory(parent.resolve(current)), shell + " current runtime");
-            assertFalse(Files.exists(parent.resolve(inactive)), shell + " inactive runtime cleanup");
+        assertTrue(Files.isDirectory(temporaryDirectory.resolve(first)));
+        assertTrue(Files.isDirectory(temporaryDirectory.resolve(second)));
+        assertTrue(Files.isRegularFile(Path.of(RemoteRuntimeLifecycle.leasePath(
+                temporaryDirectory.toString(), first, "first-run"))));
+        assertTrue(Files.isRegularFile(Path.of(RemoteRuntimeLifecycle.leasePath(
+                temporaryDirectory.toString(), second, "second-run"))));
+    }
+
+    @Test
+    void multipleControllersShareOneRuntimeWithoutLeavingTheLifecycleLock() throws Exception {
+        final String deployment = "sbk-runtime-10.6-linux-shared";
+        createRuntime(deployment, DIGEST);
+        final var operations = new java.util.ArrayList<java.util.concurrent.CompletableFuture<Void>>();
+        for (int i = 0; i < 16; i++) {
+            final String leaseId = "shared-" + i;
+            operations.add(java.util.concurrent.CompletableFuture.runAsync(() ->
+                    acquireUnchecked(deployment, DIGEST, leaseId)));
         }
+        java.util.concurrent.CompletableFuture.allOf(operations.toArray(java.util.concurrent.CompletableFuture[]::new))
+                .get(TEST_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+
+        final Path leases = temporaryDirectory.resolve(RemoteRuntimeFiles.LEASE_DIRECTORY).resolve(deployment);
+        try (var entries = Files.list(leases)) {
+            assertEquals(16, entries.count());
+        }
+        assertFalse(Files.exists(temporaryDirectory.resolve(RemoteRuntimeFiles.LOCK_DIRECTORY)));
     }
 
     @Test
-    void inactiveRuntimeDeletionDoesNotBlockLeaseAcquisition() throws Exception {
+    void recursiveDeletionIsSeparatedFromLeaseAcquisition() throws Exception {
         final Path parent = temporaryDirectory.resolve("detached-cleanup");
         final String current = "sbk-runtime-10.6-macos-current";
         final String inactive = "sbk-runtime-10.5-macos-inactive";
         createRuntime(parent, current, DIGEST);
         createRuntime(parent, inactive, "inactive-digest");
-        final Path fakeBin = Files.createDirectories(temporaryDirectory.resolve("fake-bin"));
-        final Path slowRemove = fakeBin.resolve("rm");
-        Files.writeString(slowRemove, "#!/bin/sh\ncase \"$*\" in *.sbk-runtime-retired.*) sleep 3;; esac\n"
-                + "exec /bin/rm \"$@\"\n", StandardCharsets.UTF_8);
-        assertTrue(slowRemove.toFile().setExecutable(true));
-        final String command = "PATH=" + RemoteSbkDeployment.shellQuote(fakeBin.toString())
-                + ":$PATH; export PATH; " + RemoteRuntimeLifecycle.acquireCommand(parent.toString(), current,
-                DIGEST, "detached-acquire", true, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS,
-                TEST_RESERVATION_SECONDS);
-
         final long startedNanos = System.nanoTime();
-        run(command);
+        RemoteRuntimeFiles.acquire(parent, current, DIGEST, "detached-acquire", true,
+                TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS);
         final long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedNanos);
 
         assertTrue(elapsedMillis < TimeUnit.SECONDS.toMillis(2),
                 "lease acquisition waited " + elapsedMillis + " ms for recursive deletion");
         assertTrue(Files.isDirectory(parent.resolve(current)));
         assertFalse(Files.exists(parent.resolve(inactive)));
-        waitForRetiredCleanup(parent);
+        assertEquals(1, RemoteRuntimeFiles.deleteRetired(parent));
+        assertNoRetiredRuntime(parent);
     }
 
     @Test
@@ -108,62 +137,48 @@ final class RemoteRuntimeLifecycleTest {
         final String active = "sbk-runtime-10.7-linux-amd64-active";
         createRuntime(current, DIGEST);
         createRuntime(active, "active-digest");
+        RemoteRuntimeFiles.acquire(temporaryDirectory, active, "active-digest", "active-run", false,
+                TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS);
         final Path activeLease = Path.of(RemoteRuntimeLifecycle.leasePath(
                 temporaryDirectory.toString(), active, "active-run"));
-        Files.createDirectories(Objects.requireNonNull(activeLease.getParent()));
-        Files.writeString(activeLease, "pid:" + ProcessHandle.current().pid() + "\n", StandardCharsets.UTF_8);
-
-        run(RemoteRuntimeLifecycle.acquireCommand(temporaryDirectory.toString(), current, DIGEST,
-                "run-2", true, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS));
+        RemoteRuntimeFiles.acquire(temporaryDirectory, current, DIGEST, "run-2", true,
+                TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS);
 
         assertTrue(Files.isDirectory(temporaryDirectory.resolve(active)));
         assertTrue(Files.isRegularFile(activeLease));
     }
 
     @Test
-    void launchConvertsReservationToPidAndReleasesItWithoutDeletingCurrentRuntime() throws Exception {
-        final String current = "sbk-runtime-10.6-linux-amd64-current";
-        final String leaseId = "run-3";
-        createRuntime(current, DIGEST);
-        run(RemoteRuntimeLifecycle.acquireCommand(temporaryDirectory.toString(), current, DIGEST,
-                leaseId, false, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS));
-        final String lease = RemoteRuntimeLifecycle.leasePath(temporaryDirectory.toString(), current, leaseId);
-        final String release = RemoteRuntimeLifecycle.releaseCommand(temporaryDirectory.toString(), current,
-                leaseId, false, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS);
-
-        run(RemoteRuntimeLifecycle.launchCommand(lease, release, "true"));
-
-        assertFalse(Files.exists(Path.of(lease)));
-        assertTrue(Files.isDirectory(temporaryDirectory.resolve(current)));
-    }
-
-    @Test
-    void launchPreservesCommandExitCodesAndReleasesLeaseWithAvailableShells() throws Exception {
+    void heartbeatRefreshesAnExistingLease() throws Exception {
         final String current = "sbk-runtime-10.6-linux-current";
         createRuntime(current, DIGEST);
+        RemoteRuntimeFiles.acquire(temporaryDirectory, current, DIGEST, "heartbeat", false,
+                TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS);
+        final Path lease = Path.of(RemoteRuntimeLifecycle.leasePath(
+                temporaryDirectory.toString(), current, "heartbeat"));
+        Files.writeString(lease, "active:1\n", StandardCharsets.UTF_8);
+
+        RemoteRuntimeFiles.heartbeat(temporaryDirectory, current, "heartbeat",
+                TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS);
+
+        assertFalse(Files.readString(lease).trim().equals("active:1"));
+    }
+
+    @Test
+    void launchPreservesCommandExitCodesWithAvailableShells() throws Exception {
         for (String shell : availableShells()) {
-            verifyExit(shell, current, "success", "true", 0);
-            verifyExit(shell, current, "failure", "exit 47", 47);
+            verifyExit(shell, "true", 0);
+            verifyExit(shell, "exit 47", 47);
         }
     }
 
     @Test
-    void launchPreservesSignalExitCodesAndReleasesLeaseWithAvailableShells() throws Exception {
-        final String current = "sbk-runtime-10.6-linux-amd64-current";
-        createRuntime(current, DIGEST);
-        for (String shell : availableShells()) {
-            verifySignal(shell, current, "HUP", 129);
-            verifySignal(shell, current, "INT", 130);
-            verifySignal(shell, current, "TERM", 143);
-        }
-    }
+    void launchUsesExplicitPosixShellWithoutLifecycleScript() {
+        final String command = RemoteRuntimeLifecycle.launchCommand("true");
 
-    @Test
-    void launchUsesShellPortableExitCodeVariable() {
-        final String command = RemoteRuntimeLifecycle.launchCommand("/tmp/lease", "true", "true");
-
-        assertTrue(command.contains("sbk_exit_code=$?"));
-        assertFalse(command.contains("status=$?"));
+        assertTrue(command.startsWith("sh -c "));
+        assertFalse(command.contains("lease"));
+        assertFalse(command.contains("trap"));
     }
 
     @Test
@@ -171,15 +186,15 @@ final class RemoteRuntimeLifecycleTest {
         final String old = "sbk-runtime-10.5-linux-amd64-old";
         final String current = "sbk-runtime-10.6-linux-amd64-current";
         createRuntime(old, "old-digest");
-        run(RemoteRuntimeLifecycle.acquireCommand(temporaryDirectory.toString(), old, "old-digest",
-                "old-run", true, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS));
+        RemoteRuntimeFiles.acquire(temporaryDirectory, old, "old-digest", "old-run", true,
+                TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS);
         createRuntime(current, DIGEST);
-        run(RemoteRuntimeLifecycle.acquireCommand(temporaryDirectory.toString(), current, DIGEST,
-                "current-run", true, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS));
+        RemoteRuntimeFiles.acquire(temporaryDirectory, current, DIGEST, "current-run", true,
+                TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS);
         assertTrue(Files.isDirectory(temporaryDirectory.resolve(old)));
 
-        run(RemoteRuntimeLifecycle.releaseCommand(temporaryDirectory.toString(), old, "old-run",
-                true, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS));
+        RemoteRuntimeFiles.release(temporaryDirectory, old, "old-run", true,
+                TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS);
 
         assertFalse(Files.exists(temporaryDirectory.resolve(old)));
         assertTrue(Files.isDirectory(temporaryDirectory.resolve(current)));
@@ -198,56 +213,15 @@ final class RemoteRuntimeLifecycleTest {
                 digest + "\n", StandardCharsets.UTF_8);
     }
 
-    private void verifySignal(String shell, String deploymentName, String signal, int expectedExitCode)
-            throws Exception {
-        final String leaseId = shell.substring(shell.lastIndexOf('/') + 1) + "-" + signal.toLowerCase();
-        run(RemoteRuntimeLifecycle.acquireCommand(temporaryDirectory.toString(), deploymentName, DIGEST,
-                leaseId, false, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS));
-        final String lease = RemoteRuntimeLifecycle.leasePath(temporaryDirectory.toString(), deploymentName,
-                leaseId);
-        final String release = RemoteRuntimeLifecycle.releaseCommand(temporaryDirectory.toString(),
-                deploymentName, leaseId, false, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS,
-                TEST_RESERVATION_SECONDS);
-        final Process process = new ProcessBuilder(shell, "-c", RemoteRuntimeLifecycle.launchCommand(
-                lease, release, "while :; do sleep 1; done"))
-                .redirectOutput(ProcessBuilder.Redirect.DISCARD)
-                .redirectError(ProcessBuilder.Redirect.DISCARD)
-                .start();
-        try {
-            waitForPidLease(Path.of(lease));
-            final Process signalProcess = new ProcessBuilder("kill", "-" + signal,
-                    Long.toString(process.pid())).start();
-            assertEquals(0, signalProcess.waitFor(), shell + " " + signal + " signal delivery");
-            assertTrue(process.waitFor(TEST_TIMEOUT_SECONDS, TimeUnit.SECONDS),
-                    shell + " did not exit after " + signal);
-            assertEquals(expectedExitCode, process.exitValue(), shell + " " + signal + " exit code");
-            assertFalse(Files.exists(Path.of(lease)), shell + " " + signal + " lease cleanup");
-        } finally {
-            process.destroyForcibly();
-            process.waitFor();
-        }
-    }
-
-    private void verifyExit(String shell, String deploymentName, String suffix, String command,
-                            int expectedExitCode) throws Exception {
-        final String shellName = shell.substring(shell.lastIndexOf('/') + 1);
-        final String leaseId = shellName + "-" + suffix;
-        run(RemoteRuntimeLifecycle.acquireCommand(temporaryDirectory.toString(), deploymentName, DIGEST,
-                leaseId, false, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS));
-        final String lease = RemoteRuntimeLifecycle.leasePath(temporaryDirectory.toString(), deploymentName,
-                leaseId);
-        final String release = RemoteRuntimeLifecycle.releaseCommand(temporaryDirectory.toString(),
-                deploymentName, leaseId, false, TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS,
-                TEST_RESERVATION_SECONDS);
+    private static void verifyExit(String shell, String command, int expectedExitCode) throws Exception {
         final Process process = new ProcessBuilder(shell, "-c",
-                RemoteRuntimeLifecycle.launchCommand(lease, release, command))
+                RemoteRuntimeLifecycle.launchCommand(command))
                 .redirectErrorStream(true)
                 .start();
         try {
             assertTrue(process.waitFor(TEST_TIMEOUT_SECONDS, TimeUnit.SECONDS), shell + " did not exit");
             final String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
             assertEquals(expectedExitCode, process.exitValue(), output);
-            assertFalse(Files.exists(Path.of(lease)), shell + " lease cleanup");
         } finally {
             process.destroyForcibly();
             process.waitFor();
@@ -260,39 +234,19 @@ final class RemoteRuntimeLifecycleTest {
                 .toList();
     }
 
-    private static void waitForPidLease(Path lease) throws Exception {
-        final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(TEST_TIMEOUT_SECONDS);
-        while (System.nanoTime() < deadline) {
-            if (Files.isRegularFile(lease) && Files.readString(lease).startsWith("pid:")) {
-                return;
-            }
-            Thread.sleep(10);
+    private void acquireUnchecked(String deploymentName, String digest, String leaseId) {
+        try {
+            RemoteRuntimeFiles.acquire(temporaryDirectory, deploymentName, digest, leaseId, true,
+                    TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS);
+        } catch (IOException | InterruptedException exception) {
+            throw new java.util.concurrent.CompletionException(exception);
         }
-        throw new AssertionError("Timed out waiting for PID lease: " + lease);
     }
 
-    private static void waitForRetiredCleanup(Path parent) throws Exception {
-        final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(TEST_TIMEOUT_SECONDS);
-        while (System.nanoTime() < deadline) {
-            try (var paths = Files.list(parent)) {
-                if (paths.noneMatch(path -> String.valueOf(path.getFileName())
-                        .startsWith(".sbk-runtime-retired."))) {
-                    return;
-                }
-            }
-            Thread.sleep(10);
+    private static void assertNoRetiredRuntime(Path parent) throws IOException {
+        try (var paths = Files.list(parent)) {
+            assertTrue(paths.noneMatch(path -> String.valueOf(path.getFileName())
+                    .startsWith(RemoteRuntimeFiles.RETIRED_PREFIX)));
         }
-        throw new AssertionError("Timed out waiting for retired runtime cleanup under " + parent);
-    }
-
-    private static void run(String command) throws Exception {
-        run("sh", command);
-    }
-
-    private static void run(String shell, String command) throws Exception {
-        final Process process = new ProcessBuilder(shell, "-c", command).redirectErrorStream(true).start();
-        final String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        assertTrue(process.waitFor(TEST_TIMEOUT_SECONDS, TimeUnit.SECONDS), shell + " command did not exit");
-        assertEquals(0, process.exitValue(), output);
     }
 }

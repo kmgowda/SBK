@@ -14,14 +14,18 @@ import io.sbk.system.Printer;
 import lombok.Synchronized;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.session.ClientSession;
+import org.apache.sshd.sftp.client.SftpClientFactory;
+import org.apache.sshd.sftp.client.fs.SftpFileSystem;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
+import java.nio.file.FileSystem;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Lifecycle wrapper around an SSH client/session for a single connection.
@@ -32,6 +36,20 @@ import java.util.concurrent.ExecutorService;
  * {@link Synchronized} or internal synchronization.
  */
 final public class SshSession {
+
+    /** A bounded operation performed against the remote Apache MINA SFTP file system. */
+    @FunctionalInterface
+    public interface RemoteFileOperation<T> {
+        /**
+         * Execute the operation.
+         *
+         * @param fileSystem remote SFTP file system
+         * @return operation result
+         * @throws IOException on remote file-system failure
+         * @throws InterruptedException when lifecycle coordination is interrupted
+         */
+        T execute(FileSystem fileSystem) throws IOException, InterruptedException;
+    }
 
     /**
      * <code>public SshConnection connection</code>.
@@ -188,6 +206,33 @@ final public class SshSession {
                 throw new CompletionException(exception);
             }
         }, executor).orTimeout(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS);
+    }
+
+    /**
+     * Execute a remote file-system operation through Apache MINA SFTP.
+     *
+     * @param operation remote file-system operation
+     * @param timeoutSeconds maximum operation duration
+     * @param <T> result type
+     * @return asynchronous operation result
+     * @throws ConnectException when no SSH session is available
+     */
+    public <T> CompletableFuture<T> runRemoteFileOperationAsync(RemoteFileOperation<T> operation,
+                                                                 long timeoutSeconds)
+            throws ConnectException {
+        final ClientSession sshSession = getSession();
+        return CompletableFuture.supplyAsync(() -> {
+            try (SftpFileSystem fileSystem = SftpClientFactory.instance().createSftpFileSystem(sshSession)) {
+                return operation.execute(fileSystem);
+            } catch (InterruptedException exception) {
+                Thread.currentThread().interrupt();
+                throw new CompletionException(exception);
+            } catch (IOException exception) {
+                final String message = "SBK-GEM: Apache MINA SFTP operation failed on host '"
+                        + connection.getHost() + ":" + connection.getPort() + "': " + exception.getMessage();
+                throw new CompletionException(new IOException(message, exception));
+            }
+        }, executor).orTimeout(timeoutSeconds, TimeUnit.SECONDS);
     }
 
 

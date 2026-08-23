@@ -48,7 +48,6 @@ final class DeploymentPlatformTest {
         final String command = DeploymentPlatform.probeCommand();
 
         assertTrue(command.contains("command -v tar"));
-        assertTrue(command.contains("command -v nohup"));
         assertTrue(command.contains("command -v sha256sum"));
         assertTrue(command.contains("command -v shasum"));
         assertFalse(command.contains("uname -m"));
