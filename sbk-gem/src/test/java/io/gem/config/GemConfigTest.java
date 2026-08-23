@@ -35,6 +35,9 @@ public final class GemConfigTest {
         config.remoteTimeoutSeconds = 1;
         config.deploymentTimeoutSeconds = 1;
         config.runtimeCacheDirectory = ".sbk/cache/sbk-gem";
+        config.runtimeManagementLockTimeoutSeconds = 1;
+        config.runtimeManagementLockStaleSeconds = 2;
+        config.runtimeLeaseReservationSeconds = 1;
         config.executorThreadReserve = 1;
         config.diagnosticBytes = 1;
         config.maximumAgentResponseBytes = 1;

@@ -195,7 +195,7 @@ directory modes are normalized to `0755` in both the identity and archive.
 
 The archive contains a platform descriptor and per-file SHA-256 manifest.
 Every remote node must pass the homogeneous platform/tool preflight. GEM then
-uploads only a missing content identity, verifies the archive SHA-256, extracts
+automatically uploads only a missing content identity, verifies the archive SHA-256, extracts
 to a unique staging directory, verifies every regular file, and atomically
 renames the verified runtime into place. A partially copied or failed staging
 directory is never used to launch SBK. Subsequent runs reuse the exact verified
@@ -205,11 +205,24 @@ content without copying it again. Local archives are cached under
 cache writers across GEM processes, and a separately published SHA-256 sidecar
 causes incomplete or corrupted cached archives to be rebuilt before use.
 
+The deployment lifecycle is automatic: an exact verified SBK-plus-JDK identity
+is reused, while missing content is uploaded, verified, and activated without a
+separate copy switch. The current identity is retained after benchmarking.
+Remote PID leases protect runtimes used by concurrent GEM executions; therefore
+an older active identity may coexist temporarily and is removed after its final
+lease exits.
+
 The deployment lifecycle options are:
 
-- `-copy true|false` permits upload of a missing content-addressed runtime; the default is `true`. With `false`, missing exact content is an error.
 - `-delete true|false` permits replacement only when the exact content-addressed destination exists but fails validation; the default is `true`.
-- `-deleteafter true|false` controls whether the remote deployment is removed after benchmarking; the default is `false`, allowing the verified installation to be reused.
+- `-runtimecleanup true|false` removes inactive older SBK-GEM-managed runtime
+  identities after verified activation and lease release; the default is
+  `true`. It never deletes the current identity, a live leased identity, an
+  unmanaged directory, or an external JDK selected with `-javacopy false`.
+
+The former `-copy` and `-deleteafter` options are rejected with migration
+guidance. This prevents disabling required provisioning or deleting the newly
+verified runtime at benchmark shutdown.
 
 SBK-GEM selects Java as follows:
 

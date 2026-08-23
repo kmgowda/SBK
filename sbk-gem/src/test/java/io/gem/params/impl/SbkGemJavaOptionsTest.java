@@ -49,9 +49,8 @@ final class SbkGemJavaOptionsTest {
         assertTrue(config.javacopy);
         assertEquals(25, config.javaversion);
         assertTrue(config.javadir == null || config.javadir.isEmpty());
-        assertTrue(config.copy);
         assertTrue(config.delete);
-        assertFalse(config.deleteafter);
+        assertTrue(config.runtimecleanup);
         assertTrue(config.hostkeycheck);
         assertTrue(config.knownhosts == null || config.knownhosts.isEmpty());
         assertEquals(120, config.sbmRegistrationTimeoutSeconds);
@@ -94,7 +93,7 @@ final class SbkGemJavaOptionsTest {
     }
 
     @Test
-    void parsesSbkDeploymentLifecycleOverrides() throws Exception {
+    void parsesSbkDeploymentLifecycleOverride() throws Exception {
         final Path binDirectory = temporaryDirectory.resolve("bin");
         final Path command = binDirectory.resolve("sbk");
         Files.createDirectories(binDirectory);
@@ -105,11 +104,24 @@ final class SbkGemJavaOptionsTest {
         final SbkGemParameters parameters = new SbkGemParameters("test", new String[0], new String[0], config,
                 9717, 10);
         parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1",
-                "-copy", "false", "-delete", "false", "-deleteafter", "true"});
+                "-delete", "false", "-runtimecleanup", "false"});
 
-        assertFalse(parameters.isCopy());
         assertFalse(parameters.isDelete());
-        assertTrue(parameters.isDeleteAfter());
+        assertFalse(parameters.isRuntimeCleanup());
+    }
+
+    @Test
+    void rejectsRemovedCopyAndDeleteAfterOptionsWithMigrationGuidance() throws Exception {
+        createSbkCommand();
+        final SbkGemParameters parameters = parameters();
+
+        final IllegalArgumentException copyFailure = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(new String[]{"-copy", "false"}));
+        assertTrue(copyFailure.getMessage().contains("copied automatically"));
+
+        final IllegalArgumentException deleteFailure = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(new String[]{"-deleteafter", "true"}));
+        assertTrue(deleteFailure.getMessage().contains("-runtimecleanup"));
     }
 
     @Test
@@ -190,12 +202,11 @@ final class SbkGemJavaOptionsTest {
         config.knownhosts = "";
         config.sbkdir = sbkDirectory.toString();
         config.sbkcommand = "bin/sbk";
-        config.copy = true;
         config.javacopy = true;
         config.javaversion = 25;
         config.javadir = "";
         config.delete = true;
-        config.deleteafter = false;
+        config.runtimecleanup = true;
         config.timeoutSeconds = 5;
         config.remoteDir = "sbk-gem-test";
         return config;

@@ -75,16 +75,18 @@ loadScripts(document, 'script');</script>
 <li><a href="#gemport" tabindex="0">gemport</a></li>
 <li><a href="#sbkdir" tabindex="0">sbkdir</a></li>
 <li><a href="#sbkcommand" tabindex="0">sbkcommand</a></li>
-<li><a href="#copy" tabindex="0">copy</a></li>
 <li><a href="#sbkVersion" tabindex="0">sbkVersion</a></li>
 <li><a href="#javacopy" tabindex="0">javacopy</a></li>
 <li><a href="#javaversion" tabindex="0">javaversion</a></li>
 <li><a href="#javadir" tabindex="0">javadir</a></li>
 <li><a href="#delete" tabindex="0">delete</a></li>
-<li><a href="#deleteafter" tabindex="0">deleteafter</a></li>
+<li><a href="#runtimecleanup" tabindex="0">runtimecleanup</a></li>
 <li><a href="#remoteTimeoutSeconds" tabindex="0">remoteTimeoutSeconds</a></li>
 <li><a href="#deploymentTimeoutSeconds" tabindex="0">deploymentTimeoutSeconds</a></li>
 <li><a href="#runtimeCacheDirectory" tabindex="0">runtimeCacheDirectory</a></li>
+<li><a href="#runtimeManagementLockTimeoutSeconds" tabindex="0">runtimeManagementLockTimeoutSeconds</a></li>
+<li><a href="#runtimeManagementLockStaleSeconds" tabindex="0">runtimeManagementLockStaleSeconds</a></li>
+<li><a href="#runtimeLeaseReservationSeconds" tabindex="0">runtimeLeaseReservationSeconds</a></li>
 <li><a href="#sbmRegistrationTimeoutSeconds" tabindex="0">sbmRegistrationTimeoutSeconds</a></li>
 <li><a href="#timeoutSeconds" tabindex="0">timeoutSeconds</a></li>
 <li><a href="#maxIterations" tabindex="0">maxIterations</a></li>
@@ -146,19 +148,9 @@ management, and SBM coordination.</div>
 <div class="block"><code>String BIN_DIR = "bin"</code>.</div>
 </div>
 <div class="col-first odd-row-color"><code>boolean</code></div>
-<div class="col-second odd-row-color"><code><a href="#copy" class="member-name-link">copy</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#delete" class="member-name-link">delete</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">Whether SBK-GEM may copy missing or mismatched SBK installations to remote nodes.</div>
-</div>
-<div class="col-first even-row-color"><code>boolean</code></div>
-<div class="col-second even-row-color"><code><a href="#delete" class="member-name-link">delete</a></code></div>
-<div class="col-last even-row-color">
 <div class="block">Whether to delete an existing mismatched SBK installation before copying.</div>
-</div>
-<div class="col-first odd-row-color"><code>boolean</code></div>
-<div class="col-second odd-row-color"><code><a href="#deleteafter" class="member-name-link">deleteafter</a></code></div>
-<div class="col-last odd-row-color">
-<div class="block">Whether to delete the remote SBK deployment after the benchmark.</div>
 </div>
 <div class="col-first even-row-color"><code>long</code></div>
 <div class="col-second even-row-color"><code><a href="#deploymentTimeoutSeconds" class="member-name-link">deploymentTimeoutSeconds</a></code></div>
@@ -284,6 +276,26 @@ management, and SBM coordination.</div>
 <div class="col-second even-row-color"><code><a href="#runtimeCacheDirectory" class="member-name-link">runtimeCacheDirectory</a></code></div>
 <div class="col-last even-row-color">
 <div class="block">Local content-addressed runtime bundle cache directory, absolute or relative to the user's home.</div>
+</div>
+<div class="col-first odd-row-color"><code>boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#runtimecleanup" class="member-name-link">runtimecleanup</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Whether inactive SBK-GEM-managed runtime versions are removed automatically.</div>
+</div>
+<div class="col-first even-row-color"><code>long</code></div>
+<div class="col-second even-row-color"><code><a href="#runtimeLeaseReservationSeconds" class="member-name-link">runtimeLeaseReservationSeconds</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Age after which an unlaunched runtime lease reservation may be reclaimed.</div>
+</div>
+<div class="col-first odd-row-color"><code>long</code></div>
+<div class="col-second odd-row-color"><code><a href="#runtimeManagementLockStaleSeconds" class="member-name-link">runtimeManagementLockStaleSeconds</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Age after which an abandoned remote managed-runtime lifecycle lock may be reclaimed.</div>
+</div>
+<div class="col-first even-row-color"><code>long</code></div>
+<div class="col-second even-row-color"><code><a href="#runtimeManagementLockTimeoutSeconds" class="member-name-link">runtimeManagementLockTimeoutSeconds</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Maximum wait for the remote managed-runtime lifecycle lock.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#SBK_GEM_APP_NAME" class="member-name-link">SBK_GEM_APP_NAME</a></code></div>
@@ -602,15 +614,6 @@ management, and SBM coordination.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="copy">
-<h3>copy</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">copy</span></div>
-<div class="block">Whether SBK-GEM may copy missing or mismatched SBK installations to remote nodes.</div>
-</div>
-</section>
-</li>
-<li>
 <section class="detail" id="sbkVersion">
 <h3>sbkVersion</h3>
 <div class="horizontal-scroll">
@@ -656,11 +659,11 @@ management, and SBM coordination.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="deleteafter">
-<h3>deleteafter</h3>
+<section class="detail" id="runtimecleanup">
+<h3>runtimecleanup</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">deleteafter</span></div>
-<div class="block">Whether to delete the remote SBK deployment after the benchmark.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">runtimecleanup</span></div>
+<div class="block">Whether inactive SBK-GEM-managed runtime versions are removed automatically.</div>
 </div>
 </section>
 </li>
@@ -688,6 +691,33 @@ management, and SBM coordination.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">runtimeCacheDirectory</span></div>
 <div class="block">Local content-addressed runtime bundle cache directory, absolute or relative to the user's home.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="runtimeManagementLockTimeoutSeconds">
+<h3>runtimeManagementLockTimeoutSeconds</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">runtimeManagementLockTimeoutSeconds</span></div>
+<div class="block">Maximum wait for the remote managed-runtime lifecycle lock.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="runtimeManagementLockStaleSeconds">
+<h3>runtimeManagementLockStaleSeconds</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">runtimeManagementLockStaleSeconds</span></div>
+<div class="block">Age after which an abandoned remote managed-runtime lifecycle lock may be reclaimed.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="runtimeLeaseReservationSeconds">
+<h3>runtimeLeaseReservationSeconds</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">runtimeLeaseReservationSeconds</span></div>
+<div class="block">Age after which an unlaunched runtime lease reservation may be reclaimed.</div>
 </div>
 </section>
 </li>

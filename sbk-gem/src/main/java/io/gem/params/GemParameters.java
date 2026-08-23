@@ -86,13 +86,6 @@ public sealed interface GemParameters extends Parameters permits GemParameterOpt
 
 
     /**
-     * Check whether copying missing or mismatched SBK installations is enabled.
-     *
-     * @return true when SBK copying is enabled
-     */
-    boolean isCopy();
-
-    /**
      * Check whether SBK-GEM may copy its Java runtime to remote nodes.
      *
      * @return true when Java copying is enabled
@@ -121,9 +114,9 @@ public sealed interface GemParameters extends Parameters permits GemParameterOpt
     boolean isDelete();
 
     /**
-     * Check whether remote SBK deployments should be deleted after benchmarking.
+     * Check whether inactive older SBK-GEM-managed runtimes should be removed.
      *
-     * @return true when post-benchmark deletion is enabled
+     * @return true when managed runtime cleanup is enabled
      */
-    boolean isDeleteAfter();
+    boolean isRuntimeCleanup();
 }

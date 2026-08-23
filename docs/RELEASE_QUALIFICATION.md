@@ -114,8 +114,9 @@ out beneath a long directory name. The gate:
    platform/tool preflight;
 5. runs `GemPrometheusLogger`, `GemWebLogger`, and SBK-GEM-YAL through the
    immutable SBK-plus-JDK archive creation, SHA-256 verified copy, atomic
-   activation/reuse, cache integrity, two-client coordinated launch, SBM
-   callback, aggregation, and cleanup paths, requiring two successful nodes
+   activation/reuse, managed-runtime lease and inactive-version cleanup,
+   cache integrity, two-client coordinated launch, SBM callback, aggregation,
+   and cleanup paths, requiring two successful nodes
    and two SBM registrations;
    the timed Prometheus case uses `-totalrecords`, the Web case combines
    per-client `-records` with `-totalthroughput`, and the fixed-count YAL case

@@ -147,12 +147,11 @@ final class SbkGemTotalThroughputTest {
         config.knownhosts = "";
         config.sbkdir = temporaryDirectory.toString();
         config.sbkcommand = "bin/sbk";
-        config.copy = true;
         config.javacopy = true;
         config.javaversion = 25;
         config.javadir = "";
         config.delete = true;
-        config.deleteafter = false;
+        config.runtimecleanup = true;
         config.timeoutSeconds = 5;
         config.remoteDir = "sbk-gem-test";
         return config;

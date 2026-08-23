@@ -38,7 +38,7 @@ import java.util.Objects;
  *
  * <p>Extends {@link SbkDriversParameters} to include SBK driver/logger help, and adds GEM-specific
  * options for remote orchestration (nodes, SSH creds/port, SBK and Java deployment,
- * copy/delete/deleteafter,
+ * automatic runtime deployment/cleanup,
  * local SBM host/port/idle sleep). Populates typed getters and constructs {@link ConnectionConfig}
  * instances for each target node.
  *
@@ -46,7 +46,7 @@ import java.util.Objects;
  * - -nodes: comma/space/newline-separated hostnames or host:port endpoints
  * - -gemuser, -gempass, -gemport
  * - -sbkdir, -sbkcommand
- * - -copy, -delete, -deleteafter, -javacopy, -javaversion, -javadir
+ * - -runtimecleanup, -delete, -javacopy, -javaversion, -javadir
  * - -localhost
  * - -sbmport, -sbmsleepms
  * - -totalrecords
@@ -129,14 +129,14 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("sbkdir", true, "directory path of sbk application, default: " + config.sbkdir);
         addOption("sbkcommand", true,
                 "remote sbk command; command path is relative to 'sbkdir', default: " + config.sbkcommand);
-        addOption("copy", true, "Copy SBK when missing or mismatched; default: " + config.copy);
         addOption("javacopy", true, "Include and use the controller Java runtime in the immutable remote bundle; "
                 + "when false, require matching Java on every remote host; default: " + config.javacopy);
         addOption("javaversion", true, "Required remote Java major version; default: " + config.javaversion);
         addOption("javadir", true, "Remote Java home containing bin/java; default: " +
                 (StringUtils.isEmpty(config.javadir) ? "null" : config.javadir));
         addOption("delete", true, "Delete a mismatched remote SBK before copying; default: " + config.delete);
-        addOption("deleteafter", true, "Delete remote SBK after benchmarking; default: " + config.deleteafter);
+        addOption("runtimecleanup", true, "Remove inactive older SBK-GEM-managed runtimes while retaining the "
+                + "current verified runtime; default: " + config.runtimecleanup);
         addOption("localhost", true, "this local SBM host name, default: " + localHost);
         addOption("sbmport", true, "SBM port number; default: " + this.sbmPort);
         addOption("sbmsleepms", true, "SBM idle milliseconds to sleep; default: " + this.sbmIdleSleepMilliSeconds +
@@ -147,8 +147,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("totalthroughput", true, "Total throughput in MB/s across all remote SBK clients; mutually " +
                 "exclusive with -throughput");
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-hostkeycheck", "-knownhosts",
-                "-gemport", "-sbkdir", "-sbkcommand", "-copy", "-javacopy", "-javaversion", "-javadir",
-                "-delete", "-deleteafter", "-localhost", "-sbmport", "-sbmsleepms", "-totalrecords",
+                "-gemport", "-sbkdir", "-sbkcommand", "-javacopy", "-javaversion", "-javadir",
+                "-delete", "-runtimecleanup", "-localhost", "-sbmport", "-sbmsleepms", "-totalrecords",
                 "--totalrecords", "-totalthroughput", "--totalthroughput"};
         this.parsedArgs = null;
         this.totalThroughput = BigDecimal.ZERO;
@@ -167,6 +167,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
      * @throws HelpException             if help text needs to be displayed by upstream handling
      */
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
+        rejectRemovedDeploymentOptions(args);
         totalRecordsOption = hasCommandLineOption(args, "totalrecords");
         totalThroughputOption = hasCommandLineOption(args, "totalthroughput");
         if (totalRecordsOption && hasCommandLineOption(args, "records")) {
@@ -201,13 +202,12 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         localHost = getOptionValue("localhost", localHost);
         sbmPort = Integer.parseInt(getOptionValue("sbmport", Integer.toString(sbmPort)));
         sbmIdleSleepMilliSeconds = Integer.parseInt(getOptionValue("sbmsleepms", Integer.toString(sbmIdleSleepMilliSeconds)));
-        config.copy = Boolean.parseBoolean(getOptionValue("copy", Boolean.toString(config.copy)));
         config.javacopy = Boolean.parseBoolean(getOptionValue("javacopy", Boolean.toString(config.javacopy)));
         config.javaversion = Integer.parseInt(getOptionValue("javaversion", Integer.toString(config.javaversion)));
         config.javadir = getOptionValue("javadir", Objects.requireNonNullElse(config.javadir, ""));
         config.delete = Boolean.parseBoolean(getOptionValue("delete", Boolean.toString(config.delete)));
-        config.deleteafter = Boolean.parseBoolean(getOptionValue("deleteafter",
-                Boolean.toString(config.deleteafter)));
+        config.runtimecleanup = Boolean.parseBoolean(getOptionValue("runtimecleanup",
+                Boolean.toString(config.runtimecleanup)));
 
         if (config.javaversion <= 0) {
             throw new IllegalArgumentException("The Java major version must be greater than zero");
@@ -216,10 +216,10 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.gemuser,
                 "-hostkeycheck", Boolean.toString(config.hostkeycheck), "-knownhosts", config.knownhosts,
                 "-gemport", Integer.toString(config.gemport), "-sbkdir", config.sbkdir,
-                "-sbkcommand", config.sbkcommand, "-copy", Boolean.toString(config.copy),
+                "-sbkcommand", config.sbkcommand,
                 "-javacopy", Boolean.toString(config.javacopy), "-javaversion",
                 Integer.toString(config.javaversion), "-javadir", config.javadir, "-delete",
-                Boolean.toString(config.delete), "-deleteafter", Boolean.toString(config.deleteafter),
+                Boolean.toString(config.delete), "-runtimecleanup", Boolean.toString(config.runtimecleanup),
                 "-localhost", localHost, "-sbmport", Integer.toString(sbmPort)};
 
         connections = new ConnectionConfig[nodes.length];
@@ -387,6 +387,17 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         return ("-" + option).equals(argument) || ("--" + option).equals(argument);
     }
 
+    private static void rejectRemovedDeploymentOptions(String[] args) {
+        if (hasCommandLineOption(args, "copy")) {
+            throw new IllegalArgumentException("The '-copy' option was removed: missing exact SBK/JDK runtime "
+                    + "content is now copied automatically; use '-runtimecleanup' to control stale versions");
+        }
+        if (hasCommandLineOption(args, "deleteafter")) {
+            throw new IllegalArgumentException("The '-deleteafter' option was removed: the current verified "
+                    + "runtime is retained and '-runtimecleanup' controls inactive older versions");
+        }
+    }
+
     private static NodeEndpoint parseNodeEndpoint(String value, int defaultPort) {
         if (value.startsWith("[")) {
             final int bracket = value.indexOf(']');
@@ -450,11 +461,6 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     }
 
     @Override
-    public boolean isCopy() {
-        return config.copy;
-    }
-
-    @Override
     public boolean isJavaCopy() {
         return config.javacopy;
     }
@@ -474,13 +480,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         return config.delete;
     }
 
-    /**
-     * Check whether remote SBK deployments are deleted after benchmarking.
-     *
-     * @return true when post-benchmark deletion is enabled
-     */
     @Override
-    public boolean isDeleteAfter() {
-        return config.deleteafter;
+    public boolean isRuntimeCleanup() {
+        return config.runtimecleanup;
     }
 }

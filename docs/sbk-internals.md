@@ -1934,14 +1934,17 @@ sequenceDiagram
         SSH->>N1: probe content marker, Java, and SBK
         SSH->>N2: probe content marker, Java, and SBK
     end
-    alt exact runtime is missing and copy is true
+    alt exact runtime is missing
         GEM->>SSH: upload one content-addressed archive
         SSH->>N1: verify archive and files, atomically activate
         SSH->>N2: verify archive and files, atomically activate
-    else exact runtime is missing and copy is false
-        GEM-->>User: fail with host and content identity
     end
     GEM->>SSH: verify activated Java, SBK, and content identity
+    GEM->>SSH: reserve per-command runtime leases
+    opt runtimecleanup is true (default)
+        SSH->>N1: remove inactive older managed runtimes
+        SSH->>N2: remove inactive older managed runtimes
+    end
 
     GEM->>SBM: sbmBenchmark.start()<br/>(listen on :9717 locally)
     GEM->>SSH: export SBK_JAVA_HOME and run sbkCommand on each node
@@ -1980,9 +1983,14 @@ the archive is extracted to a unique staging directory, its OS/architecture
 descriptor and every regular-file checksum are verified, and only then is the
 runtime atomically renamed into its final content-addressed directory. Failed
 or interrupted staging data is cleaned and cannot become a launch target.
-`copy=true` permits uploading a missing identity. `delete=true` permits repair
-of an invalid final directory bearing that identity, while `deleteafter=false`
-retains the verified runtime for subsequent benchmarks.
+Missing identities are uploaded automatically. `delete=true` permits repair of
+an invalid final directory bearing the expected identity. The current verified
+runtime is retained for subsequent benchmarks. With the default
+`runtimecleanup=true`, a per-host lifecycle lock and current-runtime marker
+remove older managed identities only after their PID/reservation leases are no
+longer active. Concurrent benchmarks may therefore retain two versions
+temporarily, but an active runtime is never removed. Unmanaged directories and
+external JDKs used by `javacopy=false` are outside this cleanup boundary.
 
 `javaversion` defines the required major release (25 by default). With the
 default `javacopy=true`, the complete JDK running GEM is part of the same
