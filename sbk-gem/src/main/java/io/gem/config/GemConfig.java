@@ -131,6 +131,10 @@ final public class GemConfig {
      * Timeout value used for remote operations (seconds).
      */
     public long remoteTimeoutSeconds;
+    /** Maximum runtime bundle creation, transfer, and activation duration in seconds. */
+    public long deploymentTimeoutSeconds;
+    /** Local content-addressed runtime bundle cache directory, absolute or relative to the user's home. */
+    public String runtimeCacheDirectory;
     /**
      * Maximum time to wait for all remote SBK clients to register with SBM (seconds).
      */
@@ -186,7 +190,9 @@ final public class GemConfig {
     }
 
     void validate() {
-        if (executorThreadReserve < 1 || diagnosticBytes < 1 || maximumAgentResponseBytes < 1
+        if (remoteTimeoutSeconds < 1 || deploymentTimeoutSeconds < 1
+                || runtimeCacheDirectory == null || runtimeCacheDirectory.isBlank() || executorThreadReserve < 1
+                || diagnosticBytes < 1 || maximumAgentResponseBytes < 1
                 || maximumDiagnosticCharacters < 1 || diagnosticPrefixCharacters < 1
                 || maximumDiagnosticCharacters - diagnosticPrefixCharacters
                 <= DIAGNOSTIC_TRUNCATION_MARKER.length()) {

@@ -181,21 +181,18 @@ public final class SshUtils {
     }
 
     /**
-     * Recursively copy a directory to a remote path using SCP.
+     * Copy one local file to an exact remote path using SCP.
      *
      * @param session SSH session
-     * @param srcPath local source path
-     * @param dstPath remote destination path
+     * @param srcPath local source file
+     * @param dstPath remote destination file
      * @throws IOException on copy failure
      */
-    public static void copyDirectory(final ClientSession session, String srcPath,
-                                     String dstPath) throws IOException {
-
+    public static void copyFile(final ClientSession session, String srcPath,
+                                String dstPath) throws IOException {
         final ScpClientCreator creator = ScpClientCreator.instance();
         final ScpClient scpClient = creator.createScpClient(session);
-
-        scpClient.upload(srcPath, dstPath, ScpClient.Option.Recursive, ScpClient.Option.PreserveAttributes,
-                ScpClient.Option.TargetIsDirectory);
+        scpClient.upload(srcPath, dstPath, ScpClient.Option.PreserveAttributes);
     }
 
 }

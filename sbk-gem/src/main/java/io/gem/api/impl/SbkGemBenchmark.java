@@ -14,7 +14,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.gem.api.ConnectionConfig;
 import io.gem.api.GemBenchmark;
 import io.gem.api.RemoteExecutionStatus;
-import io.gem.api.RemoteExitCode;
 import io.gem.api.RemoteResponse;
 import io.gem.api.SshCommandException;
 import io.gem.api.SshResponse;
@@ -34,16 +33,13 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
 import java.net.ConnectException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletionException;
@@ -181,16 +177,10 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
         final CompletableFuture<RemoteResponse>[] cfResults = new CompletableFuture[nodes.length];
         final String[] absoluteConnectionDirs = resolveRemoteConnectionDirectories();
-        final String[] javaHomes = prepareRemoteJava(absoluteConnectionDirs);
-        final String remoteDir = Paths.get(params.getSbkDir()).getFileName().toString();
-        final SbkDeploymentPlan deploymentPlan = planRemoteSbkDeployment(remoteDir, javaHomes);
-        if (hasSelectedTarget(deploymentPlan.copyTargets())) {
-            copySbkToRemoteTargets(deploymentPlan, remoteDir);
-            verifyCopiedSbkVersions(deploymentPlan.copyTargets(), remoteDir, javaHomes);
-        } else {
-            Printer.log.info("SBK-GEM: SBK version " + config.sbkVersion + " is already available on every host");
-        }
-        final String[] absoluteSbkCommands = resolveRemoteSbkCommands(remoteDir);
+        final DeploymentPlatform platform = verifyHomogeneousDeploymentPlatform();
+        final RuntimeDeployment runtimeDeployment = prepareRuntimeDeployment(absoluteConnectionDirs, platform);
+        final String[] javaHomes = runtimeDeployment.javaHomes();
+        final String[] absoluteSbkCommands = runtimeDeployment.sbkCommands();
 
         // start SBM
         synchronized (this) {
@@ -319,7 +309,205 @@ final public class SbkGemBenchmark implements GemBenchmark {
     }
 
     @SuppressWarnings("unchecked")
-    private String[] prepareRemoteJava(String[] absoluteConnectionDirs) throws ConnectException,
+    private DeploymentPlatform verifyHomogeneousDeploymentPlatform() throws ConnectException,
+            InterruptedException, ExecutionException {
+        final DeploymentPlatform localPlatform;
+        try {
+            localPlatform = DeploymentPlatform.local();
+        } catch (IllegalArgumentException exception) {
+            throw new InterruptedException("SBK-GEM: " + exception.getMessage());
+        }
+        final CompletableFuture<SshResponse>[] probes = new CompletableFuture[nodes.length];
+        for (int i = 0; i < nodes.length; i++) {
+            probes[i] = nodes[i].runCommandAsync(DeploymentPlatform.probeCommand(), true,
+                    config.remoteTimeoutSeconds);
+        }
+        waitFor(CompletableFuture.allOf(probes), "remote deployment platform checks");
+        for (int i = 0; i < nodes.length; i++) {
+            final SshResponse response = probes[i].get();
+            final DeploymentPlatform remotePlatform = DeploymentPlatform.fromProbe(response);
+            if (remotePlatform == null) {
+                final String diagnostic;
+                if (response == null) {
+                    diagnostic = "no response";
+                } else {
+                    final String errorOutput = response.errOutputStream.toString();
+                    diagnostic = diagnosticSummary(errorOutput.isBlank()
+                            ? response.stdOutputStream.toString() : errorOutput);
+                }
+                throw new InterruptedException("SBK-GEM: Host '" + nodes[i].connection.getHost()
+                        + "' failed the runtime deployment preflight"
+                        + (diagnostic.isEmpty() ? "" : ": " + diagnostic));
+            }
+            if (!localPlatform.equals(remotePlatform)) {
+                throw new InterruptedException("SBK-GEM: Homogeneous deployment required; controller is "
+                        + localPlatform.id() + " but host '" + nodes[i].connection.getHost() + "' is "
+                        + remotePlatform.id());
+            }
+        }
+        Printer.log.info("SBK-GEM: Homogeneous deployment platform {} verified on {} host(s)",
+                localPlatform.id(), nodes.length);
+        return localPlatform;
+    }
+
+    private RuntimeDeployment prepareRuntimeDeployment(String[] absoluteConnectionDirs,
+                                                       DeploymentPlatform platform) throws IOException,
+            ConnectException, InterruptedException, ExecutionException {
+        final Path localJavaHome = Paths.get(System.getProperty("java.home")).toAbsolutePath().normalize();
+        final int localJavaVersion = RemoteJavaDeployment.parseMajorVersion(System.getProperty("java.version"));
+        if (params.isJavaCopy() && localJavaVersion != params.getJavaVersion()) {
+            throw new IOException("Local Java " + localJavaVersion + " cannot provide requested Java "
+                    + params.getJavaVersion());
+        }
+        final String[] externalJavaHomes = params.isJavaCopy() ? null
+                : resolveRequiredRemoteJava(absoluteConnectionDirs);
+        final Path configuredCache = Paths.get(config.runtimeCacheDirectory);
+        final Path cacheDirectory = configuredCache.isAbsolute() ? configuredCache
+                : Paths.get(System.getProperty("user.home")).resolve(configuredCache);
+        Printer.log.info("SBK-GEM: Preparing immutable runtime bundle for {}", platform.id());
+        final SbkRuntimeBundle bundle = SbkRuntimeBundle.create(Paths.get(params.getSbkDir()),
+                params.getSbkCommand(), params.isJavaCopy() ? localJavaHome : null, config.sbkVersion,
+                params.getJavaVersion(), platform, cacheDirectory);
+        Printer.log.info("SBK-GEM: Runtime bundle {} content SHA-256 {} archive SHA-256 {}",
+                bundle.archive().getFileName(), bundle.contentDigest(), bundle.archiveDigest());
+        return deployRuntimeBundle(bundle, absoluteConnectionDirs, externalJavaHomes, platform);
+    }
+
+    @SuppressWarnings("unchecked")
+    private RuntimeDeployment deployRuntimeBundle(SbkRuntimeBundle bundle, String[] absoluteConnectionDirs,
+                                                  String[] externalJavaHomes, DeploymentPlatform platform)
+            throws ConnectException, InterruptedException, ExecutionException {
+        final String[] deploymentDirectories = new String[nodes.length];
+        final String[] javaHomes = new String[nodes.length];
+        final String[] sbkCommands = new String[nodes.length];
+        final boolean[] copyTargets = new boolean[nodes.length];
+        final CompletableFuture<SshResponse>[] probes = new CompletableFuture[nodes.length];
+        for (int i = 0; i < nodes.length; i++) {
+            deploymentDirectories[i] = remoteJoin(absoluteConnectionDirs[i], bundle.deploymentName());
+            javaHomes[i] = bundle.javaHome() == null ? externalJavaHomes[i]
+                    : remoteJoin(deploymentDirectories[i], bundle.javaHome());
+            sbkCommands[i] = remoteJoin(deploymentDirectories[i], bundle.sbkCommand());
+            probes[i] = nodes[i].runCommandAsync(RemoteRuntimeDeployment.probeCommand(
+                    deploymentDirectories[i], bundle.contentDigest(), javaHomes[i], sbkCommands[i],
+                    config.sbkVersion, params.getJavaVersion()), true, config.remoteTimeoutSeconds);
+        }
+        waitFor(CompletableFuture.allOf(probes), "remote immutable runtime checks");
+        for (int i = 0; i < nodes.length; i++) {
+            if (probes[i].get().returnCode == ExitCode.SUCCESS) {
+                Printer.log.info("SBK-GEM: Host '{}' already has immutable runtime {}; skipping copy",
+                        nodes[i].connection.getHost(), bundle.deploymentName());
+            } else if (params.isCopy()) {
+                copyTargets[i] = true;
+            } else {
+                throw new InterruptedException("SBK-GEM: Host '" + nodes[i].connection.getHost()
+                        + "' does not have runtime content " + bundle.contentDigest()
+                        + " and copying is disabled");
+            }
+        }
+        if (hasSelectedTarget(copyTargets)) {
+            uploadAndActivateRuntime(bundle, deploymentDirectories, copyTargets, platform);
+            verifyRuntimeDeployment(bundle, deploymentDirectories, javaHomes, sbkCommands, copyTargets);
+        } else {
+            Printer.log.info("SBK-GEM: Immutable runtime {} is already available on every host",
+                    bundle.deploymentName());
+        }
+        return new RuntimeDeployment(javaHomes, sbkCommands);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void uploadAndActivateRuntime(SbkRuntimeBundle bundle, String[] deploymentDirectories,
+                                          boolean[] copyTargets, DeploymentPlatform platform)
+            throws ConnectException, InterruptedException, ExecutionException {
+        final String transferId = Long.toUnsignedString(System.nanoTime());
+        final String[] archivePaths = new String[nodes.length];
+        final String[] stagingDirectories = new String[nodes.length];
+        final CompletableFuture<SshResponse>[] prepareFutures = new CompletableFuture[nodes.length];
+        consMap.reset();
+        for (int i = 0; i < nodes.length; i++) {
+            archivePaths[i] = deploymentDirectories[i] + "." + transferId + ".tar.gz";
+            stagingDirectories[i] = deploymentDirectories[i] + "." + transferId + ".staging";
+            if (!copyTargets[i] || consMap.isVisited(nodes[i].connection)) {
+                prepareFutures[i] = CompletableFuture.completedFuture(new SshResponse(true));
+            } else {
+                consMap.visit(nodes[i].connection);
+                final String command = "mkdir -p " + RemoteSbkDeployment.shellQuote(
+                        remoteParent(deploymentDirectories[i]));
+                prepareFutures[i] = nodes[i].runCommandAsync(command, true, config.remoteTimeoutSeconds);
+            }
+        }
+        waitFor(CompletableFuture.allOf(prepareFutures), "runtime deployment directory preparation");
+        requireSuccessfulWithDiagnostics(prepareFutures, copyTargets,
+                "Preparing remote runtime deployment directories");
+
+        final CompletableFuture<?>[] uploads = new CompletableFuture[nodes.length];
+        consMap.reset();
+        for (int i = 0; i < nodes.length; i++) {
+            if (!copyTargets[i] || consMap.isVisited(nodes[i].connection)) {
+                uploads[i] = CompletableFuture.completedFuture(null);
+            } else {
+                consMap.visit(nodes[i].connection);
+                uploads[i] = nodes[i].copyFileAsync(bundle.archive().toString(), archivePaths[i],
+                        config.deploymentTimeoutSeconds);
+            }
+        }
+        waitForDeployment(CompletableFuture.allOf(uploads), "runtime archive upload");
+
+        final CompletableFuture<SshResponse>[] activations = new CompletableFuture[nodes.length];
+        consMap.reset();
+        for (int i = 0; i < nodes.length; i++) {
+            if (!copyTargets[i] || consMap.isVisited(nodes[i].connection)) {
+                activations[i] = CompletableFuture.completedFuture(new SshResponse(true));
+            } else {
+                consMap.visit(nodes[i].connection);
+                final String command = RemoteRuntimeDeployment.activateCommand(archivePaths[i],
+                        bundle.archiveDigest(), bundle.contentDigest(), stagingDirectories[i],
+                        deploymentDirectories[i], platform.operatingSystem(), platform.architecture(),
+                        params.isDelete());
+                activations[i] = nodes[i].runCommandAsync(command, true, config.deploymentTimeoutSeconds);
+            }
+        }
+        waitForDeployment(CompletableFuture.allOf(activations), "runtime archive activation");
+        requireSuccessfulWithDiagnostics(activations, copyTargets, "Activating immutable runtime");
+        Printer.log.info("SBK-GEM: Immutable runtime archive verified and atomically activated");
+    }
+
+    @SuppressWarnings("unchecked")
+    private void verifyRuntimeDeployment(SbkRuntimeBundle bundle, String[] deploymentDirectories,
+                                         String[] javaHomes, String[] sbkCommands, boolean[] copyTargets)
+            throws ConnectException, InterruptedException, ExecutionException {
+        final CompletableFuture<SshResponse>[] probes = new CompletableFuture[nodes.length];
+        for (int i = 0; i < nodes.length; i++) {
+            probes[i] = copyTargets[i] ? nodes[i].runCommandAsync(RemoteRuntimeDeployment.probeCommand(
+                    deploymentDirectories[i], bundle.contentDigest(), javaHomes[i], sbkCommands[i],
+                    config.sbkVersion, params.getJavaVersion()), true, config.remoteTimeoutSeconds)
+                    : CompletableFuture.completedFuture(new SshResponse(true));
+        }
+        waitFor(CompletableFuture.allOf(probes), "activated runtime verification");
+        requireSuccessfulWithDiagnostics(probes, copyTargets, "Verifying activated immutable runtime");
+        Printer.log.info("SBK-GEM: Runtime content {}, Java {}, and SBK {} verified on selected hosts",
+                bundle.contentDigest(), params.getJavaVersion(), config.sbkVersion);
+    }
+
+    private void requireSuccessfulWithDiagnostics(CompletableFuture<SshResponse>[] futures,
+                                                  boolean[] selected, String operation)
+            throws InterruptedException, ExecutionException {
+        for (int i = 0; i < futures.length; i++) {
+            if (selected[i]) {
+                final SshResponse response = futures[i].get();
+                if (response.returnCode != ExitCode.SUCCESS) {
+                    final String errorOutput = response.errOutputStream.toString();
+                    final String diagnostic = diagnosticSummary(errorOutput.isBlank()
+                            ? response.stdOutputStream.toString() : errorOutput);
+                    throw new InterruptedException("SBK-GEM: " + operation + " failed on host '"
+                            + nodes[i].connection.getHost() + "' with return code " + response.returnCode
+                            + (diagnostic.isEmpty() ? "" : ": " + diagnostic));
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private String[] resolveRequiredRemoteJava(String[] absoluteConnectionDirs) throws ConnectException,
             InterruptedException, ExecutionException, IOException {
         final int expectedVersion = params.getJavaVersion();
         final String[] javaHomes = new String[nodes.length];
@@ -359,19 +547,14 @@ final public class SbkGemBenchmark implements GemBenchmark {
                     javaHomes[i] = destinationJavaHomes[i];
                     unresolved[i] = false;
                     Printer.log.info("SBK-GEM: Host '" + nodes[i].connection.getHost() +
-                            "' already has Java " + expectedVersion + " at '" + javaHomes[i] +
-                            "'; skipping copy");
+                            "' will reuse Java " + expectedVersion + " at '" + javaHomes[i] + "'");
                 }
             }
         }
 
         if (hasSelectedTarget(unresolved)) {
-            if (!params.isJavaCopy()) {
-                throw new InterruptedException("SBK-GEM: Java " + expectedVersion +
-                        " is unavailable on one or more nodes and javacopy is false");
-            }
-            copyJavaToRemoteTargets(unresolved, javaHomes, absoluteConnectionDirs, configuredJavaHome,
-                    expectedVersion);
+            throw new InterruptedException("SBK-GEM: Java " + expectedVersion
+                    + " is unavailable on one or more nodes and javacopy is false");
         }
 
         for (int i = 0; i < nodes.length; i++) {
@@ -380,113 +563,6 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
         Printer.log.info("SBK-GEM: Matching Java Major Version: " + expectedVersion + " Success..");
         return javaHomes;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void copyJavaToRemoteTargets(boolean[] copyTargets, String[] javaHomes,
-                                         String[] absoluteConnectionDirs, String configuredJavaHome,
-                                         int expectedVersion) throws IOException, ConnectException,
-            InterruptedException, ExecutionException {
-        final Path localJavaHome = Paths.get(System.getProperty("java.home")).toAbsolutePath().normalize();
-        final Path localJava = localJavaHome.resolve("bin").resolve("java");
-        if (!Files.isExecutable(localJava)) {
-            throw new IOException("Local Java executable not found at " + localJava);
-        }
-        final int localVersion = RemoteJavaDeployment.parseMajorVersion(System.getProperty("java.version"));
-        if (localVersion != expectedVersion) {
-            throw new IOException("Local Java " + localVersion + " cannot provide requested Java " +
-                    expectedVersion);
-        }
-
-        final Path localFileName = localJavaHome.getFileName();
-        if (localFileName == null) {
-            throw new IOException("Unable to determine the local Java directory name from " + localJavaHome);
-        }
-        final String localDirectoryName = localFileName.toString();
-        final String[] targets = new String[nodes.length];
-        final String[] uploadTargets = new String[nodes.length];
-        final String[] parents = new String[nodes.length];
-        for (int i = 0; i < nodes.length; i++) {
-            if (copyTargets[i]) {
-                targets[i] = RemoteJavaDeployment.destinationJavaHome(
-                        absoluteConnectionDirs[i], configuredJavaHome, expectedVersion);
-                if (!isSafeRemoteDirectory(targets[i])) {
-                    throw new IOException("Refusing to replace unsafe remote Java directory: " + targets[i]);
-                }
-                parents[i] = remoteParent(targets[i]);
-                uploadTargets[i] = remoteJoin(parents[i], localDirectoryName);
-            }
-        }
-
-        final Set<RemoteTarget> visited = new HashSet<>();
-        final CompletableFuture<SshResponse>[] prepareFutures = new CompletableFuture[nodes.length];
-        for (int i = 0; i < nodes.length; i++) {
-            final RemoteTarget key = javaTargetKey(i, targets[i]);
-            if (!copyTargets[i] || !visited.add(key)) {
-                prepareFutures[i] = CompletableFuture.completedFuture(new SshResponse(true));
-            } else {
-                final String command = "rm -rf " + RemoteSbkDeployment.shellQuote(targets[i]) + " " +
-                        RemoteSbkDeployment.shellQuote(uploadTargets[i]) + "; mkdir -p " +
-                        RemoteSbkDeployment.shellQuote(parents[i]);
-                prepareFutures[i] = nodes[i].runCommandAsync(command, true, config.remoteTimeoutSeconds);
-            }
-        }
-        waitFor(CompletableFuture.allOf(prepareFutures), "remote Java directory preparation");
-        requireSuccessful(prepareFutures, "Preparing the remote Java directory");
-
-        visited.clear();
-        final CompletableFuture<?>[] copyFutures = new CompletableFuture[nodes.length];
-        for (int i = 0; i < nodes.length; i++) {
-            final RemoteTarget key = javaTargetKey(i, targets[i]);
-            if (!copyTargets[i] || !visited.add(key)) {
-                copyFutures[i] = CompletableFuture.completedFuture(null);
-            } else {
-                copyFutures[i] = nodes[i].copyDirectoryAsync(localJavaHome.toString(), parents[i],
-                        config.remoteTimeoutSeconds);
-            }
-        }
-        waitFor(CompletableFuture.allOf(copyFutures), "Java runtime copy");
-
-        visited.clear();
-        final CompletableFuture<SshResponse>[] moveFutures = new CompletableFuture[nodes.length];
-        for (int i = 0; i < nodes.length; i++) {
-            final RemoteTarget key = javaTargetKey(i, targets[i]);
-            if (!copyTargets[i] || targets[i].equals(uploadTargets[i]) || !visited.add(key)) {
-                moveFutures[i] = CompletableFuture.completedFuture(new SshResponse(true));
-            } else {
-                final String command = "mv " + RemoteSbkDeployment.shellQuote(uploadTargets[i]) + " " +
-                        RemoteSbkDeployment.shellQuote(targets[i]);
-                moveFutures[i] = nodes[i].runCommandAsync(command, true, config.remoteTimeoutSeconds);
-            }
-        }
-        waitFor(CompletableFuture.allOf(moveFutures), "remote Java installation");
-        requireSuccessful(moveFutures, "Installing the remote Java runtime");
-
-        final CompletableFuture<SshResponse>[] verificationFutures = new CompletableFuture[nodes.length];
-        for (int i = 0; i < nodes.length; i++) {
-            if (copyTargets[i]) {
-                verificationFutures[i] = nodes[i].runCommandAsync(
-                        RemoteJavaDeployment.homeProbeCommand(targets[i]), true, config.remoteTimeoutSeconds);
-            } else {
-                verificationFutures[i] = CompletableFuture.completedFuture(new SshResponse(true));
-            }
-        }
-        waitFor(CompletableFuture.allOf(verificationFutures), "copied Java verification");
-        for (int i = 0; i < nodes.length; i++) {
-            if (copyTargets[i]) {
-                if (!RemoteJavaDeployment.hasExpectedVersion(verificationFutures[i].get(), expectedVersion)) {
-                    throw new InterruptedException("SBK-GEM: Copied Java verification failed on host " +
-                            nodes[i].connection.getHost());
-                }
-                javaHomes[i] = targets[i];
-            }
-        }
-    }
-
-    private RemoteTarget javaTargetKey(int index, String target) {
-        final ConnectionConfig connection = nodes[index].connection;
-        return new RemoteTarget(connection.getHost().toLowerCase(), connection.getPort(),
-                target == null ? "" : target.toLowerCase());
     }
 
     @SuppressWarnings("unchecked")
@@ -538,214 +614,6 @@ final public class SbkGemBenchmark implements GemBenchmark {
         return "/".equals(parent) ? parent + child : parent + "/" + child;
     }
 
-    private static boolean isSafeRemoteDirectory(String path) {
-        return path != null && !path.isBlank() && !"/".equals(path) && !".".equals(path) && !"..".equals(path);
-    }
-
-    private static void requireSuccessful(CompletableFuture<SshResponse>[] futures, String operation)
-            throws InterruptedException, ExecutionException {
-        for (CompletableFuture<SshResponse> future : futures) {
-            if (future.get().returnCode != ExitCode.SUCCESS) {
-                throw new InterruptedException("SBK-GEM: " + operation + " failed");
-            }
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private SbkDeploymentPlan planRemoteSbkDeployment(String remoteDir, String[] javaHomes) throws ConnectException,
-            InterruptedException,
-            ExecutionException {
-        final boolean[] copyTargets = new boolean[nodes.length];
-        final boolean[] deleteTargets = new boolean[nodes.length];
-
-        final CompletableFuture<SshResponse>[] probes = new CompletableFuture[nodes.length];
-        for (int i = 0; i < nodes.length; i++) {
-            final String remoteCommand = nodes[i].connection.getDir() + "/" + remoteDir + "/" +
-                    params.getSbkCommand();
-            final String command = RemoteJavaDeployment.environmentPrefix(javaHomes[i]) +
-                    RemoteSbkDeployment.versionProbeCommand(remoteCommand);
-            probes[i] = nodes[i].runCommandAsync(command, true, config.remoteTimeoutSeconds);
-        }
-        waitFor(CompletableFuture.allOf(probes), "remote SBK version checks");
-
-        for (int i = 0; i < nodes.length; i++) {
-            final SshResponse response = probes[i].get();
-            if (RemoteSbkDeployment.hasExpectedVersion(response, config.sbkVersion)) {
-                Printer.log.info("SBK-GEM: Host '" + nodes[i].connection.getHost() + "' already has SBK version " +
-                        config.sbkVersion + "; skipping copy");
-                continue;
-            }
-
-            if (response == null || response.returnCode != ExitCode.SUCCESS
-                    && response.returnCode != RemoteExitCode.COMMAND_NOT_FOUND) {
-                final String remoteError = response == null ? "no response" :
-                        response.errOutputStream.toString().trim();
-                final String errMsg = "SBK-GEM: Host '" + nodes[i].connection.getHost() +
-                        "' SBK version probe failed" +
-                        (response == null ? "" : " with return code " + response.returnCode) +
-                        (remoteError.isEmpty() ? "" : ": " + remoteError);
-                Printer.log.error(errMsg);
-                throw new InterruptedException(errMsg);
-            }
-
-            if (!params.isCopy()) {
-                final String errMsg = "SBK-GEM: Host '" + nodes[i].connection.getHost() +
-                        "' does not have expected SBK version " + config.sbkVersion +
-                        " and copying is disabled";
-                Printer.log.error(errMsg);
-                throw new InterruptedException(errMsg);
-            }
-
-            copyTargets[i] = RemoteSbkDeployment.requiresCopy(true, response, config.sbkVersion);
-            deleteTargets[i] = RemoteSbkDeployment.requiresDeleteBeforeCopy(params.isDelete(), response,
-                    config.sbkVersion);
-            if (response.returnCode == RemoteExitCode.COMMAND_NOT_FOUND) {
-                Printer.log.info("SBK-GEM: Host '" + nodes[i].connection.getHost() +
-                        "' has no remote SBK executable; scheduling copy");
-            } else if (deleteTargets[i]) {
-                Printer.log.info("SBK-GEM: Host '" + nodes[i].connection.getHost() +
-                        "' has a mismatched SBK version; scheduling deletion and copy");
-            } else {
-                Printer.log.info("SBK-GEM: Host '" + nodes[i].connection.getHost() +
-                        "' has a mismatched SBK version; scheduling copy without deletion");
-            }
-        }
-        return new SbkDeploymentPlan(copyTargets, deleteTargets);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void verifyCopiedSbkVersions(boolean[] copyTargets, String remoteDir, String[] javaHomes)
-            throws ConnectException, InterruptedException, ExecutionException {
-        final CompletableFuture<SshResponse>[] probes = new CompletableFuture[nodes.length];
-        for (int i = 0; i < nodes.length; i++) {
-            if (copyTargets[i]) {
-                final String remoteCommand = nodes[i].connection.getDir() + "/" + remoteDir + "/" +
-                        params.getSbkCommand();
-                final String command = RemoteJavaDeployment.environmentPrefix(javaHomes[i]) +
-                        RemoteSbkDeployment.versionProbeCommand(remoteCommand);
-                probes[i] = nodes[i].runCommandAsync(command, true, config.remoteTimeoutSeconds);
-            } else {
-                probes[i] = CompletableFuture.completedFuture(new SshResponse(true));
-            }
-        }
-        waitFor(CompletableFuture.allOf(probes), "copied SBK version verification");
-        for (int i = 0; i < nodes.length; i++) {
-            if (copyTargets[i] && !RemoteSbkDeployment.hasExpectedVersion(probes[i].get(), config.sbkVersion)) {
-                final String errMsg = "SBK-GEM: Copied SBK version verification failed on host '" +
-                        nodes[i].connection.getHost() + "'; enable -delete true when replacing an existing " +
-                        "installation";
-                Printer.log.error(errMsg);
-                throw new InterruptedException(errMsg);
-            }
-        }
-        Printer.log.info("SBK-GEM: Copied SBK version " + config.sbkVersion + " verification Success..");
-    }
-
-    @SuppressWarnings("unchecked")
-    private String[] resolveRemoteSbkCommands(String remoteDir) throws ConnectException, InterruptedException,
-            ExecutionException {
-        final String relativeCommand = remoteJoin(remoteDir, params.getSbkCommand());
-        final CompletableFuture<SshResponse>[] probes = new CompletableFuture[nodes.length];
-        for (int i = 0; i < nodes.length; i++) {
-            final String command = RemoteSbkDeployment.executablePathProbeCommand(
-                    nodes[i].connection.getDir(), relativeCommand);
-            probes[i] = nodes[i].runCommandAsync(command, true, config.remoteTimeoutSeconds);
-        }
-        waitFor(CompletableFuture.allOf(probes), "remote SBK executable discovery");
-
-        final String[] commands = new String[nodes.length];
-        for (int i = 0; i < nodes.length; i++) {
-            final SshResponse response = probes[i].get();
-            commands[i] = RemoteSbkDeployment.absoluteExecutablePath(response);
-            if (commands[i] == null) {
-                final String remoteError = response.errOutputStream.toString().trim();
-                final String errMsg = "SBK-GEM: Unable to locate an executable SBK command on host '" +
-                        nodes[i].connection.getHost() + "' under '" + nodes[i].connection.getDir() + "'" +
-                        (remoteError.isEmpty() ? "" : ": " + remoteError);
-                Printer.log.error(errMsg);
-                throw new InterruptedException(errMsg);
-            }
-            Printer.log.info("SBK-GEM: Host '" + nodes[i].connection.getHost() +
-                    "' verified remote SBK executable: " + commands[i]);
-        }
-        return commands;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void copySbkToRemoteTargets(SbkDeploymentPlan deploymentPlan, String remoteDir) throws ConnectException,
-            InterruptedException, ExecutionException {
-        final boolean[] copyTargets = deploymentPlan.copyTargets();
-        if (hasSelectedTarget(deploymentPlan.deleteTargets())) {
-            if (!remoteSbkDirectoryDelete(deploymentPlan.deleteTargets(), remoteDir)) {
-                final String errMsg = "SBK-GEM: Removing mismatched remote SBK directory '" + remoteDir +
-                        "' failed";
-                Printer.log.error(errMsg);
-                throw new InterruptedException(errMsg);
-            }
-            Printer.log.info("SBK-GEM: Removing mismatched remote SBK directories Success..");
-        } else {
-            Printer.log.info("SBK-GEM: No mismatched remote SBK directory selected for deletion");
-        }
-
-        final CompletableFuture<SshResponse>[] mkdirFutures = new CompletableFuture[nodes.length];
-        consMap.reset();
-        for (int i = 0; i < nodes.length; i++) {
-            if (!copyTargets[i] || consMap.isVisited(nodes[i].connection)) {
-                mkdirFutures[i] = CompletableFuture.completedFuture(new SshResponse(true));
-            } else {
-                consMap.visit(nodes[i].connection);
-                final String command = "mkdir -p " + RemoteSbkDeployment.shellQuote(nodes[i].connection.getDir());
-                mkdirFutures[i] = nodes[i].runCommandAsync(command, true, config.remoteTimeoutSeconds);
-            }
-        }
-        waitFor(CompletableFuture.allOf(mkdirFutures), "remote directory creation");
-        for (CompletableFuture<SshResponse> mkdirFuture : mkdirFutures) {
-            if (mkdirFuture.get().returnCode != ExitCode.SUCCESS) {
-                throw new InterruptedException("SBK-GEM: Creating a remote SBK directory failed");
-            }
-        }
-        Printer.log.info("SBK-GEM: Creating selected remote directories Success..");
-
-        final CompletableFuture<?>[] copyFutures = new CompletableFuture[nodes.length];
-        consMap.reset();
-        for (int i = 0; i < nodes.length; i++) {
-            if (!copyTargets[i] || consMap.isVisited(nodes[i].connection)) {
-                copyFutures[i] = CompletableFuture.completedFuture(null);
-            } else {
-                consMap.visit(nodes[i].connection);
-                copyFutures[i] = nodes[i].copyDirectoryAsync(params.getSbkDir(), nodes[i].connection.getDir(),
-                        config.remoteTimeoutSeconds);
-            }
-        }
-        waitFor(CompletableFuture.allOf(copyFutures), "SBK copy");
-        Printer.log.info("SBK-GEM: Copying SBK application to selected remote hosts Success..");
-    }
-
-    @SuppressWarnings("unchecked")
-    private boolean remoteSbkDirectoryDelete(boolean[] deleteTargets, String remoteDir)
-            throws InterruptedException, ConnectException, ExecutionException {
-        final CompletableFuture<SshResponse>[] deleteFutures = new CompletableFuture[nodes.length];
-        consMap.reset();
-        for (int i = 0; i < nodes.length; i++) {
-            if (!deleteTargets[i] || consMap.isVisited(nodes[i].connection)) {
-                deleteFutures[i] = CompletableFuture.completedFuture(new SshResponse(true));
-            } else {
-                consMap.visit(nodes[i].connection);
-                final String sbkDirectory = nodes[i].connection.getDir() + "/" + remoteDir;
-                deleteFutures[i] = nodes[i].runCommandAsync("rm -rf " +
-                                RemoteSbkDeployment.shellQuote(sbkDirectory), true,
-                        config.remoteTimeoutSeconds);
-            }
-        }
-        waitFor(CompletableFuture.allOf(deleteFutures), "remote SBK directory deletion");
-        for (CompletableFuture<SshResponse> deleteResult : deleteFutures) {
-            if (deleteResult.get().returnCode != ExitCode.SUCCESS) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     private void waitFor(CompletableFuture<?> future, String operation) throws InterruptedException,
             ExecutionException {
         for (int i = 0; i < config.maxIterations && !future.isDone(); i++) {
@@ -762,6 +630,18 @@ final public class SbkGemBenchmark implements GemBenchmark {
             throw new InterruptedException(errMsg);
         }
         future.get();
+    }
+
+    private void waitForDeployment(CompletableFuture<?> future, String operation) throws InterruptedException,
+            ExecutionException {
+        try {
+            future.get(config.deploymentTimeoutSeconds, TimeUnit.SECONDS);
+        } catch (TimeoutException exception) {
+            final String message = "SBK-GEM: " + operation + " timed out after "
+                    + config.deploymentTimeoutSeconds + " seconds";
+            Printer.log.error(message);
+            throw new InterruptedException(message);
+        }
     }
 
     private static boolean hasSelectedTarget(boolean[] selected) {
@@ -1019,7 +899,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         return new IOException("SBK-GEM: Remote SSH session establishment failed: " + cause.getMessage(), cause);
     }
 
-    private record SbkDeploymentPlan(boolean[] copyTargets, boolean[] deleteTargets) {
+    private record RuntimeDeployment(String[] javaHomes, String[] sbkCommands) {
     }
 
     private record RemoteTarget(String host, int port, String path) {

@@ -1923,33 +1923,25 @@ sequenceDiagram
         SSH->>N2: SSH + known_hosts + agent/key/password
     end
 
-    GEM->>SSH: discover java from PATH on each node
-    alt requested Java is available
-        Note over GEM: remember node-specific SBK_JAVA_HOME
-    else Java is missing or mismatched
-        GEM->>SSH: probe javadir when configured
-        opt still unresolved and javacopy is true
-            Note over GEM: locate local JVM via java.home
-            GEM->>SSH: copy local JVM and verify its version
-        end
+    GEM->>SSH: probe OS, architecture, tar, and SHA-256 tool
+    Note over GEM: require one homogeneous Linux or macOS platform
+    GEM->>GEM: validate installDist pathing JAR and dependencies
+    opt javacopy is true (default)
+        GEM->>GEM: include controller JDK in runtime bundle
     end
-
-    GEM->>SSH: run "sbk -version" on every node
-    par inspect nodes concurrently
-        SSH->>N1: executable and exact-version probe
-        SSH->>N2: executable and exact-version probe
+    GEM->>GEM: hash every file, link, and executable bit
+    par inspect exact runtime identity
+        SSH->>N1: probe content marker, Java, and SBK
+        SSH->>N2: probe content marker, Java, and SBK
     end
-    Note over GEM: select only missing or mismatched nodes
-    alt copy is true (default)
-        opt mismatch and delete is true (default)
-            GEM->>SSH: delete the outdated installation
-        end
-        GEM->>SSH: copy SBK to selected nodes and verify version
-    else copy is false and a node is unresolved
-        GEM-->>User: fail with host and expected version
+    alt exact runtime is missing and copy is true
+        GEM->>SSH: upload one content-addressed archive
+        SSH->>N1: verify archive and files, atomically activate
+        SSH->>N2: verify archive and files, atomically activate
+    else exact runtime is missing and copy is false
+        GEM-->>User: fail with host and content identity
     end
-
-    GEM->>SSH: resolve and verify absolute SBK executable per node
+    GEM->>SSH: verify activated Java, SBK, and content identity
 
     GEM->>SBM: sbmBenchmark.start()<br/>(listen on :9717 locally)
     GEM->>SSH: export SBK_JAVA_HOME and run sbkCommand on each node
@@ -1972,28 +1964,30 @@ sequenceDiagram
 GEM-->>User: printRemoteResults()
 ```
 
-The reconciliation step avoids transferring a full distribution on
-every run. A probe counts as a match only when the remote executable
-exists, exits successfully, and prints the exact SBK version embedded
-in the local SBK-GEM package. All nodes are probed concurrently. Copy
-work is then deduplicated by `(host, remote directory)`, so repeated
-workload entries sharing one installation do not race to replace it.
-`copy=true` permits this reconciliation and is the default; it does not
-force replacement of a matching installation. `delete=true` removes an
-existing mismatch before copying, while `deleteafter=false` keeps the
-verified deployment after benchmarking. Every copied target is probed
-again for the expected version, and every launch uses an executable path
-that the remote node resolved to an absolute path and confirmed executable.
+The reconciliation identity is content, not only the displayed SBK version.
+GEM verifies the local pathing JAR dependency closure, hashes every file,
+symbolic link, and executable bit, and caches a deterministic platform-specific
+archive locally. All nodes are probed concurrently. A valid exact identity is
+reused, so the full distribution is not transferred on every run. Copy work is
+deduplicated by `(host, remote directory)`, so repeated workload entries sharing
+one installation do not race to replace it.
 
-Java reconciliation is separate from SBK reconciliation. `javaversion`
-defines the required major release (25 by default). GEM first discovers
-`java` from each node's `PATH`; unresolved nodes are checked at `javadir`
-when one is supplied. With `javacopy=true`, GEM locates its own runtime
-through `System.getProperty("java.home")`, copies that complete directory,
-and verifies the copied `bin/java`. A local JVM with another major version
-is rejected rather than copied. The final SSH command exports each node's
-verified `SBK_JAVA_HOME` and prepends its `bin` directory to `PATH`, matching
-the lookup order in SBK's generated launcher scripts.
+Remote activation is transactional: the uploaded archive SHA-256 is checked,
+the archive is extracted to a unique staging directory, its OS/architecture
+descriptor and every regular-file checksum are verified, and only then is the
+runtime atomically renamed into its final content-addressed directory. Failed
+or interrupted staging data is cleaned and cannot become a launch target.
+`copy=true` permits uploading a missing identity. `delete=true` permits repair
+of an invalid final directory bearing that identity, while `deleteafter=false`
+retains the verified runtime for subsequent benchmarks.
+
+`javaversion` defines the required major release (25 by default). With the
+default `javacopy=true`, the complete JDK running GEM is part of the same
+immutable archive and is always used by remote SBK; the remote host therefore
+does not need a preinstalled Java. With `javacopy=false`, Java is excluded and
+GEM requires a matching remote JDK with executable `bin/java` and `bin/javac`,
+discovered from `PATH` or `javadir`. The final SSH command exports the selected
+node-specific `SBK_JAVA_HOME` and prepends its `bin` directory to `PATH`.
 
 ### 7.2 What SBK-GEM is and isn't
 

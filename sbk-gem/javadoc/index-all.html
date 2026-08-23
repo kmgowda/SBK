@@ -98,13 +98,13 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Whether SBK-GEM may copy missing or mismatched SBK installations to remote nodes.</div>
 </dd>
-<dt><a href="io/gem/api/SshUtils.html#copyDirectory(org.apache.sshd.client.session.ClientSession,java.lang.String,java.lang.String)" class="member-name-link">copyDirectory(ClientSession, String, String)</a> - Static method in class io.gem.api.<a href="io/gem/api/SshUtils.html" title="class in io.gem.api">SshUtils</a></dt>
+<dt><a href="io/gem/api/SshUtils.html#copyFile(org.apache.sshd.client.session.ClientSession,java.lang.String,java.lang.String)" class="member-name-link">copyFile(ClientSession, String, String)</a> - Static method in class io.gem.api.<a href="io/gem/api/SshUtils.html" title="class in io.gem.api">SshUtils</a></dt>
 <dd>
-<div class="block">Recursively copy a directory to a remote path using SCP.</div>
+<div class="block">Copy one local file to an exact remote path using SCP.</div>
 </dd>
-<dt><a href="io/gem/api/SshSession.html#copyDirectoryAsync(java.lang.String,java.lang.String,long)" class="member-name-link">copyDirectoryAsync(String, String, long)</a> - Method in class io.gem.api.<a href="io/gem/api/SshSession.html" title="class in io.gem.api">SshSession</a></dt>
+<dt><a href="io/gem/api/SshSession.html#copyFileAsync(java.lang.String,java.lang.String,long)" class="member-name-link">copyFileAsync(String, String, long)</a> - Method in class io.gem.api.<a href="io/gem/api/SshSession.html" title="class in io.gem.api">SshSession</a></dt>
 <dd>
-<div class="block">It copies directory of sessions but throws ConnectException if it occurs.</div>
+<div class="block">Copy one local file to an exact remote path asynchronously.</div>
 </dd>
 <dt><a href="io/gem/api/SshUtils.html#createClient(io.gem.api.ConnectionConfig)" class="member-name-link">createClient(ConnectionConfig)</a> - Static method in class io.gem.api.<a href="io/gem/api/SshUtils.html" title="class in io.gem.api">SshUtils</a></dt>
 <dd>
@@ -132,6 +132,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/gem/config/GemConfig.html#deleteafter" class="member-name-link">deleteafter</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
 <div class="block">Whether to delete the remote SBK deployment after the benchmark.</div>
+</dd>
+<dt><a href="io/gem/config/GemConfig.html#deploymentTimeoutSeconds" class="member-name-link">deploymentTimeoutSeconds</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Maximum runtime bundle creation, transfer, and activation duration in seconds.</div>
 </dd>
 <dt><a href="io/gem/config/GemConfig.html#DESC" class="member-name-link">DESC</a> - Static variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
@@ -551,6 +555,10 @@ remote SBK command line.</div>
 <dt><a href="io/gem/api/SshSession.html#runCommandAsync(java.lang.String,java.lang.Boolean,long)" class="member-name-link">runCommandAsync(String, Boolean, long)</a> - Method in class io.gem.api.<a href="io/gem/api/SshSession.html" title="class in io.gem.api">SshSession</a></dt>
 <dd>
 <div class="block">This method is responsible for running commands but throws ConnectException if it occurs.</div>
+</dd>
+<dt><a href="io/gem/config/GemConfig.html#runtimeCacheDirectory" class="member-name-link">runtimeCacheDirectory</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Local content-addressed runtime bundle cache directory, absolute or relative to the user's home.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:S">S</h2>

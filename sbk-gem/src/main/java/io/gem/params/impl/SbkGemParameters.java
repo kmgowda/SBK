@@ -130,8 +130,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("sbkcommand", true,
                 "remote sbk command; command path is relative to 'sbkdir', default: " + config.sbkcommand);
         addOption("copy", true, "Copy SBK when missing or mismatched; default: " + config.copy);
-        addOption("javacopy", true, "Copy the local Java runtime when the expected remote Java is unavailable; " +
-                "default: " + config.javacopy);
+        addOption("javacopy", true, "Include and use the controller Java runtime in the immutable remote bundle; "
+                + "when false, require matching Java on every remote host; default: " + config.javacopy);
         addOption("javaversion", true, "Required remote Java major version; default: " + config.javaversion);
         addOption("javadir", true, "Remote Java home containing bin/java; default: " +
                 (StringUtils.isEmpty(config.javadir) ? "null" : config.javadir));

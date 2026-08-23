@@ -98,6 +98,7 @@ final class RemoteJavaDeploymentTest {
         final String command = RemoteJavaDeployment.homeProbeCommand("/opt/SBK Java");
 
         assertTrue(command.contains("[ -x '/opt/SBK Java/bin/java' ]"));
+        assertTrue(command.contains("[ -x '/opt/SBK Java/bin/javac' ]"));
         assertTrue(command.contains("SBK_JAVA_HOME=%s"));
     }
 

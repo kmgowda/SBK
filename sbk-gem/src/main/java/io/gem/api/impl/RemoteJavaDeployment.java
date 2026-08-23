@@ -42,7 +42,9 @@ final class RemoteJavaDeployment {
         return "JAVA_BIN=$(command -v java) || exit " + RemoteExitCode.COMMAND_NOT_FOUND + "; " +
                 "JAVA_BIN=$(readlink -f \"$JAVA_BIN\" 2>/dev/null || printf '%s' \"$JAVA_BIN\"); " +
                 "SBK_HOME=$(dirname \"$(dirname \"$JAVA_BIN\")\"); " +
-                "\"$JAVA_BIN\" -version; printf '\\nSBK_JAVA_HOME=%s\\n' \"$SBK_HOME\"";
+                "test -x \"$SBK_HOME/bin/javac\" || exit " + RemoteExitCode.COMMAND_NOT_FOUND + "; " +
+                "\"$JAVA_BIN\" -version; \"$SBK_HOME/bin/javac\" -version; " +
+                "printf '\\nSBK_JAVA_HOME=%s\\n' \"$SBK_HOME\"";
     }
 
     /**
@@ -54,8 +56,10 @@ final class RemoteJavaDeployment {
     static String homeProbeCommand(String javaHome) {
         final String quotedHome = RemoteSbkDeployment.shellQuote(javaHome);
         final String quotedJava = RemoteSbkDeployment.shellQuote(javaHome + "/bin/java");
-        return "if [ -x " + quotedJava + " ]; then " + quotedJava +
-                " -version; printf '\\nSBK_JAVA_HOME=%s\\n' " + quotedHome + "; else exit "
+        final String quotedJavac = RemoteSbkDeployment.shellQuote(javaHome + "/bin/javac");
+        return "if [ -x " + quotedJava + " ] && [ -x " + quotedJavac + " ]; then " + quotedJava
+                + " -version; " + quotedJavac + " -version; printf '\\nSBK_JAVA_HOME=%s\\n' "
+                + quotedHome + "; else exit "
                 + RemoteExitCode.COMMAND_NOT_FOUND + "; fi";
     }
 

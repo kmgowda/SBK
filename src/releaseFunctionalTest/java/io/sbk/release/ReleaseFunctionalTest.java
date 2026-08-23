@@ -347,7 +347,13 @@ class ReleaseFunctionalTest {
         } else {
             args.addAll(List.of("-context", freePort() + "/metrics"));
         }
-        expect(config.sbkGem, inventory.successPattern(), inventory.environment, args.toArray(String[]::new));
+        String deploymentPattern = inventory.successPattern();
+        if (config.profile.equals("local-docker")) {
+            deploymentPattern = logger.equals("GemPrometheusLogger")
+                    ? "(?s)Immutable runtime archive verified and atomically activated.*" + deploymentPattern
+                    : "(?s)already has immutable runtime.*skipping copy.*" + deploymentPattern;
+        }
+        expect(config.sbkGem, deploymentPattern, inventory.environment, args.toArray(String[]::new));
     }
 
     private void gemYal(final Inventory inventory) throws Exception {
@@ -363,7 +369,10 @@ class ReleaseFunctionalTest {
                 .append("\n  totalthroughput: ").append(config.totalThroughput)
                 .append("\n  out: GemPrometheusLogger\n");
         Files.writeString(file, yaml, StandardCharsets.UTF_8);
-        expect(config.sbkGemYal, inventory.successPattern(), inventory.environment, "-f", file.toString());
+        final String expected = config.profile.equals("local-docker")
+                ? "(?s)already has immutable runtime.*skipping copy.*" + inventory.successPattern()
+                : inventory.successPattern();
+        expect(config.sbkGemYal, expected, inventory.environment, "-f", file.toString());
     }
 
     private void expect(final Path executable, final String regex, final String... args) throws Exception {
