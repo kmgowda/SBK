@@ -46,9 +46,7 @@ final class SbkGemJavaOptionsTest {
             config = mapper.readValue(properties, GemConfig.class);
         }
 
-        assertEquals(25, config.javaversion);
         assertTrue(config.javadir == null || config.javadir.isEmpty());
-        assertTrue(config.delete);
         assertTrue(config.runtimecleanup);
         assertTrue(config.hostkeycheck);
         assertTrue(config.knownhosts == null || config.knownhosts.isEmpty());
@@ -56,7 +54,7 @@ final class SbkGemJavaOptionsTest {
     }
 
     @Test
-    void parsesJavaProvisioningCliOverrides() throws Exception {
+    void parsesPreferredRemoteJavaHome() throws Exception {
         final Path binDirectory = temporaryDirectory.resolve("bin");
         final Path command = binDirectory.resolve("sbk");
         Files.createDirectories(binDirectory);
@@ -67,10 +65,9 @@ final class SbkGemJavaOptionsTest {
         final SbkGemParameters parameters = new SbkGemParameters("test", new String[0], new String[0], config,
                 9717, 10);
         parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1",
-                "-javaversion", "21", "-javadir", "/opt/java-21"});
+                "-javadir", "/opt/java-25"});
 
-        assertEquals(21, parameters.getJavaVersion());
-        assertEquals("/opt/java-21", parameters.getJavaDir());
+        assertEquals("/opt/java-25", parameters.getJavaDir());
     }
 
     @Test
@@ -85,9 +82,8 @@ final class SbkGemJavaOptionsTest {
         final SbkGemParameters parameters = new SbkGemParameters("test", new String[0], new String[0], config,
                 9717, 10);
         parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1",
-                "-delete", "false", "-runtimecleanup", "false"});
+                "-runtimecleanup", "false"});
 
-        assertFalse(parameters.isDelete());
         assertFalse(parameters.isRuntimeCleanup());
     }
 
@@ -104,6 +100,11 @@ final class SbkGemJavaOptionsTest {
                 () -> parameters.parseArgs(new String[]{"-deleteafter", "true"}));
         assertTrue(deleteFailure.getMessage().contains("-runtimecleanup"));
 
+        final IllegalArgumentException managedDeleteFailure = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(new String[]{"-delete", "false"}));
+        assertTrue(managedDeleteFailure.getMessage().contains("repaired automatically"));
+        assertFalse(parameters.getHelpText().contains("-delete "));
+
         final IllegalArgumentException commandFailure = assertThrows(IllegalArgumentException.class,
                 () -> parameters.parseArgs(new String[]{"-sbkcommand", "custom-bin/custom-sbk"}));
         assertTrue(commandFailure.getMessage().contains(GemConfig.SBK_COMMAND));
@@ -113,6 +114,11 @@ final class SbkGemJavaOptionsTest {
                 () -> parameters.parseArgs(new String[]{"-javacopy", "false"}));
         assertTrue(javaCopyFailure.getMessage().contains("provisions the controller JDK automatically"));
         assertFalse(parameters.getHelpText().contains("-javacopy"));
+
+        final IllegalArgumentException javaVersionFailure = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(new String[]{"-javaversion", "21"}));
+        assertTrue(javaVersionFailure.getMessage().contains("controller Java major version or newer"));
+        assertFalse(parameters.getHelpText().contains("-javaversion"));
     }
 
     @Test
@@ -192,9 +198,7 @@ final class SbkGemJavaOptionsTest {
         config.hostkeycheck = true;
         config.knownhosts = "";
         config.sbkdir = sbkDirectory.toString();
-        config.javaversion = 25;
         config.javadir = "";
-        config.delete = true;
         config.runtimecleanup = true;
         config.timeoutSeconds = 5;
         config.remoteDir = "sbk-gem-test";

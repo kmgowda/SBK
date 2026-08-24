@@ -99,17 +99,9 @@ final public class GemConfig {
      */
     public String sbkVersion;
     /**
-     * Required Java major version on remote nodes.
-     */
-    public int javaversion;
-    /**
      * Optional remote Java home containing {@code bin/java}.
      */
     public String javadir;
-    /**
-     * Whether to delete an existing mismatched SBK installation before copying.
-     */
-    public boolean delete;
     /** Whether inactive non-current managed runtimes and local cached bundles are removed automatically. */
     public boolean runtimecleanup;
 

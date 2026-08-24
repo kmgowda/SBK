@@ -72,6 +72,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     private final ExecutorService executor;
     private final SshSession[] nodes;
     private final ConnectionsMap consMap;
+    private final int controllerJavaVersion;
     private final String runtimeLeaseRunId;
     private final boolean[] runtimeLeaseLaunched;
     private final boolean[] runtimeLeaseActive;
@@ -103,6 +104,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         this.sbmBenchmark = sbmBenchmark;
         this.config = config;
         this.params = params;
+        this.controllerJavaVersion = Runtime.version().feature();
         this.sbkArgsByNode = sbkArgsByNode.stream().map(List::copyOf).toList();
         this.retFuture = new CompletableFuture<>();
         this.state = State.BEGIN;
@@ -352,11 +354,6 @@ final public class SbkGemBenchmark implements GemBenchmark {
                                                        RemoteEnvironment environment) throws IOException,
             ConnectException, InterruptedException, ExecutionException {
         final DeploymentPlatform platform = environment.platform();
-        final int localJavaVersion = Runtime.version().feature();
-        if (localJavaVersion != params.getJavaVersion()) {
-            throw new IOException("Local Java " + localJavaVersion + " cannot provide requested Java "
-                    + params.getJavaVersion());
-        }
         final Path configuredCache = Paths.get(config.runtimeCacheDirectory);
         final Path cacheDirectory = configuredCache.isAbsolute() ? configuredCache
                 : Paths.get(System.getProperty("user.home")).resolve(configuredCache);
@@ -368,7 +365,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 + platform.id(), config.runtimeProgressIntervalSeconds,
                 () -> "validating, hashing, or compressing SBK files")) {
             bundle = SbkRuntimeBundle.create(Paths.get(params.getSbkDir()), GemConfig.SBK_COMMAND,
-                    config.sbkVersion, params.getJavaVersion(), platform, cacheDirectory);
+                    config.sbkVersion, controllerJavaVersion, platform, cacheDirectory);
             bundlePreparationSeconds = progress.elapsedSeconds();
         }
         Printer.log.info("SBK-GEM: Runtime bundle {} prepared in {} second(s); content SHA-256 {}; "
@@ -700,7 +697,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                         runtimeDeployment.agentPaths()[i]);
                 activations[i] = nodes[i].runCommandAsync(command, RemoteAgent.activate(archivePaths[i],
                                 bundle.archiveDigest(), bundle.contentDigest(), stagingDirectories[i],
-                                deploymentDirectories[i], platform.operatingSystem(), params.isDelete()),
+                                deploymentDirectories[i], platform.operatingSystem()),
                         true, config.deploymentTimeoutSeconds);
             }
         }
@@ -742,8 +739,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
         waitFor(CompletableFuture.allOf(probes), "activated runtime verification");
         requireSuccessfulWithDiagnostics(probes, copyTargets, "Verifying activated immutable runtime");
-        Printer.log.info("SBK-GEM: Runtime content {}, Java {}, and SBK {} verified on selected hosts",
-                bundle.contentDigest(), params.getJavaVersion(), config.sbkVersion);
+        Printer.log.info("SBK-GEM: Runtime content {}, Java {} or newer, and SBK {} verified on selected hosts",
+                bundle.contentDigest(), controllerJavaVersion, config.sbkVersion);
     }
 
     private void requireSuccessfulWithDiagnostics(CompletableFuture<SshResponse>[] futures,
@@ -767,7 +764,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     @SuppressWarnings("unchecked")
     private RemoteEnvironment prepareRemoteEnvironment(String[] absoluteConnectionDirs) throws ConnectException,
             InterruptedException, ExecutionException, IOException {
-        final int expectedVersion = params.getJavaVersion();
+        final int expectedVersion = controllerJavaVersion;
         final DeploymentPlatform localPlatform = DeploymentPlatform.local();
         final Path localAgent = Path.of(params.getSbkDir(), "lib", "sbk-gem-agent-" + config.sbkVersion + ".jar")
                 .toAbsolutePath().normalize();
@@ -804,12 +801,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
 
         if (hasSelectedTarget(unresolved)) {
-            final int localMajor = Runtime.version().feature();
-            if (localMajor != expectedVersion) {
-                throw new IOException("Controller JDK " + localMajor + " cannot provision required JDK "
-                        + expectedVersion);
-            }
-            Printer.log.info("SBK-GEM: Java {} is missing on selected host(s); preparing a separate "
+            Printer.log.info("SBK-GEM: Java {} or newer is missing on selected host(s); preparing a separate "
                     + "content-addressed JDK copy", expectedVersion);
             final ManagedJavaRuntime javaRuntime = ManagedJavaRuntime.create(
                     Path.of(System.getProperty("java.home")), expectedVersion);
@@ -843,7 +835,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
 
         if (hasSelectedTarget(unresolved)) {
-            throw new InterruptedException("SBK-GEM: Java " + expectedVersion + " could not be provisioned");
+            throw new InterruptedException("SBK-GEM: Java " + expectedVersion
+                    + " or newer could not be provisioned");
         }
 
         DeploymentPlatform verifiedPlatform = null;
@@ -861,7 +854,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
             Printer.log.info("SBK-GEM: Host '" + nodes[i].connection.getHost() + "' will use SBK_JAVA_HOME='" +
                     javaHomes[i] + "'");
         }
-        Printer.log.info("SBK-GEM: Matching OS {} and Java major {} verified on {} host(s)",
+        Printer.log.info("SBK-GEM: Matching OS {} and Java major {} or newer verified on {} host(s)",
                 verifiedPlatform.id(), expectedVersion, nodes.length);
         return new RemoteEnvironment(javaHomes, agentPaths, verifiedPlatform);
     }

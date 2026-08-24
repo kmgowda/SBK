@@ -39,11 +39,14 @@ final class RemoteAgentProcessTest {
         Files.copy(bundle.archive(), uploaded, StandardCopyOption.REPLACE_EXISTING);
         final Path staging = temporaryDirectory.resolve("staging");
         final Path deployed = temporaryDirectory.resolve(bundle.deploymentName());
+        Files.createDirectories(deployed);
+        Files.writeString(deployed.resolve("invalid-runtime"), "corrupt", StandardCharsets.UTF_8);
 
         final ProcessResult activation = execute(RemoteAgent.activate(uploaded.toString(), bundle.archiveDigest(),
-                bundle.contentDigest(), staging.toString(), deployed.toString(), platform.operatingSystem(), true));
+                bundle.contentDigest(), staging.toString(), deployed.toString(), platform.operatingSystem()));
         assertEquals(0, activation.exitCode(), activation.output());
         assertTrue(Files.isDirectory(deployed.resolve("sbk/lib")));
+        assertTrue(Files.notExists(deployed.resolve("invalid-runtime")));
         assertTrue(Files.notExists(uploaded));
 
         final ProcessResult verification = execute(RemoteAgent.verify(deployed.toString(), bundle.contentDigest(),
@@ -54,10 +57,16 @@ final class RemoteAgentProcessTest {
 
     @Test
     void packagedAgentProbesCurrentJdk() throws Exception {
-        final ProcessResult result = execute(RemoteAgent.probe(Runtime.version().feature()));
+        final int current = Runtime.version().feature();
+        final ProcessResult result = execute(RemoteAgent.probe(current));
+        final ProcessResult newerThanMinimum = execute(RemoteAgent.probe(current - 1));
+        final ProcessResult olderThanMinimum = execute(RemoteAgent.probe(current + 1));
 
         assertEquals(0, result.exitCode(), result.output());
-        assertTrue(result.output().contains("SBK_JAVA_MAJOR=" + Runtime.version().feature()));
+        assertTrue(result.output().contains("SBK_JAVA_MAJOR=" + current));
+        assertEquals(0, newerThanMinimum.exitCode(), newerThanMinimum.output());
+        assertTrue(olderThanMinimum.exitCode() != 0);
+        assertTrue(olderThanMinimum.output().contains("required " + (current + 1) + " or newer"));
     }
 
     private ProcessResult execute(byte[] request) throws IOException, InterruptedException {

@@ -76,9 +76,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#gemport" tabindex="0">gemport</a></li>
 <li><a href="#sbkdir" tabindex="0">sbkdir</a></li>
 <li><a href="#sbkVersion" tabindex="0">sbkVersion</a></li>
-<li><a href="#javaversion" tabindex="0">javaversion</a></li>
 <li><a href="#javadir" tabindex="0">javadir</a></li>
-<li><a href="#delete" tabindex="0">delete</a></li>
 <li><a href="#runtimecleanup" tabindex="0">runtimecleanup</a></li>
 <li><a href="#remoteTimeoutSeconds" tabindex="0">remoteTimeoutSeconds</a></li>
 <li><a href="#deploymentTimeoutSeconds" tabindex="0">deploymentTimeoutSeconds</a></li>
@@ -147,80 +145,70 @@ management, and SBM coordination.</div>
 <div class="col-last even-row-color">
 <div class="block"><code>String BIN_DIR = "bin"</code>.</div>
 </div>
-<div class="col-first odd-row-color"><code>boolean</code></div>
-<div class="col-second odd-row-color"><code><a href="#delete" class="member-name-link">delete</a></code></div>
+<div class="col-first odd-row-color"><code>long</code></div>
+<div class="col-second odd-row-color"><code><a href="#deploymentTimeoutSeconds" class="member-name-link">deploymentTimeoutSeconds</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">Whether to delete an existing mismatched SBK installation before copying.</div>
-</div>
-<div class="col-first even-row-color"><code>long</code></div>
-<div class="col-second even-row-color"><code><a href="#deploymentTimeoutSeconds" class="member-name-link">deploymentTimeoutSeconds</a></code></div>
-<div class="col-last even-row-color">
 <div class="block">Maximum runtime bundle creation, transfer, and activation duration in seconds.</div>
 </div>
-<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#DESC" class="member-name-link">DESC</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#DESC" class="member-name-link">DESC</a></code></div>
+<div class="col-last even-row-color">
 <div class="block"><code>String DESC = "Storage Benchmark Kit - Group Execution Monitor"</code>.</div>
 </div>
-<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#DIAGNOSTIC_TRUNCATION_MARKER" class="member-name-link">DIAGNOSTIC_TRUNCATION_MARKER</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#DIAGNOSTIC_TRUNCATION_MARKER" class="member-name-link">DIAGNOSTIC_TRUNCATION_MARKER</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Marker inserted between retained diagnostic prefix and suffix text.</div>
 </div>
-<div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#diagnosticBytes" class="member-name-link">diagnosticBytes</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#diagnosticBytes" class="member-name-link">diagnosticBytes</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Maximum stdout/stderr bytes retained per SSH command.</div>
 </div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#diagnosticPrefixCharacters" class="member-name-link">diagnosticPrefixCharacters</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#diagnosticPrefixCharacters" class="member-name-link">diagnosticPrefixCharacters</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Prefix characters retained when a remote diagnostic is truncated.</div>
 </div>
-<div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#executorThreadReserve" class="member-name-link">executorThreadReserve</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#executorThreadReserve" class="member-name-link">executorThreadReserve</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Executor threads reserved for orchestration and embedded services.</div>
 </div>
-<div class="col-first even-row-color"><code>boolean</code></div>
-<div class="col-second even-row-color"><code><a href="#fork" class="member-name-link">fork</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#fork" class="member-name-link">fork</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Whether to fork a <code>ForkJoinPool</code> for execution (vs fixed thread pool).</div>
 </div>
-<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#GEM_PASS_OPTION" class="member-name-link">GEM_PASS_OPTION</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#GEM_PASS_OPTION" class="member-name-link">GEM_PASS_OPTION</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Command-line option name used to supply the SSH password.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#gempass" class="member-name-link">gempass</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#gempass" class="member-name-link">gempass</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">SSH password.</div>
 </div>
-<div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#gemport" class="member-name-link">gemport</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#gemport" class="member-name-link">gemport</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">SSH port.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#gemuser" class="member-name-link">gemuser</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#gemuser" class="member-name-link">gemuser</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">SSH user name.</div>
 </div>
-<div class="col-first odd-row-color"><code>boolean</code></div>
-<div class="col-second odd-row-color"><code><a href="#hostkeycheck" class="member-name-link">hostkeycheck</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>boolean</code></div>
+<div class="col-second even-row-color"><code><a href="#hostkeycheck" class="member-name-link">hostkeycheck</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Whether remote SSH host keys must match an entry in <a href="#knownhosts"><code>knownhosts</code></a>.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#javadir" class="member-name-link">javadir</a></code></div>
-<div class="col-last even-row-color">
-<div class="block">Optional remote Java home containing <code>bin/java</code>.</div>
-</div>
-<div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#javaversion" class="member-name-link">javaversion</a></code></div>
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#javadir" class="member-name-link">javadir</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">Required Java major version on remote nodes.</div>
+<div class="block">Optional remote Java home containing <code>bin/java</code>.</div>
 </div>
 <div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="#knownhosts" class="member-name-link">knownhosts</a></code></div>
@@ -631,29 +619,11 @@ management, and SBM coordination.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="javaversion">
-<h3>javaversion</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">javaversion</span></div>
-<div class="block">Required Java major version on remote nodes.</div>
-</div>
-</section>
-</li>
-<li>
 <section class="detail" id="javadir">
 <h3>javadir</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">javadir</span></div>
 <div class="block">Optional remote Java home containing <code>bin/java</code>.</div>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="delete">
-<h3>delete</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">delete</span></div>
-<div class="block">Whether to delete an existing mismatched SBK installation before copying.</div>
 </div>
 </section>
 </li>

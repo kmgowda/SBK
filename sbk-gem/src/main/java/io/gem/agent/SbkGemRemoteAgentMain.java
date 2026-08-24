@@ -75,8 +75,8 @@ public final class SbkGemRemoteAgentMain {
         requireCount(values, 1);
         final int expected = Integer.parseInt(values.getFirst());
         final int actual = Runtime.version().feature();
-        if (actual != expected) {
-            throw new IOException("Java major mismatch: expected " + expected + ", found " + actual);
+        if (!isJavaCompatible(actual, expected)) {
+            throw new IOException("Java major is too old: required " + expected + " or newer, found " + actual);
         }
         final Path home = Path.of(System.getProperty("java.home")).toAbsolutePath().normalize();
         if (!Files.isExecutable(home.resolve("bin/javac"))) {
@@ -87,14 +87,17 @@ public final class SbkGemRemoteAgentMain {
         System.out.println("SBK_JAVA_MAJOR=" + actual);
     }
 
+    static boolean isJavaCompatible(int actual, int minimum) {
+        return actual >= minimum;
+    }
+
     private static void activate(List<String> values) throws IOException {
-        requireCount(values, 7);
+        requireCount(values, 6);
         final Path archive = absolute(values.get(0));
         final String archiveDigest = values.get(1);
         final String contentDigest = values.get(2);
         final Path staging = absolute(values.get(3));
         final Path destination = absolute(values.get(4));
-        final boolean replaceInvalid = Boolean.parseBoolean(values.get(6));
         try {
             if (!archiveDigest.equals(sha256(archive))) {
                 throw new IOException("SBK archive SHA-256 mismatch");
@@ -111,9 +114,6 @@ public final class SbkGemRemoteAgentMain {
             if (Files.exists(destination, LinkOption.NOFOLLOW_LINKS)) {
                 if (Files.isRegularFile(marker) && contentDigest.equals(Files.readString(marker).trim())) {
                     return;
-                }
-                if (!replaceInvalid) {
-                    throw new IOException("Existing SBK runtime is invalid: " + destination);
                 }
                 deleteRecursively(destination);
             }

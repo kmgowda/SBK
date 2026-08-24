@@ -1992,8 +1992,8 @@ the archive is extracted to a unique staging directory, its operating-system
 descriptor and every regular-file checksum are verified, and only then is the
 runtime atomically renamed into its final content-addressed directory. Failed
 or interrupted staging data is cleaned and cannot become a launch target.
-Missing identities are uploaded automatically. `delete=true` permits repair of
-an invalid final directory bearing the expected identity. The current verified
+Missing identities are uploaded automatically. An invalid final directory
+bearing the expected managed identity is repaired automatically. The current verified
 runtime is retained for subsequent benchmarks. With the default
 `runtimecleanup=true`, an Apache MINA SFTP lifecycle lock and current-runtime
 marker remove every non-current managed identity only after its controller-
@@ -2017,9 +2017,9 @@ also retains only the current identity; per-archive locks protect bundles in
 concurrent transfer until they become inactive. Unmanaged directories and
 user-managed JDKs are outside this cleanup boundary.
 
-`javaversion` defines the required major release (25 by default). GEM first
-validates the JDK selected by `javadir` or remote `PATH`. If it is absent or
-incompatible, the controller JDK is hashed and copied separately through MINA
+The controller Java major version defines the minimum remote Java release. GEM
+first validates the JDK selected by `javadir` or remote `PATH`. If it is absent
+or older, the controller JDK is hashed and copied separately through MINA
 SFTP. Java and SBK have independent identities and reuse markers, so either can
 be reused or updated without transferring the other. The remote agent launches
 `io.sbk.main.SbkMain` directly with the verified JDK and SBK JAR classpath.

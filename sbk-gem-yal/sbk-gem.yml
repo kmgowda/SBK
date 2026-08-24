@@ -27,9 +27,7 @@ sbkGemArgs:
   # knownhosts: /home/kmg/.ssh/known_hosts
   sbkdir:
   # Delete an outdated SBK before copying its replacement (default: true).
-  delete: true
   # Retain the current runtime and remove inactive older managed versions (default: true).
   runtimecleanup: true
   # Java provisioning defaults: include and use the local Java 25 runtime.
-  javaversion: 25
   # javadir: /opt/sbk-java

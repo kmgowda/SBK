@@ -37,9 +37,9 @@ final class RemoteAgent {
     }
 
     static byte[] activate(String archive, String archiveDigest, String contentDigest, String staging,
-                           String destination, String operatingSystem, boolean replaceInvalid) throws IOException {
+                           String destination, String operatingSystem) throws IOException {
         return RemoteAgentProtocol.encode("activate", List.of(archive, archiveDigest, contentDigest, staging,
-                destination, operatingSystem, Boolean.toString(replaceInvalid)));
+                destination, operatingSystem));
     }
 
     static byte[] verify(String destination, String contentDigest, String version, String operatingSystem)

@@ -36,7 +36,7 @@ SBK-GEM owns remote launch and aggregate lifecycle. The remote SBK processes sti
 
 ## Prerequisites
 
-- JDK 25 on the local GEM host. GEM reuses a matching remote JDK when present;
+- JDK 25 on the local GEM host. GEM reuses a same-or-newer remote JDK when present;
   otherwise it copies the controller JDK as a separate content-addressed tree.
   Java is never embedded in the SBK runtime archive.
 - SSH reachability, a trusted `known_hosts` entry, and authentication for every target.
@@ -187,15 +187,16 @@ uses one shared per-worker rate for both directions.
 
 Before connecting to storage, SBK-GEM validates the local `installDist`
 layout, including the pathing JAR and every dependency named by its manifest.
-It packages the complete distribution and, by default, the controller JDK into
-one content-addressed `tar.gz` archive. The identity covers every file,
+It packages the complete SBK distribution into a content-addressed `tar.gz`
+archive. When remote Java provisioning is required, the controller JDK is
+copied separately with its own content identity. Each identity covers every file,
 contained relative symbolic link, and normalized file mode, so two builds
 carrying the same SBK version but different dependencies cannot be mistaken
 for one another. Links escaping the SBK or JDK source tree are rejected;
 directory modes are normalized to `0755` in both the identity and archive.
 
 The archive contains a platform descriptor and per-file SHA-256 manifest.
-Every remote node must pass the homogeneous platform/tool preflight. GEM then
+Every remote node must pass the homogeneous operating-system preflight. GEM then
 automatically uploads only a missing content identity, verifies the archive SHA-256, extracts
 to a unique staging directory, verifies every regular file, and atomically
 renames the verified runtime into place. A partially copied or failed staging
@@ -250,7 +251,6 @@ The deployment lifecycle options are:
 - `-sbkdir <directory>` selects the complete local SBK installation to bundle.
   SBK-GEM validates its standard `bin/sbk` installation contract, but the
   remote agent launches `SbkMain` directly from the verified JARs.
-- `-delete true|false` permits replacement only when the exact content-addressed destination exists but fails validation; the default is `true`.
 - `-runtimecleanup true|false` removes every inactive non-current remote
   SBK-GEM-managed runtime identity and controller-side cached bundle after
   verified activation and lease/transfer release, regardless of whether its
@@ -263,18 +263,16 @@ controller host when it is selected as a node. It does not scan or delete
 arbitrary SBK/JDK installations outside the SBK-GEM-managed deployment parent;
 doing so would risk deleting user-owned software.
 
-The former `-copy`, `-deleteafter`, `-sbkcommand`, and `-javacopy` options are rejected with
+The former `-copy`, `-delete`, `-deleteafter`, `-sbkcommand`, `-javacopy`, and `-javaversion` options are rejected with
 migration guidance. This prevents disabling required provisioning, deleting
 the newly verified runtime at benchmark shutdown, or bypassing the verified
 standard launcher contract.
 
-SBK-GEM selects Java as follows:
-
-- `-javaversion <major>` selects the required Java major version; the default is `25`.
-- `-javadir <home>` optionally identifies a preferred remote JDK. Otherwise
+SBK-GEM uses the controller's Java major version as the minimum remote Java
+version. `-javadir <home>` optionally identifies a preferred remote JDK. Otherwise
   GEM asks the remote Java agent to validate Java discovered from `PATH`.
 
-If the preferred or PATH JDK is absent or has the wrong major version, GEM
+If the preferred or PATH JDK is absent or older than the controller Java, GEM
 copies the controller JDK separately through Apache MINA SFTP. The JDK has its
 own content identity and reuse marker, so an unchanged JDK is not copied again.
 The SBK archive likewise has an independent content identity and is transferred
@@ -282,8 +280,8 @@ only when its exact content is absent.
 
 For each remote launch, the agent starts `io.sbk.main.SbkMain` directly with
 the selected JDK and the verified SBK pathing/main JARs. The deployed shell
-launcher is not executed. Automatic copying is rejected when the local JVM
-major version differs from `-javaversion`.
+launcher is not executed. A newer remote JDK is accepted because it can execute
+SBK classes built for the controller's Java release.
 
 Before a multi-host run:
 

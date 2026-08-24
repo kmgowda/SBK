@@ -66,9 +66,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#parseArgs(java.lang.String%5B%5D)" tabindex="0">parseArgs(String[])</a></li>
 <li><a href="#getTotalRecords()" tabindex="0">getTotalRecords()</a></li>
 <li><a href="#getSbkDir()" tabindex="0">getSbkDir()</a></li>
-<li><a href="#getJavaVersion()" tabindex="0">getJavaVersion()</a></li>
 <li><a href="#getJavaDir()" tabindex="0">getJavaDir()</a></li>
-<li><a href="#isDelete()" tabindex="0">isDelete()</a></li>
 <li><a href="#isRuntimeCleanup()" tabindex="0">isRuntimeCleanup()</a></li>
 </ol>
 </li>
@@ -110,7 +108,7 @@ instances for each target node.
 - -nodes: comma/space/newline-separated hostnames or host:port endpoints
 - -gemuser, -gempass, -gemport
 - -sbkdir
-- -runtimecleanup, -delete, -javaversion, -javadir
+- -runtimecleanup, -javadir
 - -localhost
 - -sbmport, -sbmsleepms
 - -totalrecords
@@ -164,25 +162,15 @@ instances for each target node.
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the optional remote Java home.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getJavaVersion()" class="member-name-link">getJavaVersion</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSbkDir()" class="member-name-link">getSbkDir</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the required remote Java major version.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSbkDir()" class="member-name-link">getSbkDir</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">to get Sbk directory.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalRecords()" class="member-name-link">getTotalRecords</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the configured record value.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isDelete()" class="member-name-link">isDelete</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalRecords()" class="member-name-link">getTotalRecords</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Check whether a mismatched SBK installation may be deleted before replacement.</div>
+<div class="block">Get the configured record value.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isRuntimeCleanup()" class="member-name-link">isRuntimeCleanup</a>()</code></div>
@@ -333,22 +321,6 @@ otherwise, this returns the standard SBK record value. The aggregate value is a 
 </section>
 </li>
 <li>
-<section class="detail" id="getJavaVersion()">
-<h3>getJavaVersion</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getJavaVersion</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../GemParameters.html#getJavaVersion()">GemParameters</a></code></span></div>
-<div class="block">Get the required remote Java major version.</div>
-<dl class="notes">
-<dt>Specified by:</dt>
-<dd><code><a href="../GemParameters.html#getJavaVersion()">getJavaVersion</a></code>&nbsp;in interface&nbsp;<code><a href="../GemParameters.html" title="interface in io.gem.params">GemParameters</a></code></dd>
-<dt>Returns:</dt>
-<dd>Java major version</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
 <section class="detail" id="getJavaDir()">
 <h3>getJavaDir</h3>
 <div class="horizontal-scroll">
@@ -360,22 +332,6 @@ otherwise, this returns the standard SBK record value. The aggregate value is a 
 <dd><code><a href="../GemParameters.html#getJavaDir()">getJavaDir</a></code>&nbsp;in interface&nbsp;<code><a href="../GemParameters.html" title="interface in io.gem.params">GemParameters</a></code></dd>
 <dt>Returns:</dt>
 <dd>remote Java home, or an empty value when automatic discovery is used</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="isDelete()">
-<h3>isDelete</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isDelete</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../GemParameters.html#isDelete()">GemParameters</a></code></span></div>
-<div class="block">Check whether a mismatched SBK installation may be deleted before replacement.</div>
-<dl class="notes">
-<dt>Specified by:</dt>
-<dd><code><a href="../GemParameters.html#isDelete()">isDelete</a></code>&nbsp;in interface&nbsp;<code><a href="../GemParameters.html" title="interface in io.gem.params">GemParameters</a></code></dd>
-<dt>Returns:</dt>
-<dd>true when pre-copy deletion is enabled</dd>
 </dl>
 </div>
 </section>
