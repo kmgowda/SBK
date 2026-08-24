@@ -100,6 +100,9 @@ class ReleaseFunctionalTest {
                 "SBK-GEM Version: " + config.version, "-version"));
         caseRun("launcher-sbk-gem-yal", () -> expect(config.sbkGemYal,
                 "SBK-GEM-YAL Version: " + config.version, "-version"));
+        caseRun("sbk-gem-yal-missing", () -> rejectWithoutStackTrace(config.sbkGemYal,
+                "unable to read YAML configuration file.*Usage: sbk-gem-yal -file",
+                "-file", config.workDir.resolve("missing-sbk-gem.yml").toString()));
         caseRun("sbk-invalid-class", () -> reject(config.sbk, "not found|invalid|class",
                 "-class", "DoesNotExist", "-writers", "1", "-records", "1"));
         caseRun("grpc-missing-sbm", () -> reject(config.sbk, "requires.*sbm|SBM host",
@@ -392,6 +395,16 @@ class ReleaseFunctionalTest {
         require(outcome.exitCode != 0, "invalid command exited zero; see " + outcome.log);
         require(contains(outcome.log, "(?i)" + regex),
                 "failure did not explain '" + regex + "'; see " + outcome.log);
+    }
+
+    private void rejectWithoutStackTrace(final Path executable, final String regex, final String... args)
+            throws Exception {
+        ProcessOutcome outcome = run(currentCase(), executable, Map.of(), args);
+        require(outcome.exitCode != 0, "invalid command exited zero; see " + outcome.log);
+        require(contains(outcome.log, "(?i)" + regex),
+                "failure did not explain '" + regex + "'; see " + outcome.log);
+        require(!contains(outcome.log, "Exception in thread|\\s+at io\\."),
+                "user input failure printed a Java stack trace; see " + outcome.log);
     }
 
     private ProcessOutcome run(final String name, final Path executable,

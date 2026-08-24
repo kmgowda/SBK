@@ -14,14 +14,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Tests independent, content-addressed JDK provisioning. */
@@ -52,6 +57,35 @@ final class ManagedJavaRuntimeTest {
         final ManagedJavaRuntime changed = ManagedJavaRuntime.create(javaHome, 25);
 
         assertNotEquals(first.directoryName(), changed.directoryName());
+    }
+
+    @Test
+    void copiesRelativeJdkSymbolicLinks() throws IOException {
+        final Path javaHome = createJavaHome();
+        final Path linkParent = Files.createDirectories(javaHome.resolve("legal/java.compiler"));
+        final Path linkTarget = Path.of("..", "java.base", "LICENSE");
+        Files.createDirectories(javaHome.resolve("legal/java.base"));
+        Files.writeString(javaHome.resolve("legal/java.base/LICENSE"), "license", StandardCharsets.UTF_8);
+        Files.createSymbolicLink(linkParent.resolve("LICENSE"), linkTarget);
+        final Path remoteParent = Files.createDirectories(temporaryDirectory.resolve("remote"));
+
+        final String installed = ManagedJavaRuntime.create(javaHome, 25)
+                .install(remoteParent.getFileSystem(), remoteParent.toString());
+
+        assertEquals(linkTarget, Files.readSymbolicLink(Path.of(installed).resolve("legal/java.compiler/LICENSE")));
+    }
+
+    @Test
+    void convertsLinkTargetsToDestinationFileSystemProvider() throws IOException {
+        final URI archive = URI.create("jar:" + temporaryDirectory.resolve("remote.zip").toUri());
+        try (FileSystem remoteFileSystem = FileSystems.newFileSystem(archive, Map.of("create", "true"))) {
+            final Path destination = remoteFileSystem.getPath("/jdk/legal/java.compiler/LICENSE");
+            final Path converted = ManagedJavaRuntime.remoteLinkTarget(
+                    destination, Path.of("..", "java.base", "LICENSE"));
+
+            assertSame(remoteFileSystem, converted.getFileSystem());
+            assertEquals("../java.base/LICENSE", converted.toString());
+        }
     }
 
     @Test

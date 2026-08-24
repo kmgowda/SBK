@@ -121,7 +121,8 @@ final class ManagedJavaRuntime {
                 if (Files.isSymbolicLink(source)) {
                     Files.createDirectories(Objects.requireNonNull(target.getParent(),
                             "JDK symbolic link has no parent"));
-                    Files.createSymbolicLink(target, Files.readSymbolicLink(source));
+                    Files.createSymbolicLink(target,
+                            remoteLinkTarget(target, Files.readSymbolicLink(source)));
                 } else if (Files.isDirectory(source, LinkOption.NOFOLLOW_LINKS)) {
                     Files.createDirectories(target);
                     copyPermissions(source, target);
@@ -138,6 +139,10 @@ final class ManagedJavaRuntime {
                 }
             }
         }
+    }
+
+    static Path remoteLinkTarget(Path target, Path localLinkTarget) {
+        return target.getFileSystem().getPath(localLinkTarget.toString());
     }
 
     private static void copyPermissions(Path source, Path target) throws IOException {
