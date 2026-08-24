@@ -28,6 +28,8 @@ public final class SbmHostConfig {
     public long failureReportTimeoutSeconds;
     /** Stream drain and acknowledgement timeout in seconds. */
     public long streamCloseTimeoutSeconds;
+    /** Maximum continuous HTTP/2 outbound flow-control stall in seconds. */
+    public long streamStallTimeoutSeconds;
     /** Graceful channel shutdown timeout in seconds. */
     public long channelShutdownTimeoutSeconds;
     /** Forced channel shutdown timeout in seconds. */

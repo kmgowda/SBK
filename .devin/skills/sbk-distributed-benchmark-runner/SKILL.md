@@ -50,8 +50,9 @@ preflight and judge the result.
   must be reachable from every node and must not be loopback for remote nodes.
 - Remote processes use `GrpcLogger`; choose `GemPrometheusLogger` or
   `GemWebLogger` for the controller-side aggregate.
-- Confirm `-copy`, `-delete`, `-deleteafter`, `-javacopy`, `-javaversion`, and
-  `-javadir` before allowing remote filesystem changes.
+- Confirm `-runtimecleanup` and any preferred remote `-javadir` before allowing
+  remote filesystem changes. Missing SBK content and an insufficient remote JDK
+  are provisioned automatically from the launcher-selected controller distribution.
 - Treat any failed remote return code, missing SBM connection, timeout, invalid
   latency, or unexplained discarded latency as a failed/qualified run.
 

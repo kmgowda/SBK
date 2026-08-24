@@ -41,17 +41,4 @@ final class RemoteRuntimeLifecycle {
         return RemoteRuntimeFiles.leasePath(parentDirectory, deploymentName, leaseId);
     }
 
-    /**
-     * Wrap a remote SBK command in the explicitly supported POSIX shell.
-     *
-     * @param sbkCommand actual remote SBK command
-     * @return wrapped command
-     * @throws IllegalArgumentException when the command is empty
-     */
-    static String launchCommand(String sbkCommand) {
-        if (sbkCommand == null || sbkCommand.isBlank()) {
-            throw new IllegalArgumentException("Remote SBK command must not be empty");
-        }
-        return "sh -c " + RemoteSbkDeployment.shellQuote(sbkCommand);
-    }
 }

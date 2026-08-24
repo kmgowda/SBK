@@ -90,30 +90,16 @@ final public class GemConfig {
      * SSH port.
      */
     public int gemport;
-    /**
-     * Local SBK application directory.
-     */
+    /** Local SBK application directory resolved from the generated launcher's {@code sbk.appHome}. */
     public String sbkdir;
     /**
-     * Expected SBK version, discovered from the local SBK distribution selected by {@link #sbkdir}.
+     * Expected SBK version, discovered from the local SBK distribution under {@link #sbkdir}.
      */
     public String sbkVersion;
-    /**
-     * Whether SBK-GEM may copy its local Java runtime to remote nodes.
-     */
-    public boolean javacopy;
-    /**
-     * Required Java major version on remote nodes.
-     */
-    public int javaversion;
     /**
      * Optional remote Java home containing {@code bin/java}.
      */
     public String javadir;
-    /**
-     * Whether to delete an existing mismatched SBK installation before copying.
-     */
-    public boolean delete;
     /** Whether inactive non-current managed runtimes and local cached bundles are removed automatically. */
     public boolean runtimecleanup;
 

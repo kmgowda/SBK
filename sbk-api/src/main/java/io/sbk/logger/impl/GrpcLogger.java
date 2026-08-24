@@ -157,6 +157,7 @@ public final class GrpcLogger extends AbstractSystemLogger {
             if (sbmHostConfig.maxRecordSizeMB < 1 || sbmHostConfig.maximumPendingBatches < 1
                     || sbmHostConfig.failureReportTimeoutSeconds < 1
                     || sbmHostConfig.streamCloseTimeoutSeconds < 1
+                    || sbmHostConfig.streamStallTimeoutSeconds < 1
                     || sbmHostConfig.channelShutdownTimeoutSeconds < 1
                     || sbmHostConfig.channelForceShutdownTimeoutSeconds < 1) {
                 throw new IllegalArgumentException("Invalid SBM gRPC transport configuration");
@@ -302,7 +303,8 @@ public final class GrpcLogger extends AbstractSystemLogger {
         builder = MessageLatenciesRecord.newBuilder();
         stub = ServiceGrpc.newStub(channel);
         streamSender = new GrpcStreamSender(stub, sbmHostConfig.maximumPendingBatches,
-                sbmHostConfig.streamCloseTimeoutSeconds, this::reportTransportFailure);
+                sbmHostConfig.streamCloseTimeoutSeconds, sbmHostConfig.streamStallTimeoutSeconds,
+                this::reportTransportFailure);
         Printer.log.info("SBK GRPC Logger transport: SBP client stream with packed primitive latencies");
         Printer.log.info("SBK GRPC Logger Started");
     }

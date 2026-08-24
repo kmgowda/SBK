@@ -11,41 +11,46 @@
 package io.gem.api.impl;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.Objects;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Discovers and validates the SBK version in the local distribution selected for deployment.
  */
 final class LocalSbkDeployment {
+    private static final Pattern MAIN_JAR = Pattern.compile("sbk-[0-9].*[.]jar");
     private LocalSbkDeployment() {
     }
 
     /**
-     * Run the selected local SBK launcher and read its authoritative version.
+     * Read the selected local SBK JAR manifest without invoking a launcher script.
      *
-     * @param executable local SBK executable
-     * @param timeoutSeconds finite discovery timeout in seconds
-     * @return version reported by the executable
-     * @throws IOException when the launcher fails, times out, or reports invalid output
-     * @throws InterruptedException when version discovery is interrupted
+     * @param distribution local SBK distribution
+     * @return version reported by the main JAR manifest
+     * @throws IOException when the distribution or manifest is invalid
      */
-    static String discoverVersion(Path executable, long timeoutSeconds) throws IOException, InterruptedException {
-        final Process process = new ProcessBuilder(executable.toString(), "-version")
-                .redirectErrorStream(true)
-                .start();
-        final boolean completed = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
-        if (!completed) {
-            process.destroyForcibly();
-            throw new IOException("Local SBK version discovery timed out after " + timeoutSeconds + " seconds");
+    static String discoverVersion(Path distribution) throws IOException {
+        final Path lib = distribution.resolve("lib");
+        final java.util.List<Path> candidates;
+        try (Stream<Path> entries = Files.list(lib)) {
+            candidates = entries.filter(path -> MAIN_JAR.matcher(
+                    Objects.requireNonNull(path.getFileName()).toString()).matches()).toList();
         }
-        final String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        final String version = RemoteSbkDeployment.parseVersion(output);
-        if (process.exitValue() != 0 || version == null || version.isBlank()) {
-            throw new IOException("Unable to determine SBK version from " + executable +
-                    "; return code " + process.exitValue() + ", output: " + output.trim());
+        if (candidates.size() != 1) {
+            throw new IOException("Expected one main SBK JAR under " + lib + ", found " + candidates.size());
         }
-        return version;
+        try (JarFile jar = new JarFile(candidates.getFirst().toFile())) {
+            final String version = jar.getManifest().getMainAttributes()
+                    .getValue(Attributes.Name.IMPLEMENTATION_VERSION);
+            if (version == null || version.isBlank()) {
+                throw new IOException("SBK main JAR has no Implementation-Version: " + candidates.getFirst());
+            }
+            return version;
+        }
     }
 }

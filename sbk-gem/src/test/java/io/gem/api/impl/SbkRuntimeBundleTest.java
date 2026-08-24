@@ -41,14 +41,13 @@ final class SbkRuntimeBundleTest {
     private Path temporaryDirectory;
 
     @Test
-    void packagesCompleteSbkAndJavaWithContentIdentity() throws IOException {
+    void packagesOnlyCompleteSbkWithContentIdentity() throws IOException {
         final Path sbk = createSbkDistribution();
-        final Path java = createJavaHome();
         final Path cache = temporaryDirectory.resolve("cache");
 
-        final SbkRuntimeBundle first = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.6", 25,
+        final SbkRuntimeBundle first = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                 new DeploymentPlatform("linux"), cache);
-        final SbkRuntimeBundle cached = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.6", 25,
+        final SbkRuntimeBundle cached = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                 new DeploymentPlatform("linux"), cache);
 
         assertEquals(first.archive(), cached.archive());
@@ -57,9 +56,7 @@ final class SbkRuntimeBundleTest {
         final List<String> entries = archiveEntries(first.archive());
         assertTrue(entries.contains("runtime/sbk/bin/sbk"));
         assertTrue(entries.contains("runtime/sbk/lib/dependency.jar"));
-        assertTrue(entries.contains("runtime/java/bin/java"));
-        assertTrue(entries.contains("runtime/java/bin/javac"));
-        assertTrue(entries.contains("runtime/java/LICENSE"));
+        assertFalse(entries.stream().anyMatch(entry -> entry.startsWith("runtime/java/")));
         assertTrue(entries.contains("runtime/deployment.properties"));
         assertTrue(entries.contains("runtime/deployment-files.sha256"));
         final String descriptor = archiveText(first.archive(), "runtime/deployment.properties");
@@ -67,20 +64,18 @@ final class SbkRuntimeBundleTest {
         assertFalse(descriptor.contains("platform.arch"));
         assertEquals(0755, archiveMode(first.archive(), "runtime/sbk/bin/sbk"));
         assertEquals(0755, archiveMode(first.archive(), "runtime/sbk/lib/"));
-        assertEquals(0755, archiveMode(first.archive(), "runtime/java/bin/java"));
-        assertEquals(0755, archiveMode(first.archive(), "runtime/java/bin/javac"));
+        assertTrue(descriptor.contains("includes.java=false"));
     }
 
     @Test
     void changedDependencyProducesDifferentDeploymentIdentity() throws IOException {
         final Path sbk = createSbkDistribution();
-        final Path java = createJavaHome();
         final Path cache = temporaryDirectory.resolve("cache");
-        final SbkRuntimeBundle first = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.6", 25,
+        final SbkRuntimeBundle first = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                 new DeploymentPlatform("linux"), cache);
 
         Files.writeString(sbk.resolve("lib/dependency.jar"), "changed", StandardCharsets.UTF_8);
-        final SbkRuntimeBundle changed = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.6", 25,
+        final SbkRuntimeBundle changed = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                 new DeploymentPlatform("linux"), cache);
 
         assertNotEquals(first.contentDigest(), changed.contentDigest());
@@ -90,10 +85,9 @@ final class SbkRuntimeBundleTest {
     @Test
     void localhostManagedRuntimeStateDoesNotContaminateBundleIdentity() throws IOException {
         final Path sbk = createSbkDistribution();
-        final Path java = createJavaHome();
         final Path cache = temporaryDirectory.resolve("cache");
         final DeploymentPlatform platform = new DeploymentPlatform("macos");
-        final SbkRuntimeBundle clean = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.6", 25,
+        final SbkRuntimeBundle clean = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                 platform, cache);
 
         final Path nestedRuntime = Files.createDirectories(sbk.resolve(
@@ -105,7 +99,7 @@ final class SbkRuntimeBundleTest {
         Files.createDirectories(sbk.resolve(".sbk-runtime-management.lock"));
         Files.writeString(sbk.resolve("sbk-runtime-transfer.tar.gz"), "partial", StandardCharsets.UTF_8);
 
-        final SbkRuntimeBundle withManagedState = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.6", 25,
+        final SbkRuntimeBundle withManagedState = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                 platform, cache);
 
         assertEquals(clean.contentDigest(), withManagedState.contentDigest());
@@ -117,14 +111,13 @@ final class SbkRuntimeBundleTest {
     @Test
     void cleanupRetainsCurrentAndRemovesLowerAndHigherCachedVersions() throws IOException {
         final Path sbk = createSbkDistribution();
-        final Path java = createJavaHome();
         final Path cache = temporaryDirectory.resolve("cache");
         final DeploymentPlatform platform = new DeploymentPlatform("linux");
-        final SbkRuntimeBundle lower = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.5", 25,
+        final SbkRuntimeBundle lower = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.5", 25,
                 platform, cache);
-        final SbkRuntimeBundle current = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.6", 25,
+        final SbkRuntimeBundle current = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                 platform, cache);
-        final SbkRuntimeBundle higher = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.7", 25,
+        final SbkRuntimeBundle higher = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.7", 25,
                 platform, cache);
 
         assertEquals(2, SbkRuntimeBundle.cleanupOtherCachedBundles(cache, current.deploymentName()));
@@ -137,12 +130,11 @@ final class SbkRuntimeBundleTest {
     @Test
     void cleanupRetainsCachedBundleWhileAnotherDeploymentUsesItsArchive() throws IOException {
         final Path sbk = createSbkDistribution();
-        final Path java = createJavaHome();
         final Path cache = temporaryDirectory.resolve("cache");
         final DeploymentPlatform platform = new DeploymentPlatform("linux");
-        final SbkRuntimeBundle active = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.5", 25,
+        final SbkRuntimeBundle active = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.5", 25,
                 platform, cache);
-        final SbkRuntimeBundle current = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.6", 25,
+        final SbkRuntimeBundle current = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                 platform, cache);
 
         try (SbkRuntimeBundle.ArchiveUse ignored = active.acquireArchiveUse()) {
@@ -161,7 +153,7 @@ final class SbkRuntimeBundleTest {
         Files.delete(sbk.resolve("lib/dependency.jar"));
 
         final IOException exception = assertThrows(IOException.class, () -> SbkRuntimeBundle.create(sbk,
-                "bin/sbk", createJavaHome(), "10.6", 25, new DeploymentPlatform("linux"),
+                "bin/sbk", "10.6", 25, new DeploymentPlatform("linux"),
                 temporaryDirectory.resolve("cache")));
 
         assertTrue(exception.getMessage().contains("pathing dependency is missing"));
@@ -175,7 +167,7 @@ final class SbkRuntimeBundleTest {
         Files.createSymbolicLink(sbk.resolve("external-link"), Path.of("..", "external.txt"));
 
         final IOException exception = assertThrows(IOException.class, () -> SbkRuntimeBundle.create(sbk,
-                "bin/sbk", createJavaHome(), "10.6", 25, new DeploymentPlatform("linux"),
+                "bin/sbk", "10.6", 25, new DeploymentPlatform("linux"),
                 temporaryDirectory.resolve("cache")));
 
         assertTrue(exception.getMessage().contains("symbolic link escapes its source tree"));
@@ -188,7 +180,7 @@ final class SbkRuntimeBundleTest {
         Files.writeString(shared.resolve("data.txt"), "data", StandardCharsets.UTF_8);
         Files.createSymbolicLink(sbk.resolve("shared-link"), Path.of("shared"));
 
-        final SbkRuntimeBundle bundle = SbkRuntimeBundle.create(sbk, "bin/sbk", createJavaHome(), "10.6", 25,
+        final SbkRuntimeBundle bundle = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                 new DeploymentPlatform("linux"), temporaryDirectory.resolve("cache"));
 
         assertTrue(archiveEntries(bundle.archive()).contains("runtime/sbk/shared/data.txt"));
@@ -198,13 +190,12 @@ final class SbkRuntimeBundleTest {
     @Test
     void recreatesCorruptedCachedArchive() throws IOException {
         final Path sbk = createSbkDistribution();
-        final Path java = createJavaHome();
         final Path cache = temporaryDirectory.resolve("cache");
-        final SbkRuntimeBundle first = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.6", 25,
+        final SbkRuntimeBundle first = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                 new DeploymentPlatform("linux"), cache);
         Files.writeString(first.archive(), "corrupted", StandardCharsets.UTF_8);
 
-        final SbkRuntimeBundle repaired = SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.6", 25,
+        final SbkRuntimeBundle repaired = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                 new DeploymentPlatform("linux"), cache);
 
         assertEquals(64, repaired.archiveDigest().length());
@@ -217,12 +208,11 @@ final class SbkRuntimeBundleTest {
     @Test
     void serializesConcurrentCacheCreation() throws IOException, ExecutionException, InterruptedException {
         final Path sbk = createSbkDistribution();
-        final Path java = createJavaHome();
         final Path cache = temporaryDirectory.resolve("cache");
         try (var executor = Executors.newFixedThreadPool(2)) {
-            final var first = executor.submit(() -> SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.6", 25,
+            final var first = executor.submit(() -> SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                     new DeploymentPlatform("linux"), cache));
-            final var second = executor.submit(() -> SbkRuntimeBundle.create(sbk, "bin/sbk", java, "10.6", 25,
+            final var second = executor.submit(() -> SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                     new DeploymentPlatform("linux"), cache));
 
             assertEquals(first.get().archiveDigest(), second.get().archiveDigest());
@@ -245,17 +235,6 @@ final class SbkRuntimeBundleTest {
             output.finish();
         }
         return sbk;
-    }
-
-    private Path createJavaHome() throws IOException {
-        final Path java = Files.createDirectories(temporaryDirectory.resolve("java"));
-        final Path bin = Files.createDirectories(java.resolve("bin"));
-        executable(bin.resolve("java"));
-        executable(bin.resolve("javac"));
-        final Path legal = Files.createDirectories(java.resolve("legal/java.base"));
-        Files.writeString(legal.resolve("LICENSE"), "license", StandardCharsets.UTF_8);
-        Files.createSymbolicLink(java.resolve("LICENSE"), Path.of("legal/java.base/LICENSE"));
-        return java;
     }
 
     private static void executable(Path path) throws IOException {

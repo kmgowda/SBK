@@ -65,6 +65,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#maximumPendingBatches" tabindex="0">maximumPendingBatches</a></li>
 <li><a href="#failureReportTimeoutSeconds" tabindex="0">failureReportTimeoutSeconds</a></li>
 <li><a href="#streamCloseTimeoutSeconds" tabindex="0">streamCloseTimeoutSeconds</a></li>
+<li><a href="#streamStallTimeoutSeconds" tabindex="0">streamStallTimeoutSeconds</a></li>
 <li><a href="#channelShutdownTimeoutSeconds" tabindex="0">channelShutdownTimeoutSeconds</a></li>
 <li><a href="#channelForceShutdownTimeoutSeconds" tabindex="0">channelForceShutdownTimeoutSeconds</a></li>
 </ol>
@@ -144,6 +145,11 @@ Used by <code>io.sbk.logger.impl.GrpcLogger</code> to connect and stream metrics
 <div class="col-second odd-row-color"><code><a href="#streamCloseTimeoutSeconds" class="member-name-link">streamCloseTimeoutSeconds</a></code></div>
 <div class="col-last odd-row-color">
 <div class="block">Stream drain and acknowledgement timeout in seconds.</div>
+</div>
+<div class="col-first even-row-color"><code>long</code></div>
+<div class="col-second even-row-color"><code><a href="#streamStallTimeoutSeconds" class="member-name-link">streamStallTimeoutSeconds</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Maximum continuous HTTP/2 outbound flow-control stall in seconds.</div>
 </div>
 </div>
 </section>
@@ -232,6 +238,15 @@ Used by <code>io.sbk.logger.impl.GrpcLogger</code> to connect and stream metrics
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">streamCloseTimeoutSeconds</span></div>
 <div class="block">Stream drain and acknowledgement timeout in seconds.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="streamStallTimeoutSeconds">
+<h3>streamStallTimeoutSeconds</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">streamStallTimeoutSeconds</span></div>
+<div class="block">Maximum continuous HTTP/2 outbound flow-control stall in seconds.</div>
 </div>
 </section>
 </li>

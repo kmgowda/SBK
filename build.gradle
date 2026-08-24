@@ -470,7 +470,12 @@ def additionalLaunchers = [
         registerSbkLauncher('SbkGemYal', 'io.gem.main.SbkGemYalMain', 'sbk-gem-yal')
 ]
 
+evaluationDependsOn(':sbk-gem')
+
 application {
+    applicationDistribution.from(project(':sbk-gem').tasks.named('remoteAgentJar')) {
+        into 'lib'
+    }
     additionalLaunchers.each { launcher ->
         applicationDistribution.into("bin") {
             duplicatesStrategy = DuplicatesStrategy.EXCLUDE

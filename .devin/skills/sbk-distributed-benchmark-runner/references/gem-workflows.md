@@ -34,8 +34,10 @@ Also verify:
 
 - remote account can create/write the GEM working directory;
 - enough space exists if Java or SBK must be copied;
-- remote Java is compatible, or Java copying is deliberately enabled;
-- the local `-sbkdir` contains the distribution to verify/copy;
+- remote Java is the controller major version or newer, or enough space exists
+  for GEM to provision the controller JDK automatically;
+- the generated launcher resolves a complete local distribution through its
+  internal `sbk.appHome` property;
 - the remote node reaches both storage and advertised SBM callback address.
 
 ## Minimal GEM plumbing smoke test
@@ -47,7 +49,6 @@ Also verify:
   -nodes loadgen-a.example.com,loadgen-b.example.com \
   -gemuser sbk \
   -localhost gem-controller.example.com \
-  -sbkdir "$PWD/build/install/sbk" \
   -class null -writers 1 -size 100 -records 10000 -time ns
 ```
 
@@ -58,16 +59,13 @@ inventory and SSH trust.
 
 | Option | Meaning |
 |---|---|
-| `-copy true` | Copy local SBK when remote expected version is missing/mismatched |
-| `-delete true` | Remove a mismatched remote SBK before replacement |
-| `-deleteafter false` | Keep reconciled remote SBK after the run for reuse |
-| `-javaversion 25` | Required remote Java major version |
-| `-javacopy true` | Copy the controller JVM when required Java is unavailable |
+| `-runtimecleanup true` | Retire inactive non-current GEM-managed SBK runtimes while retaining current and leased identities |
 | `-javadir <home>` | Optional remote Java home containing `bin/java` |
 
-Defaults come from generated help and may change. Copying Java is valid only
-when the controller JVM satisfies `-javaversion`. GEM verifies and exports an
-absolute node-specific `SBK_JAVA_HOME` before running remote SBK.
+Defaults come from generated help and may change. GEM always deploys the SBK
+distribution selected internally by the generated launcher's `sbk.appHome`.
+It reuses a same-or-newer remote Java or copies the controller JDK when needed,
+then verifies an absolute node-specific Java home before running remote SBK.
 
 ## GEM-YAL
 

@@ -48,7 +48,7 @@ import java.util.stream.Stream;
  * Immutable, content-addressed SBK runtime deployment archive.
  *
  * <p>The archive contains the complete installed SBK distribution, an
- * optional Java runtime, a deployment descriptor, and per-file SHA-256
+ * deployment descriptor and per-file SHA-256
  * checksums. Its content digest is derived from every source entry, so two
  * builds carrying the same SBK version but different bytes do not share a
  * remote deployment identity.
@@ -56,7 +56,6 @@ import java.util.stream.Stream;
 final class SbkRuntimeBundle {
     static final String ARCHIVE_ROOT = "runtime";
     static final String SBK_DIRECTORY = "sbk";
-    static final String JAVA_DIRECTORY = "java";
     static final String DESCRIPTOR_FILE = "deployment.properties";
     static final String CHECKSUM_FILE = "deployment-files.sha256";
     static final String REMOTE_DIGEST_FILE = ".sbk-runtime.sha256";
@@ -68,7 +67,7 @@ final class SbkRuntimeBundle {
     private static final int EXECUTABLE_FILE_MODE = 0755;
     private static final int DIRECTORY_MODE = 0755;
     private static final int SYMBOLIC_LINK_MODE = 0777;
-    private static final int BUNDLE_FORMAT_VERSION = 3;
+    private static final int BUNDLE_FORMAT_VERSION = 4;
     private static final String ARCHIVE_DIGEST_SUFFIX = ".sha256";
     private static final String CACHE_LOCK_SUFFIX = ".lock";
     private static final String CACHE_MANAGEMENT_LOCK = ".sbk-runtime-cache-management.lock";
@@ -79,17 +78,15 @@ final class SbkRuntimeBundle {
     private final String contentDigest;
     private final String deploymentName;
     private final String sbkCommand;
-    private final String javaHome;
     private final Path cacheLockFile;
 
     private SbkRuntimeBundle(Path archive, String archiveDigest, String contentDigest,
-                             String deploymentName, String sbkCommand, String javaHome, Path cacheLockFile) {
+                             String deploymentName, String sbkCommand, Path cacheLockFile) {
         this.archive = archive;
         this.archiveDigest = archiveDigest;
         this.contentDigest = contentDigest;
         this.deploymentName = deploymentName;
         this.sbkCommand = sbkCommand;
-        this.javaHome = javaHome;
         this.cacheLockFile = cacheLockFile;
     }
 
@@ -98,7 +95,6 @@ final class SbkRuntimeBundle {
      *
      * @param sbkDirectory complete local {@code installDist} directory
      * @param relativeSbkCommand launcher path relative to {@code sbkDirectory}
-     * @param javaDirectory local Java home to include, or {@code null}
      * @param sbkVersion discovered SBK version
      * @param javaVersion required Java major version
      * @param platform homogeneous deployment platform
@@ -106,22 +102,14 @@ final class SbkRuntimeBundle {
      * @return immutable runtime bundle
      * @throws IOException when validation, hashing, or archive creation fails
      */
-    static SbkRuntimeBundle create(Path sbkDirectory, String relativeSbkCommand, Path javaDirectory,
+    static SbkRuntimeBundle create(Path sbkDirectory, String relativeSbkCommand,
                                    String sbkVersion, int javaVersion, DeploymentPlatform platform,
                                    Path cacheDirectory) throws IOException {
         final Path normalizedSbkDirectory = sbkDirectory.toAbsolutePath().normalize();
-        final Path normalizedJavaDirectory = javaDirectory == null ? null
-                : javaDirectory.toAbsolutePath().normalize();
         validateSbkDistribution(normalizedSbkDirectory, relativeSbkCommand);
-        if (normalizedJavaDirectory != null) {
-            validateJavaHome(normalizedJavaDirectory);
-        }
 
         final List<BundleEntry> entries = new ArrayList<>();
         collectEntries(normalizedSbkDirectory, SBK_DIRECTORY, entries, true);
-        if (normalizedJavaDirectory != null) {
-            collectEntries(normalizedJavaDirectory, JAVA_DIRECTORY, entries, false);
-        }
         entries.sort(Comparator.comparing(BundleEntry::relativePath));
 
         final String contentDigest = calculateContentDigest(sbkVersion, javaVersion, platform, entries);
@@ -142,14 +130,12 @@ final class SbkRuntimeBundle {
                  FileLock ignored = lockChannel.lock()) {
                 String archiveDigest = cachedArchiveDigest(archive, archiveDigestFile);
                 if (archiveDigest == null) {
-                    createArchive(archive, sbkVersion, javaVersion, platform, contentDigest, entries,
-                            normalizedJavaDirectory != null);
+                    createArchive(archive, sbkVersion, javaVersion, platform, contentDigest, entries);
                     archiveDigest = sha256(archive);
                     writeAtomically(archiveDigestFile, archiveDigest + "\n");
                 }
                 return new SbkRuntimeBundle(archive, archiveDigest, contentDigest, deploymentName,
-                        SBK_DIRECTORY + "/" + normalizeRelativePath(relativeSbkCommand),
-                        normalizedJavaDirectory == null ? null : JAVA_DIRECTORY, cacheLockFile);
+                        SBK_DIRECTORY + "/" + normalizeRelativePath(relativeSbkCommand), cacheLockFile);
             } finally {
                 processLock.unlock();
             }
@@ -258,9 +244,6 @@ final class SbkRuntimeBundle {
         return sbkCommand;
     }
 
-    String javaHome() {
-        return javaHome;
-    }
 
     private static ReentrantLock cacheLock(Path path) {
         return CACHE_LOCKS.computeIfAbsent(path.toAbsolutePath().normalize(), ignored -> new ReentrantLock());
@@ -327,14 +310,6 @@ final class SbkRuntimeBundle {
         }
     }
 
-    private static void validateJavaHome(Path directory) throws IOException {
-        for (String executable : List.of("java", "javac")) {
-            final Path path = directory.resolve("bin").resolve(executable);
-            if (!Files.isExecutable(path)) {
-                throw new IOException("SBK runtime bundle Java home is missing executable " + path);
-            }
-        }
-    }
 
     private static Path resolveContained(Path parent, String relativePath) throws IOException {
         if (relativePath == null || relativePath.isBlank() || Path.of(relativePath).isAbsolute()) {
@@ -416,7 +391,7 @@ final class SbkRuntimeBundle {
 
     private static void createArchive(Path archive, String sbkVersion, int javaVersion,
                                       DeploymentPlatform platform, String contentDigest,
-                                      List<BundleEntry> entries, boolean includesJava) throws IOException {
+                                      List<BundleEntry> entries) throws IOException {
         final Path archiveParent = Objects.requireNonNull(archive.toAbsolutePath().getParent(),
                 "Runtime archive must have a parent directory");
         final Path temporaryArchive = Files.createTempFile(archiveParent, fileName(archive), ".partial");
@@ -431,7 +406,7 @@ final class SbkRuntimeBundle {
                     addFilesystemEntry(tarOutput, entry);
                 }
                 addByteEntry(tarOutput, ARCHIVE_ROOT + "/" + DESCRIPTOR_FILE,
-                        descriptor(sbkVersion, javaVersion, platform, contentDigest, includesJava));
+                        descriptor(sbkVersion, javaVersion, platform, contentDigest));
                 addByteEntry(tarOutput, ARCHIVE_ROOT + "/" + CHECKSUM_FILE, checksums(entries));
             }
             moveAtomically(temporaryArchive, archive);
@@ -484,13 +459,13 @@ final class SbkRuntimeBundle {
     }
 
     private static String descriptor(String sbkVersion, int javaVersion, DeploymentPlatform platform,
-                                     String contentDigest, boolean includesJava) {
+                                     String contentDigest) {
         return "format.version=" + BUNDLE_FORMAT_VERSION + "\n"
                 + "sbk.version=" + sbkVersion + "\n"
                 + "java.version=" + javaVersion + "\n"
                 + "platform.os=" + platform.operatingSystem() + "\n"
                 + "content.sha256=" + contentDigest + "\n"
-                + "includes.java=" + includesJava + "\n";
+                + "includes.java=false\n";
     }
 
     private static String checksums(List<BundleEntry> entries) {

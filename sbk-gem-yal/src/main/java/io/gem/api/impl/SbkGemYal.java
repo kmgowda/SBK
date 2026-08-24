@@ -11,9 +11,11 @@
 package io.gem.api.impl;
 
 
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.gem.params.impl.SbkGemYmlMap;
+import io.gem.exception.SbkGemParameterException;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.config.Config;
 import io.sbk.config.YalConfig;
@@ -27,9 +29,10 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -135,14 +138,23 @@ final public class SbkGemYal {
 
         try {
             gemArgs = YmlMap.getYmlArgs(yalFileName, SbkGemYmlMap.class);
-        } catch (FileNotFoundException ex) {
-            Printer.log.error(ex.toString());
+        } catch (IOException | JacksonException | InvalidPathException ex) {
+            final String configuredFile = StringUtils.isEmpty(yalFileName) ? "<empty>" : yalFileName;
+            final String resolvedFile;
+            try {
+                resolvedFile = Path.of(configuredFile).toAbsolutePath().normalize().toString();
+            } catch (InvalidPathException invalidPath) {
+                throw reportedYamlFailure(configuredFile, configuredFile, invalidPath, params);
+            }
+            Printer.log.error("SBK-GEM-YAL: Unable to read YAML configuration file: {}", resolvedFile);
+            Printer.log.error("SBK-GEM-YAL: {}", rootMessage(ex));
+            printYamlUsage();
             if (isPrintOption) {
                 SbkGem.run(new String[]{Config.HELP_OPTION_ARG}, applicationName, storagePackageName, loggerPackageName);
-                throw new HelpException(ex.toString());
             }
             params.printHelp();
-            throw new HelpException(ex.toString());
+            throw new SbkGemParameterException(new IllegalArgumentException(
+                    "Unable to read SBK-GEM YAML configuration file: " + resolvedFile, ex));
         }
 
         final String[] mergeArgs = SbkUtils.mergeArgs(gemArgs, nextArgs);
@@ -155,5 +167,31 @@ final public class SbkGemYal {
         }
 
         return SbkGem.run(sbkGemArgs, applicationName, storagePackageName, loggerPackageName);
+    }
+
+    private static SbkGemParameterException reportedYamlFailure(String configuredFile, String resolvedFile,
+                                                                 RuntimeException failure,
+                                                                 SbkYalParameters params) {
+        Printer.log.error("SBK-GEM-YAL: Invalid YAML configuration path '{}': {}",
+                configuredFile, failure.getMessage());
+        printYamlUsage();
+        params.printHelp();
+        return new SbkGemParameterException(new IllegalArgumentException(
+                "Invalid SBK-GEM YAML configuration path: " + resolvedFile, failure));
+    }
+
+    private static String rootMessage(Throwable failure) {
+        Throwable cause = failure;
+        while (cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        return Objects.requireNonNullElse(cause.getMessage(), cause.getClass().getSimpleName());
+    }
+
+    private static void printYamlUsage() {
+        Printer.log.info("Usage: sbk-gem-yal -file <yaml-file> [SBK-GEM option overrides]");
+        Printer.log.info("Example: ./build/install/sbk/bin/sbk-gem-yal -file /path/to/sbk-gem.yml");
+        Printer.log.info("The YAML document must start with 'sbkGemArgs:'; see "
+                + "sbk-gem-yal/sbk-gem.yml in an SBK source checkout for a template");
     }
 }

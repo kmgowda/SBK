@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -165,23 +164,6 @@ final class RemoteRuntimeLifecycleTest {
     }
 
     @Test
-    void launchPreservesCommandExitCodesWithAvailableShells() throws Exception {
-        for (String shell : availableShells()) {
-            verifyExit(shell, "true", 0);
-            verifyExit(shell, "exit 47", 47);
-        }
-    }
-
-    @Test
-    void launchUsesExplicitPosixShellWithoutLifecycleScript() {
-        final String command = RemoteRuntimeLifecycle.launchCommand("true");
-
-        assertTrue(command.startsWith("sh -c "));
-        assertFalse(command.contains("lease"));
-        assertFalse(command.contains("trap"));
-    }
-
-    @Test
     void releasingOlderLeaseRemovesFormerRuntimeButRetainsAuthoritativeCurrentRuntime() throws Exception {
         final String old = "sbk-runtime-10.5-linux-amd64-old";
         final String current = "sbk-runtime-10.6-linux-amd64-current";
@@ -211,27 +193,6 @@ final class RemoteRuntimeLifecycleTest {
                 "content.sha256=" + digest + "\n", StandardCharsets.UTF_8);
         Files.writeString(runtime.resolve(SbkRuntimeBundle.REMOTE_DIGEST_FILE),
                 digest + "\n", StandardCharsets.UTF_8);
-    }
-
-    private static void verifyExit(String shell, String command, int expectedExitCode) throws Exception {
-        final Process process = new ProcessBuilder(shell, "-c",
-                RemoteRuntimeLifecycle.launchCommand(command))
-                .redirectErrorStream(true)
-                .start();
-        try {
-            assertTrue(process.waitFor(TEST_TIMEOUT_SECONDS, TimeUnit.SECONDS), shell + " did not exit");
-            final String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-            assertEquals(expectedExitCode, process.exitValue(), output);
-        } finally {
-            process.destroyForcibly();
-            process.waitFor();
-        }
-    }
-
-    private static List<String> availableShells() {
-        return List.of("/bin/sh", "/bin/bash", "/bin/zsh").stream()
-                .filter(shell -> Files.isExecutable(Path.of(shell)))
-                .toList();
     }
 
     private void acquireUnchecked(String deploymentName, String digest, String leaseId) {

@@ -16,37 +16,42 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.jar.Attributes;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * Tests discovery of the actual SBK version selected for remote deployment.
- */
+/** Tests script-free local SBK version discovery. */
 final class LocalSbkDeploymentTest {
     @TempDir
     private Path temporaryDirectory;
 
     @Test
-    void discoversVersionFromSelectedExecutable() throws IOException, InterruptedException {
-        final Path executable = launcher("printf 'SBK Version: 10.7\\n'");
+    void discoversVersionFromMainJarManifest() throws IOException {
+        createJar("10.7");
 
-        assertEquals("10.7", LocalSbkDeployment.discoverVersion(executable, 2));
+        assertEquals("10.7", LocalSbkDeployment.discoverVersion(temporaryDirectory));
     }
 
     @Test
-    void rejectsInvalidVersionOutput() throws IOException {
-        final Path executable = launcher("printf 'not an SBK version\\n'");
+    void rejectsMissingManifestVersion() throws IOException {
+        createJar(null);
 
-        assertThrows(IOException.class, () -> LocalSbkDeployment.discoverVersion(executable, 2));
+        assertThrows(IOException.class, () -> LocalSbkDeployment.discoverVersion(temporaryDirectory));
     }
 
-    private Path launcher(String command) throws IOException {
-        final Path executable = temporaryDirectory.resolve("sbk test launcher");
-        Files.writeString(executable, "#!/bin/sh\n" + command + "\n");
-        if (!executable.toFile().setExecutable(true)) {
-            throw new IOException("Unable to make test launcher executable");
+    private void createJar(String version) throws IOException {
+        final Path lib = Files.createDirectories(temporaryDirectory.resolve("lib"));
+        final Manifest manifest = new Manifest();
+        manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+        if (version != null) {
+            manifest.getMainAttributes().put(Attributes.Name.IMPLEMENTATION_VERSION, version);
         }
-        return executable;
+        try (JarOutputStream output = new JarOutputStream(Files.newOutputStream(lib.resolve("sbk-10.7.jar")),
+                manifest)) {
+            output.finish();
+        }
     }
 }
