@@ -38,6 +38,7 @@ final class GrpcStreamSender implements AutoCloseable {
     private final CountDownLatch responseCompleted;
     private final ExceptionHandler exceptionHandler;
     private final long closeTimeoutSeconds;
+    private final long stallTimeoutNanos;
     private final Thread senderThread;
     private volatile ClientCallStreamObserver<MessageLatenciesRecord> requestStream;
     private volatile Throwable failure;
@@ -49,14 +50,16 @@ final class GrpcStreamSender implements AutoCloseable {
      * @param stub asynchronous service stub
      * @param maximumPendingBatches maximum number of retained immutable batches
      * @param closeTimeoutSeconds maximum close-phase wait in seconds
+     * @param stallTimeoutSeconds maximum continuous HTTP/2 flow-control stall in seconds
      * @param exceptionHandler benchmark shutdown callback
      */
     GrpcStreamSender(ServiceGrpc.ServiceStub stub, int maximumPendingBatches, long closeTimeoutSeconds,
-                     ExceptionHandler exceptionHandler) {
+                     long stallTimeoutSeconds, ExceptionHandler exceptionHandler) {
         this.batches = new ArrayBlockingQueue<>(maximumPendingBatches);
         this.responseCompleted = new CountDownLatch(1);
         this.exceptionHandler = exceptionHandler;
         this.closeTimeoutSeconds = closeTimeoutSeconds;
+        this.stallTimeoutNanos = TimeUnit.SECONDS.toNanos(stallTimeoutSeconds);
         this.closed = false;
         final ClientResponseObserver<MessageLatenciesRecord, Empty> responseObserver =
                 new ClientResponseObserver<>() {
@@ -80,6 +83,10 @@ final class GrpcStreamSender implements AutoCloseable {
 
                     @Override
                     public void onCompleted() {
+                        if (!closed) {
+                            reportFailure(new IOException(
+                                    "SBM completed the gRPC latency stream while the benchmark was active"));
+                        }
                         responseCompleted.countDown();
                     }
                 };
@@ -132,11 +139,22 @@ final class GrpcStreamSender implements AutoCloseable {
     }
 
     private void awaitReady() throws InterruptedException, IOException {
-        while (!requestStream.isReady()) {
+        if (requestStream.isReady()) {
+            return;
+        }
+        final long stallStarted = System.nanoTime();
+        while (true) {
             checkFailure();
             LockSupport.parkNanos(READY_PARK_NANOS);
             if (Thread.interrupted()) {
                 throw new InterruptedException("SBK gRPC stream sender interrupted");
+            }
+            if (requestStream.isReady()) {
+                return;
+            }
+            if (System.nanoTime() - stallStarted >= stallTimeoutNanos) {
+                throw new IOException("SBM gRPC latency stream flow control remained stalled for "
+                        + TimeUnit.NANOSECONDS.toSeconds(stallTimeoutNanos) + " second(s)");
             }
         }
     }

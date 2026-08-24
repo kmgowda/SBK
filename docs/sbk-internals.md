@@ -1647,6 +1647,8 @@ flowchart LR
 
     FULL["Queue full"] --> FAIL["Fail benchmark explicitly<br/>never grow memory silently"]
     Q -. capacity check .-> FULL
+    STALL["HTTP/2 flow control remains stalled<br/>for configured timeout"] --> FAIL
+    T -. local timeout check .-> STALL
 
     classDef hot fill:#fee2e2,stroke:#991b1b,color:#000
     classDef batch fill:#fef3c7,stroke:#a16207,color:#000
@@ -1655,14 +1657,19 @@ flowchart LR
     class P,A hot
     class B,Q batch
     class T,S transport
-    class ACK,FULL,FAIL safe
+    class ACK,FULL,STALL,FAIL safe
 ```
 
 The bounded sender isolates network progress from PerL without creating an
 unbounded backlog. When HTTP/2 flow control is not ready, the sender parks;
-it does not spin. If eight completed batches are already pending, the logger
-reports overload through SBK's normal exception handler and initiates normal
-benchmark shutdown.
+it does not spin. If flow control remains continuously stalled for
+`streamStallTimeoutSeconds` (30 seconds by default), or if eight completed
+batches are already pending, the logger reports transport failure through
+SBK's normal exception handler and initiates normal benchmark shutdown. An
+unexpected server stream completion while the benchmark is active is handled
+the same way. This reuses the existing sender and HTTP/2 flow-control state;
+it creates no heartbeat thread, RPC, bidirectional application message, or
+additional network traffic.
 
 #### SBP connection and data lifecycle
 

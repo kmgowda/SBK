@@ -353,7 +353,7 @@ Operational defaults have one owning source:
 | SBK PerL queue topology | `sbk-api/src/main/resources/sbk.properties` |
 | SBK lifecycle, executor reserve, and shutdown timeouts | `sbk-api/src/main/resources/sbk-runtime.properties` |
 | Logger reporting and request-ID dimensions | `sbk-api/src/main/resources/logger.properties` |
-| SBM client transport queue and close timeouts | `sbk-api/src/main/resources/sbmhost.properties` |
+| SBM client transport queue, flow-control stall, and close timeouts | `sbk-api/src/main/resources/sbmhost.properties` |
 | SBM server defaults, including its default action | `sbm/src/main/resources/sbm.properties` |
 | Web Console server, client, browser, retention, and log settings | `sbk-web-console/src/main/resources/webconsole.properties` |
 | GEM orchestration and bounded diagnostic settings | `sbk-gem/src/main/resources/gem.properties` |
