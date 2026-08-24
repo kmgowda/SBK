@@ -30,10 +30,14 @@ import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -121,6 +125,43 @@ final class SshUtilsTest {
 
             assertEquals("active", result);
             assertEquals("active", Files.readString(temporaryDirectory.resolve("runtime-leases/marker")));
+        } finally {
+            sshSession.stop();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void activelyCancelsTimedOutSftpOperationAndKeepsSessionUsable() throws Exception {
+        final Path knownHosts = writeKnownHosts(hostKey);
+        final ConnectionConfig config = new ConnectionConfig("127.0.0.1", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), true, knownHosts.toString());
+        final var executor = Executors.newFixedThreadPool(2);
+        final SshSession sshSession = new SshSession(config, executor);
+        final CountDownLatch started = new CountDownLatch(1);
+        final CountDownLatch interrupted = new CountDownLatch(1);
+        try {
+            sshSession.createSessionAsync(5).get(5, TimeUnit.SECONDS);
+            final var timedOut = sshSession.runRemoteFileOperationAsync(fileSystem -> {
+                started.countDown();
+                try {
+                    new CountDownLatch(1).await();
+                } catch (InterruptedException exception) {
+                    interrupted.countDown();
+                    throw exception;
+                }
+                return null;
+            }, 1);
+
+            assertTrue(started.await(2, TimeUnit.SECONDS));
+            final ExecutionException failure = assertThrows(ExecutionException.class,
+                    () -> timedOut.get(3, TimeUnit.SECONDS));
+            assertInstanceOf(TimeoutException.class, failure.getCause());
+            assertTrue(interrupted.await(2, TimeUnit.SECONDS));
+
+            final String result = sshSession.runRemoteFileOperationAsync(fileSystem -> "available", 5)
+                    .get(5, TimeUnit.SECONDS);
+            assertEquals("available", result);
         } finally {
             sshSession.stop();
             executor.shutdownNow();

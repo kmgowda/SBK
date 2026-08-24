@@ -24,8 +24,6 @@ import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.signature.Signature;
-import org.apache.sshd.scp.client.ScpClient;
-import org.apache.sshd.scp.client.ScpClientCreator;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -42,7 +40,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
- * SSH utility methods for session creation, command execution, and SCP copy.
+ * SSH utility methods for session creation and command execution.
  *
  * <p>Wraps Apache Mina SSHD primitives to provide simpler operations used by SBK-GEM
  * for orchestrating remote SBK runs.
@@ -196,21 +194,6 @@ public final class SshUtils {
             }
             response.returnCode = exitStatus;
         }
-    }
-
-    /**
-     * Copy one local file to an exact remote path using SCP.
-     *
-     * @param session SSH session
-     * @param srcPath local source file
-     * @param dstPath remote destination file
-     * @throws IOException on copy failure
-     */
-    public static void copyFile(final ClientSession session, String srcPath,
-                                String dstPath) throws IOException {
-        final ScpClientCreator creator = ScpClientCreator.instance();
-        final ScpClient scpClient = creator.createScpClient(session);
-        scpClient.upload(srcPath, dstPath, ScpClient.Option.PreserveAttributes);
     }
 
 }

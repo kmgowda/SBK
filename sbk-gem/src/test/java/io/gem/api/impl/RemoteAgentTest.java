@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.util.List;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -48,5 +49,11 @@ final class RemoteAgentTest {
     @Test
     void rejectsControlCharactersInExecutablePaths() {
         assertThrows(IllegalArgumentException.class, () -> RemoteAgent.command("java\nfalse", "/agent.jar"));
+    }
+
+    @Test
+    void rejectsAgentRequestsWithTooManyValues() {
+        assertThrows(java.io.IOException.class, () -> RemoteAgentProtocol.encode("run",
+                Collections.nCopies(RemoteAgentProtocol.MAX_VALUES + 1, "value")));
     }
 }

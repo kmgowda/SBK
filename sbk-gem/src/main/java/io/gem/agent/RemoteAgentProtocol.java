@@ -26,6 +26,8 @@ public final class RemoteAgentProtocol {
     public static final int MAX_VALUES = 16_384;
     /** Maximum encoded string size. */
     public static final int MAX_STRING_BYTES = 16 * 1024 * 1024;
+    /** Maximum aggregate encoded request size. */
+    public static final int MAX_REQUEST_BYTES = 64 * 1024 * 1024;
 
     private RemoteAgentProtocol() {
     }
@@ -38,6 +40,9 @@ public final class RemoteAgentProtocol {
      * @throws IOException when encoding fails
      */
     public static byte[] encode(String operation, List<String> values) throws IOException {
+        if (values.size() > MAX_VALUES) {
+            throw new IOException("Invalid SBK-GEM agent value count: " + values.size());
+        }
         try (ByteArrayOutputStream bytes = new ByteArrayOutputStream();
              DataOutputStream output = new DataOutputStream(bytes)) {
             writeString(output, MAGIC);
@@ -45,6 +50,9 @@ public final class RemoteAgentProtocol {
             output.writeInt(values.size());
             for (String value : values) {
                 writeString(output, value);
+                if (bytes.size() > MAX_REQUEST_BYTES) {
+                    throw new IOException("SBK-GEM agent request is too large");
+                }
             }
             output.flush();
             return bytes.toByteArray();
@@ -58,17 +66,22 @@ public final class RemoteAgentProtocol {
      * @throws IOException when invalid
      */
     public static Request read(DataInputStream input) throws IOException {
-        if (!MAGIC.equals(readString(input))) {
+        final int[] remainingBytes = {MAX_REQUEST_BYTES};
+        if (!MAGIC.equals(readString(input, remainingBytes))) {
             throw new IOException("Unsupported SBK-GEM agent protocol");
         }
-        final String operation = readString(input);
+        final String operation = readString(input, remainingBytes);
+        remainingBytes[0] -= Integer.BYTES;
+        if (remainingBytes[0] < 0) {
+            throw new IOException("SBK-GEM agent request is too large");
+        }
         final int count = input.readInt();
         if (count < 0 || count > MAX_VALUES) {
             throw new IOException("Invalid SBK-GEM agent value count: " + count);
         }
         final List<String> values = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
-            values.add(readString(input));
+            values.add(readString(input, remainingBytes));
         }
         return new Request(operation, List.copyOf(values));
     }
@@ -82,10 +95,18 @@ public final class RemoteAgentProtocol {
         output.write(bytes);
     }
 
-    private static String readString(DataInputStream input) throws IOException {
+    private static String readString(DataInputStream input, int[] remainingBytes) throws IOException {
+        remainingBytes[0] -= Integer.BYTES;
+        if (remainingBytes[0] < 0) {
+            throw new IOException("SBK-GEM agent request is too large");
+        }
         final int length = input.readInt();
         if (length < 0 || length > MAX_STRING_BYTES) {
             throw new IOException("Invalid SBK-GEM agent string length: " + length);
+        }
+        remainingBytes[0] -= length;
+        if (remainingBytes[0] < 0) {
+            throw new IOException("SBK-GEM agent request is too large");
         }
         final byte[] bytes = input.readNBytes(length);
         if (bytes.length != length) {
