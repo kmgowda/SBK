@@ -55,6 +55,22 @@ public final class GemConfigTest {
         assertDoesNotThrow(config::validate);
     }
 
+    /** Ensures both bounded orchestration pools retain at least one worker. */
+    @Test
+    public void validatesOrchestrationExecutorSizes() {
+        final GemConfig config = validConfig();
+        config.controlExecutorThreads = 0;
+
+        assertThrows(IllegalArgumentException.class, config::validate);
+
+        config.controlExecutorThreads = 1;
+        config.transferExecutorThreads = 0;
+        assertThrows(IllegalArgumentException.class, config::validate);
+
+        config.transferExecutorThreads = 1;
+        assertDoesNotThrow(config::validate);
+    }
+
     private static GemConfig validConfig() {
         final GemConfig config = new GemConfig();
         config.remoteTimeoutSeconds = 1;
@@ -64,7 +80,8 @@ public final class GemConfigTest {
         config.runtimeManagementLockTimeoutSeconds = 1;
         config.runtimeManagementLockStaleSeconds = 2;
         config.runtimeLeaseReservationSeconds = 3;
-        config.executorThreadReserve = 1;
+        config.controlExecutorThreads = 1;
+        config.transferExecutorThreads = 1;
         config.diagnosticBytes = 1;
         config.maximumAgentResponseBytes = 1;
         config.diagnosticPrefixCharacters = 1;

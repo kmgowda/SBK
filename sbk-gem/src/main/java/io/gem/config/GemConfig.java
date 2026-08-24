@@ -143,8 +143,10 @@ final public class GemConfig {
      * Remote working directory on each host (derived from app name/version).
      */
     public String remoteDir;
-    /** Executor threads reserved for orchestration and embedded services. */
-    public int executorThreadReserve;
+    /** Maximum platform threads used for concurrent SSH connection and control operations. */
+    public int controlExecutorThreads;
+    /** Maximum platform threads used for concurrent SFTP deployment transfers. */
+    public int transferExecutorThreads;
     /** Maximum stdout/stderr bytes retained per SSH command. */
     public int diagnosticBytes;
     /** Maximum accepted OpenSSH-agent response frame bytes. */
@@ -180,7 +182,8 @@ final public class GemConfig {
     void validate() {
         if (remoteTimeoutSeconds < 1 || deploymentTimeoutSeconds < 1
                 || runtimeProgressIntervalSeconds < 1
-                || runtimeCacheDirectory == null || runtimeCacheDirectory.isBlank() || executorThreadReserve < 1
+                || runtimeCacheDirectory == null || runtimeCacheDirectory.isBlank()
+                || controlExecutorThreads < 1 || transferExecutorThreads < 1
                 || runtimeManagementLockTimeoutSeconds < 1 || runtimeManagementLockStaleSeconds < 1
                 || runtimeManagementLockStaleSeconds <= deploymentTimeoutSeconds
                 || runtimeLeaseReservationSeconds

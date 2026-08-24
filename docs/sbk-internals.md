@@ -2138,6 +2138,14 @@ cancel outstanding operations, and close sessions without waiting for the full
 deployment deadline. The remote agent captures the launched process tree and
 force-kills any surviving descendants after its graceful shutdown interval.
 
+Execution resources are partitioned by orchestration workload. SSH connection
+and control operations run on a fixed-size platform-thread pool; SFTP runtime
+and JDK copies use a smaller independent fixed-size transfer pool; remote SBK
+commands and the coordinated-registration waiter use virtual threads because
+they remain blocked for most or all of a benchmark. Node count therefore no
+longer determines the number of controller platform threads, and a saturated
+transfer lane cannot prevent control-plane cancellation or lease work.
+
 ---
 
 ## 8. Why is SBK a high-performance framework?

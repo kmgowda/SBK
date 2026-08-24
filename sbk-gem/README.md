@@ -226,6 +226,14 @@ retirement use the same per-host progress reporting. Configure the shared bounde
 update interval with `runtimeProgressIntervalSeconds` in `gem.properties`;
 cached bundles and fast local-network copies normally complete without a heartbeat.
 
+Controller execution resources remain bounded as the node inventory grows. SSH
+connections and control-plane operations use a fixed-size platform-thread pool,
+while JDK and SBK data movement uses a smaller independent transfer pool so a
+large copy cannot starve probes, leases, or shutdown work. Remote commands that
+remain open for the complete benchmark use lightweight Java virtual threads
+instead of one platform thread per node. The pool limits are owned by
+`controlExecutorThreads` and `transferExecutorThreads` in `gem.properties`.
+
 When the controller is also a selected SSH host, its deployment parent may be
 the local SBK distribution directory. GEM reserves `sbk-runtime-*` and
 `.sbk-runtime-*` top-level names for deployment state and excludes those trees

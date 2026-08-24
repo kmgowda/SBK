@@ -39,8 +39,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * Lifecycle wrapper around an SSH client/session for a single connection.
  *
  * <p>Encapsulates connect, command execution, SFTP file copy, and graceful shutdown,
- * exposing async methods returning {@link CompletableFuture}s and performing operations on a
- * provided {@link ExecutorService}. Session state is protected by a short-held
+ * exposing async methods returning {@link CompletableFuture}s and routing connection/control,
+ * transfer, and long-running command work to separate execution resources. Session state is protected by a short-held
  * lifecycle lock; network and file operations never execute while holding it.
  */
 final public class SshSession {
@@ -73,10 +73,14 @@ final public class SshSession {
      */
     final private SshClient client;
 
-    /**
-     * <code>ExecutorService executor</code>.
-     */
-    final private ExecutorService executor;
+    /** Bounded executor for SSH connection and control-plane operations. */
+    final private ExecutorService controlExecutor;
+
+    /** Bounded executor for SFTP copies and other deployment data movement. */
+    final private ExecutorService transferExecutor;
+
+    /** Virtual-thread executor for commands that remain active for a complete benchmark. */
+    final private ExecutorService commandExecutor;
 
     /** Maximum stdout/stderr bytes retained for each command. */
     final private int diagnosticBytes;
@@ -116,8 +120,25 @@ final public class SshSession {
      * @param diagnosticBytes maximum stdout/stderr bytes retained per command
      */
     public SshSession(ConnectionConfig conn, ExecutorService executor, int diagnosticBytes) {
+        this(conn, executor, executor, executor, diagnosticBytes);
+    }
+
+    /**
+     * This constructor assigns separate execution resources to control, transfer, and long-running commands.
+     *
+     * @param conn             SSH connection
+     * @param controlExecutor  bounded connection and control-operation executor
+     * @param transferExecutor bounded deployment transfer executor
+     * @param commandExecutor  virtual-thread executor for long-running remote commands
+     * @param diagnosticBytes  maximum stdout/stderr bytes retained per command
+     */
+    public SshSession(ConnectionConfig conn, ExecutorService controlExecutor,
+                      ExecutorService transferExecutor, ExecutorService commandExecutor,
+                      int diagnosticBytes) {
         this.connection = conn;
-        this.executor = executor;
+        this.controlExecutor = controlExecutor;
+        this.transferExecutor = transferExecutor;
+        this.commandExecutor = commandExecutor;
         this.diagnosticBytes = diagnosticBytes;
         this.sessionLock = new Object();
         this.activeTasks = ConcurrentHashMap.newKeySet();
@@ -190,7 +211,7 @@ final public class SshSession {
      * @return CompletableFuture
      */
     public CompletableFuture<Void> createSessionAsync(long timeoutSeconds) {
-        return submitBounded(() -> {
+        return submitBounded(controlExecutor, () -> {
             createSession(timeoutSeconds);
             return null;
         }, () -> client.stop(), timeoutSeconds);
@@ -233,8 +254,29 @@ final public class SshSession {
      */
     public CompletableFuture<SshResponse> runCommandAsync(String cmd, byte[] input, Boolean isOutput,
                                                            long timeoutSeconds) throws ConnectException {
+        return executeCommandAsync(controlExecutor, cmd, input, isOutput, timeoutSeconds);
+    }
+
+    /**
+     * Run a remote command that remains active for the duration of a benchmark on a virtual thread.
+     *
+     * @param cmd command
+     * @param input command standard input
+     * @param isOutput whether output should be retained
+     * @param timeoutSeconds command timeout
+     * @return asynchronous response
+     * @throws ConnectException when the SSH session is unavailable
+     */
+    public CompletableFuture<SshResponse> runBenchmarkCommandAsync(String cmd, byte[] input, Boolean isOutput,
+                                                                    long timeoutSeconds) throws ConnectException {
+        return executeCommandAsync(commandExecutor, cmd, input, isOutput, timeoutSeconds);
+    }
+
+    private CompletableFuture<SshResponse> executeCommandAsync(ExecutorService operationExecutor, String cmd,
+                                                                byte[] input, Boolean isOutput,
+                                                                long timeoutSeconds) throws ConnectException {
         final ClientSession sshSession = getSession();
-        return submitBounded(() -> {
+        return submitBounded(operationExecutor, () -> {
             final SshResponse response = new SshResponse(isOutput, diagnosticBytes);
             try {
                 SshUtils.runCommand(sshSession, cmd, input, timeoutSeconds, response);
@@ -267,7 +309,7 @@ final public class SshSession {
      */
     public CompletableFuture<Void> copyFileAsync(String srcPath, String dstPath, long timeoutSeconds)
             throws ConnectException {
-        return runRemoteFileOperationAsync(fileSystem -> {
+        return runRemoteTransferOperationAsync(fileSystem -> {
             final Path destination = fileSystem.getPath(dstPath);
             Files.copy(Path.of(srcPath), destination, StandardCopyOption.REPLACE_EXISTING);
             return null;
@@ -286,9 +328,31 @@ final public class SshSession {
     public <T> CompletableFuture<T> runRemoteFileOperationAsync(RemoteFileOperation<T> operation,
                                                                  long timeoutSeconds)
             throws ConnectException {
+        return executeRemoteFileOperationAsync(controlExecutor, operation, timeoutSeconds);
+    }
+
+    /**
+     * Execute deployment data movement through Apache MINA SFTP on the bounded transfer executor.
+     *
+     * @param operation remote file-system transfer operation
+     * @param timeoutSeconds maximum operation duration
+     * @param <T> result type
+     * @return asynchronous operation result
+     * @throws ConnectException when no SSH session is available
+     */
+    public <T> CompletableFuture<T> runRemoteTransferOperationAsync(RemoteFileOperation<T> operation,
+                                                                     long timeoutSeconds)
+            throws ConnectException {
+        return executeRemoteFileOperationAsync(transferExecutor, operation, timeoutSeconds);
+    }
+
+    private <T> CompletableFuture<T> executeRemoteFileOperationAsync(ExecutorService operationExecutor,
+                                                                      RemoteFileOperation<T> operation,
+                                                                      long timeoutSeconds)
+            throws ConnectException {
         final ClientSession sshSession = getSession();
         final AtomicReference<SftpFileSystem> activeFileSystem = new AtomicReference<>();
-        return submitBounded(() -> {
+        return submitBounded(operationExecutor, () -> {
             try (SftpFileSystem fileSystem = SftpClientFactory.instance().createSftpFileSystem(sshSession)) {
                 activeFileSystem.set(fileSystem);
                 return operation.execute(fileSystem);
@@ -302,25 +366,25 @@ final public class SshSession {
         }, () -> closeQuietly(activeFileSystem.getAndSet(null)), timeoutSeconds);
     }
 
-    private <T> CompletableFuture<T> submitBounded(Callable<T> operation, Runnable cancelAction,
+    private <T> CompletableFuture<T> submitBounded(ExecutorService operationExecutor,
+                                                    Callable<T> operation, Runnable cancelAction,
                                                     long timeoutSeconds) {
         final CompletableFuture<T> completion = new CompletableFuture<>();
-        final BoundedTask<T> task = new BoundedTask<>(operation, cancelAction, completion);
+        final BoundedTask<T> task = new BoundedTask<>(operation, cancelAction, completion, timeoutSeconds);
         activeTasks.add(task);
-        try {
-            executor.execute(task);
-        } catch (RuntimeException exception) {
-            activeTasks.remove(task);
-            completion.completeExceptionally(exception);
-            return completion;
-        }
-        completion.orTimeout(timeoutSeconds, TimeUnit.SECONDS);
         completion.whenComplete((ignored, failure) -> {
             final Throwable cause = unwrap(failure);
             if (cause instanceof TimeoutException || completion.isCancelled()) {
                 task.cancel(true);
             }
         });
+        try {
+            operationExecutor.execute(task);
+        } catch (RuntimeException exception) {
+            activeTasks.remove(task);
+            completion.completeExceptionally(exception);
+            return completion;
+        }
         return completion;
     }
 
@@ -377,9 +441,12 @@ final public class SshSession {
 
     private final class BoundedTask<T> extends FutureTask<Void> {
         private final Runnable cancelAction;
+        private final CompletableFuture<T> completion;
 
-        BoundedTask(Callable<T> operation, Runnable cancelAction, CompletableFuture<T> completion) {
+        BoundedTask(Callable<T> operation, Runnable cancelAction, CompletableFuture<T> completion,
+                    long timeoutSeconds) {
             super(() -> {
+                completion.orTimeout(timeoutSeconds, TimeUnit.SECONDS);
                 try {
                     completion.complete(operation.call());
                 } catch (InterruptedException exception) {
@@ -391,12 +458,16 @@ final public class SshSession {
                 return null;
             });
             this.cancelAction = cancelAction;
+            this.completion = completion;
         }
 
         @Override
         public boolean cancel(boolean mayInterruptIfRunning) {
             final boolean cancelled = super.cancel(mayInterruptIfRunning);
-            cancelAction.run();
+            if (cancelled) {
+                completion.cancel(false);
+                cancelAction.run();
+            }
             return cancelled;
         }
 

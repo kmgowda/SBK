@@ -168,6 +168,64 @@ final class SshUtilsTest {
         }
     }
 
+    @Test
+    void routesControlAndTransferOperationsToSeparateBoundedExecutors() throws Exception {
+        final Path knownHosts = writeKnownHosts(hostKey);
+        final ConnectionConfig config = new ConnectionConfig("127.0.0.1", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), true, knownHosts.toString());
+        final var controlExecutor = Executors.newSingleThreadExecutor(
+                Thread.ofPlatform().name("test-control").factory());
+        final var transferExecutor = Executors.newSingleThreadExecutor(
+                Thread.ofPlatform().name("test-transfer").factory());
+        final var commandExecutor = Executors.newVirtualThreadPerTaskExecutor();
+        final SshSession sshSession = new SshSession(config, controlExecutor, transferExecutor, commandExecutor,
+                SshResponse.DEFAULT_DIAGNOSTIC_BYTES);
+        try {
+            sshSession.createSessionAsync(5).get(5, TimeUnit.SECONDS);
+
+            assertEquals("test-control", sshSession.runRemoteFileOperationAsync(
+                    fileSystem -> Thread.currentThread().getName(), 5).get(5, TimeUnit.SECONDS));
+            assertEquals("test-transfer", sshSession.runRemoteTransferOperationAsync(
+                    fileSystem -> Thread.currentThread().getName(), 5).get(5, TimeUnit.SECONDS));
+        } finally {
+            sshSession.stop();
+            controlExecutor.shutdownNow();
+            transferExecutor.shutdownNow();
+            commandExecutor.shutdownNow();
+        }
+    }
+
+    @Test
+    void startsOperationDeadlineAfterBoundedExecutorQueueWait() throws Exception {
+        final Path knownHosts = writeKnownHosts(hostKey);
+        final ConnectionConfig config = new ConnectionConfig("127.0.0.1", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), true, knownHosts.toString());
+        final var executor = Executors.newSingleThreadExecutor();
+        final SshSession sshSession = new SshSession(config, executor);
+        final CountDownLatch firstStarted = new CountDownLatch(1);
+        final CountDownLatch releaseFirst = new CountDownLatch(1);
+        try {
+            sshSession.createSessionAsync(5).get(5, TimeUnit.SECONDS);
+            final var first = sshSession.runRemoteFileOperationAsync(fileSystem -> {
+                firstStarted.countDown();
+                releaseFirst.await();
+                return "first";
+            }, 5);
+            assertTrue(firstStarted.await(2, TimeUnit.SECONDS));
+
+            final var queued = sshSession.runRemoteFileOperationAsync(fileSystem -> "queued", 1);
+            Thread.sleep(1_200);
+            releaseFirst.countDown();
+
+            assertEquals("first", first.get(2, TimeUnit.SECONDS));
+            assertEquals("queued", queued.get(2, TimeUnit.SECONDS));
+        } finally {
+            releaseFirst.countDown();
+            sshSession.stop();
+            executor.shutdownNow();
+        }
+    }
+
     private Path writeKnownHosts(KeyPair keyPair) throws IOException {
         final Path knownHosts = temporaryDirectory.resolve("known-hosts");
         final String host = "[127.0.0.1]:" + server.getPort();
