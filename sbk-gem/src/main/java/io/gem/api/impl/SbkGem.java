@@ -313,8 +313,7 @@ final public class SbkGem {
         }
         final Path localSbkCommand = Path.of(gemConfig.sbkdir).resolve(GemConfig.SBK_COMMAND)
                 .toAbsolutePath().normalize();
-        gemConfig.sbkVersion = LocalSbkDeployment.discoverVersion(localSbkCommand,
-                gemConfig.remoteTimeoutSeconds);
+        gemConfig.sbkVersion = LocalSbkDeployment.discoverVersion(Path.of(gemConfig.sbkdir));
         gemConfig.remoteDir = appName + "-" + gemConfig.sbkVersion;
         if (StringUtils.isNotEmpty(version) && !version.equals(gemConfig.sbkVersion)) {
             Printer.log.warn("SBK-GEM version " + version + " is deploying local SBK version " +

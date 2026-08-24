@@ -99,10 +99,6 @@ final public class GemConfig {
      */
     public String sbkVersion;
     /**
-     * Whether SBK-GEM may copy its local Java runtime to remote nodes.
-     */
-    public boolean javacopy;
-    /**
      * Required Java major version on remote nodes.
      */
     public int javaversion;

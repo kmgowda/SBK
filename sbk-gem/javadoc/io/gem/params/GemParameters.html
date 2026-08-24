@@ -64,7 +64,6 @@ loadScripts(document, 'script');</script>
 <li><a href="#isTotalRecordsOption()" tabindex="0">isTotalRecordsOption()</a></li>
 <li><a href="#isTotalThroughputOption()" tabindex="0">isTotalThroughputOption()</a></li>
 <li><a href="#getTotalThroughput()" tabindex="0">getTotalThroughput()</a></li>
-<li><a href="#isJavaCopy()" tabindex="0">isJavaCopy()</a></li>
 <li><a href="#getJavaVersion()" tabindex="0">getJavaVersion()</a></li>
 <li><a href="#getJavaDir()" tabindex="0">getJavaDir()</a></li>
 <li><a href="#isDelete()" tabindex="0">isDelete()</a></li>
@@ -158,23 +157,18 @@ extends io.sbk.params.Parameters</span>
 <div class="block">Check whether a mismatched SBK installation may be deleted before replacement.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isJavaCopy()" class="member-name-link">isJavaCopy</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isRuntimeCleanup()" class="member-name-link">isRuntimeCleanup</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Check whether SBK-GEM may copy its Java runtime to remote nodes.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isRuntimeCleanup()" class="member-name-link">isRuntimeCleanup</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Check whether every inactive non-current SBK-GEM-managed runtime and local cached bundle should be removed.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isTotalRecordsOption()" class="member-name-link">isTotalRecordsOption</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isTotalRecordsOption()" class="member-name-link">isTotalRecordsOption</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Check whether the record value is an aggregate across all remote SBK clients.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isTotalThroughputOption()" class="member-name-link">isTotalThroughputOption</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isTotalThroughputOption()" class="member-name-link">isTotalThroughputOption</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Check whether throughput is an aggregate across all remote SBK clients.</div>
 </div>
 </div>
@@ -300,19 +294,6 @@ extends io.sbk.params.Parameters</span>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>aggregate throughput in MB/s</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="isJavaCopy()">
-<h3>isJavaCopy</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="return-type">boolean</span>&nbsp;<span class="element-name">isJavaCopy</span>()</div>
-<div class="block">Check whether SBK-GEM may copy its Java runtime to remote nodes.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>true when Java copying is enabled</dd>
 </dl>
 </div>
 </section>

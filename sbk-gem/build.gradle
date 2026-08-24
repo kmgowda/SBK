@@ -24,6 +24,10 @@ apply from: "$rootDir/gradle/rat.gradle"
 apply from: "$rootDir/gradle/maven.gradle"
 apply from: "$rootDir/gradle/spotbugs.gradle"
 
+configurations {
+    remoteAgentRuntime
+}
+
 application {
     mainClass = 'io.gem.main.SbkGemMain'
     applicationDefaultJvmArgs = ['-Dsbk.applicationName=', '-Dsbk.className=', '-Dsbk.appHome=SBK_APP_HOME']
@@ -41,6 +45,36 @@ dependencies {
     implementation "org.apache.sshd:sshd-sftp:$sshdVersion"
     implementation "org.apache.sshd:sshd-mina:$sshdVersion"
     implementation "org.apache.commons:commons-compress:$commonsCompressVersion"
+    remoteAgentRuntime "org.apache.commons:commons-compress:$commonsCompressVersion"
+}
+
+def remoteAgentJar = tasks.register('remoteAgentJar', Jar) {
+    archiveBaseName = 'sbk-gem-agent'
+    archiveClassifier = ''
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes('Main-Class': 'io.gem.agent.SbkGemRemoteAgentMain')
+    }
+    from(sourceSets.main.output) {
+        include 'io/gem/agent/**'
+    }
+    from {
+        configurations.remoteAgentRuntime.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/MANIFEST.MF'
+}
+
+application.applicationDistribution.from(remoteAgentJar) {
+    into 'lib'
+}
+
+tasks.named('check') {
+    dependsOn remoteAgentJar
+}
+
+tasks.named('test') {
+    dependsOn remoteAgentJar
+    systemProperty 'sbk.gem.agentJar', remoteAgentJar.flatMap { it.archiveFile }.get().asFile.absolutePath
 }
 
 

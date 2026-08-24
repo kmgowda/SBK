@@ -29,6 +29,7 @@ import org.apache.sshd.scp.client.ScpClientCreator;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.net.SocketTimeoutException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -163,7 +164,24 @@ public final class SshUtils {
      */
     public static void runCommand(final @NotNull ClientSession session, String cmd, long timeoutSeconds,
                                   @NotNull SshResponse response) throws IOException {
+        runCommand(session, cmd, new byte[0], timeoutSeconds, response);
+    }
+
+    /**
+     * Execute a command over SSH and provide a bounded binary request on stdin.
+     *
+     * @param session non-null SSH session
+     * @param cmd command to execute
+     * @param input command standard input
+     * @param timeoutSeconds execution timeout in seconds
+     * @param response response holder
+     * @throws IOException on timeout or channel errors
+     * @throws SocketTimeoutException when the remote command exceeds its deadline
+     */
+    public static void runCommand(final @NotNull ClientSession session, String cmd, byte[] input,
+                                  long timeoutSeconds, @NotNull SshResponse response) throws IOException {
         try (ChannelExec execChannel = session.createExecChannel(cmd)) {
+            execChannel.setIn(new ByteArrayInputStream(input));
             execChannel.setErr(response.errOutputStream);
             execChannel.setOut(response.stdOutputStream);
             final long timeoutMillis = TimeUnit.SECONDS.toMillis(timeoutSeconds);

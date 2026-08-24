@@ -10,12 +10,7 @@
 
 package io.gem.api.impl;
 
-import io.gem.api.SshResponse;
-import io.sbk.config.ExitCode;
-
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Operating system of an SBK-GEM deployment.
@@ -28,8 +23,6 @@ import java.util.regex.Pattern;
  * @param operatingSystem normalized operating system
  */
 record DeploymentPlatform(String operatingSystem) {
-    private static final Pattern OPERATING_SYSTEM_PATTERN = Pattern.compile("(?m)^SBK_OS=(\\S+)$");
-
     /**
      * Detect the controller platform.
      *
@@ -40,39 +33,8 @@ record DeploymentPlatform(String operatingSystem) {
         return new DeploymentPlatform(normalizeOperatingSystem(System.getProperty("os.name")));
     }
 
-    /**
-     * Build the remote platform and deployment-tool preflight command.
-     *
-     * @return POSIX-shell command
-     */
-    static String probeCommand() {
-        return "command -v tar >/dev/null 2>&1 || { printf '%s\\n' 'tar command is required' >&2; exit 127; }; "
-                + "if command -v sha256sum >/dev/null 2>&1; then :; "
-                + "elif command -v shasum >/dev/null 2>&1; then :; "
-                + "else printf '%s\\n' 'sha256sum or shasum is required' >&2; exit 127; fi; "
-                + "printf 'SBK_OS=%s\\n' \"$(uname -s)\"";
-    }
-
-    /**
-     * Parse a successful remote platform probe.
-     *
-     * @param response SSH response
-     * @return normalized remote platform, or {@code null} for an invalid probe
-     */
-    static DeploymentPlatform fromProbe(SshResponse response) {
-        if (response == null || response.returnCode != ExitCode.SUCCESS) {
-            return null;
-        }
-        final String output = response.stdOutputStream.toString();
-        final Matcher osMatcher = OPERATING_SYSTEM_PATTERN.matcher(output);
-        if (!osMatcher.find()) {
-            return null;
-        }
-        try {
-            return new DeploymentPlatform(normalizeOperatingSystem(osMatcher.group(1)));
-        } catch (IllegalArgumentException ignored) {
-            return null;
-        }
+    static DeploymentPlatform fromOperatingSystem(String value) {
+        return new DeploymentPlatform(normalizeOperatingSystem(value));
     }
 
     /**

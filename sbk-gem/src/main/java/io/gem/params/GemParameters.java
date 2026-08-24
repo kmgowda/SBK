@@ -79,13 +79,6 @@ public sealed interface GemParameters extends Parameters permits GemParameterOpt
 
 
     /**
-     * Check whether SBK-GEM may copy its Java runtime to remote nodes.
-     *
-     * @return true when Java copying is enabled
-     */
-    boolean isJavaCopy();
-
-    /**
      * Get the required remote Java major version.
      *
      * @return Java major version

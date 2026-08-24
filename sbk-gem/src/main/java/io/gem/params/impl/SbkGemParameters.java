@@ -45,7 +45,7 @@ import java.util.Objects;
  * - -nodes: comma/space/newline-separated hostnames or host:port endpoints
  * - -gemuser, -gempass, -gemport
  * - -sbkdir
- * - -runtimecleanup, -delete, -javacopy, -javaversion, -javadir
+ * - -runtimecleanup, -delete, -javaversion, -javadir
  * - -localhost
  * - -sbmport, -sbmsleepms
  * - -totalrecords
@@ -127,8 +127,6 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("gemport", true, "ssh port of the remote hosts, default: " + config.gemport);
         addOption("sbkdir", true, "directory path of the SBK application containing the standard "
                 + GemConfig.SBK_COMMAND + " launcher; default: " + config.sbkdir);
-        addOption("javacopy", true, "Include and use the controller Java runtime in the immutable remote bundle; "
-                + "when false, require matching Java on every remote host; default: " + config.javacopy);
         addOption("javaversion", true, "Required remote Java major version; default: " + config.javaversion);
         addOption("javadir", true, "Remote Java home containing bin/java; default: " +
                 (StringUtils.isEmpty(config.javadir) ? "null" : config.javadir));
@@ -146,7 +144,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("totalthroughput", true, "Total throughput in MB/s across all remote SBK clients; mutually " +
                 "exclusive with -throughput");
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-hostkeycheck", "-knownhosts",
-                "-gemport", "-sbkdir", "-javacopy", "-javaversion", "-javadir",
+                "-gemport", "-sbkdir", "-javaversion", "-javadir",
                 "-delete", "-runtimecleanup", "-localhost", "-sbmport", "-sbmsleepms", "-totalrecords",
                 "--totalrecords", "-totalthroughput", "--totalthroughput"};
         this.parsedArgs = null;
@@ -200,7 +198,6 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         localHost = getOptionValue("localhost", localHost);
         sbmPort = Integer.parseInt(getOptionValue("sbmport", Integer.toString(sbmPort)));
         sbmIdleSleepMilliSeconds = Integer.parseInt(getOptionValue("sbmsleepms", Integer.toString(sbmIdleSleepMilliSeconds)));
-        config.javacopy = Boolean.parseBoolean(getOptionValue("javacopy", Boolean.toString(config.javacopy)));
         config.javaversion = Integer.parseInt(getOptionValue("javaversion", Integer.toString(config.javaversion)));
         config.javadir = getOptionValue("javadir", Objects.requireNonNullElse(config.javadir, ""));
         config.delete = Boolean.parseBoolean(getOptionValue("delete", Boolean.toString(config.delete)));
@@ -213,8 +210,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
 
         parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.gemuser,
                 "-hostkeycheck", Boolean.toString(config.hostkeycheck), "-knownhosts", config.knownhosts,
-                "-gemport", Integer.toString(config.gemport), "-sbkdir", config.sbkdir,
-                "-javacopy", Boolean.toString(config.javacopy), "-javaversion",
+                "-gemport", Integer.toString(config.gemport), "-sbkdir", config.sbkdir, "-javaversion",
                 Integer.toString(config.javaversion), "-javadir", config.javadir, "-delete",
                 Boolean.toString(config.delete), "-runtimecleanup", Boolean.toString(config.runtimecleanup),
                 "-localhost", localHost, "-sbmport", Integer.toString(sbmPort)};
@@ -390,6 +386,10 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
             throw new IllegalArgumentException("The '-sbkcommand' option was removed: SBK-GEM always validates "
                     + "and deploys the standard '" + GemConfig.SBK_COMMAND + "' launcher under '-sbkdir'");
         }
+        if (hasCommandLineOption(args, "javacopy")) {
+            throw new IllegalArgumentException("The '-javacopy' option was removed: SBK-GEM now reuses a "
+                    + "matching remote JDK or provisions the controller JDK automatically and separately from SBK");
+        }
     }
 
     private static NodeEndpoint parseNodeEndpoint(String value, int defaultPort) {
@@ -447,11 +447,6 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     @Override
     public String getSbkDir() {
         return config.sbkdir;
-    }
-
-    @Override
-    public boolean isJavaCopy() {
-        return config.javacopy;
     }
 
     @Override

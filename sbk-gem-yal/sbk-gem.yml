@@ -31,6 +31,5 @@ sbkGemArgs:
   # Retain the current runtime and remove inactive older managed versions (default: true).
   runtimecleanup: true
   # Java provisioning defaults: include and use the local Java 25 runtime.
-  javacopy: true
   javaversion: 25
   # javadir: /opt/sbk-java

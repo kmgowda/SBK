@@ -36,10 +36,9 @@ SBK-GEM owns remote launch and aggregate lifecycle. The remote SBK processes sti
 
 ## Prerequisites
 
-- JDK 25 on the local GEM host. With the default `-javacopy true`, remote
-  hosts do not need Java installed; the controller JDK is part of the verified
-  runtime bundle. With `-javacopy false`, every remote host must already have
-  the requested JDK, including both `bin/java` and `bin/javac`.
+- JDK 25 on the local GEM host. GEM reuses a matching remote JDK when present;
+  otherwise it copies the controller JDK as a separate content-addressed tree.
+  Java is never embedded in the SBK runtime archive.
 - SSH reachability, a trusted `known_hosts` entry, and authentication for every target.
 - A writable remote installation/work directory.
 - Network reachability from remote SBK clients back to the GEM/SBM host, normally on port `9717`.
@@ -48,7 +47,8 @@ SBK-GEM owns remote launch and aggregate lifecycle. The remote SBK processes sti
   remote nodes must use the same supported operating system (`Linux` or
   `macOS`). CPU architecture is not part of deployment compatibility. Windows
   and mixed Linux/macOS runs are rejected.
-- POSIX `tar` plus either `sha256sum` or `shasum` on every remote host.
+- No remote `tar`, checksum utility, or shell script is required. The packaged
+  Java agent performs extraction, verification, and launch through Java APIs.
 
 Use dedicated benchmark hosts and least-privilege SSH credentials. Do not put passwords or private keys in committed files.
 
@@ -209,8 +209,10 @@ causes incomplete or corrupted cached archives to be rebuilt before use. With
 a non-current archive being transferred by another GEM process is protected by
 its cache lock and is removed after it becomes inactive.
 
-Creating a new bundle hashes the complete SBK distribution and optional JDK,
-then writes a compressed archive. During this potentially long disk-intensive
+Creating a new bundle hashes the complete SBK distribution, then writes an
+SBK-only compressed archive. The independently managed JDK is hashed and copied
+as a directory tree only when its exact identity is unavailable remotely.
+During these potentially long disk-intensive
 step, GEM emits an elapsed-time heartbeat every 5 seconds by default. Runtime
 archive copies report the archive size, unique transfer-target count, completed
 targets, and hosts still pending. Runtime lease acquisition and inactive-runtime
@@ -221,12 +223,12 @@ cached bundles and fast local-network copies normally complete without a heartbe
 When the controller is also a selected SSH host, its deployment parent may be
 the local SBK distribution directory. GEM reserves `sbk-runtime-*` and
 `.sbk-runtime-*` top-level names for deployment state and excludes those trees
-from bundle input. This prevents old managed SBK+JDK trees, leases, locks, and
+from bundle input. This prevents old managed SBK trees, leases, locks, and
 transfer staging files from changing or recursively expanding the next bundle.
 
-The deployment lifecycle is automatic: an exact verified SBK-plus-JDK identity
-is reused, while missing content is uploaded, verified, and activated without a
-separate copy switch. The current identity is retained after benchmarking.
+The deployment lifecycle is automatic: exact verified SBK and Java identities
+are reused independently, while missing content is uploaded, verified, and
+activated without a separate copy switch. The current identities are retained.
 Apache MINA SFTP leases protect runtimes used by concurrent GEM executions. A
 reservation is created before probe/copy/activation and refreshed by the
 controller during the benchmark, so overlapping GEM processes cannot retire an
@@ -238,31 +240,30 @@ is first atomically renamed out of the managed `sbk-runtime-*` namespace while
 the SFTP lifecycle lock is held. Its potentially large directory tree is then
 deleted through a separate MINA SFTP operation, so recursive deletion cannot
 hold the lifecycle lock or block lease acquisition and remote benchmark startup.
-No login-shell, zsh, `nohup`, PID probe, or shell glob participates in lease
-management. Apache MINA SFTP also resolves and creates the remote deployment
-directory. Shell commands remain only where SSH has no file API equivalent:
-probing remote OS/tools or executable Java/SBK versions, extracting and
-verifying the archive, and launching the benchmark process.
+No login-shell program, zsh construct, `nohup`, PID probe, shell glob, remote
+archive command, or checksum command participates in deployment. Apache MINA
+SFTP resolves paths and manages files; the Java agent performs verification,
+archive activation, and benchmark process launch.
 
 The deployment lifecycle options are:
 
 - `-sbkdir <directory>` selects the complete local SBK installation to bundle.
-  SBK-GEM always validates and executes its standard `bin/sbk` launcher; the
-  launcher path is not configurable.
+  SBK-GEM validates its standard `bin/sbk` installation contract, but the
+  remote agent launches `SbkMain` directly from the verified JARs.
 - `-delete true|false` permits replacement only when the exact content-addressed destination exists but fails validation; the default is `true`.
 - `-runtimecleanup true|false` removes every inactive non-current remote
   SBK-GEM-managed runtime identity and controller-side cached bundle after
   verified activation and lease/transfer release, regardless of whether its
   SBK version is lower or higher; the default is
   `true`. It never deletes the current identity, a live leased identity, an
-  unmanaged directory, or an external JDK selected with `-javacopy false`.
+  unmanaged directory, or a user-managed JDK selected with `-javadir`.
 
 The rule applies to every deployment target in `-nodes`, including the
 controller host when it is selected as a node. It does not scan or delete
 arbitrary SBK/JDK installations outside the SBK-GEM-managed deployment parent;
 doing so would risk deleting user-owned software.
 
-The former `-copy`, `-deleteafter`, and `-sbkcommand` options are rejected with
+The former `-copy`, `-deleteafter`, `-sbkcommand`, and `-javacopy` options are rejected with
 migration guidance. This prevents disabling required provisioning, deleting
 the newly verified runtime at benchmark shutdown, or bypassing the verified
 standard launcher contract.
@@ -270,17 +271,19 @@ standard launcher contract.
 SBK-GEM selects Java as follows:
 
 - `-javaversion <major>` selects the required Java major version; the default is `25`.
-- `-javacopy true|false` controls bundle composition. The default `true`
-  always includes and uses the complete JDK running SBK-GEM. `false` excludes
-  Java and requires a matching remote JDK.
-- `-javadir <home>` optionally identifies the required remote JDK when
-  `-javacopy false`; otherwise GEM discovers it from `PATH`.
+- `-javadir <home>` optionally identifies a preferred remote JDK. Otherwise
+  GEM asks the remote Java agent to validate Java discovered from `PATH`.
 
-PATH discovery resolves Java symlinks with `realpath` when available, GNU
-`readlink -f` when supported, and a POSIX shell symlink walk otherwise. This
-keeps `-javacopy false` usable on both Linux and macOS.
+If the preferred or PATH JDK is absent or has the wrong major version, GEM
+copies the controller JDK separately through Apache MINA SFTP. The JDK has its
+own content identity and reuse marker, so an unchanged JDK is not copied again.
+The SBK archive likewise has an independent content identity and is transferred
+only when its exact content is absent.
 
-For each remote launch, GEM exports the selected node-specific `SBK_JAVA_HOME` and prepends `$SBK_JAVA_HOME/bin` to `PATH`. SBK’s generated launcher therefore uses the verified runtime. Automatic copying is rejected when the local JVM major version differs from `-javaversion`, because copying that JVM could not satisfy the request.
+For each remote launch, the agent starts `io.sbk.main.SbkMain` directly with
+the selected JDK and the verified SBK pathing/main JARs. The deployed shell
+launcher is not executed. Automatic copying is rejected when the local JVM
+major version differs from `-javaversion`.
 
 Before a multi-host run:
 

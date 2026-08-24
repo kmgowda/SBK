@@ -65,6 +65,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#createClient(io.gem.api.ConnectionConfig)" tabindex="0">createClient(ConnectionConfig)</a></li>
 <li><a href="#createSession(org.apache.sshd.client.SshClient,io.gem.api.ConnectionConfig,long)" tabindex="0">createSession(SshClient, ConnectionConfig, long)</a></li>
 <li><a href="#runCommand(org.apache.sshd.client.session.ClientSession,java.lang.String,long,io.gem.api.SshResponse)" tabindex="0">runCommand(ClientSession, String, long, SshResponse)</a></li>
+<li><a href="#runCommand(org.apache.sshd.client.session.ClientSession,java.lang.String,byte%5B%5D,long,io.gem.api.SshResponse)" tabindex="0">runCommand(ClientSession, String, byte[], long, SshResponse)</a></li>
 <li><a href="#copyFile(org.apache.sshd.client.session.ClientSession,java.lang.String,java.lang.String)" tabindex="0">copyFile(ClientSession, String, String)</a></li>
 </ol>
 </li>
@@ -137,11 +138,20 @@ for orchestrating remote SBK runs.</div>
 <div class="block">Create and authenticate an SSH <code>ClientSession</code>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#runCommand(org.apache.sshd.client.session.ClientSession,java.lang.String,long,io.gem.api.SshResponse)" class="member-name-link">runCommand</a><wbr>(@NotNull org.apache.sshd.client.session.ClientSession&nbsp;session,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#runCommand(org.apache.sshd.client.session.ClientSession,java.lang.String,byte%5B%5D,long,io.gem.api.SshResponse)" class="member-name-link">runCommand</a><wbr>(@NotNull org.apache.sshd.client.session.ClientSession&nbsp;session,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cmd,
+ byte[]&nbsp;input,
  long&nbsp;timeoutSeconds,
  @NotNull <a href="SshResponse.html" title="class in io.gem.api">SshResponse</a>&nbsp;response)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Execute a command over SSH and provide a bounded binary request on stdin.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#runCommand(org.apache.sshd.client.session.ClientSession,java.lang.String,long,io.gem.api.SshResponse)" class="member-name-link">runCommand</a><wbr>(@NotNull org.apache.sshd.client.session.ClientSession&nbsp;session,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cmd,
+ long&nbsp;timeoutSeconds,
+ @NotNull <a href="SshResponse.html" title="class in io.gem.api">SshResponse</a>&nbsp;response)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Execute a command over SSH, wiring stdout/stderr to the provided response streams.</div>
 </div>
 </div>
@@ -233,6 +243,33 @@ for orchestrating remote SBK runs.</div>
 <dd><code>cmd</code> - command to execute</dd>
 <dd><code>timeoutSeconds</code> - execution timeout in seconds</dd>
 <dd><code>response</code> - non-null holder to capture stdout/stderr and exit status</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - on timeout or channel errors</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/net/SocketTimeoutException.html" title="class or interface in java.net" class="external-link">SocketTimeoutException</a></code> - when the remote command exceeds its deadline</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="runCommand(org.apache.sshd.client.session.ClientSession,java.lang.String,byte[],long,io.gem.api.SshResponse)">
+<h3>runCommand</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">runCommand</span><wbr><span class="parameters">(@NotNull
+ @NotNull org.apache.sshd.client.session.ClientSession&nbsp;session,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cmd,
+ byte[]&nbsp;input,
+ long&nbsp;timeoutSeconds,
+ @NotNull
+ @NotNull <a href="SshResponse.html" title="class in io.gem.api">SshResponse</a>&nbsp;response)</span>
+                       throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
+<div class="block">Execute a command over SSH and provide a bounded binary request on stdin.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>session</code> - non-null SSH session</dd>
+<dd><code>cmd</code> - command to execute</dd>
+<dd><code>input</code> - command standard input</dd>
+<dd><code>timeoutSeconds</code> - execution timeout in seconds</dd>
+<dd><code>response</code> - response holder</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - on timeout or channel errors</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/net/SocketTimeoutException.html" title="class or interface in java.net" class="external-link">SocketTimeoutException</a></code> - when the remote command exceeds its deadline</dd>

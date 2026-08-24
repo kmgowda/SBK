@@ -142,7 +142,6 @@ final class SbkGemTotalRecordsTest {
         config.hostkeycheck = true;
         config.knownhosts = "";
         config.sbkdir = temporaryDirectory.toString();
-        config.javacopy = true;
         config.javaversion = 25;
         config.javadir = "";
         config.delete = true;

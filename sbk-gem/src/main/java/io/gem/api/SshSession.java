@@ -37,7 +37,11 @@ import java.util.concurrent.TimeUnit;
  */
 final public class SshSession {
 
-    /** A bounded operation performed against the remote Apache MINA SFTP file system. */
+    /**
+     * A bounded operation performed against the remote Apache MINA SFTP file system.
+     *
+     * @param <T> operation result type
+     */
     @FunctionalInterface
     public interface RemoteFileOperation<T> {
         /**
@@ -163,11 +167,26 @@ final public class SshSession {
      */
     public CompletableFuture<SshResponse> runCommandAsync(String cmd, Boolean isOutput, long timeoutSeconds)
             throws ConnectException {
+        return runCommandAsync(cmd, new byte[0], isOutput, timeoutSeconds);
+    }
+
+    /**
+     * Run a remote command with a binary stdin request.
+     *
+     * @param cmd command
+     * @param input command standard input
+     * @param isOutput whether output should be retained
+     * @param timeoutSeconds command timeout
+     * @return asynchronous response
+     * @throws ConnectException when the SSH session is unavailable
+     */
+    public CompletableFuture<SshResponse> runCommandAsync(String cmd, byte[] input, Boolean isOutput,
+                                                           long timeoutSeconds) throws ConnectException {
         final ClientSession sshSession = getSession();
         return CompletableFuture.supplyAsync(() -> {
             final SshResponse response = new SshResponse(isOutput);
             try {
-                SshUtils.runCommand(sshSession, cmd, timeoutSeconds, response);
+                SshUtils.runCommand(sshSession, cmd, input, timeoutSeconds, response);
             } catch (IOException e) {
                 throw new CompletionException(new SshCommandException(connection.getHost(), response,
                         hasTimeoutCause(e), e));

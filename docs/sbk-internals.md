@@ -1923,22 +1923,24 @@ sequenceDiagram
         SSH->>N2: SSH + known_hosts + agent/key/password
     end
 
-    GEM->>SSH: probe OS, tar, and SHA-256 tool
+    GEM->>SSH: install small Java agent through SFTP
+    GEM->>SSH: probe preferred/PATH Java and OS through the agent
     Note over GEM: require one homogeneous Linux or macOS operating system
     GEM->>GEM: validate installDist pathing JAR and dependencies
-    opt javacopy is true (default)
-        GEM->>GEM: include controller JDK in runtime bundle
+    opt matching Java is unavailable
+        GEM->>SSH: copy controller JDK as a separate content-addressed tree
+        GEM->>SSH: verify copied JDK through the agent
     end
-    GEM->>GEM: hash every file, contained link, and normalized mode
+    GEM->>GEM: build an SBK-only content-addressed archive
     GEM->>SSH: reserve deployment identities through MINA SFTP
     par inspect exact runtime identity
-        SSH->>N1: probe content marker, Java, and SBK
-        SSH->>N2: probe content marker, Java, and SBK
+        SSH->>N1: agent verifies content marker and SBK JARs
+        SSH->>N2: agent verifies content marker and SBK JARs
     end
     alt exact runtime is missing
         GEM->>SSH: upload one content-addressed archive
-        SSH->>N1: verify archive and files, atomically activate
-        SSH->>N2: verify archive and files, atomically activate
+        SSH->>N1: agent extracts, verifies, and atomically activates SBK
+        SSH->>N2: agent extracts, verifies, and atomically activates SBK
     end
     GEM->>SSH: verify activated Java, SBK, and content identity
     opt runtimecleanup is true (default)
@@ -1947,8 +1949,8 @@ sequenceDiagram
     end
 
     GEM->>SBM: sbmBenchmark.start()<br/>(listen on :9717 locally)
-    GEM->>SSH: export SBK_JAVA_HOME and run verified bin/sbk on each node
-    Note over SSH: remote command starts SBK with<br/>-out GrpcLogger -sbm localHost -sbmport 9717
+    GEM->>SSH: send typed run request to the Java agent
+    Note over SSH: ProcessBuilder starts SbkMain with<br/>-out GrpcLogger -sbm localHost -sbmport 9717
 
     par remote SBK runs in parallel
         SSH->>N1: spawn SBK
@@ -1999,24 +2001,21 @@ deleted by a separate SFTP operation outside that lock. Large recursive
 deletions therefore do not block lease acquisition or benchmark startup. Apache
 MINA SFTP also resolves and creates the deployment directory. Login shells, zsh
 glob behavior, PID probes, and detached shell jobs are not used for the
-lifecycle. Shell commands remain only where SSH has no file API equivalent:
-remote OS/tool and executable-version probes, archive extraction and
-verification, and benchmark-process launch. The
+lifecycle. A packaged Java agent performs OS/JDK probing, archive extraction,
+verification, and benchmark launch through Java APIs; generated remote shell
+scripts and platform tools are not used. The
 rule also applies to the controller when it is selected as a deployment node.
 The controller-side managed bundle cache
 also retains only the current identity; per-archive locks protect bundles in
 concurrent transfer until they become inactive. Unmanaged directories and
-external JDKs used by `javacopy=false` are outside this cleanup boundary.
+user-managed JDKs are outside this cleanup boundary.
 
-`javaversion` defines the required major release (25 by default). With the
-default `javacopy=true`, the complete JDK running GEM is part of the same
-immutable archive and is always used by remote SBK; the remote host therefore
-does not need a preinstalled Java. With `javacopy=false`, Java is excluded and
-GEM requires a matching remote JDK with executable `bin/java` and `bin/javac`,
-discovered from `PATH` or `javadir`. The final SSH command exports the selected
-node-specific `SBK_JAVA_HOME` and prepends its `bin` directory to `PATH`.
-PATH discovery resolves symlinks using `realpath`, GNU `readlink -f`, or a
-portable POSIX shell fallback so the same flow works on Linux and macOS.
+`javaversion` defines the required major release (25 by default). GEM first
+validates the JDK selected by `javadir` or remote `PATH`. If it is absent or
+incompatible, the controller JDK is hashed and copied separately through MINA
+SFTP. Java and SBK have independent identities and reuse markers, so either can
+be reused or updated without transferring the other. The remote agent launches
+`io.sbk.main.SbkMain` directly with the verified JDK and SBK JAR classpath.
 
 ### 7.2 What SBK-GEM is and isn't
 

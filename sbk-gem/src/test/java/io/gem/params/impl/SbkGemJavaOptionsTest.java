@@ -46,7 +46,6 @@ final class SbkGemJavaOptionsTest {
             config = mapper.readValue(properties, GemConfig.class);
         }
 
-        assertTrue(config.javacopy);
         assertEquals(25, config.javaversion);
         assertTrue(config.javadir == null || config.javadir.isEmpty());
         assertTrue(config.delete);
@@ -68,9 +67,8 @@ final class SbkGemJavaOptionsTest {
         final SbkGemParameters parameters = new SbkGemParameters("test", new String[0], new String[0], config,
                 9717, 10);
         parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1",
-                "-javacopy", "false", "-javaversion", "21", "-javadir", "/opt/java-21"});
+                "-javaversion", "21", "-javadir", "/opt/java-21"});
 
-        assertFalse(parameters.isJavaCopy());
         assertEquals(21, parameters.getJavaVersion());
         assertEquals("/opt/java-21", parameters.getJavaDir());
     }
@@ -110,6 +108,11 @@ final class SbkGemJavaOptionsTest {
                 () -> parameters.parseArgs(new String[]{"-sbkcommand", "custom-bin/custom-sbk"}));
         assertTrue(commandFailure.getMessage().contains(GemConfig.SBK_COMMAND));
         assertFalse(parameters.getHelpText().contains("-sbkcommand"));
+
+        final IllegalArgumentException javaCopyFailure = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(new String[]{"-javacopy", "false"}));
+        assertTrue(javaCopyFailure.getMessage().contains("provisions the controller JDK automatically"));
+        assertFalse(parameters.getHelpText().contains("-javacopy"));
     }
 
     @Test
@@ -189,7 +192,6 @@ final class SbkGemJavaOptionsTest {
         config.hostkeycheck = true;
         config.knownhosts = "";
         config.sbkdir = sbkDirectory.toString();
-        config.javacopy = true;
         config.javaversion = 25;
         config.javadir = "";
         config.delete = true;
