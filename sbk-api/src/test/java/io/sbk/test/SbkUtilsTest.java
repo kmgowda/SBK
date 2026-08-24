@@ -152,4 +152,11 @@ public class SbkUtilsTest {
                 "-secret", "******", "--password=******", "-size", "100"},
                 SbkUtils.redactSensitiveOptionValues(args));
     }
+
+    @Test
+    public void testGetOperatingSystemDetails() {
+        assertEquals(System.getProperty("os.name") + " " + System.getProperty("os.version")
+                        + " (" + System.getProperty("os.arch") + ")",
+                SbkUtils.getOperatingSystemDetails());
+    }
 }

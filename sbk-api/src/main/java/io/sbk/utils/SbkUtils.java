@@ -26,6 +26,10 @@ import java.util.stream.Stream;
 
 /** Utility methods for inspecting, filtering, and merging SBK arguments. */
 public final class SbkUtils {
+    private static final String OS_NAME_PROPERTY = "os.name";
+    private static final String OS_VERSION_PROPERTY = "os.version";
+    private static final String OS_ARCH_PROPERTY = "os.arch";
+    private static final String UNKNOWN_SYSTEM_PROPERTY = "unknown";
     private static final String[] SENSITIVE_OPTIONS = {
         "gempass", "key", "password", "passwd", "secret", "token"
     };
@@ -90,6 +94,17 @@ public final class SbkUtils {
      */
     public static @NotNull String[] redactSensitiveOptionValues(String[] args) {
         return redactOptionValues(args, SENSITIVE_OPTIONS);
+    }
+
+    /**
+     * Returns the operating-system name, version, and architecture reported by the JVM.
+     *
+     * @return operating-system details suitable for startup diagnostics
+     */
+    public static @NotNull String getOperatingSystemDetails() {
+        return System.getProperty(OS_NAME_PROPERTY, UNKNOWN_SYSTEM_PROPERTY) + " "
+                + System.getProperty(OS_VERSION_PROPERTY, UNKNOWN_SYSTEM_PROPERTY) + " ("
+                + System.getProperty(OS_ARCH_PROPERTY, UNKNOWN_SYSTEM_PROPERTY) + ")";
     }
 
     /**
