@@ -1983,9 +1983,10 @@ file bit, and caches a content-addressed OS-specific archive locally.
 Absolute or escaping links are rejected. Cache creation is serialized by a
 per-identity file lock, and an archive SHA-256 sidecar makes interrupted or
 corrupted cache entries self-repairing. All nodes are probed concurrently. A
-valid exact identity is reused, so the full distribution is not transferred on every run. Copy work is
-deduplicated by `(host, remote directory)`, so repeated workload entries sharing
-one installation do not race to replace it.
+valid exact identity is reused, so the full distribution is not transferred on every run. Physical work is
+deduplicated by `(SSH user, case-insensitive host, port, resolved case-sensitive remote directory)`,
+so repeated workload entries sharing one installation do not race to replace it
+while distinct paths or remote accounts remain independent.
 
 Remote activation is transactional: the uploaded archive SHA-256 is checked,
 the archive is extracted to a unique staging directory, its operating-system
@@ -2020,8 +2021,10 @@ user-managed JDKs are outside this cleanup boundary.
 The controller Java major version defines the minimum remote Java release. GEM
 first validates the JDK selected by `javadir` or remote `PATH`. If it is absent
 or older, the controller JDK is hashed and copied separately through MINA
-SFTP. Java and SBK have independent identities and reuse markers, so either can
-be reused or updated without transferring the other. The remote agent launches
+SFTP. Java content and executable/POSIX permission state participate in its
+identity; a matching marker whose `bin/java` or `bin/javac` is unusable is
+retired and repaired. Java and SBK have independent identities and reuse markers,
+so either can be reused or updated without transferring the other. The remote agent launches
 `io.sbk.main.SbkMain` directly with the verified JDK and SBK JAR classpath.
 
 ### 7.2 What SBK-GEM is and isn't
@@ -2112,27 +2115,28 @@ timeout. Failures preserve the node, user, port, and underlying cause so a bad
 credential or unreachable host is reported at the SSH boundary rather than
 later as a misleading Java-discovery timeout.
 
-```java
-public CompletableFuture<SshResponse> runCommandAsync(
-        String cmd, Boolean isOutput, long timeoutSeconds) {
-    return CompletableFuture.supplyAsync(() -> {
-        SshUtils.runCommand(getSession(), cmd, timeoutSeconds, response);
-        return response;
-    }, executor);
-}
-```
-
-All three remote operations — `createSessionAsync()`,
-`runCommandAsync()`, `copyDirectoryAsync()` — return
+All remote operations -- `createSessionAsync()`, `runCommandAsync()`,
+`copyFileAsync()`, and `runRemoteFileOperationAsync()` -- return
 `CompletableFuture`. The orchestrator chains them via
 `CompletableFuture.allOf(...)` so the slowest node bounds the wall-clock
 time, not the sum of node times.
 
-A subtle correctness point: SBK-GEM's `ConnectionsMap` *deduplicates*
-operations targeting the same (host, dir) pair. If the same host
+A subtle correctness point: `RemoteTargetPlan` *deduplicates* physical
+operations targeting the same user, host, port, and resolved path. Remote path
+case is preserved because Linux and some macOS filesystems are case-sensitive.
+If the same target
 appears multiple times in `-nodes` (e.g. to stress a single client
-machine with multiple worker processes), the orchestrator copies the
-binary once, not twice.
+machine with multiple worker processes), the orchestrator installs the agent
+and copies the JDK/SBK once, not once per logical process.
+
+Timeout completion owns cancellation: it interrupts the operation worker and
+closes the operation-owned MINA SFTP filesystem, preventing timed-out transfers
+or lock operations from continuing invisibly. The benchmark lifecycle lock is
+held only for state transitions, never across SSH, SFTP, hashing, or activation.
+Consequently Ctrl+C and internal failure can enter shutdown during startup,
+cancel outstanding operations, and close sessions without waiting for the full
+deployment deadline. The remote agent captures the launched process tree and
+force-kills any surviving descendants after its graceful shutdown interval.
 
 ---
 

@@ -26,6 +26,12 @@ import java.io.InputStream;
 final public class GemConfig {
     /** Marker inserted between retained diagnostic prefix and suffix text. */
     public static final String DIAGNOSTIC_TRUNCATION_MARKER = " ... [truncated] ... ";
+    /** Default maximum stdout/stderr bytes retained per SSH command. */
+    public static final int DEFAULT_DIAGNOSTIC_BYTES = 262_144;
+    /** Default maximum characters retained in a diagnostic summary. */
+    public static final int DEFAULT_MAXIMUM_DIAGNOSTIC_CHARACTERS = 512;
+    /** Default diagnostic prefix retained before the truncation marker. */
+    public static final int DEFAULT_DIAGNOSTIC_PREFIX_CHARACTERS = 320;
     /**
      *<code>String SBK_GEM_APP_NAME = "sbk.gem.applicationName</code>.
      */
@@ -137,10 +143,6 @@ final public class GemConfig {
      * Remote working directory on each host (derived from app name/version).
      */
     public String remoteDir;
-    /**
-     * Whether to fork a {@code ForkJoinPool} for execution (vs fixed thread pool).
-     */
-    public boolean fork;
     /** Executor threads reserved for orchestration and embedded services. */
     public int executorThreadReserve;
     /** Maximum stdout/stderr bytes retained per SSH command. */

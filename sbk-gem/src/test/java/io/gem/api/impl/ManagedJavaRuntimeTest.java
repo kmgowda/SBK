@@ -60,6 +60,32 @@ final class ManagedJavaRuntimeTest {
     }
 
     @Test
+    void changedJdkPermissionsProduceAnotherIdentity() throws IOException {
+        final Path javaHome = createJavaHome();
+        final Path release = javaHome.resolve("release");
+        final ManagedJavaRuntime first = ManagedJavaRuntime.create(javaHome, 25);
+        final boolean executable = release.toFile().setExecutable(true);
+        final ManagedJavaRuntime changed = ManagedJavaRuntime.create(javaHome, 25);
+
+        assertTrue(executable);
+        assertNotEquals(first.directoryName(), changed.directoryName());
+    }
+
+    @Test
+    void repairsCachedJdkWithInvalidExecutablePermissions() throws IOException {
+        final Path javaHome = createJavaHome();
+        final Path remoteParent = Files.createDirectories(temporaryDirectory.resolve("remote"));
+        final ManagedJavaRuntime runtime = ManagedJavaRuntime.create(javaHome, 25);
+        final Path installed = Path.of(runtime.install(remoteParent.getFileSystem(), remoteParent.toString()));
+        assertTrue(installed.resolve("bin/java").toFile().setExecutable(false));
+
+        final Path repaired = Path.of(runtime.install(remoteParent.getFileSystem(), remoteParent.toString()));
+
+        assertEquals(installed, repaired);
+        assertTrue(Files.isExecutable(repaired.resolve("bin/java")));
+    }
+
+    @Test
     void copiesRelativeJdkSymbolicLinks() throws IOException {
         final Path javaHome = createJavaHome();
         final Path linkParent = Files.createDirectories(javaHome.resolve("legal/java.compiler"));

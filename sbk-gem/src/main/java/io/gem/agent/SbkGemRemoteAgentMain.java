@@ -348,16 +348,21 @@ public final class SbkGemRemoteAgentMain {
         }
     }
 
-    private static void stopProcessTree(Process process) {
-        process.toHandle().descendants().forEach(ProcessHandle::destroy);
+    static void stopProcessTree(Process process) {
+        final List<ProcessHandle> descendants = process.toHandle().descendants().toList();
+        descendants.forEach(ProcessHandle::destroy);
         process.destroy();
         try {
-            if (!process.waitFor(5, TimeUnit.SECONDS)) {
-                process.toHandle().descendants().forEach(ProcessHandle::destroyForcibly);
+            process.waitFor(5, TimeUnit.SECONDS);
+            descendants.stream().filter(ProcessHandle::isAlive).forEach(ProcessHandle::destroyForcibly);
+            process.toHandle().descendants().filter(ProcessHandle::isAlive)
+                    .forEach(ProcessHandle::destroyForcibly);
+            if (process.isAlive()) {
                 process.destroyForcibly();
             }
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
+            descendants.stream().filter(ProcessHandle::isAlive).forEach(ProcessHandle::destroyForcibly);
             process.destroyForcibly();
         }
     }

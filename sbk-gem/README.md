@@ -211,10 +211,15 @@ a non-current archive being transferred by another GEM process is protected by
 its cache lock and is removed after it becomes inactive.
 
 Creating a new bundle hashes the complete SBK distribution, then writes an
-SBK-only compressed archive. The independently managed JDK is hashed and copied
-as a directory tree only when its exact identity is unavailable remotely.
-During these potentially long disk-intensive
-step, GEM emits an elapsed-time heartbeat every 5 seconds by default. Runtime
+SBK-only compressed archive. The independently managed JDK is hashed, including
+executable/POSIX permission state, and copied as a directory tree only when its
+exact usable identity is unavailable remotely. A matching marker with unusable
+`bin/java` or `bin/javac` permissions is retired and repaired instead of being
+reused. Physical deployment work is grouped by SSH user, case-insensitive host,
+port, and the resolved case-sensitive remote path. Multiple logical clients
+sharing that target therefore install the agent and copy Java/SBK only once.
+During these potentially long disk-intensive steps, GEM emits an elapsed-time
+heartbeat every 5 seconds by default. Runtime
 archive copies report the archive size, unique transfer-target count, completed
 targets, and hosts still pending. Runtime lease acquisition and inactive-runtime
 retirement use the same per-host progress reporting. Configure the shared bounded
@@ -245,6 +250,16 @@ No login-shell program, zsh construct, `nohup`, PID probe, shell glob, remote
 archive command, or checksum command participates in deployment. Apache MINA
 SFTP resolves paths and manages files; the Java agent performs verification,
 archive activation, and benchmark process launch.
+
+Every SSH/SFTP operation has a bounded deadline. A timeout actively interrupts
+its worker and closes the operation-owned MINA SFTP filesystem; it does not
+merely mark a future failed while transfer work continues in the background.
+Startup holds the lifecycle lock only while changing state, so Ctrl+C or an
+internal failure can cancel connection, deployment, or verification work
+without waiting for the complete startup sequence. Shutdown then releases any
+unlaunched lease it can still reach, closes all SSH sessions, stops the embedded
+SBM, and forcibly terminates surviving remote-agent child processes after the
+grace interval.
 
 The generated `bin/sbk-gem` and `bin/sbk-gem-yal` launchers select their complete
 local SBK installation through the internal `sbk.appHome` system property.

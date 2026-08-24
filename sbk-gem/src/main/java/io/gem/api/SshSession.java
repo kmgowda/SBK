@@ -11,7 +11,6 @@
 package io.gem.api;
 
 import io.sbk.system.Printer;
-import lombok.Synchronized;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.sftp.client.SftpClientFactory;
@@ -22,18 +21,27 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Lifecycle wrapper around an SSH client/session for a single connection.
  *
- * <p>Encapsulates connect, command execution, SCP file copy, and graceful shutdown,
+ * <p>Encapsulates connect, command execution, SFTP file copy, and graceful shutdown,
  * exposing async methods returning {@link CompletableFuture}s and performing operations on a
- * provided {@link ExecutorService}. Thread-safe for public methods guarded via
- * {@link Synchronized} or internal synchronization.
+ * provided {@link ExecutorService}. Session state is protected by a short-held
+ * lifecycle lock; network and file operations never execute while holding it.
  */
 final public class SshSession {
 
@@ -70,12 +78,25 @@ final public class SshSession {
      */
     final private ExecutorService executor;
 
+    /** Maximum stdout/stderr bytes retained for each command. */
+    final private int diagnosticBytes;
+
+    /** Short-held lock protecting session publication and shutdown. */
+    final private Object sessionLock;
+
+    /** Operations cancelled when this session is stopped. */
+    final private Set<BoundedTask<?>> activeTasks;
+
 
     /**
      * <code>ClientSession session</code>.
      */
-    @GuardedBy("this")
+    @GuardedBy("sessionLock")
     private ClientSession session;
+
+    /** Whether this one-shot session wrapper has been stopped. */
+    @GuardedBy("sessionLock")
+    private boolean stopped;
 
     /**
      * This Constructor initializes all values.
@@ -84,24 +105,56 @@ final public class SshSession {
      * @param executor  ExecutorService
      */
     public SshSession(ConnectionConfig conn, ExecutorService executor) {
+        this(conn, executor, SshResponse.DEFAULT_DIAGNOSTIC_BYTES);
+    }
+
+    /**
+     * This constructor initializes all values with an explicit diagnostic limit.
+     *
+     * @param conn            SSH connection
+     * @param executor        orchestration executor
+     * @param diagnosticBytes maximum stdout/stderr bytes retained per command
+     */
+    public SshSession(ConnectionConfig conn, ExecutorService executor, int diagnosticBytes) {
         this.connection = conn;
         this.executor = executor;
+        this.diagnosticBytes = diagnosticBytes;
+        this.sessionLock = new Object();
+        this.activeTasks = ConcurrentHashMap.newKeySet();
         this.client = SshUtils.createClient(conn);
         if (!conn.isHostKeyCheck()) {
             Printer.log.warn("SBK-GEM: SSH host-key verification is disabled for host '" + conn.getHost() + "'");
         }
     }
 
-    @Synchronized
     private void createSession(long timeoutSeconds) throws IOException {
         Printer.log.info("SBK-GEM: Ssh Connection to host '" + connection.getHost() + "' starting...");
+        ClientSession createdSession = null;
         try {
+            synchronized (sessionLock) {
+                if (stopped) {
+                    throw new IOException("SBK-GEM: SSH session was stopped before connection to '"
+                            + connection.getHost() + "'");
+                }
+            }
             client.start();
-            session = SshUtils.createSession(client, connection, timeoutSeconds);
+            createdSession = SshUtils.createSession(client, connection, timeoutSeconds);
+            synchronized (sessionLock) {
+                if (stopped) {
+                    createdSession.close(true);
+                    throw new IOException("SBK-GEM: SSH session was stopped while connecting to '"
+                            + connection.getHost() + "'");
+                }
+                session = createdSession;
+            }
             Printer.log.info("SBK-GEM: Authenticated ssh session to '" + connection.getUserName() + "@" +
                     connection.getHost() + ":" + connection.getPort() + "' established successfully.");
         } catch (IOException e) {
-            session = null;
+            synchronized (sessionLock) {
+                if (session == createdSession) {
+                    session = null;
+                }
+            }
             final String password = connection.getPassword();
             final boolean authenticationFailure = e.getMessage() != null &&
                     e.getMessage().startsWith("SSH authentication failed:");
@@ -137,22 +190,20 @@ final public class SshSession {
      * @return CompletableFuture
      */
     public CompletableFuture<Void> createSessionAsync(long timeoutSeconds) {
-        return CompletableFuture.runAsync(() -> {
-            try {
-                createSession(timeoutSeconds);
-            } catch (IOException ex) {
-                throw new CompletionException(ex);
-            }
-        }, executor);
+        return submitBounded(() -> {
+            createSession(timeoutSeconds);
+            return null;
+        }, () -> client.stop(), timeoutSeconds);
     }
 
-    @Synchronized
     private ClientSession getSession() throws ConnectException {
-        if (session == null) {
-            String errMgs = "ssh session to host: " + connection.getHost() + " not found!";
-            throw new ConnectException(errMgs);
+        synchronized (sessionLock) {
+            if (session == null || stopped) {
+                String errMgs = "ssh session to host: " + connection.getHost() + " not found!";
+                throw new ConnectException(errMgs);
+            }
+            return session;
         }
-        return session;
     }
 
 
@@ -183,16 +234,15 @@ final public class SshSession {
     public CompletableFuture<SshResponse> runCommandAsync(String cmd, byte[] input, Boolean isOutput,
                                                            long timeoutSeconds) throws ConnectException {
         final ClientSession sshSession = getSession();
-        return CompletableFuture.supplyAsync(() -> {
-            final SshResponse response = new SshResponse(isOutput);
+        return submitBounded(() -> {
+            final SshResponse response = new SshResponse(isOutput, diagnosticBytes);
             try {
                 SshUtils.runCommand(sshSession, cmd, input, timeoutSeconds, response);
             } catch (IOException e) {
-                throw new CompletionException(new SshCommandException(connection.getHost(), response,
-                        hasTimeoutCause(e), e));
+                throw new SshCommandException(connection.getHost(), response, hasTimeoutCause(e), e);
             }
             return response;
-        }, executor);
+        }, () -> { }, saturatedIncrement(timeoutSeconds));
     }
 
     private static boolean hasTimeoutCause(Throwable failure) {
@@ -217,14 +267,11 @@ final public class SshSession {
      */
     public CompletableFuture<Void> copyFileAsync(String srcPath, String dstPath, long timeoutSeconds)
             throws ConnectException {
-        final ClientSession sshSession = getSession();
-        return CompletableFuture.runAsync(() -> {
-            try {
-                SshUtils.copyFile(sshSession, srcPath, dstPath);
-            } catch (IOException exception) {
-                throw new CompletionException(exception);
-            }
-        }, executor).orTimeout(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS);
+        return runRemoteFileOperationAsync(fileSystem -> {
+            final Path destination = fileSystem.getPath(dstPath);
+            Files.copy(Path.of(srcPath), destination, StandardCopyOption.REPLACE_EXISTING);
+            return null;
+        }, timeoutSeconds);
     }
 
     /**
@@ -240,26 +287,82 @@ final public class SshSession {
                                                                  long timeoutSeconds)
             throws ConnectException {
         final ClientSession sshSession = getSession();
-        return CompletableFuture.supplyAsync(() -> {
+        final AtomicReference<SftpFileSystem> activeFileSystem = new AtomicReference<>();
+        return submitBounded(() -> {
             try (SftpFileSystem fileSystem = SftpClientFactory.instance().createSftpFileSystem(sshSession)) {
+                activeFileSystem.set(fileSystem);
                 return operation.execute(fileSystem);
-            } catch (InterruptedException exception) {
-                Thread.currentThread().interrupt();
-                throw new CompletionException(exception);
             } catch (IOException exception) {
                 final String message = "SBK-GEM: Apache MINA SFTP operation failed on host '"
                         + connection.getHost() + ":" + connection.getPort() + "': " + exception.getMessage();
-                throw new CompletionException(new IOException(message, exception));
+                throw new IOException(message, exception);
+            } finally {
+                activeFileSystem.set(null);
             }
-        }, executor).orTimeout(timeoutSeconds, TimeUnit.SECONDS);
+        }, () -> closeQuietly(activeFileSystem.getAndSet(null)), timeoutSeconds);
     }
 
+    private <T> CompletableFuture<T> submitBounded(Callable<T> operation, Runnable cancelAction,
+                                                    long timeoutSeconds) {
+        final CompletableFuture<T> completion = new CompletableFuture<>();
+        final BoundedTask<T> task = new BoundedTask<>(operation, cancelAction, completion);
+        activeTasks.add(task);
+        try {
+            executor.execute(task);
+        } catch (RuntimeException exception) {
+            activeTasks.remove(task);
+            completion.completeExceptionally(exception);
+            return completion;
+        }
+        completion.orTimeout(timeoutSeconds, TimeUnit.SECONDS);
+        completion.whenComplete((ignored, failure) -> {
+            final Throwable cause = unwrap(failure);
+            if (cause instanceof TimeoutException || completion.isCancelled()) {
+                task.cancel(true);
+            }
+        });
+        return completion;
+    }
 
-    @Synchronized
+    private static long saturatedIncrement(long value) {
+        return value == Long.MAX_VALUE ? value : value + 1;
+    }
+
+    private static Throwable unwrap(Throwable failure) {
+        Throwable cause = failure;
+        while (cause instanceof CompletionException && cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        return cause;
+    }
+
+    private static void closeQuietly(AutoCloseable resource) {
+        if (resource != null) {
+            try {
+                resource.close();
+            } catch (Exception ignored) {
+                // Cancellation already owns the primary timeout or shutdown failure.
+            }
+        }
+    }
+
+    /** Cancel all currently running operations without permanently closing this session. */
+    public void cancelActiveOperations() {
+        for (BoundedTask<?> task : activeTasks.toArray(BoundedTask[]::new)) {
+            task.cancel(true);
+        }
+    }
+
     private void closeSession() {
-        if (session != null) {
-            session.close(true);
+        final ClientSession activeSession;
+        synchronized (sessionLock) {
+            stopped = true;
+            activeSession = session;
             session = null;
+        }
+        cancelActiveOperations();
+        if (activeSession != null) {
+            activeSession.close(true);
         }
     }
 
@@ -272,5 +375,35 @@ final public class SshSession {
         client.stop();
     }
 
+    private final class BoundedTask<T> extends FutureTask<Void> {
+        private final Runnable cancelAction;
+
+        BoundedTask(Callable<T> operation, Runnable cancelAction, CompletableFuture<T> completion) {
+            super(() -> {
+                try {
+                    completion.complete(operation.call());
+                } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();
+                    completion.completeExceptionally(exception);
+                } catch (Throwable exception) {
+                    completion.completeExceptionally(exception);
+                }
+                return null;
+            });
+            this.cancelAction = cancelAction;
+        }
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            final boolean cancelled = super.cancel(mayInterruptIfRunning);
+            cancelAction.run();
+            return cancelled;
+        }
+
+        @Override
+        protected void done() {
+            activeTasks.remove(this);
+        }
+    }
 
 }

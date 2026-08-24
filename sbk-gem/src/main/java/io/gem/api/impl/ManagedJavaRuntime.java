@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
@@ -64,6 +65,9 @@ final class ManagedJavaRuntime {
                     update(digest, "F\0" + Files.size(path) + "\0");
                     hashFile(digest, path);
                 }
+                if (!Files.isSymbolicLink(path)) {
+                    update(digest, "P\0" + permissionIdentity(path) + "\0");
+                }
             }
         }
         final String identity = HexFormat.of().formatHex(digest.digest());
@@ -79,21 +83,22 @@ final class ManagedJavaRuntime {
         final Path parent = fileSystem.getPath(parentDirectory);
         final Path destination = parent.resolve(directoryName);
         final Path marker = destination.resolve(MARKER);
-        if (Files.isRegularFile(marker) && digest.equals(Files.readString(marker).trim())) {
+        if (hasUsableExpectedIdentity(destination)) {
             return destination.toString();
         }
+        retireInvalidIdentity(destination);
         final Path staging = parent.resolve(directoryName + ".staging." + UUID.randomUUID());
         Files.createDirectories(staging);
         try {
             copyTree(staging);
             Files.writeString(staging.resolve(MARKER), digest + System.lineSeparator(), StandardCharsets.UTF_8);
-            if (hasExpectedMarker(destination)) {
+            if (hasUsableExpectedIdentity(destination)) {
                 return destination.toString();
             }
             try {
                 move(staging, destination);
             } catch (IOException exception) {
-                if (!hasExpectedMarker(destination)) {
+                if (!hasUsableExpectedIdentity(destination)) {
                     throw new IOException("Managed JDK destination exists without the expected identity: "
                             + destination, exception);
                 }
@@ -104,9 +109,26 @@ final class ManagedJavaRuntime {
         }
     }
 
-    private boolean hasExpectedMarker(Path destination) throws IOException {
+    private boolean hasUsableExpectedIdentity(Path destination) throws IOException {
         final Path marker = destination.resolve(MARKER);
-        return Files.isRegularFile(marker) && digest.equals(Files.readString(marker).trim());
+        return Files.isRegularFile(marker) && digest.equals(Files.readString(marker).trim())
+                && Files.isExecutable(destination.resolve("bin/java"))
+                && Files.isExecutable(destination.resolve("bin/javac"));
+    }
+
+    private static void retireInvalidIdentity(Path destination) throws IOException {
+        if (!Files.exists(destination, LinkOption.NOFOLLOW_LINKS)) {
+            return;
+        }
+        final Path retired = destination.resolveSibling(destination.getFileName() + ".invalid." + UUID.randomUUID());
+        try {
+            move(destination, retired);
+            deleteRecursively(retired);
+        } catch (NoSuchFileException exception) {
+            if (Files.exists(destination, LinkOption.NOFOLLOW_LINKS)) {
+                throw exception;
+            }
+        }
     }
 
     private void copyTree(Path staging) throws IOException {
@@ -195,5 +217,14 @@ final class ManagedJavaRuntime {
 
     private static void update(MessageDigest digest, String value) {
         digest.update(value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static String permissionIdentity(Path path) throws IOException {
+        try {
+            return Files.getPosixFilePermissions(path, LinkOption.NOFOLLOW_LINKS).stream()
+                    .map(Enum::name).sorted().reduce((left, right) -> left + "," + right).orElse("");
+        } catch (UnsupportedOperationException exception) {
+            return Files.isExecutable(path) ? "executable" : "not-executable";
+        }
     }
 }
