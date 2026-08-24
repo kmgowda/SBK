@@ -246,11 +246,14 @@ archive command, or checksum command participates in deployment. Apache MINA
 SFTP resolves paths and manages files; the Java agent performs verification,
 archive activation, and benchmark process launch.
 
-The deployment lifecycle options are:
+The generated `bin/sbk-gem` and `bin/sbk-gem-yal` launchers select their complete
+local SBK installation through the internal `sbk.appHome` system property.
+SBK-GEM validates that standard installation contract and the remote agent
+launches `SbkMain` directly from the verified JARs. The distribution cannot be
+redirected through a command-line or YAML option.
 
-- `-sbkdir <directory>` selects the complete local SBK installation to bundle.
-  SBK-GEM validates its standard `bin/sbk` installation contract, but the
-  remote agent launches `SbkMain` directly from the verified JARs.
+The deployment lifecycle option is:
+
 - `-runtimecleanup true|false` removes every inactive non-current remote
   SBK-GEM-managed runtime identity and controller-side cached bundle after
   verified activation and lease/transfer release, regardless of whether its
@@ -263,7 +266,7 @@ controller host when it is selected as a node. It does not scan or delete
 arbitrary SBK/JDK installations outside the SBK-GEM-managed deployment parent;
 doing so would risk deleting user-owned software.
 
-The former `-copy`, `-delete`, `-deleteafter`, `-sbkcommand`, `-javacopy`, and `-javaversion` options are rejected with
+The former `-copy`, `-delete`, `-deleteafter`, `-sbkcommand`, `-sbkdir`, `-javacopy`, and `-javaversion` options are rejected with
 migration guidance. This prevents disabling required provisioning, deleting
 the newly verified runtime at benchmark shutdown, or bypassing the verified
 standard launcher contract.

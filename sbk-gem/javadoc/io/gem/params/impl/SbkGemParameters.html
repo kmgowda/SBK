@@ -107,7 +107,6 @@ instances for each target node.
 <p>Supported options (help text shows defaults from <a href="../../config/GemConfig.html" title="class in io.gem.config"><code>GemConfig</code></a>):
 - -nodes: comma/space/newline-separated hostnames or host:port endpoints
 - -gemuser, -gempass, -gemport
-- -sbkdir
 - -runtimecleanup, -javadir
 - -localhost
 - -sbmport, -sbmsleepms
@@ -180,7 +179,7 @@ instances for each target node.
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#parseArgs(java.lang.String%5B%5D)" class="member-name-link">parseArgs</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;args)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Parse GEM options, validate SBK directory/command, and build connection set.</div>
+<div class="block">Parse GEM options, validate the launcher-selected SBK distribution, and build the connection set.</div>
 </div>
 </div>
 </div>
@@ -266,10 +265,10 @@ instances for each target node.
                throws <span class="exceptions">org.apache.commons.cli.ParseException,
 <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a>,
 io.sbk.exception.HelpException</span></div>
-<div class="block">Parse GEM options, validate SBK directory/command, and build connection set.
+<div class="block">Parse GEM options, validate the launcher-selected SBK distribution, and build the connection set.
 
-<p>Derives <code>parsedArgs</code> and <code>connections</code>. Validates that SBK directory exists,
-command exists and is executable.</div>
+<p>Derives <code>parsedArgs</code> and <code>connections</code>. Validates that the SBK application home
+supplied internally from <code>sbk.appHome</code> exists and contains the standard executable command.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code>parseArgs</code>&nbsp;in interface&nbsp;<code>io.sbk.params.ParseInputOptions</code></dd>

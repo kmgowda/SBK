@@ -25,9 +25,7 @@ sbkGemArgs:
   # Verify server keys by default. Use a dedicated trust file when needed.
   hostkeycheck: true
   # knownhosts: /home/kmg/.ssh/known_hosts
-  sbkdir:
-  # Delete an outdated SBK before copying its replacement (default: true).
-  # Retain the current runtime and remove inactive older managed versions (default: true).
+  # Retain the current runtime and remove inactive non-current managed identities (default: true).
   runtimecleanup: true
   # Java provisioning defaults: include and use the local Java 25 runtime.
   # javadir: /opt/sbk-java

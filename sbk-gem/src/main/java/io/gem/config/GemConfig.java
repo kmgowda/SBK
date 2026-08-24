@@ -90,12 +90,10 @@ final public class GemConfig {
      * SSH port.
      */
     public int gemport;
-    /**
-     * Local SBK application directory.
-     */
+    /** Local SBK application directory resolved from the generated launcher's {@code sbk.appHome}. */
     public String sbkdir;
     /**
-     * Expected SBK version, discovered from the local SBK distribution selected by {@link #sbkdir}.
+     * Expected SBK version, discovered from the local SBK distribution under {@link #sbkdir}.
      */
     public String sbkVersion;
     /**

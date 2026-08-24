@@ -460,7 +460,7 @@ remote SBK command line.</div>
 <dl class="index">
 <dt><a href="io/gem/params/impl/SbkGemParameters.html#parseArgs(java.lang.String%5B%5D)" class="member-name-link">parseArgs(String[])</a> - Method in class io.gem.params.impl.<a href="io/gem/params/impl/SbkGemParameters.html" title="class in io.gem.params.impl">SbkGemParameters</a></dt>
 <dd>
-<div class="block">Parse GEM options, validate SBK directory/command, and build connection set.</div>
+<div class="block">Parse GEM options, validate the launcher-selected SBK distribution, and build the connection set.</div>
 </dd>
 <dt><a href="io/gem/logger/impl/AbstractGemLogger.html#print(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.gem.logger.impl.<a href="io/gem/logger/impl/AbstractGemLogger.html" title="class in io.gem.logger.impl">AbstractGemLogger</a></dt>
 <dd>&nbsp;</dd>
@@ -598,7 +598,7 @@ remote SBK command line.</div>
 </dd>
 <dt><a href="io/gem/config/GemConfig.html#sbkdir" class="member-name-link">sbkdir</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
-<div class="block">Local SBK application directory.</div>
+<div class="block">Local SBK application directory resolved from the generated launcher's <code>sbk.appHome</code>.</div>
 </dd>
 <dt><a href="io/gem/api/impl/SbkGem.html" class="type-name-link" title="class in io.gem.api.impl">SbkGem</a> - Class in <a href="io/gem/api/impl/package-summary.html">io.gem.api.impl</a></dt>
 <dd>
@@ -646,7 +646,7 @@ remote SBK command line.</div>
 </dd>
 <dt><a href="io/gem/config/GemConfig.html#sbkVersion" class="member-name-link">sbkVersion</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
-<div class="block">Expected SBK version, discovered from the local SBK distribution selected by <a href="io/gem/config/GemConfig.html#sbkdir"><code>GemConfig.sbkdir</code></a>.</div>
+<div class="block">Expected SBK version, discovered from the local SBK distribution under <a href="io/gem/config/GemConfig.html#sbkdir"><code>GemConfig.sbkdir</code></a>.</div>
 </dd>
 <dt><a href="io/gem/config/GemConfig.html#sbmRegistrationTimeoutSeconds" class="member-name-link">sbmRegistrationTimeoutSeconds</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>

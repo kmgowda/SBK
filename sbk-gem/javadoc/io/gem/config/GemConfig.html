@@ -308,12 +308,12 @@ management, and SBM coordination.</div>
 <div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#sbkdir" class="member-name-link">sbkdir</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">Local SBK application directory.</div>
+<div class="block">Local SBK application directory resolved from the generated launcher's <code>sbk.appHome</code>.</div>
 </div>
 <div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="#sbkVersion" class="member-name-link">sbkVersion</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Expected SBK version, discovered from the local SBK distribution selected by <a href="#sbkdir"><code>sbkdir</code></a>.</div>
+<div class="block">Expected SBK version, discovered from the local SBK distribution under <a href="#sbkdir"><code>sbkdir</code></a>.</div>
 </div>
 <div class="col-first odd-row-color"><code>long</code></div>
 <div class="col-second odd-row-color"><code><a href="#sbmRegistrationTimeoutSeconds" class="member-name-link">sbmRegistrationTimeoutSeconds</a></code></div>
@@ -605,7 +605,7 @@ management, and SBM coordination.</div>
 <h3>sbkdir</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">sbkdir</span></div>
-<div class="block">Local SBK application directory.</div>
+<div class="block">Local SBK application directory resolved from the generated launcher's <code>sbk.appHome</code>.</div>
 </div>
 </section>
 </li>
@@ -614,7 +614,7 @@ management, and SBM coordination.</div>
 <h3>sbkVersion</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">sbkVersion</span></div>
-<div class="block">Expected SBK version, discovered from the local SBK distribution selected by <a href="#sbkdir"><code>sbkdir</code></a>.</div>
+<div class="block">Expected SBK version, discovered from the local SBK distribution under <a href="#sbkdir"><code>sbkdir</code></a>.</div>
 </div>
 </section>
 </li>

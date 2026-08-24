@@ -110,6 +110,11 @@ final class SbkGemJavaOptionsTest {
         assertTrue(commandFailure.getMessage().contains(GemConfig.SBK_COMMAND));
         assertFalse(parameters.getHelpText().contains("-sbkcommand"));
 
+        final IllegalArgumentException directoryFailure = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(new String[]{"-sbkdir", temporaryDirectory.toString()}));
+        assertTrue(directoryFailure.getMessage().contains("sbk.appHome"));
+        assertFalse(parameters.getHelpText().contains("-sbkdir"));
+
         final IllegalArgumentException javaCopyFailure = assertThrows(IllegalArgumentException.class,
                 () -> parameters.parseArgs(new String[]{"-javacopy", "false"}));
         assertTrue(javaCopyFailure.getMessage().contains("provisions the controller JDK automatically"));

@@ -303,13 +303,9 @@ final public class SbkGem {
             throw new HelpException(helpText);
         }
 
-        final String requestedSbkDir = firstNonEmpty(SbkUtils.getArgValue(nextArgs, "-sbkdir"),
-                SbkUtils.getArgValue(nextArgs, "--sbkdir"));
-        if (StringUtils.isNotEmpty(requestedSbkDir)) {
-            gemConfig.sbkdir = requestedSbkDir;
-        }
         if (StringUtils.isEmpty(gemConfig.sbkdir)) {
-            throw new IOException("The local SBK directory is required for version discovery");
+            throw new IOException("SBK-GEM requires the sbk.appHome system property; launch it with the "
+                    + "generated bin/sbk-gem or bin/sbk-gem-yal script");
         }
         final Path localSbkCommand = Path.of(gemConfig.sbkdir).resolve(GemConfig.SBK_COMMAND)
                 .toAbsolutePath().normalize();
@@ -542,10 +538,6 @@ final public class SbkGem {
             argumentsByNode.add(immutableArguments);
         }
         return List.copyOf(argumentsByNode);
-    }
-
-    private static String firstNonEmpty(String first, String second) {
-        return StringUtils.isNotEmpty(first) ? first : second;
     }
 
     private static void addOption(List<String> arguments, String option, String value) {

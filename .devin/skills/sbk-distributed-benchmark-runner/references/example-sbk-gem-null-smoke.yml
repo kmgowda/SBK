@@ -11,12 +11,7 @@ sbkGemArgs:
   hostkeycheck: true
   localhost: gem-controller.example.com
   sbmport: 9717
-  sbkdir: /absolute/path/to/SBK/build/install/sbk
-  copy: true
-  delete: true
-  deleteafter: false
-  javacopy: true
-  javaversion: 25
+  runtimecleanup: true
   class: null
   writers: 1
   size: 100

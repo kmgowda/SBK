@@ -17,7 +17,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -93,7 +92,7 @@ final class ManagedJavaRuntime {
             }
             try {
                 move(staging, destination);
-            } catch (FileAlreadyExistsException exception) {
+            } catch (IOException exception) {
                 if (!hasExpectedMarker(destination)) {
                     throw new IOException("Managed JDK destination exists without the expected identity: "
                             + destination, exception);

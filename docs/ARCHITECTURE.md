@@ -317,10 +317,11 @@ SBK-GEM uses Apache MINA SSHD for connection, exact-file transfer, and command e
 
 Remote execution uses two independent content-addressed deployments: an SBK-only archive and, only when required, a separately copied controller JDK. GEM reuses a same-or-newer preferred/PATH JDK; otherwise Apache MINA SFTP copies the JDK tree with its own digest and marker. The SBK archive identity includes file bytes, contained relative symbolic links, normalized directory modes, and executable file state; escaping or absolute links are rejected. A small packaged Java agent is installed through SFTP and receives length-delimited requests over SSH stdin. It probes Java/OS, verifies and extracts the SBK archive with Commons Compress, checks every file digest, atomically activates the runtime, and launches `io.sbk.main.SbkMain` with `ProcessBuilder`. Remote shell scripts, `tar`, platform checksum commands, traps, and generated export pipelines are not used. Controller, containers, and nodes must use the same supported operating system, Linux or macOS; CPU architecture and distribution/version are deliberately not part of compatibility. Apache MINA SFTP also owns directory resolution, lifecycle locks, authoritative current-runtime markers, leases, retirement, and deletion. Exact SBK and Java identities are reused independently, so changing one does not force copying the other. `runtimecleanup=true` retires inactive non-current managed SBK identities without deleting current/leased runtimes or user-managed JDKs. Bundle preparation, JDK/SBK transfer, activation, and lifecycle work emit bounded progress messages.
 
-The local distribution is selected with `-sbkdir`. SBK-GEM validates and
-packages the standard installation, then the remote agent launches `SbkMain`
-directly from its verified pathing and main JARs. Arbitrary launcher overrides
-are not part of the deployment contract.
+The generated `bin/sbk-gem` and `bin/sbk-gem-yal` launchers select the local
+distribution through the internal `sbk.appHome` system property. SBK-GEM
+validates and packages that standard installation, then the remote agent
+launches `SbkMain` directly from its verified pathing and main JARs. Directory
+and launcher overrides are not part of the deployment contract.
 
 ## Configuration layers
 
