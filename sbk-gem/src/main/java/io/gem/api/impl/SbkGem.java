@@ -352,6 +352,7 @@ final public class SbkGem {
         if (StringUtils.isNotEmpty(gemConfig.gempass)) {
             Printer.log.info("SBK-GEM: SSH password supplied; password authentication will be attempted first, " +
                     "with ssh-agent and key-file authentication as fallback");
+            Printer.log.info("SBK-GEM: SSH host-key checking is disabled because a password was supplied");
         } else {
             Printer.log.info("SBK-GEM: No SSH password supplied; using ssh-agent and key-file authentication");
         }

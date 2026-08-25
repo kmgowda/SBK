@@ -70,15 +70,18 @@ in SBK configuration.
 The `-gempass` option and `SBK_GEM_SSH_PASSWD` environment variable are optional
 password-authentication inputs. When a password is supplied, SBK-GEM asks Apache
 MINA to try password authentication first and then falls back to the SSH agent
-and configured key files if the server rejects the password. Leave both unset
-for passwordless login. Do not store `gempass` in a committed YML or properties
-file.
+and configured key files if the server rejects the password. A supplied password
+also disables SSH host-key checking, so stale or changed `known_hosts` entries do
+not prevent login. Leave both unset for passwordless login. Do not store `gempass`
+in a committed YML or properties file.
 
 Remote host identity is checked against the local user's OpenSSH
 `~/.ssh/known_hosts` data by default. Use `-knownhosts <path>` to select a
 dedicated trust file. A previously unknown host key is accepted and persisted
 on first contact (TOFU/accept-new); SBK-GEM logs its type and fingerprint.
-Subsequent connections must present that key, and a changed key is rejected.
+For passwordless connections, subsequent connections must present that key, and
+a changed key is rejected. Host-key checking is bypassed whenever `-gempass` or
+`SBK_GEM_SSH_PASSWD` supplies a password, regardless of `-hostkeycheck`.
 Verify newly recorded fingerprints through an independent channel when the
 environment requires stronger first-contact assurance. `-hostkeycheck false`
 is an explicit opt-out for isolated, disposable environments and also disables

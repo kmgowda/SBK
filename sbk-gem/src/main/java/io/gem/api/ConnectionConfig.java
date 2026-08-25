@@ -51,7 +51,7 @@ public final class ConnectionConfig {
      * @param password  SSH password (may be empty if key auth is used upstream)
      * @param port          SSH port
      * @param dir           remote working directory (e.g., target SBK path)
-     * @param hostKeyCheck  whether the server key must be present in known hosts
+     * @param hostKeyCheck  whether passwordless connections verify the server key through known hosts
      * @param knownHosts    optional known-hosts path; empty selects the user's default file
      */
     public ConnectionConfig(String host, String userName, String password, int port, String dir,

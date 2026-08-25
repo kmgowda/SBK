@@ -191,6 +191,21 @@ final class SshUtilsTest {
     }
 
     @Test
+    void acceptsChangedServerKeyWhenPasswordIsSupplied() throws Exception {
+        final Path knownHosts = writeKnownHosts(hostKey);
+        server.setKeyPairProvider(KeyPairProvider.wrap(generateEcKey()));
+        final ConnectionConfig config = new ConnectionConfig("127.0.0.1", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), true, knownHosts.toString());
+
+        try (SshClient client = SshUtils.createClient(config)) {
+            client.start();
+            try (ClientSession session = SshUtils.createSession(client, config, 5)) {
+                assertTrue(session.isAuthenticated());
+            }
+        }
+    }
+
+    @Test
     void executesRemoteFileOperationsThroughApacheMinaSftp() throws Exception {
         final Path knownHosts = writeKnownHosts(hostKey);
         final ConnectionConfig config = new ConnectionConfig("127.0.0.1", USER, "sftp-password",

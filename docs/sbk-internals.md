@@ -2102,31 +2102,33 @@ per-operation measurement path.
 SBK-GEM uses **Apache Mina SSHD** (a pure-Java SSH client; no native
 binary, no `ssh` shell-out). Each remote node is a `SshSession`:
 
-Connection setup deliberately follows the local user's SSH trust and credential
-model. By default, a previously unknown server key is accepted and persisted in
+For passwordless connections, setup follows the local user's SSH trust and
+credential model. A previously unknown server key is accepted and persisted in
 `~/.ssh/known_hosts`, or the file selected by `-knownhosts <path>`; a changed
 server key is rejected before GEM copies or executes anything. This accept-new
 trust-on-first-use behavior is serialized per known-hosts file and logs the new
-fingerprint. The explicit `-hostkeycheck false` escape hatch is only for
-isolated environments because it also disables changed-key protection. For client
-authentication, GEM can use identities exposed by `SSH_AUTH_SOCK` and key files
+fingerprint. The explicit `-hostkeycheck false` escape hatch disables changed-key
+protection for passwordless connections. For client authentication, GEM can use
+identities exposed by `SSH_AUTH_SOCK` and key files
 selected by the local OpenSSH configuration (including conventional `~/.ssh`
 keys). An explicit `-gempass` value, or `SBK_GEM_SSH_PASSWD`, makes password
 authentication the first method and retains agent/key authentication as the
-fallback. Therefore, an empty password is not an error: it means "attempt
+fallback. Supplying that password also disables host-key verification regardless
+of `-hostkeycheck`, allowing password login when `known_hosts` is stale or the
+server key changed. Therefore, an empty password is not an error: it means "attempt
 passwordless public-key authentication." Using an SSH
 agent is the normal way to make a passphrase-protected key available without
 putting the passphrase in an SBK file.
 
 ```mermaid
 flowchart LR
-    START["Connect to node"] --> HOST{"Host key state?"}
+    START["Connect to node"] --> PASS{"Password configured?"}
+    PASS -->|Yes| PASSWORD["Disable host-key check and try password"]
+    PASS -->|No| HOST{"Host key state?"}
     HOST -->|Unknown| RECORD["Record new key and fingerprint"]
     HOST -->|Changed| REJECT["Reject changed server key"]
-    HOST -->|Known| PASS{"Password configured?"}
-    RECORD --> PASS
-    PASS -->|Yes| PASSWORD["Try password authentication"]
-    PASS -->|No| AGENT["Try identities from ssh-agent"]
+    HOST -->|Known| AGENT["Try identities from ssh-agent"]
+    RECORD --> AGENT
     PASSWORD -->|Rejected| AGENT
     AGENT --> FILES["Try OpenSSH-configured key files"]
     PASSWORD -->|Accepted| READY["Authenticated SshSession"]

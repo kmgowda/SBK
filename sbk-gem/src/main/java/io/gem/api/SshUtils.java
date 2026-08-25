@@ -66,7 +66,10 @@ public final class SshUtils {
      */
     public static SshClient createClient(ConnectionConfig connConfig) {
         final SshClient client = SshClient.setUpDefaultClient();
-        if (connConfig.isHostKeyCheck()) {
+        final boolean passwordSupplied = StringUtils.isNotEmpty(connConfig.getPassword());
+        if (passwordSupplied) {
+            client.setServerKeyVerifier(AcceptAllServerKeyVerifier.INSTANCE);
+        } else if (connConfig.isHostKeyCheck()) {
             final Path knownHosts = (StringUtils.isEmpty(connConfig.getKnownHosts())
                     ? KnownHostEntry.getDefaultKnownHostsFile()
                     : Path.of(connConfig.getKnownHosts())).toAbsolutePath().normalize();
@@ -77,7 +80,7 @@ public final class SshUtils {
             client.setServerKeyVerifier(AcceptAllServerKeyVerifier.INSTANCE);
         }
 
-        if (StringUtils.isNotEmpty(connConfig.getPassword())) {
+        if (passwordSupplied) {
             preferPasswordAuthentication(client);
         }
 

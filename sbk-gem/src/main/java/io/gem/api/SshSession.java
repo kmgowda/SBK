@@ -52,7 +52,7 @@ import java.util.function.LongConsumer;
  * lifecycle lock; network and file operations never execute while holding it.
  */
 final public class SshSession {
-    private static final int COPY_BUFFER_SIZE = 256 * 1024;
+    private static final int COPY_BUFFER_SIZE = 4 * 1024 * 1024;
 
     /**
      * A bounded operation performed against the remote Apache MINA SFTP file system.
