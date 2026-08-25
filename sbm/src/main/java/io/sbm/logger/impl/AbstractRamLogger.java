@@ -77,8 +77,8 @@ public abstract class AbstractRamLogger extends CSVLogger implements RamLogger {
      */
     @Override
     public void incrementConnections() {
-        connections.incrementAndGet();
-        maxConnections.incrementAndGet();
+        final int current = connections.incrementAndGet();
+        maxConnections.accumulateAndGet(current, Math::max);
     }
 
     /**

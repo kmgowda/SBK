@@ -8,7 +8,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.gem.api.impl;
+package io.gem.agent;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -23,8 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** Tests Apache MINA file-system leases, cleanup, concurrency, and the minimal launch shell wrapper. */
-final class RemoteRuntimeLifecycleTest {
+/** Tests remote-local runtime leases, cleanup, and concurrency. */
+final class RemoteRuntimeFilesTest {
     private static final long TEST_TIMEOUT_SECONDS = 5;
     private static final long TEST_STALE_SECONDS = 60;
     private static final long TEST_RESERVATION_SECONDS = 60;
@@ -60,7 +60,7 @@ final class RemoteRuntimeLifecycleTest {
         assertFalse(Files.exists(temporaryDirectory.resolve(old)));
         assertFalse(Files.exists(temporaryDirectory.resolve(newer)));
         assertEquals(current, Files.readString(temporaryDirectory.resolve(".sbk-runtime-current")).trim());
-        assertTrue(Files.readString(Path.of(RemoteRuntimeLifecycle.leasePath(
+        assertTrue(Files.readString(Path.of(RemoteRuntimeFiles.leasePath(
                 temporaryDirectory.toString(), current, "run-1"))).startsWith("active:"));
     }
 
@@ -84,9 +84,9 @@ final class RemoteRuntimeLifecycleTest {
 
         assertTrue(Files.isDirectory(temporaryDirectory.resolve(first)));
         assertTrue(Files.isDirectory(temporaryDirectory.resolve(second)));
-        assertTrue(Files.isRegularFile(Path.of(RemoteRuntimeLifecycle.leasePath(
+        assertTrue(Files.isRegularFile(Path.of(RemoteRuntimeFiles.leasePath(
                 temporaryDirectory.toString(), first, "first-run"))));
-        assertTrue(Files.isRegularFile(Path.of(RemoteRuntimeLifecycle.leasePath(
+        assertTrue(Files.isRegularFile(Path.of(RemoteRuntimeFiles.leasePath(
                 temporaryDirectory.toString(), second, "second-run"))));
     }
 
@@ -138,7 +138,7 @@ final class RemoteRuntimeLifecycleTest {
         createRuntime(active, "active-digest");
         RemoteRuntimeFiles.acquire(temporaryDirectory, active, "active-digest", "active-run", false,
                 TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS);
-        final Path activeLease = Path.of(RemoteRuntimeLifecycle.leasePath(
+        final Path activeLease = Path.of(RemoteRuntimeFiles.leasePath(
                 temporaryDirectory.toString(), active, "active-run"));
         RemoteRuntimeFiles.acquire(temporaryDirectory, current, DIGEST, "run-2", true,
                 TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS);
@@ -153,7 +153,7 @@ final class RemoteRuntimeLifecycleTest {
         createRuntime(current, DIGEST);
         RemoteRuntimeFiles.acquire(temporaryDirectory, current, DIGEST, "heartbeat", false,
                 TEST_TIMEOUT_SECONDS, TEST_STALE_SECONDS, TEST_RESERVATION_SECONDS);
-        final Path lease = Path.of(RemoteRuntimeLifecycle.leasePath(
+        final Path lease = Path.of(RemoteRuntimeFiles.leasePath(
                 temporaryDirectory.toString(), current, "heartbeat"));
         Files.writeString(lease, "active:1\n", StandardCharsets.UTF_8);
 
@@ -189,9 +189,9 @@ final class RemoteRuntimeLifecycleTest {
     private static void createRuntime(Path parent, String name, String digest) throws IOException {
         final Path runtime = parent.resolve(name);
         Files.createDirectories(runtime);
-        Files.writeString(runtime.resolve(SbkRuntimeBundle.DESCRIPTOR_FILE),
+        Files.writeString(runtime.resolve("deployment.properties"),
                 "content.sha256=" + digest + "\n", StandardCharsets.UTF_8);
-        Files.writeString(runtime.resolve(SbkRuntimeBundle.REMOTE_DIGEST_FILE),
+        Files.writeString(runtime.resolve(".sbk-runtime.sha256"),
                 digest + "\n", StandardCharsets.UTF_8);
     }
 

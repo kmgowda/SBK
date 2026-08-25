@@ -48,6 +48,7 @@ import io.sbk.system.Printer;
 import io.sbp.api.Sbp;
 import io.sbp.config.SbpVersion;
 import io.time.Time;
+import io.time.TimeUnit;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang3.StringUtils;
@@ -221,16 +222,9 @@ final public class SbkGem {
         gemConfig = GemConfig.load();
 
         if (StringUtils.isEmpty(gemConfig.gempass)) {
-            Printer.log.info("SBK-GEM: The SSH password is not set in gem.properties; " +
-                    "checking " + GemConfig.SBK_GEM_SSH_PASSWD + " environment variable");
             String envPass = System.getenv(GemConfig.SBK_GEM_SSH_PASSWD);
             if (StringUtils.isNotEmpty(envPass)) {
                 gemConfig.gempass = envPass;
-                Printer.log.info("SBK-GEM: Using password from "+ GemConfig.SBK_GEM_SSH_PASSWD +
-                        " environment variable");
-            } else {
-                Printer.log.info("SBK-GEM: No SSH password configured; attempting ssh-agent and key-file " +
-                        "authentication");
             }
         }
 
@@ -355,6 +349,17 @@ final public class SbkGem {
             break;
         }
 
+        if (StringUtils.isNotEmpty(gemConfig.gempass)) {
+            Printer.log.info("SBK-GEM: SSH password supplied; password authentication will be attempted first, " +
+                    "with ssh-agent and key-file authentication as fallback");
+            Printer.log.info("SBK-GEM: SSH host-key checking is disabled because a password was supplied");
+        } else {
+            Printer.log.info("SBK-GEM: No SSH password supplied; using ssh-agent and key-file authentication");
+            if (!gemConfig.hostkeycheck) {
+                Printer.log.info("SBK-GEM: SSH host-key checking is disabled for passwordless authentication");
+            }
+        }
+
         if (storageDevice != null) {
             final DataType<?> dType = storageDevice.getDataType();
             if (dType == null) {
@@ -391,6 +396,10 @@ final public class SbkGem {
         sbkCommandArgs.add("-out");
         sbkCommandArgs.add(GrpcLogger.class.getSimpleName());
         time = PerlBuilder.buildTime(logger);
+        if (time.getTimeUnit() == TimeUnit.ms) {
+            Printer.log.warn("SBK-GEM: Millisecond latency resolution records operations shorter than 1 ms as "
+                    + "0 ms; use '-time mcs' or '-time ns' when sub-millisecond latency is expected");
+        }
         addOption(sbkCommandArgs, "-time", time.getTimeUnit().name());
         addOption(sbkCommandArgs, "-minlatency", Long.toString(logger.getMinLatency()));
         addOption(sbkCommandArgs, "-maxlatency", Long.toString(logger.getMaxLatency()));
@@ -421,9 +430,17 @@ final public class SbkGem {
 
         Printer.log.info("SBK dir: " + params.getSbkDir());
         Printer.log.info("SBK command: " + GemConfig.SBK_COMMAND);
-        Printer.log.info("Arguments to remote SBK command: "
-                + Arrays.toString(SbkUtils.redactSensitiveOptionValues(
-                        sbkCommandArgs.toArray(String[]::new))));
+        if (params.isLocalHostOption()) {
+            Printer.log.info("Arguments to remote SBK command: "
+                    + Arrays.toString(SbkUtils.redactSensitiveOptionValues(
+                            sbkCommandArgs.toArray(String[]::new))));
+        } else {
+            final List<String> displayedArguments = new ArrayList<>(sbkCommandArgs);
+            SbkGemBenchmark.replaceOptionValue(displayedArguments, "-sbm", "<authenticated-ssh-route-address>");
+            Printer.log.info("Remote SBK argument template; each '-sbm' value is resolved after SSH authentication: "
+                    + Arrays.toString(SbkUtils.redactSensitiveOptionValues(
+                            displayedArguments.toArray(String[]::new))));
+        }
         Printer.log.info("SBK-GEM: Arguments to remote SBK command verification Success..");
 
         sbmConfig.maxConnections = params.getConnections().length;

@@ -25,6 +25,7 @@ final class RemoteTargetPlanTest {
                 connection("NODE-A", "user"), connection("node-a", "user"), connection("node-a", "user")
         };
         final RemoteTargetPlan plan = RemoteTargetPlan.create(connections,
+                new String[]{"192.0.2.10", "192.0.2.10", "192.0.2.10"},
                 new String[]{"/srv/SBK", "/srv/SBK", "/srv/sbk"});
 
         assertTrue(plan.isRepresentative(0));
@@ -36,7 +37,8 @@ final class RemoteTargetPlanTest {
     @Test
     void keepsDifferentRemoteUsersAsIndependentTargets() {
         final ConnectionConfig[] connections = {connection("node-a", "first"), connection("node-a", "second")};
-        final RemoteTargetPlan plan = RemoteTargetPlan.create(connections, new String[]{"/srv/sbk", "/srv/sbk"});
+        final RemoteTargetPlan plan = RemoteTargetPlan.create(connections,
+                new String[]{"192.0.2.10", "192.0.2.10"}, new String[]{"/srv/sbk", "/srv/sbk"});
 
         assertTrue(plan.isRepresentative(0));
         assertTrue(plan.isRepresentative(1));
@@ -45,12 +47,26 @@ final class RemoteTargetPlanTest {
     @Test
     void representativeOwnsWorkSelectedByAnyLogicalNode() {
         final ConnectionConfig[] connections = {connection("node-a", "user"), connection("node-a", "user")};
-        final RemoteTargetPlan plan = RemoteTargetPlan.create(connections, new String[]{"/srv/sbk", "/srv/sbk"});
+        final RemoteTargetPlan plan = RemoteTargetPlan.create(connections,
+                new String[]{"192.0.2.10", "192.0.2.10"}, new String[]{"/srv/sbk", "/srv/sbk"});
 
         assertTrue(plan.hasSelectedNode(0, new boolean[]{false, true}));
         final boolean[] physicalSelection = plan.representativeSelection(new boolean[]{false, true});
         assertTrue(physicalSelection[0]);
         assertFalse(physicalSelection[1]);
+    }
+
+    @Test
+    void deduplicatesHostAliasesConnectedToTheSameEndpoint() {
+        final ConnectionConfig[] connections = {
+                connection("127.0.0.1", "user"), connection("localhost", "user")
+        };
+        final RemoteTargetPlan plan = RemoteTargetPlan.create(connections,
+                new String[]{"127.0.0.1", "127.0.0.1"}, new String[]{"/srv/sbk", "/srv/sbk"});
+
+        assertTrue(plan.isRepresentative(0));
+        assertFalse(plan.isRepresentative(1));
+        assertEquals(0, plan.representative(1));
     }
 
     private static ConnectionConfig connection(String host, String user) {

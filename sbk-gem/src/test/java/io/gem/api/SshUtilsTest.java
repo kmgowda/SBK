@@ -11,18 +11,21 @@
 package io.gem.api;
 
 import org.apache.sshd.client.SshClient;
+import org.apache.sshd.client.config.hosts.KnownHostEntry;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.common.config.keys.PublicKeyEntry;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.pubkey.KeySetPublickeyAuthenticator;
+import org.apache.sshd.scp.server.ScpCommandFactory;
 import org.apache.sshd.sftp.server.SftpSubsystemFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,7 +38,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
@@ -70,6 +76,7 @@ final class SshUtilsTest {
         server.setPasswordAuthenticator((username, password, session) ->
                 USER.equals(username) && "sftp-password".equals(password));
         server.setFileSystemFactory(new VirtualFileSystemFactory(temporaryDirectory));
+        server.setCommandFactory(new ScpCommandFactory.Builder().build());
         server.setSubsystemFactories(List.of(new SftpSubsystemFactory.Builder().build()));
         server.start();
     }
@@ -95,14 +102,106 @@ final class SshUtilsTest {
     }
 
     @Test
-    void rejectsServerMissingFromKnownHosts() throws IOException {
+    void prefersSuppliedPasswordBeforePublicKeyAuthentication() throws IOException {
+        final AtomicInteger passwordAttempts = new AtomicInteger();
+        final AtomicInteger publicKeyAttempts = new AtomicInteger();
+        server.setPasswordAuthenticator((username, password, session) -> {
+            passwordAttempts.incrementAndGet();
+            return USER.equals(username) && "sftp-password".equals(password);
+        });
+        server.setPublickeyAuthenticator((username, key, session) -> {
+            publicKeyAttempts.incrementAndGet();
+            return USER.equals(username) && userKey.getPublic().equals(key);
+        });
+        final Path knownHosts = writeKnownHosts(hostKey);
+        final ConnectionConfig config = new ConnectionConfig("127.0.0.1", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), true, knownHosts.toString());
+        try (SshClient client = SshUtils.createClient(config)) {
+            client.addPublicKeyIdentity(userKey);
+            client.start();
+            try (ClientSession session = SshUtils.createSession(client, config, 5)) {
+                assertTrue(session.isAuthenticated());
+                assertTrue(passwordAttempts.get() > 0);
+                assertEquals(0, publicKeyAttempts.get());
+            }
+        }
+    }
+
+    @Test
+    void fallsBackToPublicKeyWhenSuppliedPasswordIsRejected() throws IOException {
+        final AtomicInteger passwordAttempts = new AtomicInteger();
+        final AtomicInteger publicKeyAttempts = new AtomicInteger();
+        server.setPasswordAuthenticator((username, password, session) -> {
+            passwordAttempts.incrementAndGet();
+            return false;
+        });
+        server.setPublickeyAuthenticator((username, key, session) -> {
+            publicKeyAttempts.incrementAndGet();
+            return USER.equals(username) && userKey.getPublic().equals(key);
+        });
+        final Path knownHosts = writeKnownHosts(hostKey);
+        final ConnectionConfig config = new ConnectionConfig("127.0.0.1", USER, "rejected-password",
+                server.getPort(), temporaryDirectory.toString(), true, knownHosts.toString());
+        try (SshClient client = SshUtils.createClient(config)) {
+            client.addPublicKeyIdentity(userKey);
+            client.start();
+            try (ClientSession session = SshUtils.createSession(client, config, 5)) {
+                assertTrue(session.isAuthenticated());
+                assertTrue(passwordAttempts.get() > 0);
+                assertTrue(publicKeyAttempts.get() > 0);
+            }
+        }
+    }
+
+    @Test
+    void acceptsAndPersistsServerMissingFromKnownHosts() throws IOException {
         final Path knownHosts = temporaryDirectory.resolve("empty-known-hosts");
         Files.createFile(knownHosts);
         final ConnectionConfig config = connectionConfig(knownHosts);
         try (SshClient client = SshUtils.createClient(config)) {
             client.addPublicKeyIdentity(userKey);
             client.start();
+            try (ClientSession session = SshUtils.createSession(client, config, 5)) {
+                assertTrue(session.isAuthenticated());
+            }
+        }
+        assertTrue(KnownHostEntry.readKnownHostEntries(knownHosts).stream()
+                .anyMatch(entry -> entry.isHostMatch("127.0.0.1", server.getPort())));
+    }
+
+    @Test
+    void rejectsChangedServerKeyAfterAcceptNewPersistence() throws Exception {
+        final Path knownHosts = temporaryDirectory.resolve("accept-new-known-hosts");
+        Files.createFile(knownHosts);
+        final ConnectionConfig config = connectionConfig(knownHosts);
+        try (SshClient client = SshUtils.createClient(config)) {
+            client.addPublicKeyIdentity(userKey);
+            client.start();
+            try (ClientSession session = SshUtils.createSession(client, config, 5)) {
+                assertTrue(session.isAuthenticated());
+            }
+        }
+
+        server.setKeyPairProvider(KeyPairProvider.wrap(generateEcKey()));
+        try (SshClient client = SshUtils.createClient(config)) {
+            client.addPublicKeyIdentity(userKey);
+            client.start();
             assertThrows(IOException.class, () -> SshUtils.createSession(client, config, 5));
+        }
+    }
+
+    @Test
+    void acceptsChangedServerKeyWhenPasswordIsSupplied() throws Exception {
+        final Path knownHosts = writeKnownHosts(hostKey);
+        server.setKeyPairProvider(KeyPairProvider.wrap(generateEcKey()));
+        final ConnectionConfig config = new ConnectionConfig("127.0.0.1", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), true, knownHosts.toString());
+
+        try (SshClient client = SshUtils.createClient(config)) {
+            client.start();
+            try (ClientSession session = SshUtils.createSession(client, config, 5)) {
+                assertTrue(session.isAuthenticated());
+            }
         }
     }
 
@@ -115,6 +214,7 @@ final class SshUtilsTest {
         final SshSession sshSession = new SshSession(config, executor);
         try {
             sshSession.createSessionAsync(5).get(5, TimeUnit.SECONDS);
+            assertEquals("127.0.0.1", sshSession.getRemoteEndpointIdentity());
             final String result = sshSession.runRemoteFileOperationAsync(fileSystem -> {
                 final Path directory = fileSystem.getPath("/runtime-leases");
                 Files.createDirectories(directory);
@@ -125,6 +225,75 @@ final class SshUtilsTest {
 
             assertEquals("active", result);
             assertEquals("active", Files.readString(temporaryDirectory.resolve("runtime-leases/marker")));
+        } finally {
+            sshSession.stop();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void writesAgentSizedFileThroughApacheMinaSftp() throws Exception {
+        final Path knownHosts = writeKnownHosts(hostKey);
+        final ConnectionConfig config = new ConnectionConfig("127.0.0.1", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), true, knownHosts.toString());
+        final var executor = Executors.newFixedThreadPool(2);
+        final SshSession sshSession = new SshSession(config, executor);
+        final byte[] expected = new byte[512 * 1024 + 17];
+        java.util.Arrays.fill(expected, (byte) 0x5a);
+        try {
+            sshSession.createSessionAsync(5).get(5, TimeUnit.SECONDS);
+            sshSession.runRemoteTransferOperationAsync(fileSystem -> {
+                final Path remoteFile = fileSystem.getPath("/agent.jar");
+                try (var output = new BufferedOutputStream(Files.newOutputStream(remoteFile))) {
+                    output.write(expected);
+                }
+                return null;
+            }, 10).get(10, TimeUnit.SECONDS);
+
+            assertArrayEquals(expected, Files.readAllBytes(temporaryDirectory.resolve("agent.jar")));
+        } finally {
+            sshSession.stop();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void copiesLargeFilesThroughBulkScpAndReportsExactProgress() throws Exception {
+        final Path knownHosts = writeKnownHosts(hostKey);
+        final ConnectionConfig config = new ConnectionConfig("127.0.0.1", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), true, knownHosts.toString());
+        final var executor = Executors.newFixedThreadPool(2);
+        final SshSession sshSession = new SshSession(config, executor);
+        final Path source = temporaryDirectory.resolve("source.bin");
+        Files.write(source, new byte[2 * 1024 * 1024 + 17]);
+        final AtomicLong copiedBytes = new AtomicLong();
+        try {
+            sshSession.createSessionAsync(5).get(5, TimeUnit.SECONDS);
+
+            sshSession.copyFileAsync(source.toString(), "/copied.bin", 10, copiedBytes::addAndGet)
+                    .get(10, TimeUnit.SECONDS);
+
+            assertEquals(Files.size(source), copiedBytes.get());
+            assertEquals(-1, Files.mismatch(source, temporaryDirectory.resolve("copied.bin")));
+        } finally {
+            sshSession.stop();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void reportsResolvedEndpointForLocalhostAlias() throws Exception {
+        final Path knownHosts = temporaryDirectory.resolve("localhost-known-hosts");
+        Files.createFile(knownHosts);
+        final ConnectionConfig config = new ConnectionConfig("localhost", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), true, knownHosts.toString());
+        final var executor = Executors.newSingleThreadExecutor();
+        final SshSession sshSession = new SshSession(config, executor);
+        try {
+            sshSession.createSessionAsync(5).get(5, TimeUnit.SECONDS);
+
+            assertEquals("127.0.0.1", sshSession.getRemoteEndpointIdentity());
+            assertEquals("127.0.0.1", sshSession.getLocalRouteAddress());
         } finally {
             sshSession.stop();
             executor.shutdownNow();

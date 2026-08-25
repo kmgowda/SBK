@@ -74,6 +74,9 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     private String localHost;
 
     @Getter
+    private boolean localHostOption;
+
+    @Getter
     private int sbmPort;
 
     @Getter
@@ -119,8 +122,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("gemuser", true, "ssh user name of the remote hosts, default: " + config.gemuser);
         addOption(GemConfig.GEM_PASS_OPTION, true, "ssh user password of the remote hosts, default: " +
                 (StringUtils.isEmpty(config.gempass) ? "not set" : "******"));
-        addOption("hostkeycheck", true, "Verify remote SSH host keys against known_hosts; default: " +
-                config.hostkeycheck);
+        addOption("hostkeycheck", true, "Verify SSH host keys for passwordless authentication; ignored when "
+                + "-gempass is set; default: " + config.hostkeycheck);
         addOption("knownhosts", true, "Known-hosts file; an empty value uses ~/.ssh/known_hosts; default: " +
                 (StringUtils.isEmpty(config.knownhosts) ? "default" : config.knownhosts));
         addOption("gemport", true, "ssh port of the remote hosts, default: " + config.gemport);
@@ -129,7 +132,9 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("runtimecleanup", true, "Remove every inactive non-current SBK-GEM-managed runtime and "
                 + "local cached bundle, regardless of version ordering, while retaining the current verified "
                 + "identity; default: " + config.runtimecleanup);
-        addOption("localhost", true, "this local SBM host name, default: " + localHost);
+        addOption("localhost", true, "SBM address reachable from every remote node; when omitted, SBK-GEM uses "
+                + "the numeric controller address selected by each authenticated SSH route; detected local host: "
+                + localHost);
         addOption("sbmport", true, "SBM port number; default: " + this.sbmPort);
         addOption("sbmsleepms", true, "SBM idle milliseconds to sleep; default: " + this.sbmIdleSleepMilliSeconds +
                 " ms");
@@ -162,6 +167,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         rejectRemovedDeploymentOptions(args);
         totalRecordsOption = hasCommandLineOption(args, "totalrecords");
         totalThroughputOption = hasCommandLineOption(args, "totalthroughput");
+        localHostOption = hasCommandLineOption(args, "localhost");
         if (totalRecordsOption && hasCommandLineOption(args, "records")) {
             throw new IllegalArgumentException("The '-totalrecords' and '-records' options are mutually exclusive");
         }

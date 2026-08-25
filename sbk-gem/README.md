@@ -39,16 +39,21 @@ SBK-GEM owns remote launch and aggregate lifecycle. The remote SBK processes sti
 - JDK 25 on the local GEM host. GEM reuses a same-or-newer remote JDK when present;
   otherwise it copies the controller JDK as a separate content-addressed tree.
   Java is never embedded in the SBK runtime archive.
-- SSH reachability, a trusted `known_hosts` entry, and authentication for every target.
+- SSH reachability, a writable `known_hosts` file, and authentication for every target.
 - A writable remote installation/work directory.
-- Network reachability from remote SBK clients back to the GEM/SBM host, normally on port `9717`.
+- Network reachability from remote SBK clients back to the GEM/SBM host, normally on port `9717`. By default,
+  SBK-GEM advertises the numeric controller address selected by each authenticated SSH route, avoiding a dependency
+  on remote DNS. Use `-localhost <address>` only when an explicit shared callback address is required (for example,
+  through NAT or a load balancer).
 - Network reachability from remote hosts to the target storage system.
 - A homogeneous operating-system cluster: controller, containers, and all
   remote nodes must use the same supported operating system (`Linux` or
   `macOS`). CPU architecture is not part of deployment compatibility. Windows
   and mixed Linux/macOS runs are rejected.
-- No remote `tar`, checksum utility, or shell script is required. The packaged
-  Java agent performs extraction, verification, and launch through Java APIs.
+- Standard remote `scp` and `tar` executables are required for bulk transfer
+  and first-time JDK extraction. No checksum utility or generated shell script
+  is required; the packaged Java agent performs SBK extraction, verification,
+  and launch through Java APIs.
 
 Use dedicated benchmark hosts and least-privilege SSH credentials. Do not put passwords or private keys in committed files.
 
@@ -63,18 +68,28 @@ to use passphrase-protected keys because their passphrases do not have to be put
 in SBK configuration.
 
 The `-gempass` option and `SBK_GEM_SSH_PASSWD` environment variable are optional
-password-authentication fallbacks. Leave both unset for passwordless login. Do
-not store `gempass` in a committed YML or properties file.
+password-authentication inputs. When a password is supplied, SBK-GEM asks Apache
+MINA to try password authentication first and then falls back to the SSH agent
+and configured key files if the server rejects the password. A supplied password
+also disables SSH host-key checking, so stale or changed `known_hosts` entries do
+not prevent login. Leave both unset for passwordless login. Do not store `gempass`
+in a committed YML or properties file.
 
-Remote host identity is checked against the local user's OpenSSH
-`~/.ssh/known_hosts` data by default. Use `-knownhosts <path>` to select a
-dedicated trust file. Add and verify each node's host key before starting a
-benchmark; an unknown or changed key is rejected. `-hostkeycheck false` is an
-explicit opt-out for isolated, disposable environments and weakens protection
-against server impersonation, so it should not be used for normal benchmarks.
-A successful command-line `ssh` connection is a useful preflight check, but run
-it as the exact operating system user that will launch SBK-GEM so it reads the
-same agent, key files, SSH configuration, and `known_hosts` file.
+Remote host-key checking is disabled by default so unattended passwordless SSH
+can use the configured SSH agent or key files without `known_hosts` blocking the
+connection. Set `-hostkeycheck true` to enable accept-new checking against the
+local user's OpenSSH `~/.ssh/known_hosts` data, or use `-knownhosts <path>` to
+select a dedicated trust file. A previously unknown host key is then accepted
+and persisted on first contact (TOFU/accept-new), and a changed key is rejected.
+Host-key checking is bypassed whenever `-gempass` or `SBK_GEM_SSH_PASSWD`
+supplies a password, regardless of `-hostkeycheck`.
+Verify newly recorded fingerprints through an independent channel when the
+environment requires stronger first-contact assurance. `-hostkeycheck false`
+is an explicit opt-out for isolated, disposable environments and also disables
+changed-key protection. A successful command-line `ssh` connection is a useful
+preflight check, but run it as the exact operating system user that will launch
+SBK-GEM so it reads the same agent, key files, SSH configuration, and
+`known_hosts` file.
 
 ## Build
 
@@ -187,8 +202,10 @@ uses one shared per-worker rate for both directions.
 
 Before connecting to storage, SBK-GEM validates the local `installDist`
 layout, including the pathing JAR and every dependency named by its manifest.
-It packages the complete SBK distribution into a content-addressed `tar.gz`
-archive. When remote Java provisioning is required, the controller JDK is
+The Gradle distribution records an identity covering its runtime JARs,
+launchers, Java bootstrap files, and remote agent. SBK-GEM packages the
+runtime-only `bin`, `lib`, and identity files into a content-addressed plain
+`tar` archive. When remote Java provisioning is required, the controller JDK is
 copied separately with its own content identity. Each identity covers every file,
 contained relative symbolic link, and normalized file mode, so two builds
 carrying the same SBK version but different dependencies cannot be mistaken
@@ -205,23 +222,36 @@ content without copying it again. Local archives are cached under
 `~/.sbk/cache/sbk-gem` by default; `runtimeCacheDirectory` in
 `gem.properties` changes that location. A per-identity file lock serializes
 cache writers across GEM processes, and a separately published SHA-256 sidecar
-causes incomplete or corrupted cached archives to be rebuilt before use. With
+plus archive-size sidecar causes incomplete cached archives to be rebuilt before
+use. An unchanged build identity reuses both sidecars without rehashing the
+installed distribution or cached archive. The remote agent still verifies the
+complete transferred archive; a digest mismatch rebuilds the local archive and
+retries the affected transfer once. With
 `runtimecleanup=true`, the controller retains only the selected cached bundle;
 a non-current archive being transferred by another GEM process is protected by
 its cache lock and is removed after it becomes inactive.
 
-Creating a new bundle hashes the complete SBK distribution, then writes an
-SBK-only compressed archive. The independently managed JDK is hashed, including
-executable/POSIX permission state, and copied as a directory tree only when its
-exact usable identity is unavailable remotely. A matching marker with unusable
+Creating a new bundle hashes the runtime files once and calculates the archive
+SHA-256 while writing the uncompressed tar, avoiding separate compression and
+archive-hashing passes. The independently managed JDK is hashed, including
+executable/POSIX permission state, and copied as one cached tar file only when
+its exact usable identity is unavailable remotely. A matching marker with unusable
 `bin/java` or `bin/javac` permissions is retired and repaired instead of being
-reused. Physical deployment work is grouped by SSH user, case-insensitive host,
-port, and the resolved case-sensitive remote path. Multiple logical clients
-sharing that target therefore install the agent and copy Java/SBK only once.
+reused. Physical deployment work is grouped by SSH user, authenticated network
+endpoint, port, and the resolved case-sensitive remote path. Host aliases and
+multiple logical clients sharing that target therefore install the agent and
+copy Java/SBK only once.
+First-time JDK deployment creates or reuses one cached plain-tar archive and sends
+it through a single Apache MINA SCP stream per active target. The standard remote
+`tar` executable extracts it into an atomic staging directory. SBK runtime archives
+use the same single-file bulk transport and are extracted by the Java agent. SFTP
+remains limited to small atomic metadata and lifecycle operations. JDK and SBK
+deployment progress reports transferred bytes, percentage, MiB/s, and ETA;
+after payload completion it explicitly reports remote metadata finalization.
 During these potentially long disk-intensive steps, GEM emits an elapsed-time
 heartbeat every 5 seconds by default. Runtime
-archive copies report the archive size, unique transfer-target count, completed
-targets, and hosts still pending. Runtime lease acquisition and inactive-runtime
+bulk SCP copies also report the archive size, unique transfer-target count,
+completed targets, and hosts still pending. Runtime lease acquisition and inactive-runtime
 retirement use the same per-host progress reporting. Configure the shared bounded
 update interval with `runtimeProgressIntervalSeconds` in `gem.properties`;
 cached bundles and fast local-network copies normally complete without a heartbeat.
@@ -243,21 +273,24 @@ transfer staging files from changing or recursively expanding the next bundle.
 The deployment lifecycle is automatic: exact verified SBK and Java identities
 are reused independently, while missing content is uploaded, verified, and
 activated without a separate copy switch. The current identities are retained.
-Apache MINA SFTP leases protect runtimes used by concurrent GEM executions. A
-reservation is created before probe/copy/activation and refreshed by the
-controller during the benchmark, so overlapping GEM processes cannot retire an
+Remote-agent leases protect runtimes used by concurrent GEM executions. The
+controller sends one typed Java-agent request per host to reserve, acquire,
+refresh, or release a lease; the agent performs the corresponding filesystem
+work locally on that host. A reservation is created before probe/copy/activation
+and refreshed during the benchmark, so overlapping GEM processes cannot retire an
 identity another process is preparing or using. Therefore
 an active non-current identity may coexist temporarily and is removed after its
 final lease exits. Cleanup compares immutable identities, not version numbers,
 so both lower and higher inactive SBK versions are removed. An inactive runtime
 is first atomically renamed out of the managed `sbk-runtime-*` namespace while
-the SFTP lifecycle lock is held. Its potentially large directory tree is then
-deleted through a separate MINA SFTP operation, so recursive deletion cannot
+the lifecycle lock is held. Its potentially large directory tree is then
+deleted by the remote Java agent after leases are released, so recursive deletion cannot
 hold the lifecycle lock or block lease acquisition and remote benchmark startup.
 No login-shell program, zsh construct, `nohup`, PID probe, shell glob, remote
 archive command, or checksum command participates in deployment. Apache MINA
-SFTP resolves paths and manages files; the Java agent performs verification,
-archive activation, and benchmark process launch.
+SFTP resolves paths and installs the small Java agent; that agent performs
+lifecycle metadata updates, verification, archive activation, cleanup, and
+benchmark process launch through local Java filesystem APIs.
 
 Every SSH/SFTP operation has a bounded deadline. A timeout actively interrupts
 its worker and closes the operation-owned MINA SFTP filesystem; it does not
@@ -299,8 +332,8 @@ version. `-javadir <home>` optionally identifies a preferred remote JDK. Otherwi
   GEM asks the remote Java agent to validate Java discovered from `PATH`.
 
 If the preferred or PATH JDK is absent or older than the controller Java, GEM
-copies the controller JDK separately through Apache MINA SFTP. The JDK has its
-own content identity and reuse marker, so an unchanged JDK is not copied again.
+copies the controller JDK separately as one cached tar through Apache MINA SCP.
+The JDK has its own content identity and reuse marker, so an unchanged JDK is not copied again.
 The SBK archive likewise has an independent content identity and is transferred
 only when its exact content is absent.
 
@@ -323,14 +356,18 @@ Before a multi-host run:
 
 1. `SbkGemMain` delegates to `SbkGem`.
 2. GEM parses connection, remote-path, SBM, and forwarded SBK arguments.
-3. GEM adds the common `GrpcLogger`, SBM callback host, and SBM port arguments.
+3. GEM adds the common `GrpcLogger` and SBM port arguments. After SSH authentication, each node receives the
+   numeric controller callback address selected by its SSH route; an explicit `-localhost` value overrides this.
 4. It distributes `-totalrecords` and `-totalthroughput` when requested, creating node-specific `-records` and `-throughput` argument lists.
 5. It constructs the embedded `SbmBenchmark` and `SbkGemBenchmark`.
 6. `SbkGemBenchmark` establishes SSH sessions, enforces homogeneous platform
    compatibility, and verifies or atomically deploys the exact SBK/Java runtime bundle.
-7. It starts SBM and launches every remote SBK process with its node-specific arguments.
-8. Measurements return to embedded SBM and are reported as aggregate windows and totals.
-9. GEM collects remote responses and shuts down sessions and SBM.
+7. It starts the SBM gRPC service and launches every remote SBK process with its node-specific arguments.
+8. Each remote SBK opens its storage and creates its workers before registering. After every
+   prepared client reaches the coordinated-start barrier, GEM starts SBM aggregation and the
+   benchmark reporting clock, then explicitly releases every pending registration response.
+9. Measurements return to embedded SBM and are reported as aggregate windows and totals.
+10. GEM collects remote responses and shuts down sessions and SBM.
 
 ## Distributed failure reporting
 
@@ -356,6 +393,12 @@ never reaches SBM cannot leave the other clients waiting indefinitely. Configure
 `sbmRegistrationTimeoutSeconds` in `gem.properties` for slow JVM or storage-driver
 startup; its default is 120 seconds. The independent `remoteTimeoutSeconds`
 setting remains the timeout for individual SSH control operations.
+
+Remote driver initialization is deliberately outside SBM's reporting clock. This two-phase
+ready-then-release barrier prevents a short benchmark from running before SBM is ready. The
+remote PerL reporters and SBM use independent periodic windows, so the first
+aggregate result can arrive within two reporting intervals after the prepared-client
+barrier; subsequent aggregate windows use the normal configured interval.
 
 For diagnostics, GEM retains only the most recent 256 KiB of each remote
 process's stdout and stderr. Failed hosts include these bounded tails in the

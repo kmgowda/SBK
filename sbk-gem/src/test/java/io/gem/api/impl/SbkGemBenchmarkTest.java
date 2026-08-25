@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -36,6 +38,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 final class SbkGemBenchmarkTest {
     @Test
+    void replacesAdvertisedSbmAddressWithoutChangingOtherArguments() {
+        final List<String> arguments = new java.util.ArrayList<>(List.of(
+                "-class", "File", "-sbm", "controller-name", "-sbmport", "9717"));
+
+        SbkGemBenchmark.replaceOptionValue(arguments, "-sbm", "10.118.232.91");
+
+        assertEquals(List.of("-class", "File", "-sbm", "10.118.232.91", "-sbmport", "9717"), arguments);
+    }
+
+    @Test
+    void rejectsMissingRequiredRemoteOption() {
+        final List<String> arguments = new java.util.ArrayList<>(List.of("-class", "File"));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> SbkGemBenchmark.replaceOptionValue(arguments, "-sbm", "10.118.232.91"));
+    }
+
+    @Test
     void reportsFinishedAndPendingRuntimeTransfers() {
         final CompletableFuture<?>[] uploads = {CompletableFuture.completedFuture(null),
                 new CompletableFuture<>(), CompletableFuture.completedFuture(null)};
@@ -43,6 +63,41 @@ final class SbkGemBenchmarkTest {
 
         assertEquals("1 of 2 transfer(s) finished; awaiting host(s): node-b:2202",
                 SbkGemBenchmark.futureProgress(uploads, hosts, "transfer(s)"));
+    }
+
+    @Test
+    void reportsSimplePendingHostProgressForRemoteRuntimeSetup() {
+        final CompletableFuture<?>[] operations = {CompletableFuture.completedFuture(null),
+                new CompletableFuture<>(), CompletableFuture.completedFuture(null)};
+        final String[] hosts = {"node-a:22", "node-b:2202", null};
+
+        assertEquals("waiting for node-b:2202", SbkGemBenchmark.pendingHostProgress(operations, hosts));
+        operations[1].complete(null);
+        assertEquals("finalizing", SbkGemBenchmark.pendingHostProgress(operations, hosts));
+    }
+
+    @Test
+    void reportsJdkCopyBytesPercentageAndRateForPhysicalTargets() {
+        final CompletableFuture<?>[] copies = {new CompletableFuture<>(), new CompletableFuture<>()};
+        final String[] hosts = {"node-a:22", null};
+        final AtomicLong[] copiedBytes = {new AtomicLong(50L * 1024 * 1024), new AtomicLong()};
+
+        final String progress = SbkGemBenchmark.javaCopyProgress(copies, hosts, copiedBytes, 100L * 1024 * 1024,
+                System.nanoTime() - TimeUnit.SECONDS.toNanos(2));
+
+        assertTrue(progress.contains("0 of 1 JDK operation(s) finished"));
+        assertTrue(progress.contains("transferred 50.00 MiB of 100.00 MiB"));
+        assertTrue(progress.contains("50.0%"));
+        assertTrue(progress.contains("MiB/s"));
+        assertTrue(progress.contains("ETA"));
+    }
+
+    @Test
+    void formatsTransferSizesUsingAnAppropriateBinaryUnit() {
+        assertEquals("0.00 KiB", SbkGemBenchmark.formatTransferSize(0));
+        assertEquals("1.50 KiB", SbkGemBenchmark.formatTransferSize(1_536));
+        assertEquals("1.00 MiB", SbkGemBenchmark.formatTransferSize(1_048_576));
+        assertEquals("1.16 GiB", SbkGemBenchmark.formatTransferSize(1_249_950_208));
     }
 
     @Test
@@ -203,6 +258,17 @@ final class SbkGemBenchmarkTest {
         assertSame(remoteFailure, failure);
         assertEquals(1, failure.getSuppressed().length);
         assertSame(sbmFailure, failure.getSuppressed()[0]);
+    }
+
+    @Test
+    void describesMessageLessCleanupFailureByType() {
+        assertEquals("IOException", SbkGemBenchmark.failureDescription(new IOException()));
+    }
+
+    @Test
+    void unwrapsCleanupFailureDescription() {
+        assertEquals("remote cleanup failed", SbkGemBenchmark.failureDescription(
+                new CompletionException(new IOException("remote cleanup failed"))));
     }
 
     @Test

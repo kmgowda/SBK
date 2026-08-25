@@ -48,7 +48,7 @@ final class SbkGemJavaOptionsTest {
 
         assertTrue(config.javadir == null || config.javadir.isEmpty());
         assertTrue(config.runtimecleanup);
-        assertTrue(config.hostkeycheck);
+        assertFalse(config.hostkeycheck);
         assertTrue(config.knownhosts == null || config.knownhosts.isEmpty());
         assertEquals(120, config.sbmRegistrationTimeoutSeconds);
     }
@@ -85,6 +85,28 @@ final class SbkGemJavaOptionsTest {
                 "-runtimecleanup", "false"});
 
         assertFalse(parameters.isRuntimeCleanup());
+    }
+
+    @Test
+    void detectsExplicitSbmCallbackAddressOverride() throws Exception {
+        createSbkCommand();
+        final SbkGemParameters parameters = parameters();
+
+        parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1",
+                "-localhost", "controller.example"});
+
+        assertTrue(parameters.isLocalHostOption());
+        assertEquals("controller.example", parameters.getLocalHost());
+    }
+
+    @Test
+    void enablesRouteSelectedSbmAddressWhenOverrideIsAbsent() throws Exception {
+        createSbkCommand();
+        final SbkGemParameters parameters = parameters();
+
+        parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1"});
+
+        assertFalse(parameters.isLocalHostOption());
     }
 
     @Test

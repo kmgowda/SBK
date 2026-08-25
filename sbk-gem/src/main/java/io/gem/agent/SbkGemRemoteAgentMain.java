@@ -12,7 +12,6 @@ package io.gem.agent;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -20,15 +19,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HexFormat;
 import java.util.List;
@@ -61,6 +62,11 @@ public final class SbkGemRemoteAgentMain {
                 case "probe" -> probe(request.values());
                 case "activate" -> activate(request.values());
                 case "verify" -> verify(request.values());
+                case "runtime-reserve" -> reserveRuntime(request.values());
+                case "runtime-acquire" -> acquireRuntime(request.values());
+                case "runtime-heartbeat" -> heartbeatRuntime(request.values());
+                case "runtime-release" -> releaseRuntime(request.values());
+                case "cleanup" -> cleanup(request.values());
                 case "run" -> System.exit(run(request.values()));
                 default -> throw new IOException("Unknown operation: " + request.operation());
             }
@@ -100,7 +106,7 @@ public final class SbkGemRemoteAgentMain {
         final Path destination = absolute(values.get(4));
         try {
             if (!archiveDigest.equals(sha256(archive))) {
-                throw new IOException("SBK archive SHA-256 mismatch");
+                throw new IOException(RemoteAgentProtocol.ARCHIVE_DIGEST_MISMATCH);
             }
             deleteRecursively(staging);
             Files.createDirectories(staging);
@@ -139,6 +145,51 @@ public final class SbkGemRemoteAgentMain {
         runtimeJars(runtime.resolve("sbk"), values.get(2));
         System.out.println("SBK_RUNTIME_CONTENT=" + values.get(1));
         System.out.println("SBK_VERSION=" + values.get(2));
+    }
+
+    private static void cleanup(List<String> values) throws IOException {
+        requireCount(values, 1);
+        System.out.println("SBK_RETIRED_RUNTIMES=" + cleanupRetiredRuntimes(absolute(values.getFirst())));
+    }
+
+    static int cleanupRetiredRuntimes(Path parent) throws IOException {
+        return RemoteRuntimeFiles.deleteRetired(parent);
+    }
+
+    private static void reserveRuntime(List<String> values) throws IOException, InterruptedException {
+        requireCount(values, 5);
+        RemoteRuntimeFiles.reserve(absolute(values.get(0)), values.get(1), values.get(2),
+                parseLong(values.get(3), "runtime lock timeout"),
+                parseLong(values.get(4), "stale runtime lock timeout"));
+        System.out.println("SBK_RUNTIME_LIFECYCLE=reserved");
+    }
+
+    private static void acquireRuntime(List<String> values) throws IOException, InterruptedException {
+        requireCount(values, 8);
+        RemoteRuntimeFiles.acquire(absolute(values.get(0)), values.get(1), values.get(2), values.get(3),
+                parseBoolean(values.get(4), "runtime cleanup"),
+                parseLong(values.get(5), "runtime lock timeout"),
+                parseLong(values.get(6), "stale runtime lock timeout"),
+                parseLong(values.get(7), "runtime lease reservation"));
+        System.out.println("SBK_RUNTIME_LIFECYCLE=acquired");
+    }
+
+    private static void heartbeatRuntime(List<String> values) throws IOException, InterruptedException {
+        requireCount(values, 5);
+        RemoteRuntimeFiles.heartbeat(absolute(values.get(0)), values.get(1), values.get(2),
+                parseLong(values.get(3), "runtime lock timeout"),
+                parseLong(values.get(4), "stale runtime lock timeout"));
+        System.out.println("SBK_RUNTIME_LIFECYCLE=refreshed");
+    }
+
+    private static void releaseRuntime(List<String> values) throws IOException, InterruptedException {
+        requireCount(values, 7);
+        RemoteRuntimeFiles.release(absolute(values.get(0)), values.get(1), values.get(2),
+                parseBoolean(values.get(3), "runtime cleanup"),
+                parseLong(values.get(4), "runtime lock timeout"),
+                parseLong(values.get(5), "stale runtime lock timeout"),
+                parseLong(values.get(6), "runtime lease reservation"));
+        System.out.println("SBK_RUNTIME_LIFECYCLE=released");
     }
 
     private static int run(List<String> values) throws IOException, InterruptedException {
@@ -201,8 +252,7 @@ public final class SbkGemRemoteAgentMain {
 
     private static void extract(Path archive, Path staging) throws IOException {
         try (InputStream file = new BufferedInputStream(Files.newInputStream(archive));
-             GzipCompressorInputStream gzip = new GzipCompressorInputStream(file);
-             TarArchiveInputStream tar = new TarArchiveInputStream(gzip)) {
+             TarArchiveInputStream tar = new TarArchiveInputStream(file)) {
             TarArchiveEntry entry;
             while ((entry = tar.getNextEntry()) != null) {
                 final Path target = staging.resolve(entry.getName()).normalize();
@@ -329,6 +379,24 @@ public final class SbkGemRemoteAgentMain {
         return path;
     }
 
+    private static long parseLong(String value, String description) throws IOException {
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException exception) {
+            throw new IOException("Invalid " + description + ": " + value, exception);
+        }
+    }
+
+    private static boolean parseBoolean(String value, String description) throws IOException {
+        if ("true".equalsIgnoreCase(value)) {
+            return true;
+        }
+        if ("false".equalsIgnoreCase(value)) {
+            return false;
+        }
+        throw new IOException("Invalid " + description + ": " + value);
+    }
+
     private static void move(Path source, Path destination) throws IOException {
         try {
             Files.move(source, destination, StandardCopyOption.ATOMIC_MOVE);
@@ -341,11 +409,22 @@ public final class SbkGemRemoteAgentMain {
         if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
             return;
         }
-        try (Stream<Path> entries = Files.walk(path)) {
-            for (Path entry : entries.sorted(Comparator.reverseOrder()).toList()) {
-                Files.deleteIfExists(entry);
+        Files.walkFileTree(path, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
+                Files.deleteIfExists(file);
+                return FileVisitResult.CONTINUE;
             }
-        }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path directory, IOException failure) throws IOException {
+                if (failure != null) {
+                    throw failure;
+                }
+                Files.deleteIfExists(directory);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
     static void stopProcessTree(Process process) {

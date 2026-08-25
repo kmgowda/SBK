@@ -62,6 +62,8 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     private final Set<Long> registeredClientIDs;
     private final Map<Long, ClientFailure> clientFailures;
     private boolean startReleased;
+    /** Whether every expected coordinated client has registered and is waiting for controller release. */
+    private boolean startReady;
     private String registrationFailure;
     private int maximumRegisteredClients;
 
@@ -129,6 +131,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
         this.registeredClientIDs = new HashSet<>();
         this.clientFailures = new LinkedHashMap<>();
         this.startReleased = !coordinatedStart;
+        this.startReady = !coordinatedStart;
         this.registrationFailure = null;
         this.maximumRegisteredClients = 0;
     }
@@ -214,11 +217,7 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
         }
         pendingRegistrations.add(new PendingRegistration(responseObserver, clientID));
         if (registered >= params.getMaxConnections()) {
-            startReleased = true;
-            for (PendingRegistration registration : pendingRegistrations) {
-                completeRegistration(registration.observer(), registration.clientID());
-            }
-            pendingRegistrations.clear();
+            startReady = true;
             notifyAll();
         }
     }
@@ -255,18 +254,44 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
      *
      * @param timeout maximum wait duration
      * @param unit timeout unit
-     * @return true when the coordinated-start barrier was released normally
+     * @return true when every expected client is registered and waiting for release
      * @throws InterruptedException if the waiting controller thread is interrupted
      */
     public synchronized boolean awaitCoordinatedStart(long timeout, TimeUnit unit) throws InterruptedException {
         final long timeoutNanos = unit.toNanos(timeout);
         final long started = System.nanoTime();
         long remaining = timeoutNanos;
-        while (!startReleased && registrationFailure == null && remaining > 0) {
+        while (!startReady && registrationFailure == null && remaining > 0) {
             TimeUnit.NANOSECONDS.timedWait(this, remaining);
             remaining = timeoutNanos - (System.nanoTime() - started);
         }
-        return startReleased;
+        return startReady && registrationFailure == null;
+    }
+
+    /**
+     * Release every prepared client after the controller has started latency aggregation.
+     *
+     * @return number of coordinated clients released
+     * @throws IllegalStateException when all expected clients have not registered
+     */
+    public synchronized int releaseCoordinatedStart() {
+        if (registrationFailure != null) {
+            throw new IllegalStateException("SBM coordinated start was aborted: " + registrationFailure);
+        }
+        if (!startReady) {
+            throw new IllegalStateException("SBM coordinated start is not ready for release");
+        }
+        if (startReleased) {
+            return 0;
+        }
+        startReleased = true;
+        final int released = pendingRegistrations.size();
+        for (PendingRegistration registration : pendingRegistrations) {
+            completeRegistration(registration.observer(), registration.clientID());
+        }
+        pendingRegistrations.clear();
+        notifyAll();
+        return released;
     }
 
     /**
@@ -432,9 +457,10 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     public synchronized void closeClient(io.sbp.grpc.ClientID request,
                                          io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         // Decrement counters upon client disconnect and acknowledge
-        registeredClientIDs.remove(request.getId());
-        countConnections.decrementConnections();
-        connections.decrementAndGet();
+        if (registeredClientIDs.remove(request.getId())) {
+            countConnections.decrementConnections();
+            connections.decrementAndGet();
+        }
         if (responseObserver != null) {
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();

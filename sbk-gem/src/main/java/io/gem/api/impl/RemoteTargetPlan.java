@@ -13,7 +13,6 @@ package io.gem.api.impl;
 import io.gem.api.ConnectionConfig;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 /** Maps logical SBK clients to unique physical remote deployment targets. */
@@ -28,19 +27,22 @@ final class RemoteTargetPlan {
      * Build a target plan from resolved absolute remote directories.
      *
      * @param connections SSH connections
+     * @param endpointIdentities authenticated network endpoint identities corresponding to the connections
      * @param directories resolved absolute directories corresponding to the connections
      * @return immutable target plan
      * @throws IllegalArgumentException when the array lengths differ
      */
-    static RemoteTargetPlan create(ConnectionConfig[] connections, String[] directories) {
-        if (connections.length != directories.length) {
-            throw new IllegalArgumentException("Connection and remote-directory counts must match");
+    static RemoteTargetPlan create(ConnectionConfig[] connections, String[] endpointIdentities,
+                                   String[] directories) {
+        if (connections.length != endpointIdentities.length || connections.length != directories.length) {
+            throw new IllegalArgumentException("Connection, endpoint-identity, and remote-directory counts "
+                    + "must match");
         }
         final int[] representatives = new int[connections.length];
         final Map<RemoteTarget, Integer> firstByTarget = new HashMap<>();
         for (int index = 0; index < connections.length; index++) {
             final int currentIndex = index;
-            final RemoteTarget target = target(connections[index], directories[index]);
+            final RemoteTarget target = target(connections[index], endpointIdentities[index], directories[index]);
             representatives[index] = firstByTarget.computeIfAbsent(target, ignored -> currentIndex);
         }
         return new RemoteTargetPlan(representatives);
@@ -98,9 +100,8 @@ final class RemoteTargetPlan {
         return representativesSelected;
     }
 
-    static RemoteTarget target(ConnectionConfig connection, String directory) {
-        return new RemoteTarget(connection.getUserName(), connection.getHost().toLowerCase(Locale.ROOT),
-                connection.getPort(), directory);
+    static RemoteTarget target(ConnectionConfig connection, String endpointIdentity, String directory) {
+        return new RemoteTarget(connection.getUserName(), endpointIdentity, connection.getPort(), directory);
     }
 
     record RemoteTarget(String user, String host, int port, String directory) {

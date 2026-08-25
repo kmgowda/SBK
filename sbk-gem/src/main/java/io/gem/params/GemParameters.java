@@ -42,6 +42,13 @@ public sealed interface GemParameters extends Parameters permits GemParameterOpt
     String getLocalHost();
 
     /**
+     * Check whether the SBM callback address was explicitly supplied.
+     *
+     * @return true when {@code -localhost} was supplied by the user or YML launcher
+     */
+    boolean isLocalHostOption();
+
+    /**
      * to get SBM port number.
      *
      * @return SBM port number.

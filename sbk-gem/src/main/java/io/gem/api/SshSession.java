@@ -13,17 +13,24 @@ package io.gem.api;
 import io.sbk.system.Printer;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.session.ClientSession;
+import org.apache.sshd.scp.client.ScpClient;
+import org.apache.sshd.scp.client.ScpClientCreator;
 import org.apache.sshd.sftp.client.SftpClientFactory;
 import org.apache.sshd.sftp.client.fs.SftpFileSystem;
 
 import javax.annotation.concurrent.GuardedBy;
+import java.io.BufferedInputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ConnectException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -34,16 +41,18 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.LongConsumer;
 
 /**
  * Lifecycle wrapper around an SSH client/session for a single connection.
  *
- * <p>Encapsulates connect, command execution, SFTP file copy, and graceful shutdown,
+ * <p>Encapsulates connect, command execution, bulk SCP transfer, SFTP metadata operations, and graceful shutdown,
  * exposing async methods returning {@link CompletableFuture}s and routing connection/control,
  * transfer, and long-running command work to separate execution resources. Session state is protected by a short-held
  * lifecycle lock; network and file operations never execute while holding it.
  */
 final public class SshSession {
+    private static final int COPY_BUFFER_SIZE = 4 * 1024 * 1024;
 
     /**
      * A bounded operation performed against the remote Apache MINA SFTP file system.
@@ -76,7 +85,7 @@ final public class SshSession {
     /** Bounded executor for SSH connection and control-plane operations. */
     final private ExecutorService controlExecutor;
 
-    /** Bounded executor for SFTP copies and other deployment data movement. */
+    /** Bounded executor for SCP copies and other deployment data movement. */
     final private ExecutorService transferExecutor;
 
     /** Virtual-thread executor for commands that remain active for a complete benchmark. */
@@ -227,6 +236,45 @@ final public class SshSession {
         }
     }
 
+    /**
+     * Return the authenticated network endpoint used by this SSH session.
+     *
+     * <p>The numeric address lets orchestration collapse aliases such as {@code localhost}
+     * and {@code 127.0.0.1} before performing physical deployment work. The configured
+     * host name remains available through {@link #connection} for user-facing diagnostics.
+     *
+     * @return normalized numeric address, or the normalized endpoint text when unavailable
+     * @throws ConnectException when the SSH session is unavailable
+     */
+    public String getRemoteEndpointIdentity() throws ConnectException {
+        final SocketAddress connectAddress = getSession().getConnectAddress();
+        if (connectAddress instanceof InetSocketAddress inetAddress) {
+            if (inetAddress.getAddress() != null) {
+                return inetAddress.getAddress().getHostAddress().toLowerCase(Locale.ROOT);
+            }
+            return inetAddress.getHostString().toLowerCase(Locale.ROOT);
+        }
+        return connectAddress.toString().toLowerCase(Locale.ROOT);
+    }
+
+    /**
+     * Return the numeric controller address selected by the authenticated SSH route.
+     *
+     * <p>This address is suitable for advertising controller services back to the same remote host and avoids
+     * depending on remote DNS resolution of the controller hostname.
+     *
+     * @return numeric local address of the SSH connection
+     * @throws ConnectException when the SSH session is unavailable or has no resolved IP address
+     */
+    public String getLocalRouteAddress() throws ConnectException {
+        final SocketAddress localAddress = getSession().getLocalAddress();
+        if (localAddress instanceof InetSocketAddress inetAddress && inetAddress.getAddress() != null) {
+            return inetAddress.getAddress().getHostAddress();
+        }
+        throw new ConnectException("Authenticated SSH session to host '" + connection.getHost()
+                + "' has no resolved local route address: " + localAddress);
+    }
+
 
     /**
      * This method is responsible for running commands but throws ConnectException if it occurs.
@@ -299,7 +347,7 @@ final public class SshSession {
     }
 
     /**
-     * Copy one local file to an exact remote path asynchronously.
+     * Copy one local file to an exact remote path with bulk SCP.
      *
      * @param srcPath local source file
      * @param dstPath remote destination file
@@ -309,11 +357,38 @@ final public class SshSession {
      */
     public CompletableFuture<Void> copyFileAsync(String srcPath, String dstPath, long timeoutSeconds)
             throws ConnectException {
-        return runRemoteTransferOperationAsync(fileSystem -> {
-            final Path destination = fileSystem.getPath(dstPath);
-            Files.copy(Path.of(srcPath), destination, StandardCopyOption.REPLACE_EXISTING);
+        return copyFileAsync(srcPath, dstPath, timeoutSeconds, ignored -> { });
+    }
+
+    /**
+     * Copy one local file to an exact remote path and report transferred bytes.
+     *
+     * @param srcPath local source file
+     * @param dstPath remote destination file
+     * @param timeoutSeconds maximum copy duration in seconds
+     * @param copyProgress callback receiving each completed byte increment
+     * @return copy completion
+     * @throws ConnectException when no SSH session is available
+     */
+    public CompletableFuture<Void> copyFileAsync(String srcPath, String dstPath, long timeoutSeconds,
+                                                  LongConsumer copyProgress) throws ConnectException {
+        final ClientSession sshSession = getSession();
+        final Path source = Path.of(srcPath);
+        return submitBounded(transferExecutor, () -> {
+            final ScpClient client = ScpClientCreator.instance().createScpClient(sshSession);
+            try (InputStream input = new ProgressInputStream(new BufferedInputStream(
+                    Files.newInputStream(source), COPY_BUFFER_SIZE), copyProgress)) {
+                client.upload(input, dstPath, Files.size(source), Files.getPosixFilePermissions(source), null);
+            } catch (IOException exception) {
+                throw scpFailure(exception);
+            }
             return null;
-        }, timeoutSeconds);
+        }, () -> { }, timeoutSeconds);
+    }
+
+    private IOException scpFailure(IOException exception) {
+        return new IOException("SBK-GEM: Apache MINA SCP bulk transfer failed on host '"
+                + connection.getHost() + ":" + connection.getPort() + "': " + exception.getMessage(), exception);
     }
 
     /**
@@ -386,6 +461,33 @@ final public class SshSession {
             return completion;
         }
         return completion;
+    }
+
+    private static final class ProgressInputStream extends FilterInputStream {
+        private final LongConsumer progress;
+
+        private ProgressInputStream(InputStream input, LongConsumer progress) {
+            super(input);
+            this.progress = progress;
+        }
+
+        @Override
+        public int read() throws IOException {
+            final int value = super.read();
+            if (value >= 0) {
+                progress.accept(1L);
+            }
+            return value;
+        }
+
+        @Override
+        public int read(byte[] bytes, int offset, int length) throws IOException {
+            final int count = in.read(bytes, offset, length);
+            if (count > 0) {
+                progress.accept(count);
+            }
+            return count;
+        }
     }
 
     private static long saturatedIncrement(long value) {

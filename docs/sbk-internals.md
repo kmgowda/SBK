@@ -1564,6 +1564,15 @@ flowchart TB
 use to talk to SBM. It is a gRPC service defined in
 [`sbp.proto`](../sbk-api/src/main/proto/sbp.proto), with six RPCs:
 
+For an SBK-GEM coordinated run, registration is also the prepared-client
+boundary. Remote SBK opens the storage and creates its reader/writer objects
+before `GrpcLogger` registers. The controller starts SBM's existing aggregation
+consumer only after every prepared client has registered, keeping deployment and
+driver initialization outside the aggregate reporting clock. This is orchestration
+ordering only; it adds no condition, state, or dispatch to PerL or SBM ingestion
+iterations. Because remote PerL and SBM rotate independent periodic windows, the
+first aggregate output can require up to two reporting intervals.
+
 | RPC | Request | Response | Purpose |
 |---|---|---|---|
 | `getVersion` | Empty | `Version(major, minor)` | Client checks protocol compatibility |
@@ -1977,16 +1986,30 @@ GEM-->>User: printRemoteResults()
 ```
 
 The reconciliation identity is content, not only the displayed SBK version.
-GEM verifies the local pathing JAR dependency closure, hashes every file,
-contained relative symbolic link, normalized directory mode, and executable
-file bit, and caches a content-addressed OS-specific archive locally.
-Absolute or escaping links are rejected. Cache creation is serialized by a
-per-identity file lock, and an archive SHA-256 sidecar makes interrupted or
-corrupted cache entries self-repairing. All nodes are probed concurrently. A
-valid exact identity is reused, so the full distribution is not transferred on every run. Physical work is
-deduplicated by `(SSH user, case-insensitive host, port, resolved case-sensitive remote directory)`,
+Gradle records a build identity covering the installed runtime dependencies,
+launchers, Java bootstrap files, and remote agent. GEM verifies the local
+pathing JAR dependency closure and uses that identity to select a cached
+OS-specific plain-tar archive without rehashing the installed runtime or
+archive on every execution. Creating a new archive hashes the runtime files
+once, preserves contained relative symbolic links and executable state, and
+calculates the archive SHA-256 while writing it. Absolute or escaping links are
+rejected. Cache creation is serialized by a per-identity file lock; digest and
+size sidecars detect incomplete entries. The remote agent always performs full
+archive and per-file verification, and a transferred-archive digest mismatch
+causes one local rebuild and retry. All nodes are probed concurrently. A valid
+exact identity is reused, so the full distribution is not transferred on every run. Physical work is
+deduplicated by `(SSH user, authenticated network endpoint, port, resolved case-sensitive remote directory)`,
 so repeated workload entries sharing one installation do not race to replace it
 while distinct paths or remote accounts remain independent.
+The separate first-time JDK deployment creates or reuses one cached plain-tar
+archive, sends it through a single Apache MINA SCP stream per active target,
+and invokes the standard remote `tar` executable for staging extraction. SBK
+archives use a single-file SCP stream and Java-agent extraction. SFTP is limited
+to remote-directory resolution and small Java-agent installation; runtime
+lifecycle operations execute locally through one typed Java-agent request per host. This avoids
+serialized per-entry payload round trips. JDK and SBK copies report aggregate bytes,
+completion percentage, MiB/s, and ETA without per-file logging; once all bytes
+arrive, progress identifies the remaining remote metadata finalization phase.
 
 Remote activation is transactional: the uploaded archive SHA-256 is checked,
 the archive is extracted to a unique staging directory, its operating-system
@@ -1996,22 +2019,24 @@ or interrupted staging data is cleaned and cannot become a launch target.
 Missing identities are uploaded automatically. An invalid final directory
 bearing the expected managed identity is repaired automatically. The current verified
 runtime is retained for subsequent benchmarks. With the default
-`runtimecleanup=true`, an Apache MINA SFTP lifecycle lock and current-runtime
-marker remove every non-current managed identity only after its controller-
-refreshed leases are no longer active, regardless of whether its SBK version is
+`runtimecleanup=true`, a remote-local lifecycle lock and current-runtime marker
+remove every non-current managed identity only after its controller-refreshed
+leases are no longer active, regardless of whether its SBK version is
 lower or higher. Each controller reserves its identity before probe, transfer,
 or activation, preventing overlapping GEM processes from retiring an identity
 another process is preparing.
 Concurrent benchmarks may therefore retain two versions temporarily, but an
 active runtime is never removed. Inactive runtime directories are atomically
 renamed out of the managed namespace while the lifecycle lock is held, then
-deleted by a separate SFTP operation outside that lock. Large recursive
+deleted by the remote Java agent outside that lock. Large recursive
 deletions therefore do not block lease acquisition or benchmark startup. Apache
-MINA SFTP also resolves and creates the deployment directory. Login shells, zsh
+MINA SFTP resolves and creates the deployment directory. Login shells, zsh
 glob behavior, PID probes, and detached shell jobs are not used for the
-lifecycle. A packaged Java agent performs OS/JDK probing, archive extraction,
-verification, and benchmark launch through Java APIs; generated remote shell
-scripts and platform tools are not used. The
+lifecycle. A packaged Java agent performs OS/JDK probing, lifecycle state
+management, SBK archive extraction, verification, cleanup, and benchmark launch
+through Java APIs. Generated remote shell
+scripts are not used; the bulk transport requires standard remote `scp`, and
+first-time managed-JDK extraction requires standard remote `tar`. The
 rule also applies to the controller when it is selected as a deployment node.
 The controller-side managed bundle cache
 also retains only the current identity; per-archive locks protect bundles in
@@ -2020,8 +2045,10 @@ user-managed JDKs are outside this cleanup boundary.
 
 The controller Java major version defines the minimum remote Java release. GEM
 first validates the JDK selected by `javadir` or remote `PATH`. If it is absent
-or older, the controller JDK is hashed and copied separately through MINA
-SFTP. Java content and executable/POSIX permission state participate in its
+or older, a cached filesystem-metadata identity reuses the controller JDK's
+previously calculated full-content digest when the installed JDK is unchanged;
+otherwise the controller JDK is hashed and copied separately through a bulk
+Apache MINA SCP stream. Java content and executable/POSIX permission state participate in its
 identity; a matching marker whose `bin/java` or `bin/javac` is unusable is
 retired and repaired. Java and SBK have independent identities and reuse markers,
 so either can be reused or updated without transferring the other. The remote agent launches
@@ -2075,31 +2102,38 @@ per-operation measurement path.
 SBK-GEM uses **Apache Mina SSHD** (a pure-Java SSH client; no native
 binary, no `ssh` shell-out). Each remote node is a `SshSession`:
 
-Connection setup deliberately follows the local user's SSH trust and credential
-model. By default, the server key must match an entry in
-`~/.ssh/known_hosts`, or the file selected by `-knownhosts <path>`; an unknown or
-changed server is rejected before GEM copies or executes anything. The explicit
-`-hostkeycheck false` escape hatch is only for isolated environments because it
-allows an attacker to impersonate a benchmark node. For client
-authentication, GEM can use identities exposed by `SSH_AUTH_SOCK` and key files
+Host-key verification is disabled by default so unattended passwordless SSH can
+reach agent and key-file authentication without being blocked by stale trust
+data. When `-hostkeycheck true` is selected, a previously unknown server key is accepted and persisted in
+`~/.ssh/known_hosts`, or the file selected by `-knownhosts <path>`; a changed
+server key is rejected before GEM copies or executes anything. This accept-new
+trust-on-first-use behavior is serialized per known-hosts file and logs the new
+fingerprint. For client authentication, GEM can use
+identities exposed by `SSH_AUTH_SOCK` and key files
 selected by the local OpenSSH configuration (including conventional `~/.ssh`
-keys). An explicit `-gempass` value, or `SBK_GEM_SSH_PASSWD`, enables password
-authentication as an optional fallback. Therefore, an empty password is not an
-error: it means "attempt passwordless public-key authentication." Using an SSH
+keys). An explicit `-gempass` value, or `SBK_GEM_SSH_PASSWD`, makes password
+authentication the first method and retains agent/key authentication as the
+fallback. Supplying that password also disables host-key verification regardless
+of `-hostkeycheck`, allowing password login when `known_hosts` is stale or the
+server key changed. Therefore, an empty password is not an error: it means "attempt
+passwordless public-key authentication." Using an SSH
 agent is the normal way to make a passphrase-protected key available without
 putting the passphrase in an SBK file.
 
 ```mermaid
 flowchart LR
-    START["Connect to node"] --> HOST{"Host key matches known_hosts?"}
-    HOST -->|No| REJECT["Reject unknown or changed server"]
-    HOST -->|Yes| AGENT["Try identities from ssh-agent"]
+    START["Connect to node"] --> PASS{"Password configured?"}
+    PASS -->|Yes| PASSWORD["Disable host-key check and try password"]
+    PASS -->|No| HOST{"Host key state?"}
+    HOST -->|Unknown| RECORD["Record new key and fingerprint"]
+    HOST -->|Changed| REJECT["Reject changed server key"]
+    HOST -->|Known| AGENT["Try identities from ssh-agent"]
+    RECORD --> AGENT
+    PASSWORD -->|Rejected| AGENT
     AGENT --> FILES["Try OpenSSH-configured key files"]
-    FILES --> PASS{"Optional password configured?"}
-    PASS -->|Yes| PASSWORD["Try password authentication"]
-    PASS -->|No| RESULT{"Any authentication succeeded?"}
-    PASSWORD --> RESULT
-    RESULT -->|Yes| READY["Authenticated SshSession"]
+    PASSWORD -->|Accepted| READY["Authenticated SshSession"]
+    FILES --> RESULT{"Key authentication succeeded?"}
+    RESULT -->|Yes| READY
     RESULT -->|No| FAIL["Report host-specific authentication failure"]
 
     classDef good fill:#dcfce7,stroke:#166534,color:#000
@@ -2115,6 +2149,14 @@ timeout. Failures preserve the node, user, port, and underlying cause so a bad
 credential or unreachable host is reported at the SSH boundary rather than
 later as a misleading Java-discovery timeout.
 
+After authentication, each session also exposes the numeric controller address
+selected by the operating system's route to that remote node. Unless
+`-localhost` explicitly overrides the callback address, GEM places this
+route-selected address in that node's `-sbm` argument. Remote clients therefore
+do not depend on DNS being able to resolve the controller hostname. This is
+resolved per node because a multi-homed controller can reach different node
+groups through different interfaces.
+
 All remote operations -- `createSessionAsync()`, `runCommandAsync()`,
 `copyFileAsync()`, and `runRemoteFileOperationAsync()` -- return
 `CompletableFuture`. The orchestrator chains them via
@@ -2122,7 +2164,7 @@ All remote operations -- `createSessionAsync()`, `runCommandAsync()`,
 time, not the sum of node times.
 
 A subtle correctness point: `RemoteTargetPlan` *deduplicates* physical
-operations targeting the same user, host, port, and resolved path. Remote path
+operations targeting the same user, authenticated network endpoint, port, and resolved path. Remote path
 case is preserved because Linux and some macOS filesystems are case-sensitive.
 If the same target
 appears multiple times in `-nodes` (e.g. to stress a single client
@@ -2139,12 +2181,15 @@ deployment deadline. The remote agent captures the launched process tree and
 force-kills any surviving descendants after its graceful shutdown interval.
 
 Execution resources are partitioned by orchestration workload. SSH connection
-and control operations run on a fixed-size platform-thread pool; SFTP runtime
+and control operations run on a fixed-size platform-thread pool; bulk SCP runtime
 and JDK copies use a smaller independent fixed-size transfer pool; remote SBK
 commands and the coordinated-registration waiter use virtual threads because
 they remain blocked for most or all of a benchmark. Node count therefore no
 longer determines the number of controller platform threads, and a saturated
 transfer lane cannot prevent control-plane cancellation or lease work.
+Lease heartbeats are paused and drained before the final lease acquisition and
+retirement transition, then restarted. This prevents a heartbeat SFTP operation
+from racing the atomic lease/current-runtime update on a slow remote filesystem.
 
 ---
 

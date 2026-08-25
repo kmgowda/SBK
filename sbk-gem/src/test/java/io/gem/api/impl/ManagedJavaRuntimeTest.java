@@ -23,6 +23,8 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -50,6 +52,27 @@ final class ManagedJavaRuntimeTest {
     }
 
     @Test
+    void reportsBufferedJdkCopyProgressWithoutRecountingReuse() throws IOException {
+        final Path javaHome = createJavaHome();
+        Files.write(javaHome.resolve("large-runtime-image"), new byte[1024 * 1024 + 7]);
+        final Path remoteParent = Files.createDirectories(temporaryDirectory.resolve("remote"));
+        final ManagedJavaRuntime runtime = ManagedJavaRuntime.create(javaHome, 25);
+        final AtomicLong copiedBytes = new AtomicLong();
+        final AtomicInteger updates = new AtomicInteger();
+
+        runtime.install(remoteParent.getFileSystem(), remoteParent.toString(), copied -> {
+            copiedBytes.addAndGet(copied);
+            updates.incrementAndGet();
+        });
+
+        assertEquals(runtime.contentBytes(), copiedBytes.get());
+        assertTrue(updates.get() < 20);
+        copiedBytes.set(0);
+        runtime.install(remoteParent.getFileSystem(), remoteParent.toString(), copiedBytes::addAndGet);
+        assertEquals(0, copiedBytes.get());
+    }
+
+    @Test
     void changedJdkBytesProduceAnotherIdentity() throws IOException {
         final Path javaHome = createJavaHome();
         final ManagedJavaRuntime first = ManagedJavaRuntime.create(javaHome, 25);
@@ -68,6 +91,25 @@ final class ManagedJavaRuntimeTest {
         final ManagedJavaRuntime changed = ManagedJavaRuntime.create(javaHome, 25);
 
         assertTrue(executable);
+        assertNotEquals(first.directoryName(), changed.directoryName());
+    }
+
+    @Test
+    void cachesFullJdkDigestUntilFilesystemMetadataChanges() throws IOException {
+        final Path javaHome = createJavaHome();
+        final Path cache = temporaryDirectory.resolve("cache");
+        final ManagedJavaRuntime first = ManagedJavaRuntime.create(javaHome, 25, cache);
+        final ManagedJavaRuntime cached = ManagedJavaRuntime.create(javaHome, 25, cache);
+
+        assertEquals(first.directoryName(), cached.directoryName());
+        try (var files = Files.list(cache)) {
+            assertEquals(1, files.filter(path -> java.util.Objects.requireNonNull(path.getFileName()).toString()
+                    .endsWith(".properties")).count());
+        }
+
+        Files.writeString(javaHome.resolve("release"), "JAVA_VERSION=25_CHANGED", StandardCharsets.UTF_8);
+        final ManagedJavaRuntime changed = ManagedJavaRuntime.create(javaHome, 25, cache);
+
         assertNotEquals(first.directoryName(), changed.directoryName());
     }
 

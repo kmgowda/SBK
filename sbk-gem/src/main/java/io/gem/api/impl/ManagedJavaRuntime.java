@@ -10,6 +10,12 @@
 
 package io.gem.api.impl;
 
+import io.gem.api.SshSession;
+import io.sbk.config.ExitCode;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.archivers.tar.TarConstants;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -23,28 +29,51 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.function.LongConsumer;
 import java.util.stream.Stream;
 
 /** Content-addressed controller JDK copied independently from the SBK runtime. */
 final class ManagedJavaRuntime {
     private static final String MARKER = ".sbk-java.sha256";
-    private static final int BUFFER_SIZE = 64 * 1024;
+    private static final String IDENTITY_CACHE_FORMAT = "1";
+    private static final int HASH_BUFFER_SIZE = 64 * 1024;
+    private static final int COPY_BUFFER_SIZE = 256 * 1024;
+    private static final int FILE_COPY_CONCURRENCY = 8;
     private static final int IDENTITY_CHARACTERS = 24;
+    private static final LongConsumer NO_COPY_PROGRESS = ignored -> { };
     private final Path localHome;
     private final String digest;
     private final String directoryName;
+    private final long contentBytes;
+    private final Path cacheDirectory;
+    private volatile Path archive;
+    private volatile long archiveBytes;
 
-    private ManagedJavaRuntime(Path localHome, String digest, String directoryName) {
+    private ManagedJavaRuntime(Path localHome, String digest, String directoryName, long contentBytes,
+                               Path cacheDirectory) {
         this.localHome = localHome;
         this.digest = digest;
         this.directoryName = directoryName;
+        this.contentBytes = contentBytes;
+        this.cacheDirectory = cacheDirectory;
     }
 
     static ManagedJavaRuntime create(Path javaHome, int major) throws IOException {
@@ -53,6 +82,7 @@ final class ManagedJavaRuntime {
             throw new IOException("Controller JDK is incomplete: " + home);
         }
         final MessageDigest digest = newDigest();
+        long contentBytes = 0;
         try (Stream<Path> entries = Files.walk(home)) {
             for (Path path : entries.sorted(Comparator.comparing(Path::toString)).toList()) {
                 final String relative = home.relativize(path).toString().replace('\\', '/');
@@ -62,7 +92,9 @@ final class ManagedJavaRuntime {
                 } else if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
                     update(digest, "D\0");
                 } else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
-                    update(digest, "F\0" + Files.size(path) + "\0");
+                    final long fileBytes = Files.size(path);
+                    contentBytes += fileBytes;
+                    update(digest, "F\0" + fileBytes + "\0");
                     hashFile(digest, path);
                 }
                 if (!Files.isSymbolicLink(path)) {
@@ -71,26 +103,120 @@ final class ManagedJavaRuntime {
             }
         }
         final String identity = HexFormat.of().formatHex(digest.digest());
+        return runtime(home, major, identity, contentBytes, null);
+    }
+
+    /**
+     * Create a managed JDK identity, reusing a persisted full-content digest while filesystem metadata is unchanged.
+     *
+     * @param javaHome controller JDK home
+     * @param major controller Java major version
+     * @param cacheDirectory local SBK-GEM cache directory
+     * @return content-addressed managed Java runtime
+     * @throws IOException when the JDK or identity cache cannot be read
+     */
+    static ManagedJavaRuntime create(Path javaHome, int major, Path cacheDirectory) throws IOException {
+        final Path home = javaHome.toAbsolutePath().normalize();
+        if (!Files.isExecutable(home.resolve("bin/java")) || !Files.isExecutable(home.resolve("bin/javac"))) {
+            throw new IOException("Controller JDK is incomplete: " + home);
+        }
+        Files.createDirectories(cacheDirectory);
+        final String cacheKey = sha256((home + "\0" + major).getBytes(StandardCharsets.UTF_8));
+        final Path identityFile = cacheDirectory.resolve("sbk-java-identity-" + cacheKey + ".properties");
+        final Path lockFile = identityFile.resolveSibling(identityFile.getFileName() + ".lock");
+        synchronized (ManagedJavaRuntime.class) {
+            try (FileChannel channel = FileChannel.open(lockFile, java.nio.file.StandardOpenOption.CREATE,
+                    java.nio.file.StandardOpenOption.WRITE);
+                 FileLock ignored = channel.lock()) {
+                final MetadataIdentity metadata = metadataIdentity(home);
+                final Properties cached = loadIdentity(identityFile);
+                final String cachedDigest = cached.getProperty("content.sha256", "");
+                if (IDENTITY_CACHE_FORMAT.equals(cached.getProperty("format.version"))
+                        && home.toString().equals(cached.getProperty("java.home"))
+                        && Integer.toString(major).equals(cached.getProperty("java.major"))
+                        && metadata.digest().equals(cached.getProperty("metadata.sha256"))
+                        && isSha256(cachedDigest)) {
+                    return runtime(home, major, cachedDigest, metadata.contentBytes(), cacheDirectory);
+                }
+                final ManagedJavaRuntime runtime = create(home, major);
+                final Properties identity = new Properties();
+                identity.setProperty("format.version", IDENTITY_CACHE_FORMAT);
+                identity.setProperty("java.home", home.toString());
+                identity.setProperty("java.major", Integer.toString(major));
+                identity.setProperty("metadata.sha256", metadata.digest());
+                identity.setProperty("content.sha256", runtime.digest);
+                writeIdentity(identityFile, identity);
+                return runtime(home, major, runtime.digest, runtime.contentBytes, cacheDirectory);
+            }
+        }
+    }
+
+    private static ManagedJavaRuntime runtime(Path home, int major, String identity, long contentBytes,
+                                              Path cacheDirectory) {
         return new ManagedJavaRuntime(home, identity,
-                "sbk-java-" + major + "-" + identity.substring(0, IDENTITY_CHARACTERS));
+                "sbk-java-" + major + "-" + identity.substring(0, IDENTITY_CHARACTERS), contentBytes,
+                cacheDirectory);
     }
 
     String directoryName() {
         return directoryName;
     }
 
+    long contentBytes() {
+        return contentBytes;
+    }
+
+    Path prepareArchive() throws IOException {
+        if (cacheDirectory == null) {
+            throw new IOException("Managed JDK archive cache is unavailable");
+        }
+        final Path target = cacheDirectory.resolve(directoryName + ".tar");
+        final Path descriptor = target.resolveSibling(target.getFileName() + ".properties");
+        final Path lock = target.resolveSibling(target.getFileName() + ".lock");
+        synchronized (this) {
+            try (FileChannel channel = FileChannel.open(lock, java.nio.file.StandardOpenOption.CREATE,
+                    java.nio.file.StandardOpenOption.WRITE);
+                 FileLock ignored = channel.lock()) {
+                final Properties metadata = loadIdentity(descriptor);
+                if (Files.isRegularFile(target) && digest.equals(metadata.getProperty("content.sha256"))
+                        && Long.toString(Files.size(target)).equals(metadata.getProperty("archive.bytes"))) {
+                    archive = target;
+                    archiveBytes = Files.size(target);
+                    return target;
+                }
+                createArchive(target);
+                final Properties updated = new Properties();
+                updated.setProperty("content.sha256", digest);
+                updated.setProperty("archive.bytes", Long.toString(Files.size(target)));
+                writeIdentity(descriptor, updated);
+                archive = target;
+                archiveBytes = Files.size(target);
+                return target;
+            }
+        }
+    }
+
+    long archiveBytes() {
+        return archiveBytes;
+    }
+
     String install(java.nio.file.FileSystem fileSystem, String parentDirectory) throws IOException {
+        return install(fileSystem, parentDirectory, NO_COPY_PROGRESS);
+    }
+
+    String install(java.nio.file.FileSystem fileSystem, String parentDirectory, LongConsumer copyProgress)
+            throws IOException {
         final Path parent = fileSystem.getPath(parentDirectory);
         final Path destination = parent.resolve(directoryName);
         final Path marker = destination.resolve(MARKER);
         if (hasUsableExpectedIdentity(destination)) {
             return destination.toString();
         }
-        retireInvalidIdentity(destination);
+        final Path retired = retireInvalidIdentity(destination);
         final Path staging = parent.resolve(directoryName + ".staging." + UUID.randomUUID());
         Files.createDirectories(staging);
         try {
-            copyTree(staging);
+            copyTree(staging, retired, copyProgress);
             Files.writeString(staging.resolve(MARKER), digest + System.lineSeparator(), StandardCharsets.UTF_8);
             if (hasUsableExpectedIdentity(destination)) {
                 return destination.toString();
@@ -109,56 +235,266 @@ final class ManagedJavaRuntime {
         }
     }
 
+    CompletableFuture<String> installBulk(SshSession session, String parentDirectory, long timeoutSeconds,
+                                           LongConsumer copyProgress) throws java.net.ConnectException {
+        final Path localArchive = Objects.requireNonNull(archive, "Managed JDK archive was not prepared");
+        final CompletableFuture<BulkInstall> prepared = session.runRemoteTransferOperationAsync(fileSystem -> {
+            final Path parent = fileSystem.getPath(parentDirectory);
+            final Path destination = parent.resolve(directoryName);
+            if (hasUsableExpectedIdentity(destination)) {
+                return new BulkInstall(destination.toString(), null, null, null, true);
+            }
+            final Path retired = retireInvalidIdentity(destination);
+            final Path staging = parent.resolve(directoryName + ".staging." + UUID.randomUUID());
+            Files.createDirectories(staging);
+            return new BulkInstall(destination.toString(), staging.toString(), staging + ".tar",
+                    retired == null ? null : retired.toString(), false);
+        }, timeoutSeconds);
+        return prepared.thenCompose(plan -> {
+            if (plan.available()) {
+                return CompletableFuture.completedFuture(plan.destination());
+            }
+            try {
+                final CompletableFuture<String> deployment = session.copyFileAsync(localArchive.toString(),
+                                plan.remoteArchive(), timeoutSeconds, copyProgress)
+                        .thenCompose(ignored -> extractBulkArchive(session, plan, timeoutSeconds))
+                        .thenCompose(ignored -> activateBulk(session, plan, timeoutSeconds));
+                deployment.whenComplete((installed, failure) -> cleanupBulkInstall(session, plan, timeoutSeconds));
+                return deployment;
+            } catch (java.net.ConnectException exception) {
+                return CompletableFuture.failedFuture(exception);
+            }
+        });
+    }
+
+    private CompletableFuture<Void> extractBulkArchive(SshSession session, BulkInstall plan, long timeoutSeconds) {
+        final String command = "tar -xf " + quote(plan.remoteArchive()) + " -C " + quote(plan.staging());
+        try {
+            return session.runCommandAsync(command, true, timeoutSeconds).thenCompose(response -> {
+                if (response.returnCode == ExitCode.SUCCESS) {
+                    return CompletableFuture.completedFuture(null);
+                }
+                return CompletableFuture.failedFuture(new IOException("Remote JDK archive extraction failed: "
+                        + response.errOutputStream));
+            });
+        } catch (java.net.ConnectException exception) {
+            return CompletableFuture.failedFuture(exception);
+        }
+    }
+
+    private CompletableFuture<String> activateBulk(SshSession session, BulkInstall plan, long timeoutSeconds) {
+        try {
+            final CompletableFuture<String> activation = session.runRemoteTransferOperationAsync(fileSystem -> {
+                final Path staging = fileSystem.getPath(plan.staging());
+                final Path destination = fileSystem.getPath(plan.destination());
+                copyPermissions(localHome.resolve("bin/java"), staging.resolve("bin/java"));
+                copyPermissions(localHome.resolve("bin/javac"), staging.resolve("bin/javac"));
+                if (!isExecutable(staging.resolve("bin/java"))
+                        || !isExecutable(staging.resolve("bin/javac"))) {
+                    throw new IOException("Bulk SCP transfer did not preserve executable JDK files under "
+                            + staging + "; entries: " + listNames(staging));
+                }
+                Files.writeString(staging.resolve(MARKER), digest + System.lineSeparator(),
+                        StandardCharsets.UTF_8);
+                if (!hasUsableExpectedIdentity(destination)) {
+                    try {
+                        move(staging, destination);
+                    } catch (IOException exception) {
+                        if (!hasUsableExpectedIdentity(destination)) {
+                            throw new IOException("Managed JDK destination exists without the expected identity: "
+                                    + destination, exception);
+                        }
+                    }
+                }
+                return destination.toString();
+            }, timeoutSeconds);
+            return activation;
+        } catch (java.net.ConnectException exception) {
+            return CompletableFuture.failedFuture(exception);
+        }
+    }
+
+    private static void cleanupBulkInstall(SshSession session, BulkInstall plan, long timeoutSeconds) {
+        try {
+            session.runRemoteTransferOperationAsync(fileSystem -> {
+                if (plan.staging() != null) {
+                    deleteRecursively(fileSystem.getPath(plan.staging()));
+                }
+                if (plan.retired() != null) {
+                    deleteRecursively(fileSystem.getPath(plan.retired()));
+                }
+                if (plan.remoteArchive() != null) {
+                    Files.deleteIfExists(fileSystem.getPath(plan.remoteArchive()));
+                }
+                return null;
+            }, timeoutSeconds);
+        } catch (java.net.ConnectException ignored) {
+            // A later deployment cleanup can remove interrupted staging and retired trees.
+        }
+    }
+
+    private static List<String> listNames(Path directory) throws IOException {
+        try (Stream<Path> entries = Files.list(directory)) {
+            return entries.map(path -> Objects.requireNonNull(path.getFileName()).toString()).sorted().toList();
+        }
+    }
+
+    private static String quote(String value) {
+        if (value == null || value.isBlank() || value.indexOf('\n') >= 0 || value.indexOf('\r') >= 0
+                || value.indexOf('\0') >= 0) {
+            throw new IllegalArgumentException("Invalid remote JDK path");
+        }
+        return "'" + value.replace("'", "'\\''") + "'";
+    }
+
     private boolean hasUsableExpectedIdentity(Path destination) throws IOException {
         final Path marker = destination.resolve(MARKER);
         return Files.isRegularFile(marker) && digest.equals(Files.readString(marker).trim())
-                && Files.isExecutable(destination.resolve("bin/java"))
-                && Files.isExecutable(destination.resolve("bin/javac"));
+                && isExecutable(destination.resolve("bin/java"))
+                && isExecutable(destination.resolve("bin/javac"));
     }
 
-    private static void retireInvalidIdentity(Path destination) throws IOException {
+    private static boolean isExecutable(Path path) throws IOException {
+        try {
+            final Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path,
+                    LinkOption.NOFOLLOW_LINKS);
+            return permissions.contains(PosixFilePermission.OWNER_EXECUTE)
+                    || permissions.contains(PosixFilePermission.GROUP_EXECUTE)
+                    || permissions.contains(PosixFilePermission.OTHERS_EXECUTE);
+        } catch (UnsupportedOperationException exception) {
+            return Files.isExecutable(path);
+        }
+    }
+
+    private static Path retireInvalidIdentity(Path destination) throws IOException {
         if (!Files.exists(destination, LinkOption.NOFOLLOW_LINKS)) {
-            return;
+            return null;
         }
         final Path retired = destination.resolveSibling(destination.getFileName() + ".invalid." + UUID.randomUUID());
         try {
             move(destination, retired);
-            deleteRecursively(retired);
+            return retired;
         } catch (NoSuchFileException exception) {
             if (Files.exists(destination, LinkOption.NOFOLLOW_LINKS)) {
                 throw exception;
             }
+            return null;
         }
     }
 
-    private void copyTree(Path staging) throws IOException {
+    private void copyTree(Path staging, Path retired, LongConsumer copyProgress) throws IOException {
         try (Stream<Path> entries = Files.walk(localHome)) {
-            for (Path source : entries.toList()) {
-                final Path relative = localHome.relativize(source);
-                if (relative.getNameCount() == 0) {
-                    continue;
-                }
-                final Path target = staging.resolve(relative.toString());
-                if (Files.isSymbolicLink(source)) {
-                    Files.createDirectories(Objects.requireNonNull(target.getParent(),
-                            "JDK symbolic link has no parent"));
-                    Files.createSymbolicLink(target,
-                            remoteLinkTarget(target, Files.readSymbolicLink(source)));
-                } else if (Files.isDirectory(source, LinkOption.NOFOLLOW_LINKS)) {
-                    Files.createDirectories(target);
-                    copyPermissions(source, target);
-                } else if (Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) {
-                    Files.createDirectories(Objects.requireNonNull(target.getParent(),
-                            "JDK file has no parent"));
-                    try (InputStream input = new BufferedInputStream(Files.newInputStream(source));
-                         OutputStream output = new BufferedOutputStream(Files.newOutputStream(target))) {
-                        input.transferTo(output);
-                    }
-                    copyPermissions(source, target);
-                } else {
+            copyEntries(staging, retired, copyProgress, entries.filter(path -> !path.equals(localHome)).toList());
+        }
+    }
+
+    private void copyEntries(Path staging, Path retired, LongConsumer copyProgress, List<Path> entries)
+            throws IOException {
+        final List<JdkFile> files = new ArrayList<>();
+        for (Path entry : entries) {
+            if (Files.isRegularFile(entry, LinkOption.NOFOLLOW_LINKS)) {
+                files.add(new JdkFile(entry, Files.size(entry)));
+            }
+        }
+        files.sort(Comparator.comparingLong(JdkFile::size).reversed());
+        final Set<Path> createdDirectories = new HashSet<>();
+        final int workers = Math.min(FILE_COPY_CONCURRENCY, Math.max(1, files.size()));
+        try (ExecutorService executor = Executors.newFixedThreadPool(workers,
+                Thread.ofVirtual().name("sbk-gem-jdk-copy-", 0).factory())) {
+            final List<Future<?>> copies = new ArrayList<>(files.size() + 1);
+            if (retired != null) {
+                copies.add(executor.submit(() -> {
+                    deleteRecursively(retired);
+                    return null;
+                }));
+            }
+            for (JdkFile file : files) {
+                final Path source = file.path();
+                createParentDirectories(source.getParent(), staging, createdDirectories);
+                copies.add(executor.submit(() -> {
+                    copyFile(source, staging.resolve(localHome.relativize(source).toString()), copyProgress);
+                    return null;
+                }));
+            }
+            for (Path source : entries) {
+                if (Files.isDirectory(source, LinkOption.NOFOLLOW_LINKS)) {
+                    createParentDirectories(source.getParent(), staging, createdDirectories);
+                    createDirectory(source, staging, createdDirectories);
+                } else if (!Files.isSymbolicLink(source)
+                        && !Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) {
                     throw new IOException("Unsupported JDK filesystem entry: " + source);
                 }
             }
+            awaitCopies(copies);
+
+            final List<Future<?>> links = new ArrayList<>();
+            for (Path source : entries) {
+                if (Files.isSymbolicLink(source)) {
+                    final Path target = staging.resolve(localHome.relativize(source).toString());
+                    final Path linkTarget = Files.readSymbolicLink(source);
+                    links.add(executor.submit(() -> {
+                        Files.createSymbolicLink(target, remoteLinkTarget(target, linkTarget));
+                        return null;
+                    }));
+                }
+            }
+            awaitCopies(links);
+
+            final List<Future<?>> permissions = new ArrayList<>();
+            for (Path source : entries.stream()
+                    .filter(path -> !Files.isSymbolicLink(path))
+                    .sorted(Comparator.comparingInt(Path::getNameCount).reversed()).toList()) {
+                final Path target = staging.resolve(localHome.relativize(source).toString());
+                permissions.add(executor.submit(() -> {
+                    copyPermissions(source, target);
+                    return null;
+                }));
+            }
+            awaitCopies(permissions);
+        }
+    }
+
+    private void createParentDirectories(Path sourceParent, Path staging, Set<Path> createdDirectories)
+            throws IOException {
+        if (sourceParent == null || sourceParent.equals(localHome)) {
+            return;
+        }
+        createParentDirectories(sourceParent.getParent(), staging, createdDirectories);
+        createDirectory(sourceParent, staging, createdDirectories);
+    }
+
+    private void createDirectory(Path source, Path staging, Set<Path> createdDirectories) throws IOException {
+        if (createdDirectories.add(source)) {
+            Files.createDirectory(staging.resolve(localHome.relativize(source).toString()));
+        }
+    }
+
+    private static void copyFile(Path source, Path target, LongConsumer copyProgress) throws IOException {
+        final byte[] copyBuffer = new byte[COPY_BUFFER_SIZE];
+        try (InputStream input = new BufferedInputStream(Files.newInputStream(source), COPY_BUFFER_SIZE);
+             OutputStream output = new BufferedOutputStream(Files.newOutputStream(target), COPY_BUFFER_SIZE)) {
+            int copied;
+            while ((copied = input.read(copyBuffer)) >= 0) {
+                output.write(copyBuffer, 0, copied);
+                copyProgress.accept(copied);
+            }
+        }
+    }
+
+    private static void awaitCopies(List<Future<?>> copies) throws IOException {
+        try {
+            for (Future<?> copy : copies) {
+                copy.get();
+            }
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Interrupted while copying the managed JDK", exception);
+        } catch (ExecutionException exception) {
+            final Throwable cause = exception.getCause();
+            if (cause instanceof IOException ioException) {
+                throw ioException;
+            }
+            throw new IOException("Managed JDK copy failed", cause);
         }
     }
 
@@ -167,6 +503,9 @@ final class ManagedJavaRuntime {
     }
 
     private static void copyPermissions(Path source, Path target) throws IOException {
+        if (!Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS) || !Files.isExecutable(source)) {
+            return;
+        }
         try {
             final Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(source,
                     LinkOption.NOFOLLOW_LINKS);
@@ -179,10 +518,20 @@ final class ManagedJavaRuntime {
     }
 
     private static void move(Path source, Path destination) throws IOException {
+        move(source, destination, false);
+    }
+
+    private static void move(Path source, Path destination, boolean replace) throws IOException {
+        final StandardCopyOption[] atomicOptions = replace
+                ? new StandardCopyOption[]{StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING}
+                : new StandardCopyOption[]{StandardCopyOption.ATOMIC_MOVE};
+        final StandardCopyOption[] regularOptions = replace
+                ? new StandardCopyOption[]{StandardCopyOption.REPLACE_EXISTING}
+                : new StandardCopyOption[0];
         try {
-            Files.move(source, destination, StandardCopyOption.ATOMIC_MOVE);
+            Files.move(source, destination, atomicOptions);
         } catch (AtomicMoveNotSupportedException exception) {
-            Files.move(source, destination);
+            Files.move(source, destination, regularOptions);
         }
     }
 
@@ -205,13 +554,145 @@ final class ManagedJavaRuntime {
         }
     }
 
+    private static MetadataIdentity metadataIdentity(Path home) throws IOException {
+        final MessageDigest digest = newDigest();
+        long contentBytes = 0;
+        try (Stream<Path> entries = Files.walk(home)) {
+            for (Path path : entries.sorted(Comparator.comparing(Path::toString)).toList()) {
+                update(digest, home.relativize(path).toString().replace('\\', '/') + "\0");
+                if (Files.isSymbolicLink(path)) {
+                    update(digest, "L\0" + Files.readSymbolicLink(path) + "\0");
+                } else if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
+                    update(digest, "D\0");
+                } else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
+                    final long fileBytes = Files.size(path);
+                    contentBytes += fileBytes;
+                    update(digest, "F\0" + fileBytes + "\0"
+                            + Files.getLastModifiedTime(path, LinkOption.NOFOLLOW_LINKS).toMillis() + "\0");
+                }
+                if (!Files.isSymbolicLink(path)) {
+                    update(digest, "P\0" + permissionIdentity(path) + "\0");
+                }
+            }
+        }
+        return new MetadataIdentity(HexFormat.of().formatHex(digest.digest()), contentBytes);
+    }
+
+    private static Properties loadIdentity(Path identityFile) throws IOException {
+        final Properties identity = new Properties();
+        if (Files.isRegularFile(identityFile)) {
+            try (InputStream input = Files.newInputStream(identityFile)) {
+                identity.load(input);
+            }
+        }
+        return identity;
+    }
+
+    private static void writeIdentity(Path identityFile, Properties identity) throws IOException {
+        final Path temporary = Files.createTempFile(Objects.requireNonNull(identityFile.getParent()),
+                Objects.requireNonNull(identityFile.getFileName()).toString(), ".tmp");
+        try {
+            try (OutputStream output = Files.newOutputStream(temporary)) {
+                identity.store(output, "SBK-GEM managed JDK identity cache");
+            }
+            try {
+                Files.move(temporary, identityFile, StandardCopyOption.ATOMIC_MOVE,
+                        StandardCopyOption.REPLACE_EXISTING);
+            } catch (AtomicMoveNotSupportedException exception) {
+                Files.move(temporary, identityFile, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(temporary);
+        }
+    }
+
+    private static String sha256(byte[] value) {
+        final MessageDigest digest = newDigest();
+        digest.update(value);
+        return HexFormat.of().formatHex(digest.digest());
+    }
+
+    private static boolean isSha256(String value) {
+        if (value.length() != 64) {
+            return false;
+        }
+        try {
+            HexFormat.of().parseHex(value);
+            return true;
+        } catch (IllegalArgumentException exception) {
+            return false;
+        }
+    }
+
     private static void hashFile(MessageDigest digest, Path path) throws IOException {
         try (InputStream input = new BufferedInputStream(Files.newInputStream(path))) {
-            final byte[] buffer = new byte[BUFFER_SIZE];
+            final byte[] buffer = new byte[HASH_BUFFER_SIZE];
             int count;
             while ((count = input.read(buffer)) >= 0) {
                 digest.update(buffer, 0, count);
             }
+        }
+    }
+
+    private void createArchive(Path target) throws IOException {
+        final Path temporary = Files.createTempFile(Objects.requireNonNull(target.getParent()),
+                Objects.requireNonNull(target.getFileName()).toString(), ".partial");
+        try {
+            try (OutputStream file = Files.newOutputStream(temporary);
+                 BufferedOutputStream buffered = new BufferedOutputStream(file, COPY_BUFFER_SIZE);
+                 TarArchiveOutputStream output = new TarArchiveOutputStream(buffered)) {
+                output.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
+                output.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
+                try (Stream<Path> paths = Files.walk(localHome)) {
+                    for (Path source : paths.filter(path -> !path.equals(localHome))
+                            .sorted(Comparator.comparing(Path::toString)).toList()) {
+                        final String relative = localHome.relativize(source).toString().replace('\\', '/');
+                        final TarArchiveEntry entry;
+                        if (Files.isSymbolicLink(source)) {
+                            final Path link = Files.readSymbolicLink(source);
+                            final Path resolved = Objects.requireNonNull(source.getParent()).resolve(link).normalize();
+                            if (link.isAbsolute() || !resolved.startsWith(localHome)) {
+                                throw new IOException("Managed JDK symbolic link escapes Java home: " + source);
+                            }
+                            entry = new TarArchiveEntry(relative, TarConstants.LF_SYMLINK);
+                            entry.setLinkName(link.toString().replace('\\', '/'));
+                        } else if (Files.isDirectory(source, LinkOption.NOFOLLOW_LINKS)) {
+                            entry = new TarArchiveEntry(relative + "/");
+                        } else if (Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) {
+                            entry = new TarArchiveEntry(relative);
+                            entry.setSize(Files.size(source));
+                        } else {
+                            throw new IOException("Unsupported managed JDK entry: " + source);
+                        }
+                        entry.setMode(posixMode(source));
+                        output.putArchiveEntry(entry);
+                        if (Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) {
+                            Files.copy(source, output);
+                        }
+                        output.closeArchiveEntry();
+                    }
+                }
+                output.finish();
+            }
+            move(temporary, target, true);
+        } finally {
+            Files.deleteIfExists(temporary);
+        }
+    }
+
+    private static int posixMode(Path path) throws IOException {
+        if (Files.isSymbolicLink(path)) {
+            return 0777;
+        }
+        try {
+            int mode = 0;
+            for (PosixFilePermission permission : Files.getPosixFilePermissions(path,
+                    LinkOption.NOFOLLOW_LINKS)) {
+                mode |= 1 << (8 - permission.ordinal());
+            }
+            return mode;
+        } catch (UnsupportedOperationException exception) {
+            return Files.isExecutable(path) ? 0755 : 0644;
         }
     }
 
@@ -226,5 +707,15 @@ final class ManagedJavaRuntime {
         } catch (UnsupportedOperationException exception) {
             return Files.isExecutable(path) ? "executable" : "not-executable";
         }
+    }
+
+    private record MetadataIdentity(String digest, long contentBytes) {
+    }
+
+    private record BulkInstall(String destination, String staging, String remoteArchive, String retired,
+                               boolean available) {
+    }
+
+    private record JdkFile(Path path, long size) {
     }
 }
