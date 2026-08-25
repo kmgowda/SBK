@@ -18,6 +18,7 @@ import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.pubkey.KeySetPublickeyAuthenticator;
+import org.apache.sshd.scp.server.ScpCommandFactory;
 import org.apache.sshd.sftp.server.SftpSubsystemFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +38,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -72,6 +74,7 @@ final class SshUtilsTest {
         server.setPasswordAuthenticator((username, password, session) ->
                 USER.equals(username) && "sftp-password".equals(password));
         server.setFileSystemFactory(new VirtualFileSystemFactory(temporaryDirectory));
+        server.setCommandFactory(new ScpCommandFactory.Builder().build());
         server.setSubsystemFactories(List.of(new SftpSubsystemFactory.Builder().build()));
         server.start();
     }
@@ -212,6 +215,30 @@ final class SshUtilsTest {
     }
 
     @Test
+    void copiesLargeFilesThroughBulkScpAndReportsExactProgress() throws Exception {
+        final Path knownHosts = writeKnownHosts(hostKey);
+        final ConnectionConfig config = new ConnectionConfig("127.0.0.1", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), true, knownHosts.toString());
+        final var executor = Executors.newFixedThreadPool(2);
+        final SshSession sshSession = new SshSession(config, executor);
+        final Path source = temporaryDirectory.resolve("source.bin");
+        Files.write(source, new byte[2 * 1024 * 1024 + 17]);
+        final AtomicLong copiedBytes = new AtomicLong();
+        try {
+            sshSession.createSessionAsync(5).get(5, TimeUnit.SECONDS);
+
+            sshSession.copyFileAsync(source.toString(), "/copied.bin", 10, copiedBytes::addAndGet)
+                    .get(10, TimeUnit.SECONDS);
+
+            assertEquals(Files.size(source), copiedBytes.get());
+            assertEquals(-1, Files.mismatch(source, temporaryDirectory.resolve("copied.bin")));
+        } finally {
+            sshSession.stop();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
     void reportsResolvedEndpointForLocalhostAlias() throws Exception {
         final Path knownHosts = temporaryDirectory.resolve("localhost-known-hosts");
         Files.createFile(knownHosts);
@@ -223,6 +250,7 @@ final class SshUtilsTest {
             sshSession.createSessionAsync(5).get(5, TimeUnit.SECONDS);
 
             assertEquals("127.0.0.1", sshSession.getRemoteEndpointIdentity());
+            assertEquals("127.0.0.1", sshSession.getLocalRouteAddress());
         } finally {
             sshSession.stop();
             executor.shutdownNow();

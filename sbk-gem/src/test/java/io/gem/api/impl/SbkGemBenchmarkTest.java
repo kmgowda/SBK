@@ -38,6 +38,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 final class SbkGemBenchmarkTest {
     @Test
+    void replacesAdvertisedSbmAddressWithoutChangingOtherArguments() {
+        final List<String> arguments = new java.util.ArrayList<>(List.of(
+                "-class", "File", "-sbm", "controller-name", "-sbmport", "9717"));
+
+        SbkGemBenchmark.replaceOptionValue(arguments, "-sbm", "10.118.232.91");
+
+        assertEquals(List.of("-class", "File", "-sbm", "10.118.232.91", "-sbmport", "9717"), arguments);
+    }
+
+    @Test
+    void rejectsMissingRequiredRemoteOption() {
+        final List<String> arguments = new java.util.ArrayList<>(List.of("-class", "File"));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> SbkGemBenchmark.replaceOptionValue(arguments, "-sbm", "10.118.232.91"));
+    }
+
+    @Test
     void reportsFinishedAndPendingRuntimeTransfers() {
         final CompletableFuture<?>[] uploads = {CompletableFuture.completedFuture(null),
                 new CompletableFuture<>(), CompletableFuture.completedFuture(null)};
@@ -60,6 +78,7 @@ final class SbkGemBenchmarkTest {
         assertTrue(progress.contains("transferred 50 of 100 byte(s)"));
         assertTrue(progress.contains("50.0%"));
         assertTrue(progress.contains("MiB/s"));
+        assertTrue(progress.contains("ETA"));
     }
 
     @Test

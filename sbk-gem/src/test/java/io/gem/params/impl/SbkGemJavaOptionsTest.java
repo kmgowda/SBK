@@ -88,6 +88,28 @@ final class SbkGemJavaOptionsTest {
     }
 
     @Test
+    void detectsExplicitSbmCallbackAddressOverride() throws Exception {
+        createSbkCommand();
+        final SbkGemParameters parameters = parameters();
+
+        parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1",
+                "-localhost", "controller.example"});
+
+        assertTrue(parameters.isLocalHostOption());
+        assertEquals("controller.example", parameters.getLocalHost());
+    }
+
+    @Test
+    void enablesRouteSelectedSbmAddressWhenOverrideIsAbsent() throws Exception {
+        createSbkCommand();
+        final SbkGemParameters parameters = parameters();
+
+        parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1"});
+
+        assertFalse(parameters.isLocalHostOption());
+    }
+
+    @Test
     void rejectsRemovedDeploymentOptionsWithMigrationGuidance() throws Exception {
         createSbkCommand();
         final SbkGemParameters parameters = parameters();

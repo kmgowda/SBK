@@ -2001,8 +2001,14 @@ exact identity is reused, so the full distribution is not transferred on every r
 deduplicated by `(SSH user, authenticated network endpoint, port, resolved case-sensitive remote directory)`,
 so repeated workload entries sharing one installation do not race to replace it
 while distinct paths or remote accounts remain independent.
-The separate first-time JDK tree copy reuses one 256 KiB transfer buffer and
-reports aggregate bytes, completion percentage, and MiB/s without per-file logging.
+The separate first-time JDK deployment creates or reuses one cached plain-tar
+archive, sends it through a single Apache MINA SCP stream per active target,
+and invokes the standard remote `tar` executable for staging extraction. SBK
+archives use a single-file SCP stream and Java-agent extraction. SFTP is reserved
+for small atomic metadata and lifecycle operations. This avoids
+serialized per-entry payload round trips. JDK and SBK copies report aggregate bytes,
+completion percentage, MiB/s, and ETA without per-file logging; once all bytes
+arrive, progress identifies the remaining remote metadata finalization phase.
 
 Remote activation is transactional: the uploaded archive SHA-256 is checked,
 the archive is extracted to a unique staging directory, its operating-system
@@ -2025,9 +2031,10 @@ deleted by a separate SFTP operation outside that lock. Large recursive
 deletions therefore do not block lease acquisition or benchmark startup. Apache
 MINA SFTP also resolves and creates the deployment directory. Login shells, zsh
 glob behavior, PID probes, and detached shell jobs are not used for the
-lifecycle. A packaged Java agent performs OS/JDK probing, archive extraction,
-verification, and benchmark launch through Java APIs; generated remote shell
-scripts and platform tools are not used. The
+lifecycle. A packaged Java agent performs OS/JDK probing, SBK archive extraction,
+verification, and benchmark launch through Java APIs. Generated remote shell
+scripts are not used; the bulk transport requires standard remote `scp`, and
+first-time managed-JDK extraction requires standard remote `tar`. The
 rule also applies to the controller when it is selected as a deployment node.
 The controller-side managed bundle cache
 also retains only the current identity; per-archive locks protect bundles in
@@ -2038,8 +2045,8 @@ The controller Java major version defines the minimum remote Java release. GEM
 first validates the JDK selected by `javadir` or remote `PATH`. If it is absent
 or older, a cached filesystem-metadata identity reuses the controller JDK's
 previously calculated full-content digest when the installed JDK is unchanged;
-otherwise the controller JDK is hashed and copied separately through MINA
-SFTP. Java content and executable/POSIX permission state participate in its
+otherwise the controller JDK is hashed and copied separately through a bulk
+Apache MINA SCP stream. Java content and executable/POSIX permission state participate in its
 identity; a matching marker whose `bin/java` or `bin/javac` is unusable is
 retired and repaired. Java and SBK have independent identities and reuse markers,
 so either can be reused or updated without transferring the other. The remote agent launches
@@ -2138,6 +2145,14 @@ timeout. Failures preserve the node, user, port, and underlying cause so a bad
 credential or unreachable host is reported at the SSH boundary rather than
 later as a misleading Java-discovery timeout.
 
+After authentication, each session also exposes the numeric controller address
+selected by the operating system's route to that remote node. Unless
+`-localhost` explicitly overrides the callback address, GEM places this
+route-selected address in that node's `-sbm` argument. Remote clients therefore
+do not depend on DNS being able to resolve the controller hostname. This is
+resolved per node because a multi-homed controller can reach different node
+groups through different interfaces.
+
 All remote operations -- `createSessionAsync()`, `runCommandAsync()`,
 `copyFileAsync()`, and `runRemoteFileOperationAsync()` -- return
 `CompletableFuture`. The orchestrator chains them via
@@ -2162,12 +2177,15 @@ deployment deadline. The remote agent captures the launched process tree and
 force-kills any surviving descendants after its graceful shutdown interval.
 
 Execution resources are partitioned by orchestration workload. SSH connection
-and control operations run on a fixed-size platform-thread pool; SFTP runtime
+and control operations run on a fixed-size platform-thread pool; bulk SCP runtime
 and JDK copies use a smaller independent fixed-size transfer pool; remote SBK
 commands and the coordinated-registration waiter use virtual threads because
 they remain blocked for most or all of a benchmark. Node count therefore no
 longer determines the number of controller platform threads, and a saturated
 transfer lane cannot prevent control-plane cancellation or lease work.
+Lease heartbeats are paused and drained before the final lease acquisition and
+retirement transition, then restarted. This prevents a heartbeat SFTP operation
+from racing the atomic lease/current-runtime update on a slow remote filesystem.
 
 ---
 

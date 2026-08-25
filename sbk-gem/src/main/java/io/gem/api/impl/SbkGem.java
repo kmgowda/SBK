@@ -421,9 +421,17 @@ final public class SbkGem {
 
         Printer.log.info("SBK dir: " + params.getSbkDir());
         Printer.log.info("SBK command: " + GemConfig.SBK_COMMAND);
-        Printer.log.info("Arguments to remote SBK command: "
-                + Arrays.toString(SbkUtils.redactSensitiveOptionValues(
-                        sbkCommandArgs.toArray(String[]::new))));
+        if (params.isLocalHostOption()) {
+            Printer.log.info("Arguments to remote SBK command: "
+                    + Arrays.toString(SbkUtils.redactSensitiveOptionValues(
+                            sbkCommandArgs.toArray(String[]::new))));
+        } else {
+            final List<String> displayedArguments = new ArrayList<>(sbkCommandArgs);
+            SbkGemBenchmark.replaceOptionValue(displayedArguments, "-sbm", "<authenticated-ssh-route-address>");
+            Printer.log.info("Remote SBK argument template; each '-sbm' value is resolved after SSH authentication: "
+                    + Arrays.toString(SbkUtils.redactSensitiveOptionValues(
+                            displayedArguments.toArray(String[]::new))));
+        }
         Printer.log.info("SBK-GEM: Arguments to remote SBK command verification Success..");
 
         sbmConfig.maxConnections = params.getConnections().length;
