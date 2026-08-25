@@ -11,6 +11,8 @@
 package io.gem.api.impl;
 
 import io.gem.agent.RemoteAgentProtocol;
+import io.gem.api.SshResponse;
+import io.sbk.config.ExitCode;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -21,6 +23,7 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Tests typed remote-agent requests and executable-only SSH commands. */
 final class RemoteAgentTest {
@@ -55,5 +58,22 @@ final class RemoteAgentTest {
     void rejectsAgentRequestsWithTooManyValues() {
         assertThrows(java.io.IOException.class, () -> RemoteAgentProtocol.encode("run",
                 Collections.nCopies(RemoteAgentProtocol.MAX_VALUES + 1, "value")));
+    }
+
+    @Test
+    void recognizesOnlyArchiveIntegrityFailuresAsRetryable() throws Exception {
+        final SshResponse integrityFailure = new SshResponse(true);
+        integrityFailure.returnCode = 70;
+        integrityFailure.errOutputStream.write(("SBK-GEM remote agent failed: IOException: "
+                + RemoteAgentProtocol.ARCHIVE_DIGEST_MISMATCH).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        final SshResponse otherFailure = new SshResponse(true);
+        otherFailure.returnCode = 70;
+        otherFailure.errOutputStream.write("permission denied".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        final SshResponse success = new SshResponse(true);
+        success.returnCode = ExitCode.SUCCESS;
+
+        assertTrue(RemoteAgent.archiveDigestMismatch(integrityFailure));
+        assertFalse(RemoteAgent.archiveDigestMismatch(otherFailure));
+        assertFalse(RemoteAgent.archiveDigestMismatch(success));
     }
 }

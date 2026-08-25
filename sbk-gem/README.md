@@ -187,8 +187,10 @@ uses one shared per-worker rate for both directions.
 
 Before connecting to storage, SBK-GEM validates the local `installDist`
 layout, including the pathing JAR and every dependency named by its manifest.
-It packages the complete SBK distribution into a content-addressed `tar.gz`
-archive. When remote Java provisioning is required, the controller JDK is
+The Gradle distribution records an identity covering its runtime JARs,
+launchers, Java bootstrap files, and remote agent. SBK-GEM packages the
+runtime-only `bin`, `lib`, and identity files into a content-addressed plain
+`tar` archive. When remote Java provisioning is required, the controller JDK is
 copied separately with its own content identity. Each identity covers every file,
 contained relative symbolic link, and normalized file mode, so two builds
 carrying the same SBK version but different dependencies cannot be mistaken
@@ -205,13 +207,18 @@ content without copying it again. Local archives are cached under
 `~/.sbk/cache/sbk-gem` by default; `runtimeCacheDirectory` in
 `gem.properties` changes that location. A per-identity file lock serializes
 cache writers across GEM processes, and a separately published SHA-256 sidecar
-causes incomplete or corrupted cached archives to be rebuilt before use. With
+plus archive-size sidecar causes incomplete cached archives to be rebuilt before
+use. An unchanged build identity reuses both sidecars without rehashing the
+installed distribution or cached archive. The remote agent still verifies the
+complete transferred archive; a digest mismatch rebuilds the local archive and
+retries the affected transfer once. With
 `runtimecleanup=true`, the controller retains only the selected cached bundle;
 a non-current archive being transferred by another GEM process is protected by
 its cache lock and is removed after it becomes inactive.
 
-Creating a new bundle hashes the complete SBK distribution, then writes an
-SBK-only compressed archive. The independently managed JDK is hashed, including
+Creating a new bundle hashes the runtime files once and calculates the archive
+SHA-256 while writing the uncompressed tar, avoiding separate compression and
+archive-hashing passes. The independently managed JDK is hashed, including
 executable/POSIX permission state, and copied as a directory tree only when its
 exact usable identity is unavailable remotely. A matching marker with unusable
 `bin/java` or `bin/javac` permissions is retired and repaired instead of being

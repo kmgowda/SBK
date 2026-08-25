@@ -58,6 +58,11 @@ final class RemoteAgent {
         return RemoteAgentProtocol.encode("run", values);
     }
 
+    static boolean archiveDigestMismatch(SshResponse response) {
+        return response != null && response.returnCode != ExitCode.SUCCESS
+                && response.errOutputStream.toString().contains(RemoteAgentProtocol.ARCHIVE_DIGEST_MISMATCH);
+    }
+
     static boolean successful(SshResponse response) {
         return response != null && response.returnCode == ExitCode.SUCCESS;
     }

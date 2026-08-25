@@ -617,7 +617,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         final String[] archivePaths = new String[nodes.length];
         final String[] stagingDirectories = new String[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
-            archivePaths[i] = deploymentDirectories[i] + "." + transferId + ".tar.gz";
+            archivePaths[i] = deploymentDirectories[i] + "." + transferId + ".tar";
             stagingDirectories[i] = deploymentDirectories[i] + "." + transferId + ".staging";
         }
         final RemoteTargetPlan targetPlan = RemoteTargetPlan.create(params.getConnections(), deploymentDirectories);
@@ -666,8 +666,51 @@ final public class SbkGemBenchmark implements GemBenchmark {
             }
         }
         waitForDeployment(CompletableFuture.allOf(activations), "runtime archive activation");
+        final boolean[] retryTargets = archiveDigestMismatchTargets(activations, physicalCopyTargets);
+        if (hasSelectedTarget(retryTargets)) {
+            Printer.log.warn("SBK-GEM: Remote archive integrity verification failed; rebuilding the local "
+                    + "runtime archive and retrying affected target(s) once");
+            bundle.rebuildArchive();
+            final CompletableFuture<?>[] retryUploads = new CompletableFuture[nodes.length];
+            try (SbkRuntimeBundle.ArchiveUse ignored = bundle.acquireArchiveUse()) {
+                for (int i = 0; i < nodes.length; i++) {
+                    retryUploads[i] = retryTargets[i]
+                            ? nodes[i].copyFileAsync(bundle.archive().toString(), archivePaths[i],
+                            config.deploymentTimeoutSeconds)
+                            : CompletableFuture.completedFuture(null);
+                }
+                waitForDeployment(CompletableFuture.allOf(retryUploads), "runtime archive integrity retry upload");
+            }
+            for (int i = 0; i < nodes.length; i++) {
+                if (retryTargets[i]) {
+                    final String command = RemoteAgent.command(runtimeDeployment.javaHomes()[i] + "/bin/java",
+                            runtimeDeployment.agentPaths()[i]);
+                    activations[i] = nodes[i].runCommandAsync(command, RemoteAgent.activate(archivePaths[i],
+                                    bundle.archiveDigest(), bundle.contentDigest(), stagingDirectories[i],
+                                    deploymentDirectories[i], platform.operatingSystem()),
+                            true, config.deploymentTimeoutSeconds);
+                }
+            }
+            waitForDeployment(CompletableFuture.allOf(activations), "runtime archive integrity retry activation");
+        }
         requireSuccessfulWithDiagnostics(activations, physicalCopyTargets, "Activating immutable runtime");
         Printer.log.info("SBK-GEM: Immutable runtime archive verified and atomically activated");
+    }
+
+    private static boolean[] archiveDigestMismatchTargets(CompletableFuture<SshResponse>[] activations,
+                                                           boolean[] selected)
+            throws InterruptedException, ExecutionException {
+        final boolean[] retryTargets = new boolean[selected.length];
+        for (int i = 0; i < selected.length; i++) {
+            if (selected[i]) {
+                final SshResponse response = activations[i].get();
+                if (response.returnCode != ExitCode.SUCCESS && !RemoteAgent.archiveDigestMismatch(response)) {
+                    return new boolean[selected.length];
+                }
+                retryTargets[i] = RemoteAgent.archiveDigestMismatch(response);
+            }
+        }
+        return retryTargets;
     }
 
     static String futureProgress(CompletableFuture<?>[] futures, String[] targetHosts, String operationLabel) {

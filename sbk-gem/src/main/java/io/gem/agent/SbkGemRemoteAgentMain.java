@@ -12,7 +12,6 @@ package io.gem.agent;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -100,7 +99,7 @@ public final class SbkGemRemoteAgentMain {
         final Path destination = absolute(values.get(4));
         try {
             if (!archiveDigest.equals(sha256(archive))) {
-                throw new IOException("SBK archive SHA-256 mismatch");
+                throw new IOException(RemoteAgentProtocol.ARCHIVE_DIGEST_MISMATCH);
             }
             deleteRecursively(staging);
             Files.createDirectories(staging);
@@ -201,8 +200,7 @@ public final class SbkGemRemoteAgentMain {
 
     private static void extract(Path archive, Path staging) throws IOException {
         try (InputStream file = new BufferedInputStream(Files.newInputStream(archive));
-             GzipCompressorInputStream gzip = new GzipCompressorInputStream(file);
-             TarArchiveInputStream tar = new TarArchiveInputStream(gzip)) {
+             TarArchiveInputStream tar = new TarArchiveInputStream(file)) {
             TarArchiveEntry entry;
             while ((entry = tar.getNextEntry()) != null) {
                 final Path target = staging.resolve(entry.getName()).normalize();

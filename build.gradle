@@ -472,7 +472,76 @@ def additionalLaunchers = [
 
 evaluationDependsOn(':sbk-gem')
 
+def sbkRuntimeIdentityFile = layout.buildDirectory.file(
+        'generated/sbk-runtime-identity/sbk-runtime-identity.properties')
+def sbkBootstrapFiles = files(
+        'gradle/sbk-java-bootstrap.sh',
+        'gradle/sbk-java-bootstrap.bat',
+        'gradle/sbk-java-bootstrap.ps1',
+        'gradle/sbk-java-bootstrap.properties')
+def generateSbkRuntimeIdentity = tasks.register('generateSbkRuntimeIdentity') {
+    dependsOn tasks.named('jar'), tasks.named('pathingJar'), tasks.withType(CreateStartScripts),
+            project(':sbk-gem').tasks.named('remoteAgentJar')
+    inputs.property('runtimeIdentityFormat', 1)
+    inputs.property('sbkVersion', sbkVersion.toString())
+    inputs.files(configurations.runtimeClasspath)
+            .withPropertyName('runtimeClasspath')
+            .withPathSensitivity(PathSensitivity.NAME_ONLY)
+    inputs.file(tasks.named('jar').flatMap { it.archiveFile })
+            .withPropertyName('sbkJar')
+            .withPathSensitivity(PathSensitivity.NAME_ONLY)
+    inputs.file(tasks.named('pathingJar').flatMap { it.archiveFile })
+            .withPropertyName('pathingJar')
+            .withPathSensitivity(PathSensitivity.NAME_ONLY)
+    inputs.file(project(':sbk-gem').tasks.named('remoteAgentJar').flatMap { it.archiveFile })
+            .withPropertyName('remoteAgentJar')
+            .withPathSensitivity(PathSensitivity.NAME_ONLY)
+    inputs.files(tasks.withType(CreateStartScripts))
+            .withPropertyName('launchers')
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.files(sbkBootstrapFiles)
+            .withPropertyName('javaBootstrap')
+            .withPathSensitivity(PathSensitivity.NAME_ONLY)
+    outputs.file(sbkRuntimeIdentityFile)
+
+    doLast {
+        def digest = java.security.MessageDigest.getInstance('SHA-256')
+        def updateDigest = { String label, File input ->
+            digest.update(label.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+            digest.update((byte) 0)
+            input.withInputStream { stream ->
+                byte[] buffer = new byte[64 * 1024]
+                int count
+                while ((count = stream.read(buffer)) >= 0) {
+                    digest.update(buffer, 0, count)
+                }
+            }
+        }
+        configurations.runtimeClasspath.files.sort { it.name }.each {
+            updateDigest("lib/${it.name}", it)
+        }
+        [tasks.named('jar').get().archiveFile.get().asFile,
+         tasks.named('pathingJar').get().archiveFile.get().asFile,
+         project(':sbk-gem').tasks.named('remoteAgentJar').get().archiveFile.get().asFile]
+                .sort { it.name }
+                .each { updateDigest("lib/${it.name}", it) }
+        tasks.withType(CreateStartScripts).sort { it.name }.each { scriptTask ->
+            fileTree(scriptTask.outputDir).files.sort { it.name }.each {
+                updateDigest("bin/${it.name}", it)
+            }
+        }
+        sbkBootstrapFiles.files.sort { it.name }.each {
+            updateDigest("bin/${it.name}", it)
+        }
+        def identity = java.util.HexFormat.of().formatHex(digest.digest())
+        def output = sbkRuntimeIdentityFile.get().asFile
+        output.parentFile.mkdirs()
+        output.setText("format.version=1\nsbk.version=${sbkVersion}\nbuild.sha256=${identity}\n", 'UTF-8')
+    }
+}
+
 application {
+    applicationDistribution.from(generateSbkRuntimeIdentity)
     applicationDistribution.from(project(':sbk-gem').tasks.named('remoteAgentJar')) {
         into 'lib'
     }

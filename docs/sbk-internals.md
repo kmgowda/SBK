@@ -1977,13 +1977,18 @@ GEM-->>User: printRemoteResults()
 ```
 
 The reconciliation identity is content, not only the displayed SBK version.
-GEM verifies the local pathing JAR dependency closure, hashes every file,
-contained relative symbolic link, normalized directory mode, and executable
-file bit, and caches a content-addressed OS-specific archive locally.
-Absolute or escaping links are rejected. Cache creation is serialized by a
-per-identity file lock, and an archive SHA-256 sidecar makes interrupted or
-corrupted cache entries self-repairing. All nodes are probed concurrently. A
-valid exact identity is reused, so the full distribution is not transferred on every run. Physical work is
+Gradle records a build identity covering the installed runtime dependencies,
+launchers, Java bootstrap files, and remote agent. GEM verifies the local
+pathing JAR dependency closure and uses that identity to select a cached
+OS-specific plain-tar archive without rehashing the installed runtime or
+archive on every execution. Creating a new archive hashes the runtime files
+once, preserves contained relative symbolic links and executable state, and
+calculates the archive SHA-256 while writing it. Absolute or escaping links are
+rejected. Cache creation is serialized by a per-identity file lock; digest and
+size sidecars detect incomplete entries. The remote agent always performs full
+archive and per-file verification, and a transferred-archive digest mismatch
+causes one local rebuild and retry. All nodes are probed concurrently. A valid
+exact identity is reused, so the full distribution is not transferred on every run. Physical work is
 deduplicated by `(SSH user, case-insensitive host, port, resolved case-sensitive remote directory)`,
 so repeated workload entries sharing one installation do not race to replace it
 while distinct paths or remote accounts remain independent.

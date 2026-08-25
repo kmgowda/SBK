@@ -14,7 +14,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.tar.TarConstants;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -32,11 +31,13 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.DigestOutputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -47,11 +48,10 @@ import java.util.stream.Stream;
 /**
  * Immutable, content-addressed SBK runtime deployment archive.
  *
- * <p>The archive contains the complete installed SBK distribution, an
- * deployment descriptor and per-file SHA-256
- * checksums. Its content digest is derived from every source entry, so two
- * builds carrying the same SBK version but different bytes do not share a
- * remote deployment identity.
+ * <p>The archive contains the installed SBK runtime files, a deployment
+ * descriptor and per-file SHA-256 checksums. Gradle derives the build identity
+ * from the runtime inputs, allowing an unchanged cached archive to be selected
+ * without rehashing the complete installation on every execution.
  */
 final class SbkRuntimeBundle {
     static final String ARCHIVE_ROOT = "runtime";
@@ -59,6 +59,7 @@ final class SbkRuntimeBundle {
     static final String DESCRIPTOR_FILE = "deployment.properties";
     static final String CHECKSUM_FILE = "deployment-files.sha256";
     static final String REMOTE_DIGEST_FILE = ".sbk-runtime.sha256";
+    static final String RUNTIME_IDENTITY_FILE = "sbk-runtime-identity.properties";
     private static final String SHA_256 = "SHA-256";
     private static final int SHA_256_HEX_LENGTH = 64;
     private static final int DIGEST_NAME_CHARACTERS = 24;
@@ -67,27 +68,45 @@ final class SbkRuntimeBundle {
     private static final int EXECUTABLE_FILE_MODE = 0755;
     private static final int DIRECTORY_MODE = 0755;
     private static final int SYMBOLIC_LINK_MODE = 0777;
-    private static final int BUNDLE_FORMAT_VERSION = 4;
+    private static final int BUNDLE_FORMAT_VERSION = 5;
+    private static final int RUNTIME_IDENTITY_FORMAT_VERSION = 1;
+    private static final String ARCHIVE_EXTENSION = ".tar";
+    private static final String LEGACY_ARCHIVE_EXTENSION = ".tar.gz";
     private static final String ARCHIVE_DIGEST_SUFFIX = ".sha256";
+    private static final String ARCHIVE_SIZE_SUFFIX = ".size";
     private static final String CACHE_LOCK_SUFFIX = ".lock";
     private static final String CACHE_MANAGEMENT_LOCK = ".sbk-runtime-cache-management.lock";
     private static final ConcurrentMap<Path, ReentrantLock> CACHE_LOCKS = new ConcurrentHashMap<>();
 
     private final Path archive;
-    private final String archiveDigest;
+    private volatile String archiveDigest;
     private final String contentDigest;
     private final String deploymentName;
-    private final String sbkCommand;
+    private final String relativeSbkCommand;
     private final Path cacheLockFile;
+    private final Path archiveDigestFile;
+    private final Path archiveSizeFile;
+    private final Path sbkDirectory;
+    private final String sbkVersion;
+    private final int javaVersion;
+    private final DeploymentPlatform platform;
 
     private SbkRuntimeBundle(Path archive, String archiveDigest, String contentDigest,
-                             String deploymentName, String sbkCommand, Path cacheLockFile) {
+                             String deploymentName, String relativeSbkCommand, Path cacheLockFile,
+                             Path archiveDigestFile, Path archiveSizeFile, Path sbkDirectory,
+                             String sbkVersion, int javaVersion, DeploymentPlatform platform) {
         this.archive = archive;
         this.archiveDigest = archiveDigest;
         this.contentDigest = contentDigest;
         this.deploymentName = deploymentName;
-        this.sbkCommand = sbkCommand;
+        this.relativeSbkCommand = relativeSbkCommand;
         this.cacheLockFile = cacheLockFile;
+        this.archiveDigestFile = archiveDigestFile;
+        this.archiveSizeFile = archiveSizeFile;
+        this.sbkDirectory = sbkDirectory;
+        this.sbkVersion = sbkVersion;
+        this.javaVersion = javaVersion;
+        this.platform = platform;
     }
 
     /**
@@ -107,17 +126,16 @@ final class SbkRuntimeBundle {
                                    Path cacheDirectory) throws IOException {
         final Path normalizedSbkDirectory = sbkDirectory.toAbsolutePath().normalize();
         validateSbkDistribution(normalizedSbkDirectory, relativeSbkCommand);
-
-        final List<BundleEntry> entries = new ArrayList<>();
-        collectEntries(normalizedSbkDirectory, SBK_DIRECTORY, entries, true);
-        entries.sort(Comparator.comparing(BundleEntry::relativePath));
-
-        final String contentDigest = calculateContentDigest(sbkVersion, javaVersion, platform, entries);
+        final String buildIdentity = loadBuildIdentity(normalizedSbkDirectory, sbkVersion);
+        final String contentDigest = calculateContentDigest(sbkVersion, javaVersion, platform, buildIdentity);
         final String deploymentName = "sbk-runtime-" + sbkVersion + "-" + platform.id() + "-"
                 + contentDigest.substring(0, DIGEST_NAME_CHARACTERS);
         Files.createDirectories(cacheDirectory);
-        final Path archive = cacheDirectory.resolve(deploymentName + ".tar.gz");
-        final Path archiveDigestFile = cacheDirectory.resolve(deploymentName + ".tar.gz" + ARCHIVE_DIGEST_SUFFIX);
+        final Path archive = cacheDirectory.resolve(deploymentName + ARCHIVE_EXTENSION);
+        final Path archiveDigestFile = cacheDirectory.resolve(deploymentName + ARCHIVE_EXTENSION
+                + ARCHIVE_DIGEST_SUFFIX);
+        final Path archiveSizeFile = cacheDirectory.resolve(deploymentName + ARCHIVE_EXTENSION
+                + ARCHIVE_SIZE_SUFFIX);
         final Path cacheLockFile = cacheDirectory.resolve(deploymentName + CACHE_LOCK_SUFFIX);
         final Path managementLockFile = cacheDirectory.resolve(CACHE_MANAGEMENT_LOCK);
         final ReentrantLock managementLock = cacheLock(managementLockFile);
@@ -128,14 +146,17 @@ final class SbkRuntimeBundle {
             processLock.lock();
             try (FileChannel lockChannel = openLockChannel(cacheLockFile);
                  FileLock ignored = lockChannel.lock()) {
-                String archiveDigest = cachedArchiveDigest(archive, archiveDigestFile);
+                String archiveDigest = cachedArchiveDigest(archive, archiveDigestFile, archiveSizeFile);
                 if (archiveDigest == null) {
-                    createArchive(archive, sbkVersion, javaVersion, platform, contentDigest, entries);
-                    archiveDigest = sha256(archive);
+                    final List<BundleEntry> entries = collectRuntimeEntries(normalizedSbkDirectory);
+                    archiveDigest = createArchive(archive, sbkVersion, javaVersion, platform, contentDigest, entries);
                     writeAtomically(archiveDigestFile, archiveDigest + "\n");
+                    writeAtomically(archiveSizeFile, Files.size(archive) + "\n");
                 }
                 return new SbkRuntimeBundle(archive, archiveDigest, contentDigest, deploymentName,
-                        SBK_DIRECTORY + "/" + normalizeRelativePath(relativeSbkCommand), cacheLockFile);
+                        relativeSbkCommand, cacheLockFile,
+                        archiveDigestFile, archiveSizeFile, normalizedSbkDirectory, sbkVersion, javaVersion,
+                        platform);
             } finally {
                 processLock.unlock();
             }
@@ -170,6 +191,32 @@ final class SbkRuntimeBundle {
     }
 
     /**
+     * Rebuild a locally corrupted archive from the immutable installed distribution.
+     *
+     * @throws IOException when the installed build identity changed or archive recreation fails
+     */
+    void rebuildArchive() throws IOException {
+        validateSbkDistribution(sbkDirectory, relativeSbkCommand);
+        final String currentIdentity = loadBuildIdentity(sbkDirectory, sbkVersion);
+        final String currentContentDigest = calculateContentDigest(sbkVersion, javaVersion, platform,
+                currentIdentity);
+        if (!contentDigest.equals(currentContentDigest)) {
+            throw new IOException("SBK installed distribution changed while rebuilding runtime archive");
+        }
+        final ReentrantLock processLock = cacheLock(cacheLockFile);
+        processLock.lock();
+        try (FileChannel lockChannel = openLockChannel(cacheLockFile);
+             FileLock ignored = lockChannel.lock()) {
+            final List<BundleEntry> entries = collectRuntimeEntries(sbkDirectory);
+            archiveDigest = createArchive(archive, sbkVersion, javaVersion, platform, contentDigest, entries);
+            writeAtomically(archiveDigestFile, archiveDigest + "\n");
+            writeAtomically(archiveSizeFile, Files.size(archive) + "\n");
+        } finally {
+            processLock.unlock();
+        }
+    }
+
+    /**
      * Retain only the selected inactive local bundle cache identity.
      *
      * <p>An archive currently locked by another GEM deployment is retained and
@@ -195,7 +242,7 @@ final class SbkRuntimeBundle {
             for (Path archive : paths.filter(SbkRuntimeBundle::isBundleArchive).toList()) {
                 final String archiveName = fileName(archive);
                 final String candidateName = archiveName.substring(0,
-                        archiveName.length() - ".tar.gz".length());
+                        archiveName.length() - archiveExtension(archiveName).length());
                 if (candidateName.equals(deploymentName)) {
                     continue;
                 }
@@ -212,6 +259,7 @@ final class SbkRuntimeBundle {
                     try (fileLock) {
                         Files.deleteIfExists(archive);
                         Files.deleteIfExists(cacheDirectory.resolve(archiveName + ARCHIVE_DIGEST_SUFFIX));
+                        Files.deleteIfExists(cacheDirectory.resolve(archiveName + ARCHIVE_SIZE_SUFFIX));
                         removed++;
                     }
                 } finally {
@@ -240,10 +288,6 @@ final class SbkRuntimeBundle {
         return deploymentName;
     }
 
-    String sbkCommand() {
-        return sbkCommand;
-    }
-
 
     private static ReentrantLock cacheLock(Path path) {
         return CACHE_LOCKS.computeIfAbsent(path.toAbsolutePath().normalize(), ignored -> new ReentrantLock());
@@ -263,7 +307,12 @@ final class SbkRuntimeBundle {
 
     private static boolean isBundleArchive(Path path) {
         final String name = fileName(path);
-        return Files.isRegularFile(path) && name.startsWith("sbk-runtime-") && name.endsWith(".tar.gz");
+        return Files.isRegularFile(path) && name.startsWith("sbk-runtime-")
+                && (name.endsWith(ARCHIVE_EXTENSION) || name.endsWith(LEGACY_ARCHIVE_EXTENSION));
+    }
+
+    private static String archiveExtension(String archiveName) {
+        return archiveName.endsWith(LEGACY_ARCHIVE_EXTENSION) ? LEGACY_ARCHIVE_EXTENSION : ARCHIVE_EXTENSION;
     }
 
     private static void validateIdentifier(String value) {
@@ -310,6 +359,30 @@ final class SbkRuntimeBundle {
         }
     }
 
+    private static String loadBuildIdentity(Path directory, String sbkVersion) throws IOException {
+        final Path identityFile = directory.resolve(RUNTIME_IDENTITY_FILE);
+        if (!Files.isRegularFile(identityFile)) {
+            throw new IOException("SBK runtime identity is missing: " + identityFile
+                    + ". Rebuild the installed distribution with './gradlew installDist'.");
+        }
+        final Properties identity = new Properties();
+        try (var input = Files.newInputStream(identityFile)) {
+            identity.load(input);
+        }
+        if (!Integer.toString(RUNTIME_IDENTITY_FORMAT_VERSION).equals(identity.getProperty("format.version"))) {
+            throw new IOException("Unsupported SBK runtime identity format in " + identityFile);
+        }
+        if (!sbkVersion.equals(identity.getProperty("sbk.version"))) {
+            throw new IOException("SBK runtime identity version does not match " + sbkVersion + " in "
+                    + identityFile);
+        }
+        final String buildIdentity = identity.getProperty("build.sha256", "").trim();
+        if (buildIdentity.length() != SHA_256_HEX_LENGTH) {
+            throw new IOException("Invalid SBK runtime build identity in " + identityFile);
+        }
+        return buildIdentity;
+    }
+
 
     private static Path resolveContained(Path parent, String relativePath) throws IOException {
         if (relativePath == null || relativePath.isBlank() || Path.of(relativePath).isAbsolute()) {
@@ -322,15 +395,12 @@ final class SbkRuntimeBundle {
         return resolved;
     }
 
-    private static void collectEntries(Path sourceRoot, String archiveRoot, List<BundleEntry> entries,
-                                       boolean excludeManagedArtifacts) throws IOException {
+    private static void collectEntries(Path sourceRoot, String archiveRoot, List<BundleEntry> entries)
+            throws IOException {
         final Path realSourceRoot = sourceRoot.toRealPath();
         addEntry(sourceRoot, sourceRoot, realSourceRoot, archiveRoot, entries);
         try (Stream<Path> children = Files.list(sourceRoot)) {
             for (Path child : children.toList()) {
-                if (excludeManagedArtifacts && RemoteRuntimeLifecycle.isManagedArtifact(fileName(child))) {
-                    continue;
-                }
                 try (Stream<Path> paths = Files.walk(child)) {
                     for (Path path : paths.toList()) {
                         addEntry(sourceRoot, path, realSourceRoot, archiveRoot, entries);
@@ -340,10 +410,22 @@ final class SbkRuntimeBundle {
         }
     }
 
+    private static List<BundleEntry> collectRuntimeEntries(Path sbkDirectory) throws IOException {
+        final List<BundleEntry> entries = new ArrayList<>();
+        entries.add(new BundleEntry(sbkDirectory, SBK_DIRECTORY, EntryType.DIRECTORY, 0, "", "",
+                DIRECTORY_MODE));
+        collectEntries(sbkDirectory.resolve("bin"), SBK_DIRECTORY + "/bin", entries);
+        collectEntries(sbkDirectory.resolve("lib"), SBK_DIRECTORY + "/lib", entries);
+        addEntry(sbkDirectory, sbkDirectory.resolve(RUNTIME_IDENTITY_FILE), sbkDirectory.toRealPath(),
+                SBK_DIRECTORY, entries);
+        entries.sort(Comparator.comparing(BundleEntry::relativePath));
+        return entries;
+    }
+
     private static void addEntry(Path sourceRoot, Path path, Path realSourceRoot, String archiveRoot,
                                  List<BundleEntry> entries) throws IOException {
         final Path relative = sourceRoot.relativize(path);
-        final String archivePath = relative.getNameCount() == 0 ? archiveRoot
+        final String archivePath = relative.toString().isEmpty() ? archiveRoot
                 : archiveRoot + "/" + normalizeRelativePath(relative.toString());
         if (Files.isSymbolicLink(path)) {
             final Path symbolicTarget = Files.readSymbolicLink(path);
@@ -376,29 +458,28 @@ final class SbkRuntimeBundle {
     }
 
     private static String calculateContentDigest(String sbkVersion, int javaVersion, DeploymentPlatform platform,
-                                                 List<BundleEntry> entries) {
+                                                 String buildIdentity) {
         final MessageDigest digest = newDigest();
         update(digest, "format=" + BUNDLE_FORMAT_VERSION + "\n");
         update(digest, "sbk.version=" + sbkVersion + "\n");
         update(digest, "java.version=" + javaVersion + "\n");
         update(digest, "platform.os=" + platform.id() + "\n");
-        for (BundleEntry entry : entries) {
-            update(digest, entry.type() + "\t" + entry.relativePath() + "\t" + entry.size() + "\t"
-                    + entry.digest() + "\t" + entry.linkTarget() + "\t" + entry.mode() + "\n");
-        }
+        update(digest, "build.sha256=" + buildIdentity + "\n");
         return HexFormat.of().formatHex(digest.digest());
     }
 
-    private static void createArchive(Path archive, String sbkVersion, int javaVersion,
-                                      DeploymentPlatform platform, String contentDigest,
-                                      List<BundleEntry> entries) throws IOException {
+    private static String createArchive(Path archive, String sbkVersion, int javaVersion,
+                                        DeploymentPlatform platform, String contentDigest,
+                                        List<BundleEntry> entries) throws IOException {
         final Path archiveParent = Objects.requireNonNull(archive.toAbsolutePath().getParent(),
                 "Runtime archive must have a parent directory");
         final Path temporaryArchive = Files.createTempFile(archiveParent, fileName(archive), ".partial");
+        final MessageDigest archiveDigest = newDigest();
         try {
-            try (OutputStream fileOutput = new BufferedOutputStream(Files.newOutputStream(temporaryArchive));
-                 GzipCompressorOutputStream gzipOutput = new GzipCompressorOutputStream(fileOutput);
-                 TarArchiveOutputStream tarOutput = new TarArchiveOutputStream(gzipOutput)) {
+            try (OutputStream fileOutput = Files.newOutputStream(temporaryArchive);
+                 DigestOutputStream digestOutput = new DigestOutputStream(fileOutput, archiveDigest);
+                 BufferedOutputStream bufferedOutput = new BufferedOutputStream(digestOutput, BUFFER_SIZE);
+                 TarArchiveOutputStream tarOutput = new TarArchiveOutputStream(bufferedOutput)) {
                 tarOutput.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
                 tarOutput.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
                 addDirectoryEntry(tarOutput, ARCHIVE_ROOT + "/");
@@ -410,6 +491,7 @@ final class SbkRuntimeBundle {
                 addByteEntry(tarOutput, ARCHIVE_ROOT + "/" + CHECKSUM_FILE, checksums(entries));
             }
             moveAtomically(temporaryArchive, archive);
+            return HexFormat.of().formatHex(archiveDigest.digest());
         } finally {
             Files.deleteIfExists(temporaryArchive);
         }
@@ -486,16 +568,22 @@ final class SbkRuntimeBundle {
         }
     }
 
-    private static String cachedArchiveDigest(Path archive, Path digestFile) throws IOException {
-        if (!Files.isRegularFile(archive) || !Files.isRegularFile(digestFile)) {
+    private static String cachedArchiveDigest(Path archive, Path digestFile, Path sizeFile) throws IOException {
+        if (!Files.isRegularFile(archive) || !Files.isRegularFile(digestFile)
+                || !Files.isRegularFile(sizeFile)) {
             return null;
         }
         final String expectedDigest = Files.readString(digestFile, StandardCharsets.UTF_8).trim();
         if (expectedDigest.length() != SHA_256_HEX_LENGTH) {
             return null;
         }
-        final String actualDigest = sha256(archive);
-        return expectedDigest.equals(actualDigest) ? actualDigest : null;
+        final long expectedSize;
+        try {
+            expectedSize = Long.parseLong(Files.readString(sizeFile, StandardCharsets.UTF_8).trim());
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
+        return expectedSize >= 0 && Files.size(archive) == expectedSize ? expectedDigest : null;
     }
 
     private static void writeAtomically(Path target, String value) throws IOException {

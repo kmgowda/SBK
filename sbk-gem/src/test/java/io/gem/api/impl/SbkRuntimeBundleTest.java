@@ -12,7 +12,6 @@ package io.gem.api.impl;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -21,7 +20,10 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -75,6 +77,7 @@ final class SbkRuntimeBundleTest {
                 new DeploymentPlatform("linux"), cache);
 
         Files.writeString(sbk.resolve("lib/dependency.jar"), "changed", StandardCharsets.UTF_8);
+        writeRuntimeIdentity(sbk, "b".repeat(64));
         final SbkRuntimeBundle changed = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                 new DeploymentPlatform("linux"), cache);
 
@@ -97,7 +100,7 @@ final class SbkRuntimeBundleTest {
         Files.writeString(sbk.resolve(".sbk-runtime-current"), clean.deploymentName(), StandardCharsets.UTF_8);
         Files.createDirectories(sbk.resolve(".sbk-runtime-leases").resolve(clean.deploymentName()));
         Files.createDirectories(sbk.resolve(".sbk-runtime-management.lock"));
-        Files.writeString(sbk.resolve("sbk-runtime-transfer.tar.gz"), "partial", StandardCharsets.UTF_8);
+        Files.writeString(sbk.resolve("sbk-runtime-transfer.tar"), "partial", StandardCharsets.UTF_8);
 
         final SbkRuntimeBundle withManagedState = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                 platform, cache);
@@ -105,7 +108,7 @@ final class SbkRuntimeBundleTest {
         assertEquals(clean.contentDigest(), withManagedState.contentDigest());
         assertEquals(clean.archive(), withManagedState.archive());
         assertFalse(archiveEntries(withManagedState.archive()).stream()
-                .anyMatch(name -> name.contains("sbk-runtime-") || name.contains(".sbk-runtime-")));
+                .anyMatch(name -> name.contains("sbk-runtime-10.5") || name.contains(".sbk-runtime-")));
     }
 
     @Test
@@ -113,18 +116,26 @@ final class SbkRuntimeBundleTest {
         final Path sbk = createSbkDistribution();
         final Path cache = temporaryDirectory.resolve("cache");
         final DeploymentPlatform platform = new DeploymentPlatform("linux");
+        writeRuntimeIdentity(sbk, "10.5", "5".repeat(64));
         final SbkRuntimeBundle lower = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.5", 25,
                 platform, cache);
+        writeRuntimeIdentity(sbk, "10.6", "6".repeat(64));
         final SbkRuntimeBundle current = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                 platform, cache);
+        writeRuntimeIdentity(sbk, "10.7", "7".repeat(64));
         final SbkRuntimeBundle higher = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.7", 25,
                 platform, cache);
+        final Path legacyArchive = cache.resolve("sbk-runtime-10.4-linux-legacy.tar.gz");
+        Files.writeString(legacyArchive, "legacy", StandardCharsets.UTF_8);
+        Files.writeString(cache.resolve(legacyArchive.getFileName() + ".sha256"), "legacy", StandardCharsets.UTF_8);
 
-        assertEquals(2, SbkRuntimeBundle.cleanupOtherCachedBundles(cache, current.deploymentName()));
+        assertEquals(3, SbkRuntimeBundle.cleanupOtherCachedBundles(cache, current.deploymentName()));
 
         assertFalse(Files.exists(lower.archive()));
         assertTrue(Files.exists(current.archive()));
         assertFalse(Files.exists(higher.archive()));
+        assertFalse(Files.exists(legacyArchive));
+        assertFalse(Files.exists(cache.resolve(legacyArchive.getFileName() + ".sha256")));
     }
 
     @Test
@@ -132,8 +143,10 @@ final class SbkRuntimeBundleTest {
         final Path sbk = createSbkDistribution();
         final Path cache = temporaryDirectory.resolve("cache");
         final DeploymentPlatform platform = new DeploymentPlatform("linux");
+        writeRuntimeIdentity(sbk, "10.5", "5".repeat(64));
         final SbkRuntimeBundle active = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.5", 25,
                 platform, cache);
+        writeRuntimeIdentity(sbk, "10.6", "6".repeat(64));
         final SbkRuntimeBundle current = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                 platform, cache);
 
@@ -164,7 +177,7 @@ final class SbkRuntimeBundleTest {
         final Path sbk = createSbkDistribution();
         final Path external = temporaryDirectory.resolve("external.txt");
         Files.writeString(external, "external", StandardCharsets.UTF_8);
-        Files.createSymbolicLink(sbk.resolve("external-link"), Path.of("..", "external.txt"));
+        Files.createSymbolicLink(sbk.resolve("lib/external-link"), Path.of("..", "..", "external.txt"));
 
         final IOException exception = assertThrows(IOException.class, () -> SbkRuntimeBundle.create(sbk,
                 "bin/sbk", "10.6", 25, new DeploymentPlatform("linux"),
@@ -176,15 +189,15 @@ final class SbkRuntimeBundleTest {
     @Test
     void preservesContainedDirectoryLinksAndTheirTargets() throws IOException {
         final Path sbk = createSbkDistribution();
-        final Path shared = Files.createDirectories(sbk.resolve("shared"));
+        final Path shared = Files.createDirectories(sbk.resolve("lib/shared"));
         Files.writeString(shared.resolve("data.txt"), "data", StandardCharsets.UTF_8);
-        Files.createSymbolicLink(sbk.resolve("shared-link"), Path.of("shared"));
+        Files.createSymbolicLink(sbk.resolve("lib/shared-link"), Path.of("shared"));
 
         final SbkRuntimeBundle bundle = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
                 new DeploymentPlatform("linux"), temporaryDirectory.resolve("cache"));
 
-        assertTrue(archiveEntries(bundle.archive()).contains("runtime/sbk/shared/data.txt"));
-        assertEquals("shared", archiveLinkTarget(bundle.archive(), "runtime/sbk/shared-link"));
+        assertTrue(archiveEntries(bundle.archive()).contains("runtime/sbk/lib/shared/data.txt"));
+        assertEquals("shared", archiveLinkTarget(bundle.archive(), "runtime/sbk/lib/shared-link"));
     }
 
     @Test
@@ -203,6 +216,27 @@ final class SbkRuntimeBundleTest {
                 repaired.archive().resolveSibling(repaired.archive().getFileName() + ".sha256"),
                 StandardCharsets.UTF_8).trim());
         assertTrue(archiveEntries(repaired.archive()).contains("runtime/sbk/bin/sbk"));
+    }
+
+    @Test
+    void rebuildsSameSizeCorruptionAfterRemoteIntegrityFailure() throws IOException {
+        final Path sbk = createSbkDistribution();
+        final Path cache = temporaryDirectory.resolve("cache");
+        final SbkRuntimeBundle first = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
+                new DeploymentPlatform("linux"), cache);
+        final byte[] corrupted = Files.readAllBytes(first.archive());
+        corrupted[corrupted.length / 2] ^= 1;
+        Files.write(first.archive(), corrupted);
+
+        final SbkRuntimeBundle cached = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
+                new DeploymentPlatform("linux"), cache);
+        assertEquals(first.archiveDigest(), cached.archiveDigest());
+        assertNotEquals(cached.archiveDigest(), sha256(cached.archive()));
+
+        cached.rebuildArchive();
+
+        assertEquals(cached.archiveDigest(), sha256(cached.archive()));
+        assertTrue(archiveEntries(cached.archive()).contains("runtime/sbk/bin/sbk"));
     }
 
     @Test
@@ -234,7 +268,18 @@ final class SbkRuntimeBundleTest {
                 Files.newOutputStream(lib.resolve("sbk-pathing-10.6.jar")), manifest)) {
             output.finish();
         }
+        writeRuntimeIdentity(sbk, "10.6", "a".repeat(64));
         return sbk;
+    }
+
+    private static void writeRuntimeIdentity(Path sbk, String identity) throws IOException {
+        writeRuntimeIdentity(sbk, "10.6", identity);
+    }
+
+    private static void writeRuntimeIdentity(Path sbk, String version, String identity) throws IOException {
+        Files.writeString(sbk.resolve(SbkRuntimeBundle.RUNTIME_IDENTITY_FILE),
+                "format.version=1\nsbk.version=" + version + "\nbuild.sha256=" + identity + "\n",
+                StandardCharsets.UTF_8);
     }
 
     private static void executable(Path path) throws IOException {
@@ -245,8 +290,7 @@ final class SbkRuntimeBundleTest {
     private static List<String> archiveEntries(Path archive) throws IOException {
         final List<String> entries = new ArrayList<>();
         try (InputStream fileInput = Files.newInputStream(archive);
-             GzipCompressorInputStream gzipInput = new GzipCompressorInputStream(fileInput);
-             TarArchiveInputStream tarInput = new TarArchiveInputStream(gzipInput)) {
+             TarArchiveInputStream tarInput = new TarArchiveInputStream(fileInput)) {
             TarArchiveEntry entry;
             while ((entry = tarInput.getNextEntry()) != null) {
                 entries.add(entry.getName());
@@ -257,8 +301,7 @@ final class SbkRuntimeBundleTest {
 
     private static int archiveMode(Path archive, String name) throws IOException {
         try (InputStream fileInput = Files.newInputStream(archive);
-             GzipCompressorInputStream gzipInput = new GzipCompressorInputStream(fileInput);
-             TarArchiveInputStream tarInput = new TarArchiveInputStream(gzipInput)) {
+             TarArchiveInputStream tarInput = new TarArchiveInputStream(fileInput)) {
             TarArchiveEntry entry;
             while ((entry = tarInput.getNextEntry()) != null) {
                 if (name.equals(entry.getName())) {
@@ -271,8 +314,7 @@ final class SbkRuntimeBundleTest {
 
     private static String archiveLinkTarget(Path archive, String name) throws IOException {
         try (InputStream fileInput = Files.newInputStream(archive);
-             GzipCompressorInputStream gzipInput = new GzipCompressorInputStream(fileInput);
-             TarArchiveInputStream tarInput = new TarArchiveInputStream(gzipInput)) {
+             TarArchiveInputStream tarInput = new TarArchiveInputStream(fileInput)) {
             TarArchiveEntry entry;
             while ((entry = tarInput.getNextEntry()) != null) {
                 if (name.equals(entry.getName())) {
@@ -285,8 +327,7 @@ final class SbkRuntimeBundleTest {
 
     private static String archiveText(Path archive, String name) throws IOException {
         try (InputStream fileInput = Files.newInputStream(archive);
-             GzipCompressorInputStream gzipInput = new GzipCompressorInputStream(fileInput);
-             TarArchiveInputStream tarInput = new TarArchiveInputStream(gzipInput)) {
+             TarArchiveInputStream tarInput = new TarArchiveInputStream(fileInput)) {
             TarArchiveEntry entry;
             while ((entry = tarInput.getNextEntry()) != null) {
                 if (name.equals(entry.getName())) {
@@ -295,5 +336,13 @@ final class SbkRuntimeBundleTest {
             }
         }
         throw new IOException("Archive entry not found: " + name);
+    }
+
+    private static String sha256(Path path) throws IOException {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(path)));
+        } catch (NoSuchAlgorithmException exception) {
+            throw new IllegalStateException(exception);
+        }
     }
 }

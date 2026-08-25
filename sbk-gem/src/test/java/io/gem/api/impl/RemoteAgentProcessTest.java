@@ -35,7 +35,7 @@ final class RemoteAgentProcessTest {
         final DeploymentPlatform platform = DeploymentPlatform.local();
         final SbkRuntimeBundle bundle = SbkRuntimeBundle.create(createSbkDistribution(), "bin/sbk", "10.6", 25,
                 platform, temporaryDirectory.resolve("cache"));
-        final Path uploaded = temporaryDirectory.resolve("uploaded.tar.gz");
+        final Path uploaded = temporaryDirectory.resolve("uploaded.tar");
         Files.copy(bundle.archive(), uploaded, StandardCopyOption.REPLACE_EXISTING);
         final Path staging = temporaryDirectory.resolve("staging");
         final Path deployed = temporaryDirectory.resolve(bundle.deploymentName());
@@ -93,6 +93,9 @@ final class RemoteAgentProcessTest {
                 manifest)) {
             output.finish();
         }
+        Files.writeString(sbk.resolve(SbkRuntimeBundle.RUNTIME_IDENTITY_FILE),
+                "format.version=1\nsbk.version=10.6\nbuild.sha256=" + "a".repeat(64) + "\n",
+                StandardCharsets.UTF_8);
         return sbk;
     }
 

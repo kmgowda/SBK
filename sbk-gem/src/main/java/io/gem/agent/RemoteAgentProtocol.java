@@ -28,6 +28,8 @@ public final class RemoteAgentProtocol {
     public static final int MAX_STRING_BYTES = 16 * 1024 * 1024;
     /** Maximum aggregate encoded request size. */
     public static final int MAX_REQUEST_BYTES = 64 * 1024 * 1024;
+    /** Stable diagnostic emitted when a transferred runtime archive fails integrity verification. */
+    public static final String ARCHIVE_DIGEST_MISMATCH = "SBK archive SHA-256 mismatch";
 
     private RemoteAgentProtocol() {
     }
