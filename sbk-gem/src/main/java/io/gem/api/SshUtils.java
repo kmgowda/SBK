@@ -10,16 +10,18 @@
 
 package io.gem.api;
 
+import io.sbk.system.Printer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.client.SshClient;
+import org.apache.sshd.client.auth.UserAuthFactory;
+import org.apache.sshd.client.auth.password.UserAuthPasswordFactory;
 import org.apache.sshd.client.channel.ChannelExec;
 import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.config.hosts.KnownHostEntry;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.keyverifier.AcceptAllServerKeyVerifier;
 import org.apache.sshd.client.keyverifier.KnownHostsServerKeyVerifier;
-import org.apache.sshd.client.keyverifier.RejectAllServerKeyVerifier;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.config.keys.KeyUtils;
@@ -36,7 +38,9 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,6 +50,7 @@ import java.util.concurrent.TimeUnit;
  * for orchestrating remote SBK runs.
  */
 public final class SshUtils {
+    private static final Map<Path, KnownHostsServerKeyVerifier> KNOWN_HOST_VERIFIERS = new ConcurrentHashMap<>();
 
     /**
      * Creates an SSH utility facade for remote SBK orchestration.
@@ -62,14 +67,18 @@ public final class SshUtils {
     public static SshClient createClient(ConnectionConfig connConfig) {
         final SshClient client = SshClient.setUpDefaultClient();
         if (connConfig.isHostKeyCheck()) {
-            final Path knownHosts = StringUtils.isEmpty(connConfig.getKnownHosts())
+            final Path knownHosts = (StringUtils.isEmpty(connConfig.getKnownHosts())
                     ? KnownHostEntry.getDefaultKnownHostsFile()
-                    : Path.of(connConfig.getKnownHosts());
-            client.setServerKeyVerifier(new KnownHostsServerKeyVerifier(RejectAllServerKeyVerifier.INSTANCE,
-                    knownHosts));
+                    : Path.of(connConfig.getKnownHosts())).toAbsolutePath().normalize();
+            client.setServerKeyVerifier(KNOWN_HOST_VERIFIERS.computeIfAbsent(knownHosts,
+                    SshUtils::acceptNewKnownHostsVerifier));
             preferKnownHostAlgorithms(client, connConfig, knownHosts);
         } else {
             client.setServerKeyVerifier(AcceptAllServerKeyVerifier.INSTANCE);
+        }
+
+        if (StringUtils.isNotEmpty(connConfig.getPassword())) {
+            preferPasswordAuthentication(client);
         }
 
         final String agentSocket = System.getenv(SshAgent.SSH_AUTHSOCKET_ENV_NAME);
@@ -77,6 +86,24 @@ public final class SshUtils {
             client.setAgentFactory(new JdkUnixAgentFactory(agentSocket));
         }
         return client;
+    }
+
+    private static KnownHostsServerKeyVerifier acceptNewKnownHostsVerifier(Path knownHosts) {
+        return new KnownHostsServerKeyVerifier((session, remoteAddress, serverKey) -> {
+            Printer.log.warn("SBK-GEM: Trusting previously unknown SSH host key for '{}' and recording it in "
+                            + "'{}'; key type: {}, fingerprint: {}", remoteAddress, knownHosts,
+                    KeyUtils.getKeyType(serverKey), KeyUtils.getFingerPrint(serverKey));
+            return true;
+        }, knownHosts);
+    }
+
+    private static void preferPasswordAuthentication(SshClient client) {
+        final List<UserAuthFactory> configuredFactories = client.getUserAuthFactories();
+        final List<UserAuthFactory> factories = new ArrayList<>(configuredFactories == null
+                ? SshClient.DEFAULT_USER_AUTH_FACTORIES : configuredFactories);
+        factories.removeIf(factory -> UserAuthPasswordFactory.NAME.equals(factory.getName()));
+        factories.add(0, UserAuthPasswordFactory.INSTANCE);
+        client.setUserAuthFactories(factories);
     }
 
     /**

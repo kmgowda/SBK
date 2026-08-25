@@ -39,7 +39,7 @@ SBK-GEM owns remote launch and aggregate lifecycle. The remote SBK processes sti
 - JDK 25 on the local GEM host. GEM reuses a same-or-newer remote JDK when present;
   otherwise it copies the controller JDK as a separate content-addressed tree.
   Java is never embedded in the SBK runtime archive.
-- SSH reachability, a trusted `known_hosts` entry, and authentication for every target.
+- SSH reachability, a writable `known_hosts` file, and authentication for every target.
 - A writable remote installation/work directory.
 - Network reachability from remote SBK clients back to the GEM/SBM host, normally on port `9717`.
 - Network reachability from remote hosts to the target storage system.
@@ -63,18 +63,24 @@ to use passphrase-protected keys because their passphrases do not have to be put
 in SBK configuration.
 
 The `-gempass` option and `SBK_GEM_SSH_PASSWD` environment variable are optional
-password-authentication fallbacks. Leave both unset for passwordless login. Do
-not store `gempass` in a committed YML or properties file.
+password-authentication inputs. When a password is supplied, SBK-GEM asks Apache
+MINA to try password authentication first and then falls back to the SSH agent
+and configured key files if the server rejects the password. Leave both unset
+for passwordless login. Do not store `gempass` in a committed YML or properties
+file.
 
 Remote host identity is checked against the local user's OpenSSH
 `~/.ssh/known_hosts` data by default. Use `-knownhosts <path>` to select a
-dedicated trust file. Add and verify each node's host key before starting a
-benchmark; an unknown or changed key is rejected. `-hostkeycheck false` is an
-explicit opt-out for isolated, disposable environments and weakens protection
-against server impersonation, so it should not be used for normal benchmarks.
-A successful command-line `ssh` connection is a useful preflight check, but run
-it as the exact operating system user that will launch SBK-GEM so it reads the
-same agent, key files, SSH configuration, and `known_hosts` file.
+dedicated trust file. A previously unknown host key is accepted and persisted
+on first contact (TOFU/accept-new); SBK-GEM logs its type and fingerprint.
+Subsequent connections must present that key, and a changed key is rejected.
+Verify newly recorded fingerprints through an independent channel when the
+environment requires stronger first-contact assurance. `-hostkeycheck false`
+is an explicit opt-out for isolated, disposable environments and also disables
+changed-key protection. A successful command-line `ssh` connection is a useful
+preflight check, but run it as the exact operating system user that will launch
+SBK-GEM so it reads the same agent, key files, SSH configuration, and
+`known_hosts` file.
 
 ## Build
 

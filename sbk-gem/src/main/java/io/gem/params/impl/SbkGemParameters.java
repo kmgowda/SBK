@@ -119,8 +119,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("gemuser", true, "ssh user name of the remote hosts, default: " + config.gemuser);
         addOption(GemConfig.GEM_PASS_OPTION, true, "ssh user password of the remote hosts, default: " +
                 (StringUtils.isEmpty(config.gempass) ? "not set" : "******"));
-        addOption("hostkeycheck", true, "Verify remote SSH host keys against known_hosts; default: " +
-                config.hostkeycheck);
+        addOption("hostkeycheck", true, "Trust and record unknown SSH host keys, and reject changed keys, using "
+                + "known_hosts; default: " + config.hostkeycheck);
         addOption("knownhosts", true, "Known-hosts file; an empty value uses ~/.ssh/known_hosts; default: " +
                 (StringUtils.isEmpty(config.knownhosts) ? "default" : config.knownhosts));
         addOption("gemport", true, "ssh port of the remote hosts, default: " + config.gemport);

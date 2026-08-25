@@ -11,6 +11,7 @@
 package io.gem.api;
 
 import org.apache.sshd.client.SshClient;
+import org.apache.sshd.client.config.hosts.KnownHostEntry;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.common.config.keys.PublicKeyEntry;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
@@ -35,6 +36,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -95,10 +97,87 @@ final class SshUtilsTest {
     }
 
     @Test
-    void rejectsServerMissingFromKnownHosts() throws IOException {
+    void prefersSuppliedPasswordBeforePublicKeyAuthentication() throws IOException {
+        final AtomicInteger passwordAttempts = new AtomicInteger();
+        final AtomicInteger publicKeyAttempts = new AtomicInteger();
+        server.setPasswordAuthenticator((username, password, session) -> {
+            passwordAttempts.incrementAndGet();
+            return USER.equals(username) && "sftp-password".equals(password);
+        });
+        server.setPublickeyAuthenticator((username, key, session) -> {
+            publicKeyAttempts.incrementAndGet();
+            return USER.equals(username) && userKey.getPublic().equals(key);
+        });
+        final Path knownHosts = writeKnownHosts(hostKey);
+        final ConnectionConfig config = new ConnectionConfig("127.0.0.1", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), true, knownHosts.toString());
+        try (SshClient client = SshUtils.createClient(config)) {
+            client.addPublicKeyIdentity(userKey);
+            client.start();
+            try (ClientSession session = SshUtils.createSession(client, config, 5)) {
+                assertTrue(session.isAuthenticated());
+                assertTrue(passwordAttempts.get() > 0);
+                assertEquals(0, publicKeyAttempts.get());
+            }
+        }
+    }
+
+    @Test
+    void fallsBackToPublicKeyWhenSuppliedPasswordIsRejected() throws IOException {
+        final AtomicInteger passwordAttempts = new AtomicInteger();
+        final AtomicInteger publicKeyAttempts = new AtomicInteger();
+        server.setPasswordAuthenticator((username, password, session) -> {
+            passwordAttempts.incrementAndGet();
+            return false;
+        });
+        server.setPublickeyAuthenticator((username, key, session) -> {
+            publicKeyAttempts.incrementAndGet();
+            return USER.equals(username) && userKey.getPublic().equals(key);
+        });
+        final Path knownHosts = writeKnownHosts(hostKey);
+        final ConnectionConfig config = new ConnectionConfig("127.0.0.1", USER, "rejected-password",
+                server.getPort(), temporaryDirectory.toString(), true, knownHosts.toString());
+        try (SshClient client = SshUtils.createClient(config)) {
+            client.addPublicKeyIdentity(userKey);
+            client.start();
+            try (ClientSession session = SshUtils.createSession(client, config, 5)) {
+                assertTrue(session.isAuthenticated());
+                assertTrue(passwordAttempts.get() > 0);
+                assertTrue(publicKeyAttempts.get() > 0);
+            }
+        }
+    }
+
+    @Test
+    void acceptsAndPersistsServerMissingFromKnownHosts() throws IOException {
         final Path knownHosts = temporaryDirectory.resolve("empty-known-hosts");
         Files.createFile(knownHosts);
         final ConnectionConfig config = connectionConfig(knownHosts);
+        try (SshClient client = SshUtils.createClient(config)) {
+            client.addPublicKeyIdentity(userKey);
+            client.start();
+            try (ClientSession session = SshUtils.createSession(client, config, 5)) {
+                assertTrue(session.isAuthenticated());
+            }
+        }
+        assertTrue(KnownHostEntry.readKnownHostEntries(knownHosts).stream()
+                .anyMatch(entry -> entry.isHostMatch("127.0.0.1", server.getPort())));
+    }
+
+    @Test
+    void rejectsChangedServerKeyAfterAcceptNewPersistence() throws Exception {
+        final Path knownHosts = temporaryDirectory.resolve("accept-new-known-hosts");
+        Files.createFile(knownHosts);
+        final ConnectionConfig config = connectionConfig(knownHosts);
+        try (SshClient client = SshUtils.createClient(config)) {
+            client.addPublicKeyIdentity(userKey);
+            client.start();
+            try (ClientSession session = SshUtils.createSession(client, config, 5)) {
+                assertTrue(session.isAuthenticated());
+            }
+        }
+
+        server.setKeyPairProvider(KeyPairProvider.wrap(generateEcKey()));
         try (SshClient client = SshUtils.createClient(config)) {
             client.addPublicKeyIdentity(userKey);
             client.start();

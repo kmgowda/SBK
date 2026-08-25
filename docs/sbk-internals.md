@@ -2092,30 +2092,35 @@ SBK-GEM uses **Apache Mina SSHD** (a pure-Java SSH client; no native
 binary, no `ssh` shell-out). Each remote node is a `SshSession`:
 
 Connection setup deliberately follows the local user's SSH trust and credential
-model. By default, the server key must match an entry in
-`~/.ssh/known_hosts`, or the file selected by `-knownhosts <path>`; an unknown or
-changed server is rejected before GEM copies or executes anything. The explicit
-`-hostkeycheck false` escape hatch is only for isolated environments because it
-allows an attacker to impersonate a benchmark node. For client
+model. By default, a previously unknown server key is accepted and persisted in
+`~/.ssh/known_hosts`, or the file selected by `-knownhosts <path>`; a changed
+server key is rejected before GEM copies or executes anything. This accept-new
+trust-on-first-use behavior is serialized per known-hosts file and logs the new
+fingerprint. The explicit `-hostkeycheck false` escape hatch is only for
+isolated environments because it also disables changed-key protection. For client
 authentication, GEM can use identities exposed by `SSH_AUTH_SOCK` and key files
 selected by the local OpenSSH configuration (including conventional `~/.ssh`
-keys). An explicit `-gempass` value, or `SBK_GEM_SSH_PASSWD`, enables password
-authentication as an optional fallback. Therefore, an empty password is not an
-error: it means "attempt passwordless public-key authentication." Using an SSH
+keys). An explicit `-gempass` value, or `SBK_GEM_SSH_PASSWD`, makes password
+authentication the first method and retains agent/key authentication as the
+fallback. Therefore, an empty password is not an error: it means "attempt
+passwordless public-key authentication." Using an SSH
 agent is the normal way to make a passphrase-protected key available without
 putting the passphrase in an SBK file.
 
 ```mermaid
 flowchart LR
-    START["Connect to node"] --> HOST{"Host key matches known_hosts?"}
-    HOST -->|No| REJECT["Reject unknown or changed server"]
-    HOST -->|Yes| AGENT["Try identities from ssh-agent"]
-    AGENT --> FILES["Try OpenSSH-configured key files"]
-    FILES --> PASS{"Optional password configured?"}
+    START["Connect to node"] --> HOST{"Host key state?"}
+    HOST -->|Unknown| RECORD["Record new key and fingerprint"]
+    HOST -->|Changed| REJECT["Reject changed server key"]
+    HOST -->|Known| PASS{"Password configured?"}
+    RECORD --> PASS
     PASS -->|Yes| PASSWORD["Try password authentication"]
-    PASS -->|No| RESULT{"Any authentication succeeded?"}
-    PASSWORD --> RESULT
-    RESULT -->|Yes| READY["Authenticated SshSession"]
+    PASS -->|No| AGENT["Try identities from ssh-agent"]
+    PASSWORD -->|Rejected| AGENT
+    AGENT --> FILES["Try OpenSSH-configured key files"]
+    PASSWORD -->|Accepted| READY["Authenticated SshSession"]
+    FILES --> RESULT{"Key authentication succeeded?"}
+    RESULT -->|Yes| READY
     RESULT -->|No| FAIL["Report host-specific authentication failure"]
 
     classDef good fill:#dcfce7,stroke:#166534,color:#000

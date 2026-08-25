@@ -221,16 +221,9 @@ final public class SbkGem {
         gemConfig = GemConfig.load();
 
         if (StringUtils.isEmpty(gemConfig.gempass)) {
-            Printer.log.info("SBK-GEM: The SSH password is not set in gem.properties; " +
-                    "checking " + GemConfig.SBK_GEM_SSH_PASSWD + " environment variable");
             String envPass = System.getenv(GemConfig.SBK_GEM_SSH_PASSWD);
             if (StringUtils.isNotEmpty(envPass)) {
                 gemConfig.gempass = envPass;
-                Printer.log.info("SBK-GEM: Using password from "+ GemConfig.SBK_GEM_SSH_PASSWD +
-                        " environment variable");
-            } else {
-                Printer.log.info("SBK-GEM: No SSH password configured; attempting ssh-agent and key-file " +
-                        "authentication");
             }
         }
 
@@ -353,6 +346,13 @@ final public class SbkGem {
                 throw new SbkGemParameterException(ex);
             }
             break;
+        }
+
+        if (StringUtils.isNotEmpty(gemConfig.gempass)) {
+            Printer.log.info("SBK-GEM: SSH password supplied; password authentication will be attempted first, " +
+                    "with ssh-agent and key-file authentication as fallback");
+        } else {
+            Printer.log.info("SBK-GEM: No SSH password supplied; using ssh-agent and key-file authentication");
         }
 
         if (storageDevice != null) {
