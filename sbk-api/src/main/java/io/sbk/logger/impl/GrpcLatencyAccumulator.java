@@ -20,8 +20,8 @@ import org.eclipse.collections.impl.map.mutable.primitive.LongLongHashMap;
  * transport. This keeps protobuf allocation out of the per-measurement path.
  */
 final class GrpcLatencyAccumulator {
-    private static final int LATENCY_VALUES_FIELD_NUMBER = 23;
-    private static final int LATENCY_COUNTS_FIELD_NUMBER = 24;
+    private static final int LATENCY_VALUES_FIELD_NUMBER = MessageLatenciesRecord.LATENCYVALUES_FIELD_NUMBER;
+    private static final int LATENCY_COUNTS_FIELD_NUMBER = MessageLatenciesRecord.LATENCYCOUNTS_FIELD_NUMBER;
     private static final int MAXIMUM_METADATA_BYTES = maximumMetadataBytes();
     private final LongLongHashMap latencies;
     private final long maximumMessageBytes;

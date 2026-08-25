@@ -140,7 +140,7 @@ final public class Sbm {
         Printer.log.info("SBP Version Major: " + sbpVersion.major+", Minor: "+sbpVersion.minor);
         loggerStore.printClasses("Logger");
 
-        sbmConfig = SbmConfig.get();
+        sbmConfig = SbmConfig.load();
 
         if (StringUtils.isEmpty(argsLoggerName)) {
             logger = new  SbmPrometheusLogger();

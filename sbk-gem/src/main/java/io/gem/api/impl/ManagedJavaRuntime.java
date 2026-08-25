@@ -54,10 +54,15 @@ import java.util.stream.Stream;
 final class ManagedJavaRuntime {
     private static final String MARKER = ".sbk-java.sha256";
     private static final String IDENTITY_CACHE_FORMAT = "1";
+    private static final String SHA_256 = "SHA-256";
+    private static final int SHA_256_HEX_LENGTH = 64;
     private static final int HASH_BUFFER_SIZE = 64 * 1024;
     private static final int COPY_BUFFER_SIZE = 256 * 1024;
     private static final int FILE_COPY_CONCURRENCY = 8;
     private static final int IDENTITY_CHARACTERS = 24;
+    private static final int REGULAR_FILE_MODE = 0644;
+    private static final int EXECUTABLE_FILE_MODE = 0755;
+    private static final int SYMBOLIC_LINK_MODE = 0777;
     private static final LongConsumer NO_COPY_PROGRESS = ignored -> { };
     private final Path localHome;
     private final String digest;
@@ -548,7 +553,7 @@ final class ManagedJavaRuntime {
 
     private static MessageDigest newDigest() {
         try {
-            return MessageDigest.getInstance("SHA-256");
+            return MessageDigest.getInstance(SHA_256);
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException(exception);
         }
@@ -613,7 +618,7 @@ final class ManagedJavaRuntime {
     }
 
     private static boolean isSha256(String value) {
-        if (value.length() != 64) {
+        if (value.length() != SHA_256_HEX_LENGTH) {
             return false;
         }
         try {
@@ -682,7 +687,7 @@ final class ManagedJavaRuntime {
 
     private static int posixMode(Path path) throws IOException {
         if (Files.isSymbolicLink(path)) {
-            return 0777;
+            return SYMBOLIC_LINK_MODE;
         }
         try {
             int mode = 0;
@@ -692,7 +697,7 @@ final class ManagedJavaRuntime {
             }
             return mode;
         } catch (UnsupportedOperationException exception) {
-            return Files.isExecutable(path) ? 0755 : 0644;
+            return Files.isExecutable(path) ? EXECUTABLE_FILE_MODE : REGULAR_FILE_MODE;
         }
     }
 

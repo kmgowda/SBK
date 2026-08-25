@@ -30,6 +30,24 @@ public final class RemoteAgentProtocol {
     public static final int MAX_REQUEST_BYTES = 64 * 1024 * 1024;
     /** Stable diagnostic emitted when a transferred runtime archive fails integrity verification. */
     public static final String ARCHIVE_DIGEST_MISMATCH = "SBK archive SHA-256 mismatch";
+    /** Probe operation. */
+    public static final String PROBE = "probe";
+    /** Runtime activation operation. */
+    public static final String ACTIVATE = "activate";
+    /** Runtime verification operation. */
+    public static final String VERIFY = "verify";
+    /** Retired-runtime cleanup operation. */
+    public static final String CLEANUP = "cleanup";
+    /** Runtime reservation operation. */
+    public static final String RUNTIME_RESERVE = "runtime-reserve";
+    /** Runtime lease acquisition operation. */
+    public static final String RUNTIME_ACQUIRE = "runtime-acquire";
+    /** Runtime lease heartbeat operation. */
+    public static final String RUNTIME_HEARTBEAT = "runtime-heartbeat";
+    /** Runtime lease release operation. */
+    public static final String RUNTIME_RELEASE = "runtime-release";
+    /** Remote benchmark execution operation. */
+    public static final String RUN = "run";
 
     private RemoteAgentProtocol() {
     }
