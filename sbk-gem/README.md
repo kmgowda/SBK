@@ -75,13 +75,14 @@ also disables SSH host-key checking, so stale or changed `known_hosts` entries d
 not prevent login. Leave both unset for passwordless login. Do not store `gempass`
 in a committed YML or properties file.
 
-Remote host identity is checked against the local user's OpenSSH
-`~/.ssh/known_hosts` data by default. Use `-knownhosts <path>` to select a
-dedicated trust file. A previously unknown host key is accepted and persisted
-on first contact (TOFU/accept-new); SBK-GEM logs its type and fingerprint.
-For passwordless connections, subsequent connections must present that key, and
-a changed key is rejected. Host-key checking is bypassed whenever `-gempass` or
-`SBK_GEM_SSH_PASSWD` supplies a password, regardless of `-hostkeycheck`.
+Remote host-key checking is disabled by default so unattended passwordless SSH
+can use the configured SSH agent or key files without `known_hosts` blocking the
+connection. Set `-hostkeycheck true` to enable accept-new checking against the
+local user's OpenSSH `~/.ssh/known_hosts` data, or use `-knownhosts <path>` to
+select a dedicated trust file. A previously unknown host key is then accepted
+and persisted on first contact (TOFU/accept-new), and a changed key is rejected.
+Host-key checking is bypassed whenever `-gempass` or `SBK_GEM_SSH_PASSWD`
+supplies a password, regardless of `-hostkeycheck`.
 Verify newly recorded fingerprints through an independent channel when the
 environment requires stronger first-contact assurance. `-hostkeycheck false`
 is an explicit opt-out for isolated, disposable environments and also disables

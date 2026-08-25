@@ -355,6 +355,9 @@ final public class SbkGem {
             Printer.log.info("SBK-GEM: SSH host-key checking is disabled because a password was supplied");
         } else {
             Printer.log.info("SBK-GEM: No SSH password supplied; using ssh-agent and key-file authentication");
+            if (!gemConfig.hostkeycheck) {
+                Printer.log.info("SBK-GEM: SSH host-key checking is disabled for passwordless authentication");
+            }
         }
 
         if (storageDevice != null) {

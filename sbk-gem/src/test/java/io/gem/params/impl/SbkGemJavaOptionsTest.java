@@ -48,7 +48,7 @@ final class SbkGemJavaOptionsTest {
 
         assertTrue(config.javadir == null || config.javadir.isEmpty());
         assertTrue(config.runtimecleanup);
-        assertTrue(config.hostkeycheck);
+        assertFalse(config.hostkeycheck);
         assertTrue(config.knownhosts == null || config.knownhosts.isEmpty());
         assertEquals(120, config.sbmRegistrationTimeoutSeconds);
     }

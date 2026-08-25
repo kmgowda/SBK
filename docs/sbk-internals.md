@@ -2102,13 +2102,13 @@ per-operation measurement path.
 SBK-GEM uses **Apache Mina SSHD** (a pure-Java SSH client; no native
 binary, no `ssh` shell-out). Each remote node is a `SshSession`:
 
-For passwordless connections, setup follows the local user's SSH trust and
-credential model. A previously unknown server key is accepted and persisted in
+Host-key verification is disabled by default so unattended passwordless SSH can
+reach agent and key-file authentication without being blocked by stale trust
+data. When `-hostkeycheck true` is selected, a previously unknown server key is accepted and persisted in
 `~/.ssh/known_hosts`, or the file selected by `-knownhosts <path>`; a changed
 server key is rejected before GEM copies or executes anything. This accept-new
 trust-on-first-use behavior is serialized per known-hosts file and logs the new
-fingerprint. The explicit `-hostkeycheck false` escape hatch disables changed-key
-protection for passwordless connections. For client authentication, GEM can use
+fingerprint. For client authentication, GEM can use
 identities exposed by `SSH_AUTH_SOCK` and key files
 selected by the local OpenSSH configuration (including conventional `~/.ssh`
 keys). An explicit `-gempass` value, or `SBK_GEM_SSH_PASSWD`, makes password
