@@ -22,15 +22,18 @@ SBK-YAL loads a YML benchmark description and delegates to the normal SBK bootst
 
 ```bash
 ./gradlew :sbk-yal:check
-./gradlew :sbk-yal:installDist
+./gradlew installDist
 ```
+
+Use the root distribution because it assembles the enabled storage drivers and
+registers the dedicated `sbk-yal` launcher.
 
 ## Run
 
 The repository includes example files in this module. Display current options first:
 
 ```bash
-./sbk-yal/build/install/sbk-yal/bin/sbk-yal -help
+./build/install/sbk/bin/sbk-yal -help
 ```
 
 Then run a YML definition using the file option shown by that help output. YML keys are mapped by `io.sbk.params.impl.SbkYmlMap` into ordinary SBK arguments and passed to `Sbk.run(...)`.

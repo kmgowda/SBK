@@ -354,10 +354,14 @@ Operational defaults have one owning source:
 | SBK PerL queue topology | `sbk-api/src/main/resources/sbk.properties` |
 | SBK lifecycle, executor reserve, and shutdown timeouts | `sbk-api/src/main/resources/sbk-runtime.properties` |
 | Logger reporting and request-ID dimensions | `sbk-api/src/main/resources/logger.properties` |
+| Direct SBK Prometheus endpoint defaults | `sbk-api/src/main/resources/metrics.properties` |
 | SBM client transport queue, flow-control stall, and close timeouts | `sbk-api/src/main/resources/sbmhost.properties` |
 | SBM server defaults, including its default action | `sbm/src/main/resources/sbm.properties` |
+| SBM/GEM aggregate Prometheus endpoint defaults | `sbm/src/main/resources/sbm-metrics.properties` |
 | Web Console server, client, browser, retention, and log settings | `sbk-web-console/src/main/resources/webconsole.properties` |
 | GEM orchestration and bounded diagnostic settings | `sbk-gem/src/main/resources/gem.properties` |
+| SBK-YAL default input file | `sbk-yal/src/main/resources/sbk-yal.properties` |
+| SBK-GEM-YAL default input file | `sbk-gem-yal/src/main/resources/gem-yal.properties` |
 
 The SBP failure text limits are protocol constraints rather than operator tuning;
 `SbpFailureLimits` is the shared client/server authority. Container manifests read

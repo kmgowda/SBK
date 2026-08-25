@@ -14,7 +14,6 @@ site_url: 'https://kmgowda.github.io/SBK/'
 site_description: 'Documentation for SBK'
 
 repo_url: 'https://github.com/kmgowda/SBK'
-edit_uri: 'tree/master/documentation/src/docs'
 
 
 # Extensions
@@ -37,6 +36,11 @@ markdown_extensions:
 
 nav:
   - SBK: 'https://github.com/kmgowda/SBK/blob/master/README.md'
-  - SBK RAM: 'https://github.com/kmgowda/SBK/blob/master/sbk-ram/README.md'
+  - Documentation Index: 'https://github.com/kmgowda/SBK/blob/master/docs/README.md'
+  - Architecture: 'https://github.com/kmgowda/SBK/blob/master/docs/ARCHITECTURE.md'
+  - PerL: 'https://github.com/kmgowda/SBK/blob/master/perl/README.md'
+  - SBK Web Console: 'https://github.com/kmgowda/SBK/blob/master/sbk-web-console/README.md'
+  - SBM: 'https://github.com/kmgowda/SBK/blob/master/sbm/README.md'
+  - SBK YAL: 'https://github.com/kmgowda/SBK/blob/master/sbk-yal/README.md'
   - SBK GEM: 'https://github.com/kmgowda/SBK/blob/master/sbk-gem/README.md'
   - SBK GEM YAL: 'https://github.com/kmgowda/SBK/blob/master/sbk-gem-yal/README.md'

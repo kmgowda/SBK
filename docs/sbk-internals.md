@@ -1570,7 +1570,7 @@ before `GrpcLogger` registers. The controller starts SBM's existing aggregation
 consumer only after every prepared client has registered, keeping deployment and
 driver initialization outside the aggregate reporting clock. This is orchestration
 ordering only; it adds no condition, state, or dispatch to PerL or SBM ingestion
-iterations. Because remote PerL and SBM rotate independent periodic windows, the
+iterations. Because remote SBK and SBM rotate independent periodic windows, the
 first aggregate output can require up to two reporting intervals.
 
 | RPC | Request | Response | Purpose |
@@ -1948,7 +1948,7 @@ sequenceDiagram
         GEM->>SSH: verify copied JDK through the agent
     end
     GEM->>GEM: build an SBK-only content-addressed archive
-    GEM->>SSH: reserve deployment identities through MINA SFTP
+    GEM->>SSH: reserve deployment identities through the Java agent
     par inspect exact runtime identity
         SSH->>N1: agent verifies content marker and SBK JARs
         SSH->>N2: agent verifies content marker and SBK JARs
@@ -1960,8 +1960,8 @@ sequenceDiagram
     end
     GEM->>SSH: verify activated Java, SBK, and content identity
     opt runtimecleanup is true (default)
-        SSH->>N1: atomically retire inactive runtimes; delete through SFTP
-        SSH->>N2: atomically retire inactive runtimes; delete through SFTP
+        SSH->>N1: agent atomically retires and deletes inactive runtimes
+        SSH->>N2: agent atomically retires and deletes inactive runtimes
     end
 
     GEM->>SBM: sbmBenchmark.start()<br/>(listen on :9717 locally)
@@ -2188,8 +2188,8 @@ they remain blocked for most or all of a benchmark. Node count therefore no
 longer determines the number of controller platform threads, and a saturated
 transfer lane cannot prevent control-plane cancellation or lease work.
 Lease heartbeats are paused and drained before the final lease acquisition and
-retirement transition, then restarted. This prevents a heartbeat SFTP operation
-from racing the atomic lease/current-runtime update on a slow remote filesystem.
+retirement transition, then restarted. This prevents a Java-agent heartbeat
+request from racing the atomic lease/current-runtime update on a slow remote filesystem.
 
 ---
 

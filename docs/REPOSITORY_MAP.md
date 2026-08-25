@@ -143,6 +143,14 @@ the harness permits.
 - `io.gem.api.impl.SbkGem`: discovery, argument parsing, and distributed benchmark construction.
 - `SbkGemBenchmark`: embedded SBM and remote-run lifecycle.
 - `SshSession` and `SshUtils`: Apache MINA SSHD integration.
+- `SbkRuntimeBundle` and `ManagedJavaRuntime`: independent content-addressed
+  SBK/JDK archives, controller caches, and remote provisioning plans.
+- `RemoteAgentFiles`: atomic SFTP installation of the small packaged agent.
+- `RemoteAgent` and `RemoteAgentProtocol`: bounded typed controller/agent messages.
+- `io.gem.agent.SbkGemRemoteAgentMain`: remote probe, SBK extraction and
+  verification, runtime leases and cleanup, and direct `SbkMain` process launch.
+- `RemoteTargetPlan`: deduplication of physical deployment work shared by
+  repeated logical nodes targeting the same account, endpoint, and path.
 - `io.gem.params`: remote connection and benchmark argument model.
 
 ### YAL modules
@@ -152,10 +160,12 @@ the harness permits.
 
 ## Tests
 
-Tests currently concentrate on PerL, utility behavior, and a small number of drivers. Locate them with:
+The core modules contain unit, lifecycle, concurrency, protocol, packaging,
+and orchestration tests; selected drivers add focused unit or integration
+coverage. Locate the complete current inventory with:
 
 ```bash
-find . -path '*/src/test/*' -type f | sort
+rg --files | rg '/src/test/' | sort
 ```
 
 Because many vendor drivers require external services, their strongest verification is module checks plus a controlled integration smoke test against the real backend.

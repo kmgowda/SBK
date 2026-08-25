@@ -396,7 +396,7 @@ ls build/install/sbk/lib/ | grep <expected-jar>
 ```
 
 If the jar is in `lib/` but not in the pathing manifest, it's the
-stale-pathing-JAR bug (see [AGENTS.md](../AGENTS.md#44-the-pathing-jar-can-get-stale-after-dependency-changes)).
+stale-pathing-JAR bug (see [AGENTS.md](../AGENTS.md#44-the-pathing-jar-carries-the-runtime-dependency-graph)).
 Fix with:
 
 ```bash

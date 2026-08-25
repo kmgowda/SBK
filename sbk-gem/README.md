@@ -39,7 +39,8 @@ SBK-GEM owns remote launch and aggregate lifecycle. The remote SBK processes sti
 - JDK 25 on the local GEM host. GEM reuses a same-or-newer remote JDK when present;
   otherwise it copies the controller JDK as a separate content-addressed tree.
   Java is never embedded in the SBK runtime archive.
-- SSH reachability, a writable `known_hosts` file, and authentication for every target.
+- SSH reachability and authentication for every target. A writable
+  `known_hosts` file is needed only when host-key checking is explicitly enabled.
 - A writable remote installation/work directory.
 - Network reachability from remote SBK clients back to the GEM/SBM host, normally on port `9717`. By default,
   SBK-GEM advertises the numeric controller address selected by each authenticated SSH route, avoiding a dependency
@@ -95,15 +96,18 @@ SBK-GEM so it reads the same agent, key files, SSH configuration, and
 
 ```bash
 ./gradlew :sbk-gem:check
-./gradlew :sbk-gem:installDist
+./gradlew installDist
 ```
+
+Use the root distribution because it contains the complete enabled-driver
+dependency graph that GEM packages for remote SBK processes.
 
 ## Run
 
 Display the current connection, remote-installation, SBM, and benchmark options:
 
 ```bash
-./sbk-gem/build/install/sbk-gem/bin/sbk-gem -help
+./build/install/sbk/bin/sbk-gem -help
 ```
 
 SBK-GEM accepts GEM-specific options and forwards an SBK argument set to remote processes. Because authentication and connection-file formats are security-sensitive and evolve independently of a sample environment, use generated help and the checked-in example configuration files as the authority.
@@ -245,7 +249,8 @@ First-time JDK deployment creates or reuses one cached plain-tar archive and sen
 it through a single Apache MINA SCP stream per active target. The standard remote
 `tar` executable extracts it into an atomic staging directory. SBK runtime archives
 use the same single-file bulk transport and are extracted by the Java agent. SFTP
-remains limited to small atomic metadata and lifecycle operations. JDK and SBK
+remains limited to remote-directory resolution and atomic installation of the
+small Java agent; typed agent requests perform runtime lifecycle operations. JDK and SBK
 deployment progress reports transferred bytes, percentage, MiB/s, and ETA;
 after payload completion it explicitly reports remote metadata finalization.
 During these potentially long disk-intensive steps, GEM emits an elapsed-time
@@ -396,7 +401,7 @@ setting remains the timeout for individual SSH control operations.
 
 Remote driver initialization is deliberately outside SBM's reporting clock. This two-phase
 ready-then-release barrier prevents a short benchmark from running before SBM is ready. The
-remote PerL reporters and SBM use independent periodic windows, so the first
+remote SBK processes and SBM use independent periodic windows, so the first
 aggregate result can arrive within two reporting intervals after the prepared-client
 barrier; subsequent aggregate windows use the normal configured interval.
 
@@ -415,6 +420,12 @@ without allowing a noisy remote process to consume unbounded GEM heap.
 | `SshSession` | One SSH connection/session abstraction |
 | `SshUtils` | SSH and file-transfer helpers |
 | `ConnectionConfig` | Remote connection model |
+| `SbkRuntimeBundle` | Content-addressed SBK archive creation, identity, and local cache management |
+| `ManagedJavaRuntime` | Controller-JDK identity, archive, transfer, extraction, and reuse planning |
+| `RemoteAgentFiles` | Atomic installation of the packaged Java agent through SFTP |
+| `RemoteAgent` and `RemoteAgentProtocol` | Bounded typed requests and responses exchanged with the remote Java agent |
+| `SbkGemRemoteAgentMain` | Remote probe, SBK activation/verification, runtime leases, cleanup, and process launch |
+| `RemoteTargetPlan` | Deduplication of physical deployment work shared by logical nodes |
 | `GemPrometheusLogger` | GEM/SBM aggregate metrics output |
 | `GemWebLogger` | GEM adapter for the embedded SBM local live web console |
 
@@ -448,7 +459,7 @@ Diagnose distributed failures by boundary:
 | Cannot connect | DNS, route, SSH port, account, `SSH_AUTH_SOCK`, identity-file permissions, and `known_hosts` |
 | Authentication rejected | Remote `authorized_keys`, requested user, agent contents, configured identity files, or optional password |
 | Host key rejected | Missing or changed entry in the SBK-GEM user's `~/.ssh/known_hosts`; verify the key out of band before updating it |
-| Copy/install fails | Remote permissions, disk space, `tar`, SHA-256 tool, archive or file-manifest diagnostic |
+| Copy/install fails | Remote permissions, disk space, remote `scp`/`tar` support, archive-digest or file-manifest diagnostic |
 | Remote Java failure | Homogeneous OS, Java 25 compatibility, executable `java` and `javac` |
 | Driver not found | Same distribution on all hosts, both driver registration files, pathing JAR |
 | No aggregate records | Remote command includes `GrpcLogger`; callback host/port reachable |
