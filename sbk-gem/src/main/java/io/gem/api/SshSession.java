@@ -19,11 +19,14 @@ import org.apache.sshd.sftp.client.fs.SftpFileSystem;
 import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -225,6 +228,27 @@ final public class SshSession {
             }
             return session;
         }
+    }
+
+    /**
+     * Return the authenticated network endpoint used by this SSH session.
+     *
+     * <p>The numeric address lets orchestration collapse aliases such as {@code localhost}
+     * and {@code 127.0.0.1} before performing physical deployment work. The configured
+     * host name remains available through {@link #connection} for user-facing diagnostics.
+     *
+     * @return normalized numeric address, or the normalized endpoint text when unavailable
+     * @throws ConnectException when the SSH session is unavailable
+     */
+    public String getRemoteEndpointIdentity() throws ConnectException {
+        final SocketAddress connectAddress = getSession().getConnectAddress();
+        if (connectAddress instanceof InetSocketAddress inetAddress) {
+            if (inetAddress.getAddress() != null) {
+                return inetAddress.getAddress().getHostAddress().toLowerCase(Locale.ROOT);
+            }
+            return inetAddress.getHostString().toLowerCase(Locale.ROOT);
+        }
+        return connectAddress.toString().toLowerCase(Locale.ROOT);
     }
 
 

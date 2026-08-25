@@ -65,6 +65,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     /** Execution resources separated by orchestration workload. */
     private final SbkGemExecutors executors;
     private final SshSession[] nodes;
+    private final String[] remoteEndpointIdentities;
     private final int controllerJavaVersion;
     private final String runtimeLeaseRunId;
     private final boolean[] runtimeLeaseLaunched;
@@ -107,6 +108,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         executors = SbkGemExecutors.create(config.controlExecutorThreads, config.transferExecutorThreads);
         this.remoteResults = new RemoteResponse[connections.length];
         this.nodes = new SshSession[connections.length];
+        this.remoteEndpointIdentities = new String[connections.length];
         this.runtimeLeaseLaunched = new boolean[connections.length];
         this.runtimeLeaseActive = new boolean[connections.length];
         this.runtimeLeaseHeartbeats = new CompletableFuture<?>[connections.length];
@@ -157,6 +159,9 @@ final public class SbkGemBenchmark implements GemBenchmark {
             throw remoteSessionFailure(ex);
         }
         requireRunning("SSH session establishment");
+        for (int i = 0; i < nodes.length; i++) {
+            remoteEndpointIdentities[i] = nodes[i].getRemoteEndpointIdentity();
+        }
         Printer.log.info("SBK-GEM: Ssh session establishment Success..");
 
         final CompletableFuture<RemoteResponse>[] cfResults = new CompletableFuture[nodes.length];
@@ -549,7 +554,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
         if (!params.isRuntimeCleanup()) {
             return;
         }
-        final RemoteTargetPlan targetPlan = RemoteTargetPlan.create(params.getConnections(), parentDirectories);
+        final RemoteTargetPlan targetPlan = RemoteTargetPlan.create(params.getConnections(),
+                remoteEndpointIdentities, parentDirectories);
         for (int i = 0; i < nodes.length; i++) {
             if (!targetPlan.isRepresentative(i)) {
                 continue;
@@ -635,7 +641,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
             archivePaths[i] = deploymentDirectories[i] + "." + transferId + ".tar";
             stagingDirectories[i] = deploymentDirectories[i] + "." + transferId + ".staging";
         }
-        final RemoteTargetPlan targetPlan = RemoteTargetPlan.create(params.getConnections(), deploymentDirectories);
+        final RemoteTargetPlan targetPlan = RemoteTargetPlan.create(params.getConnections(),
+                remoteEndpointIdentities, deploymentDirectories);
         final boolean[] physicalCopyTargets = targetPlan.representativeSelection(copyTargets);
 
         try (SbkRuntimeBundle.ArchiveUse ignored = bundle.acquireArchiveUse()) {
@@ -797,7 +804,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         final String[] agentPaths = new String[nodes.length];
         final CompletableFuture<String>[] agentInstalls = new CompletableFuture[nodes.length];
         final RemoteTargetPlan targetPlan = RemoteTargetPlan.create(params.getConnections(),
-                absoluteConnectionDirs);
+                remoteEndpointIdentities, absoluteConnectionDirs);
         for (int i = 0; i < nodes.length; i++) {
             if (targetPlan.isRepresentative(i)) {
                 final int nodeIndex = i;
@@ -839,7 +846,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 javaParentDirectories[i] = remoteParent(absoluteConnectionDirs[i]);
             }
             final RemoteTargetPlan javaTargetPlan = RemoteTargetPlan.create(params.getConnections(),
-                    javaParentDirectories);
+                    remoteEndpointIdentities, javaParentDirectories);
             final CompletableFuture<String>[] copies = new CompletableFuture[nodes.length];
             for (int i = 0; i < nodes.length; i++) {
                 if (!javaTargetPlan.isRepresentative(i)) {

@@ -228,9 +228,10 @@ archive-hashing passes. The independently managed JDK is hashed, including
 executable/POSIX permission state, and copied as a directory tree only when its
 exact usable identity is unavailable remotely. A matching marker with unusable
 `bin/java` or `bin/javac` permissions is retired and repaired instead of being
-reused. Physical deployment work is grouped by SSH user, case-insensitive host,
-port, and the resolved case-sensitive remote path. Multiple logical clients
-sharing that target therefore install the agent and copy Java/SBK only once.
+reused. Physical deployment work is grouped by SSH user, authenticated network
+endpoint, port, and the resolved case-sensitive remote path. Host aliases and
+multiple logical clients sharing that target therefore install the agent and
+copy Java/SBK only once.
 During these potentially long disk-intensive steps, GEM emits an elapsed-time
 heartbeat every 5 seconds by default. Runtime
 archive copies report the archive size, unique transfer-target count, completed

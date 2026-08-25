@@ -1998,7 +1998,7 @@ size sidecars detect incomplete entries. The remote agent always performs full
 archive and per-file verification, and a transferred-archive digest mismatch
 causes one local rebuild and retry. All nodes are probed concurrently. A valid
 exact identity is reused, so the full distribution is not transferred on every run. Physical work is
-deduplicated by `(SSH user, case-insensitive host, port, resolved case-sensitive remote directory)`,
+deduplicated by `(SSH user, authenticated network endpoint, port, resolved case-sensitive remote directory)`,
 so repeated workload entries sharing one installation do not race to replace it
 while distinct paths or remote accounts remain independent.
 
@@ -2143,7 +2143,7 @@ All remote operations -- `createSessionAsync()`, `runCommandAsync()`,
 time, not the sum of node times.
 
 A subtle correctness point: `RemoteTargetPlan` *deduplicates* physical
-operations targeting the same user, host, port, and resolved path. Remote path
+operations targeting the same user, authenticated network endpoint, port, and resolved path. Remote path
 case is preserved because Linux and some macOS filesystems are case-sensitive.
 If the same target
 appears multiple times in `-nodes` (e.g. to stress a single client

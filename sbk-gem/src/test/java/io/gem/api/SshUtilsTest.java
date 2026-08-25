@@ -194,6 +194,7 @@ final class SshUtilsTest {
         final SshSession sshSession = new SshSession(config, executor);
         try {
             sshSession.createSessionAsync(5).get(5, TimeUnit.SECONDS);
+            assertEquals("127.0.0.1", sshSession.getRemoteEndpointIdentity());
             final String result = sshSession.runRemoteFileOperationAsync(fileSystem -> {
                 final Path directory = fileSystem.getPath("/runtime-leases");
                 Files.createDirectories(directory);
@@ -204,6 +205,24 @@ final class SshUtilsTest {
 
             assertEquals("active", result);
             assertEquals("active", Files.readString(temporaryDirectory.resolve("runtime-leases/marker")));
+        } finally {
+            sshSession.stop();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void reportsResolvedEndpointForLocalhostAlias() throws Exception {
+        final Path knownHosts = temporaryDirectory.resolve("localhost-known-hosts");
+        Files.createFile(knownHosts);
+        final ConnectionConfig config = new ConnectionConfig("localhost", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), true, knownHosts.toString());
+        final var executor = Executors.newSingleThreadExecutor();
+        final SshSession sshSession = new SshSession(config, executor);
+        try {
+            sshSession.createSessionAsync(5).get(5, TimeUnit.SECONDS);
+
+            assertEquals("127.0.0.1", sshSession.getRemoteEndpointIdentity());
         } finally {
             sshSession.stop();
             executor.shutdownNow();
