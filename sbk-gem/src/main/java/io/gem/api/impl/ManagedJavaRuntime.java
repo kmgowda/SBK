@@ -33,22 +33,27 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.LongConsumer;
 import java.util.stream.Stream;
 
 /** Content-addressed controller JDK copied independently from the SBK runtime. */
 final class ManagedJavaRuntime {
     private static final String MARKER = ".sbk-java.sha256";
     private static final String IDENTITY_CACHE_FORMAT = "1";
-    private static final int BUFFER_SIZE = 64 * 1024;
+    private static final int HASH_BUFFER_SIZE = 64 * 1024;
+    private static final int COPY_BUFFER_SIZE = 256 * 1024;
     private static final int IDENTITY_CHARACTERS = 24;
+    private static final LongConsumer NO_COPY_PROGRESS = ignored -> { };
     private final Path localHome;
     private final String digest;
     private final String directoryName;
+    private final long contentBytes;
 
-    private ManagedJavaRuntime(Path localHome, String digest, String directoryName) {
+    private ManagedJavaRuntime(Path localHome, String digest, String directoryName, long contentBytes) {
         this.localHome = localHome;
         this.digest = digest;
         this.directoryName = directoryName;
+        this.contentBytes = contentBytes;
     }
 
     static ManagedJavaRuntime create(Path javaHome, int major) throws IOException {
@@ -57,6 +62,7 @@ final class ManagedJavaRuntime {
             throw new IOException("Controller JDK is incomplete: " + home);
         }
         final MessageDigest digest = newDigest();
+        long contentBytes = 0;
         try (Stream<Path> entries = Files.walk(home)) {
             for (Path path : entries.sorted(Comparator.comparing(Path::toString)).toList()) {
                 final String relative = home.relativize(path).toString().replace('\\', '/');
@@ -66,7 +72,9 @@ final class ManagedJavaRuntime {
                 } else if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
                     update(digest, "D\0");
                 } else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
-                    update(digest, "F\0" + Files.size(path) + "\0");
+                    final long fileBytes = Files.size(path);
+                    contentBytes += fileBytes;
+                    update(digest, "F\0" + fileBytes + "\0");
                     hashFile(digest, path);
                 }
                 if (!Files.isSymbolicLink(path)) {
@@ -75,7 +83,7 @@ final class ManagedJavaRuntime {
             }
         }
         final String identity = HexFormat.of().formatHex(digest.digest());
-        return runtime(home, major, identity);
+        return runtime(home, major, identity, contentBytes);
     }
 
     /**
@@ -100,22 +108,22 @@ final class ManagedJavaRuntime {
             try (FileChannel channel = FileChannel.open(lockFile, java.nio.file.StandardOpenOption.CREATE,
                     java.nio.file.StandardOpenOption.WRITE);
                  FileLock ignored = channel.lock()) {
-                final String metadata = metadataIdentity(home);
+                final MetadataIdentity metadata = metadataIdentity(home);
                 final Properties cached = loadIdentity(identityFile);
                 final String cachedDigest = cached.getProperty("content.sha256", "");
                 if (IDENTITY_CACHE_FORMAT.equals(cached.getProperty("format.version"))
                         && home.toString().equals(cached.getProperty("java.home"))
                         && Integer.toString(major).equals(cached.getProperty("java.major"))
-                        && metadata.equals(cached.getProperty("metadata.sha256"))
+                        && metadata.digest().equals(cached.getProperty("metadata.sha256"))
                         && isSha256(cachedDigest)) {
-                    return runtime(home, major, cachedDigest);
+                    return runtime(home, major, cachedDigest, metadata.contentBytes());
                 }
                 final ManagedJavaRuntime runtime = create(home, major);
                 final Properties identity = new Properties();
                 identity.setProperty("format.version", IDENTITY_CACHE_FORMAT);
                 identity.setProperty("java.home", home.toString());
                 identity.setProperty("java.major", Integer.toString(major));
-                identity.setProperty("metadata.sha256", metadata);
+                identity.setProperty("metadata.sha256", metadata.digest());
                 identity.setProperty("content.sha256", runtime.digest);
                 writeIdentity(identityFile, identity);
                 return runtime;
@@ -123,16 +131,25 @@ final class ManagedJavaRuntime {
         }
     }
 
-    private static ManagedJavaRuntime runtime(Path home, int major, String identity) {
+    private static ManagedJavaRuntime runtime(Path home, int major, String identity, long contentBytes) {
         return new ManagedJavaRuntime(home, identity,
-                "sbk-java-" + major + "-" + identity.substring(0, IDENTITY_CHARACTERS));
+                "sbk-java-" + major + "-" + identity.substring(0, IDENTITY_CHARACTERS), contentBytes);
     }
 
     String directoryName() {
         return directoryName;
     }
 
+    long contentBytes() {
+        return contentBytes;
+    }
+
     String install(java.nio.file.FileSystem fileSystem, String parentDirectory) throws IOException {
+        return install(fileSystem, parentDirectory, NO_COPY_PROGRESS);
+    }
+
+    String install(java.nio.file.FileSystem fileSystem, String parentDirectory, LongConsumer copyProgress)
+            throws IOException {
         final Path parent = fileSystem.getPath(parentDirectory);
         final Path destination = parent.resolve(directoryName);
         final Path marker = destination.resolve(MARKER);
@@ -143,7 +160,7 @@ final class ManagedJavaRuntime {
         final Path staging = parent.resolve(directoryName + ".staging." + UUID.randomUUID());
         Files.createDirectories(staging);
         try {
-            copyTree(staging);
+            copyTree(staging, copyProgress);
             Files.writeString(staging.resolve(MARKER), digest + System.lineSeparator(), StandardCharsets.UTF_8);
             if (hasUsableExpectedIdentity(destination)) {
                 return destination.toString();
@@ -184,7 +201,8 @@ final class ManagedJavaRuntime {
         }
     }
 
-    private void copyTree(Path staging) throws IOException {
+    private void copyTree(Path staging, LongConsumer copyProgress) throws IOException {
+        final byte[] copyBuffer = new byte[COPY_BUFFER_SIZE];
         try (Stream<Path> entries = Files.walk(localHome)) {
             for (Path source : entries.toList()) {
                 final Path relative = localHome.relativize(source);
@@ -205,7 +223,11 @@ final class ManagedJavaRuntime {
                             "JDK file has no parent"));
                     try (InputStream input = new BufferedInputStream(Files.newInputStream(source));
                          OutputStream output = new BufferedOutputStream(Files.newOutputStream(target))) {
-                        input.transferTo(output);
+                        int copied;
+                        while ((copied = input.read(copyBuffer)) >= 0) {
+                            output.write(copyBuffer, 0, copied);
+                            copyProgress.accept(copied);
+                        }
                     }
                     copyPermissions(source, target);
                 } else {
@@ -258,8 +280,9 @@ final class ManagedJavaRuntime {
         }
     }
 
-    private static String metadataIdentity(Path home) throws IOException {
+    private static MetadataIdentity metadataIdentity(Path home) throws IOException {
         final MessageDigest digest = newDigest();
+        long contentBytes = 0;
         try (Stream<Path> entries = Files.walk(home)) {
             for (Path path : entries.sorted(Comparator.comparing(Path::toString)).toList()) {
                 update(digest, home.relativize(path).toString().replace('\\', '/') + "\0");
@@ -268,7 +291,9 @@ final class ManagedJavaRuntime {
                 } else if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
                     update(digest, "D\0");
                 } else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
-                    update(digest, "F\0" + Files.size(path) + "\0"
+                    final long fileBytes = Files.size(path);
+                    contentBytes += fileBytes;
+                    update(digest, "F\0" + fileBytes + "\0"
                             + Files.getLastModifiedTime(path, LinkOption.NOFOLLOW_LINKS).toMillis() + "\0");
                 }
                 if (!Files.isSymbolicLink(path)) {
@@ -276,7 +301,7 @@ final class ManagedJavaRuntime {
                 }
             }
         }
-        return HexFormat.of().formatHex(digest.digest());
+        return new MetadataIdentity(HexFormat.of().formatHex(digest.digest()), contentBytes);
     }
 
     private static Properties loadIdentity(Path identityFile) throws IOException {
@@ -327,7 +352,7 @@ final class ManagedJavaRuntime {
 
     private static void hashFile(MessageDigest digest, Path path) throws IOException {
         try (InputStream input = new BufferedInputStream(Files.newInputStream(path))) {
-            final byte[] buffer = new byte[BUFFER_SIZE];
+            final byte[] buffer = new byte[HASH_BUFFER_SIZE];
             int count;
             while ((count = input.read(buffer)) >= 0) {
                 digest.update(buffer, 0, count);
@@ -346,5 +371,8 @@ final class ManagedJavaRuntime {
         } catch (UnsupportedOperationException exception) {
             return Files.isExecutable(path) ? "executable" : "not-executable";
         }
+    }
+
+    private record MetadataIdentity(String digest, long contentBytes) {
     }
 }

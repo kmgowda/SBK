@@ -232,6 +232,8 @@ reused. Physical deployment work is grouped by SSH user, authenticated network
 endpoint, port, and the resolved case-sensitive remote path. Host aliases and
 multiple logical clients sharing that target therefore install the agent and
 copy Java/SBK only once.
+JDK file content is streamed through a reusable 256 KiB buffer, and first-time
+JDK deployment progress reports transferred bytes, percentage, and MiB/s.
 During these potentially long disk-intensive steps, GEM emits an elapsed-time
 heartbeat every 5 seconds by default. Runtime
 archive copies report the archive size, unique transfer-target count, completed

@@ -2001,6 +2001,8 @@ exact identity is reused, so the full distribution is not transferred on every r
 deduplicated by `(SSH user, authenticated network endpoint, port, resolved case-sensitive remote directory)`,
 so repeated workload entries sharing one installation do not race to replace it
 while distinct paths or remote accounts remain independent.
+The separate first-time JDK tree copy reuses one 256 KiB transfer buffer and
+reports aggregate bytes, completion percentage, and MiB/s without per-file logging.
 
 Remote activation is transactional: the uploaded archive SHA-256 is checked,
 the archive is extracted to a unique staging directory, its operating-system

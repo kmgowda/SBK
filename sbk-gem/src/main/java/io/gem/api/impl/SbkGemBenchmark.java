@@ -34,6 +34,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CancellationException;
@@ -44,6 +45,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 /**
@@ -848,22 +850,33 @@ final public class SbkGemBenchmark implements GemBenchmark {
             final RemoteTargetPlan javaTargetPlan = RemoteTargetPlan.create(params.getConnections(),
                     remoteEndpointIdentities, javaParentDirectories);
             final CompletableFuture<String>[] copies = new CompletableFuture[nodes.length];
+            final AtomicLong[] copiedBytes = new AtomicLong[nodes.length];
+            final String[] copyHosts = new String[nodes.length];
+            final long copyStartedNanos = System.nanoTime();
             for (int i = 0; i < nodes.length; i++) {
+                copiedBytes[i] = new AtomicLong();
                 if (!javaTargetPlan.isRepresentative(i)) {
                     copies[i] = copies[javaTargetPlan.representative(i)];
                 } else if (javaTargetPlan.hasSelectedNode(i, unresolved)) {
                     final int nodeIndex = i;
+                    copyHosts[i] = nodes[i].connection.getHost() + ":" + nodes[i].connection.getPort();
                     copies[i] = nodes[i].runRemoteTransferOperationAsync(fileSystem -> javaRuntime.install(fileSystem,
-                            javaParentDirectories[nodeIndex]), config.deploymentTimeoutSeconds);
+                            javaParentDirectories[nodeIndex], copiedBytes[nodeIndex]::addAndGet),
+                            config.deploymentTimeoutSeconds);
                 } else {
                     copies[i] = CompletableFuture.completedFuture(javaHomes[i]);
                 }
             }
+            final long copySeconds;
             try (LifecycleProgress progress = new LifecycleProgress("Separate JDK copy",
                     config.runtimeProgressIntervalSeconds, runtimeLeaseHeartbeatScheduler,
-                    () -> futureProgress(copies, hostLabels(), "JDK operation(s)"))) {
+                    () -> javaCopyProgress(copies, copyHosts, copiedBytes, javaRuntime.contentBytes(),
+                            copyStartedNanos))) {
                 waitForDeployment(CompletableFuture.allOf(copies), "separate remote JDK provisioning");
+                copySeconds = progress.elapsedSeconds();
             }
+            Printer.log.info("SBK-GEM: Separate JDK provisioning completed in {} second(s); {} byte(s) "
+                            + "transferred", copySeconds, copiedByteCount(copiedBytes));
             for (int i = 0; i < nodes.length; i++) {
                 javaHomes[i] = copies[i].get();
                 final SshResponse verified = nodes[i].runCommandAsync(
@@ -904,12 +917,30 @@ final public class SbkGemBenchmark implements GemBenchmark {
         return new RemoteEnvironment(javaHomes, agentPaths, verifiedPlatform);
     }
 
-    private String[] hostLabels() {
-        final String[] labels = new String[nodes.length];
-        for (int i = 0; i < nodes.length; i++) {
-            labels[i] = nodes[i].connection.getHost() + ":" + nodes[i].connection.getPort();
+    static String javaCopyProgress(CompletableFuture<?>[] copies, String[] copyHosts, AtomicLong[] copiedBytes,
+                                   long contentBytesPerTarget, long startedNanos) {
+        final long copied = copiedByteCount(copiedBytes);
+        int targets = 0;
+        for (String host : copyHosts) {
+            if (host != null) {
+                targets++;
+            }
         }
-        return labels;
+        final long total = contentBytesPerTarget * targets;
+        final double percentage = total == 0 ? 100.0 : Math.min(100.0, copied * 100.0 / total);
+        final double elapsedSeconds = Math.max(1L, System.nanoTime() - startedNanos) / 1_000_000_000.0;
+        final double mebibytesPerSecond = copied / (1024.0 * 1024.0) / elapsedSeconds;
+        return String.format(Locale.ROOT, "%s; transferred %,d of %,d byte(s) (%.1f%%, %.2f MiB/s)",
+                futureProgress(copies, copyHosts, "JDK operation(s)"), copied, total, percentage,
+                mebibytesPerSecond);
+    }
+
+    private static long copiedByteCount(AtomicLong[] copiedBytes) {
+        long copied = 0;
+        for (AtomicLong counter : copiedBytes) {
+            copied += counter.get();
+        }
+        return copied;
     }
 
     private static String remoteParent(String path) {

@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -43,6 +45,21 @@ final class SbkGemBenchmarkTest {
 
         assertEquals("1 of 2 transfer(s) finished; awaiting host(s): node-b:2202",
                 SbkGemBenchmark.futureProgress(uploads, hosts, "transfer(s)"));
+    }
+
+    @Test
+    void reportsJdkCopyBytesPercentageAndRateForPhysicalTargets() {
+        final CompletableFuture<?>[] copies = {new CompletableFuture<>(), new CompletableFuture<>()};
+        final String[] hosts = {"node-a:22", null};
+        final AtomicLong[] copiedBytes = {new AtomicLong(50), new AtomicLong()};
+
+        final String progress = SbkGemBenchmark.javaCopyProgress(copies, hosts, copiedBytes, 100,
+                System.nanoTime() - TimeUnit.SECONDS.toNanos(2));
+
+        assertTrue(progress.contains("0 of 1 JDK operation(s) finished"));
+        assertTrue(progress.contains("transferred 50 of 100 byte(s)"));
+        assertTrue(progress.contains("50.0%"));
+        assertTrue(progress.contains("MiB/s"));
     }
 
     @Test

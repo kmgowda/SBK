@@ -23,6 +23,8 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -47,6 +49,27 @@ final class ManagedJavaRuntimeTest {
         assertTrue(Files.isExecutable(Path.of(first).resolve("bin/java")));
         assertTrue(Files.isRegularFile(Path.of(first).resolve(".sbk-java.sha256")));
         assertTrue(Path.of(first).getFileName().toString().startsWith("sbk-java-25-"));
+    }
+
+    @Test
+    void reportsBufferedJdkCopyProgressWithoutRecountingReuse() throws IOException {
+        final Path javaHome = createJavaHome();
+        Files.write(javaHome.resolve("large-runtime-image"), new byte[1024 * 1024 + 7]);
+        final Path remoteParent = Files.createDirectories(temporaryDirectory.resolve("remote"));
+        final ManagedJavaRuntime runtime = ManagedJavaRuntime.create(javaHome, 25);
+        final AtomicLong copiedBytes = new AtomicLong();
+        final AtomicInteger updates = new AtomicInteger();
+
+        runtime.install(remoteParent.getFileSystem(), remoteParent.toString(), copied -> {
+            copiedBytes.addAndGet(copied);
+            updates.incrementAndGet();
+        });
+
+        assertEquals(runtime.contentBytes(), copiedBytes.get());
+        assertTrue(updates.get() < 20);
+        copiedBytes.set(0);
+        runtime.install(remoteParent.getFileSystem(), remoteParent.toString(), copiedBytes::addAndGet);
+        assertEquals(0, copiedBytes.get());
     }
 
     @Test
