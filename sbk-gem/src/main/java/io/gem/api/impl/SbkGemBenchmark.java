@@ -272,7 +272,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                     sbmBenchmark.startLatencyAggregation();
                     final int releasedClients = sbmBenchmark.releaseCoordinatedStart();
                     Printer.log.info("SBK-GEM: All prepared remote SBK clients registered with SBM ({}/{}); " +
-                                    "benchmark timing has started. Because remote PerL and SBM use independent " +
+                                    "benchmark timing has started. Because remote SBK and SBM use independent " +
                                     "{}-second reporting windows, first performance results are expected within " +
                                     "{} seconds", releasedClients, nodes.length,
                             PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS,
