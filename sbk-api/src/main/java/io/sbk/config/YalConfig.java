@@ -10,6 +10,13 @@
 
 package io.sbk.config;
 
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
+
 /**
  * Class YalConfig.
  */
@@ -44,6 +51,30 @@ final public class YalConfig {
      * Creates an empty YAML launcher configuration for property binding.
      */
     public YalConfig() {
+    }
+
+    /**
+     * Loads and validates YAML launcher defaults from a class-path resource.
+     *
+     * @param classLoader class loader that owns the launcher resource
+     * @param configFile class-path properties resource name
+     * @return validated YAML launcher configuration
+     * @throws IOException if the resource is missing or cannot be parsed
+     * @throws IllegalArgumentException if a required default is empty
+     */
+    public static YalConfig load(ClassLoader classLoader, String configFile) throws IOException {
+        Objects.requireNonNull(classLoader, "classLoader");
+        Objects.requireNonNull(configFile, "configFile");
+        try (InputStream input = classLoader.getResourceAsStream(configFile)) {
+            if (input == null) {
+                throw new IOException("Missing " + configFile);
+            }
+            final YalConfig config = new ObjectMapper(new JavaPropsFactory()).readValue(input, YalConfig.class);
+            if (config.yamlFileName == null || config.yamlFileName.isBlank()) {
+                throw new IllegalArgumentException("Invalid YAML launcher defaults in " + configFile);
+            }
+            return config;
+        }
     }
 
 }

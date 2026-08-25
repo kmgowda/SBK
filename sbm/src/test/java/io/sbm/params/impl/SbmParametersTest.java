@@ -15,11 +15,27 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Tests parsing of storage identity used by SBM metrics. */
 final class SbmParametersTest {
+
+    @Test
+    void loadsIndependentValidatedConfigurations() {
+        final SbmConfig shared = SbmConfig.get();
+        final SbmConfig first = SbmConfig.load();
+        final SbmConfig second = SbmConfig.load();
+        final int configuredMaximum = shared.maxConnections;
+
+        assertNotSame(shared, first);
+        assertNotSame(first, second);
+        first.maxConnections = configuredMaximum + 1;
+
+        assertEquals(configuredMaximum, shared.maxConnections);
+        assertEquals(configuredMaximum, second.maxConnections);
+    }
 
     @Test
     void usesConfiguredDefaultAction() throws Exception {

@@ -46,7 +46,18 @@ public final class SbkGemRemoteAgentMain {
     private static final String MARKER = ".sbk-runtime.sha256";
     private static final String DESCRIPTOR = "deployment.properties";
     private static final String CHECKSUMS = "deployment-files.sha256";
+    private static final String SHA_256 = "SHA-256";
+    private static final int SOFTWARE_ERROR_EXIT_CODE = 70;
     private static final int BUFFER_SIZE = 64 * 1024;
+    private static final int PROBE_VALUE_COUNT = 1;
+    private static final int CLEANUP_VALUE_COUNT = 1;
+    private static final int ACTIVATE_VALUE_COUNT = 6;
+    private static final int VERIFY_VALUE_COUNT = 4;
+    private static final int RUN_MINIMUM_VALUE_COUNT = 4;
+    private static final int RESERVE_VALUE_COUNT = 5;
+    private static final int HEARTBEAT_VALUE_COUNT = 5;
+    private static final int ACQUIRE_VALUE_COUNT = 8;
+    private static final int RELEASE_VALUE_COUNT = 7;
 
     private SbkGemRemoteAgentMain() {
     }
@@ -59,26 +70,26 @@ public final class SbkGemRemoteAgentMain {
         try {
             final RemoteAgentProtocol.Request request = RemoteAgentProtocol.read(new DataInputStream(System.in));
             switch (request.operation()) {
-                case "probe" -> probe(request.values());
-                case "activate" -> activate(request.values());
-                case "verify" -> verify(request.values());
-                case "runtime-reserve" -> reserveRuntime(request.values());
-                case "runtime-acquire" -> acquireRuntime(request.values());
-                case "runtime-heartbeat" -> heartbeatRuntime(request.values());
-                case "runtime-release" -> releaseRuntime(request.values());
-                case "cleanup" -> cleanup(request.values());
-                case "run" -> System.exit(run(request.values()));
+                case RemoteAgentProtocol.PROBE -> probe(request.values());
+                case RemoteAgentProtocol.ACTIVATE -> activate(request.values());
+                case RemoteAgentProtocol.VERIFY -> verify(request.values());
+                case RemoteAgentProtocol.RUNTIME_RESERVE -> reserveRuntime(request.values());
+                case RemoteAgentProtocol.RUNTIME_ACQUIRE -> acquireRuntime(request.values());
+                case RemoteAgentProtocol.RUNTIME_HEARTBEAT -> heartbeatRuntime(request.values());
+                case RemoteAgentProtocol.RUNTIME_RELEASE -> releaseRuntime(request.values());
+                case RemoteAgentProtocol.CLEANUP -> cleanup(request.values());
+                case RemoteAgentProtocol.RUN -> System.exit(run(request.values()));
                 default -> throw new IOException("Unknown operation: " + request.operation());
             }
         } catch (Throwable failure) {
             System.err.println("SBK-GEM remote agent failed: " + failure.getClass().getSimpleName() + ": "
                     + failure.getMessage());
-            System.exit(70);
+            System.exit(SOFTWARE_ERROR_EXIT_CODE);
         }
     }
 
     private static void probe(List<String> values) throws IOException {
-        requireCount(values, 1);
+        requireCount(values, PROBE_VALUE_COUNT);
         final int expected = Integer.parseInt(values.getFirst());
         final int actual = Runtime.version().feature();
         if (!isJavaCompatible(actual, expected)) {
@@ -98,7 +109,7 @@ public final class SbkGemRemoteAgentMain {
     }
 
     private static void activate(List<String> values) throws IOException {
-        requireCount(values, 6);
+        requireCount(values, ACTIVATE_VALUE_COUNT);
         final Path archive = absolute(values.get(0));
         final String archiveDigest = values.get(1);
         final String contentDigest = values.get(2);
@@ -133,7 +144,7 @@ public final class SbkGemRemoteAgentMain {
     }
 
     private static void verify(List<String> values) throws IOException {
-        requireCount(values, 4);
+        requireCount(values, VERIFY_VALUE_COUNT);
         final Path runtime = absolute(values.get(0));
         if (!values.get(1).equals(Files.readString(runtime.resolve(MARKER)).trim())) {
             throw new IOException("SBK runtime content digest mismatch");
@@ -148,7 +159,7 @@ public final class SbkGemRemoteAgentMain {
     }
 
     private static void cleanup(List<String> values) throws IOException {
-        requireCount(values, 1);
+        requireCount(values, CLEANUP_VALUE_COUNT);
         System.out.println("SBK_RETIRED_RUNTIMES=" + cleanupRetiredRuntimes(absolute(values.getFirst())));
     }
 
@@ -157,7 +168,7 @@ public final class SbkGemRemoteAgentMain {
     }
 
     private static void reserveRuntime(List<String> values) throws IOException, InterruptedException {
-        requireCount(values, 5);
+        requireCount(values, RESERVE_VALUE_COUNT);
         RemoteRuntimeFiles.reserve(absolute(values.get(0)), values.get(1), values.get(2),
                 parseLong(values.get(3), "runtime lock timeout"),
                 parseLong(values.get(4), "stale runtime lock timeout"));
@@ -165,7 +176,7 @@ public final class SbkGemRemoteAgentMain {
     }
 
     private static void acquireRuntime(List<String> values) throws IOException, InterruptedException {
-        requireCount(values, 8);
+        requireCount(values, ACQUIRE_VALUE_COUNT);
         RemoteRuntimeFiles.acquire(absolute(values.get(0)), values.get(1), values.get(2), values.get(3),
                 parseBoolean(values.get(4), "runtime cleanup"),
                 parseLong(values.get(5), "runtime lock timeout"),
@@ -175,7 +186,7 @@ public final class SbkGemRemoteAgentMain {
     }
 
     private static void heartbeatRuntime(List<String> values) throws IOException, InterruptedException {
-        requireCount(values, 5);
+        requireCount(values, HEARTBEAT_VALUE_COUNT);
         RemoteRuntimeFiles.heartbeat(absolute(values.get(0)), values.get(1), values.get(2),
                 parseLong(values.get(3), "runtime lock timeout"),
                 parseLong(values.get(4), "stale runtime lock timeout"));
@@ -183,7 +194,7 @@ public final class SbkGemRemoteAgentMain {
     }
 
     private static void releaseRuntime(List<String> values) throws IOException, InterruptedException {
-        requireCount(values, 7);
+        requireCount(values, RELEASE_VALUE_COUNT);
         RemoteRuntimeFiles.release(absolute(values.get(0)), values.get(1), values.get(2),
                 parseBoolean(values.get(3), "runtime cleanup"),
                 parseLong(values.get(4), "runtime lock timeout"),
@@ -193,7 +204,7 @@ public final class SbkGemRemoteAgentMain {
     }
 
     private static int run(List<String> values) throws IOException, InterruptedException {
-        if (values.size() < 4) {
+        if (values.size() < RUN_MINIMUM_VALUE_COUNT) {
             throw new IOException("Invalid run request");
         }
         final Path runtime = absolute(values.get(0));
@@ -357,7 +368,7 @@ public final class SbkGemRemoteAgentMain {
     private static String sha256(Path path) throws IOException {
         final MessageDigest digest;
         try {
-            digest = MessageDigest.getInstance("SHA-256");
+            digest = MessageDigest.getInstance(SHA_256);
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException(exception);
         }

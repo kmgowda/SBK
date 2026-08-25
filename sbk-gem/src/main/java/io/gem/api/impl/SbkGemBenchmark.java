@@ -61,6 +61,8 @@ import java.util.function.Supplier;
  */
 final public class SbkGemBenchmark implements GemBenchmark {
     private static final long BYTES_PER_GIB = (long) Bytes.BYTES_PER_MB * Bytes.BYTES_PER_KB;
+    private static final double PERCENTAGE_SCALE = 100.0;
+    private static final double NANOSECONDS_PER_SECOND = TimeUnit.SECONDS.toNanos(1);
     private final SbmBenchmark sbmBenchmark;
     private final GemConfig config;
     private final GemParameters params;
@@ -1104,9 +1106,10 @@ final public class SbkGemBenchmark implements GemBenchmark {
             }
         }
         final long total = saturatedMultiply(contentBytesPerTarget, targets);
-        final double percentage = total == 0 ? 100.0 : Math.min(100.0, copied * 100.0 / total);
-        final double elapsedSeconds = Math.max(1L, System.nanoTime() - startedNanos) / 1_000_000_000.0;
-        final double mebibytesPerSecond = copied / (1024.0 * 1024.0) / elapsedSeconds;
+        final double percentage = total == 0 ? PERCENTAGE_SCALE
+                : Math.min(PERCENTAGE_SCALE, copied * PERCENTAGE_SCALE / total);
+        final double elapsedSeconds = Math.max(1L, System.nanoTime() - startedNanos) / NANOSECONDS_PER_SECOND;
+        final double mebibytesPerSecond = copied / (double) Bytes.BYTES_PER_MB / elapsedSeconds;
         final String estimate;
         if (copied == 0) {
             estimate = "ETA pending while remote metadata is prepared";

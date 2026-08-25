@@ -82,6 +82,19 @@ final public class SbmConfig extends LatencyConfig {
         return INSTANCE;
     }
 
+    /**
+     * Loads a new validated SBM configuration from the bundled properties.
+     *
+     * <p>Callers that customize configuration for one benchmark should use
+     * this method so that they do not mutate the shared defaults returned by
+     * {@link #get()}.
+     *
+     * @return independent validated SBM configuration
+     */
+    public static SbmConfig load() {
+        return loadConfig();
+    }
+
     private static SbmConfig loadConfig() {
         try (InputStream input = SbmConfig.class.getClassLoader().getResourceAsStream(CONFIG_FILE)) {
             if (input == null) {

@@ -12,8 +12,6 @@ package io.gem.api.impl;
 
 
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.gem.params.impl.SbkGemYmlMap;
 import io.gem.exception.SbkGemParameterException;
 import io.micrometer.core.instrument.util.IOUtils;
@@ -106,10 +104,7 @@ final public class SbkGemYal {
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("Operating System: " + SbkUtils.getOperatingSystemDetails());
 
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
-
-        yalConfig = mapper.readValue(SbkGemYal.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
-                YalConfig.class);
+        yalConfig = YalConfig.load(SbkGemYal.class.getClassLoader(), CONFIG_FILE);
         params = new SbkGemYalParameters(appName, SbkGemYal.DESC, yalConfig);
 
         final boolean isPrintOption =  SbkUtils.hasArg(args, YalConfig.PRINT_OPTION_ARG);

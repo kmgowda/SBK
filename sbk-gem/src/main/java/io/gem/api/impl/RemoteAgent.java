@@ -34,50 +34,55 @@ final class RemoteAgent {
     }
 
     static byte[] probe(int javaVersion) throws IOException {
-        return RemoteAgentProtocol.encode("probe", List.of(Integer.toString(javaVersion)));
+        return RemoteAgentProtocol.encode(RemoteAgentProtocol.PROBE, List.of(Integer.toString(javaVersion)));
     }
 
     static byte[] activate(String archive, String archiveDigest, String contentDigest, String staging,
                            String destination, String operatingSystem) throws IOException {
-        return RemoteAgentProtocol.encode("activate", List.of(archive, archiveDigest, contentDigest, staging,
-                destination, operatingSystem));
+        return RemoteAgentProtocol.encode(RemoteAgentProtocol.ACTIVATE,
+                List.of(archive, archiveDigest, contentDigest, staging, destination, operatingSystem));
     }
 
     static byte[] verify(String destination, String contentDigest, String version, String operatingSystem)
             throws IOException {
-        return RemoteAgentProtocol.encode("verify", List.of(destination, contentDigest, version, operatingSystem));
+        return RemoteAgentProtocol.encode(RemoteAgentProtocol.VERIFY,
+                List.of(destination, contentDigest, version, operatingSystem));
     }
 
     static byte[] cleanup(String parentDirectory) throws IOException {
-        return RemoteAgentProtocol.encode("cleanup", List.of(parentDirectory));
+        return RemoteAgentProtocol.encode(RemoteAgentProtocol.CLEANUP, List.of(parentDirectory));
     }
 
     static byte[] reserveRuntime(String parentDirectory, String deploymentName, String leaseId,
                                  long lockTimeoutSeconds, long lockStaleSeconds) throws IOException {
-        return RemoteAgentProtocol.encode("runtime-reserve", List.of(parentDirectory, deploymentName, leaseId,
-                Long.toString(lockTimeoutSeconds), Long.toString(lockStaleSeconds)));
+        return RemoteAgentProtocol.encode(RemoteAgentProtocol.RUNTIME_RESERVE,
+                List.of(parentDirectory, deploymentName, leaseId,
+                        Long.toString(lockTimeoutSeconds), Long.toString(lockStaleSeconds)));
     }
 
     static byte[] acquireRuntime(String parentDirectory, String deploymentName, String contentDigest,
                                  String leaseId, boolean cleanupEnabled, long lockTimeoutSeconds,
                                  long lockStaleSeconds, long reservationSeconds) throws IOException {
-        return RemoteAgentProtocol.encode("runtime-acquire", List.of(parentDirectory, deploymentName,
-                contentDigest, leaseId, Boolean.toString(cleanupEnabled), Long.toString(lockTimeoutSeconds),
-                Long.toString(lockStaleSeconds), Long.toString(reservationSeconds)));
+        return RemoteAgentProtocol.encode(RemoteAgentProtocol.RUNTIME_ACQUIRE,
+                List.of(parentDirectory, deploymentName, contentDigest, leaseId,
+                        Boolean.toString(cleanupEnabled), Long.toString(lockTimeoutSeconds),
+                        Long.toString(lockStaleSeconds), Long.toString(reservationSeconds)));
     }
 
     static byte[] heartbeatRuntime(String parentDirectory, String deploymentName, String leaseId,
                                    long lockTimeoutSeconds, long lockStaleSeconds) throws IOException {
-        return RemoteAgentProtocol.encode("runtime-heartbeat", List.of(parentDirectory, deploymentName, leaseId,
-                Long.toString(lockTimeoutSeconds), Long.toString(lockStaleSeconds)));
+        return RemoteAgentProtocol.encode(RemoteAgentProtocol.RUNTIME_HEARTBEAT,
+                List.of(parentDirectory, deploymentName, leaseId,
+                        Long.toString(lockTimeoutSeconds), Long.toString(lockStaleSeconds)));
     }
 
     static byte[] releaseRuntime(String parentDirectory, String deploymentName, String leaseId,
                                  boolean cleanupEnabled, long lockTimeoutSeconds, long lockStaleSeconds,
                                  long reservationSeconds) throws IOException {
-        return RemoteAgentProtocol.encode("runtime-release", List.of(parentDirectory, deploymentName, leaseId,
-                Boolean.toString(cleanupEnabled), Long.toString(lockTimeoutSeconds),
-                Long.toString(lockStaleSeconds), Long.toString(reservationSeconds)));
+        return RemoteAgentProtocol.encode(RemoteAgentProtocol.RUNTIME_RELEASE,
+                List.of(parentDirectory, deploymentName, leaseId, Boolean.toString(cleanupEnabled),
+                        Long.toString(lockTimeoutSeconds), Long.toString(lockStaleSeconds),
+                        Long.toString(reservationSeconds)));
     }
 
     static byte[] run(String destination, String version, List<String> jvmArgs, List<String> sbkArgs)
@@ -88,7 +93,7 @@ final class RemoteAgent {
         values.add(Integer.toString(jvmArgs.size()));
         values.addAll(jvmArgs);
         values.addAll(sbkArgs);
-        return RemoteAgentProtocol.encode("run", values);
+        return RemoteAgentProtocol.encode(RemoteAgentProtocol.RUN, values);
     }
 
     static boolean archiveDigestMismatch(SshResponse response) {

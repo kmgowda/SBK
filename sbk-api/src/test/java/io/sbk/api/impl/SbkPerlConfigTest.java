@@ -12,16 +12,20 @@ package io.sbk.api.impl;
 
 import io.perl.config.PerlConfig;
 import io.sbk.config.SbkConfig;
+import io.sbk.config.YalConfig;
 import io.sbk.params.impl.SbkParameters;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -140,5 +144,24 @@ public class SbkPerlConfigTest {
         first.idleTimeoutSeconds = 17;
         assertEquals(600, second.idleTimeoutSeconds);
         assertEquals(600, SbkConfig.get().getPerlConfig().idleTimeoutSeconds);
+    }
+
+    /** Verifies centralized YAML launcher configuration loading and validation. */
+    @Test
+    public void yamlLauncherConfigurationRequiresAFileName() throws Exception {
+        final YalConfig config = YalConfig.load(configLoader("yamlFileName=benchmark.yml"), "test.properties");
+
+        assertEquals("benchmark.yml", config.yamlFileName);
+        assertThrows(IllegalArgumentException.class,
+                () -> YalConfig.load(configLoader("yamlFileName= "), "test.properties"));
+    }
+
+    private static ClassLoader configLoader(String properties) {
+        return new ClassLoader(null) {
+            @Override
+            public InputStream getResourceAsStream(String name) {
+                return new ByteArrayInputStream(properties.getBytes(StandardCharsets.UTF_8));
+            }
+        };
     }
 }

@@ -11,8 +11,6 @@
 package io.gem.api.impl;
 
 
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.gem.config.GemConfig;
 import io.gem.exception.SbkGemParameterException;
 import io.gem.api.GemBenchmark;
@@ -37,11 +35,11 @@ import io.sbm.logger.RamLogger;
 import io.sbk.utils.ApplicationShutdownHook;
 import io.sbk.utils.SbkUtils;
 import io.sbk.config.Config;
+import io.sbk.config.SbkConfig;
 import io.sbm.config.SbmConfig;
 import io.sbk.data.DataType;
 import io.sbk.exception.HelpException;
 import io.sbm.params.RamParameterOptions;
-import io.sbm.api.impl.Sbm;
 import io.sbm.api.impl.SbmBenchmark;
 import io.sbm.params.impl.SbmParameters;
 import io.sbk.system.Printer;
@@ -82,9 +80,6 @@ import java.util.concurrent.TimeoutException;
  * - aggregate and print remote results.
  */
 final public class SbkGem {
-    final static String SBM_CONFIG_FILE = "sbm.properties";
-    final static String SBK_CONFIG_FILE = "sbk.properties";
-
     final static String BANNER_FILE = "gem-banner.txt";
     private static final int MINIMUM_RESULT_SEPARATOR_WIDTH = 80;
     private static final int TOTAL_THROUGHPUT_SCALE = 12;
@@ -189,8 +184,7 @@ final public class SbkGem {
         final StoragePackage packageStore = new StoragePackage(sbkStoragePackageName);
         final GemLoggerPackage loggerStore = new GemLoggerPackage(gemLoggerPackageName);
         final SbpVersion sbpVersion = Sbp.getVersion();
-        final PerlConfig perlConfig = PerlConfig.build(
-                SbkGem.class.getClassLoader().getResourceAsStream(SBK_CONFIG_FILE));
+        final PerlConfig perlConfig = SbkConfig.loadPerlConfig();
         final Storage<?> storageDevice;
         final String[] storageDrivers;
         final String[] nextArgs;
@@ -215,10 +209,7 @@ final public class SbkGem {
         packageStore.printClasses("Storage");
         loggerStore.printClasses("Gem Logger");
 
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
-
-        sbmConfig = mapper.readValue(Sbm.class.getClassLoader().getResourceAsStream(SBM_CONFIG_FILE),
-                SbmConfig.class);
+        sbmConfig = SbmConfig.load();
         gemConfig = GemConfig.load();
 
         if (StringUtils.isEmpty(gemConfig.gempass)) {

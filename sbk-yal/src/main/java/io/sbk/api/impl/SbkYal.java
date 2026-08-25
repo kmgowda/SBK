@@ -11,8 +11,6 @@
 package io.sbk.api.impl;
 
 
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.sbk.config.Config;
 import io.sbk.config.YalConfig;
@@ -97,10 +95,7 @@ public final class SbkYal {
         Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
         Printer.log.info("Operating System: " + SbkUtils.getOperatingSystemDetails());
 
-        final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
-
-        yalConfig = mapper.readValue(io.sbk.api.impl.SbkYal.class.getClassLoader().getResourceAsStream(CONFIG_FILE),
-                YalConfig.class);
+        yalConfig = YalConfig.load(SbkYal.class.getClassLoader(), CONFIG_FILE);
         params = new SbkYalParameters(appName, SbkYal.DESC, yalConfig);
         final boolean isPrintOption =  SbkUtils.hasArg(args, YalConfig.PRINT_OPTION_ARG);
         String[] nextArgs = SbkUtils.removeOptionArgs(args, new String[]{YalConfig.PRINT_OPTION_ARG});
