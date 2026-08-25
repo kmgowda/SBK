@@ -26,6 +26,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /** Tests non-blocking SBK-GEM lifecycle state transitions. */
 final class BenchmarkLifecycleTest {
     @Test
+    void reportsRunningOnlyBetweenBeginAndShutdown() {
+        final BenchmarkLifecycle lifecycle = new BenchmarkLifecycle();
+
+        assertFalse(lifecycle.isRunning());
+        assertTrue(lifecycle.begin());
+        assertTrue(lifecycle.isRunning());
+        assertTrue(lifecycle.beginShutdown());
+        assertFalse(lifecycle.isRunning());
+    }
+
+    @Test
     void shutdownDoesNotWaitForBlockingStartupWork() {
         final BenchmarkLifecycle lifecycle = new BenchmarkLifecycle();
         final CountDownLatch startupBlocked = new CountDownLatch(1);

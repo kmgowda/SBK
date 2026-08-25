@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,6 +41,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
@@ -208,6 +210,32 @@ final class SshUtilsTest {
 
             assertEquals("active", result);
             assertEquals("active", Files.readString(temporaryDirectory.resolve("runtime-leases/marker")));
+        } finally {
+            sshSession.stop();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void writesAgentSizedFileThroughApacheMinaSftp() throws Exception {
+        final Path knownHosts = writeKnownHosts(hostKey);
+        final ConnectionConfig config = new ConnectionConfig("127.0.0.1", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), true, knownHosts.toString());
+        final var executor = Executors.newFixedThreadPool(2);
+        final SshSession sshSession = new SshSession(config, executor);
+        final byte[] expected = new byte[512 * 1024 + 17];
+        java.util.Arrays.fill(expected, (byte) 0x5a);
+        try {
+            sshSession.createSessionAsync(5).get(5, TimeUnit.SECONDS);
+            sshSession.runRemoteTransferOperationAsync(fileSystem -> {
+                final Path remoteFile = fileSystem.getPath("/agent.jar");
+                try (var output = new BufferedOutputStream(Files.newOutputStream(remoteFile))) {
+                    output.write(expected);
+                }
+                return null;
+            }, 10).get(10, TimeUnit.SECONDS);
+
+            assertArrayEquals(expected, Files.readAllBytes(temporaryDirectory.resolve("agent.jar")));
         } finally {
             sshSession.stop();
             executor.shutdownNow();

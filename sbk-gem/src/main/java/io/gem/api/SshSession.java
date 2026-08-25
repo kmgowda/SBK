@@ -430,7 +430,6 @@ final public class SshSession {
         return submitBounded(operationExecutor, () -> {
             try (SftpFileSystem fileSystem = SftpClientFactory.instance().createSftpFileSystem(sshSession)) {
                 activeFileSystem.set(fileSystem);
-                fileSystem.setWriteBufferSize(COPY_BUFFER_SIZE);
                 return operation.execute(fileSystem);
             } catch (IOException exception) {
                 final String message = "SBK-GEM: Apache MINA SFTP operation failed on host '"

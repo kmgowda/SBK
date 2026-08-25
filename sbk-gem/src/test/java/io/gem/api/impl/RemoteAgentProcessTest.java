@@ -23,6 +23,7 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Executes the packaged remote agent for probe, activation, and verification. */
@@ -67,6 +68,61 @@ final class RemoteAgentProcessTest {
         assertEquals(0, newerThanMinimum.exitCode(), newerThanMinimum.output());
         assertTrue(olderThanMinimum.exitCode() != 0);
         assertTrue(olderThanMinimum.output().contains("required " + (current + 1) + " or newer"));
+    }
+
+    @Test
+    void packagedAgentDeletesRetiredRuntimeTree() throws Exception {
+        final Path parent = Files.createDirectories(temporaryDirectory.resolve("managed runtimes"));
+        final Path retired = Files.createDirectories(parent.resolve(".sbk-runtime-retired.old/sbk/lib"));
+        final Path current = Files.createDirectories(parent.resolve("sbk-runtime-current/sbk/lib"));
+        Files.writeString(retired.resolve("retired.jar"), "retired", StandardCharsets.UTF_8);
+        Files.writeString(current.resolve("current.jar"), "current", StandardCharsets.UTF_8);
+
+        final ProcessResult result = execute(RemoteAgent.cleanup(parent.toString()));
+
+        assertEquals(0, result.exitCode(), result.output());
+        assertTrue(result.output().contains("SBK_RETIRED_RUNTIMES=1"));
+        assertTrue(Files.notExists(retired.getParent().getParent()));
+        assertTrue(Files.isRegularFile(current.resolve("current.jar")));
+    }
+
+    @Test
+    void packagedAgentManagesRuntimeLeaseLocally() throws Exception {
+        final Path parent = Files.createDirectories(temporaryDirectory.resolve("runtime parent"));
+        final String deployment = "sbk-runtime-10.6-linux-test";
+        final String digest = "0123456789abcdef";
+        final String leaseId = "test-run";
+        final Path runtime = Files.createDirectories(parent.resolve(deployment));
+        Files.writeString(runtime.resolve("deployment.properties"), "content.sha256=" + digest + "\n",
+                StandardCharsets.UTF_8);
+        Files.writeString(runtime.resolve(".sbk-runtime.sha256"), digest + "\n", StandardCharsets.UTF_8);
+        final Path lease = parent.resolve(".sbk-runtime-leases").resolve(deployment).resolve(leaseId);
+
+        final ProcessResult reservation = execute(RemoteAgent.reserveRuntime(parent.toString(), deployment,
+                leaseId, 5, 60));
+        assertEquals(0, reservation.exitCode(), reservation.output());
+        assertTrue(reservation.output().contains("SBK_RUNTIME_LIFECYCLE=reserved"));
+        assertTrue(Files.isRegularFile(lease));
+
+        final ProcessResult acquisition = execute(RemoteAgent.acquireRuntime(parent.toString(), deployment,
+                digest, leaseId, true, 5, 60, 300));
+        assertEquals(0, acquisition.exitCode(), acquisition.output());
+        assertTrue(acquisition.output().contains("SBK_RUNTIME_LIFECYCLE=acquired"));
+        assertEquals(deployment, Files.readString(parent.resolve(".sbk-runtime-current")).trim());
+
+        Files.writeString(lease, "active:1\n", StandardCharsets.UTF_8);
+        final ProcessResult heartbeat = execute(RemoteAgent.heartbeatRuntime(parent.toString(), deployment,
+                leaseId, 5, 60));
+        assertEquals(0, heartbeat.exitCode(), heartbeat.output());
+        assertTrue(heartbeat.output().contains("SBK_RUNTIME_LIFECYCLE=refreshed"));
+        assertFalse(Files.readString(lease).trim().equals("active:1"));
+
+        final ProcessResult release = execute(RemoteAgent.releaseRuntime(parent.toString(), deployment,
+                leaseId, true, 5, 60, 300));
+        assertEquals(0, release.exitCode(), release.output());
+        assertTrue(release.output().contains("SBK_RUNTIME_LIFECYCLE=released"));
+        assertTrue(Files.notExists(lease));
+        assertTrue(Files.isDirectory(runtime));
     }
 
     private ProcessResult execute(byte[] request) throws IOException, InterruptedException {

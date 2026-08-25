@@ -2004,8 +2004,9 @@ while distinct paths or remote accounts remain independent.
 The separate first-time JDK deployment creates or reuses one cached plain-tar
 archive, sends it through a single Apache MINA SCP stream per active target,
 and invokes the standard remote `tar` executable for staging extraction. SBK
-archives use a single-file SCP stream and Java-agent extraction. SFTP is reserved
-for small atomic metadata and lifecycle operations. This avoids
+archives use a single-file SCP stream and Java-agent extraction. SFTP is limited
+to remote-directory resolution and small Java-agent installation; runtime
+lifecycle operations execute locally through one typed Java-agent request per host. This avoids
 serialized per-entry payload round trips. JDK and SBK copies report aggregate bytes,
 completion percentage, MiB/s, and ETA without per-file logging; once all bytes
 arrive, progress identifies the remaining remote metadata finalization phase.
@@ -2018,21 +2019,22 @@ or interrupted staging data is cleaned and cannot become a launch target.
 Missing identities are uploaded automatically. An invalid final directory
 bearing the expected managed identity is repaired automatically. The current verified
 runtime is retained for subsequent benchmarks. With the default
-`runtimecleanup=true`, an Apache MINA SFTP lifecycle lock and current-runtime
-marker remove every non-current managed identity only after its controller-
-refreshed leases are no longer active, regardless of whether its SBK version is
+`runtimecleanup=true`, a remote-local lifecycle lock and current-runtime marker
+remove every non-current managed identity only after its controller-refreshed
+leases are no longer active, regardless of whether its SBK version is
 lower or higher. Each controller reserves its identity before probe, transfer,
 or activation, preventing overlapping GEM processes from retiring an identity
 another process is preparing.
 Concurrent benchmarks may therefore retain two versions temporarily, but an
 active runtime is never removed. Inactive runtime directories are atomically
 renamed out of the managed namespace while the lifecycle lock is held, then
-deleted by a separate SFTP operation outside that lock. Large recursive
+deleted by the remote Java agent outside that lock. Large recursive
 deletions therefore do not block lease acquisition or benchmark startup. Apache
-MINA SFTP also resolves and creates the deployment directory. Login shells, zsh
+MINA SFTP resolves and creates the deployment directory. Login shells, zsh
 glob behavior, PID probes, and detached shell jobs are not used for the
-lifecycle. A packaged Java agent performs OS/JDK probing, SBK archive extraction,
-verification, and benchmark launch through Java APIs. Generated remote shell
+lifecycle. A packaged Java agent performs OS/JDK probing, lifecycle state
+management, SBK archive extraction, verification, cleanup, and benchmark launch
+through Java APIs. Generated remote shell
 scripts are not used; the bulk transport requires standard remote `scp`, and
 first-time managed-JDK extraction requires standard remote `tar`. The
 rule also applies to the controller when it is selected as a deployment node.

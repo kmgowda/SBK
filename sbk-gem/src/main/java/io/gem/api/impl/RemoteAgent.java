@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 final class RemoteAgent {
     private static final Pattern JAVA_HOME = Pattern.compile("(?m)^SBK_JAVA_HOME=(.+)$");
     private static final Pattern OPERATING_SYSTEM = Pattern.compile("(?m)^SBK_OS=(\\S+)$");
+    private static final Pattern RETIRED_RUNTIME_COUNT = Pattern.compile("(?m)^SBK_RETIRED_RUNTIMES=(\\d+)$");
 
     private RemoteAgent() {
     }
@@ -45,6 +46,38 @@ final class RemoteAgent {
     static byte[] verify(String destination, String contentDigest, String version, String operatingSystem)
             throws IOException {
         return RemoteAgentProtocol.encode("verify", List.of(destination, contentDigest, version, operatingSystem));
+    }
+
+    static byte[] cleanup(String parentDirectory) throws IOException {
+        return RemoteAgentProtocol.encode("cleanup", List.of(parentDirectory));
+    }
+
+    static byte[] reserveRuntime(String parentDirectory, String deploymentName, String leaseId,
+                                 long lockTimeoutSeconds, long lockStaleSeconds) throws IOException {
+        return RemoteAgentProtocol.encode("runtime-reserve", List.of(parentDirectory, deploymentName, leaseId,
+                Long.toString(lockTimeoutSeconds), Long.toString(lockStaleSeconds)));
+    }
+
+    static byte[] acquireRuntime(String parentDirectory, String deploymentName, String contentDigest,
+                                 String leaseId, boolean cleanupEnabled, long lockTimeoutSeconds,
+                                 long lockStaleSeconds, long reservationSeconds) throws IOException {
+        return RemoteAgentProtocol.encode("runtime-acquire", List.of(parentDirectory, deploymentName,
+                contentDigest, leaseId, Boolean.toString(cleanupEnabled), Long.toString(lockTimeoutSeconds),
+                Long.toString(lockStaleSeconds), Long.toString(reservationSeconds)));
+    }
+
+    static byte[] heartbeatRuntime(String parentDirectory, String deploymentName, String leaseId,
+                                   long lockTimeoutSeconds, long lockStaleSeconds) throws IOException {
+        return RemoteAgentProtocol.encode("runtime-heartbeat", List.of(parentDirectory, deploymentName, leaseId,
+                Long.toString(lockTimeoutSeconds), Long.toString(lockStaleSeconds)));
+    }
+
+    static byte[] releaseRuntime(String parentDirectory, String deploymentName, String leaseId,
+                                 boolean cleanupEnabled, long lockTimeoutSeconds, long lockStaleSeconds,
+                                 long reservationSeconds) throws IOException {
+        return RemoteAgentProtocol.encode("runtime-release", List.of(parentDirectory, deploymentName, leaseId,
+                Boolean.toString(cleanupEnabled), Long.toString(lockTimeoutSeconds),
+                Long.toString(lockStaleSeconds), Long.toString(reservationSeconds)));
     }
 
     static byte[] run(String destination, String version, List<String> jvmArgs, List<String> sbkArgs)
@@ -74,6 +107,11 @@ final class RemoteAgent {
     static DeploymentPlatform platform(SshResponse response) {
         final String value = match(OPERATING_SYSTEM, response);
         return value == null ? null : DeploymentPlatform.fromOperatingSystem(value);
+    }
+
+    static int retiredRuntimeCount(SshResponse response) {
+        final String value = match(RETIRED_RUNTIME_COUNT, response);
+        return value == null ? 0 : Integer.parseInt(value);
     }
 
     private static String match(Pattern pattern, SshResponse response) {

@@ -269,21 +269,24 @@ transfer staging files from changing or recursively expanding the next bundle.
 The deployment lifecycle is automatic: exact verified SBK and Java identities
 are reused independently, while missing content is uploaded, verified, and
 activated without a separate copy switch. The current identities are retained.
-Apache MINA SFTP leases protect runtimes used by concurrent GEM executions. A
-reservation is created before probe/copy/activation and refreshed by the
-controller during the benchmark, so overlapping GEM processes cannot retire an
+Remote-agent leases protect runtimes used by concurrent GEM executions. The
+controller sends one typed Java-agent request per host to reserve, acquire,
+refresh, or release a lease; the agent performs the corresponding filesystem
+work locally on that host. A reservation is created before probe/copy/activation
+and refreshed during the benchmark, so overlapping GEM processes cannot retire an
 identity another process is preparing or using. Therefore
 an active non-current identity may coexist temporarily and is removed after its
 final lease exits. Cleanup compares immutable identities, not version numbers,
 so both lower and higher inactive SBK versions are removed. An inactive runtime
 is first atomically renamed out of the managed `sbk-runtime-*` namespace while
-the SFTP lifecycle lock is held. Its potentially large directory tree is then
-deleted through a separate MINA SFTP operation, so recursive deletion cannot
+the lifecycle lock is held. Its potentially large directory tree is then
+deleted by the remote Java agent after leases are released, so recursive deletion cannot
 hold the lifecycle lock or block lease acquisition and remote benchmark startup.
 No login-shell program, zsh construct, `nohup`, PID probe, shell glob, remote
 archive command, or checksum command participates in deployment. Apache MINA
-SFTP resolves paths and manages files; the Java agent performs verification,
-archive activation, and benchmark process launch.
+SFTP resolves paths and installs the small Java agent; that agent performs
+lifecycle metadata updates, verification, archive activation, cleanup, and
+benchmark process launch through local Java filesystem APIs.
 
 Every SSH/SFTP operation has a bounded deadline. A timeout actively interrupts
 its worker and closes the operation-owned MINA SFTP filesystem; it does not

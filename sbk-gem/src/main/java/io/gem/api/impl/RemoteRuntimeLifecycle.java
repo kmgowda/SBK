@@ -10,6 +10,8 @@
 
 package io.gem.api.impl;
 
+import io.gem.agent.RemoteRuntimeFiles;
+
 /** Defines managed-runtime names and the unavoidable remote benchmark launch command. */
 final class RemoteRuntimeLifecycle {
     private RemoteRuntimeLifecycle() {

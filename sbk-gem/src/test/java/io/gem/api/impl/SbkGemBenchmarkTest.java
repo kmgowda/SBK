@@ -66,19 +66,38 @@ final class SbkGemBenchmarkTest {
     }
 
     @Test
+    void reportsSimplePendingHostProgressForRemoteRuntimeSetup() {
+        final CompletableFuture<?>[] operations = {CompletableFuture.completedFuture(null),
+                new CompletableFuture<>(), CompletableFuture.completedFuture(null)};
+        final String[] hosts = {"node-a:22", "node-b:2202", null};
+
+        assertEquals("waiting for node-b:2202", SbkGemBenchmark.pendingHostProgress(operations, hosts));
+        operations[1].complete(null);
+        assertEquals("finalizing", SbkGemBenchmark.pendingHostProgress(operations, hosts));
+    }
+
+    @Test
     void reportsJdkCopyBytesPercentageAndRateForPhysicalTargets() {
         final CompletableFuture<?>[] copies = {new CompletableFuture<>(), new CompletableFuture<>()};
         final String[] hosts = {"node-a:22", null};
-        final AtomicLong[] copiedBytes = {new AtomicLong(50), new AtomicLong()};
+        final AtomicLong[] copiedBytes = {new AtomicLong(50L * 1024 * 1024), new AtomicLong()};
 
-        final String progress = SbkGemBenchmark.javaCopyProgress(copies, hosts, copiedBytes, 100,
+        final String progress = SbkGemBenchmark.javaCopyProgress(copies, hosts, copiedBytes, 100L * 1024 * 1024,
                 System.nanoTime() - TimeUnit.SECONDS.toNanos(2));
 
         assertTrue(progress.contains("0 of 1 JDK operation(s) finished"));
-        assertTrue(progress.contains("transferred 50 of 100 byte(s)"));
+        assertTrue(progress.contains("transferred 50.00 MiB of 100.00 MiB"));
         assertTrue(progress.contains("50.0%"));
         assertTrue(progress.contains("MiB/s"));
         assertTrue(progress.contains("ETA"));
+    }
+
+    @Test
+    void formatsTransferSizesUsingAnAppropriateBinaryUnit() {
+        assertEquals("0.00 KiB", SbkGemBenchmark.formatTransferSize(0));
+        assertEquals("1.50 KiB", SbkGemBenchmark.formatTransferSize(1_536));
+        assertEquals("1.00 MiB", SbkGemBenchmark.formatTransferSize(1_048_576));
+        assertEquals("1.16 GiB", SbkGemBenchmark.formatTransferSize(1_249_950_208));
     }
 
     @Test
@@ -239,6 +258,17 @@ final class SbkGemBenchmarkTest {
         assertSame(remoteFailure, failure);
         assertEquals(1, failure.getSuppressed().length);
         assertSame(sbmFailure, failure.getSuppressed()[0]);
+    }
+
+    @Test
+    void describesMessageLessCleanupFailureByType() {
+        assertEquals("IOException", SbkGemBenchmark.failureDescription(new IOException()));
+    }
+
+    @Test
+    void unwrapsCleanupFailureDescription() {
+        assertEquals("remote cleanup failed", SbkGemBenchmark.failureDescription(
+                new CompletionException(new IOException("remote cleanup failed"))));
     }
 
     @Test

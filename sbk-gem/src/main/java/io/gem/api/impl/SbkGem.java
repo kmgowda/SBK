@@ -48,6 +48,7 @@ import io.sbk.system.Printer;
 import io.sbp.api.Sbp;
 import io.sbp.config.SbpVersion;
 import io.time.Time;
+import io.time.TimeUnit;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang3.StringUtils;
@@ -391,6 +392,10 @@ final public class SbkGem {
         sbkCommandArgs.add("-out");
         sbkCommandArgs.add(GrpcLogger.class.getSimpleName());
         time = PerlBuilder.buildTime(logger);
+        if (time.getTimeUnit() == TimeUnit.ms) {
+            Printer.log.warn("SBK-GEM: Millisecond latency resolution records operations shorter than 1 ms as "
+                    + "0 ms; use '-time mcs' or '-time ns' when sub-millisecond latency is expected");
+        }
         addOption(sbkCommandArgs, "-time", time.getTimeUnit().name());
         addOption(sbkCommandArgs, "-minlatency", Long.toString(logger.getMinLatency()));
         addOption(sbkCommandArgs, "-maxlatency", Long.toString(logger.getMaxLatency()));

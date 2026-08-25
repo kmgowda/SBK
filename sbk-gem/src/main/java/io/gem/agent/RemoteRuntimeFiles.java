@@ -8,7 +8,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.gem.api.impl;
+package io.gem.agent;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,14 +30,16 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-/** Implements managed-runtime ownership using remote file-system operations. */
-final class RemoteRuntimeFiles {
+/** Implements managed-runtime ownership using local file-system operations on the remote node. */
+public final class RemoteRuntimeFiles {
     static final String RUNTIME_PREFIX = "sbk-runtime-";
     static final String CURRENT_FILE = ".sbk-runtime-current";
     static final String LEASE_DIRECTORY = ".sbk-runtime-leases";
     static final String LOCK_DIRECTORY = ".sbk-runtime-management.lock";
     static final String RETIRED_PREFIX = ".sbk-runtime-retired.";
     private static final String ACTIVE_PREFIX = "active:";
+    private static final String DESCRIPTOR_FILE = "deployment.properties";
+    private static final String REMOTE_DIGEST_FILE = ".sbk-runtime.sha256";
     private static final String OWNER_FILE = "owner";
     private static final String CREATED_FILE = "created";
     private static final long LOCK_RETRY_MILLIS = 100;
@@ -48,19 +50,42 @@ final class RemoteRuntimeFiles {
     private RemoteRuntimeFiles() {
     }
 
-    static boolean isManagedArtifact(String name) {
+    /**
+     * Identify an SBK-GEM-managed runtime artifact.
+     *
+     * @param name top-level file name
+     * @return true when the name is reserved for managed runtime state
+     */
+    public static boolean isManagedArtifact(String name) {
         return name.startsWith(RUNTIME_PREFIX) || name.equals(CURRENT_FILE)
                 || name.equals(LEASE_DIRECTORY) || name.startsWith(LOCK_DIRECTORY)
                 || name.startsWith(RETIRED_PREFIX);
     }
 
-    static String leasePath(String parentDirectory, String deploymentName, String leaseId) {
+    /**
+     * Return the path of a managed runtime lease.
+     *
+     * @param parentDirectory managed runtime parent directory
+     * @param deploymentName runtime deployment name
+     * @param leaseId lease identifier
+     * @return remote lease path
+     */
+    public static String leasePath(String parentDirectory, String deploymentName, String leaseId) {
         validateIdentifier(deploymentName, "deployment name");
         validateIdentifier(leaseId, "lease identifier");
         return parentDirectory + "/" + LEASE_DIRECTORY + "/" + deploymentName + "/" + leaseId;
     }
 
-    static String resolveDirectory(FileSystem fileSystem, String remoteDirectory) throws IOException {
+    /**
+     * Resolve and create a remote working directory through its file-system provider.
+     *
+     * @param fileSystem remote file system
+     * @param remoteDirectory configured directory
+     * @return absolute normalized directory
+     * @throws IllegalArgumentException when the configured directory is blank
+     * @throws IOException when the directory cannot be resolved
+     */
+    public static String resolveDirectory(FileSystem fileSystem, String remoteDirectory) throws IOException {
         if (remoteDirectory == null || remoteDirectory.isBlank()) {
             throw new IllegalArgumentException("Remote directory must not be blank");
         }
@@ -92,7 +117,7 @@ final class RemoteRuntimeFiles {
                 lockStaleSeconds, reservationSeconds);
         withLock(parent, leaseId, lockTimeoutSeconds, lockStaleSeconds, () -> {
             final Path runtime = parent.resolve(deploymentName);
-            final String actualDigest = readControlFile(runtime.resolve(SbkRuntimeBundle.REMOTE_DIGEST_FILE));
+            final String actualDigest = readControlFile(runtime.resolve(REMOTE_DIGEST_FILE));
             if (!contentDigest.equals(actualDigest)) {
                 throw new IOException("Managed runtime digest mismatch for " + runtime);
             }
@@ -218,9 +243,9 @@ final class RemoteRuntimeFiles {
                 final String candidateName = String.valueOf(candidate.getFileName());
                 if (candidateName.equals(current)
                         || !Files.isDirectory(candidate, LinkOption.NOFOLLOW_LINKS)
-                        || !Files.isRegularFile(candidate.resolve(SbkRuntimeBundle.DESCRIPTOR_FILE),
+                        || !Files.isRegularFile(candidate.resolve(DESCRIPTOR_FILE),
                         LinkOption.NOFOLLOW_LINKS)
-                        || !Files.isRegularFile(candidate.resolve(SbkRuntimeBundle.REMOTE_DIGEST_FILE),
+                        || !Files.isRegularFile(candidate.resolve(REMOTE_DIGEST_FILE),
                         LinkOption.NOFOLLOW_LINKS)
                         || hasActiveLease(parent, candidateName, now, reservationSeconds)) {
                     continue;

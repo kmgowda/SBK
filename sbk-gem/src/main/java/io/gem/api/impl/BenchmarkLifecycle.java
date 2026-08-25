@@ -42,6 +42,15 @@ final class BenchmarkLifecycle {
     }
 
     /**
+     * Return whether orchestration can still schedule lifecycle work.
+     *
+     * @return true while the benchmark is running
+     */
+    synchronized boolean isRunning() {
+        return state == State.RUN;
+    }
+
+    /**
      * Fail when blocking orchestration should no longer continue.
      *
      * @param operation current orchestration phase

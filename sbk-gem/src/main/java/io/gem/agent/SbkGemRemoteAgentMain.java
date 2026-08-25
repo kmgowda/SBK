@@ -62,6 +62,11 @@ public final class SbkGemRemoteAgentMain {
                 case "probe" -> probe(request.values());
                 case "activate" -> activate(request.values());
                 case "verify" -> verify(request.values());
+                case "runtime-reserve" -> reserveRuntime(request.values());
+                case "runtime-acquire" -> acquireRuntime(request.values());
+                case "runtime-heartbeat" -> heartbeatRuntime(request.values());
+                case "runtime-release" -> releaseRuntime(request.values());
+                case "cleanup" -> cleanup(request.values());
                 case "run" -> System.exit(run(request.values()));
                 default -> throw new IOException("Unknown operation: " + request.operation());
             }
@@ -140,6 +145,51 @@ public final class SbkGemRemoteAgentMain {
         runtimeJars(runtime.resolve("sbk"), values.get(2));
         System.out.println("SBK_RUNTIME_CONTENT=" + values.get(1));
         System.out.println("SBK_VERSION=" + values.get(2));
+    }
+
+    private static void cleanup(List<String> values) throws IOException {
+        requireCount(values, 1);
+        System.out.println("SBK_RETIRED_RUNTIMES=" + cleanupRetiredRuntimes(absolute(values.getFirst())));
+    }
+
+    static int cleanupRetiredRuntimes(Path parent) throws IOException {
+        return RemoteRuntimeFiles.deleteRetired(parent);
+    }
+
+    private static void reserveRuntime(List<String> values) throws IOException, InterruptedException {
+        requireCount(values, 5);
+        RemoteRuntimeFiles.reserve(absolute(values.get(0)), values.get(1), values.get(2),
+                parseLong(values.get(3), "runtime lock timeout"),
+                parseLong(values.get(4), "stale runtime lock timeout"));
+        System.out.println("SBK_RUNTIME_LIFECYCLE=reserved");
+    }
+
+    private static void acquireRuntime(List<String> values) throws IOException, InterruptedException {
+        requireCount(values, 8);
+        RemoteRuntimeFiles.acquire(absolute(values.get(0)), values.get(1), values.get(2), values.get(3),
+                parseBoolean(values.get(4), "runtime cleanup"),
+                parseLong(values.get(5), "runtime lock timeout"),
+                parseLong(values.get(6), "stale runtime lock timeout"),
+                parseLong(values.get(7), "runtime lease reservation"));
+        System.out.println("SBK_RUNTIME_LIFECYCLE=acquired");
+    }
+
+    private static void heartbeatRuntime(List<String> values) throws IOException, InterruptedException {
+        requireCount(values, 5);
+        RemoteRuntimeFiles.heartbeat(absolute(values.get(0)), values.get(1), values.get(2),
+                parseLong(values.get(3), "runtime lock timeout"),
+                parseLong(values.get(4), "stale runtime lock timeout"));
+        System.out.println("SBK_RUNTIME_LIFECYCLE=refreshed");
+    }
+
+    private static void releaseRuntime(List<String> values) throws IOException, InterruptedException {
+        requireCount(values, 7);
+        RemoteRuntimeFiles.release(absolute(values.get(0)), values.get(1), values.get(2),
+                parseBoolean(values.get(3), "runtime cleanup"),
+                parseLong(values.get(4), "runtime lock timeout"),
+                parseLong(values.get(5), "stale runtime lock timeout"),
+                parseLong(values.get(6), "runtime lease reservation"));
+        System.out.println("SBK_RUNTIME_LIFECYCLE=released");
     }
 
     private static int run(List<String> values) throws IOException, InterruptedException {
@@ -327,6 +377,24 @@ public final class SbkGemRemoteAgentMain {
             throw new IOException("Agent path must be absolute: " + value);
         }
         return path;
+    }
+
+    private static long parseLong(String value, String description) throws IOException {
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException exception) {
+            throw new IOException("Invalid " + description + ": " + value, exception);
+        }
+    }
+
+    private static boolean parseBoolean(String value, String description) throws IOException {
+        if ("true".equalsIgnoreCase(value)) {
+            return true;
+        }
+        if ("false".equalsIgnoreCase(value)) {
+            return false;
+        }
+        throw new IOException("Invalid " + description + ": " + value);
     }
 
     private static void move(Path source, Path destination) throws IOException {

@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,6 +54,20 @@ final class SbkGemRemoteAgentMainTest {
                 parent.destroyForcibly();
             }
         });
+    }
+
+    @Test
+    void deletesOnlyRetiredRuntimeTreesLocally() throws Exception {
+        final Path retired = temporaryDirectory.resolve(".sbk-runtime-retired.old");
+        final Path current = temporaryDirectory.resolve("sbk-runtime-10.6-current");
+        Files.createDirectories(retired.resolve("sbk/lib/nested"));
+        Files.writeString(retired.resolve("sbk/lib/nested/runtime.jar"), "retired");
+        Files.createDirectories(current);
+        Files.writeString(current.resolve("runtime.jar"), "current");
+
+        assertEquals(1, SbkGemRemoteAgentMain.cleanupRetiredRuntimes(temporaryDirectory));
+        assertFalse(Files.exists(retired));
+        assertTrue(Files.isRegularFile(current.resolve("runtime.jar")));
     }
 
     private static List<ProcessHandle> awaitProcessTree(Path pidFile) throws Exception {
