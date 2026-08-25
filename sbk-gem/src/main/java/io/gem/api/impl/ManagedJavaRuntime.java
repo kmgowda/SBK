@@ -23,11 +23,14 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -35,6 +38,7 @@ import java.util.stream.Stream;
 /** Content-addressed controller JDK copied independently from the SBK runtime. */
 final class ManagedJavaRuntime {
     private static final String MARKER = ".sbk-java.sha256";
+    private static final String IDENTITY_CACHE_FORMAT = "1";
     private static final int BUFFER_SIZE = 64 * 1024;
     private static final int IDENTITY_CHARACTERS = 24;
     private final Path localHome;
@@ -71,6 +75,55 @@ final class ManagedJavaRuntime {
             }
         }
         final String identity = HexFormat.of().formatHex(digest.digest());
+        return runtime(home, major, identity);
+    }
+
+    /**
+     * Create a managed JDK identity, reusing a persisted full-content digest while filesystem metadata is unchanged.
+     *
+     * @param javaHome controller JDK home
+     * @param major controller Java major version
+     * @param cacheDirectory local SBK-GEM cache directory
+     * @return content-addressed managed Java runtime
+     * @throws IOException when the JDK or identity cache cannot be read
+     */
+    static ManagedJavaRuntime create(Path javaHome, int major, Path cacheDirectory) throws IOException {
+        final Path home = javaHome.toAbsolutePath().normalize();
+        if (!Files.isExecutable(home.resolve("bin/java")) || !Files.isExecutable(home.resolve("bin/javac"))) {
+            throw new IOException("Controller JDK is incomplete: " + home);
+        }
+        Files.createDirectories(cacheDirectory);
+        final String cacheKey = sha256((home + "\0" + major).getBytes(StandardCharsets.UTF_8));
+        final Path identityFile = cacheDirectory.resolve("sbk-java-identity-" + cacheKey + ".properties");
+        final Path lockFile = identityFile.resolveSibling(identityFile.getFileName() + ".lock");
+        synchronized (ManagedJavaRuntime.class) {
+            try (FileChannel channel = FileChannel.open(lockFile, java.nio.file.StandardOpenOption.CREATE,
+                    java.nio.file.StandardOpenOption.WRITE);
+                 FileLock ignored = channel.lock()) {
+                final String metadata = metadataIdentity(home);
+                final Properties cached = loadIdentity(identityFile);
+                final String cachedDigest = cached.getProperty("content.sha256", "");
+                if (IDENTITY_CACHE_FORMAT.equals(cached.getProperty("format.version"))
+                        && home.toString().equals(cached.getProperty("java.home"))
+                        && Integer.toString(major).equals(cached.getProperty("java.major"))
+                        && metadata.equals(cached.getProperty("metadata.sha256"))
+                        && isSha256(cachedDigest)) {
+                    return runtime(home, major, cachedDigest);
+                }
+                final ManagedJavaRuntime runtime = create(home, major);
+                final Properties identity = new Properties();
+                identity.setProperty("format.version", IDENTITY_CACHE_FORMAT);
+                identity.setProperty("java.home", home.toString());
+                identity.setProperty("java.major", Integer.toString(major));
+                identity.setProperty("metadata.sha256", metadata);
+                identity.setProperty("content.sha256", runtime.digest);
+                writeIdentity(identityFile, identity);
+                return runtime;
+            }
+        }
+    }
+
+    private static ManagedJavaRuntime runtime(Path home, int major, String identity) {
         return new ManagedJavaRuntime(home, identity,
                 "sbk-java-" + major + "-" + identity.substring(0, IDENTITY_CHARACTERS));
     }
@@ -202,6 +255,73 @@ final class ManagedJavaRuntime {
             return MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException(exception);
+        }
+    }
+
+    private static String metadataIdentity(Path home) throws IOException {
+        final MessageDigest digest = newDigest();
+        try (Stream<Path> entries = Files.walk(home)) {
+            for (Path path : entries.sorted(Comparator.comparing(Path::toString)).toList()) {
+                update(digest, home.relativize(path).toString().replace('\\', '/') + "\0");
+                if (Files.isSymbolicLink(path)) {
+                    update(digest, "L\0" + Files.readSymbolicLink(path) + "\0");
+                } else if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
+                    update(digest, "D\0");
+                } else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
+                    update(digest, "F\0" + Files.size(path) + "\0"
+                            + Files.getLastModifiedTime(path, LinkOption.NOFOLLOW_LINKS).toMillis() + "\0");
+                }
+                if (!Files.isSymbolicLink(path)) {
+                    update(digest, "P\0" + permissionIdentity(path) + "\0");
+                }
+            }
+        }
+        return HexFormat.of().formatHex(digest.digest());
+    }
+
+    private static Properties loadIdentity(Path identityFile) throws IOException {
+        final Properties identity = new Properties();
+        if (Files.isRegularFile(identityFile)) {
+            try (InputStream input = Files.newInputStream(identityFile)) {
+                identity.load(input);
+            }
+        }
+        return identity;
+    }
+
+    private static void writeIdentity(Path identityFile, Properties identity) throws IOException {
+        final Path temporary = Files.createTempFile(Objects.requireNonNull(identityFile.getParent()),
+                Objects.requireNonNull(identityFile.getFileName()).toString(), ".tmp");
+        try {
+            try (OutputStream output = Files.newOutputStream(temporary)) {
+                identity.store(output, "SBK-GEM managed JDK identity cache");
+            }
+            try {
+                Files.move(temporary, identityFile, StandardCopyOption.ATOMIC_MOVE,
+                        StandardCopyOption.REPLACE_EXISTING);
+            } catch (AtomicMoveNotSupportedException exception) {
+                Files.move(temporary, identityFile, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(temporary);
+        }
+    }
+
+    private static String sha256(byte[] value) {
+        final MessageDigest digest = newDigest();
+        digest.update(value);
+        return HexFormat.of().formatHex(digest.digest());
+    }
+
+    private static boolean isSha256(String value) {
+        if (value.length() != 64) {
+            return false;
+        }
+        try {
+            HexFormat.of().parseHex(value);
+            return true;
+        } catch (IllegalArgumentException exception) {
+            return false;
         }
     }
 

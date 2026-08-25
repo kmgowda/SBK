@@ -2034,7 +2034,9 @@ user-managed JDKs are outside this cleanup boundary.
 
 The controller Java major version defines the minimum remote Java release. GEM
 first validates the JDK selected by `javadir` or remote `PATH`. If it is absent
-or older, the controller JDK is hashed and copied separately through MINA
+or older, a cached filesystem-metadata identity reuses the controller JDK's
+previously calculated full-content digest when the installed JDK is unchanged;
+otherwise the controller JDK is hashed and copied separately through MINA
 SFTP. Java content and executable/POSIX permission state participate in its
 identity; a matching marker whose `bin/java` or `bin/javac` is unusable is
 retired and repaired. Java and SBK have independent identities and reuse markers,

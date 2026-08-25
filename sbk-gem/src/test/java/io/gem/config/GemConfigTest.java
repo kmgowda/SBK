@@ -71,6 +71,24 @@ public final class GemConfigTest {
         assertDoesNotThrow(config::validate);
     }
 
+    /** Ensures registration and driver operation timeouts are positive and safely convertible. */
+    @Test
+    public void validatesRegistrationAndDriverTimeouts() {
+        final GemConfig config = validConfig();
+        config.sbmRegistrationTimeoutSeconds = 0;
+        assertThrows(IllegalArgumentException.class, config::validate);
+
+        config.sbmRegistrationTimeoutSeconds = 1;
+        config.timeoutSeconds = 0;
+        assertThrows(IllegalArgumentException.class, config::validate);
+
+        config.timeoutSeconds = Integer.MAX_VALUE;
+        assertThrows(IllegalArgumentException.class, config::validate);
+
+        config.timeoutSeconds = 1;
+        assertDoesNotThrow(config::validate);
+    }
+
     private static GemConfig validConfig() {
         final GemConfig config = new GemConfig();
         config.remoteTimeoutSeconds = 1;
@@ -80,6 +98,8 @@ public final class GemConfigTest {
         config.runtimeManagementLockTimeoutSeconds = 1;
         config.runtimeManagementLockStaleSeconds = 2;
         config.runtimeLeaseReservationSeconds = 3;
+        config.sbmRegistrationTimeoutSeconds = 1;
+        config.timeoutSeconds = 1;
         config.controlExecutorThreads = 1;
         config.transferExecutorThreads = 1;
         config.diagnosticBytes = 1;

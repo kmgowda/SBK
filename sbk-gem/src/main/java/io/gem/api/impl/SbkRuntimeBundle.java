@@ -137,31 +137,23 @@ final class SbkRuntimeBundle {
         final Path archiveSizeFile = cacheDirectory.resolve(deploymentName + ARCHIVE_EXTENSION
                 + ARCHIVE_SIZE_SUFFIX);
         final Path cacheLockFile = cacheDirectory.resolve(deploymentName + CACHE_LOCK_SUFFIX);
-        final Path managementLockFile = cacheDirectory.resolve(CACHE_MANAGEMENT_LOCK);
-        final ReentrantLock managementLock = cacheLock(managementLockFile);
-        managementLock.lock();
-        try (FileChannel managementChannel = openLockChannel(managementLockFile);
-             FileLock ignoredManagement = managementChannel.lock()) {
-            final ReentrantLock processLock = cacheLock(cacheLockFile);
-            processLock.lock();
-            try (FileChannel lockChannel = openLockChannel(cacheLockFile);
-                 FileLock ignored = lockChannel.lock()) {
-                String archiveDigest = cachedArchiveDigest(archive, archiveDigestFile, archiveSizeFile);
-                if (archiveDigest == null) {
-                    final List<BundleEntry> entries = collectRuntimeEntries(normalizedSbkDirectory);
-                    archiveDigest = createArchive(archive, sbkVersion, javaVersion, platform, contentDigest, entries);
-                    writeAtomically(archiveDigestFile, archiveDigest + "\n");
-                    writeAtomically(archiveSizeFile, Files.size(archive) + "\n");
-                }
-                return new SbkRuntimeBundle(archive, archiveDigest, contentDigest, deploymentName,
-                        relativeSbkCommand, cacheLockFile,
-                        archiveDigestFile, archiveSizeFile, normalizedSbkDirectory, sbkVersion, javaVersion,
-                        platform);
-            } finally {
-                processLock.unlock();
+        final ReentrantLock processLock = cacheLock(cacheLockFile);
+        processLock.lock();
+        try (FileChannel lockChannel = openLockChannel(cacheLockFile);
+             FileLock ignored = lockChannel.lock()) {
+            String archiveDigest = cachedArchiveDigest(archive, archiveDigestFile, archiveSizeFile);
+            if (archiveDigest == null) {
+                final List<BundleEntry> entries = collectRuntimeEntries(normalizedSbkDirectory);
+                archiveDigest = createArchive(archive, sbkVersion, javaVersion, platform, contentDigest, entries);
+                writeAtomically(archiveDigestFile, archiveDigest + "\n");
+                writeAtomically(archiveSizeFile, Files.size(archive) + "\n");
             }
+            return new SbkRuntimeBundle(archive, archiveDigest, contentDigest, deploymentName,
+                    relativeSbkCommand, cacheLockFile,
+                    archiveDigestFile, archiveSizeFile, normalizedSbkDirectory, sbkVersion, javaVersion,
+                    platform);
         } finally {
-            managementLock.unlock();
+            processLock.unlock();
         }
     }
 

@@ -72,6 +72,25 @@ final class ManagedJavaRuntimeTest {
     }
 
     @Test
+    void cachesFullJdkDigestUntilFilesystemMetadataChanges() throws IOException {
+        final Path javaHome = createJavaHome();
+        final Path cache = temporaryDirectory.resolve("cache");
+        final ManagedJavaRuntime first = ManagedJavaRuntime.create(javaHome, 25, cache);
+        final ManagedJavaRuntime cached = ManagedJavaRuntime.create(javaHome, 25, cache);
+
+        assertEquals(first.directoryName(), cached.directoryName());
+        try (var files = Files.list(cache)) {
+            assertEquals(1, files.filter(path -> java.util.Objects.requireNonNull(path.getFileName()).toString()
+                    .endsWith(".properties")).count());
+        }
+
+        Files.writeString(javaHome.resolve("release"), "JAVA_VERSION=25_CHANGED", StandardCharsets.UTF_8);
+        final ManagedJavaRuntime changed = ManagedJavaRuntime.create(javaHome, 25, cache);
+
+        assertNotEquals(first.directoryName(), changed.directoryName());
+    }
+
+    @Test
     void repairsCachedJdkWithInvalidExecutablePermissions() throws IOException {
         final Path javaHome = createJavaHome();
         final Path remoteParent = Files.createDirectories(temporaryDirectory.resolve("remote"));

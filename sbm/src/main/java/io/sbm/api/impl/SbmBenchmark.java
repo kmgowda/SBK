@@ -454,4 +454,14 @@ final public class SbmBenchmark implements Benchmark {
     public boolean awaitCoordinatedStart(long timeout, TimeUnit unit) throws InterruptedException {
         return service.awaitCoordinatedStart(timeout, unit);
     }
+
+    /**
+     * Release prepared remote clients after latency aggregation has started.
+     *
+     * @return number of coordinated clients released
+     * @throws IllegalStateException when the registration barrier is not ready
+     */
+    public int releaseCoordinatedStart() {
+        return service.releaseCoordinatedStart();
+    }
 }

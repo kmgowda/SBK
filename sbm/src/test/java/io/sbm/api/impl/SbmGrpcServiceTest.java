@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -57,7 +58,7 @@ final class SbmGrpcServiceTest {
     }
 
     @Test
-    void releasesAllClientsOnlyAfterExpectedNodesRegister() throws Exception {
+    void releasesAllClientsOnlyAfterAggregationIsReady() throws Exception {
         final SbmParameters params = new SbmParameters("test", 0, 2, 0, null);
         params.parseArgs(new String[]{"-class", "file", "-action", "r", "-max", "2"});
         final CountConnections connections = mock(CountConnections.class);
@@ -72,6 +73,11 @@ final class SbmGrpcServiceTest {
         assertTrue(first.values.isEmpty());
 
         service.registerClient(Config.getDefaultInstance(), second);
+        assertTrue(service.awaitCoordinatedStart(1, TimeUnit.MILLISECONDS));
+        assertTrue(first.values.isEmpty());
+        assertTrue(second.values.isEmpty());
+
+        assertEquals(2, service.releaseCoordinatedStart());
         assertEquals(List.of(10L), first.values);
         assertEquals(List.of(11L), second.values);
         assertTrue(first.completed);
@@ -145,11 +151,34 @@ final class SbmGrpcServiceTest {
 
         service.registerClient(Config.getDefaultInstance(), observer);
 
+        assertTrue(service.awaitCoordinatedStart(1, TimeUnit.MILLISECONDS));
+        assertTrue(observer.values.isEmpty());
+        assertEquals(1, service.releaseCoordinatedStart());
         assertEquals(0, service.abortPendingRegistrations("late failure"));
         assertTrue(observer.completed);
         assertEquals(List.of(10L), observer.values);
-        assertTrue(service.awaitCoordinatedStart(1, TimeUnit.MILLISECONDS));
         verify(connections, times(1)).incrementConnections();
+    }
+
+    @Test
+    void duplicateAndUnknownClientCloseDoNotCorruptConnectionCount() throws Exception {
+        final SbmParameters params = new SbmParameters("test", 0, 1, 0, null);
+        params.parseArgs(new String[]{"-class", "file", "-action", "r", "-max", "1"});
+        final CountConnections connections = mock(CountConnections.class);
+        final SbmRegistry registry = mock(SbmRegistry.class);
+        when(registry.getID()).thenReturn(7L);
+        final SbmGrpcService service = new SbmGrpcService(params, new MilliSeconds(), 0, 1000,
+                connections, registry);
+        service.registerClient(Config.getDefaultInstance(), new CapturingObserver());
+
+        service.closeClient(ClientID.newBuilder().setId(7).build(), new CapturingEmptyObserver());
+        service.closeClient(ClientID.newBuilder().setId(7).build(), new CapturingEmptyObserver());
+        service.closeClient(ClientID.newBuilder().setId(99).build(), new CapturingEmptyObserver());
+
+        verify(connections).decrementConnections();
+        final CapturingConfigObserver available = new CapturingConfigObserver();
+        service.getConfig(Empty.getDefaultInstance(), available);
+        assertTrue(available.completed);
     }
 
     @Test
@@ -162,6 +191,25 @@ final class SbmGrpcServiceTest {
         assertFalse(service.awaitCoordinatedStart(1, TimeUnit.MILLISECONDS));
         service.abortPendingRegistrations("registration deadline expired");
         assertTrue(service.getRegistrationFailure().contains("deadline"));
+    }
+
+    @Test
+    void abortAfterBarrierReadyPreventsClientRelease() throws Exception {
+        final SbmParameters params = new SbmParameters("test", 0, 1, 0, null);
+        params.parseArgs(new String[]{"-class", "file", "-action", "r", "-max", "1"});
+        final SbmRegistry registry = mock(SbmRegistry.class);
+        when(registry.getID()).thenReturn(10L);
+        final SbmGrpcService service = new SbmGrpcService(params, new MilliSeconds(), 0, 1000,
+                mock(CountConnections.class), registry, true);
+        final CapturingObserver observer = new CapturingObserver();
+        service.registerClient(Config.getDefaultInstance(), observer);
+
+        assertTrue(service.awaitCoordinatedStart(1, TimeUnit.MILLISECONDS));
+        assertEquals(1, service.abortPendingRegistrations("aggregation startup failed"));
+
+        assertFalse(service.awaitCoordinatedStart(1, TimeUnit.MILLISECONDS));
+        assertThrows(IllegalStateException.class, service::releaseCoordinatedStart);
+        assertEquals(Status.Code.ABORTED, Status.fromThrowable(observer.failure).getCode());
     }
 
     @Test

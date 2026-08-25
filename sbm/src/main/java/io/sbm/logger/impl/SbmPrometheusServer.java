@@ -49,8 +49,8 @@ public final class SbmPrometheusServer extends SbkPrometheusServer implements Co
 
     @Override
     public void incrementConnections() {
-        connections.incrementAndGet();
-        maxConnections.incrementAndGet();
+        final int current = connections.incrementAndGet();
+        maxConnections.accumulateAndGet(current, Math::max);
     }
 
     @Override

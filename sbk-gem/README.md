@@ -338,7 +338,7 @@ Before a multi-host run:
 7. It starts the SBM gRPC service and launches every remote SBK process with its node-specific arguments.
 8. Each remote SBK opens its storage and creates its workers before registering. After every
    prepared client reaches the coordinated-start barrier, GEM starts SBM aggregation and the
-   benchmark reporting clock.
+   benchmark reporting clock, then explicitly releases every pending registration response.
 9. Measurements return to embedded SBM and are reported as aggregate windows and totals.
 10. GEM collects remote responses and shuts down sessions and SBM.
 
@@ -367,7 +367,8 @@ never reaches SBM cannot leave the other clients waiting indefinitely. Configure
 startup; its default is 120 seconds. The independent `remoteTimeoutSeconds`
 setting remains the timeout for individual SSH control operations.
 
-Remote driver initialization is deliberately outside SBM's reporting clock. The
+Remote driver initialization is deliberately outside SBM's reporting clock. This two-phase
+ready-then-release barrier prevents a short benchmark from running before SBM is ready. The
 remote PerL reporters and SBM use independent periodic windows, so the first
 aggregate result can arrive within two reporting intervals after the prepared-client
 barrier; subsequent aggregate windows use the normal configured interval.

@@ -136,10 +136,6 @@ final public class GemConfig {
      */
     public int timeoutSeconds;
     /**
-     * Maximum number of iterations to wait/retry for remote operations.
-     */
-    public int maxIterations;
-    /**
      * Remote working directory on each host (derived from app name/version).
      */
     public String remoteDir;
@@ -181,6 +177,8 @@ final public class GemConfig {
 
     void validate() {
         if (remoteTimeoutSeconds < 1 || deploymentTimeoutSeconds < 1
+                || sbmRegistrationTimeoutSeconds < 1 || timeoutSeconds < 1
+                || timeoutSeconds > Integer.MAX_VALUE / io.time.Time.MS_PER_SEC
                 || runtimeProgressIntervalSeconds < 1
                 || runtimeCacheDirectory == null || runtimeCacheDirectory.isBlank()
                 || controlExecutorThreads < 1 || transferExecutorThreads < 1

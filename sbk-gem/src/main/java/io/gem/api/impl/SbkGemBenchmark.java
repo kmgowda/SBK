@@ -41,6 +41,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
@@ -111,7 +112,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         this.runtimeLeaseHeartbeats = new CompletableFuture<?>[connections.length];
         this.runtimeLeaseStateLock = new Object();
         this.runtimeLeaseHeartbeatScheduler = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
-                .name("sbk-gem-runtime-lease-heartbeat").daemon(true).factory());
+                .name("sbk-gem-lifecycle-scheduler").daemon(true).factory());
         for (int i = 0; i < connections.length; i++) {
             nodes[i] = new SshSession(connections[i], executors.control(), executors.transfer(), executors.command(),
                     config.diagnosticBytes);
@@ -181,11 +182,12 @@ final public class SbkGemBenchmark implements GemBenchmark {
         });
 
         // Start remote SBK instances
+        final List<String> jvmArgs = runtimeJvmArgs();
+        final long remoteBenchmarkTimeoutSeconds = benchmarkTimeoutSeconds();
         for (int i = 0; i < nodes.length; i++) {
             final List<String> sbkArgs = sbkArgsByNode.get(i);
             final String agentCommand = RemoteAgent.command(javaHomes[i] + "/bin/java",
                     runtimeDeployment.agentPaths()[i]);
-            final List<String> jvmArgs = runtimeJvmArgs();
             final byte[] request = RemoteAgent.run(runtimeDeployment.deploymentDirectories()[i],
                     config.sbkVersion, jvmArgs, sbkArgs);
             final String redactedCommand = "java agent run " + java.util.Arrays.toString(
@@ -196,7 +198,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
             final CompletableFuture<SshResponse> commandFuture;
             try {
                 commandFuture = nodes[i].runBenchmarkCommandAsync(agentCommand, request, true,
-                        benchmarkTimeoutSeconds());
+                        remoteBenchmarkTimeoutSeconds);
                 runtimeLeaseLaunched[i] = true;
             } catch (ConnectException ex) {
                 cfResults[i] = CompletableFuture.completedFuture(remoteCommandResult(host, null, ex));
@@ -253,10 +255,11 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 }
                 if (coordinatedStart) {
                     sbmBenchmark.startLatencyAggregation();
+                    final int releasedClients = sbmBenchmark.releaseCoordinatedStart();
                     Printer.log.info("SBK-GEM: All prepared remote SBK clients registered with SBM ({}/{}); " +
                                     "benchmark timing has started. Because remote PerL and SBM use independent " +
                                     "{}-second reporting windows, first performance results are expected within " +
-                                    "{} seconds", sbmBenchmark.getMaximumRegisteredClients(), nodes.length,
+                                    "{} seconds", releasedClients, nodes.length,
                             PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS,
                             2 * PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS);
                 } else if (sbmBenchmark.getRegistrationFailure() == null) {
@@ -329,15 +332,13 @@ final public class SbkGemBenchmark implements GemBenchmark {
                                                        RemoteEnvironment environment) throws IOException,
             ConnectException, InterruptedException, ExecutionException {
         final DeploymentPlatform platform = environment.platform();
-        final Path configuredCache = Paths.get(config.runtimeCacheDirectory);
-        final Path cacheDirectory = configuredCache.isAbsolute() ? configuredCache
-                : Paths.get(System.getProperty("user.home")).resolve(configuredCache);
+        final Path cacheDirectory = runtimeCacheDirectory();
         Printer.log.info("SBK-GEM: Preparing immutable runtime bundle for {}; progress every {} second(s)",
                 platform.id(), config.runtimeProgressIntervalSeconds);
         final SbkRuntimeBundle bundle;
         final long bundlePreparationSeconds;
         try (LifecycleProgress progress = new LifecycleProgress("Immutable runtime bundle preparation for "
-                + platform.id(), config.runtimeProgressIntervalSeconds,
+                + platform.id(), config.runtimeProgressIntervalSeconds, runtimeLeaseHeartbeatScheduler,
                 () -> "validating, hashing, or compressing SBK files")) {
             bundle = SbkRuntimeBundle.create(Paths.get(params.getSbkDir()), GemConfig.SBK_COMMAND,
                     config.sbkVersion, controllerJavaVersion, platform, cacheDirectory);
@@ -362,15 +363,15 @@ final public class SbkGemBenchmark implements GemBenchmark {
         private final String operation;
         private final Supplier<String> detail;
         private final long startedNanos;
-        private final ScheduledExecutorService scheduler;
+        private final ScheduledFuture<?> progressTask;
 
-        private LifecycleProgress(String operation, int intervalSeconds, Supplier<String> detail) {
+        private LifecycleProgress(String operation, int intervalSeconds, ScheduledExecutorService scheduler,
+                                  Supplier<String> detail) {
             this.operation = operation;
             this.detail = detail;
             this.startedNanos = System.nanoTime();
-            this.scheduler = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
-                    .name("sbk-gem-runtime-progress").daemon(true).factory());
-            scheduler.scheduleWithFixedDelay(this::logProgress, intervalSeconds, intervalSeconds, TimeUnit.SECONDS);
+            this.progressTask = scheduler.scheduleWithFixedDelay(this::logProgress, intervalSeconds,
+                    intervalSeconds, TimeUnit.SECONDS);
         }
 
         private void logProgress() {
@@ -384,8 +385,14 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
         @Override
         public void close() {
-            scheduler.shutdownNow();
+            progressTask.cancel(false);
         }
+    }
+
+    private Path runtimeCacheDirectory() {
+        final Path configuredCache = Paths.get(config.runtimeCacheDirectory);
+        return configuredCache.isAbsolute() ? configuredCache
+                : Paths.get(System.getProperty("user.home")).resolve(configuredCache);
     }
 
     @SuppressWarnings("unchecked")
@@ -438,7 +445,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
     @SuppressWarnings("unchecked")
     private void reserveRuntimeLeases(String[] parentDirectories, String[] deploymentNames, String[] leaseIds)
-            throws InterruptedException, ExecutionException {
+            throws InterruptedException, ExecutionException, IOException {
         final CompletableFuture<Void>[] reservations = new CompletableFuture[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
             final int nodeIndex = i;
@@ -463,7 +470,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     @SuppressWarnings("unchecked")
     private void acquireRuntimeLeases(SbkRuntimeBundle bundle, String[] parentDirectories,
                                       String[] deploymentNames, String[] leaseIds)
-            throws InterruptedException, ExecutionException {
+            throws InterruptedException, ExecutionException, IOException {
         final CompletableFuture<Void>[] acquisitions = new CompletableFuture[nodes.length];
         final String[] targetHosts = new String[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
@@ -487,7 +494,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 params.isRuntimeCleanup() ? "enabled" : "disabled", config.runtimeProgressIntervalSeconds);
         final long acquisitionSeconds;
         try (LifecycleProgress progress = new LifecycleProgress("Runtime lease acquisition and retirement",
-                config.runtimeProgressIntervalSeconds,
+                config.runtimeProgressIntervalSeconds, runtimeLeaseHeartbeatScheduler,
                 () -> futureProgress(acquisitions, targetHosts, "host operation(s)"))) {
             waitForDeployment(CompletableFuture.allOf(acquisitions), "runtime lease acquisition and retirement");
             acquisitionSeconds = progress.elapsedSeconds();
@@ -651,7 +658,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                     archiveBytes, transferCount, config.runtimeProgressIntervalSeconds);
             final long transferSeconds;
             try (LifecycleProgress progress = new LifecycleProgress("Immutable runtime archive copy",
-                    config.runtimeProgressIntervalSeconds,
+                    config.runtimeProgressIntervalSeconds, runtimeLeaseHeartbeatScheduler,
                     () -> futureProgress(uploads, transferHosts, "transfer(s)"))) {
                 waitForDeployment(CompletableFuture.allOf(uploads), "runtime archive upload");
                 transferSeconds = progress.elapsedSeconds();
@@ -760,7 +767,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
     private void requireSuccessfulWithDiagnostics(CompletableFuture<SshResponse>[] futures,
                                                   boolean[] selected, String operation)
-            throws InterruptedException, ExecutionException {
+            throws IOException, InterruptedException, ExecutionException {
         for (int i = 0; i < futures.length; i++) {
             if (selected[i]) {
                 final SshResponse response = futures[i].get();
@@ -769,7 +776,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                     final String diagnostic = diagnosticSummary(errorOutput.isBlank()
                                     ? response.stdOutputStream.toString() : errorOutput,
                             config.maximumDiagnosticCharacters, config.diagnosticPrefixCharacters);
-                    throw new InterruptedException("SBK-GEM: " + operation + " failed on host '"
+                    throw new IOException("SBK-GEM: " + operation + " failed on host '"
                             + nodes[i].connection.getHost() + "' with return code " + response.returnCode
                             + (diagnostic.isEmpty() ? "" : ": " + diagnostic));
                 }
@@ -826,7 +833,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
             Printer.log.info("SBK-GEM: Java {} or newer is missing on selected host(s); preparing a separate "
                     + "content-addressed JDK copy", expectedVersion);
             final ManagedJavaRuntime javaRuntime = ManagedJavaRuntime.create(
-                    Path.of(System.getProperty("java.home")), expectedVersion);
+                    Path.of(System.getProperty("java.home")), expectedVersion, runtimeCacheDirectory());
             final String[] javaParentDirectories = new String[nodes.length];
             for (int i = 0; i < nodes.length; i++) {
                 javaParentDirectories[i] = remoteParent(absoluteConnectionDirs[i]);
@@ -846,7 +853,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 }
             }
             try (LifecycleProgress progress = new LifecycleProgress("Separate JDK copy",
-                    config.runtimeProgressIntervalSeconds,
+                    config.runtimeProgressIntervalSeconds, runtimeLeaseHeartbeatScheduler,
                     () -> futureProgress(copies, hostLabels(), "JDK operation(s)"))) {
                 waitForDeployment(CompletableFuture.allOf(copies), "separate remote JDK provisioning");
             }
@@ -866,7 +873,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
 
         if (hasSelectedTarget(unresolved)) {
-            throw new InterruptedException("SBK-GEM: Java " + expectedVersion
+            throw new IOException("SBK-GEM: Java " + expectedVersion
                     + " or newer could not be provisioned");
         }
 
@@ -904,7 +911,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
     }
 
     @SuppressWarnings("unchecked")
-    private String[] resolveRemoteConnectionDirectories() throws InterruptedException, ExecutionException {
+    private String[] resolveRemoteConnectionDirectories() throws IOException, InterruptedException,
+            ExecutionException {
         final CompletableFuture<String>[] resolutions = new CompletableFuture[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
             final int nodeIndex = i;
@@ -945,15 +953,15 @@ final public class SbkGemBenchmark implements GemBenchmark {
         lifecycle.requireRunning(operation);
     }
 
-    private void waitForDeployment(CompletableFuture<?> future, String operation) throws InterruptedException,
-            ExecutionException {
+    private void waitForDeployment(CompletableFuture<?> future, String operation) throws IOException,
+            InterruptedException, ExecutionException {
         try {
             future.get(config.deploymentTimeoutSeconds, TimeUnit.SECONDS);
         } catch (TimeoutException exception) {
             final String message = "SBK-GEM: " + operation + " timed out after "
                     + config.deploymentTimeoutSeconds + " seconds";
             Printer.log.error(message);
-            throw new InterruptedException(message);
+            throw new IOException(message, exception);
         }
     }
 
@@ -1095,7 +1103,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     }
 
     @SuppressWarnings("unchecked")
-    private void releaseUnlaunchedRuntimeLeases() throws InterruptedException, ExecutionException {
+    private void releaseUnlaunchedRuntimeLeases() throws IOException, InterruptedException, ExecutionException {
         if (runtimeDeployment == null) {
             return;
         }
@@ -1135,7 +1143,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
         try {
             releaseUnlaunchedRuntimeLeases();
-        } catch (InterruptedException | ExecutionException releaseFailure) {
+        } catch (IOException | InterruptedException | ExecutionException releaseFailure) {
             terminalFailure = combineTerminalFailures(terminalFailure, releaseFailure);
             if (releaseFailure instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
