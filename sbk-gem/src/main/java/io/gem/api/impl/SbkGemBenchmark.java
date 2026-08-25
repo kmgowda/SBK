@@ -252,10 +252,13 @@ final public class SbkGemBenchmark implements GemBenchmark {
                     }
                 }
                 if (coordinatedStart) {
-                    Printer.log.info("SBK-GEM: All remote SBK clients registered with SBM ({}/{}); benchmark " +
-                                    "is running. First performance results are expected after the {}-second " +
-                                    "reporting interval", sbmBenchmark.getMaximumRegisteredClients(), nodes.length,
-                            PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS);
+                    sbmBenchmark.startLatencyAggregation();
+                    Printer.log.info("SBK-GEM: All prepared remote SBK clients registered with SBM ({}/{}); " +
+                                    "benchmark timing has started. Because remote PerL and SBM use independent " +
+                                    "{}-second reporting windows, first performance results are expected within " +
+                                    "{} seconds", sbmBenchmark.getMaximumRegisteredClients(), nodes.length,
+                            PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS,
+                            2 * PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS);
                 } else if (sbmBenchmark.getRegistrationFailure() == null) {
                     final String failure = "SBK-GEM: SBM coordinated start timed out after " +
                             config.sbmRegistrationTimeoutSeconds + " seconds; registered " +
@@ -268,6 +271,11 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 final String failure = "SBK-GEM: Interrupted while waiting for remote clients to register with SBM";
                 Printer.log.error(failure, ex);
                 sbmBenchmark.abortPendingRegistrations(failure);
+            } catch (ExecutionException | RuntimeException ex) {
+                final Throwable failure = unwrapCompletionFailure(ex);
+                Printer.log.error("SBK-GEM: Unable to start SBM latency aggregation after all remote clients " +
+                        "registered", failure);
+                shutdown(failure, BenchmarkTermination.INTERNAL_FAILURE);
             }
         }, executors.command());
         final CompletableFuture<Void> sbkFuture = CompletableFuture.allOf(cfResults);

@@ -217,10 +217,7 @@ final public class SbkBenchmark implements Benchmark {
         }
         state = State.RUN;
         Printer.log.info("SBK Benchmark Started");
-        rwLogger.open(params, storage.getClass().getSimpleName(), params.getAction(), time);
         storage.openStorage(params);
-        final WriteRequestsLogger writeRequestsLogger = rwLogger.getMaxWriterIDs() > 0 ? rwLogger : null;
-        final ReadRequestsLogger readRequestsLogger = rwLogger.getMaxReaderIDs() > 0 ? rwLogger : null;
         final List<SbkWriter> sbkWriters;
         final List<SbkReader> sbkReaders;
         final List<CompletableFuture<Void>> writeFutures;
@@ -246,6 +243,15 @@ final public class SbkBenchmark implements Benchmark {
         if (writers.size() <= 0 && readers.size() <= 0) {
             throw new IllegalStateException("No Writers and/or Readers Created\n");
         }
+
+        /*
+         * Prepare storage workers before a distributed logger registers with
+         * SBM. Registration is the coordinated-start readiness boundary; a
+         * slow driver open must not make an unready client appear runnable.
+         */
+        rwLogger.open(params, storage.getClass().getSimpleName(), params.getAction(), time);
+        final WriteRequestsLogger writeRequestsLogger = rwLogger.getMaxWriterIDs() > 0 ? rwLogger : null;
+        final ReadRequestsLogger readRequestsLogger = rwLogger.getMaxReaderIDs() > 0 ? rwLogger : null;
 
         if (writers.size() > 0) {
             if (writePerl != null) {

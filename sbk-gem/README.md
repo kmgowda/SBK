@@ -335,9 +335,12 @@ Before a multi-host run:
 5. It constructs the embedded `SbmBenchmark` and `SbkGemBenchmark`.
 6. `SbkGemBenchmark` establishes SSH sessions, enforces homogeneous platform
    compatibility, and verifies or atomically deploys the exact SBK/Java runtime bundle.
-7. It starts SBM and launches every remote SBK process with its node-specific arguments.
-8. Measurements return to embedded SBM and are reported as aggregate windows and totals.
-9. GEM collects remote responses and shuts down sessions and SBM.
+7. It starts the SBM gRPC service and launches every remote SBK process with its node-specific arguments.
+8. Each remote SBK opens its storage and creates its workers before registering. After every
+   prepared client reaches the coordinated-start barrier, GEM starts SBM aggregation and the
+   benchmark reporting clock.
+9. Measurements return to embedded SBM and are reported as aggregate windows and totals.
+10. GEM collects remote responses and shuts down sessions and SBM.
 
 ## Distributed failure reporting
 
@@ -363,6 +366,11 @@ never reaches SBM cannot leave the other clients waiting indefinitely. Configure
 `sbmRegistrationTimeoutSeconds` in `gem.properties` for slow JVM or storage-driver
 startup; its default is 120 seconds. The independent `remoteTimeoutSeconds`
 setting remains the timeout for individual SSH control operations.
+
+Remote driver initialization is deliberately outside SBM's reporting clock. The
+remote PerL reporters and SBM use independent periodic windows, so the first
+aggregate result can arrive within two reporting intervals after the prepared-client
+barrier; subsequent aggregate windows use the normal configured interval.
 
 For diagnostics, GEM retains only the most recent 256 KiB of each remote
 process's stdout and stderr. Failed hosts include these bounded tails in the

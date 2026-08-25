@@ -1564,6 +1564,15 @@ flowchart TB
 use to talk to SBM. It is a gRPC service defined in
 [`sbp.proto`](../sbk-api/src/main/proto/sbp.proto), with six RPCs:
 
+For an SBK-GEM coordinated run, registration is also the prepared-client
+boundary. Remote SBK opens the storage and creates its reader/writer objects
+before `GrpcLogger` registers. The controller starts SBM's existing aggregation
+consumer only after every prepared client has registered, keeping deployment and
+driver initialization outside the aggregate reporting clock. This is orchestration
+ordering only; it adds no condition, state, or dispatch to PerL or SBM ingestion
+iterations. Because remote PerL and SBM rotate independent periodic windows, the
+first aggregate output can require up to two reporting intervals.
+
 | RPC | Request | Response | Purpose |
 |---|---|---|---|
 | `getVersion` | Empty | `Version(major, minor)` | Client checks protocol compatibility |

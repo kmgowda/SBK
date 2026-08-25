@@ -67,6 +67,7 @@ final public class SbmBenchmark implements Benchmark {
     final private Server server;
     final private SbmGrpcService service;
     final private SbmLatencyBenchmark benchmark;
+    final private boolean coordinatedStart;
     final private double[] percentileFractions;
     final private CompletableFuture<Void> retFuture;
     final private ScheduledExecutorService deadlineExecutor;
@@ -116,6 +117,7 @@ final public class SbmBenchmark implements Benchmark {
         this.params = params;
         this.logger = logger;
         this.time = time;
+        this.coordinatedStart = coordinatedStart;
         final double[] percentiles = logger.getPercentiles();
         percentileFractions = new double[percentiles.length];
 
@@ -210,6 +212,40 @@ final public class SbmBenchmark implements Benchmark {
         state = State.RUN;
         Printer.log.info("SBM Started");
         logger.open(params, params.getStorageName(), params.getAction(), time);
+        if (!coordinatedStart) {
+            startLatencyAggregation();
+        }
+        if (state == State.RUN) {
+            try {
+                server.start();
+                serverStarted = true;
+            } catch (IOException exception) {
+                shutdown(exception, BenchmarkTermination.INTERNAL_FAILURE);
+                throw exception;
+            }
+        }
+        return retFuture.toCompletableFuture();
+    }
+
+    /**
+     * Start latency aggregation after an orchestrated client-registration barrier.
+     *
+     * <p>Standalone SBM starts aggregation from {@link #start()}. SBK-GEM uses this
+     * method only after every prepared remote SBK client has registered, so deployment
+     * and remote storage preparation are excluded from the benchmark reporting clock.
+     *
+     * @throws ExecutionException if latency aggregation fails during startup
+     * @throws InterruptedException if interrupted while inspecting startup completion
+     * @throws IllegalStateException if SBM is not running
+     */
+    @Synchronized
+    public void startLatencyAggregation() throws ExecutionException, InterruptedException, IllegalStateException {
+        if (state != State.RUN) {
+            throw new IllegalStateException("SBM latency aggregation cannot start after shutdown");
+        }
+        if (latencyCompletion != null) {
+            return;
+        }
         final CompletableFuture<Void> latencyFuture = benchmark.start();
         latencyCompletion = latencyFuture;
         latencyFuture.whenComplete((ignored, failure) -> {
@@ -230,16 +266,6 @@ final public class SbmBenchmark implements Benchmark {
                 throw exception;
             }
         }
-        if (state == State.RUN) {
-            try {
-                server.start();
-                serverStarted = true;
-            } catch (IOException exception) {
-                shutdown(exception, BenchmarkTermination.INTERNAL_FAILURE);
-                throw exception;
-            }
-        }
-        return retFuture.toCompletableFuture();
     }
 
     /**

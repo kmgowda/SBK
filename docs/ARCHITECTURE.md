@@ -311,7 +311,7 @@ sequenceDiagram
     SBM-->>Operator: aggregate windows and totals
 ```
 
-SBP messages and gRPC services are generated from protobuf definitions in `sbk-api/src/main/proto`. SBM receives client registrations and latency records through `SbmGrpcService`, queues them in `SbmLatencyBenchmark`, and merges them into periodic and total windows. The default gRPC port is 9717.
+SBP messages and gRPC services are generated from protobuf definitions in `sbk-api/src/main/proto`. SBM receives client registrations and latency records through `SbmGrpcService`, queues them in `SbmLatencyBenchmark`, and merges them into periodic and total windows. The default gRPC port is 9717. For SBK-GEM coordinated runs, each remote SBK opens its storage and creates its workers before registering; SBM starts its aggregation consumer and reporting clock only after all prepared clients reach the registration barrier. Deployment and remote driver initialization therefore do not dilute aggregate duration or throughput.
 
 SBK-GEM uses Apache MINA SSHD for connection, exact-file transfer, and command execution. It supports passwordless public-key authentication through the launching user's SSH agent and OpenSSH-configured identity files; an explicitly configured password is an optional fallback. Server identities are verified against that user's `~/.ssh/known_hosts`, or the path selected by `-knownhosts`, so unknown or changed host keys fail before deployment. Strict checking is the default; `-hostkeycheck false` is an explicit, insecure opt-out for isolated environments.
 
