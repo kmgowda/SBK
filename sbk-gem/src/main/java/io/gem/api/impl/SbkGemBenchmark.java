@@ -75,6 +75,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     private final SshSession[] nodes;
     private final String[] remoteEndpointIdentities;
     private final int controllerJavaVersion;
+    private final RuntimeCopyPolicy runtimeCopyPolicy;
     private final String runtimeLeaseRunId;
     private final boolean[] runtimeLeaseLaunched;
     private final boolean[] runtimeLeaseActive;
@@ -104,6 +105,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         this.config = config;
         this.params = params;
         this.controllerJavaVersion = Runtime.version().feature();
+        this.runtimeCopyPolicy = RuntimeCopyPolicy.select(config.fullcopy);
         this.sbkArgsByNode = sbkArgsByNode.stream().<List<String>>map(ArrayList::new).toList();
         this.retFuture = new CompletableFuture<>();
         this.lifecycle = new BenchmarkLifecycle();
@@ -398,24 +400,14 @@ final public class SbkGemBenchmark implements GemBenchmark {
         final Path sbkSourceDirectory = Paths.get(params.getSbkDir()).toAbsolutePath().normalize();
         Printer.log.info("SBK-GEM: Preparing immutable runtime bundle for {}; progress every {} second(s)",
                 platform.id(), config.runtimeProgressIntervalSeconds);
-        final DriverRuntimeManifest driverRuntime = config.fullcopy ? null
-                : DriverRuntimeManifest.load(sbkSourceDirectory, config.driverClass, config.sbkVersion);
-        if (driverRuntime == null) {
-            Printer.log.info("SBK-GEM: Complete SBK distribution deployment is enabled");
-        } else {
-            Printer.log.info("SBK-GEM: Compact runtime copy is enabled; selected SBK driver '{}'",
-                    driverRuntime.driverName());
-        }
         final SbkRuntimeBundle bundle;
         final long bundlePreparationMillis;
         try (LifecycleProgress progress = new LifecycleProgress("Immutable runtime bundle preparation for "
                 + platform.id(), config.runtimeProgressIntervalSeconds, runtimeLeaseHeartbeatScheduler,
                 () -> "validating, hashing, or compressing SBK files")) {
-            bundle = driverRuntime == null
-                    ? SbkRuntimeBundle.create(sbkSourceDirectory, GemConfig.SBK_COMMAND,
-                    config.sbkVersion, controllerJavaVersion, platform, cacheDirectory)
-                    : SbkRuntimeBundle.create(sbkSourceDirectory, GemConfig.SBK_COMMAND,
-                    config.sbkVersion, controllerJavaVersion, platform, cacheDirectory, driverRuntime);
+            bundle = runtimeCopyPolicy.createSbkRuntime(new RuntimeCopyPolicy.SbkRuntimeSource(
+                    sbkSourceDirectory, GemConfig.SBK_COMMAND, config.sbkVersion, controllerJavaVersion,
+                    platform, cacheDirectory, config.driverClass));
             bundlePreparationMillis = progress.elapsedMillis();
         }
         Printer.log.info("SBK-GEM: {} SBK runtime bundle '{}' {} source directory '{}' in {} ms; {}; "
@@ -1022,22 +1014,15 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
 
         if (hasSelectedTarget(unresolved)) {
+            final String javaDeploymentName = runtimeCopyPolicy.javaDeploymentName();
             Printer.log.info("SBK-GEM: Java {} or newer is missing on selected host(s); preparing a separate "
                     + "content-addressed {} bulk SCP transfer", expectedVersion,
-                    config.fullcopy ? "full JDK" : "compact Java runtime");
+                    javaDeploymentName);
             final Path javaSourceDirectory = Path.of(System.getProperty("java.home")).toAbsolutePath().normalize();
             final Path localSbkDirectory = Paths.get(params.getSbkDir()).toAbsolutePath().normalize();
-            final ManagedJavaRuntime javaRuntime;
-            if (config.fullcopy) {
-                javaRuntime = ManagedJavaRuntime.create(javaSourceDirectory, expectedVersion,
-                        runtimeCacheDirectory());
-            } else {
-                final CompactJavaRuntimeDescriptor descriptor = CompactJavaRuntimeDescriptor.load(
-                        localSbkDirectory, expectedVersion);
-                javaRuntime = ManagedJavaRuntime.createCompact(javaSourceDirectory, expectedVersion,
-                        runtimeCacheDirectory(), descriptor);
-            }
-            final String javaDeploymentName = config.fullcopy ? "full JDK" : "compact Java runtime";
+            final ManagedJavaRuntime javaRuntime = runtimeCopyPolicy.createJavaRuntime(
+                    new RuntimeCopyPolicy.JavaRuntimeSource(javaSourceDirectory, expectedVersion,
+                            runtimeCacheDirectory(), localSbkDirectory));
             final long archivePreparationMillis;
             final Path javaArchive;
             try (LifecycleProgress progress = new LifecycleProgress("Managed " + javaDeploymentName

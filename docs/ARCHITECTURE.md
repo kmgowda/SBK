@@ -326,6 +326,13 @@ SBK-GEM; normal `build`, `installDist`, and `distTar` outputs remain complete.
 Both compact artifacts retain independent content identities, cache reuse,
 parallel host transfer, verification, and atomic activation.
 
+GEM resolves `-fullcopy` once at benchmark construction. Full-artifact
+selection lives in `FullRuntimeCopyPolicy`, while compact Java and
+driver-scoped SBK selection lives in `MinimalRuntimeCopyPolicy`. Both policies
+return the same `ManagedJavaRuntime` and `SbkRuntimeBundle` abstractions to the
+shared orchestration path, so archive progress, caching, transfer, verification,
+activation, leases, and cleanup are implemented only once.
+
 The generated `bin/sbk-gem` and `bin/sbk-gem-yal` launchers select the local
 distribution through the internal `sbk.appHome` system property. SBK-GEM
 validates and packages that standard installation, then the remote agent
