@@ -159,6 +159,27 @@ final class SbkRuntimeBundleTest {
     }
 
     @Test
+    void minimalCleanupRemovesCachedFullAndOtherDriverScopedBundles() throws IOException {
+        final Path sbk = createSbkDistribution();
+        final Path cache = temporaryDirectory.resolve("cache");
+        final DeploymentPlatform platform = new DeploymentPlatform("linux");
+        final SbkRuntimeBundle full = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
+                platform, cache);
+        createDriverRuntimeManifest(sbk, "rocksdb", List.of("dependency.jar", "sbk-10.6.jar"));
+        final SbkRuntimeBundle rocksDb = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
+                platform, cache, DriverRuntimeManifest.load(sbk, "RocksDB", "10.6"));
+        createDriverRuntimeManifest(sbk, "file", List.of("dependency.jar", "sbk-10.6.jar"));
+        final SbkRuntimeBundle file = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
+                platform, cache, DriverRuntimeManifest.load(sbk, "File", "10.6"));
+
+        assertEquals(2, SbkRuntimeBundle.cleanupOtherCachedBundles(cache, file.deploymentName()));
+
+        assertFalse(Files.exists(full.archive()));
+        assertFalse(Files.exists(rocksDb.archive()));
+        assertTrue(Files.exists(file.archive()));
+    }
+
+    @Test
     void cleanupRetainsCachedBundleWhileAnotherDeploymentUsesItsArchive() throws IOException {
         final Path sbk = createSbkDistribution();
         final Path cache = temporaryDirectory.resolve("cache");

@@ -354,7 +354,10 @@ The deployment lifecycle option is:
   verified activation and lease/transfer release, regardless of whether its
   SBK version is lower or higher; the default is
   `true`. It never deletes the current identity, a live leased identity, an
-  unmanaged directory, or a user-managed JDK selected with `-javadir`.
+  unmanaged directory, or a user-managed JDK selected with `-javadir`. Cleanup
+  is independent of `-fullcopy`: a minimal run removes inactive old full
+  distributions and inactive runtimes for other drivers, while a full run
+  removes inactive full and driver-scoped runtimes.
 - `-fullcopy true|false` provisions the complete controller JDK and complete
   SBK distribution when `true`. The default, `false`, selects both the compact
   Gradle Java-runtime contract and the driver-specific SBK runtime closure.

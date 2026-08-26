@@ -260,7 +260,9 @@ final class SbkRuntimeBundle {
      * <p>An archive currently locked by another GEM deployment is retained and
      * becomes eligible for removal after that deployment releases its lock.
      * Lock metadata is intentionally retained so concurrent processes always
-     * coordinate through the same filesystem inode.</p>
+     * coordinate through the same filesystem inode. Cleanup is intentionally
+     * copy-mode agnostic: a selected driver-scoped bundle removes inactive full
+     * and other driver-scoped bundles, and a selected full bundle does the same.</p>
      *
      * @param cacheDirectory local runtime bundle cache
      * @param deploymentName selected deployment identity
