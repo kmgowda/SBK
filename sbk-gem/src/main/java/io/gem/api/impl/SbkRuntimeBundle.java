@@ -10,6 +10,7 @@
 
 package io.gem.api.impl;
 
+import io.gem.agent.RemoteDeploymentContract;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,13 +56,13 @@ import java.util.stream.Stream;
  * without rehashing the complete installation on every execution.
  */
 final class SbkRuntimeBundle {
-    static final String ARCHIVE_ROOT = "runtime";
-    static final String SBK_DIRECTORY = "sbk";
-    static final String DESCRIPTOR_FILE = "deployment.properties";
-    static final String CHECKSUM_FILE = "deployment-files.sha256";
-    static final String REMOTE_DIGEST_FILE = ".sbk-runtime.sha256";
+    static final String ARCHIVE_ROOT = RemoteDeploymentContract.ARCHIVE_ROOT;
+    static final String SBK_DIRECTORY = RemoteDeploymentContract.SBK_DIRECTORY;
+    static final String DESCRIPTOR_FILE = RemoteDeploymentContract.DESCRIPTOR_FILE;
+    static final String CHECKSUM_FILE = RemoteDeploymentContract.CHECKSUM_FILE;
+    static final String REMOTE_DIGEST_FILE = RemoteDeploymentContract.REMOTE_DIGEST_FILE;
     static final String RUNTIME_IDENTITY_FILE = "sbk-runtime-identity.properties";
-    private static final String SHA_256 = "SHA-256";
+    private static final String SHA_256 = RemoteDeploymentContract.SHA_256;
     private static final int SHA_256_HEX_LENGTH = 64;
     private static final int DIGEST_NAME_CHARACTERS = 24;
     private static final int BUFFER_SIZE = 64 * 1024;
@@ -91,12 +93,13 @@ final class SbkRuntimeBundle {
     private final int javaVersion;
     private final DeploymentPlatform platform;
     private final boolean archiveReused;
+    private final DriverRuntimeManifest driverRuntime;
 
     private SbkRuntimeBundle(Path archive, String archiveDigest, String contentDigest,
                              String deploymentName, String relativeSbkCommand, Path cacheLockFile,
                              Path archiveDigestFile, Path archiveSizeFile, Path sbkDirectory,
                              String sbkVersion, int javaVersion, DeploymentPlatform platform,
-                             boolean archiveReused) {
+                             boolean archiveReused, DriverRuntimeManifest driverRuntime) {
         this.archive = archive;
         this.archiveDigest = archiveDigest;
         this.contentDigest = contentDigest;
@@ -110,6 +113,7 @@ final class SbkRuntimeBundle {
         this.javaVersion = javaVersion;
         this.platform = platform;
         this.archiveReused = archiveReused;
+        this.driverRuntime = driverRuntime;
     }
 
     /**
@@ -127,11 +131,38 @@ final class SbkRuntimeBundle {
     static SbkRuntimeBundle create(Path sbkDirectory, String relativeSbkCommand,
                                    String sbkVersion, int javaVersion, DeploymentPlatform platform,
                                    Path cacheDirectory) throws IOException {
+        return create(sbkDirectory, relativeSbkCommand, sbkVersion, javaVersion, platform, cacheDirectory, null);
+    }
+
+    /**
+     * Create or reuse a cached runtime archive containing one Gradle-resolved driver closure.
+     *
+     * @param sbkDirectory complete local {@code installDist} directory
+     * @param relativeSbkCommand launcher path relative to {@code sbkDirectory}
+     * @param sbkVersion discovered SBK version
+     * @param javaVersion required Java major version
+     * @param platform homogeneous deployment platform
+     * @param cacheDirectory local runtime bundle cache
+     * @param driverRuntime selected Gradle-generated driver runtime
+     * @return immutable driver-scoped runtime bundle
+     * @throws IOException when validation, hashing, or archive creation fails
+     */
+    static SbkRuntimeBundle create(Path sbkDirectory, String relativeSbkCommand,
+                                   String sbkVersion, int javaVersion, DeploymentPlatform platform,
+                                   Path cacheDirectory, DriverRuntimeManifest driverRuntime) throws IOException {
         final Path normalizedSbkDirectory = sbkDirectory.toAbsolutePath().normalize();
-        validateSbkDistribution(normalizedSbkDirectory, relativeSbkCommand);
-        final String buildIdentity = loadBuildIdentity(normalizedSbkDirectory, sbkVersion);
+        if (driverRuntime == null) {
+            validateSbkDistribution(normalizedSbkDirectory, relativeSbkCommand);
+        } else {
+            validateDriverRuntime(normalizedSbkDirectory, sbkVersion, driverRuntime);
+        }
+        final String buildIdentity = driverRuntime == null
+                ? loadBuildIdentity(normalizedSbkDirectory, sbkVersion) : driverRuntime.runtimeIdentity();
         final String contentDigest = calculateContentDigest(sbkVersion, javaVersion, platform, buildIdentity);
-        final String deploymentName = "sbk-runtime-" + sbkVersion + "-" + platform.id() + "-"
+        final String runtimeScope = driverRuntime == null ? ""
+                : "-" + driverRuntime.driverName().toLowerCase(Locale.ROOT);
+        final String deploymentName = RemoteDeploymentContract.RUNTIME_PREFIX + sbkVersion + "-" + platform.id()
+                + runtimeScope + "-"
                 + contentDigest.substring(0, DIGEST_NAME_CHARACTERS);
         Files.createDirectories(cacheDirectory);
         final Path archive = cacheDirectory.resolve(deploymentName + ARCHIVE_EXTENSION);
@@ -147,7 +178,9 @@ final class SbkRuntimeBundle {
             String archiveDigest = cachedArchiveDigest(archive, archiveDigestFile, archiveSizeFile);
             final boolean archiveReused = archiveDigest != null;
             if (archiveDigest == null) {
-                final List<BundleEntry> entries = collectRuntimeEntries(normalizedSbkDirectory);
+                final List<BundleEntry> entries = driverRuntime == null
+                        ? collectRuntimeEntries(normalizedSbkDirectory)
+                        : collectDriverRuntimeEntries(normalizedSbkDirectory, sbkVersion, driverRuntime);
                 archiveDigest = createArchive(archive, sbkVersion, javaVersion, platform, contentDigest, entries);
                 writeAtomically(archiveDigestFile, archiveDigest + "\n");
                 writeAtomically(archiveSizeFile, Files.size(archive) + "\n");
@@ -155,7 +188,7 @@ final class SbkRuntimeBundle {
             return new SbkRuntimeBundle(archive, archiveDigest, contentDigest, deploymentName,
                     relativeSbkCommand, cacheLockFile,
                     archiveDigestFile, archiveSizeFile, normalizedSbkDirectory, sbkVersion, javaVersion,
-                    platform, archiveReused);
+                    platform, archiveReused, driverRuntime);
         } finally {
             processLock.unlock();
         }
@@ -196,8 +229,13 @@ final class SbkRuntimeBundle {
      * @throws IOException when the installed build identity changed or archive recreation fails
      */
     void rebuildArchive() throws IOException {
-        validateSbkDistribution(sbkDirectory, relativeSbkCommand);
-        final String currentIdentity = loadBuildIdentity(sbkDirectory, sbkVersion);
+        if (driverRuntime == null) {
+            validateSbkDistribution(sbkDirectory, relativeSbkCommand);
+        } else {
+            validateDriverRuntime(sbkDirectory, sbkVersion, driverRuntime);
+        }
+        final String currentIdentity = driverRuntime == null
+                ? loadBuildIdentity(sbkDirectory, sbkVersion) : driverRuntime.runtimeIdentity();
         final String currentContentDigest = calculateContentDigest(sbkVersion, javaVersion, platform,
                 currentIdentity);
         if (!contentDigest.equals(currentContentDigest)) {
@@ -207,7 +245,9 @@ final class SbkRuntimeBundle {
         processLock.lock();
         try (FileChannel lockChannel = openLockChannel(cacheLockFile);
              FileLock ignored = lockChannel.lock()) {
-            final List<BundleEntry> entries = collectRuntimeEntries(sbkDirectory);
+            final List<BundleEntry> entries = driverRuntime == null
+                    ? collectRuntimeEntries(sbkDirectory)
+                    : collectDriverRuntimeEntries(sbkDirectory, sbkVersion, driverRuntime);
             archiveDigest = createArchive(archive, sbkVersion, javaVersion, platform, contentDigest, entries);
             writeAtomically(archiveDigestFile, archiveDigest + "\n");
             writeAtomically(archiveSizeFile, Files.size(archive) + "\n");
@@ -222,7 +262,9 @@ final class SbkRuntimeBundle {
      * <p>An archive currently locked by another GEM deployment is retained and
      * becomes eligible for removal after that deployment releases its lock.
      * Lock metadata is intentionally retained so concurrent processes always
-     * coordinate through the same filesystem inode.</p>
+     * coordinate through the same filesystem inode. Cleanup is intentionally
+     * copy-mode agnostic: a selected driver-scoped bundle removes inactive full
+     * and other driver-scoped bundles, and a selected full bundle does the same.</p>
      *
      * @param cacheDirectory local runtime bundle cache
      * @param deploymentName selected deployment identity
@@ -307,7 +349,7 @@ final class SbkRuntimeBundle {
 
     private static boolean isBundleArchive(Path path) {
         final String name = fileName(path);
-        return Files.isRegularFile(path) && name.startsWith("sbk-runtime-")
+        return Files.isRegularFile(path) && name.startsWith(RemoteDeploymentContract.RUNTIME_PREFIX)
                 && (name.endsWith(ARCHIVE_EXTENSION) || name.endsWith(LEGACY_ARCHIVE_EXTENSION));
     }
 
@@ -316,7 +358,7 @@ final class SbkRuntimeBundle {
     }
 
     private static void validateIdentifier(String value) {
-        if (value == null || !value.startsWith("sbk-runtime-") || value.indexOf('/') >= 0
+        if (value == null || !value.startsWith(RemoteDeploymentContract.RUNTIME_PREFIX) || value.indexOf('/') >= 0
                 || value.indexOf('\\') >= 0) {
             throw new IllegalArgumentException("Invalid SBK runtime deployment name: " + value);
         }
@@ -359,6 +401,25 @@ final class SbkRuntimeBundle {
         }
     }
 
+    private static void validateDriverRuntime(Path directory, String sbkVersion,
+                                              DriverRuntimeManifest driverRuntime) throws IOException {
+        if (!Files.isDirectory(directory)) {
+            throw new IOException("SBK runtime bundle source is not a directory: " + directory);
+        }
+        final String mainJarName = "sbk-" + sbkVersion + ".jar";
+        if (driverRuntime.libraries().stream().noneMatch(path -> fileName(path).equals(mainJarName))) {
+            throw new IOException("Driver runtime " + driverRuntime.driverName() + " is missing " + mainJarName);
+        }
+        for (Path library : driverRuntime.libraries()) {
+            if (!Files.isRegularFile(library) || !library.normalize().startsWith(directory.resolve("lib"))) {
+                throw new IOException("Invalid driver runtime dependency: " + library);
+            }
+        }
+        if (!Files.isRegularFile(driverRuntime.pathingJar())) {
+            throw new IOException("Driver runtime pathing JAR is missing: " + driverRuntime.pathingJar());
+        }
+    }
+
     private static String loadBuildIdentity(Path directory, String sbkVersion) throws IOException {
         final Path identityFile = directory.resolve(RUNTIME_IDENTITY_FILE);
         if (!Files.isRegularFile(identityFile)) {
@@ -369,10 +430,11 @@ final class SbkRuntimeBundle {
         try (var input = Files.newInputStream(identityFile)) {
             identity.load(input);
         }
-        if (!Integer.toString(RUNTIME_IDENTITY_FORMAT_VERSION).equals(identity.getProperty("format.version"))) {
+        if (!Integer.toString(RUNTIME_IDENTITY_FORMAT_VERSION).equals(
+                identity.getProperty(RemoteDeploymentContract.FORMAT_VERSION_PROPERTY))) {
             throw new IOException("Unsupported SBK runtime identity format in " + identityFile);
         }
-        if (!sbkVersion.equals(identity.getProperty("sbk.version"))) {
+        if (!sbkVersion.equals(identity.getProperty(RemoteDeploymentContract.SBK_VERSION_PROPERTY))) {
             throw new IOException("SBK runtime identity version does not match " + sbkVersion + " in "
                     + identityFile);
         }
@@ -422,6 +484,32 @@ final class SbkRuntimeBundle {
         return entries;
     }
 
+    private static List<BundleEntry> collectDriverRuntimeEntries(Path sbkDirectory, String sbkVersion,
+                                                                  DriverRuntimeManifest driverRuntime)
+            throws IOException {
+        final List<BundleEntry> entries = new ArrayList<>();
+        entries.add(new BundleEntry(sbkDirectory, SBK_DIRECTORY, EntryType.DIRECTORY, 0, "", "",
+                DIRECTORY_MODE));
+        entries.add(new BundleEntry(sbkDirectory.resolve("lib"), SBK_DIRECTORY + "/lib", EntryType.DIRECTORY,
+                0, "", "", DIRECTORY_MODE));
+        for (Path library : driverRuntime.libraries()) {
+            addMappedRegularFile(library, SBK_DIRECTORY + "/lib/" + fileName(library), entries);
+        }
+        addMappedRegularFile(driverRuntime.pathingJar(),
+                SBK_DIRECTORY + "/lib/sbk-pathing-" + sbkVersion + ".jar", entries);
+        entries.sort(Comparator.comparing(BundleEntry::relativePath));
+        return entries;
+    }
+
+    private static void addMappedRegularFile(Path source, String archivePath, List<BundleEntry> entries)
+            throws IOException {
+        if (!Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Driver runtime file is missing: " + source);
+        }
+        entries.add(new BundleEntry(source, archivePath, EntryType.REGULAR_FILE, Files.size(source),
+                sha256(source), "", Files.isExecutable(source) ? EXECUTABLE_FILE_MODE : REGULAR_FILE_MODE));
+    }
+
     private static void addEntry(Path sourceRoot, Path path, Path realSourceRoot, String archiveRoot,
                                  List<BundleEntry> entries) throws IOException {
         final Path relative = sourceRoot.relativize(path);
@@ -461,9 +549,9 @@ final class SbkRuntimeBundle {
                                                  String buildIdentity) {
         final MessageDigest digest = newDigest();
         update(digest, "format=" + BUNDLE_FORMAT_VERSION + "\n");
-        update(digest, "sbk.version=" + sbkVersion + "\n");
-        update(digest, "java.version=" + javaVersion + "\n");
-        update(digest, "platform.os=" + platform.id() + "\n");
+        update(digest, RemoteDeploymentContract.SBK_VERSION_PROPERTY + "=" + sbkVersion + "\n");
+        update(digest, RemoteDeploymentContract.JAVA_VERSION_PROPERTY + "=" + javaVersion + "\n");
+        update(digest, RemoteDeploymentContract.PLATFORM_OS_PROPERTY + "=" + platform.id() + "\n");
         update(digest, "build.sha256=" + buildIdentity + "\n");
         return HexFormat.of().formatHex(digest.digest());
     }
@@ -542,12 +630,12 @@ final class SbkRuntimeBundle {
 
     private static String descriptor(String sbkVersion, int javaVersion, DeploymentPlatform platform,
                                      String contentDigest) {
-        return "format.version=" + BUNDLE_FORMAT_VERSION + "\n"
-                + "sbk.version=" + sbkVersion + "\n"
-                + "java.version=" + javaVersion + "\n"
-                + "platform.os=" + platform.operatingSystem() + "\n"
-                + "content.sha256=" + contentDigest + "\n"
-                + "includes.java=false\n";
+        return RemoteDeploymentContract.FORMAT_VERSION_PROPERTY + "=" + BUNDLE_FORMAT_VERSION + "\n"
+                + RemoteDeploymentContract.SBK_VERSION_PROPERTY + "=" + sbkVersion + "\n"
+                + RemoteDeploymentContract.JAVA_VERSION_PROPERTY + "=" + javaVersion + "\n"
+                + RemoteDeploymentContract.PLATFORM_OS_PROPERTY + "=" + platform.operatingSystem() + "\n"
+                + RemoteDeploymentContract.CONTENT_SHA_256_PROPERTY + "=" + contentDigest + "\n"
+                + RemoteDeploymentContract.INCLUDES_JAVA_PROPERTY + "=false\n";
     }
 
     private static String checksums(List<BundleEntry> entries) {

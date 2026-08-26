@@ -32,14 +32,12 @@ import java.util.regex.Pattern;
 
 /** Implements managed-runtime ownership using local file-system operations on the remote node. */
 public final class RemoteRuntimeFiles {
-    static final String RUNTIME_PREFIX = "sbk-runtime-";
+    static final String RUNTIME_PREFIX = RemoteDeploymentContract.RUNTIME_PREFIX;
     static final String CURRENT_FILE = ".sbk-runtime-current";
     static final String LEASE_DIRECTORY = ".sbk-runtime-leases";
     static final String LOCK_DIRECTORY = ".sbk-runtime-management.lock";
     static final String RETIRED_PREFIX = ".sbk-runtime-retired.";
     private static final String ACTIVE_PREFIX = "active:";
-    private static final String DESCRIPTOR_FILE = "deployment.properties";
-    private static final String REMOTE_DIGEST_FILE = ".sbk-runtime.sha256";
     private static final String OWNER_FILE = "owner";
     private static final String CREATED_FILE = "created";
     private static final long LOCK_RETRY_MILLIS = 100;
@@ -73,7 +71,7 @@ public final class RemoteRuntimeFiles {
     public static String leasePath(String parentDirectory, String deploymentName, String leaseId) {
         validateIdentifier(deploymentName, "deployment name");
         validateIdentifier(leaseId, "lease identifier");
-        return parentDirectory + "/" + LEASE_DIRECTORY + "/" + deploymentName + "/" + leaseId;
+        return RemotePath.join(parentDirectory, LEASE_DIRECTORY, deploymentName, leaseId);
     }
 
     /**
@@ -92,7 +90,7 @@ public final class RemoteRuntimeFiles {
         final Path directory = fileSystem.getPath(remoteDirectory).normalize();
         Files.createDirectories(directory);
         final String absoluteDirectory = directory.toRealPath().toString();
-        if (!absoluteDirectory.startsWith("/")) {
+        if (!RemotePath.isAbsolute(absoluteDirectory)) {
             throw new IOException("Apache MINA SFTP returned a non-absolute remote directory: "
                     + absoluteDirectory);
         }
@@ -117,7 +115,7 @@ public final class RemoteRuntimeFiles {
                 lockStaleSeconds, reservationSeconds);
         withLock(parent, leaseId, lockTimeoutSeconds, lockStaleSeconds, () -> {
             final Path runtime = parent.resolve(deploymentName);
-            final String actualDigest = readControlFile(runtime.resolve(REMOTE_DIGEST_FILE));
+            final String actualDigest = readControlFile(runtime.resolve(RemoteDeploymentContract.REMOTE_DIGEST_FILE));
             if (!contentDigest.equals(actualDigest)) {
                 throw new IOException("Managed runtime digest mismatch for " + runtime);
             }
@@ -243,9 +241,9 @@ public final class RemoteRuntimeFiles {
                 final String candidateName = String.valueOf(candidate.getFileName());
                 if (candidateName.equals(current)
                         || !Files.isDirectory(candidate, LinkOption.NOFOLLOW_LINKS)
-                        || !Files.isRegularFile(candidate.resolve(DESCRIPTOR_FILE),
+                        || !Files.isRegularFile(candidate.resolve(RemoteDeploymentContract.DESCRIPTOR_FILE),
                         LinkOption.NOFOLLOW_LINKS)
-                        || !Files.isRegularFile(candidate.resolve(REMOTE_DIGEST_FILE),
+                        || !Files.isRegularFile(candidate.resolve(RemoteDeploymentContract.REMOTE_DIGEST_FILE),
                         LinkOption.NOFOLLOW_LINKS)
                         || hasActiveLease(parent, candidateName, now, reservationSeconds)) {
                     continue;

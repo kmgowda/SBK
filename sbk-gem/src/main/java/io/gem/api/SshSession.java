@@ -10,6 +10,7 @@
 
 package io.gem.api;
 
+import io.gem.config.GemConfig;
 import io.sbk.system.Printer;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.session.ClientSession;
@@ -52,7 +53,6 @@ import java.util.function.LongConsumer;
  * lifecycle lock; network and file operations never execute while holding it.
  */
 final public class SshSession {
-    private static final int COPY_BUFFER_SIZE = 4 * 1024 * 1024;
 
     /**
      * A bounded operation performed against the remote Apache MINA SFTP file system.
@@ -94,6 +94,9 @@ final public class SshSession {
     /** Maximum stdout/stderr bytes retained for each command. */
     final private int diagnosticBytes;
 
+    /** Read buffer bytes used by each bulk SCP upload. */
+    final private int copyBufferBytes;
+
     /** Short-held lock protecting session publication and shutdown. */
     final private Object sessionLock;
 
@@ -129,7 +132,7 @@ final public class SshSession {
      * @param diagnosticBytes maximum stdout/stderr bytes retained per command
      */
     public SshSession(ConnectionConfig conn, ExecutorService executor, int diagnosticBytes) {
-        this(conn, executor, executor, executor, diagnosticBytes);
+        this(conn, executor, executor, executor, diagnosticBytes, GemConfig.DEFAULT_SSH_COPY_BUFFER_BYTES);
     }
 
     /**
@@ -139,16 +142,38 @@ final public class SshSession {
      * @param controlExecutor  bounded connection and control-operation executor
      * @param transferExecutor bounded deployment transfer executor
      * @param commandExecutor  virtual-thread executor for long-running remote commands
-     * @param diagnosticBytes  maximum stdout/stderr bytes retained per command
+     * @param diagnosticBytes maximum stdout/stderr bytes retained per command
      */
     public SshSession(ConnectionConfig conn, ExecutorService controlExecutor,
                       ExecutorService transferExecutor, ExecutorService commandExecutor,
                       int diagnosticBytes) {
+        this(conn, controlExecutor, transferExecutor, commandExecutor, diagnosticBytes,
+                GemConfig.DEFAULT_SSH_COPY_BUFFER_BYTES);
+    }
+
+    /**
+     * This constructor assigns separate execution resources and an explicit SCP copy buffer.
+     *
+     * @param conn SSH connection
+     * @param controlExecutor bounded connection and control-operation executor
+     * @param transferExecutor bounded deployment transfer executor
+     * @param commandExecutor virtual-thread executor for long-running remote commands
+     * @param diagnosticBytes maximum stdout/stderr bytes retained per command
+     * @param copyBufferBytes read buffer bytes used by each bulk SCP upload
+     * @throws IllegalArgumentException when {@code copyBufferBytes} is not positive
+     */
+    public SshSession(ConnectionConfig conn, ExecutorService controlExecutor,
+                      ExecutorService transferExecutor, ExecutorService commandExecutor,
+                      int diagnosticBytes, int copyBufferBytes) {
+        if (copyBufferBytes < 1) {
+            throw new IllegalArgumentException("SCP copy buffer must contain at least one byte");
+        }
         this.connection = conn;
         this.controlExecutor = controlExecutor;
         this.transferExecutor = transferExecutor;
         this.commandExecutor = commandExecutor;
         this.diagnosticBytes = diagnosticBytes;
+        this.copyBufferBytes = copyBufferBytes;
         this.sessionLock = new Object();
         this.activeTasks = ConcurrentHashMap.newKeySet();
         this.client = SshUtils.createClient(conn);
@@ -377,7 +402,7 @@ final public class SshSession {
         return submitBounded(transferExecutor, () -> {
             final ScpClient client = ScpClientCreator.instance().createScpClient(sshSession);
             try (InputStream input = new ProgressInputStream(new BufferedInputStream(
-                    Files.newInputStream(source), COPY_BUFFER_SIZE), copyProgress)) {
+                    Files.newInputStream(source), copyBufferBytes), copyProgress)) {
                 client.upload(input, dstPath, Files.size(source), Files.getPosixFilePermissions(source), null);
             } catch (IOException exception) {
                 throw scpFailure(exception);

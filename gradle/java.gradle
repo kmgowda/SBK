@@ -115,7 +115,9 @@ plugins.withId('java') {
 
     tasks.register('generateJavadoc', Javadoc) {
         source = sourceSets.main.allJava
-        classpath = sourceSets.main.runtimeClasspath
+        // Javadoc resolves types used only in source-level annotations, while
+        // those compile-only dependencies must stay out of production runtimes.
+        classpath = sourceSets.main.compileClasspath + sourceSets.main.output
         failOnError = true
         // Keep the publication Javadocs separate from the standard `javadoc`
         // task. Gradle 9 rejects two independently scheduled tasks that write
@@ -169,8 +171,15 @@ plugins.withId('java') {
     dependencies {
         // The production code uses the SLF4J logging API at api time
         api "org.slf4j:slf4j-api:$slf4jVersion"
-        api "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-        api "org.mockito:mockito-core:${mockitoVersion}"
+        // Source annotations are available to every module without becoming runtime artifacts.
+        compileOnly "org.projectlombok:lombok:$lombokVersion"
+        compileOnly "com.github.spotbugs:spotbugs-annotations:$spotbugsVersion"
+        testCompileOnly "org.projectlombok:lombok:$lombokVersion"
+        testCompileOnly "com.github.spotbugs:spotbugs-annotations:$spotbugsVersion"
+        // Test frameworks must not leak into the production runtime graph. Driver-scoped
+        // distributions are derived from that graph and must contain executable code only.
+        testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+        testImplementation "org.mockito:mockito-core:${mockitoVersion}"
         
         // JUnit 5 test engine and runtime for test discovery and execution
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"

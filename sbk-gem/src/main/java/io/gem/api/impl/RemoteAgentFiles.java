@@ -10,6 +10,9 @@
 
 package io.gem.api.impl;
 
+import io.gem.agent.RemoteDeploymentContract;
+import io.gem.agent.RemoteRuntimeFiles;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -26,19 +29,25 @@ import java.util.UUID;
 
 /** Installs the small remote agent JAR through Apache MINA SFTP. */
 final class RemoteAgentFiles {
-    private static final String SHA_256 = "SHA-256";
     private static final int BUFFER_SIZE = 64 * 1024;
 
     private RemoteAgentFiles() {
     }
 
-    static String install(java.nio.file.FileSystem fileSystem, String parentDirectory, Path localAgent,
-                          String version) throws IOException {
-        final Path parent = fileSystem.getPath(parentDirectory);
-        Files.createDirectories(parent);
+    static AgentBootstrap prepare(java.nio.file.FileSystem fileSystem, String configuredDirectory, Path localAgent,
+                                  String version, String digest) throws IOException {
+        final String resolvedDirectory = RemoteRuntimeFiles.resolveDirectory(fileSystem, configuredDirectory);
+        final String agentPath = install(fileSystem.getPath(resolvedDirectory), localAgent, version, digest);
+        return new AgentBootstrap(resolvedDirectory, agentPath);
+    }
+
+    static String digest(Path localAgent) throws IOException {
+        return sha256(localAgent);
+    }
+
+    private static String install(Path parent, Path localAgent, String version, String digest) throws IOException {
         final Path destination = parent.resolve(".sbk-gem-agent-" + version + ".jar");
         final Path marker = parent.resolve(".sbk-gem-agent-" + version + ".sha256");
-        final String digest = sha256(localAgent);
         if (Files.isRegularFile(destination) && Files.isRegularFile(marker)
                 && digest.equals(Files.readString(marker).trim())) {
             return destination.toString();
@@ -56,7 +65,7 @@ final class RemoteAgentFiles {
     private static String sha256(Path path) throws IOException {
         final MessageDigest digest;
         try {
-            digest = MessageDigest.getInstance(SHA_256);
+            digest = MessageDigest.getInstance(RemoteDeploymentContract.SHA_256);
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException(exception);
         }
@@ -68,5 +77,8 @@ final class RemoteAgentFiles {
             }
         }
         return HexFormat.of().formatHex(digest.digest());
+    }
+
+    record AgentBootstrap(String directory, String agentPath) {
     }
 }

@@ -45,10 +45,10 @@ final class RemoteRuntimeFilesTest {
     }
 
     @Test
-    void acquisitionRetainsCurrentRuntimeAndRemovesAllInactiveNonCurrentVersions() throws Exception {
-        final String current = "sbk-runtime-10.6-linux-amd64-current";
-        final String old = "sbk-runtime-10.5-linux-amd64-old";
-        final String newer = "sbk-runtime-10.7-linux-amd64-newer";
+    void minimalAcquisitionRemovesInactiveFullAndDriverScopedRuntimes() throws Exception {
+        final String current = "sbk-runtime-10.6-linux-file-current";
+        final String old = "sbk-runtime-10.5-linux-old-full";
+        final String newer = "sbk-runtime-10.7-linux-rocksdb-newer";
         createRuntime(current, DIGEST);
         createRuntime(old, "old-digest");
         createRuntime(newer, "newer-digest");

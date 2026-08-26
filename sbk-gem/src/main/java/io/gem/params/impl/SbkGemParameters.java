@@ -44,7 +44,7 @@ import java.util.Objects;
  * <p>Supported options (help text shows defaults from {@link GemConfig}):
  * - -nodes: comma/space/newline-separated hostnames or host:port endpoints
  * - -gemuser, -gempass, -gemport
- * - -runtimecleanup, -javadir
+ * - -packagescleanup, -fullcopy, -javadir
  * - -localhost
  * - -sbmport, -sbmsleepms
  * - -totalrecords
@@ -55,6 +55,21 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
 
     private static final int MINIMUM_PORT = 1;
     private static final int MAXIMUM_PORT = 65_535;
+    private static final String NODES_OPTION = "nodes";
+    private static final String GEM_USER_OPTION = "gemuser";
+    private static final String HOST_KEY_CHECK_OPTION = "hostkeycheck";
+    private static final String KNOWN_HOSTS_OPTION = "knownhosts";
+    private static final String GEM_PORT_OPTION = "gemport";
+    private static final String JAVA_DIRECTORY_OPTION = "javadir";
+    private static final String PACKAGES_CLEANUP_OPTION = "packagescleanup";
+    private static final String FULL_COPY_OPTION = "fullcopy";
+    private static final String LOCAL_HOST_OPTION = "localhost";
+    private static final String SBM_PORT_OPTION = "sbmport";
+    private static final String SBM_SLEEP_OPTION = "sbmsleepms";
+    private static final String TOTAL_RECORDS_OPTION = "totalrecords";
+    private static final String TOTAL_THROUGHPUT_OPTION = "totalthroughput";
+    private static final String RECORDS_OPTION = "records";
+    private static final String THROUGHPUT_OPTION = "throughput";
 
     final private GemConfig config;
 
@@ -116,37 +131,43 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
             Printer.log.error(ex.toString());
             this.localHost = GemConfig.LOCAL_HOST;
         }
-        addOption("nodes", true, """
+        addOption(NODES_OPTION, true, """
                 remote hostnames or host:port endpoints separated by ',';
                 default:""" + config.nodes);
-        addOption("gemuser", true, "ssh user name of the remote hosts, default: " + config.gemuser);
+        addOption(GEM_USER_OPTION, true, "ssh user name of the remote hosts, default: " + config.gemuser);
         addOption(GemConfig.GEM_PASS_OPTION, true, "ssh user password of the remote hosts, default: " +
                 (StringUtils.isEmpty(config.gempass) ? "not set" : "******"));
-        addOption("hostkeycheck", true, "Verify SSH host keys for passwordless authentication; ignored when "
+        addOption(HOST_KEY_CHECK_OPTION, true, "Verify SSH host keys for passwordless authentication; ignored when "
                 + "-gempass is set; default: " + config.hostkeycheck);
-        addOption("knownhosts", true, "Known-hosts file; an empty value uses ~/.ssh/known_hosts; default: " +
+        addOption(KNOWN_HOSTS_OPTION, true, "Known-hosts file; an empty value uses ~/.ssh/known_hosts; default: " +
                 (StringUtils.isEmpty(config.knownhosts) ? "default" : config.knownhosts));
-        addOption("gemport", true, "ssh port of the remote hosts, default: " + config.gemport);
-        addOption("javadir", true, "Remote Java home containing bin/java; default: " +
+        addOption(GEM_PORT_OPTION, true, "ssh port of the remote hosts, default: " + config.gemport);
+        addOption(JAVA_DIRECTORY_OPTION, true, "Remote Java home containing bin/java; default: " +
                 (StringUtils.isEmpty(config.javadir) ? "null" : config.javadir));
-        addOption("runtimecleanup", true, "Remove every inactive non-current SBK-GEM-managed runtime and "
+        addOption(PACKAGES_CLEANUP_OPTION, true, "Remove every inactive non-current SBK-GEM-managed runtime and "
                 + "local cached bundle, regardless of version ordering, while retaining the current verified "
-                + "identity; default: " + config.runtimecleanup);
-        addOption("localhost", true, "SBM address reachable from every remote node; when omitted, SBK-GEM uses "
+                + "identity; default: " + config.packagescleanup);
+        addOption(FULL_COPY_OPTION, true,
+                "Copy the complete controller JDK and SBK distribution when provisioning is required; false "
+                + "copies a compact Java runtime and only the selected driver's Gradle-resolved SBK closure; "
+                + "default: " + config.fullcopy);
+        addOption(LOCAL_HOST_OPTION, true, "SBM address reachable from every remote node; when omitted, SBK-GEM uses "
                 + "the numeric controller address selected by each authenticated SSH route; detected local host: "
                 + localHost);
-        addOption("sbmport", true, "SBM port number; default: " + this.sbmPort);
-        addOption("sbmsleepms", true, "SBM idle milliseconds to sleep; default: " + this.sbmIdleSleepMilliSeconds +
+        addOption(SBM_PORT_OPTION, true, "SBM port number; default: " + this.sbmPort);
+        addOption(SBM_SLEEP_OPTION, true, "SBM idle milliseconds to sleep; default: " + this.sbmIdleSleepMilliSeconds +
                 " ms");
-        addOption("totalrecords", true, "Total records across all remote SBK clients; without -seconds this is " +
+        addOption(TOTAL_RECORDS_OPTION, true, "Total records across all remote SBK clients; without -seconds this is " +
                 "a fixed record count, and with -seconds this is the aggregate records/second rate; mutually " +
                 "exclusive with -records and -throughput");
-        addOption("totalthroughput", true, "Total throughput in MB/s across all remote SBK clients; mutually " +
+        addOption(TOTAL_THROUGHPUT_OPTION, true, "Total throughput in MB/s across all remote SBK clients; mutually " +
                 "exclusive with -throughput");
-        this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-hostkeycheck", "-knownhosts",
-                "-gemport", "-javadir",
-                "-runtimecleanup", "-localhost", "-sbmport", "-sbmsleepms", "-totalrecords",
-                "--totalrecords", "-totalthroughput", "--totalthroughput"};
+        this.optionsArgs = new String[]{option(NODES_OPTION), option(GEM_USER_OPTION),
+                option(GemConfig.GEM_PASS_OPTION), option(HOST_KEY_CHECK_OPTION), option(KNOWN_HOSTS_OPTION),
+                option(GEM_PORT_OPTION), option(JAVA_DIRECTORY_OPTION), option(PACKAGES_CLEANUP_OPTION),
+                option(FULL_COPY_OPTION), option(LOCAL_HOST_OPTION), option(SBM_PORT_OPTION), option(SBM_SLEEP_OPTION),
+                option(TOTAL_RECORDS_OPTION), longOption(TOTAL_RECORDS_OPTION), option(TOTAL_THROUGHPUT_OPTION),
+                longOption(TOTAL_THROUGHPUT_OPTION)};
         this.parsedArgs = null;
         this.totalThroughput = BigDecimal.ZERO;
     }
@@ -165,17 +186,17 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
      */
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         rejectRemovedDeploymentOptions(args);
-        totalRecordsOption = hasCommandLineOption(args, "totalrecords");
-        totalThroughputOption = hasCommandLineOption(args, "totalthroughput");
-        localHostOption = hasCommandLineOption(args, "localhost");
-        if (totalRecordsOption && hasCommandLineOption(args, "records")) {
+        totalRecordsOption = hasCommandLineOption(args, TOTAL_RECORDS_OPTION);
+        totalThroughputOption = hasCommandLineOption(args, TOTAL_THROUGHPUT_OPTION);
+        localHostOption = hasCommandLineOption(args, LOCAL_HOST_OPTION);
+        if (totalRecordsOption && hasCommandLineOption(args, RECORDS_OPTION)) {
             throw new IllegalArgumentException("The '-totalrecords' and '-records' options are mutually exclusive");
         }
-        if (totalRecordsOption && hasCommandLineOption(args, "throughput")) {
+        if (totalRecordsOption && hasCommandLineOption(args, THROUGHPUT_OPTION)) {
             throw new IllegalArgumentException(
                     "The '-totalrecords' and '-throughput' options are mutually exclusive");
         }
-        if (totalThroughputOption && hasCommandLineOption(args, "throughput")) {
+        if (totalThroughputOption && hasCommandLineOption(args, THROUGHPUT_OPTION)) {
             throw new IllegalArgumentException(
                     "The '-totalthroughput' and '-throughput' options are mutually exclusive");
         }
@@ -186,27 +207,31 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
             totalThroughput = parseTotalThroughput(args);
         }
         super.parseArgs(normalizeAggregateOptions(args));
-        final String nodeString = getOptionValue("nodes", config.nodes);
+        final String nodeString = getOptionValue(NODES_OPTION, config.nodes);
         String[] nodes = nodeString.split("[ ,\n]+");
-        config.gemuser = getOptionValue("gemuser", config.gemuser);
+        config.gemuser = getOptionValue(GEM_USER_OPTION, config.gemuser);
         config.gempass = getOptionValue(GemConfig.GEM_PASS_OPTION, config.gempass);
-        config.hostkeycheck = Boolean.parseBoolean(getOptionValue("hostkeycheck",
+        config.hostkeycheck = Boolean.parseBoolean(getOptionValue(HOST_KEY_CHECK_OPTION,
                 Boolean.toString(config.hostkeycheck)));
-        config.knownhosts = getOptionValue("knownhosts", Objects.requireNonNullElse(config.knownhosts, ""));
-        config.gemport = Integer.parseInt(getOptionValue("gemport", Integer.toString(config.gemport)));
-        validatePort(config.gemport, "-gemport");
-        localHost = getOptionValue("localhost", localHost);
-        sbmPort = Integer.parseInt(getOptionValue("sbmport", Integer.toString(sbmPort)));
-        sbmIdleSleepMilliSeconds = Integer.parseInt(getOptionValue("sbmsleepms", Integer.toString(sbmIdleSleepMilliSeconds)));
-        config.javadir = getOptionValue("javadir", Objects.requireNonNullElse(config.javadir, ""));
-        config.runtimecleanup = Boolean.parseBoolean(getOptionValue("runtimecleanup",
-                Boolean.toString(config.runtimecleanup)));
+        config.knownhosts = getOptionValue(KNOWN_HOSTS_OPTION, Objects.requireNonNullElse(config.knownhosts, ""));
+        config.gemport = Integer.parseInt(getOptionValue(GEM_PORT_OPTION, Integer.toString(config.gemport)));
+        validatePort(config.gemport, option(GEM_PORT_OPTION));
+        localHost = getOptionValue(LOCAL_HOST_OPTION, localHost);
+        sbmPort = Integer.parseInt(getOptionValue(SBM_PORT_OPTION, Integer.toString(sbmPort)));
+        sbmIdleSleepMilliSeconds = Integer.parseInt(getOptionValue(SBM_SLEEP_OPTION,
+                Integer.toString(sbmIdleSleepMilliSeconds)));
+        config.javadir = getOptionValue(JAVA_DIRECTORY_OPTION, Objects.requireNonNullElse(config.javadir, ""));
+        config.packagescleanup = Boolean.parseBoolean(getOptionValue(PACKAGES_CLEANUP_OPTION,
+                Boolean.toString(config.packagescleanup)));
+        config.fullcopy = Boolean.parseBoolean(getOptionValue(FULL_COPY_OPTION,
+                Boolean.toString(config.fullcopy)));
 
-        parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.gemuser,
-                "-hostkeycheck", Boolean.toString(config.hostkeycheck), "-knownhosts", config.knownhosts,
-                "-gemport", Integer.toString(config.gemport), "-javadir", config.javadir,
-                "-runtimecleanup", Boolean.toString(config.runtimecleanup),
-                "-localhost", localHost, "-sbmport", Integer.toString(sbmPort)};
+        parsedArgs = new String[]{option(NODES_OPTION), nodeString, option(GEM_USER_OPTION), config.gemuser,
+                option(HOST_KEY_CHECK_OPTION), Boolean.toString(config.hostkeycheck), option(KNOWN_HOSTS_OPTION),
+                config.knownhosts, option(GEM_PORT_OPTION), Integer.toString(config.gemport),
+                option(JAVA_DIRECTORY_OPTION), config.javadir, option(PACKAGES_CLEANUP_OPTION),
+                Boolean.toString(config.packagescleanup), option(FULL_COPY_OPTION), Boolean.toString(config.fullcopy),
+                option(LOCAL_HOST_OPTION), localHost, option(SBM_PORT_OPTION), Integer.toString(sbmPort)};
 
         connections = new ConnectionConfig[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
@@ -305,7 +330,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
 
     private static long parseTotalRecords(String[] args) {
         for (int i = 0; i < args.length; i++) {
-            if (isOption(args[i], "totalrecords")) {
+            if (isOption(args[i], TOTAL_RECORDS_OPTION)) {
                 if (i + 1 >= args.length) {
                     throw new IllegalArgumentException("The '-totalrecords' option requires a value");
                 }
@@ -321,7 +346,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
 
     private static BigDecimal parseTotalThroughput(String[] args) {
         for (int i = 0; i < args.length; i++) {
-            if (isOption(args[i], "totalthroughput")) {
+            if (isOption(args[i], TOTAL_THROUGHPUT_OPTION)) {
                 if (i + 1 >= args.length) {
                     throw new IllegalArgumentException("The '-totalthroughput' option requires a value");
                 }
@@ -343,13 +368,13 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     private static String[] normalizeAggregateOptions(String[] args) {
         final String[] normalized = Arrays.copyOf(args, args.length);
         for (int i = 0; i < normalized.length; i++) {
-            if (isOption(normalized[i], "totalrecords")) {
-                normalized[i] = "-records";
+            if (isOption(normalized[i], TOTAL_RECORDS_OPTION)) {
+                normalized[i] = option(RECORDS_OPTION);
                 if (i + 1 < normalized.length) {
                     normalized[i + 1] = "1";
                 }
-            } else if (isOption(normalized[i], "totalthroughput")) {
-                normalized[i] = "-throughput";
+            } else if (isOption(normalized[i], TOTAL_THROUGHPUT_OPTION)) {
+                normalized[i] = option(THROUGHPUT_OPTION);
                 if (i + 1 < normalized.length) {
                     normalized[i + 1] = "1";
                 }
@@ -363,21 +388,44 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     }
 
     private static boolean isOption(String argument, String option) {
-        return ("-" + option).equals(argument) || ("--" + option).equals(argument);
+        return option(option).equals(argument) || longOption(option).equals(argument);
+    }
+
+    private static String option(String name) {
+        return "-" + name;
+    }
+
+    private static String longOption(String name) {
+        return "--" + name;
     }
 
     private static void rejectRemovedDeploymentOptions(String[] args) {
+        if (hasCommandLineOption(args, "copyonlydrivers")) {
+            throw new IllegalArgumentException("The '-copyonlydrivers' option was replaced by '-fullcopy'; "
+                    + "use '-fullcopy false' for minimal Java and SBK copies");
+        }
+        if (hasCommandLineOption(args, "compactruntimecopy")) {
+            throw new IllegalArgumentException("The '-compactruntimecopy' option was replaced by '-fullcopy'; "
+                    + "invert its former value when migrating");
+        }
+        if (hasCommandLineOption(args, "compactcopy")) {
+            throw new IllegalArgumentException("The '-compactcopy' option was replaced by '-fullcopy'; "
+                    + "invert its former value when migrating");
+        }
+        if (hasCommandLineOption(args, "runtimecleanup")) {
+            throw new IllegalArgumentException("The '-runtimecleanup' option was renamed to '-packagescleanup'");
+        }
         if (hasCommandLineOption(args, "copy")) {
             throw new IllegalArgumentException("The '-copy' option was removed: missing exact SBK/JDK runtime "
-                    + "content is now copied automatically; use '-runtimecleanup' to control stale versions");
+                    + "content is now copied automatically; use '-packagescleanup' to control stale versions");
         }
         if (hasCommandLineOption(args, "deleteafter")) {
             throw new IllegalArgumentException("The '-deleteafter' option was removed: the current verified "
-                    + "runtime is retained and '-runtimecleanup' controls inactive non-current versions");
+                    + "runtime is retained and '-packagescleanup' controls inactive non-current versions");
         }
         if (hasCommandLineOption(args, "delete")) {
             throw new IllegalArgumentException("The '-delete' option was removed: invalid SBK-GEM-managed "
-                    + "runtime destinations are now repaired automatically; '-runtimecleanup' controls "
+                    + "runtime destinations are now repaired automatically; '-packagescleanup' controls "
                     + "inactive non-current runtimes");
         }
         if (hasCommandLineOption(args, "sbkcommand")) {
@@ -461,7 +509,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     }
 
     @Override
-    public boolean isRuntimeCleanup() {
-        return config.runtimecleanup;
+    public boolean isPackagesCleanup() {
+        return config.packagescleanup;
     }
 }

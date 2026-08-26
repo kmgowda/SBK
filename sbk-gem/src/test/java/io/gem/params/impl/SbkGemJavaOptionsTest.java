@@ -47,7 +47,8 @@ final class SbkGemJavaOptionsTest {
         }
 
         assertTrue(config.javadir == null || config.javadir.isEmpty());
-        assertTrue(config.runtimecleanup);
+        assertTrue(config.packagescleanup);
+        assertFalse(config.fullcopy);
         assertFalse(config.hostkeycheck);
         assertTrue(config.knownhosts == null || config.knownhosts.isEmpty());
         assertEquals(120, config.sbmRegistrationTimeoutSeconds);
@@ -82,9 +83,22 @@ final class SbkGemJavaOptionsTest {
         final SbkGemParameters parameters = new SbkGemParameters("test", new String[0], new String[0], config,
                 9717, 10);
         parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1",
-                "-runtimecleanup", "false"});
+                "-packagescleanup", "false"});
 
-        assertFalse(parameters.isRuntimeCleanup());
+        assertFalse(parameters.isPackagesCleanup());
+    }
+
+    @Test
+    void enablesFullJavaAndSbkDistributionCopyOnlyWhenExplicitlyRequested() throws Exception {
+        createSbkCommand();
+        final GemConfig config = defaultConfig(temporaryDirectory);
+        final SbkGemParameters parameters = new SbkGemParameters("test", new String[0], new String[0], config,
+                9717, 10);
+
+        parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1",
+                "-fullcopy", "true"});
+
+        assertTrue(config.fullcopy);
     }
 
     @Test
@@ -114,13 +128,27 @@ final class SbkGemJavaOptionsTest {
         createSbkCommand();
         final SbkGemParameters parameters = parameters();
 
+        final IllegalArgumentException cleanupFailure = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(new String[]{"-runtimecleanup", "true"}));
+        assertTrue(cleanupFailure.getMessage().contains("-packagescleanup"));
+
+        final IllegalArgumentException compactCopyFailure = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(new String[]{"-copyonlydrivers", "true"}));
+        assertTrue(compactCopyFailure.getMessage().contains("-fullcopy"));
+        final IllegalArgumentException formerCompactCopyFailure = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(new String[]{"-compactruntimecopy", "true"}));
+        assertTrue(formerCompactCopyFailure.getMessage().contains("-fullcopy"));
+        final IllegalArgumentException compactNameFailure = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(new String[]{"-compactcopy", "true"}));
+        assertTrue(compactNameFailure.getMessage().contains("-fullcopy"));
+
         final IllegalArgumentException copyFailure = assertThrows(IllegalArgumentException.class,
                 () -> parameters.parseArgs(new String[]{"-copy", "false"}));
         assertTrue(copyFailure.getMessage().contains("copied automatically"));
 
         final IllegalArgumentException deleteFailure = assertThrows(IllegalArgumentException.class,
                 () -> parameters.parseArgs(new String[]{"-deleteafter", "true"}));
-        assertTrue(deleteFailure.getMessage().contains("-runtimecleanup"));
+        assertTrue(deleteFailure.getMessage().contains("-packagescleanup"));
 
         final IllegalArgumentException managedDeleteFailure = assertThrows(IllegalArgumentException.class,
                 () -> parameters.parseArgs(new String[]{"-delete", "false"}));
@@ -226,7 +254,8 @@ final class SbkGemJavaOptionsTest {
         config.knownhosts = "";
         config.sbkdir = sbkDirectory.toString();
         config.javadir = "";
-        config.runtimecleanup = true;
+        config.packagescleanup = true;
+        config.fullcopy = false;
         config.timeoutSeconds = 5;
         config.remoteDir = "sbk-gem-test";
         return config;

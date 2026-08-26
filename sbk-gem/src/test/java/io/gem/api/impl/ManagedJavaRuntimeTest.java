@@ -52,6 +52,22 @@ final class ManagedJavaRuntimeTest {
     }
 
     @Test
+    void installsAndReusesRuntimeImageWithoutCompiler() throws IOException {
+        final Path javaHome = createJavaRuntimeHome();
+        final Path cache = Files.createDirectories(temporaryDirectory.resolve("cache"));
+        final Path remoteParent = Files.createDirectories(temporaryDirectory.resolve("remote"));
+        final ManagedJavaRuntime runtime = ManagedJavaRuntime.createRuntimeImage(javaHome, 25, cache);
+
+        final Path installed = Path.of(runtime.install(remoteParent.getFileSystem(), remoteParent.toString()));
+        final Path reused = Path.of(runtime.install(remoteParent.getFileSystem(), remoteParent.toString()));
+
+        assertEquals(installed, reused);
+        assertTrue(Files.isExecutable(installed.resolve("bin/java")));
+        assertTrue(Files.notExists(installed.resolve("bin/javac")));
+        assertTrue(installed.getFileName().toString().startsWith("sbk-java-runtime-25-"));
+    }
+
+    @Test
     void reportsBufferedJdkCopyProgressWithoutRecountingReuse() throws IOException {
         final Path javaHome = createJavaHome();
         Files.write(javaHome.resolve("large-runtime-image"), new byte[1024 * 1024 + 7]);
@@ -179,6 +195,14 @@ final class ManagedJavaRuntimeTest {
         final Path bin = Files.createDirectories(home.resolve("bin"));
         executable(bin.resolve("java"));
         executable(bin.resolve("javac"));
+        Files.writeString(home.resolve("release"), "JAVA_VERSION=25", StandardCharsets.UTF_8);
+        return home;
+    }
+
+    private Path createJavaRuntimeHome() throws IOException {
+        final Path home = Files.createDirectories(temporaryDirectory.resolve("java-runtime"));
+        final Path bin = Files.createDirectories(home.resolve("bin"));
+        executable(bin.resolve("java"));
         Files.writeString(home.resolve("release"), "JAVA_VERSION=25", StandardCharsets.UTF_8);
         return home;
     }

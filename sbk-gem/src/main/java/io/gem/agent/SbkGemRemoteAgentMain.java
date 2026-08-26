@@ -43,10 +43,6 @@ import java.util.stream.Stream;
 
 /** Java-only remote deployment and execution agent for SBK-GEM. */
 public final class SbkGemRemoteAgentMain {
-    private static final String MARKER = ".sbk-runtime.sha256";
-    private static final String DESCRIPTOR = "deployment.properties";
-    private static final String CHECKSUMS = "deployment-files.sha256";
-    private static final String SHA_256 = "SHA-256";
     private static final String SBK_JAVA_HOME = "SBK_JAVA_HOME";
     private static final String JAVA_HOME = "JAVA_HOME";
     private static final String SBK_JAVA_SOURCE = "SBK_JAVA_SOURCE";
@@ -62,6 +58,7 @@ public final class SbkGemRemoteAgentMain {
     private static final int HEARTBEAT_VALUE_COUNT = 5;
     private static final int ACQUIRE_VALUE_COUNT = 8;
     private static final int RELEASE_VALUE_COUNT = 7;
+    private static final long PROCESS_TERMINATION_GRACE_SECONDS = 5;
 
     private SbkGemRemoteAgentMain() {
     }
@@ -100,8 +97,8 @@ public final class SbkGemRemoteAgentMain {
             throw new IOException("Java major is too old: required " + expected + " or newer, found " + actual);
         }
         final Path home = Path.of(System.getProperty("java.home")).toAbsolutePath().normalize();
-        if (!Files.isExecutable(home.resolve("bin/javac"))) {
-            throw new IOException("JDK compiler is missing under " + home);
+        if (!Files.isExecutable(home.resolve(RemoteDeploymentContract.JAVA_EXECUTABLE))) {
+            throw new IOException("Java executable is missing under " + home);
         }
         System.out.println("SBK_OS=" + operatingSystem());
         System.out.println("SBK_JAVA_HOME=" + home);
@@ -126,12 +123,12 @@ public final class SbkGemRemoteAgentMain {
             deleteRecursively(staging);
             Files.createDirectories(staging);
             extract(archive, staging);
-            final Path extracted = staging.resolve("runtime");
-            final Properties descriptor = loadProperties(extracted.resolve(DESCRIPTOR));
-            requireProperty(descriptor, "content.sha256", contentDigest);
-            requireProperty(descriptor, "platform.os", values.get(5));
+            final Path extracted = staging.resolve(RemoteDeploymentContract.ARCHIVE_ROOT);
+            final Properties descriptor = loadProperties(extracted.resolve(RemoteDeploymentContract.DESCRIPTOR_FILE));
+            requireProperty(descriptor, RemoteDeploymentContract.CONTENT_SHA_256_PROPERTY, contentDigest);
+            requireProperty(descriptor, RemoteDeploymentContract.PLATFORM_OS_PROPERTY, values.get(5));
             verifyChecksums(extracted);
-            final Path marker = destination.resolve(MARKER);
+            final Path marker = destination.resolve(RemoteDeploymentContract.REMOTE_DIGEST_FILE);
             if (Files.exists(destination, LinkOption.NOFOLLOW_LINKS)) {
                 if (Files.isRegularFile(marker) && contentDigest.equals(Files.readString(marker).trim())) {
                     return;
@@ -139,7 +136,8 @@ public final class SbkGemRemoteAgentMain {
                 deleteRecursively(destination);
             }
             move(extracted, destination);
-            Files.writeString(destination.resolve(MARKER), contentDigest + System.lineSeparator(),
+            Files.writeString(destination.resolve(RemoteDeploymentContract.REMOTE_DIGEST_FILE),
+                    contentDigest + System.lineSeparator(),
                     StandardCharsets.UTF_8);
         } finally {
             Files.deleteIfExists(archive);
@@ -150,14 +148,15 @@ public final class SbkGemRemoteAgentMain {
     private static void verify(List<String> values) throws IOException {
         requireCount(values, VERIFY_VALUE_COUNT);
         final Path runtime = absolute(values.get(0));
-        if (!values.get(1).equals(Files.readString(runtime.resolve(MARKER)).trim())) {
+        if (!values.get(1).equals(Files.readString(
+                runtime.resolve(RemoteDeploymentContract.REMOTE_DIGEST_FILE)).trim())) {
             throw new IOException("SBK runtime content digest mismatch");
         }
-        final Properties descriptor = loadProperties(runtime.resolve(DESCRIPTOR));
-        requireProperty(descriptor, "content.sha256", values.get(1));
-        requireProperty(descriptor, "sbk.version", values.get(2));
-        requireProperty(descriptor, "platform.os", values.get(3));
-        runtimeJars(runtime.resolve("sbk"), values.get(2));
+        final Properties descriptor = loadProperties(runtime.resolve(RemoteDeploymentContract.DESCRIPTOR_FILE));
+        requireProperty(descriptor, RemoteDeploymentContract.CONTENT_SHA_256_PROPERTY, values.get(1));
+        requireProperty(descriptor, RemoteDeploymentContract.SBK_VERSION_PROPERTY, values.get(2));
+        requireProperty(descriptor, RemoteDeploymentContract.PLATFORM_OS_PROPERTY, values.get(3));
+        runtimeJars(runtime.resolve(RemoteDeploymentContract.SBK_DIRECTORY), values.get(2));
         System.out.println("SBK_RUNTIME_CONTENT=" + values.get(1));
         System.out.println("SBK_VERSION=" + values.get(2));
     }
@@ -216,10 +215,10 @@ public final class SbkGemRemoteAgentMain {
         if (jvmCount < 0 || 3 + jvmCount > values.size()) {
             throw new IOException("Invalid JVM argument count");
         }
-        final Path sbk = runtime.resolve("sbk");
+        final Path sbk = runtime.resolve(RemoteDeploymentContract.SBK_DIRECTORY);
         final List<Path> jars = runtimeJars(sbk, values.get(1));
         final Path javaHome = Path.of(System.getProperty("java.home")).toAbsolutePath().normalize();
-        final Path javaExecutable = javaHome.resolve("bin/java");
+        final Path javaExecutable = javaHome.resolve(RemoteDeploymentContract.JAVA_EXECUTABLE);
         if (!Files.isExecutable(javaExecutable)) {
             throw new IOException("Selected remote Java executable is unavailable: " + javaExecutable);
         }
@@ -314,7 +313,8 @@ public final class SbkGemRemoteAgentMain {
     }
 
     private static void verifyChecksums(Path root) throws IOException {
-        for (String line : Files.readAllLines(root.resolve(CHECKSUMS), StandardCharsets.UTF_8)) {
+        for (String line : Files.readAllLines(root.resolve(RemoteDeploymentContract.CHECKSUM_FILE),
+                StandardCharsets.UTF_8)) {
             if (line.isBlank()) {
                 continue;
             }
@@ -387,7 +387,7 @@ public final class SbkGemRemoteAgentMain {
     private static String sha256(Path path) throws IOException {
         final MessageDigest digest;
         try {
-            digest = MessageDigest.getInstance(SHA_256);
+            digest = MessageDigest.getInstance(RemoteDeploymentContract.SHA_256);
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException(exception);
         }
@@ -462,7 +462,7 @@ public final class SbkGemRemoteAgentMain {
         descendants.forEach(ProcessHandle::destroy);
         process.destroy();
         try {
-            process.waitFor(5, TimeUnit.SECONDS);
+            process.waitFor(PROCESS_TERMINATION_GRACE_SECONDS, TimeUnit.SECONDS);
             descendants.stream().filter(ProcessHandle::isAlive).forEach(ProcessHandle::destroyForcibly);
             process.toHandle().descendants().filter(ProcessHandle::isAlive)
                     .forEach(ProcessHandle::destroyForcibly);

@@ -69,6 +69,20 @@ final class RemoteTargetPlanTest {
         assertEquals(0, plan.representative(1));
     }
 
+    @Test
+    void deduplicatesEquivalentTargetsBeforeDirectoryResolution() {
+        final ConnectionConfig[] connections = {
+                connection("node-a", "user"), connection("node-alias", "user")
+        };
+
+        final RemoteTargetPlan plan = RemoteTargetPlan.createBeforeDirectoryResolution(connections,
+                new String[]{"192.0.2.10", "192.0.2.10"});
+
+        assertTrue(plan.isRepresentative(0));
+        assertFalse(plan.isRepresentative(1));
+        assertEquals(0, plan.representative(1));
+    }
+
     private static ConnectionConfig connection(String host, String user) {
         return new ConnectionConfig(host, user, "", 22, "/configured", true, "");
     }

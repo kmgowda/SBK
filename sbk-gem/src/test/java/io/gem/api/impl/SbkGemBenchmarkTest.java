@@ -77,7 +77,7 @@ final class SbkGemBenchmarkTest {
     }
 
     @Test
-    void reportsJdkCopyBytesPercentageAndRateForPhysicalTargets() {
+    void reportsJavaCopyBytesPercentageAndRateForPhysicalTargets() {
         final CompletableFuture<?>[] copies = {new CompletableFuture<>(), new CompletableFuture<>()};
         final String[] hosts = {"node-a:22", null};
         final AtomicLong[] copiedBytes = {new AtomicLong(50L * 1024 * 1024), new AtomicLong()};
@@ -85,7 +85,7 @@ final class SbkGemBenchmarkTest {
         final String progress = SbkGemBenchmark.javaCopyProgress(copies, hosts, copiedBytes, 100L * 1024 * 1024,
                 System.nanoTime() - TimeUnit.SECONDS.toNanos(2));
 
-        assertTrue(progress.contains("0 of 1 JDK operation(s) finished"));
+        assertTrue(progress.contains("0 of 1 Java operation(s) finished"));
         assertTrue(progress.contains("transferred 50.00 MiB of 100.00 MiB"));
         assertTrue(progress.contains("[50.0%"));
         assertTrue(progress.contains("MiB/s"));

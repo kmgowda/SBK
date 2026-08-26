@@ -276,6 +276,7 @@ final public class SbkGem {
         storageDrivers = storageDevice == null ? packageStore.getClassNames() : null;
         final String resolvedClassName = storageDevice == null
                 ? className : storageDevice.getClass().getSimpleName();
+        gemConfig.driverClass = resolvedClassName;
 
         params = new SbkGemParameters(usageLine, storageDrivers, loggerNames, gemConfig, sbmConfig.port, sbmConfig.idleMS);
         logger.addArgs(params);

@@ -27,6 +27,8 @@ sbkGemArgs:
   hostkeycheck: true
   # knownhosts: /home/kmg/.ssh/known_hosts
   # Retain the current runtime and remove inactive non-current managed identities (default: true).
-  runtimecleanup: true
+  packagescleanup: true
+  # Set true to copy the complete controller JDK and complete SBK distribution (default: false).
+  fullcopy: false
   # Java provisioning defaults: include and use the local Java 25 runtime.
   # javadir: /opt/sbk-java
