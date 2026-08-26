@@ -197,7 +197,7 @@ final public class SbkGem {
         Printer.log.info(GemConfig.NAME.toUpperCase() + " Website: " + Config.SBK_WEBSITE_NAME);
         Printer.log.info("Arguments List: "
                 + Arrays.toString(SbkUtils.redactSensitiveOptionValues(args)));
-        Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
+        SbkUtils.logJavaRuntimeDetails();
         Printer.log.info("Operating System: " + SbkUtils.getOperatingSystemDetails());
         Printer.log.info("Remote SBK PerL Timestamp Queue: " + perlConfig.getTimestampQueueName());
         Printer.log.info("SBP Version Major: " + sbpVersion.major+", Minor: "+sbpVersion.minor);

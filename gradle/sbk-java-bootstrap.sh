@@ -280,15 +280,19 @@ sbk_java_install_managed() {
 }
 
 if [ -n "${SBK_JAVA_HOME:-}" ]; then
+    SBK_JAVA_SOURCE=SBK_JAVA_HOME
     sbk_java_select_home "$SBK_JAVA_HOME" ||
         sbk_java_error "SBK_JAVA_HOME must point to a complete JDK $SBK_JAVA_MAJOR installation: $SBK_JAVA_HOME"
 elif [ -n "${JAVA_HOME:-}" ]; then
+    SBK_JAVA_SOURCE=JAVA_HOME
     sbk_java_select_home "$JAVA_HOME" ||
         sbk_java_error "JAVA_HOME must point to a complete JDK $SBK_JAVA_MAJOR installation: $JAVA_HOME"
 elif sbk_java_home_from_path; then
-    :
+    SBK_JAVA_SOURCE=PATH
 elif sbk_java_install_managed; then
+    SBK_JAVA_SOURCE=SBK_MANAGED_JDK_CACHE
     echo "Using managed OpenJDK $SBK_JAVA_VERSION from $SBK_JAVA_HOME" >&2
 else
     sbk_java_error "no usable JDK $SBK_JAVA_MAJOR was found. Set SBK_JAVA_HOME or JAVA_HOME."
 fi
+export SBK_JAVA_SOURCE

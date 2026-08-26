@@ -181,7 +181,7 @@ final public class Sbk {
         Printer.log.info("{} Website: " + Config.SBK_WEBSITE_NAME, Config.NAME.toUpperCase());
         Printer.log.info("Arguments List: {}",
                 Arrays.toString(SbkUtils.redactSensitiveOptionValues(args)));
-        Printer.log.info("Java Runtime Version: {}", System.getProperty("java.runtime.version"));
+        SbkUtils.logJavaRuntimeDetails();
         Printer.log.info("Operating System: {}", SbkUtils.getOperatingSystemDetails());
         Printer.log.info("SBP Version Major: {}, Minor: {}", sbpVersion.major, sbpVersion.minor);
         Printer.log.info("Storage Drivers Package: {}", sbkStoragePackageName);

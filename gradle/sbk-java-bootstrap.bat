@@ -15,7 +15,11 @@
 set "SBK_JAVA_INSTALL=%~1"
 if not defined SBK_JAVA_INSTALL set "SBK_JAVA_INSTALL=true"
 set "SBK_JAVA_RESOLVED_HOME="
-for /f "usebackq delims=" %%J in (`powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0sbk-java-bootstrap.ps1" -InstallIfMissing %SBK_JAVA_INSTALL% -ConfigFile "%~dp0sbk-java-bootstrap.properties"`) do set "SBK_JAVA_RESOLVED_HOME=%%J"
+set "SBK_JAVA_SOURCE="
+for /f "usebackq tokens=1,* delims=|" %%S in (`powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0sbk-java-bootstrap.ps1" -InstallIfMissing %SBK_JAVA_INSTALL% -ConfigFile "%~dp0sbk-java-bootstrap.properties"`) do (
+    set "SBK_JAVA_SOURCE=%%S"
+    set "SBK_JAVA_RESOLVED_HOME=%%T"
+)
 if not defined SBK_JAVA_RESOLVED_HOME exit /b 1
 set "SBK_JAVA_HOME=%SBK_JAVA_RESOLVED_HOME%"
 set "JAVA_EXE=%SBK_JAVA_HOME%\bin\java.exe"

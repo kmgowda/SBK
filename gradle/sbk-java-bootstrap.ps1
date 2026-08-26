@@ -76,13 +76,17 @@ function Stop-SbkJava([string]$Message) {
     exit 1
 }
 
+function Write-SbkJavaResolution([string]$Source, [string]$Home) {
+    Write-Output "$Source|$Home"
+    exit 0
+}
+
 if ($env:SBK_JAVA_HOME) {
     $candidate = $env:SBK_JAVA_HOME.Trim('"')
     if (-not (Test-SbkJdk $candidate)) {
         Stop-SbkJava "SBK_JAVA_HOME must point to a complete JDK $jdkMajor installation: $candidate"
     }
-    Write-Output $candidate
-    exit 0
+    Write-SbkJavaResolution 'SBK_JAVA_HOME' $candidate
 }
 
 if ($env:JAVA_HOME) {
@@ -90,8 +94,7 @@ if ($env:JAVA_HOME) {
     if (-not (Test-SbkJdk $candidate)) {
         Stop-SbkJava "JAVA_HOME must point to a complete JDK $jdkMajor installation: $candidate"
     }
-    Write-Output $candidate
-    exit 0
+    Write-SbkJavaResolution 'JAVA_HOME' $candidate
 }
 
 $pathJava = Get-Command java.exe -ErrorAction SilentlyContinue
@@ -100,8 +103,7 @@ if ($pathJava) {
     if ($settings -match '(?m)^\s*java\.home\s*=\s*(.+)$') {
         $candidate = $Matches[1].Trim()
         if (Test-SbkJdk $candidate) {
-            Write-Output $candidate
-            exit 0
+            Write-SbkJavaResolution 'PATH' $candidate
         }
     }
 }
@@ -115,8 +117,7 @@ $cacheRoot = if ($env:SBK_JAVA_CACHE_DIR) {
 }
 $target = Join-Path $cacheRoot "openjdk-$jdkVersion-windows-x64"
 if (Test-SbkJdk $target) {
-    Write-Output $target
-    exit 0
+    Write-SbkJavaResolution 'SBK_MANAGED_JDK_CACHE' $target
 }
 if ($InstallIfMissing -ne 'true') {
     Stop-SbkJava "no usable JDK $jdkMajor was found. Run gradlew once to install the managed JDK, or set SBK_JAVA_HOME."
@@ -135,8 +136,7 @@ if (-not $mutex.WaitOne([TimeSpan]::FromSeconds($lockTimeoutSeconds))) {
 
 try {
     if (Test-SbkJdk $target) {
-        Write-Output $target
-        exit 0
+        Write-SbkJavaResolution 'SBK_MANAGED_JDK_CACHE' $target
     }
     $temp = Join-Path $cacheRoot ('.openjdk-' + [Guid]::NewGuid().ToString('N'))
     New-Item -ItemType Directory -Path $temp | Out-Null
@@ -157,7 +157,7 @@ try {
     }
     Move-Item $extracted $target
     Remove-Item $temp -Recurse -Force
-    Write-Output $target
+    Write-SbkJavaResolution 'SBK_MANAGED_JDK_CACHE' $target
 } catch {
     if ($temp -and (Test-Path $temp)) { Remove-Item $temp -Recurse -Force }
     Stop-SbkJava "managed JDK installation failed: $($_.Exception.Message)"

@@ -11,9 +11,12 @@
 package io.sbk.utils;
 
 import io.sbk.config.Config;
+import io.sbk.system.Printer;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -30,6 +33,11 @@ public final class SbkUtils {
     private static final String OS_VERSION_PROPERTY = "os.version";
     private static final String OS_ARCH_PROPERTY = "os.arch";
     private static final String UNKNOWN_SYSTEM_PROPERTY = "unknown";
+    private static final String SBK_JAVA_HOME_ENV = "SBK_JAVA_HOME";
+    private static final String JAVA_HOME_ENV = "JAVA_HOME";
+    private static final String SBK_JAVA_SOURCE_ENV = "SBK_JAVA_SOURCE";
+    private static final String JAVA_SOURCE_PATH = "PATH";
+    private static final String JAVA_SOURCE_MANAGED = "SBK_MANAGED_JDK_CACHE";
     private static final String[] SENSITIVE_OPTIONS = {
         "gempass", "key", "password", "passwd", "secret", "token"
     };
@@ -105,6 +113,73 @@ public final class SbkUtils {
         return System.getProperty(OS_NAME_PROPERTY, UNKNOWN_SYSTEM_PROPERTY) + " "
                 + System.getProperty(OS_VERSION_PROPERTY, UNKNOWN_SYSTEM_PROPERTY) + " ("
                 + System.getProperty(OS_ARCH_PROPERTY, UNKNOWN_SYSTEM_PROPERTY) + ")";
+    }
+
+    /** Log the running JVM version, resolved home, executable, and launcher selection source. */
+    public static void logJavaRuntimeDetails() {
+        final String javaHome = getJavaRuntimeHome();
+        Printer.log.info("Java Runtime Version: {}", System.getProperty("java.runtime.version"));
+        Printer.log.info("Java Runtime Home: {}", javaHome);
+        Printer.log.info("Java Executable: {}", getJavaExecutable(javaHome));
+        Printer.log.info("Java Selection Source: {}", getJavaSelectionSource(System.getenv(), javaHome));
+    }
+
+    /**
+     * Return the normalized home of the running JVM.
+     *
+     * @return normalized Java runtime home
+     */
+    public static @NotNull String getJavaRuntimeHome() {
+        return normalizePath(System.getProperty("java.home", UNKNOWN_SYSTEM_PROPERTY));
+    }
+
+    /**
+     * Identify how the launcher selected the running JVM.
+     *
+     * @param environment process environment
+     * @param runtimeHome normalized home of the running JVM
+     * @return human-readable Java selection source
+     */
+    public static @NotNull String getJavaSelectionSource(Map<String, String> environment, String runtimeHome) {
+        final Map<String, String> currentEnvironment = environment == null ? Map.of() : environment;
+        final String launcherSource = currentEnvironment.getOrDefault(SBK_JAVA_SOURCE_ENV, "").trim();
+        if (!launcherSource.isEmpty()) {
+            return switch (launcherSource) {
+                case SBK_JAVA_HOME_ENV -> SBK_JAVA_HOME_ENV + " environment variable";
+                case JAVA_HOME_ENV -> JAVA_HOME_ENV + " environment variable";
+                case JAVA_SOURCE_PATH -> "system PATH";
+                case JAVA_SOURCE_MANAGED -> "SBK managed JDK cache";
+                default -> "launcher selection: " + launcherSource;
+            };
+        }
+        if (samePath(currentEnvironment.get(SBK_JAVA_HOME_ENV), runtimeHome)) {
+            return SBK_JAVA_HOME_ENV + " environment variable";
+        }
+        if (samePath(currentEnvironment.get(JAVA_HOME_ENV), runtimeHome)) {
+            return JAVA_HOME_ENV + " environment variable";
+        }
+        return "running JVM (system PATH or direct Java invocation)";
+    }
+
+    private static String getJavaExecutable(String javaHome) {
+        return ProcessHandle.current().info().command().map(SbkUtils::normalizePath)
+                .orElseGet(() -> Path.of(javaHome, "bin", isWindows() ? "java.exe" : "java").toString());
+    }
+
+    private static boolean samePath(String first, String second) {
+        return first != null && !first.isBlank() && normalizePath(first).equals(normalizePath(second));
+    }
+
+    private static String normalizePath(String path) {
+        try {
+            return Path.of(path).toAbsolutePath().normalize().toString();
+        } catch (InvalidPathException exception) {
+            return path;
+        }
+    }
+
+    private static boolean isWindows() {
+        return System.getProperty(OS_NAME_PROPERTY, "").toLowerCase(Locale.ROOT).contains("windows");
     }
 
     /**

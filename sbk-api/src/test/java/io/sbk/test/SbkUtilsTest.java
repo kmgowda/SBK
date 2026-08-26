@@ -159,4 +159,26 @@ public class SbkUtilsTest {
                         + " (" + System.getProperty("os.arch") + ")",
                 SbkUtils.getOperatingSystemDetails());
     }
+
+    @Test
+    public void testJavaSelectionSourceUsesLauncherProvenance() {
+        assertEquals("SBK_JAVA_HOME environment variable",
+                SbkUtils.getJavaSelectionSource(Map.of("SBK_JAVA_SOURCE", "SBK_JAVA_HOME"), "jdk-home"));
+        assertEquals("JAVA_HOME environment variable",
+                SbkUtils.getJavaSelectionSource(Map.of("SBK_JAVA_SOURCE", "JAVA_HOME"), "jdk-home"));
+        assertEquals("system PATH",
+                SbkUtils.getJavaSelectionSource(Map.of("SBK_JAVA_SOURCE", "PATH"), "jdk-home"));
+        assertEquals("SBK managed JDK cache",
+                SbkUtils.getJavaSelectionSource(Map.of("SBK_JAVA_SOURCE", "SBK_MANAGED_JDK_CACHE"), "jdk-home"));
+    }
+
+    @Test
+    public void testJavaSelectionSourceFallsBackToMatchingEnvironmentHome() {
+        assertEquals("SBK_JAVA_HOME environment variable",
+                SbkUtils.getJavaSelectionSource(Map.of("SBK_JAVA_HOME", "jdk-home"), "jdk-home"));
+        assertEquals("JAVA_HOME environment variable",
+                SbkUtils.getJavaSelectionSource(Map.of("JAVA_HOME", "jdk-home"), "jdk-home"));
+        assertEquals("running JVM (system PATH or direct Java invocation)",
+                SbkUtils.getJavaSelectionSource(Map.of(), "jdk-home"));
+    }
 }
