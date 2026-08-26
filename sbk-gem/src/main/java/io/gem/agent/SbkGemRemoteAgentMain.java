@@ -100,8 +100,8 @@ public final class SbkGemRemoteAgentMain {
             throw new IOException("Java major is too old: required " + expected + " or newer, found " + actual);
         }
         final Path home = Path.of(System.getProperty("java.home")).toAbsolutePath().normalize();
-        if (!Files.isExecutable(home.resolve("bin/javac"))) {
-            throw new IOException("JDK compiler is missing under " + home);
+        if (!Files.isExecutable(home.resolve("bin/java"))) {
+            throw new IOException("Java executable is missing under " + home);
         }
         System.out.println("SBK_OS=" + operatingSystem());
         System.out.println("SBK_JAVA_HOME=" + home);

@@ -50,9 +50,10 @@ import java.util.concurrent.Future;
 import java.util.function.LongConsumer;
 import java.util.stream.Stream;
 
-/** Content-addressed controller JDK copied independently from the SBK runtime. */
+/** Content-addressed full or compact Java tree copied independently from the SBK runtime. */
 final class ManagedJavaRuntime {
     private static final String MARKER = ".sbk-java.sha256";
+    private static final String COMPACT_IMAGE_MARKER = ".sbk-java-runtime.identity";
     private static final String IDENTITY_CACHE_FORMAT = "1";
     private static final String SHA_256 = "SHA-256";
     private static final int SHA_256_HEX_LENGTH = 64;
@@ -60,6 +61,7 @@ final class ManagedJavaRuntime {
     private static final int COPY_BUFFER_SIZE = 256 * 1024;
     private static final int FILE_COPY_CONCURRENCY = 8;
     private static final int IDENTITY_CHARACTERS = 24;
+    private static final int MAXIMUM_JLINK_DIAGNOSTIC_BYTES = 64 * 1024;
     private static final int REGULAR_FILE_MODE = 0644;
     private static final int EXECUTABLE_FILE_MODE = 0755;
     private static final int SYMBOLIC_LINK_MODE = 0777;
@@ -69,24 +71,29 @@ final class ManagedJavaRuntime {
     private final String directoryName;
     private final long contentBytes;
     private final Path cacheDirectory;
+    private final boolean compilerRequired;
     private volatile Path archive;
     private volatile long archiveBytes;
     private volatile boolean archiveReused;
 
     private ManagedJavaRuntime(Path localHome, String digest, String directoryName, long contentBytes,
-                               Path cacheDirectory) {
+                               Path cacheDirectory, boolean compilerRequired) {
         this.localHome = localHome;
         this.digest = digest;
         this.directoryName = directoryName;
         this.contentBytes = contentBytes;
         this.cacheDirectory = cacheDirectory;
+        this.compilerRequired = compilerRequired;
     }
 
     static ManagedJavaRuntime create(Path javaHome, int major) throws IOException {
+        return create(javaHome, major, null, true, "sbk-java");
+    }
+
+    private static ManagedJavaRuntime create(Path javaHome, int major, Path cacheDirectory,
+                                             boolean compilerRequired, String directoryPrefix) throws IOException {
         final Path home = javaHome.toAbsolutePath().normalize();
-        if (!Files.isExecutable(home.resolve("bin/java")) || !Files.isExecutable(home.resolve("bin/javac"))) {
-            throw new IOException("Controller JDK is incomplete: " + home);
-        }
+        validateJavaHome(home, compilerRequired);
         final MessageDigest digest = newDigest();
         long contentBytes = 0;
         try (Stream<Path> entries = Files.walk(home)) {
@@ -109,7 +116,7 @@ final class ManagedJavaRuntime {
             }
         }
         final String identity = HexFormat.of().formatHex(digest.digest());
-        return runtime(home, major, identity, contentBytes, null);
+        return runtime(home, major, identity, contentBytes, cacheDirectory, compilerRequired, directoryPrefix);
     }
 
     /**
@@ -122,12 +129,17 @@ final class ManagedJavaRuntime {
      * @throws IOException when the JDK or identity cache cannot be read
      */
     static ManagedJavaRuntime create(Path javaHome, int major, Path cacheDirectory) throws IOException {
+        return createCached(javaHome, major, cacheDirectory, true, "sbk-java");
+    }
+
+    private static ManagedJavaRuntime createCached(Path javaHome, int major, Path cacheDirectory,
+                                                   boolean compilerRequired, String directoryPrefix)
+            throws IOException {
         final Path home = javaHome.toAbsolutePath().normalize();
-        if (!Files.isExecutable(home.resolve("bin/java")) || !Files.isExecutable(home.resolve("bin/javac"))) {
-            throw new IOException("Controller JDK is incomplete: " + home);
-        }
+        validateJavaHome(home, compilerRequired);
         Files.createDirectories(cacheDirectory);
-        final String cacheKey = sha256((home + "\0" + major).getBytes(StandardCharsets.UTF_8));
+        final String cacheKey = sha256((home + "\0" + major + "\0" + directoryPrefix)
+                .getBytes(StandardCharsets.UTF_8));
         final Path identityFile = cacheDirectory.resolve("sbk-java-identity-" + cacheKey + ".properties");
         final Path lockFile = identityFile.resolveSibling(identityFile.getFileName() + ".lock");
         synchronized (ManagedJavaRuntime.class) {
@@ -142,9 +154,11 @@ final class ManagedJavaRuntime {
                         && Integer.toString(major).equals(cached.getProperty("java.major"))
                         && metadata.digest().equals(cached.getProperty("metadata.sha256"))
                         && isSha256(cachedDigest)) {
-                    return runtime(home, major, cachedDigest, metadata.contentBytes(), cacheDirectory);
+                    return runtime(home, major, cachedDigest, metadata.contentBytes(), cacheDirectory,
+                            compilerRequired, directoryPrefix);
                 }
-                final ManagedJavaRuntime runtime = create(home, major);
+                final ManagedJavaRuntime runtime = create(home, major, cacheDirectory,
+                        compilerRequired, directoryPrefix);
                 final Properties identity = new Properties();
                 identity.setProperty("format.version", IDENTITY_CACHE_FORMAT);
                 identity.setProperty("java.home", home.toString());
@@ -152,16 +166,118 @@ final class ManagedJavaRuntime {
                 identity.setProperty("metadata.sha256", metadata.digest());
                 identity.setProperty("content.sha256", runtime.digest);
                 writeIdentity(identityFile, identity);
-                return runtime(home, major, runtime.digest, runtime.contentBytes, cacheDirectory);
+                return runtime(home, major, runtime.digest, runtime.contentBytes, cacheDirectory,
+                        compilerRequired, directoryPrefix);
             }
         }
     }
 
+    /**
+     * Generate or reuse a compact Java runtime image using the Gradle-produced runtime descriptor.
+     *
+     * @param javaHome complete controller JDK containing jlink and jmods
+     * @param major required Java major version
+     * @param cacheDirectory local content-addressed SBK-GEM cache
+     * @param descriptor validated compact-runtime build contract
+     * @return managed compact Java runtime
+     * @throws IOException when jlink is unavailable or runtime generation fails
+     */
+    static ManagedJavaRuntime createCompact(Path javaHome, int major, Path cacheDirectory,
+                                            CompactJavaRuntimeDescriptor descriptor) throws IOException {
+        if (descriptor.javaMajor() != major) {
+            throw new IOException("Compact Java runtime descriptor does not match Java " + major);
+        }
+        final ManagedJavaRuntime source = createCached(javaHome, major, cacheDirectory, true, "sbk-java");
+        final String imageIdentity = sha256((source.digest + "\0" + descriptor.identity())
+                .getBytes(StandardCharsets.UTF_8));
+        final Path image = cacheDirectory.resolve("sbk-java-runtime-image-"
+                + imageIdentity.substring(0, IDENTITY_CHARACTERS));
+        final Path lock = image.resolveSibling(image.getFileName() + ".lock");
+        synchronized (ManagedJavaRuntime.class) {
+            try (FileChannel channel = FileChannel.open(lock, java.nio.file.StandardOpenOption.CREATE,
+                    java.nio.file.StandardOpenOption.WRITE);
+                 FileLock ignored = channel.lock()) {
+                if (!hasCompactImage(image, imageIdentity)) {
+                    createCompactImage(javaHome.toAbsolutePath().normalize(), image, imageIdentity, descriptor);
+                }
+            }
+        }
+        return createRuntimeImage(image, major, cacheDirectory);
+    }
+
+    static ManagedJavaRuntime createRuntimeImage(Path javaHome, int major, Path cacheDirectory) throws IOException {
+        return createCached(javaHome, major, cacheDirectory, false, "sbk-java-runtime");
+    }
+
     private static ManagedJavaRuntime runtime(Path home, int major, String identity, long contentBytes,
-                                              Path cacheDirectory) {
+                                              Path cacheDirectory, boolean compilerRequired,
+                                              String directoryPrefix) {
         return new ManagedJavaRuntime(home, identity,
-                "sbk-java-" + major + "-" + identity.substring(0, IDENTITY_CHARACTERS), contentBytes,
-                cacheDirectory);
+                directoryPrefix + "-" + major + "-" + identity.substring(0, IDENTITY_CHARACTERS), contentBytes,
+                cacheDirectory, compilerRequired);
+    }
+
+    private static void validateJavaHome(Path home, boolean compilerRequired) throws IOException {
+        if (!Files.isExecutable(home.resolve("bin/java"))) {
+            throw new IOException("Java runtime is incomplete: " + home);
+        }
+        if (compilerRequired && !Files.isExecutable(home.resolve("bin/javac"))) {
+            throw new IOException("Controller JDK compiler is missing: " + home);
+        }
+    }
+
+    private static boolean hasCompactImage(Path image, String expectedIdentity) throws IOException {
+        final Path marker = image.resolve(COMPACT_IMAGE_MARKER);
+        return Files.isRegularFile(marker)
+                && expectedIdentity.equals(Files.readString(marker, StandardCharsets.UTF_8).trim())
+                && Files.isExecutable(image.resolve("bin/java"))
+                && !Files.exists(image.resolve("bin/javac"), LinkOption.NOFOLLOW_LINKS);
+    }
+
+    private static void createCompactImage(Path javaHome, Path image, String imageIdentity,
+                                           CompactJavaRuntimeDescriptor descriptor) throws IOException {
+        final Path jlink = javaHome.resolve("bin/jlink");
+        final Path jmods = javaHome.resolve("jmods");
+        if (!Files.isExecutable(jlink) || !Files.isDirectory(jmods)) {
+            throw new IOException("Controller JDK cannot generate a compact Java runtime: " + javaHome);
+        }
+        final Path staging = image.resolveSibling(image.getFileName() + ".staging." + UUID.randomUUID());
+        final List<String> command = new ArrayList<>();
+        command.add(jlink.toString());
+        command.add("--module-path");
+        command.add(jmods.toString());
+        command.add("--add-modules");
+        command.add(String.join(",", descriptor.modules()));
+        command.addAll(descriptor.options());
+        command.add("--output");
+        command.add(staging.toString());
+        try {
+            final Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+            final byte[] diagnostic;
+            try (InputStream output = process.getInputStream()) {
+                diagnostic = output.readNBytes(MAXIMUM_JLINK_DIAGNOSTIC_BYTES);
+                output.transferTo(OutputStream.nullOutputStream());
+            }
+            final int exitCode;
+            try {
+                exitCode = process.waitFor();
+            } catch (InterruptedException exception) {
+                process.destroyForcibly();
+                Thread.currentThread().interrupt();
+                throw new IOException("Interrupted while generating the compact Java runtime", exception);
+            }
+            if (exitCode != ExitCode.SUCCESS || !Files.isExecutable(staging.resolve("bin/java"))
+                    || Files.exists(staging.resolve("bin/javac"), LinkOption.NOFOLLOW_LINKS)) {
+                throw new IOException("jlink failed to generate the compact Java runtime (exit " + exitCode
+                        + "): " + new String(diagnostic, StandardCharsets.UTF_8));
+            }
+            Files.writeString(staging.resolve(COMPACT_IMAGE_MARKER), imageIdentity + System.lineSeparator(),
+                    StandardCharsets.UTF_8);
+            deleteRecursively(image);
+            move(staging, image);
+        } finally {
+            deleteRecursively(staging);
+        }
     }
 
     String directoryName() {
@@ -300,10 +416,12 @@ final class ManagedJavaRuntime {
                 final Path staging = fileSystem.getPath(plan.staging());
                 final Path destination = fileSystem.getPath(plan.destination());
                 copyPermissions(localHome.resolve("bin/java"), staging.resolve("bin/java"));
-                copyPermissions(localHome.resolve("bin/javac"), staging.resolve("bin/javac"));
+                if (compilerRequired) {
+                    copyPermissions(localHome.resolve("bin/javac"), staging.resolve("bin/javac"));
+                }
                 if (!isExecutable(staging.resolve("bin/java"))
-                        || !isExecutable(staging.resolve("bin/javac"))) {
-                    throw new IOException("Bulk SCP transfer did not preserve executable JDK files under "
+                        || (compilerRequired && !isExecutable(staging.resolve("bin/javac")))) {
+                    throw new IOException("Bulk SCP transfer did not preserve executable Java files under "
                             + staging + "; entries: " + listNames(staging));
                 }
                 Files.writeString(staging.resolve(MARKER), digest + System.lineSeparator(),
@@ -363,7 +481,7 @@ final class ManagedJavaRuntime {
         final Path marker = destination.resolve(MARKER);
         return Files.isRegularFile(marker) && digest.equals(Files.readString(marker).trim())
                 && isExecutable(destination.resolve("bin/java"))
-                && isExecutable(destination.resolve("bin/javac"));
+                && (!compilerRequired || isExecutable(destination.resolve("bin/javac")));
     }
 
     private static boolean isExecutable(Path path) throws IOException {

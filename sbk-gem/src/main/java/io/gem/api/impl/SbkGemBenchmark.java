@@ -398,12 +398,12 @@ final public class SbkGemBenchmark implements GemBenchmark {
         final Path sbkSourceDirectory = Paths.get(params.getSbkDir()).toAbsolutePath().normalize();
         Printer.log.info("SBK-GEM: Preparing immutable runtime bundle for {}; progress every {} second(s)",
                 platform.id(), config.runtimeProgressIntervalSeconds);
-        final DriverRuntimeManifest driverRuntime = config.copyonlydrivers
+        final DriverRuntimeManifest driverRuntime = config.compactruntimecopy
                 ? DriverRuntimeManifest.load(sbkSourceDirectory, config.driverClass, config.sbkVersion) : null;
         if (driverRuntime == null) {
             Printer.log.info("SBK-GEM: Complete SBK distribution deployment is enabled");
         } else {
-            Printer.log.info("SBK-GEM: Driver-scoped runtime deployment is enabled for '{}'",
+            Printer.log.info("SBK-GEM: Compact runtime copy is enabled; selected SBK driver '{}'",
                     driverRuntime.driverName());
         }
         final SbkRuntimeBundle bundle;
@@ -1023,20 +1023,32 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
         if (hasSelectedTarget(unresolved)) {
             Printer.log.info("SBK-GEM: Java {} or newer is missing on selected host(s); preparing a separate "
-                    + "content-addressed JDK bulk SCP transfer", expectedVersion);
+                    + "content-addressed {} bulk SCP transfer", expectedVersion,
+                    config.compactruntimecopy ? "compact Java runtime" : "full JDK");
             final Path javaSourceDirectory = Path.of(System.getProperty("java.home")).toAbsolutePath().normalize();
-            final ManagedJavaRuntime javaRuntime = ManagedJavaRuntime.create(
-                    javaSourceDirectory, expectedVersion, runtimeCacheDirectory());
+            final Path localSbkDirectory = Paths.get(params.getSbkDir()).toAbsolutePath().normalize();
+            final ManagedJavaRuntime javaRuntime;
+            if (config.compactruntimecopy) {
+                final CompactJavaRuntimeDescriptor descriptor = CompactJavaRuntimeDescriptor.load(
+                        localSbkDirectory, expectedVersion);
+                javaRuntime = ManagedJavaRuntime.createCompact(javaSourceDirectory, expectedVersion,
+                        runtimeCacheDirectory(), descriptor);
+            } else {
+                javaRuntime = ManagedJavaRuntime.create(javaSourceDirectory, expectedVersion,
+                        runtimeCacheDirectory());
+            }
+            final String javaDeploymentName = config.compactruntimecopy ? "compact Java runtime" : "full JDK";
             final long archivePreparationMillis;
             final Path javaArchive;
-            try (LifecycleProgress progress = new LifecycleProgress("Managed JDK archive preparation",
+            try (LifecycleProgress progress = new LifecycleProgress("Managed " + javaDeploymentName
+                    + " archive preparation",
                     config.runtimeProgressIntervalSeconds, runtimeLeaseHeartbeatScheduler,
                     () -> "creating or validating the cached single-file tar archive")) {
                 javaArchive = javaRuntime.prepareArchive();
                 archivePreparationMillis = progress.elapsedMillis();
             }
-            Printer.log.info("SBK-GEM: {} managed JDK archive '{}' {} source directory '{}' in {} ms; {}",
-                    javaRuntime.archiveReused() ? "Reused cached" : "Built", javaArchive,
+            Printer.log.info("SBK-GEM: {} managed {} archive '{}' {} source directory '{}' in {} ms; {}",
+                    javaRuntime.archiveReused() ? "Reused cached" : "Built", javaDeploymentName, javaArchive,
                     javaRuntime.archiveReused() ? "for" : "from", javaSourceDirectory,
                     archivePreparationMillis, formatTransferSize(javaRuntime.archiveBytes()));
             final String[] javaParentDirectories = new String[nodes.length];
@@ -1063,14 +1075,14 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 }
             }
             final long copySeconds;
-            try (LifecycleProgress progress = new LifecycleProgress("Separate JDK copy",
+            try (LifecycleProgress progress = new LifecycleProgress("Separate Java runtime copy",
                     config.runtimeProgressIntervalSeconds, runtimeLeaseHeartbeatScheduler,
                     () -> javaCopyProgress(copies, copyHosts, copiedBytes, javaRuntime.archiveBytes(),
                             copyStartedNanos))) {
-                waitForDeployment(CompletableFuture.allOf(copies), "separate remote JDK provisioning");
+                waitForDeployment(CompletableFuture.allOf(copies), "separate remote Java provisioning");
                 copySeconds = progress.elapsedSeconds();
             }
-            Printer.log.info("SBK-GEM: Separate JDK provisioning completed in {} second(s); {} transferred",
+            Printer.log.info("SBK-GEM: Separate Java provisioning completed in {} second(s); {} transferred",
                     copySeconds, formatTransferSize(copiedByteCount(copiedBytes)));
             for (int i = 0; i < nodes.length; i++) {
                 javaHomes[i] = copies[i].get();
@@ -1115,7 +1127,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     static String javaCopyProgress(CompletableFuture<?>[] copies, String[] copyHosts, AtomicLong[] copiedBytes,
                                    long contentBytesPerTarget, long startedNanos) {
         return copyProgress(copies, copyHosts, copiedBytes, contentBytesPerTarget, startedNanos,
-                "JDK operation(s)");
+                "Java operation(s)");
     }
 
     private static String copyProgress(CompletableFuture<?>[] copies, String[] copyHosts,

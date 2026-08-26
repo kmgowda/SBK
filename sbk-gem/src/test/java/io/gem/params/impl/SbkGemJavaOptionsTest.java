@@ -48,7 +48,7 @@ final class SbkGemJavaOptionsTest {
 
         assertTrue(config.javadir == null || config.javadir.isEmpty());
         assertTrue(config.packagescleanup);
-        assertFalse(config.copyonlydrivers);
+        assertFalse(config.compactruntimecopy);
         assertFalse(config.hostkeycheck);
         assertTrue(config.knownhosts == null || config.knownhosts.isEmpty());
         assertEquals(120, config.sbmRegistrationTimeoutSeconds);
@@ -89,16 +89,16 @@ final class SbkGemJavaOptionsTest {
     }
 
     @Test
-    void enablesDriverScopedRuntimeOnlyWhenExplicitlyRequested() throws Exception {
+    void enablesCompactJavaAndDriverScopedSbkCopyOnlyWhenExplicitlyRequested() throws Exception {
         createSbkCommand();
         final GemConfig config = defaultConfig(temporaryDirectory);
         final SbkGemParameters parameters = new SbkGemParameters("test", new String[0], new String[0], config,
                 9717, 10);
 
         parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1",
-                "-copyonlydrivers", "true"});
+                "-compactruntimecopy", "true"});
 
-        assertTrue(config.copyonlydrivers);
+        assertTrue(config.compactruntimecopy);
     }
 
     @Test
@@ -131,6 +131,10 @@ final class SbkGemJavaOptionsTest {
         final IllegalArgumentException cleanupFailure = assertThrows(IllegalArgumentException.class,
                 () -> parameters.parseArgs(new String[]{"-runtimecleanup", "true"}));
         assertTrue(cleanupFailure.getMessage().contains("-packagescleanup"));
+
+        final IllegalArgumentException compactCopyFailure = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(new String[]{"-copyonlydrivers", "true"}));
+        assertTrue(compactCopyFailure.getMessage().contains("-compactruntimecopy"));
 
         final IllegalArgumentException copyFailure = assertThrows(IllegalArgumentException.class,
                 () -> parameters.parseArgs(new String[]{"-copy", "false"}));

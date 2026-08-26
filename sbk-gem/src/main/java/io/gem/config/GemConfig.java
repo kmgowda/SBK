@@ -108,8 +108,8 @@ final public class GemConfig {
     public String javadir;
     /** Whether inactive non-current managed runtimes and local cached bundles are removed automatically. */
     public boolean packagescleanup;
-    /** Whether SBK-GEM deploys only the Gradle-resolved runtime closure for the selected driver. */
-    public boolean copyonlydrivers;
+    /** Whether compact Java and driver-scoped SBK runtime copies are enabled. */
+    public boolean compactruntimecopy;
     /** Resolved driver class selected for this invocation; assigned after driver discovery. */
     public String driverClass;
 

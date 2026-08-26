@@ -15,6 +15,20 @@
 def sbkDriverRuntimeDirectory = layout.buildDirectory.dir('generated/sbk-driver-runtimes')
 def driverRuntimeManifestFormat = '1'
 def reproducibleJarTimestamp = 0L
+def compactJavaRuntimeConfigFile = rootProject.file('gradle/sbk-compact-java-runtime.properties')
+def compactJavaRuntimeConfig = new Properties()
+compactJavaRuntimeConfigFile.withInputStream { compactJavaRuntimeConfig.load(it) }
+def compactJavaRuntimeDescriptorName = 'java-runtime.properties'
+def compactJavaRuntimeModules = compactJavaRuntimeConfig.getProperty('java.modules', '').split(',')
+        .collect { it.trim() }.findAll { !it.isEmpty() }.sort()
+def compactJavaRuntimeOptions = compactJavaRuntimeConfig.getProperty('jlink.options', '').split(',')
+        .collect { it.trim() }.findAll { !it.isEmpty() }
+
+if (compactJavaRuntimeConfig.getProperty('format.version') != '1'
+        || compactJavaRuntimeModules.isEmpty() || compactJavaRuntimeOptions.isEmpty()) {
+    throw new GradleException("Invalid compact Java runtime configuration: ${compactJavaRuntimeConfigFile}")
+}
+
 def generateSbkDriverRuntimes = tasks.register('generateSbkDriverRuntimes') {
     description = 'Generates independently consumable runtime manifests and pathing JARs for every enabled driver.'
     dependsOn tasks.named('jar')
@@ -24,6 +38,9 @@ def generateSbkDriverRuntimes = tasks.register('generateSbkDriverRuntimes') {
     inputs.file(tasks.named('jar').flatMap { it.archiveFile })
             .withPropertyName('aggregateMainJar')
             .withPathSensitivity(PathSensitivity.NAME_ONLY)
+    inputs.file(compactJavaRuntimeConfigFile)
+            .withPropertyName('compactJavaRuntimeConfig')
+            .withPathSensitivity(PathSensitivity.RELATIVE)
     outputs.dir(sbkDriverRuntimeDirectory)
 
     doLast {
@@ -38,6 +55,13 @@ def generateSbkDriverRuntimes = tasks.register('generateSbkDriverRuntimes') {
         def driverProjects = subprojects.findAll {
             it.parent != null && it.parent.name == 'drivers'
         }.sort { it.name.toLowerCase(Locale.ROOT) }
+
+        new File(outputDirectory, compactJavaRuntimeDescriptorName).setText(
+                "format.version=${compactJavaRuntimeConfig.getProperty('format.version')}\n"
+                        + "java.major=${sbkJavaMajorVersion}\n"
+                        + "java.modules=${compactJavaRuntimeModules.join(',')}\n"
+                        + "jlink.options=${compactJavaRuntimeOptions.join(',')}\n",
+                'UTF-8')
 
         driverProjects.each { driverProject ->
             def driverComponent = components.find {
@@ -123,6 +147,15 @@ def verifySbkDriverRuntimes = tasks.register('verifySbkDriverRuntimes') {
 
     doLast {
         def directory = sbkDriverRuntimeDirectory.get().asFile
+        def javaRuntimeDescriptor = new File(directory, compactJavaRuntimeDescriptorName)
+        def javaRuntimeProperties = new Properties()
+        javaRuntimeDescriptor.withInputStream { javaRuntimeProperties.load(it) }
+        if (javaRuntimeProperties.getProperty('format.version') != '1'
+                || javaRuntimeProperties.getProperty('java.major') != sbkJavaMajorVersion.toString()
+                || javaRuntimeProperties.getProperty('java.modules') != compactJavaRuntimeModules.join(',')
+                || javaRuntimeProperties.getProperty('jlink.options') != compactJavaRuntimeOptions.join(',')) {
+            throw new GradleException("Invalid compact Java runtime descriptor ${javaRuntimeDescriptor}")
+        }
         def expectedDrivers = subprojects.findAll {
             it.parent != null && it.parent.name == 'drivers'
         }.collect { it.name }.sort()
@@ -155,6 +188,43 @@ def verifySbkDriverRuntimes = tasks.register('verifySbkDriverRuntimes') {
                     || pathingManifest.split(/\s+/).toList().toSet() != runtimeFiles.toSet()) {
                 throw new GradleException("Pathing JAR does not match driver runtime manifest ${manifestFile}")
             }
+        }
+    }
+}
+
+def compactJavaRuntimeOutput = layout.buildDirectory.dir('generated/sbk-compact-java-runtime')
+def compactJavaRuntimeWindows = System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')
+def jlinkExecutable = new File(System.getProperty('java.home'),
+        compactJavaRuntimeWindows ? 'bin/jlink.exe' : 'bin/jlink')
+def javaExecutableName = compactJavaRuntimeWindows ? 'java.exe' : 'java'
+tasks.register('generateSbkCompactJavaRuntime', Exec) {
+    description = 'Generates the standalone compact Java runtime described by worker-runtime/java-runtime.properties.'
+    group = 'distribution'
+    dependsOn generateSbkDriverRuntimes
+    inputs.file(compactJavaRuntimeConfigFile)
+    inputs.file(new File(System.getProperty('java.home'), 'release'))
+    inputs.property('javaMajor', sbkJavaMajorVersion)
+    inputs.property('javaModules', compactJavaRuntimeModules.join(','))
+    inputs.property('jlinkOptions', compactJavaRuntimeOptions.join(','))
+    outputs.dir(compactJavaRuntimeOutput)
+
+    doFirst {
+        if (!jlinkExecutable.isFile()) {
+            throw new GradleException("The selected build JDK has no jlink executable: ${jlinkExecutable}")
+        }
+        delete compactJavaRuntimeOutput
+        commandLine([jlinkExecutable.absolutePath,
+                     '--module-path', new File(System.getProperty('java.home'), 'jmods').absolutePath,
+                     '--add-modules', compactJavaRuntimeModules.join(',')]
+                + compactJavaRuntimeOptions
+                + ['--output', compactJavaRuntimeOutput.get().asFile.absolutePath])
+    }
+    doLast {
+        def runtimeJava = new File(compactJavaRuntimeOutput.get().asFile, "bin/${javaExecutableName}")
+        def runtimeJavac = new File(compactJavaRuntimeOutput.get().asFile,
+                compactJavaRuntimeWindows ? 'bin/javac.exe' : 'bin/javac')
+        if (!runtimeJava.isFile() || runtimeJavac.exists()) {
+            throw new GradleException("Invalid compact Java runtime under ${compactJavaRuntimeOutput.get().asFile}")
         }
     }
 }

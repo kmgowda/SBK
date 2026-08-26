@@ -1944,8 +1944,9 @@ sequenceDiagram
     Note over GEM: require one homogeneous Linux or macOS operating system
     GEM->>GEM: validate installDist and Gradle driver runtime metadata
     opt matching Java is unavailable
-        GEM->>SSH: copy controller JDK as a separate content-addressed tree
-        GEM->>SSH: verify copied JDK through the agent
+        GEM->>GEM: select full JDK or build/reuse compact jlink runtime
+        GEM->>SSH: copy Java as a separate content-addressed tree
+        GEM->>SSH: verify copied Java through the agent
     end
     GEM->>GEM: build a full or opt-in driver-scoped SBK archive
     GEM->>SSH: reserve deployment identities through the Java agent
@@ -1991,8 +1992,10 @@ JAR for every enabled driver and includes that metadata under `worker-runtime/`
 in the otherwise complete `build`, `installDist`, and `distTar` outputs. Thus a
 customer receiving the normal SBK tar retains every application and driver,
 whether or not SBK-GEM is used. SBK-GEM consumes this build contract only when
-`-copyonlydrivers true` is requested; its default remains the complete
-distribution archive. A File-scoped runtime and a RocksDB-scoped runtime have
+`-compactruntimecopy true` is requested; this same option selects a compact
+Gradle-defined Java runtime when remote Java must be provisioned. Its default
+remains the complete distribution archive and full controller JDK. A
+File-scoped runtime and a RocksDB-scoped runtime have
 different content identities and dependency sets. They can coexist when
 inactive-runtime cleanup is disabled, while the normal cleanup policy retires
 an inactive identity after the next one becomes current.
@@ -2012,7 +2015,7 @@ exact identity is reused, so the full distribution is not transferred on every r
 deduplicated by `(SSH user, authenticated network endpoint, port, resolved case-sensitive remote directory)`,
 so repeated workload entries sharing one installation do not race to replace it
 while distinct paths or remote accounts remain independent.
-The separate first-time JDK deployment creates or reuses one cached plain-tar
+The separate first-time Java deployment creates or reuses one cached plain-tar
 archive, sends it through a single Apache MINA SCP stream per active target,
 and invokes the standard remote `tar` executable for staging extraction. SBK
 archives use a single-file SCP stream and Java-agent extraction. SFTP is limited
@@ -2055,13 +2058,15 @@ concurrent transfer until they become inactive. Unmanaged directories and
 user-managed JDKs are outside this cleanup boundary.
 
 The controller Java major version defines the minimum remote Java release. GEM
-first validates the JDK selected by `javadir` or remote `PATH`. If it is absent
-or older, a cached filesystem-metadata identity reuses the controller JDK's
-previously calculated full-content digest when the installed JDK is unchanged;
-otherwise the controller JDK is hashed and copied separately through a bulk
-Apache MINA SCP stream. Java content and executable/POSIX permission state participate in its
-identity; a matching marker whose `bin/java` or `bin/javac` is unusable is
-retired and repaired. Java and SBK have independent identities and reuse markers,
+first validates Java selected by `javadir` or remote `PATH`. If it is absent
+or older, default mode copies a content-addressed full controller JDK. With
+`-compactruntimecopy true`, GEM instead runs the controller JDK's `jlink` from
+the versioned Gradle contract, caches the runtime-only image, and copies that
+smaller tree. The standalone `generateSbkCompactJavaRuntime` Gradle task applies
+the same contract without invoking SBK-GEM. Java content and executable/POSIX
+permission state participate in its identity; a matching marker whose required
+`bin/java` (and, for full mode, `bin/javac`) is unusable is retired and repaired.
+Java and SBK have independent identities and reuse markers,
 so either can be reused or updated without transferring the other. The remote agent launches
 `io.sbk.main.SbkMain` directly with the verified JDK and SBK JAR classpath.
 

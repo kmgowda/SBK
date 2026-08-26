@@ -28,5 +28,7 @@ sbkGemArgs:
   # knownhosts: /home/kmg/.ssh/known_hosts
   # Retain the current runtime and remove inactive non-current managed identities (default: true).
   packagescleanup: true
+  # Set true to copy a compact Java runtime and only the selected driver's SBK closure (default: false).
+  compactruntimecopy: false
   # Java provisioning defaults: include and use the local Java 25 runtime.
   # javadir: /opt/sbk-java
