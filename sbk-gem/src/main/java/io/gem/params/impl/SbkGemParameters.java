@@ -44,7 +44,7 @@ import java.util.Objects;
  * <p>Supported options (help text shows defaults from {@link GemConfig}):
  * - -nodes: comma/space/newline-separated hostnames or host:port endpoints
  * - -gemuser, -gempass, -gemport
- * - -packagescleanup, -compactruntimecopy, -javadir
+ * - -packagescleanup, -fullcopy, -javadir
  * - -localhost
  * - -sbmport, -sbmsleepms
  * - -totalrecords
@@ -55,7 +55,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
 
     private static final int MINIMUM_PORT = 1;
     private static final int MAXIMUM_PORT = 65_535;
-    private static final String COMPACT_RUNTIME_COPY_OPTION = "compactruntimecopy";
+    private static final String FULL_COPY_OPTION = "fullcopy";
 
     final private GemConfig config;
 
@@ -133,10 +133,10 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("packagescleanup", true, "Remove every inactive non-current SBK-GEM-managed runtime and "
                 + "local cached bundle, regardless of version ordering, while retaining the current verified "
                 + "identity; default: " + config.packagescleanup);
-        addOption(COMPACT_RUNTIME_COPY_OPTION, true,
-                "Copy a compact Java runtime and only the Gradle-resolved SBK closure for the selected "
-                + "storage driver; false copies the complete controller JDK and SBK distribution when missing; "
-                + "default: " + config.compactruntimecopy);
+        addOption(FULL_COPY_OPTION, true,
+                "Copy the complete controller JDK and SBK distribution when provisioning is required; false "
+                + "copies a compact Java runtime and only the selected driver's Gradle-resolved SBK closure; "
+                + "default: " + config.fullcopy);
         addOption("localhost", true, "SBM address reachable from every remote node; when omitted, SBK-GEM uses "
                 + "the numeric controller address selected by each authenticated SSH route; detected local host: "
                 + localHost);
@@ -150,7 +150,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
                 "exclusive with -throughput");
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-hostkeycheck", "-knownhosts",
                 "-gemport", "-javadir",
-                "-packagescleanup", "-compactruntimecopy", "-localhost", "-sbmport", "-sbmsleepms", "-totalrecords",
+                "-packagescleanup", "-fullcopy", "-localhost", "-sbmport", "-sbmsleepms", "-totalrecords",
                 "--totalrecords", "-totalthroughput", "--totalthroughput"};
         this.parsedArgs = null;
         this.totalThroughput = BigDecimal.ZERO;
@@ -206,14 +206,14 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         config.javadir = getOptionValue("javadir", Objects.requireNonNullElse(config.javadir, ""));
         config.packagescleanup = Boolean.parseBoolean(getOptionValue("packagescleanup",
                 Boolean.toString(config.packagescleanup)));
-        config.compactruntimecopy = Boolean.parseBoolean(getOptionValue(COMPACT_RUNTIME_COPY_OPTION,
-                Boolean.toString(config.compactruntimecopy)));
+        config.fullcopy = Boolean.parseBoolean(getOptionValue(FULL_COPY_OPTION,
+                Boolean.toString(config.fullcopy)));
 
         parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.gemuser,
                 "-hostkeycheck", Boolean.toString(config.hostkeycheck), "-knownhosts", config.knownhosts,
                 "-gemport", Integer.toString(config.gemport), "-javadir", config.javadir,
                 "-packagescleanup", Boolean.toString(config.packagescleanup),
-                "-compactruntimecopy", Boolean.toString(config.compactruntimecopy),
+                "-fullcopy", Boolean.toString(config.fullcopy),
                 "-localhost", localHost, "-sbmport", Integer.toString(sbmPort)};
 
         connections = new ConnectionConfig[nodes.length];
@@ -376,8 +376,16 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
 
     private static void rejectRemovedDeploymentOptions(String[] args) {
         if (hasCommandLineOption(args, "copyonlydrivers")) {
-            throw new IllegalArgumentException("The '-copyonlydrivers' option was renamed to "
-                    + "'-compactruntimecopy' because compact mode reduces both Java and SBK copies");
+            throw new IllegalArgumentException("The '-copyonlydrivers' option was replaced by '-fullcopy'; "
+                    + "use '-fullcopy false' for minimal Java and SBK copies");
+        }
+        if (hasCommandLineOption(args, "compactruntimecopy")) {
+            throw new IllegalArgumentException("The '-compactruntimecopy' option was replaced by '-fullcopy'; "
+                    + "invert its former value when migrating");
+        }
+        if (hasCommandLineOption(args, "compactcopy")) {
+            throw new IllegalArgumentException("The '-compactcopy' option was replaced by '-fullcopy'; "
+                    + "invert its former value when migrating");
         }
         if (hasCommandLineOption(args, "runtimecleanup")) {
             throw new IllegalArgumentException("The '-runtimecleanup' option was renamed to '-packagescleanup'");

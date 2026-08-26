@@ -37,9 +37,10 @@ SBK-GEM owns remote launch and aggregate lifecycle. The remote SBK processes sti
 ## Prerequisites
 
 - JDK 25 on the local GEM host. GEM reuses a same-or-newer remote Java runtime
-  when present. Otherwise it copies either the full controller JDK (default) or
-  a compact runtime-only image (`-compactruntimecopy true`) as a separate
-  content-addressed tree. Java is never embedded in the SBK runtime archive.
+  when present. Otherwise it copies either a compact runtime-only image
+  (`-fullcopy false`, the default) or the full controller JDK
+  (`-fullcopy true`) as a separate content-addressed tree. Java is never
+  embedded in the SBK runtime archive.
 - SSH reachability and authentication for every target. A writable
   `known_hosts` file is needed only when host-key checking is explicitly enabled.
 - A writable remote installation/work directory.
@@ -225,9 +226,7 @@ change the contents of `installDist` and `distTar`. The standard distribution
 packages only the small descriptor consumed by deployment tools, keeping the
 customer tar portable rather than embedding a controller-platform Java image.
 
-By default, SBK-GEM preserves the established behavior: when provisioning is
-needed it deploys the full SBK distribution and the full controller JDK. Set
-`-compactruntimecopy true` to reduce both payloads. The remote SBK archive then
+By default, `-fullcopy false` reduces both payloads. The remote SBK archive
 uses the Gradle-generated closure for the selected `-class`, and missing remote
 Java is supplied as a `jlink` runtime image generated from the versioned
 `worker-runtime/java-runtime.properties` contract. For example, a `File` run
@@ -237,6 +236,8 @@ driver and its native dependency. Exact Java and SBK identities are still
 reused independently. With `packagescleanup=false`, multiple inactive driver
 identities may remain cached for fast switching; the default cleanup policy
 retains only the current SBK identity after its leases become inactive.
+Set `-fullcopy true` to provision the full controller JDK and complete SBK
+distribution instead.
 
 The Gradle distribution records an identity covering its runtime JARs,
 launchers, Java bootstrap files, and remote agent. SBK-GEM packages the
@@ -354,9 +355,9 @@ The deployment lifecycle option is:
   SBK version is lower or higher; the default is
   `true`. It never deletes the current identity, a live leased identity, an
   unmanaged directory, or a user-managed JDK selected with `-javadir`.
-- `-compactruntimecopy true|false` selects both the compact Gradle Java-runtime
-  contract and the driver-specific SBK runtime closure when `true`. The default
-  `false` provisions the complete controller JDK and complete SBK distribution.
+- `-fullcopy true|false` provisions the complete controller JDK and complete
+  SBK distribution when `true`. The default, `false`, selects both the compact
+  Gradle Java-runtime contract and the driver-specific SBK runtime closure.
   The locally built `installDist` and `distTar` artifacts remain complete and
   independently usable at customer sites in either mode.
 
@@ -365,7 +366,9 @@ controller host when it is selected as a node. It does not scan or delete
 arbitrary SBK/JDK installations outside the SBK-GEM-managed deployment parent;
 doing so would risk deleting user-owned software.
 
-The former `-copy`, `-delete`, `-deleteafter`, `-sbkcommand`, `-sbkdir`, `-javacopy`, and `-javaversion` options are rejected with
+The former `-copy`, `-delete`, `-deleteafter`, `-sbkcommand`, `-sbkdir`,
+`-javacopy`, `-javaversion`, `-copyonlydrivers`, `-compactruntimecopy`, and
+`-compactcopy` options are rejected with
 migration guidance. This prevents disabling required provisioning, deleting
 the newly verified runtime at benchmark shutdown, or bypassing the verified
 standard launcher contract.
@@ -376,14 +379,17 @@ version. `-javadir <home>` optionally identifies a preferred remote JDK. Otherwi
 
 If the preferred or PATH Java is absent or older than the controller Java, GEM
 copies Java separately as one cached tar through Apache MINA SCP. In default
-mode this is the controller JDK. With `-compactruntimecopy true`, GEM generates
-or reuses a runtime-only image with the controller JDK's `jlink`; the selected
+mode, `-fullcopy false`, GEM generates or reuses a runtime-only image with
+the controller JDK's `jlink`; the selected
 module and option contract comes from Gradle's
 `gradle/sbk-compact-java-runtime.properties` and the packaged
 `worker-runtime/java-runtime.properties` descriptor. Java has its own content
 identity and reuse marker, so an unchanged image is not copied again.
 The SBK archive likewise has an independent content identity and is transferred
 only when its exact content is absent.
+
+Use `-fullcopy true` when remote deployment specifically requires the
+complete controller JDK and complete SBK package.
 
 For each remote launch, the agent starts `io.sbk.main.SbkMain` directly with
 the selected JDK and the verified SBK pathing/main JARs. The deployed shell

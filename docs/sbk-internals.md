@@ -1992,9 +1992,9 @@ JAR for every enabled driver and includes that metadata under `worker-runtime/`
 in the otherwise complete `build`, `installDist`, and `distTar` outputs. Thus a
 customer receiving the normal SBK tar retains every application and driver,
 whether or not SBK-GEM is used. SBK-GEM consumes this build contract only when
-`-compactruntimecopy true` is requested; this same option selects a compact
-Gradle-defined Java runtime when remote Java must be provisioned. Its default
-remains the complete distribution archive and full controller JDK. A
+`-fullcopy false` is used (the default); this same option selects a compact
+Gradle-defined Java runtime when remote Java must be provisioned. Setting it to
+`true` selects the complete distribution archive and full controller JDK. A
 File-scoped runtime and a RocksDB-scoped runtime have
 different content identities and dependency sets. They can coexist when
 inactive-runtime cleanup is disabled, while the normal cleanup policy retires
@@ -2059,10 +2059,10 @@ user-managed JDKs are outside this cleanup boundary.
 
 The controller Java major version defines the minimum remote Java release. GEM
 first validates Java selected by `javadir` or remote `PATH`. If it is absent
-or older, default mode copies a content-addressed full controller JDK. With
-`-compactruntimecopy true`, GEM instead runs the controller JDK's `jlink` from
+or older, default `-fullcopy false` mode runs the controller JDK's `jlink` from
 the versioned Gradle contract, caches the runtime-only image, and copies that
-smaller tree. The standalone `generateSbkCompactJavaRuntime` Gradle task applies
+smaller tree. Setting `-fullcopy true` copies a content-addressed full controller
+JDK instead. The standalone `generateSbkCompactJavaRuntime` Gradle task applies
 the same contract without invoking SBK-GEM. Java content and executable/POSIX
 permission state participate in its identity; a matching marker whose required
 `bin/java` (and, for full mode, `bin/javac`) is unusable is retired and repaired.

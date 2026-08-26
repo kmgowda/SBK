@@ -398,8 +398,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
         final Path sbkSourceDirectory = Paths.get(params.getSbkDir()).toAbsolutePath().normalize();
         Printer.log.info("SBK-GEM: Preparing immutable runtime bundle for {}; progress every {} second(s)",
                 platform.id(), config.runtimeProgressIntervalSeconds);
-        final DriverRuntimeManifest driverRuntime = config.compactruntimecopy
-                ? DriverRuntimeManifest.load(sbkSourceDirectory, config.driverClass, config.sbkVersion) : null;
+        final DriverRuntimeManifest driverRuntime = config.fullcopy ? null
+                : DriverRuntimeManifest.load(sbkSourceDirectory, config.driverClass, config.sbkVersion);
         if (driverRuntime == null) {
             Printer.log.info("SBK-GEM: Complete SBK distribution deployment is enabled");
         } else {
@@ -1024,20 +1024,20 @@ final public class SbkGemBenchmark implements GemBenchmark {
         if (hasSelectedTarget(unresolved)) {
             Printer.log.info("SBK-GEM: Java {} or newer is missing on selected host(s); preparing a separate "
                     + "content-addressed {} bulk SCP transfer", expectedVersion,
-                    config.compactruntimecopy ? "compact Java runtime" : "full JDK");
+                    config.fullcopy ? "full JDK" : "compact Java runtime");
             final Path javaSourceDirectory = Path.of(System.getProperty("java.home")).toAbsolutePath().normalize();
             final Path localSbkDirectory = Paths.get(params.getSbkDir()).toAbsolutePath().normalize();
             final ManagedJavaRuntime javaRuntime;
-            if (config.compactruntimecopy) {
+            if (config.fullcopy) {
+                javaRuntime = ManagedJavaRuntime.create(javaSourceDirectory, expectedVersion,
+                        runtimeCacheDirectory());
+            } else {
                 final CompactJavaRuntimeDescriptor descriptor = CompactJavaRuntimeDescriptor.load(
                         localSbkDirectory, expectedVersion);
                 javaRuntime = ManagedJavaRuntime.createCompact(javaSourceDirectory, expectedVersion,
                         runtimeCacheDirectory(), descriptor);
-            } else {
-                javaRuntime = ManagedJavaRuntime.create(javaSourceDirectory, expectedVersion,
-                        runtimeCacheDirectory());
             }
-            final String javaDeploymentName = config.compactruntimecopy ? "compact Java runtime" : "full JDK";
+            final String javaDeploymentName = config.fullcopy ? "full JDK" : "compact Java runtime";
             final long archivePreparationMillis;
             final Path javaArchive;
             try (LifecycleProgress progress = new LifecycleProgress("Managed " + javaDeploymentName

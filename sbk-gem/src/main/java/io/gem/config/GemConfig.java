@@ -108,8 +108,8 @@ final public class GemConfig {
     public String javadir;
     /** Whether inactive non-current managed runtimes and local cached bundles are removed automatically. */
     public boolean packagescleanup;
-    /** Whether compact Java and driver-scoped SBK runtime copies are enabled. */
-    public boolean compactruntimecopy;
+    /** Whether complete JDK and SBK distribution copies replace the default minimal copies. */
+    public boolean fullcopy;
     /** Resolved driver class selected for this invocation; assigned after driver discovery. */
     public String driverClass;
 

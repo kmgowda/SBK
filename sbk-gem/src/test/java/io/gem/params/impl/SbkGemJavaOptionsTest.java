@@ -48,7 +48,7 @@ final class SbkGemJavaOptionsTest {
 
         assertTrue(config.javadir == null || config.javadir.isEmpty());
         assertTrue(config.packagescleanup);
-        assertFalse(config.compactruntimecopy);
+        assertFalse(config.fullcopy);
         assertFalse(config.hostkeycheck);
         assertTrue(config.knownhosts == null || config.knownhosts.isEmpty());
         assertEquals(120, config.sbmRegistrationTimeoutSeconds);
@@ -89,16 +89,16 @@ final class SbkGemJavaOptionsTest {
     }
 
     @Test
-    void enablesCompactJavaAndDriverScopedSbkCopyOnlyWhenExplicitlyRequested() throws Exception {
+    void enablesFullJavaAndSbkDistributionCopyOnlyWhenExplicitlyRequested() throws Exception {
         createSbkCommand();
         final GemConfig config = defaultConfig(temporaryDirectory);
         final SbkGemParameters parameters = new SbkGemParameters("test", new String[0], new String[0], config,
                 9717, 10);
 
         parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1",
-                "-compactruntimecopy", "true"});
+                "-fullcopy", "true"});
 
-        assertTrue(config.compactruntimecopy);
+        assertTrue(config.fullcopy);
     }
 
     @Test
@@ -134,7 +134,13 @@ final class SbkGemJavaOptionsTest {
 
         final IllegalArgumentException compactCopyFailure = assertThrows(IllegalArgumentException.class,
                 () -> parameters.parseArgs(new String[]{"-copyonlydrivers", "true"}));
-        assertTrue(compactCopyFailure.getMessage().contains("-compactruntimecopy"));
+        assertTrue(compactCopyFailure.getMessage().contains("-fullcopy"));
+        final IllegalArgumentException formerCompactCopyFailure = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(new String[]{"-compactruntimecopy", "true"}));
+        assertTrue(formerCompactCopyFailure.getMessage().contains("-fullcopy"));
+        final IllegalArgumentException compactNameFailure = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(new String[]{"-compactcopy", "true"}));
+        assertTrue(compactNameFailure.getMessage().contains("-fullcopy"));
 
         final IllegalArgumentException copyFailure = assertThrows(IllegalArgumentException.class,
                 () -> parameters.parseArgs(new String[]{"-copy", "false"}));
@@ -249,6 +255,7 @@ final class SbkGemJavaOptionsTest {
         config.sbkdir = sbkDirectory.toString();
         config.javadir = "";
         config.packagescleanup = true;
+        config.fullcopy = false;
         config.timeoutSeconds = 5;
         config.remoteDir = "sbk-gem-test";
         return config;
