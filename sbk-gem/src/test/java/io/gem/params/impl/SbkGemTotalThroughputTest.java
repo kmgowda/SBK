@@ -147,7 +147,7 @@ final class SbkGemTotalThroughputTest {
         config.knownhosts = "";
         config.sbkdir = temporaryDirectory.toString();
         config.javadir = "";
-        config.runtimecleanup = true;
+        config.packagescleanup = true;
         config.timeoutSeconds = 5;
         config.remoteDir = "sbk-gem-test";
         return config;

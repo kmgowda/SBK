@@ -44,7 +44,7 @@ import java.util.Objects;
  * <p>Supported options (help text shows defaults from {@link GemConfig}):
  * - -nodes: comma/space/newline-separated hostnames or host:port endpoints
  * - -gemuser, -gempass, -gemport
- * - -runtimecleanup, -javadir
+ * - -packagescleanup, -javadir
  * - -localhost
  * - -sbmport, -sbmsleepms
  * - -totalrecords
@@ -130,9 +130,9 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("gemport", true, "ssh port of the remote hosts, default: " + config.gemport);
         addOption("javadir", true, "Remote Java home containing bin/java; default: " +
                 (StringUtils.isEmpty(config.javadir) ? "null" : config.javadir));
-        addOption("runtimecleanup", true, "Remove every inactive non-current SBK-GEM-managed runtime and "
+        addOption("packagescleanup", true, "Remove every inactive non-current SBK-GEM-managed runtime and "
                 + "local cached bundle, regardless of version ordering, while retaining the current verified "
-                + "identity; default: " + config.runtimecleanup);
+                + "identity; default: " + config.packagescleanup);
         addOption(COPY_ONLY_DRIVERS_OPTION, true,
                 "Deploy only the Gradle-resolved runtime closure for the selected "
                 + "storage driver; false deploys the complete SBK distribution; default: "
@@ -150,7 +150,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
                 "exclusive with -throughput");
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-hostkeycheck", "-knownhosts",
                 "-gemport", "-javadir",
-                "-runtimecleanup", "-copyonlydrivers", "-localhost", "-sbmport", "-sbmsleepms", "-totalrecords",
+                "-packagescleanup", "-copyonlydrivers", "-localhost", "-sbmport", "-sbmsleepms", "-totalrecords",
                 "--totalrecords", "-totalthroughput", "--totalthroughput"};
         this.parsedArgs = null;
         this.totalThroughput = BigDecimal.ZERO;
@@ -204,15 +204,15 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         sbmPort = Integer.parseInt(getOptionValue("sbmport", Integer.toString(sbmPort)));
         sbmIdleSleepMilliSeconds = Integer.parseInt(getOptionValue("sbmsleepms", Integer.toString(sbmIdleSleepMilliSeconds)));
         config.javadir = getOptionValue("javadir", Objects.requireNonNullElse(config.javadir, ""));
-        config.runtimecleanup = Boolean.parseBoolean(getOptionValue("runtimecleanup",
-                Boolean.toString(config.runtimecleanup)));
+        config.packagescleanup = Boolean.parseBoolean(getOptionValue("packagescleanup",
+                Boolean.toString(config.packagescleanup)));
         config.copyonlydrivers = Boolean.parseBoolean(getOptionValue(COPY_ONLY_DRIVERS_OPTION,
                 Boolean.toString(config.copyonlydrivers)));
 
         parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.gemuser,
                 "-hostkeycheck", Boolean.toString(config.hostkeycheck), "-knownhosts", config.knownhosts,
                 "-gemport", Integer.toString(config.gemport), "-javadir", config.javadir,
-                "-runtimecleanup", Boolean.toString(config.runtimecleanup),
+                "-packagescleanup", Boolean.toString(config.packagescleanup),
                 "-copyonlydrivers", Boolean.toString(config.copyonlydrivers),
                 "-localhost", localHost, "-sbmport", Integer.toString(sbmPort)};
 
@@ -375,17 +375,20 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     }
 
     private static void rejectRemovedDeploymentOptions(String[] args) {
+        if (hasCommandLineOption(args, "runtimecleanup")) {
+            throw new IllegalArgumentException("The '-runtimecleanup' option was renamed to '-packagescleanup'");
+        }
         if (hasCommandLineOption(args, "copy")) {
             throw new IllegalArgumentException("The '-copy' option was removed: missing exact SBK/JDK runtime "
-                    + "content is now copied automatically; use '-runtimecleanup' to control stale versions");
+                    + "content is now copied automatically; use '-packagescleanup' to control stale versions");
         }
         if (hasCommandLineOption(args, "deleteafter")) {
             throw new IllegalArgumentException("The '-deleteafter' option was removed: the current verified "
-                    + "runtime is retained and '-runtimecleanup' controls inactive non-current versions");
+                    + "runtime is retained and '-packagescleanup' controls inactive non-current versions");
         }
         if (hasCommandLineOption(args, "delete")) {
             throw new IllegalArgumentException("The '-delete' option was removed: invalid SBK-GEM-managed "
-                    + "runtime destinations are now repaired automatically; '-runtimecleanup' controls "
+                    + "runtime destinations are now repaired automatically; '-packagescleanup' controls "
                     + "inactive non-current runtimes");
         }
         if (hasCommandLineOption(args, "sbkcommand")) {
@@ -469,7 +472,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     }
 
     @Override
-    public boolean isRuntimeCleanup() {
-        return config.runtimecleanup;
+    public boolean isPackagesCleanup() {
+        return config.packagescleanup;
     }
 }

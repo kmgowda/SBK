@@ -219,7 +219,7 @@ the Gradle-generated closure for the selected `-class`. For example, a `File`
 run transfers SBK core, the File driver, and their runtime dependencies; a
 later `RocksDB` run selects a different content identity containing the RocksDB
 driver and its native dependency. Exact identities are still reused. With
-`runtimecleanup=false`, multiple inactive driver identities may remain cached
+`packagescleanup=false`, multiple inactive driver identities may remain cached
 for fast switching; the default cleanup policy retains only the current
 identity after its leases become inactive.
 
@@ -248,7 +248,7 @@ use. An unchanged build identity reuses both sidecars without rehashing the
 installed distribution or cached archive. The remote agent still verifies the
 complete transferred archive; a digest mismatch rebuilds the local archive and
 retries the affected transfer once. With
-`runtimecleanup=true`, the controller retains only the selected cached bundle;
+`packagescleanup=true`, the controller retains only the selected cached bundle;
 a non-current archive being transferred by another GEM process is protected by
 its cache lock and is removed after it becomes inactive.
 
@@ -332,7 +332,7 @@ redirected through a command-line or YAML option.
 
 The deployment lifecycle option is:
 
-- `-runtimecleanup true|false` removes every inactive non-current remote
+- `-packagescleanup true|false` removes every inactive non-current remote
   SBK-GEM-managed runtime identity and controller-side cached bundle after
   verified activation and lease/transfer release, regardless of whether its
   SBK version is lower or higher; the default is

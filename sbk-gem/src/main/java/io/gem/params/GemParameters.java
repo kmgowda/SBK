@@ -97,5 +97,5 @@ public sealed interface GemParameters extends Parameters permits GemParameterOpt
      *
      * @return true when managed runtime cleanup is enabled
      */
-    boolean isRuntimeCleanup();
+    boolean isPackagesCleanup();
 }

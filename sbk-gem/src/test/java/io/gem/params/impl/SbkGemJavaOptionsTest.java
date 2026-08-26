@@ -47,7 +47,7 @@ final class SbkGemJavaOptionsTest {
         }
 
         assertTrue(config.javadir == null || config.javadir.isEmpty());
-        assertTrue(config.runtimecleanup);
+        assertTrue(config.packagescleanup);
         assertFalse(config.copyonlydrivers);
         assertFalse(config.hostkeycheck);
         assertTrue(config.knownhosts == null || config.knownhosts.isEmpty());
@@ -83,9 +83,9 @@ final class SbkGemJavaOptionsTest {
         final SbkGemParameters parameters = new SbkGemParameters("test", new String[0], new String[0], config,
                 9717, 10);
         parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1",
-                "-runtimecleanup", "false"});
+                "-packagescleanup", "false"});
 
-        assertFalse(parameters.isRuntimeCleanup());
+        assertFalse(parameters.isPackagesCleanup());
     }
 
     @Test
@@ -128,13 +128,17 @@ final class SbkGemJavaOptionsTest {
         createSbkCommand();
         final SbkGemParameters parameters = parameters();
 
+        final IllegalArgumentException cleanupFailure = assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(new String[]{"-runtimecleanup", "true"}));
+        assertTrue(cleanupFailure.getMessage().contains("-packagescleanup"));
+
         final IllegalArgumentException copyFailure = assertThrows(IllegalArgumentException.class,
                 () -> parameters.parseArgs(new String[]{"-copy", "false"}));
         assertTrue(copyFailure.getMessage().contains("copied automatically"));
 
         final IllegalArgumentException deleteFailure = assertThrows(IllegalArgumentException.class,
                 () -> parameters.parseArgs(new String[]{"-deleteafter", "true"}));
-        assertTrue(deleteFailure.getMessage().contains("-runtimecleanup"));
+        assertTrue(deleteFailure.getMessage().contains("-packagescleanup"));
 
         final IllegalArgumentException managedDeleteFailure = assertThrows(IllegalArgumentException.class,
                 () -> parameters.parseArgs(new String[]{"-delete", "false"}));
@@ -240,7 +244,7 @@ final class SbkGemJavaOptionsTest {
         config.knownhosts = "";
         config.sbkdir = sbkDirectory.toString();
         config.javadir = "";
-        config.runtimecleanup = true;
+        config.packagescleanup = true;
         config.timeoutSeconds = 5;
         config.remoteDir = "sbk-gem-test";
         return config;

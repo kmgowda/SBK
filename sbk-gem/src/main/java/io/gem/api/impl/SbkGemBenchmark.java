@@ -426,7 +426,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 bundle.contentDigest(), bundle.archiveDigest());
         final RuntimeDeployment deployment = deployRuntimeBundle(bundle, absoluteConnectionDirs,
                 environment, platform);
-        if (params.isRuntimeCleanup()) {
+        if (params.isPackagesCleanup()) {
             final int removed = SbkRuntimeBundle.cleanupOtherCachedBundles(cacheDirectory,
                     bundle.deploymentName());
             Printer.log.info("SBK-GEM: Retained local runtime bundle {}; removed {} inactive non-current "
@@ -566,7 +566,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 final int nodeIndex = i;
                 acquisitions[i] = runRemoteLifecycleOperationAsync(nodeIndex,
                         RemoteAgent.acquireRuntime(parentDirectories[nodeIndex], deploymentNames[nodeIndex],
-                                bundle.contentDigest(), leaseIds[nodeIndex], params.isRuntimeCleanup(),
+                                bundle.contentDigest(), leaseIds[nodeIndex], params.isPackagesCleanup(),
                                 config.runtimeManagementLockTimeoutSeconds,
                                 config.runtimeManagementLockStaleSeconds,
                                 config.runtimeLeaseReservationSeconds), "Runtime setup");
@@ -576,7 +576,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
         Printer.log.info("SBK-GEM: Preparing managed runtime {} on {} remote host(s); old-runtime cleanup is {}; "
                         + "progress every {} second(s)", bundle.deploymentName(), nodes.length,
-                params.isRuntimeCleanup() ? "enabled" : "disabled", config.runtimeProgressIntervalSeconds);
+                params.isPackagesCleanup() ? "enabled" : "disabled", config.runtimeProgressIntervalSeconds);
         final long acquisitionSeconds;
         try (LifecycleProgress progress = new LifecycleProgress("Remote runtime setup",
                 config.runtimeProgressIntervalSeconds, runtimeLeaseHeartbeatScheduler,
@@ -587,7 +587,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         startRuntimeLeaseHeartbeats();
         Printer.log.info("SBK-GEM: Reserved runtime {} on {} host(s) in {} second(s); inactive non-current "
                         + "runtime retirement is {}", bundle.deploymentName(), nodes.length, acquisitionSeconds,
-                params.isRuntimeCleanup() ? "enabled" : "disabled");
+                params.isPackagesCleanup() ? "enabled" : "disabled");
     }
 
     private void startRuntimeLeaseHeartbeats() {
@@ -658,7 +658,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     }
 
     private CompletableFuture<Void> startRetiredRuntimeCleanup(String[] parentDirectories) {
-        if (!params.isRuntimeCleanup()) {
+        if (!params.isPackagesCleanup()) {
             return CompletableFuture.completedFuture(null);
         }
         final RemoteTargetPlan targetPlan = RemoteTargetPlan.create(params.getConnections(),
@@ -739,7 +739,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
             return runRemoteLifecycleOperationAsync(nodeIndex,
                     RemoteAgent.releaseRuntime(deployment.parentDirectories()[nodeIndex],
                             deployment.deploymentNames()[nodeIndex], deployment.leaseIds()[nodeIndex],
-                            params.isRuntimeCleanup(), config.runtimeManagementLockTimeoutSeconds,
+                            params.isPackagesCleanup(), config.runtimeManagementLockTimeoutSeconds,
                             config.runtimeManagementLockStaleSeconds, config.runtimeLeaseReservationSeconds),
                     "Runtime lease release");
         } catch (IOException exception) {

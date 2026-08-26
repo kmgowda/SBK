@@ -1959,7 +1959,7 @@ sequenceDiagram
         SSH->>N2: agent extracts, verifies, and atomically activates SBK
     end
     GEM->>SSH: verify activated Java, SBK, and content identity
-    opt runtimecleanup is true (default)
+    opt packagescleanup is true (default)
         SSH->>N1: agent atomically retires and deletes inactive runtimes
         SSH->>N2: agent atomically retires and deletes inactive runtimes
     end
@@ -2030,7 +2030,7 @@ or interrupted staging data is cleaned and cannot become a launch target.
 Missing identities are uploaded automatically. An invalid final directory
 bearing the expected managed identity is repaired automatically. The current verified
 runtime is retained for subsequent benchmarks. With the default
-`runtimecleanup=true`, a remote-local lifecycle lock and current-runtime marker
+`packagescleanup=true`, a remote-local lifecycle lock and current-runtime marker
 remove every non-current managed identity only after its controller-refreshed
 leases are no longer active, regardless of whether its SBK version is
 lower or higher. Each controller reserves its identity before probe, transfer,
