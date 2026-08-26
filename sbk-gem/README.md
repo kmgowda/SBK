@@ -206,6 +206,23 @@ uses one shared per-worker rate for both directions.
 
 Before connecting to storage, SBK-GEM validates the local `installDist`
 layout, including the pathing JAR and every dependency named by its manifest.
+Every standard Gradle `build`, `installDist`, and `distTar` output remains a
+complete SBK distribution. The independent `generateSbkDriverRuntimes` task
+also writes one dependency manifest and pathing JAR per enabled driver under
+`worker-runtime/`. These files describe the selected driver's transitive
+runtime closure without replacing or removing any normal launcher, library,
+manifest, or documentation file from the complete distribution.
+
+By default, SBK-GEM preserves the established behavior and deploys the full
+distribution. Set `-copyonlydrivers true` to build the remote archive from
+the Gradle-generated closure for the selected `-class`. For example, a `File`
+run transfers SBK core, the File driver, and their runtime dependencies; a
+later `RocksDB` run selects a different content identity containing the RocksDB
+driver and its native dependency. Exact identities are still reused. With
+`runtimecleanup=false`, multiple inactive driver identities may remain cached
+for fast switching; the default cleanup policy retains only the current
+identity after its leases become inactive.
+
 The Gradle distribution records an identity covering its runtime JARs,
 launchers, Java bootstrap files, and remote agent. SBK-GEM packages the
 runtime-only `bin`, `lib`, and identity files into a content-addressed plain
@@ -321,6 +338,11 @@ The deployment lifecycle option is:
   SBK version is lower or higher; the default is
   `true`. It never deletes the current identity, a live leased identity, an
   unmanaged directory, or a user-managed JDK selected with `-javadir`.
+- `-copyonlydrivers true|false` selects the driver-specific Gradle runtime
+  closure when `true`; the default `false` deploys the complete SBK
+  distribution. This changes only remote archive contents. The locally built
+  `installDist` and `distTar` artifacts remain complete and independently
+  usable at customer sites.
 
 The rule applies to every deployment target in `-nodes`, including the
 controller host when it is selected as a node. It does not scan or delete

@@ -31,8 +31,4 @@ plugins.withId('com.github.spotbugs') {
             html.enabled = true
         }
     }
-
-    dependencies {
-        api "com.github.spotbugs:spotbugs-annotations:$spotbugsVersion"
-    }
 }

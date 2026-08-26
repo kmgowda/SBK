@@ -1,0 +1,176 @@
+/**
+ * Copyright (c) KMG. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ */
+
+// This build contract is independent of SBK-GEM. Every standard distribution remains
+// complete, while worker-runtime contains a reproducible dependency closure that any
+// deployment tool can consume for one enabled driver.
+def sbkDriverRuntimeDirectory = layout.buildDirectory.dir('generated/sbk-driver-runtimes')
+def driverRuntimeManifestFormat = '1'
+def reproducibleJarTimestamp = 0L
+def generateSbkDriverRuntimes = tasks.register('generateSbkDriverRuntimes') {
+    description = 'Generates independently consumable runtime manifests and pathing JARs for every enabled driver.'
+    dependsOn tasks.named('jar')
+    inputs.files(configurations.runtimeClasspath)
+            .withPropertyName('aggregateRuntimeClasspath')
+            .withPathSensitivity(PathSensitivity.NAME_ONLY)
+    inputs.file(tasks.named('jar').flatMap { it.archiveFile })
+            .withPropertyName('aggregateMainJar')
+            .withPathSensitivity(PathSensitivity.NAME_ONLY)
+    outputs.dir(sbkDriverRuntimeDirectory)
+
+    doLast {
+        def outputDirectory = sbkDriverRuntimeDirectory.get().asFile
+        delete outputDirectory
+        outputDirectory.mkdirs()
+
+        def resolvedArtifacts = configurations.runtimeClasspath.incoming.artifacts.artifacts
+        def artifactsByComponent = resolvedArtifacts.groupBy { it.id.componentIdentifier }
+        def components = configurations.runtimeClasspath.incoming.resolutionResult.allComponents
+        def rootMainJar = tasks.named('jar').get().archiveFile.get().asFile
+        def driverProjects = subprojects.findAll {
+            it.parent != null && it.parent.name == 'drivers'
+        }.sort { it.name.toLowerCase(Locale.ROOT) }
+
+        driverProjects.each { driverProject ->
+            def driverComponent = components.find {
+                it.id instanceof org.gradle.api.artifacts.component.ProjectComponentIdentifier
+                        && it.id.projectPath == driverProject.path
+            }
+            if (driverComponent == null) {
+                throw new GradleException("Enabled driver ${driverProject.path} is absent from the aggregate runtime")
+            }
+
+            def selectedComponents = new LinkedHashSet()
+            def visitComponent
+            visitComponent = { component ->
+                if (selectedComponents.add(component.id)) {
+                    component.dependencies.findAll {
+                        it instanceof org.gradle.api.artifacts.result.ResolvedDependencyResult
+                    }.each { visitComponent(it.selected) }
+                }
+            }
+            visitComponent(driverComponent)
+
+            def runtimeFiles = selectedComponents.collectMany {
+                (artifactsByComponent[it] ?: []).collect { artifact -> artifact.file }
+            }
+            runtimeFiles.add(rootMainJar)
+            def duplicateNames = runtimeFiles.groupBy { it.name }.findAll { name, files -> files.size() > 1 }
+            if (!duplicateNames.isEmpty()) {
+                throw new GradleException("Driver ${driverProject.name} has duplicate runtime filenames: "
+                        + duplicateNames.keySet())
+            }
+            runtimeFiles = runtimeFiles.sort { it.name }
+
+            def pathingJar = new File(outputDirectory,
+                    "${driverProject.name}-sbk-pathing-${sbkVersion}.jar")
+            def pathingManifest = new java.util.jar.Manifest()
+            pathingManifest.mainAttributes.put(java.util.jar.Attributes.Name.MANIFEST_VERSION, '1.0')
+            pathingManifest.mainAttributes.put(java.util.jar.Attributes.Name.CLASS_PATH,
+                    runtimeFiles.collect { it.name }.join(' '))
+            pathingJar.withOutputStream { stream ->
+                new java.util.jar.JarOutputStream(stream).withCloseable { jar ->
+                    def manifestDirectory = new java.util.jar.JarEntry('META-INF/')
+                    manifestDirectory.setTime(reproducibleJarTimestamp)
+                    jar.putNextEntry(manifestDirectory)
+                    jar.closeEntry()
+                    def manifestEntry = new java.util.jar.JarEntry('META-INF/MANIFEST.MF')
+                    manifestEntry.setTime(reproducibleJarTimestamp)
+                    jar.putNextEntry(manifestEntry)
+                    pathingManifest.write(jar)
+                    jar.closeEntry()
+                }
+            }
+
+            def digest = java.security.MessageDigest.getInstance('SHA-256')
+            (runtimeFiles + pathingJar).each { runtimeFile ->
+                digest.update(runtimeFile.name.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+                digest.update((byte) 0)
+                runtimeFile.withInputStream { input ->
+                    byte[] buffer = new byte[64 * 1024]
+                    int count
+                    while ((count = input.read(buffer)) >= 0) {
+                        digest.update(buffer, 0, count)
+                    }
+                }
+            }
+            def runtimeIdentity = java.util.HexFormat.of().formatHex(digest.digest())
+            def manifestFile = new File(outputDirectory, "${driverProject.name}.properties")
+            manifestFile.setText(
+                    "format.version=${driverRuntimeManifestFormat}\n"
+                            + "driver.name=${driverProject.name}\n"
+                            + "sbk.version=${sbkVersion}\n"
+                            + "runtime.pathing=${pathingJar.name}\n"
+                            + "runtime.files=${runtimeFiles.collect { it.name }.join(',')}\n"
+                            + "runtime.sha256=${runtimeIdentity}\n",
+                    'UTF-8')
+        }
+    }
+}
+
+def verifySbkDriverRuntimes = tasks.register('verifySbkDriverRuntimes') {
+    description = 'Verifies every enabled driver has a complete packaged runtime manifest and pathing JAR.'
+    dependsOn generateSbkDriverRuntimes
+    inputs.dir(sbkDriverRuntimeDirectory)
+
+    doLast {
+        def directory = sbkDriverRuntimeDirectory.get().asFile
+        def expectedDrivers = subprojects.findAll {
+            it.parent != null && it.parent.name == 'drivers'
+        }.collect { it.name }.sort()
+        expectedDrivers.each { driverName ->
+            def manifestFile = new File(directory, "${driverName}.properties")
+            if (!manifestFile.isFile()) {
+                throw new GradleException("Missing driver runtime manifest ${manifestFile}")
+            }
+            def properties = new Properties()
+            manifestFile.withInputStream { properties.load(it) }
+            if (properties.getProperty('format.version') != driverRuntimeManifestFormat
+                    || properties.getProperty('driver.name') != driverName
+                    || properties.getProperty('sbk.version') != sbkVersion.toString()
+                    || !(properties.getProperty('runtime.sha256') ==~ /[0-9a-f]{64}/)) {
+                throw new GradleException("Invalid driver runtime manifest ${manifestFile}")
+            }
+            def pathingJar = new File(directory, properties.getProperty('runtime.pathing', ''))
+            if (!pathingJar.isFile()) {
+                throw new GradleException("Missing driver runtime pathing JAR ${pathingJar}")
+            }
+            def runtimeFiles = properties.getProperty('runtime.files', '').split(',').findAll { !it.isBlank() }
+            if (runtimeFiles.isEmpty()
+                    || !runtimeFiles.contains("sbk-${sbkVersion}.jar".toString())) {
+                throw new GradleException("Incomplete driver runtime classpath in ${manifestFile}")
+            }
+            def pathingManifest = new java.util.jar.JarFile(pathingJar).withCloseable {
+                it.manifest?.mainAttributes?.getValue(java.util.jar.Attributes.Name.CLASS_PATH)
+            }
+            if (pathingManifest == null
+                    || pathingManifest.split(/\s+/).toList().toSet() != runtimeFiles.toSet()) {
+                throw new GradleException("Pathing JAR does not match driver runtime manifest ${manifestFile}")
+            }
+        }
+    }
+}
+
+application {
+    applicationDistribution.from(generateSbkDriverRuntimes) {
+        into 'worker-runtime'
+    }
+}
+
+tasks.named('installDist') {
+    dependsOn verifySbkDriverRuntimes
+}
+tasks.named('distTar') {
+    dependsOn verifySbkDriverRuntimes
+}
+tasks.named('build') {
+    dependsOn tasks.named('installDist'), tasks.named('distTar'), verifySbkDriverRuntimes
+}

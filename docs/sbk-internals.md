@@ -1942,12 +1942,12 @@ sequenceDiagram
     GEM->>SSH: install small Java agent through SFTP
     GEM->>SSH: probe preferred/PATH Java and OS through the agent
     Note over GEM: require one homogeneous Linux or macOS operating system
-    GEM->>GEM: validate installDist pathing JAR and dependencies
+    GEM->>GEM: validate installDist and Gradle driver runtime metadata
     opt matching Java is unavailable
         GEM->>SSH: copy controller JDK as a separate content-addressed tree
         GEM->>SSH: verify copied JDK through the agent
     end
-    GEM->>GEM: build an SBK-only content-addressed archive
+    GEM->>GEM: build a full or opt-in driver-scoped SBK archive
     GEM->>SSH: reserve deployment identities through the Java agent
     par inspect exact runtime identity
         SSH->>N1: agent verifies content marker and SBK JARs
@@ -1986,6 +1986,17 @@ GEM-->>User: printRemoteResults()
 ```
 
 The reconciliation identity is content, not only the displayed SBK version.
+The Gradle build independently derives a transitive runtime closure and pathing
+JAR for every enabled driver and includes that metadata under `worker-runtime/`
+in the otherwise complete `build`, `installDist`, and `distTar` outputs. Thus a
+customer receiving the normal SBK tar retains every application and driver,
+whether or not SBK-GEM is used. SBK-GEM consumes this build contract only when
+`-copyonlydrivers true` is requested; its default remains the complete
+distribution archive. A File-scoped runtime and a RocksDB-scoped runtime have
+different content identities and dependency sets. They can coexist when
+inactive-runtime cleanup is disabled, while the normal cleanup policy retires
+an inactive identity after the next one becomes current.
+
 Gradle records a build identity covering the installed runtime dependencies,
 launchers, Java bootstrap files, and remote agent. GEM verifies the local
 pathing JAR dependency closure and uses that identity to select a cached

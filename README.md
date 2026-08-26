@@ -400,6 +400,9 @@ The Local Web Console binds to `0.0.0.0`, while benchmark clients discover and r
 
 - [SBM](sbm/README.md) accepts SBP/gRPC measurements and aggregates them.
 - [SBK-GEM](sbk-gem/README.md) copies and launches SBK on remote hosts over SSH while running an embedded SBM instance.
+  Its optional `-copyonlydrivers true` mode uses Gradle-generated per-driver
+  dependency metadata to reduce remote payloads; complete Gradle distributions
+  and the default SBK-GEM deployment behavior are unchanged.
 - [SBK-YAL](sbk-yal/README.md) loads single-node SBK arguments from YML.
 - [SBK-GEM-YAL](sbk-gem-yal/README.md) loads distributed SBK-GEM arguments from YML.
 

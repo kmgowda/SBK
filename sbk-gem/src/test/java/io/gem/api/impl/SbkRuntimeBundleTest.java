@@ -58,7 +58,6 @@ final class SbkRuntimeBundleTest {
         assertTrue(cached.archiveReused());
         assertEquals(64, first.archiveDigest().length());
         final List<String> entries = archiveEntries(first.archive());
-        assertTrue(entries.contains("runtime/sbk/bin/sbk"));
         assertTrue(entries.contains("runtime/sbk/lib/dependency.jar"));
         assertFalse(entries.stream().anyMatch(entry -> entry.startsWith("runtime/java/")));
         assertTrue(entries.contains("runtime/deployment.properties"));
@@ -69,6 +68,25 @@ final class SbkRuntimeBundleTest {
         assertEquals(0755, archiveMode(first.archive(), "runtime/sbk/bin/sbk"));
         assertEquals(0755, archiveMode(first.archive(), "runtime/sbk/lib/"));
         assertTrue(descriptor.contains("includes.java=false"));
+    }
+
+    @Test
+    void packagesOnlyTheSelectedGradleDriverRuntimeWhenRequested() throws IOException {
+        final Path sbk = createSbkDistribution();
+        Files.writeString(sbk.resolve("lib/unrelated-driver.jar"), "unrelated", StandardCharsets.UTF_8);
+        createDriverRuntimeManifest(sbk, "file", List.of("dependency.jar", "sbk-10.6.jar"));
+        final DriverRuntimeManifest driverRuntime = DriverRuntimeManifest.load(sbk, "File", "10.6");
+
+        final SbkRuntimeBundle bundle = SbkRuntimeBundle.create(sbk, "bin/sbk", "10.6", 25,
+                new DeploymentPlatform("linux"), temporaryDirectory.resolve("cache"), driverRuntime);
+
+        final List<String> entries = archiveEntries(bundle.archive());
+        assertTrue(bundle.deploymentName().contains("-file-"));
+        assertFalse(entries.contains("runtime/sbk/bin/sbk"));
+        assertTrue(entries.contains("runtime/sbk/lib/dependency.jar"));
+        assertTrue(entries.contains("runtime/sbk/lib/sbk-10.6.jar"));
+        assertTrue(entries.contains("runtime/sbk/lib/sbk-pathing-10.6.jar"));
+        assertFalse(entries.contains("runtime/sbk/lib/unrelated-driver.jar"));
     }
 
     @Test
@@ -272,6 +290,27 @@ final class SbkRuntimeBundleTest {
         }
         writeRuntimeIdentity(sbk, "10.6", "a".repeat(64));
         return sbk;
+    }
+
+    private static void createDriverRuntimeManifest(Path sbk, String driver, List<String> libraries)
+            throws IOException {
+        final Path directory = Files.createDirectories(sbk.resolve(DriverRuntimeManifest.DIRECTORY));
+        final String pathingName = driver + "-sbk-pathing-10.6.jar";
+        final Manifest pathingManifest = new Manifest();
+        pathingManifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+        pathingManifest.getMainAttributes().put(Attributes.Name.CLASS_PATH, String.join(" ", libraries));
+        try (JarOutputStream output = new JarOutputStream(
+                Files.newOutputStream(directory.resolve(pathingName)), pathingManifest)) {
+            output.finish();
+        }
+        Files.writeString(directory.resolve(driver + ".properties"),
+                "format.version=1\n"
+                        + "driver.name=" + driver + "\n"
+                        + "sbk.version=10.6\n"
+                        + "runtime.pathing=" + pathingName + "\n"
+                        + "runtime.files=" + String.join(",", libraries) + "\n"
+                        + "runtime.sha256=" + "c".repeat(64) + "\n",
+                StandardCharsets.UTF_8);
     }
 
     private static void writeRuntimeIdentity(Path sbk, String identity) throws IOException {

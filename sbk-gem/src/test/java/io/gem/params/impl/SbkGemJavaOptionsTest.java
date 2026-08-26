@@ -48,6 +48,7 @@ final class SbkGemJavaOptionsTest {
 
         assertTrue(config.javadir == null || config.javadir.isEmpty());
         assertTrue(config.runtimecleanup);
+        assertFalse(config.copyonlydrivers);
         assertFalse(config.hostkeycheck);
         assertTrue(config.knownhosts == null || config.knownhosts.isEmpty());
         assertEquals(120, config.sbmRegistrationTimeoutSeconds);
@@ -85,6 +86,19 @@ final class SbkGemJavaOptionsTest {
                 "-runtimecleanup", "false"});
 
         assertFalse(parameters.isRuntimeCleanup());
+    }
+
+    @Test
+    void enablesDriverScopedRuntimeOnlyWhenExplicitlyRequested() throws Exception {
+        createSbkCommand();
+        final GemConfig config = defaultConfig(temporaryDirectory);
+        final SbkGemParameters parameters = new SbkGemParameters("test", new String[0], new String[0], config,
+                9717, 10);
+
+        parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1", "-records", "1", "-size", "1",
+                "-copyonlydrivers", "true"});
+
+        assertTrue(config.copyonlydrivers);
     }
 
     @Test

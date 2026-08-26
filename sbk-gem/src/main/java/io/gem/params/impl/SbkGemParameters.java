@@ -55,6 +55,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
 
     private static final int MINIMUM_PORT = 1;
     private static final int MAXIMUM_PORT = 65_535;
+    private static final String COPY_ONLY_DRIVERS_OPTION = "copyonlydrivers";
 
     final private GemConfig config;
 
@@ -132,6 +133,10 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         addOption("runtimecleanup", true, "Remove every inactive non-current SBK-GEM-managed runtime and "
                 + "local cached bundle, regardless of version ordering, while retaining the current verified "
                 + "identity; default: " + config.runtimecleanup);
+        addOption(COPY_ONLY_DRIVERS_OPTION, true,
+                "Deploy only the Gradle-resolved runtime closure for the selected "
+                + "storage driver; false deploys the complete SBK distribution; default: "
+                + config.copyonlydrivers);
         addOption("localhost", true, "SBM address reachable from every remote node; when omitted, SBK-GEM uses "
                 + "the numeric controller address selected by each authenticated SSH route; detected local host: "
                 + localHost);
@@ -145,7 +150,7 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
                 "exclusive with -throughput");
         this.optionsArgs = new String[]{"-nodes", "-gemuser", "-gempass", "-hostkeycheck", "-knownhosts",
                 "-gemport", "-javadir",
-                "-runtimecleanup", "-localhost", "-sbmport", "-sbmsleepms", "-totalrecords",
+                "-runtimecleanup", "-copyonlydrivers", "-localhost", "-sbmport", "-sbmsleepms", "-totalrecords",
                 "--totalrecords", "-totalthroughput", "--totalthroughput"};
         this.parsedArgs = null;
         this.totalThroughput = BigDecimal.ZERO;
@@ -201,11 +206,14 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         config.javadir = getOptionValue("javadir", Objects.requireNonNullElse(config.javadir, ""));
         config.runtimecleanup = Boolean.parseBoolean(getOptionValue("runtimecleanup",
                 Boolean.toString(config.runtimecleanup)));
+        config.copyonlydrivers = Boolean.parseBoolean(getOptionValue(COPY_ONLY_DRIVERS_OPTION,
+                Boolean.toString(config.copyonlydrivers)));
 
         parsedArgs = new String[]{"-nodes", nodeString, "-gemuser", config.gemuser,
                 "-hostkeycheck", Boolean.toString(config.hostkeycheck), "-knownhosts", config.knownhosts,
                 "-gemport", Integer.toString(config.gemport), "-javadir", config.javadir,
                 "-runtimecleanup", Boolean.toString(config.runtimecleanup),
+                "-copyonlydrivers", Boolean.toString(config.copyonlydrivers),
                 "-localhost", localHost, "-sbmport", Integer.toString(sbmPort)};
 
         connections = new ConnectionConfig[nodes.length];

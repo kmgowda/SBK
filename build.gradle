@@ -767,6 +767,7 @@ dependencies {
 }
 
 apply from: "build-drivers.gradle"
+apply from: "gradle/driver-runtime.gradle"
 
 apply from: "gradle/release-qualification.gradle"
 apply from: "gradle/release-publication.gradle"

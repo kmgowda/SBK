@@ -398,13 +398,24 @@ final public class SbkGemBenchmark implements GemBenchmark {
         final Path sbkSourceDirectory = Paths.get(params.getSbkDir()).toAbsolutePath().normalize();
         Printer.log.info("SBK-GEM: Preparing immutable runtime bundle for {}; progress every {} second(s)",
                 platform.id(), config.runtimeProgressIntervalSeconds);
+        final DriverRuntimeManifest driverRuntime = config.copyonlydrivers
+                ? DriverRuntimeManifest.load(sbkSourceDirectory, config.driverClass, config.sbkVersion) : null;
+        if (driverRuntime == null) {
+            Printer.log.info("SBK-GEM: Complete SBK distribution deployment is enabled");
+        } else {
+            Printer.log.info("SBK-GEM: Driver-scoped runtime deployment is enabled for '{}'",
+                    driverRuntime.driverName());
+        }
         final SbkRuntimeBundle bundle;
         final long bundlePreparationMillis;
         try (LifecycleProgress progress = new LifecycleProgress("Immutable runtime bundle preparation for "
                 + platform.id(), config.runtimeProgressIntervalSeconds, runtimeLeaseHeartbeatScheduler,
                 () -> "validating, hashing, or compressing SBK files")) {
-            bundle = SbkRuntimeBundle.create(sbkSourceDirectory, GemConfig.SBK_COMMAND,
-                    config.sbkVersion, controllerJavaVersion, platform, cacheDirectory);
+            bundle = driverRuntime == null
+                    ? SbkRuntimeBundle.create(sbkSourceDirectory, GemConfig.SBK_COMMAND,
+                    config.sbkVersion, controllerJavaVersion, platform, cacheDirectory)
+                    : SbkRuntimeBundle.create(sbkSourceDirectory, GemConfig.SBK_COMMAND,
+                    config.sbkVersion, controllerJavaVersion, platform, cacheDirectory, driverRuntime);
             bundlePreparationMillis = progress.elapsedMillis();
         }
         Printer.log.info("SBK-GEM: {} SBK runtime bundle '{}' {} source directory '{}' in {} ms; {}; "
