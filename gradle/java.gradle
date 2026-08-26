@@ -115,7 +115,9 @@ plugins.withId('java') {
 
     tasks.register('generateJavadoc', Javadoc) {
         source = sourceSets.main.allJava
-        classpath = sourceSets.main.runtimeClasspath
+        // Javadoc resolves types used only in source-level annotations, while
+        // those compile-only dependencies must stay out of production runtimes.
+        classpath = sourceSets.main.compileClasspath + sourceSets.main.output
         failOnError = true
         // Keep the publication Javadocs separate from the standard `javadoc`
         // task. Gradle 9 rejects two independently scheduled tasks that write

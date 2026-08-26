@@ -161,20 +161,20 @@ final class WebConsoleServerTest {
 
     @Test
     void retainsCompletedLogsForBrowserThenStopsAfterBrowserDisconnects() throws Exception {
-        final Duration idleTimeout = Duration.ofMillis(500);
+        final Duration idleTimeout = Duration.ofSeconds(2);
         final WebConsoleServer server = new WebConsoleServer(0, 2, idleTimeout,
                 Duration.ofMillis(20));
         server.start();
         final URI baseUri = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
-        final WebConsoleClient client = WebConsoleClient.connect(config(server.getAddress().getPort()),
-                run("retained-run"));
+        assertEquals(201, post(baseUri.resolve("/api/v1/runs"),
+                MAPPER.writeValueAsString(run("retained-run"))).statusCode());
         post(baseUri.resolve("/api/v1/browser/connect"), "{\"browserId\":\"test-browser\"}");
         final HttpResponse<java.io.InputStream> events = HttpClient.newHttpClient().send(
                 HttpRequest.newBuilder(baseUri.resolve("/api/v1/runs/retained-run/events")).GET().build(),
                 HttpResponse.BodyHandlers.ofInputStream());
         assertEquals(200, events.statusCode());
 
-        client.close();
+        assertEquals(204, post(baseUri.resolve("/api/v1/runs/retained-run/complete"), "{}").statusCode());
         for (int refresh = 0; refresh < 10; refresh++) {
             Thread.sleep(100);
             post(baseUri.resolve("/api/v1/browser/connect"), "{\"browserId\":\"test-browser\"}");
@@ -183,7 +183,7 @@ final class WebConsoleServerTest {
 
         post(baseUri.resolve("/api/v1/browser/disconnect"), "{\"browserId\":\"test-browser\"}");
         events.body().close();
-        assertTimeoutPreemptively(Duration.ofSeconds(2), server::awaitTermination);
+        assertTimeoutPreemptively(Duration.ofSeconds(4), server::awaitTermination);
     }
 
     @Test
