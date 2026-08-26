@@ -20,7 +20,7 @@ Drivers are the primary SBK extension point. A driver converts the harness's gen
 
 ## Runtime inventory
 
-The aggregate distribution currently enables 53 driver projects. The source tree also contains disabled drivers and a template.
+The aggregate distribution currently enables 52 driver projects. The source tree also contains disabled drivers and a template.
 
 | Category | Enabled drivers |
 |---|---|
@@ -28,11 +28,11 @@ The aggregate distribution currently enables 53 driver projects. The source tree
 | Files and distributed filesystems | `asyncfile`, `file`, `filestream`, `hdfs` |
 | Streaming and messaging | `activemq`, `artemis`, `bookkeeper`, `kafka`, `nats`, `natsStream`, `nsq`, `pravega`, `pulsar`, `rabbitmq`, `redpanda`, `rocketmq` |
 | Relational and SQL systems | `db2`, `derby`, `exasol`, `h2`, `hive`, `jdbc`, `mariadb`, `mssql`, `mysql`, `postgresql`, `sqlite` |
-| Document, search, and analytical systems | `chromadb`, `couchbase`, `couchdb`, `dynamodb`, `elasticsearch`, `mongodb`, `solr` |
+| Document, search, and analytical systems | `couchbase`, `couchdb`, `dynamodb`, `elasticsearch`, `mongodb`, `solr` |
 | Key-value and embedded stores | `fdbrecord`, `foundationdb`, `leveldb`, `memcached`, `redis`, `rocksdb` |
 | Harness and local data structures | `atomicq`, `cassandra`, `concurrentq`, `conqueue`, `csv`, `linkedbq`, `null`, `perlbench`, `syncq` |
 
-`ignite` is disabled in the Gradle registration files. `halodb` is disabled because its GitHub Packages dependency can be unavailable without credentials or package quota. `sbktemplate` is intentionally excluded because it is a scaffold.
+`chromadb` is disabled because its Java client adds an approximately 829 MiB all-platform local-embedding dependency closure to the aggregate distribution. `ignite` is disabled in the Gradle registration files. `halodb` is disabled because its GitHub Packages dependency can be unavailable without credentials or package quota. `sbktemplate` is intentionally excluded because it is a scaffold.
 
 The registration files—not this table—are authoritative:
 

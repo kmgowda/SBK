@@ -63,7 +63,11 @@ include 'drivers:atomicq'
 include 'drivers:syncq'
 include 'drivers:elasticsearch'
 // include 'drivers:halodb' // disabled: GitHub Packages quota exceeded
-include 'drivers:chromadb'
+// ChromaDB is source-only by default. chromadb-java-client 0.1.7 pulls an all-platform
+// local-embedding stack (ND4J, ONNX Runtime, OpenBLAS, MKL, and JavaCPP) that adds
+// about 829 MiB of unique artifacts to the aggregate distribution. Uncomment this
+// line and the matching dependency in build-drivers.gradle for ChromaDB benchmarks.
+// include 'drivers:chromadb'
 include 'drivers:solr'
 /* include 'drivers:sbktemplate' */
 /* above line is a signature */

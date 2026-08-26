@@ -54,7 +54,7 @@ throughput baseline: its default operation deliberately remains incomplete.
 - Source-only/disabled: present in the tree but commented out of registration.
 - Template: `sbktemplate`, which must never be treated as a benchmark backend.
 
-HaloDB and Ignite are currently disabled. HaloDB's external package availability is a known constraint.
+ChromaDB, HaloDB, and Ignite are currently disabled. ChromaDB is source-only because its Java client adds an approximately 829 MiB all-platform local-embedding dependency closure to the aggregate distribution. HaloDB's external package availability is a known constraint.
 
 ## Build one driver
 

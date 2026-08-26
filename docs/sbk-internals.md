@@ -175,7 +175,7 @@ The framework's stated design principle, quoted verbatim from
 
 In practice that means:
 
-- **Storage agnostic.** 53 drivers are enabled in the aggregate build today (Kafka,
+- **Storage agnostic.** 52 drivers are enabled in the aggregate build today (Kafka,
   Pulsar, Pravega, BookKeeper, S3, HDFS, Cassandra, MongoDB, Redis,
   RocksDB, PostgreSQL, …). Adding a new one is a matter of implementing
   one Java interface with seven methods.
@@ -243,7 +243,7 @@ flowchart TB
         GYAL["<b>SBK-GEM-YAL</b><br/>YML + SSH<br/>SbkGemYalMain.main()"]
     end
 
-    subgraph DRIVERS["🔌 Drivers (53 enabled)"]
+    subgraph DRIVERS["🔌 Drivers (52 enabled)"]
         DRV["Kafka · Pulsar · Pravega · S3<br/>HDFS · Cassandra · MongoDB · Redis<br/>JDBC · RocksDB · File · …"]
     end
 

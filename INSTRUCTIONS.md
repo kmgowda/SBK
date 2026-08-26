@@ -35,7 +35,7 @@ This is the compact compatibility entry point for tools that look for `INSTRUCTI
 - Checkstyle is strict, including import-package allow-listing.
 - Do not add synchronization or avoidable allocation to driver operation paths.
 - Do not hand-edit generated Javadocs.
-- HaloDB and Ignite are disabled; `sbktemplate` is not a runtime driver.
+- ChromaDB, HaloDB, and Ignite are disabled; `sbktemplate` is not a runtime driver.
 - MinIO 8.5.17 is intentionally pinned for older S3-compatible backend behavior.
 
 ## Normal workflow

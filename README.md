@@ -196,7 +196,7 @@ Useful development commands:
 ./gradlew clean :pathingJar installDist --rerun-tasks
 ```
 
-HaloDB and Ignite are present in the source tree but are not enabled in the aggregate build. HaloDB depends on a GitHub Packages artifact that may require credentials. The `sbktemplate` directory is a scaffold, not a runtime driver.
+ChromaDB, HaloDB, and Ignite are present in the source tree but are not enabled in the aggregate build. ChromaDB's Java client adds an approximately 829 MiB all-platform local-embedding dependency closure; enable it explicitly only for ChromaDB benchmarks. HaloDB depends on a GitHub Packages artifact that may require credentials. The `sbktemplate` directory is a scaffold, not a runtime driver.
 
 ## Run a benchmark
 
