@@ -108,8 +108,7 @@ download.
 Generated launchers for `sbk`, `sbk-yal`, `sbm`, `sbk-gem`, `sbk-gem-yal`, and `sbk-web-console`
 use the same selection order and managed cache. They do not download Java at
 application startup; run the Gradle wrapper once to populate the cache, or set
-`SBK_JAVA_HOME`/`JAVA_HOME`. The standalone `./install-java` command uses the
-same resolver when an explicit installation step is preferred.
+`SBK_JAVA_HOME`/`JAVA_HOME`.
 
 ### Runtime JVM and garbage collector defaults
 
