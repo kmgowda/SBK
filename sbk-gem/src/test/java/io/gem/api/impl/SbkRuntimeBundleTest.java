@@ -54,6 +54,8 @@ final class SbkRuntimeBundleTest {
 
         assertEquals(first.archive(), cached.archive());
         assertEquals(first.contentDigest(), cached.contentDigest());
+        assertFalse(first.archiveReused());
+        assertTrue(cached.archiveReused());
         assertEquals(64, first.archiveDigest().length());
         final List<String> entries = archiveEntries(first.archive());
         assertTrue(entries.contains("runtime/sbk/bin/sbk"));

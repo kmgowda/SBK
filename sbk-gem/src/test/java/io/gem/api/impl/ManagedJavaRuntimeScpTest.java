@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Integration coverage for bulk managed-JDK transfer over Apache MINA SCP. */
@@ -74,8 +75,10 @@ final class ManagedJavaRuntimeScpTest {
         final ManagedJavaRuntime runtime = ManagedJavaRuntime.create(javaHome, 25,
                 Files.createDirectories(temporaryDirectory.resolve("cache")));
         final Path archive = runtime.prepareArchive();
+        assertFalse(runtime.archiveReused());
         final long archiveModified = Files.getLastModifiedTime(archive).toMillis();
         assertEquals(archive, runtime.prepareArchive());
+        assertTrue(runtime.archiveReused());
         assertEquals(archiveModified, Files.getLastModifiedTime(archive).toMillis());
         final Map<String, TarArchiveEntry> archiveEntries = readArchive(archive);
         assertTrue(archiveEntries.containsKey("bin/java"));

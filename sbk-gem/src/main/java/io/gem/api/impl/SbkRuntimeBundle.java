@@ -90,11 +90,13 @@ final class SbkRuntimeBundle {
     private final String sbkVersion;
     private final int javaVersion;
     private final DeploymentPlatform platform;
+    private final boolean archiveReused;
 
     private SbkRuntimeBundle(Path archive, String archiveDigest, String contentDigest,
                              String deploymentName, String relativeSbkCommand, Path cacheLockFile,
                              Path archiveDigestFile, Path archiveSizeFile, Path sbkDirectory,
-                             String sbkVersion, int javaVersion, DeploymentPlatform platform) {
+                             String sbkVersion, int javaVersion, DeploymentPlatform platform,
+                             boolean archiveReused) {
         this.archive = archive;
         this.archiveDigest = archiveDigest;
         this.contentDigest = contentDigest;
@@ -107,6 +109,7 @@ final class SbkRuntimeBundle {
         this.sbkVersion = sbkVersion;
         this.javaVersion = javaVersion;
         this.platform = platform;
+        this.archiveReused = archiveReused;
     }
 
     /**
@@ -142,6 +145,7 @@ final class SbkRuntimeBundle {
         try (FileChannel lockChannel = openLockChannel(cacheLockFile);
              FileLock ignored = lockChannel.lock()) {
             String archiveDigest = cachedArchiveDigest(archive, archiveDigestFile, archiveSizeFile);
+            final boolean archiveReused = archiveDigest != null;
             if (archiveDigest == null) {
                 final List<BundleEntry> entries = collectRuntimeEntries(normalizedSbkDirectory);
                 archiveDigest = createArchive(archive, sbkVersion, javaVersion, platform, contentDigest, entries);
@@ -151,10 +155,14 @@ final class SbkRuntimeBundle {
             return new SbkRuntimeBundle(archive, archiveDigest, contentDigest, deploymentName,
                     relativeSbkCommand, cacheLockFile,
                     archiveDigestFile, archiveSizeFile, normalizedSbkDirectory, sbkVersion, javaVersion,
-                    platform);
+                    platform, archiveReused);
         } finally {
             processLock.unlock();
         }
+    }
+
+    boolean archiveReused() {
+        return archiveReused;
     }
 
     /**

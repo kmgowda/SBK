@@ -87,9 +87,9 @@ final class SbkGemBenchmarkTest {
 
         assertTrue(progress.contains("0 of 1 JDK operation(s) finished"));
         assertTrue(progress.contains("transferred 50.00 MiB of 100.00 MiB"));
-        assertTrue(progress.contains("50.0%"));
+        assertTrue(progress.contains("[50.0%"));
         assertTrue(progress.contains("MiB/s"));
-        assertTrue(progress.contains("ETA"));
+        assertTrue(progress.matches(".*\\[50\\.0%, [0-9.]+ MiB/s, ETA [0-9]+ second\\(s\\)\\]"));
     }
 
     @Test

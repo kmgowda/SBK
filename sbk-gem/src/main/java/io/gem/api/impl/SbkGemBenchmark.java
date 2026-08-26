@@ -32,6 +32,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -394,19 +395,23 @@ final public class SbkGemBenchmark implements GemBenchmark {
             ConnectException, InterruptedException, ExecutionException {
         final DeploymentPlatform platform = environment.platform();
         final Path cacheDirectory = runtimeCacheDirectory();
+        final Path sbkSourceDirectory = Paths.get(params.getSbkDir()).toAbsolutePath().normalize();
         Printer.log.info("SBK-GEM: Preparing immutable runtime bundle for {}; progress every {} second(s)",
                 platform.id(), config.runtimeProgressIntervalSeconds);
         final SbkRuntimeBundle bundle;
-        final long bundlePreparationSeconds;
+        final long bundlePreparationMillis;
         try (LifecycleProgress progress = new LifecycleProgress("Immutable runtime bundle preparation for "
                 + platform.id(), config.runtimeProgressIntervalSeconds, runtimeLeaseHeartbeatScheduler,
                 () -> "validating, hashing, or compressing SBK files")) {
-            bundle = SbkRuntimeBundle.create(Paths.get(params.getSbkDir()), GemConfig.SBK_COMMAND,
+            bundle = SbkRuntimeBundle.create(sbkSourceDirectory, GemConfig.SBK_COMMAND,
                     config.sbkVersion, controllerJavaVersion, platform, cacheDirectory);
-            bundlePreparationSeconds = progress.elapsedSeconds();
+            bundlePreparationMillis = progress.elapsedMillis();
         }
-        Printer.log.info("SBK-GEM: Runtime bundle {} prepared in {} second(s); content SHA-256 {}; "
-                        + "archive SHA-256 {}", bundle.archive().getFileName(), bundlePreparationSeconds,
+        Printer.log.info("SBK-GEM: {} SBK runtime bundle '{}' {} source directory '{}' in {} ms; {}; "
+                        + "content SHA-256 {}; archive SHA-256 {}",
+                bundle.archiveReused() ? "Reused cached" : "Built",
+                bundle.archive(), bundle.archiveReused() ? "for" : "from", sbkSourceDirectory,
+                bundlePreparationMillis, formatTransferSize(Files.size(bundle.archive())),
                 bundle.contentDigest(), bundle.archiveDigest());
         final RuntimeDeployment deployment = deployRuntimeBundle(bundle, absoluteConnectionDirs,
                 environment, platform);
@@ -442,6 +447,10 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
         private long elapsedSeconds() {
             return TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startedNanos);
+        }
+
+        private long elapsedMillis() {
+            return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedNanos);
         }
 
         @Override
@@ -1004,18 +1013,21 @@ final public class SbkGemBenchmark implements GemBenchmark {
         if (hasSelectedTarget(unresolved)) {
             Printer.log.info("SBK-GEM: Java {} or newer is missing on selected host(s); preparing a separate "
                     + "content-addressed JDK bulk SCP transfer", expectedVersion);
+            final Path javaSourceDirectory = Path.of(System.getProperty("java.home")).toAbsolutePath().normalize();
             final ManagedJavaRuntime javaRuntime = ManagedJavaRuntime.create(
-                    Path.of(System.getProperty("java.home")), expectedVersion, runtimeCacheDirectory());
-            final long archivePreparationSeconds;
+                    javaSourceDirectory, expectedVersion, runtimeCacheDirectory());
+            final long archivePreparationMillis;
+            final Path javaArchive;
             try (LifecycleProgress progress = new LifecycleProgress("Managed JDK archive preparation",
                     config.runtimeProgressIntervalSeconds, runtimeLeaseHeartbeatScheduler,
                     () -> "creating or validating the cached single-file tar archive")) {
-                javaRuntime.prepareArchive();
-                archivePreparationSeconds = progress.elapsedSeconds();
+                javaArchive = javaRuntime.prepareArchive();
+                archivePreparationMillis = progress.elapsedMillis();
             }
-            Printer.log.info("SBK-GEM: Managed JDK archive {} prepared in {} second(s); {}",
-                    javaRuntime.directoryName() + ".tar", archivePreparationSeconds,
-                    formatTransferSize(javaRuntime.archiveBytes()));
+            Printer.log.info("SBK-GEM: {} managed JDK archive '{}' {} source directory '{}' in {} ms; {}",
+                    javaRuntime.archiveReused() ? "Reused cached" : "Built", javaArchive,
+                    javaRuntime.archiveReused() ? "for" : "from", javaSourceDirectory,
+                    archivePreparationMillis, formatTransferSize(javaRuntime.archiveBytes()));
             final String[] javaParentDirectories = new String[nodes.length];
             for (int i = 0; i < nodes.length; i++) {
                 javaParentDirectories[i] = remoteParent(absoluteConnectionDirs[i]);
@@ -1120,7 +1132,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         } else {
             estimate = "data transfer complete; finalizing remote metadata";
         }
-        return String.format(Locale.ROOT, "%s; transferred %s of %s (%.1f%%, %.2f MiB/s, %s)",
+        return String.format(Locale.ROOT, "%s; transferred %s of %s [%.1f%%, %.2f MiB/s, %s]",
                 futureProgress(copies, copyHosts, operationDescription), formatTransferSize(copied),
                 formatTransferSize(total), percentage,
                 mebibytesPerSecond, estimate);

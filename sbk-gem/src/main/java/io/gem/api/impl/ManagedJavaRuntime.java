@@ -71,6 +71,7 @@ final class ManagedJavaRuntime {
     private final Path cacheDirectory;
     private volatile Path archive;
     private volatile long archiveBytes;
+    private volatile boolean archiveReused;
 
     private ManagedJavaRuntime(Path localHome, String digest, String directoryName, long contentBytes,
                                Path cacheDirectory) {
@@ -187,6 +188,7 @@ final class ManagedJavaRuntime {
                         && Long.toString(Files.size(target)).equals(metadata.getProperty("archive.bytes"))) {
                     archive = target;
                     archiveBytes = Files.size(target);
+                    archiveReused = true;
                     return target;
                 }
                 createArchive(target);
@@ -196,6 +198,7 @@ final class ManagedJavaRuntime {
                 writeIdentity(descriptor, updated);
                 archive = target;
                 archiveBytes = Files.size(target);
+                archiveReused = false;
                 return target;
             }
         }
@@ -203,6 +206,10 @@ final class ManagedJavaRuntime {
 
     long archiveBytes() {
         return archiveBytes;
+    }
+
+    boolean archiveReused() {
+        return archiveReused;
     }
 
     String install(java.nio.file.FileSystem fileSystem, String parentDirectory) throws IOException {
