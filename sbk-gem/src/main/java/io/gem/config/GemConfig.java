@@ -15,6 +15,7 @@ import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 
 /**
  * Configuration properties for SBK-GEM orchestration.
@@ -32,6 +33,8 @@ final public class GemConfig {
     public static final int DEFAULT_MAXIMUM_DIAGNOSTIC_CHARACTERS = 512;
     /** Default diagnostic prefix retained before the truncation marker. */
     public static final int DEFAULT_DIAGNOSTIC_PREFIX_CHARACTERS = 320;
+    /** Backward-compatible SCP copy buffer for direct {@code SshSession} construction. */
+    public static final int DEFAULT_SSH_COPY_BUFFER_BYTES = 4 * 1024 * 1024;
     /**
      *<code>String SBK_GEM_APP_NAME = "sbk.gem.applicationName</code>.
      */
@@ -49,7 +52,7 @@ final public class GemConfig {
      */
     final public static String BIN_DIR = "bin";
     /** Standard SBK launcher relative to an installed distribution. */
-    final public static String SBK_COMMAND = BIN_DIR + "/sbk";
+    final public static String SBK_COMMAND = Path.of(BIN_DIR, "sbk").toString();
     /**
      * <code>String LOCAL_HOST = "localhost"</code>.
      */
@@ -147,6 +150,8 @@ final public class GemConfig {
     public int controlExecutorThreads;
     /** Maximum platform threads used for concurrent SFTP deployment transfers. */
     public int transferExecutorThreads;
+    /** Read buffer bytes used by each bulk SCP upload. */
+    public int sshCopyBufferBytes;
     /** Maximum stdout/stderr bytes retained per SSH command. */
     public int diagnosticBytes;
     /** Maximum accepted OpenSSH-agent response frame bytes. */
@@ -185,7 +190,7 @@ final public class GemConfig {
                 || timeoutSeconds > Integer.MAX_VALUE / io.time.Time.MS_PER_SEC
                 || runtimeProgressIntervalSeconds < 1
                 || runtimeCacheDirectory == null || runtimeCacheDirectory.isBlank()
-                || controlExecutorThreads < 1 || transferExecutorThreads < 1
+                || controlExecutorThreads < 1 || transferExecutorThreads < 1 || sshCopyBufferBytes < 1
                 || runtimeManagementLockTimeoutSeconds < 1 || runtimeManagementLockStaleSeconds < 1
                 || runtimeManagementLockStaleSeconds <= deploymentTimeoutSeconds
                 || runtimeLeaseReservationSeconds

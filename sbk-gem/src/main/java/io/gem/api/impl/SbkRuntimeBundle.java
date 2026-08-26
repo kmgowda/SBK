@@ -10,6 +10,7 @@
 
 package io.gem.api.impl;
 
+import io.gem.agent.RemoteDeploymentContract;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -55,13 +56,13 @@ import java.util.stream.Stream;
  * without rehashing the complete installation on every execution.
  */
 final class SbkRuntimeBundle {
-    static final String ARCHIVE_ROOT = "runtime";
-    static final String SBK_DIRECTORY = "sbk";
-    static final String DESCRIPTOR_FILE = "deployment.properties";
-    static final String CHECKSUM_FILE = "deployment-files.sha256";
-    static final String REMOTE_DIGEST_FILE = ".sbk-runtime.sha256";
+    static final String ARCHIVE_ROOT = RemoteDeploymentContract.ARCHIVE_ROOT;
+    static final String SBK_DIRECTORY = RemoteDeploymentContract.SBK_DIRECTORY;
+    static final String DESCRIPTOR_FILE = RemoteDeploymentContract.DESCRIPTOR_FILE;
+    static final String CHECKSUM_FILE = RemoteDeploymentContract.CHECKSUM_FILE;
+    static final String REMOTE_DIGEST_FILE = RemoteDeploymentContract.REMOTE_DIGEST_FILE;
     static final String RUNTIME_IDENTITY_FILE = "sbk-runtime-identity.properties";
-    private static final String SHA_256 = "SHA-256";
+    private static final String SHA_256 = RemoteDeploymentContract.SHA_256;
     private static final int SHA_256_HEX_LENGTH = 64;
     private static final int DIGEST_NAME_CHARACTERS = 24;
     private static final int BUFFER_SIZE = 64 * 1024;
@@ -160,7 +161,8 @@ final class SbkRuntimeBundle {
         final String contentDigest = calculateContentDigest(sbkVersion, javaVersion, platform, buildIdentity);
         final String runtimeScope = driverRuntime == null ? ""
                 : "-" + driverRuntime.driverName().toLowerCase(Locale.ROOT);
-        final String deploymentName = "sbk-runtime-" + sbkVersion + "-" + platform.id() + runtimeScope + "-"
+        final String deploymentName = RemoteDeploymentContract.RUNTIME_PREFIX + sbkVersion + "-" + platform.id()
+                + runtimeScope + "-"
                 + contentDigest.substring(0, DIGEST_NAME_CHARACTERS);
         Files.createDirectories(cacheDirectory);
         final Path archive = cacheDirectory.resolve(deploymentName + ARCHIVE_EXTENSION);
@@ -347,7 +349,7 @@ final class SbkRuntimeBundle {
 
     private static boolean isBundleArchive(Path path) {
         final String name = fileName(path);
-        return Files.isRegularFile(path) && name.startsWith("sbk-runtime-")
+        return Files.isRegularFile(path) && name.startsWith(RemoteDeploymentContract.RUNTIME_PREFIX)
                 && (name.endsWith(ARCHIVE_EXTENSION) || name.endsWith(LEGACY_ARCHIVE_EXTENSION));
     }
 
@@ -356,7 +358,7 @@ final class SbkRuntimeBundle {
     }
 
     private static void validateIdentifier(String value) {
-        if (value == null || !value.startsWith("sbk-runtime-") || value.indexOf('/') >= 0
+        if (value == null || !value.startsWith(RemoteDeploymentContract.RUNTIME_PREFIX) || value.indexOf('/') >= 0
                 || value.indexOf('\\') >= 0) {
             throw new IllegalArgumentException("Invalid SBK runtime deployment name: " + value);
         }
@@ -428,10 +430,11 @@ final class SbkRuntimeBundle {
         try (var input = Files.newInputStream(identityFile)) {
             identity.load(input);
         }
-        if (!Integer.toString(RUNTIME_IDENTITY_FORMAT_VERSION).equals(identity.getProperty("format.version"))) {
+        if (!Integer.toString(RUNTIME_IDENTITY_FORMAT_VERSION).equals(
+                identity.getProperty(RemoteDeploymentContract.FORMAT_VERSION_PROPERTY))) {
             throw new IOException("Unsupported SBK runtime identity format in " + identityFile);
         }
-        if (!sbkVersion.equals(identity.getProperty("sbk.version"))) {
+        if (!sbkVersion.equals(identity.getProperty(RemoteDeploymentContract.SBK_VERSION_PROPERTY))) {
             throw new IOException("SBK runtime identity version does not match " + sbkVersion + " in "
                     + identityFile);
         }
@@ -546,9 +549,9 @@ final class SbkRuntimeBundle {
                                                  String buildIdentity) {
         final MessageDigest digest = newDigest();
         update(digest, "format=" + BUNDLE_FORMAT_VERSION + "\n");
-        update(digest, "sbk.version=" + sbkVersion + "\n");
-        update(digest, "java.version=" + javaVersion + "\n");
-        update(digest, "platform.os=" + platform.id() + "\n");
+        update(digest, RemoteDeploymentContract.SBK_VERSION_PROPERTY + "=" + sbkVersion + "\n");
+        update(digest, RemoteDeploymentContract.JAVA_VERSION_PROPERTY + "=" + javaVersion + "\n");
+        update(digest, RemoteDeploymentContract.PLATFORM_OS_PROPERTY + "=" + platform.id() + "\n");
         update(digest, "build.sha256=" + buildIdentity + "\n");
         return HexFormat.of().formatHex(digest.digest());
     }
@@ -627,12 +630,12 @@ final class SbkRuntimeBundle {
 
     private static String descriptor(String sbkVersion, int javaVersion, DeploymentPlatform platform,
                                      String contentDigest) {
-        return "format.version=" + BUNDLE_FORMAT_VERSION + "\n"
-                + "sbk.version=" + sbkVersion + "\n"
-                + "java.version=" + javaVersion + "\n"
-                + "platform.os=" + platform.operatingSystem() + "\n"
-                + "content.sha256=" + contentDigest + "\n"
-                + "includes.java=false\n";
+        return RemoteDeploymentContract.FORMAT_VERSION_PROPERTY + "=" + BUNDLE_FORMAT_VERSION + "\n"
+                + RemoteDeploymentContract.SBK_VERSION_PROPERTY + "=" + sbkVersion + "\n"
+                + RemoteDeploymentContract.JAVA_VERSION_PROPERTY + "=" + javaVersion + "\n"
+                + RemoteDeploymentContract.PLATFORM_OS_PROPERTY + "=" + platform.operatingSystem() + "\n"
+                + RemoteDeploymentContract.CONTENT_SHA_256_PROPERTY + "=" + contentDigest + "\n"
+                + RemoteDeploymentContract.INCLUDES_JAVA_PROPERTY + "=false\n";
     }
 
     private static String checksums(List<BundleEntry> entries) {

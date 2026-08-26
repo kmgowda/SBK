@@ -10,6 +10,7 @@
 
 package io.gem.api.impl;
 
+import io.gem.agent.RemoteDeploymentContract;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -68,7 +69,7 @@ final class DriverRuntimeManifest {
         try (InputStream input = Files.newInputStream(manifestPath)) {
             properties.load(input);
         }
-        if (!FORMAT_VERSION.equals(properties.getProperty("format.version"))) {
+        if (!FORMAT_VERSION.equals(properties.getProperty(RemoteDeploymentContract.FORMAT_VERSION_PROPERTY))) {
             throw new IOException("Unsupported driver runtime manifest format: " + manifestPath);
         }
         final String driverName = required(properties, "driver.name", manifestPath);
@@ -76,7 +77,7 @@ final class DriverRuntimeManifest {
             throw new IOException("Driver runtime manifest " + manifestPath + " selects " + driverName
                     + " instead of " + selectedDriver);
         }
-        if (!sbkVersion.equals(required(properties, "sbk.version", manifestPath))) {
+        if (!sbkVersion.equals(required(properties, RemoteDeploymentContract.SBK_VERSION_PROPERTY, manifestPath))) {
             throw new IOException("Driver runtime manifest version does not match SBK " + sbkVersion + ": "
                     + manifestPath);
         }

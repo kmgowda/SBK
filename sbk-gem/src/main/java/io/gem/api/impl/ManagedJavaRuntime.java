@@ -10,6 +10,7 @@
 
 package io.gem.api.impl;
 
+import io.gem.agent.RemoteDeploymentContract;
 import io.gem.api.SshSession;
 import io.sbk.config.ExitCode;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -55,7 +56,9 @@ final class ManagedJavaRuntime {
     private static final String MARKER = ".sbk-java.sha256";
     private static final String COMPACT_IMAGE_MARKER = ".sbk-java-runtime.identity";
     private static final String IDENTITY_CACHE_FORMAT = "1";
-    private static final String SHA_256 = "SHA-256";
+    private static final String METADATA_SHA_256_PROPERTY = "metadata.sha256";
+    private static final String ARCHIVE_BYTES_PROPERTY = "archive.bytes";
+    private static final String SHA_256 = RemoteDeploymentContract.SHA_256;
     private static final int SHA_256_HEX_LENGTH = 64;
     private static final int HASH_BUFFER_SIZE = 64 * 1024;
     private static final int COPY_BUFFER_SIZE = 256 * 1024;
@@ -148,11 +151,11 @@ final class ManagedJavaRuntime {
                  FileLock ignored = channel.lock()) {
                 final MetadataIdentity metadata = metadataIdentity(home);
                 final Properties cached = loadIdentity(identityFile);
-                final String cachedDigest = cached.getProperty("content.sha256", "");
-                if (IDENTITY_CACHE_FORMAT.equals(cached.getProperty("format.version"))
+                final String cachedDigest = cached.getProperty(RemoteDeploymentContract.CONTENT_SHA_256_PROPERTY, "");
+                if (IDENTITY_CACHE_FORMAT.equals(cached.getProperty(RemoteDeploymentContract.FORMAT_VERSION_PROPERTY))
                         && home.toString().equals(cached.getProperty("java.home"))
                         && Integer.toString(major).equals(cached.getProperty("java.major"))
-                        && metadata.digest().equals(cached.getProperty("metadata.sha256"))
+                        && metadata.digest().equals(cached.getProperty(METADATA_SHA_256_PROPERTY))
                         && isSha256(cachedDigest)) {
                     return runtime(home, major, cachedDigest, metadata.contentBytes(), cacheDirectory,
                             compilerRequired, directoryPrefix);
@@ -160,11 +163,11 @@ final class ManagedJavaRuntime {
                 final ManagedJavaRuntime runtime = create(home, major, cacheDirectory,
                         compilerRequired, directoryPrefix);
                 final Properties identity = new Properties();
-                identity.setProperty("format.version", IDENTITY_CACHE_FORMAT);
+                identity.setProperty(RemoteDeploymentContract.FORMAT_VERSION_PROPERTY, IDENTITY_CACHE_FORMAT);
                 identity.setProperty("java.home", home.toString());
                 identity.setProperty("java.major", Integer.toString(major));
-                identity.setProperty("metadata.sha256", metadata.digest());
-                identity.setProperty("content.sha256", runtime.digest);
+                identity.setProperty(METADATA_SHA_256_PROPERTY, metadata.digest());
+                identity.setProperty(RemoteDeploymentContract.CONTENT_SHA_256_PROPERTY, runtime.digest);
                 writeIdentity(identityFile, identity);
                 return runtime(home, major, runtime.digest, runtime.contentBytes, cacheDirectory,
                         compilerRequired, directoryPrefix);
@@ -218,10 +221,10 @@ final class ManagedJavaRuntime {
     }
 
     private static void validateJavaHome(Path home, boolean compilerRequired) throws IOException {
-        if (!Files.isExecutable(home.resolve("bin/java"))) {
+        if (!Files.isExecutable(home.resolve(RemoteDeploymentContract.JAVA_EXECUTABLE))) {
             throw new IOException("Java runtime is incomplete: " + home);
         }
-        if (compilerRequired && !Files.isExecutable(home.resolve("bin/javac"))) {
+        if (compilerRequired && !Files.isExecutable(home.resolve(RemoteDeploymentContract.JAVA_COMPILER))) {
             throw new IOException("Controller JDK compiler is missing: " + home);
         }
     }
@@ -230,8 +233,8 @@ final class ManagedJavaRuntime {
         final Path marker = image.resolve(COMPACT_IMAGE_MARKER);
         return Files.isRegularFile(marker)
                 && expectedIdentity.equals(Files.readString(marker, StandardCharsets.UTF_8).trim())
-                && Files.isExecutable(image.resolve("bin/java"))
-                && !Files.exists(image.resolve("bin/javac"), LinkOption.NOFOLLOW_LINKS);
+                && Files.isExecutable(image.resolve(RemoteDeploymentContract.JAVA_EXECUTABLE))
+                && !Files.exists(image.resolve(RemoteDeploymentContract.JAVA_COMPILER), LinkOption.NOFOLLOW_LINKS);
     }
 
     private static void createCompactImage(Path javaHome, Path image, String imageIdentity,
@@ -266,8 +269,9 @@ final class ManagedJavaRuntime {
                 Thread.currentThread().interrupt();
                 throw new IOException("Interrupted while generating the compact Java runtime", exception);
             }
-            if (exitCode != ExitCode.SUCCESS || !Files.isExecutable(staging.resolve("bin/java"))
-                    || Files.exists(staging.resolve("bin/javac"), LinkOption.NOFOLLOW_LINKS)) {
+            if (exitCode != ExitCode.SUCCESS
+                    || !Files.isExecutable(staging.resolve(RemoteDeploymentContract.JAVA_EXECUTABLE))
+                    || Files.exists(staging.resolve(RemoteDeploymentContract.JAVA_COMPILER), LinkOption.NOFOLLOW_LINKS)) {
                 throw new IOException("jlink failed to generate the compact Java runtime (exit " + exitCode
                         + "): " + new String(diagnostic, StandardCharsets.UTF_8));
             }
@@ -300,8 +304,9 @@ final class ManagedJavaRuntime {
                     java.nio.file.StandardOpenOption.WRITE);
                  FileLock ignored = channel.lock()) {
                 final Properties metadata = loadIdentity(descriptor);
-                if (Files.isRegularFile(target) && digest.equals(metadata.getProperty("content.sha256"))
-                        && Long.toString(Files.size(target)).equals(metadata.getProperty("archive.bytes"))) {
+                if (Files.isRegularFile(target)
+                        && digest.equals(metadata.getProperty(RemoteDeploymentContract.CONTENT_SHA_256_PROPERTY))
+                        && Long.toString(Files.size(target)).equals(metadata.getProperty(ARCHIVE_BYTES_PROPERTY))) {
                     archive = target;
                     archiveBytes = Files.size(target);
                     archiveReused = true;
@@ -309,8 +314,8 @@ final class ManagedJavaRuntime {
                 }
                 createArchive(target);
                 final Properties updated = new Properties();
-                updated.setProperty("content.sha256", digest);
-                updated.setProperty("archive.bytes", Long.toString(Files.size(target)));
+                updated.setProperty(RemoteDeploymentContract.CONTENT_SHA_256_PROPERTY, digest);
+                updated.setProperty(ARCHIVE_BYTES_PROPERTY, Long.toString(Files.size(target)));
                 writeIdentity(descriptor, updated);
                 archive = target;
                 archiveBytes = Files.size(target);
@@ -415,12 +420,15 @@ final class ManagedJavaRuntime {
             final CompletableFuture<String> activation = session.runRemoteTransferOperationAsync(fileSystem -> {
                 final Path staging = fileSystem.getPath(plan.staging());
                 final Path destination = fileSystem.getPath(plan.destination());
-                copyPermissions(localHome.resolve("bin/java"), staging.resolve("bin/java"));
+                copyPermissions(localHome.resolve(RemoteDeploymentContract.JAVA_EXECUTABLE),
+                        staging.resolve(RemoteDeploymentContract.JAVA_EXECUTABLE));
                 if (compilerRequired) {
-                    copyPermissions(localHome.resolve("bin/javac"), staging.resolve("bin/javac"));
+                    copyPermissions(localHome.resolve(RemoteDeploymentContract.JAVA_COMPILER),
+                            staging.resolve(RemoteDeploymentContract.JAVA_COMPILER));
                 }
-                if (!isExecutable(staging.resolve("bin/java"))
-                        || (compilerRequired && !isExecutable(staging.resolve("bin/javac")))) {
+                if (!isExecutable(staging.resolve(RemoteDeploymentContract.JAVA_EXECUTABLE))
+                        || (compilerRequired
+                        && !isExecutable(staging.resolve(RemoteDeploymentContract.JAVA_COMPILER)))) {
                     throw new IOException("Bulk SCP transfer did not preserve executable Java files under "
                             + staging + "; entries: " + listNames(staging));
                 }
@@ -480,8 +488,8 @@ final class ManagedJavaRuntime {
     private boolean hasUsableExpectedIdentity(Path destination) throws IOException {
         final Path marker = destination.resolve(MARKER);
         return Files.isRegularFile(marker) && digest.equals(Files.readString(marker).trim())
-                && isExecutable(destination.resolve("bin/java"))
-                && (!compilerRequired || isExecutable(destination.resolve("bin/javac")));
+                && isExecutable(destination.resolve(RemoteDeploymentContract.JAVA_EXECUTABLE))
+                && (!compilerRequired || isExecutable(destination.resolve(RemoteDeploymentContract.JAVA_COMPILER)));
     }
 
     private static boolean isExecutable(Path path) throws IOException {

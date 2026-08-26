@@ -10,6 +10,7 @@
 
 package io.gem.api.impl;
 
+import io.gem.agent.RemoteDeploymentContract;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -63,7 +64,7 @@ final class CompactJavaRuntimeDescriptor {
         try (InputStream input = Files.newInputStream(descriptor)) {
             properties.load(input);
         }
-        if (!FORMAT_VERSION.equals(properties.getProperty("format.version"))) {
+        if (!FORMAT_VERSION.equals(properties.getProperty(RemoteDeploymentContract.FORMAT_VERSION_PROPERTY))) {
             throw new IOException("Unsupported compact Java runtime descriptor format: " + descriptor);
         }
         final int javaMajor;
@@ -126,7 +127,7 @@ final class CompactJavaRuntimeDescriptor {
 
     private static String sha256(String value) {
         try {
-            final MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            final MessageDigest digest = MessageDigest.getInstance(RemoteDeploymentContract.SHA_256);
             return HexFormat.of().formatHex(digest.digest(value.getBytes(StandardCharsets.UTF_8)));
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException(exception);

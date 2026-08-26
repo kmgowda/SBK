@@ -302,6 +302,9 @@ large copy cannot starve probes, leases, or shutdown work. Remote commands that
 remain open for the complete benchmark use lightweight Java virtual threads
 instead of one platform thread per node. The pool limits are owned by
 `controlExecutorThreads` and `transferExecutorThreads` in `gem.properties`.
+Each bulk SCP stream uses the separately configurable `sshCopyBufferBytes`
+read buffer (4 MiB by default); this affects controller memory per active
+transfer but does not change the number of parallel transfers.
 
 When the controller is also a selected SSH host, its deployment parent may be
 the local SBK distribution directory. GEM reserves `sbk-runtime-*` and

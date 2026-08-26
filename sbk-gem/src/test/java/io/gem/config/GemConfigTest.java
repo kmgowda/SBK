@@ -11,11 +11,20 @@ package io.gem.config;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /** Verifies validation of bundled SBK-GEM runtime configuration. */
 public final class GemConfigTest {
+
+    /** Ensures the bundled deployment configuration owns the default SCP buffer. */
+    @Test
+    public void loadsSshCopyBufferDefault() throws IOException {
+        assertEquals(GemConfig.DEFAULT_SSH_COPY_BUFFER_BYTES, GemConfig.load().sshCopyBufferBytes);
+    }
 
     /** Ensures diagnostic truncation always retains at least one suffix character. */
     @Test
@@ -71,6 +80,18 @@ public final class GemConfigTest {
         assertDoesNotThrow(config::validate);
     }
 
+    /** Ensures each SCP stream has a non-empty read buffer. */
+    @Test
+    public void validatesSshCopyBufferSize() {
+        final GemConfig config = validConfig();
+        config.sshCopyBufferBytes = 0;
+
+        assertThrows(IllegalArgumentException.class, config::validate);
+
+        config.sshCopyBufferBytes = 1;
+        assertDoesNotThrow(config::validate);
+    }
+
     /** Ensures registration and driver operation timeouts are positive and safely convertible. */
     @Test
     public void validatesRegistrationAndDriverTimeouts() {
@@ -102,6 +123,7 @@ public final class GemConfigTest {
         config.timeoutSeconds = 1;
         config.controlExecutorThreads = 1;
         config.transferExecutorThreads = 1;
+        config.sshCopyBufferBytes = 1;
         config.diagnosticBytes = 1;
         config.maximumAgentResponseBytes = 1;
         config.diagnosticPrefixCharacters = 1;

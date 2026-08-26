@@ -10,6 +10,7 @@
 
 package io.gem.api.impl;
 
+import io.gem.agent.RemoteDeploymentContract;
 import io.gem.agent.RemoteRuntimeFiles;
 
 import java.io.BufferedInputStream;
@@ -28,7 +29,6 @@ import java.util.UUID;
 
 /** Installs the small remote agent JAR through Apache MINA SFTP. */
 final class RemoteAgentFiles {
-    private static final String SHA_256 = "SHA-256";
     private static final int BUFFER_SIZE = 64 * 1024;
 
     private RemoteAgentFiles() {
@@ -65,7 +65,7 @@ final class RemoteAgentFiles {
     private static String sha256(Path path) throws IOException {
         final MessageDigest digest;
         try {
-            digest = MessageDigest.getInstance(SHA_256);
+            digest = MessageDigest.getInstance(RemoteDeploymentContract.SHA_256);
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException(exception);
         }
