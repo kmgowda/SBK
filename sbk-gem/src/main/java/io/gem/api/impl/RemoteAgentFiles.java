@@ -10,6 +10,8 @@
 
 package io.gem.api.impl;
 
+import io.gem.agent.RemoteRuntimeFiles;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -32,13 +34,20 @@ final class RemoteAgentFiles {
     private RemoteAgentFiles() {
     }
 
-    static String install(java.nio.file.FileSystem fileSystem, String parentDirectory, Path localAgent,
-                          String version) throws IOException {
-        final Path parent = fileSystem.getPath(parentDirectory);
-        Files.createDirectories(parent);
+    static AgentBootstrap prepare(java.nio.file.FileSystem fileSystem, String configuredDirectory, Path localAgent,
+                                  String version, String digest) throws IOException {
+        final String resolvedDirectory = RemoteRuntimeFiles.resolveDirectory(fileSystem, configuredDirectory);
+        final String agentPath = install(fileSystem.getPath(resolvedDirectory), localAgent, version, digest);
+        return new AgentBootstrap(resolvedDirectory, agentPath);
+    }
+
+    static String digest(Path localAgent) throws IOException {
+        return sha256(localAgent);
+    }
+
+    private static String install(Path parent, Path localAgent, String version, String digest) throws IOException {
         final Path destination = parent.resolve(".sbk-gem-agent-" + version + ".jar");
         final Path marker = parent.resolve(".sbk-gem-agent-" + version + ".sha256");
-        final String digest = sha256(localAgent);
         if (Files.isRegularFile(destination) && Files.isRegularFile(marker)
                 && digest.equals(Files.readString(marker).trim())) {
             return destination.toString();
@@ -68,5 +77,8 @@ final class RemoteAgentFiles {
             }
         }
         return HexFormat.of().formatHex(digest.digest());
+    }
+
+    record AgentBootstrap(String directory, String agentPath) {
     }
 }

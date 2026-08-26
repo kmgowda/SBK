@@ -1939,8 +1939,8 @@ sequenceDiagram
         SSH->>N2: SSH + known_hosts + agent/key/password
     end
 
-    GEM->>SSH: install small Java agent through SFTP
-    GEM->>SSH: probe preferred/PATH Java and OS through the agent
+    GEM->>SSH: resolve directory and verify/install agent in one SFTP operation
+    GEM->>SSH: probe preferred/PATH Java and OS as each target becomes ready
     Note over GEM: require one homogeneous Linux or macOS operating system
     GEM->>GEM: validate installDist and Gradle driver runtime metadata
     opt matching Java is unavailable
@@ -2019,9 +2019,14 @@ The separate first-time Java deployment creates or reuses one cached plain-tar
 archive, sends it through a single Apache MINA SCP stream per active target,
 and invokes the standard remote `tar` executable for staging extraction. SBK
 archives use a single-file SCP stream and Java-agent extraction. SFTP is limited
-to remote-directory resolution and small Java-agent installation; runtime
+to one combined remote-directory resolution and small Java-agent installation
+operation per physical target; runtime
 lifecycle operations execute locally through one typed Java-agent request per host. This avoids
-serialized per-entry payload round trips. JDK and SBK copies report aggregate bytes,
+serialized per-entry payload round trips. The controller hashes its agent once,
+pipelines each Java probe behind its own target's SFTP operation, retains successful
+probe results for final platform verification, and runs required post-provisioning
+probes concurrently. A bounded progress message names targets that are still
+bootstrapping. JDK and SBK copies report aggregate bytes,
 completion percentage, MiB/s, and ETA without per-file logging; once all bytes
 arrive, progress identifies the remaining remote metadata finalization phase.
 

@@ -327,7 +327,10 @@ deleted by the remote Java agent after leases are released, so recursive deletio
 hold the lifecycle lock or block lease acquisition and remote benchmark startup.
 No login-shell program, zsh construct, `nohup`, PID probe, shell glob, remote
 archive command, or checksum command participates in deployment. Apache MINA
-SFTP resolves paths and installs the small Java agent; that agent performs
+SFTP resolves paths and verifies or installs the small Java agent in one
+operation per physical target. SBK-GEM hashes the local agent once and starts
+each target's Java probe immediately after that target is ready, while bounded
+progress logs identify any hosts still bootstrapping. The agent performs
 lifecycle metadata updates, verification, archive activation, cleanup, and
 benchmark process launch through local Java filesystem APIs.
 

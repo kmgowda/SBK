@@ -49,6 +49,27 @@ final class RemoteTargetPlan {
     }
 
     /**
+     * Build a preliminary plan before configured remote directories are resolved.
+     *
+     * <p>This safely deduplicates aliases only when they use the same configured
+     * directory text. A later plan based on resolved absolute paths can collapse
+     * any additional equivalent targets.</p>
+     *
+     * @param connections SSH connections
+     * @param endpointIdentities authenticated network endpoint identities
+     * @return preliminary immutable target plan
+     * @throws IllegalArgumentException when the array lengths differ
+     */
+    static RemoteTargetPlan createBeforeDirectoryResolution(ConnectionConfig[] connections,
+                                                             String[] endpointIdentities) {
+        final String[] configuredDirectories = new String[connections.length];
+        for (int index = 0; index < connections.length; index++) {
+            configuredDirectories[index] = connections[index].getDir();
+        }
+        return create(connections, endpointIdentities, configuredDirectories);
+    }
+
+    /**
      * Return whether an index owns physical deployment work for its target.
      *
      * @param index logical node index
