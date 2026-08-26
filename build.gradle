@@ -30,17 +30,21 @@ buildscript {
     }
 
     // Determine JDK source and path
-    def jdkSource = "System Default"
+    def jdkSource = System.getenv("SBK_JAVA_SOURCE") ?: "System Default"
     def jdkPath = System.getProperty("java.home")
 
     def sbkJavaHome = System.getenv("SBK_JAVA_HOME")
     def javaHome = System.getenv("JAVA_HOME")
 
     if (sbkJavaHome != null && !sbkJavaHome.isEmpty()) {
-        jdkSource = "SBK_JAVA_HOME"
+        if (jdkSource == "System Default") {
+            jdkSource = "SBK_JAVA_HOME"
+        }
         jdkPath = sbkJavaHome
     } else if (javaHome != null && !javaHome.isEmpty()) {
-        jdkSource = "JAVA_HOME"
+        if (jdkSource == "System Default") {
+            jdkSource = "JAVA_HOME"
+        }
         jdkPath = javaHome
     }
 

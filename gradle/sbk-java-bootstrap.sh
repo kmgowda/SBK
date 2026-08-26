@@ -71,6 +71,32 @@ sbk_java_select_home() {
     return 0
 }
 
+sbk_java_configure_cache() {
+    if [ -n "${SBK_JAVA_CACHE_DIR:-}" ]; then
+        sbk_java_cache=$SBK_JAVA_CACHE_DIR
+    elif [ -n "${XDG_CACHE_HOME:-}" ]; then
+        sbk_java_cache=$XDG_CACHE_HOME/sbk/jdks
+    else
+        sbk_java_cache=$HOME/.cache/sbk/jdks
+    fi
+    sbk_java_state_file=$sbk_java_cache/$SBK_JAVA_STATE_FILE
+}
+
+sbk_java_persisted_home() {
+    [ -r "$sbk_java_state_file" ] || return 1
+    sbk_java_saved_home=$(sed -n 's/^SBK_JAVA_HOME=//p' "$sbk_java_state_file" | sed -n '1p')
+    [ -n "$sbk_java_saved_home" ] || return 1
+    sbk_java_select_home "$sbk_java_saved_home"
+}
+
+sbk_java_persist_home() {
+    [ "${SBK_JAVA_INSTALL:-true}" = "true" ] || return 0
+    mkdir -p "$sbk_java_cache" || return 1
+    sbk_java_state_temp=$sbk_java_state_file.$$
+    (umask 077 && printf 'SBK_JAVA_HOME=%s\n' "$SBK_JAVA_HOME" > "$sbk_java_state_temp") || return 1
+    mv "$sbk_java_state_temp" "$sbk_java_state_file"
+}
+
 sbk_java_home_from_path() {
     sbk_java_path_command=$(command -v java 2>/dev/null) || return 1
     sbk_java_path_home=$(
@@ -254,14 +280,6 @@ sbk_java_install_archive() (
 
 sbk_java_install_managed() {
     sbk_java_managed_platform || return 1
-    if [ -n "${SBK_JAVA_CACHE_DIR:-}" ]; then
-        sbk_java_cache=$SBK_JAVA_CACHE_DIR
-    elif [ -n "${XDG_CACHE_HOME:-}" ]; then
-        sbk_java_cache=$XDG_CACHE_HOME/sbk/jdks
-    else
-        sbk_java_cache=$HOME/.cache/sbk/jdks
-    fi
-
     sbk_java_target=$sbk_java_cache/openjdk-$SBK_JAVA_VERSION-$SBK_JAVA_PLATFORM
     sbk_java_home=$sbk_java_target
     case "$SBK_JAVA_PLATFORM" in
@@ -279,14 +297,21 @@ sbk_java_install_managed() {
     sbk_java_select_home "$sbk_java_home"
 }
 
+sbk_java_configure_cache
 if [ -n "${SBK_JAVA_HOME:-}" ]; then
     SBK_JAVA_SOURCE=SBK_JAVA_HOME
-    sbk_java_select_home "$SBK_JAVA_HOME" ||
+    if ! sbk_java_select_home "$SBK_JAVA_HOME"; then
         sbk_java_error "SBK_JAVA_HOME must point to a complete JDK $SBK_JAVA_MAJOR installation: $SBK_JAVA_HOME"
+        return 1
+    fi
+elif sbk_java_persisted_home; then
+    SBK_JAVA_SOURCE=SBK_JAVA_HOME_PERSISTED
 elif [ -n "${JAVA_HOME:-}" ]; then
     SBK_JAVA_SOURCE=JAVA_HOME
-    sbk_java_select_home "$JAVA_HOME" ||
+    if ! sbk_java_select_home "$JAVA_HOME"; then
         sbk_java_error "JAVA_HOME must point to a complete JDK $SBK_JAVA_MAJOR installation: $JAVA_HOME"
+        return 1
+    fi
 elif sbk_java_home_from_path; then
     SBK_JAVA_SOURCE=PATH
 elif sbk_java_install_managed; then
@@ -294,5 +319,10 @@ elif sbk_java_install_managed; then
     echo "Using managed OpenJDK $SBK_JAVA_VERSION from $SBK_JAVA_HOME" >&2
 else
     sbk_java_error "no usable JDK $SBK_JAVA_MAJOR was found. Set SBK_JAVA_HOME or JAVA_HOME."
+    return 1
+fi
+if ! sbk_java_persist_home; then
+    sbk_java_error "unable to persist SBK_JAVA_HOME in $sbk_java_state_file"
+    return 1
 fi
 export SBK_JAVA_SOURCE

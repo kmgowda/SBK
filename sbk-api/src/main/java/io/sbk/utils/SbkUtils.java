@@ -38,6 +38,8 @@ public final class SbkUtils {
     private static final String SBK_JAVA_SOURCE_ENV = "SBK_JAVA_SOURCE";
     private static final String JAVA_SOURCE_PATH = "PATH";
     private static final String JAVA_SOURCE_MANAGED = "SBK_MANAGED_JDK_CACHE";
+    private static final String JAVA_SOURCE_PERSISTED = "SBK_JAVA_HOME_PERSISTED";
+    private static final String JAVA_SOURCE_SBK_GEM_REMOTE = "SBK_GEM_REMOTE_JDK";
     private static final String[] SENSITIVE_OPTIONS = {
         "gempass", "key", "password", "passwd", "secret", "token"
     };
@@ -149,6 +151,8 @@ public final class SbkUtils {
                 case JAVA_HOME_ENV -> JAVA_HOME_ENV + " environment variable";
                 case JAVA_SOURCE_PATH -> "system PATH";
                 case JAVA_SOURCE_MANAGED -> "SBK managed JDK cache";
+                case JAVA_SOURCE_PERSISTED -> "persisted SBK_JAVA_HOME configuration";
+                case JAVA_SOURCE_SBK_GEM_REMOTE -> "SBK-GEM selected remote JDK";
                 default -> "launcher selection: " + launcherSource;
             };
         }

@@ -170,6 +170,10 @@ public class SbkUtilsTest {
                 SbkUtils.getJavaSelectionSource(Map.of("SBK_JAVA_SOURCE", "PATH"), "jdk-home"));
         assertEquals("SBK managed JDK cache",
                 SbkUtils.getJavaSelectionSource(Map.of("SBK_JAVA_SOURCE", "SBK_MANAGED_JDK_CACHE"), "jdk-home"));
+        assertEquals("persisted SBK_JAVA_HOME configuration",
+                SbkUtils.getJavaSelectionSource(Map.of("SBK_JAVA_SOURCE", "SBK_JAVA_HOME_PERSISTED"), "jdk-home"));
+        assertEquals("SBK-GEM selected remote JDK",
+                SbkUtils.getJavaSelectionSource(Map.of("SBK_JAVA_SOURCE", "SBK_GEM_REMOTE_JDK"), "jdk-home"));
     }
 
     @Test

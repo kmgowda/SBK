@@ -86,29 +86,34 @@ java -version
 The Gradle wrappers resolve a complete JDK 25 in this order:
 
 1. `SBK_JAVA_HOME`;
-2. `JAVA_HOME`;
-3. a JDK 25 available through `PATH`; and
-4. the SBK-managed JDK cache.
+2. the persisted `SBK_JAVA_HOME` selection from the first successful build;
+3. `JAVA_HOME`;
+4. a JDK 25 available through `PATH`; and
+5. the SBK-managed JDK cache.
 
 If none is available, `gradlew` downloads the pinned OpenJDK 25 release,
 verifies its SHA-256 checksum, and installs it without administrator access in
 `${XDG_CACHE_HOME:-$HOME/.cache}/sbk/jdks` on Unix or
 `%LOCALAPPDATA%\SBK\jdks` on Windows. Later wrapper invocations reuse that
-installation. Set `SBK_JAVA_CACHE_DIR` to select a different cache directory.
+selection through `sbk-java-home.properties` in the same directory. The
+wrapper and generated launchers export the resolved path as `SBK_JAVA_HOME`
+to Gradle and the Java application process. A child process cannot modify its
+parent shell environment, so this per-user file provides persistence between
+invocations. Set `SBK_JAVA_CACHE_DIR` to select a different cache directory.
 Automatic installation supports Linux x64/AArch64, macOS x64/AArch64, and
 Windows x64. Other platforms can use a manually installed JDK through
 `SBK_JAVA_HOME`.
 The pinned version, platform checksums, and bootstrap network/lock timeouts
 have one authoritative source:
 [`gradle/sbk-java-bootstrap.properties`](gradle/sbk-java-bootstrap.properties).
-An explicitly configured but invalid `SBK_JAVA_HOME` or `JAVA_HOME` is treated
-as an error so a configuration mistake is never hidden by an automatic
-download.
+An invalid explicit `SBK_JAVA_HOME`, or an invalid `JAVA_HOME` when no higher
+priority persisted selection exists, is treated as an error so a selected
+configuration mistake is never hidden by an automatic download.
 
 Generated launchers for `sbk`, `sbk-yal`, `sbm`, `sbk-gem`, `sbk-gem-yal`, and `sbk-web-console`
-use the same selection order and managed cache. They do not download Java at
-application startup; run the Gradle wrapper once to populate the cache, or set
-`SBK_JAVA_HOME`/`JAVA_HOME`.
+use the same persisted selection and export it as `SBK_JAVA_HOME`. They do not
+download Java at application startup; run the Gradle wrapper once to establish
+the persisted selection, or set `SBK_JAVA_HOME`/`JAVA_HOME`.
 
 ### Runtime JVM and garbage collector defaults
 

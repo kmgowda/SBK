@@ -38,7 +38,7 @@ plugins.withId('application') {
     }
 
     // Configure every standard and custom start script to use the same JVM
-    // options and SBK_JAVA_HOME -> JAVA_HOME -> PATH selection order.
+    // options and explicit/persisted SBK_JAVA_HOME -> JAVA_HOME -> PATH selection order.
     tasks.withType(CreateStartScripts).configureEach {
         doFirst {
             defaultJvmOpts = ((defaultJvmOpts ?: []) + rootProject.ext.sbkRuntimeJvmArgs).unique()
@@ -46,7 +46,7 @@ plugins.withId('application') {
         doLast {
             // For Unix scripts - inject SBK_JAVA_HOME runtime check with fallback
             def unixJavaDetectionLogic = '''# Resolve the same JDK used by the SBK build.
-# Application launchers reuse a configured, system, or previously managed JDK;
+# Application launchers reuse the explicit or persisted SBK_JAVA_HOME selection;
 # only gradlew performs a first-run download.
 SBK_JAVA_INSTALL=false
 export SBK_JAVA_INSTALL
@@ -67,7 +67,7 @@ unset SBK_JAVA_INSTALL'''
             unixScript.text = unixScript.text.substring(0, startIndex) + unixJavaDetectionLogic + '\n\n' + unixScript.text.substring(endIndex)
             
             // For Windows scripts - inject SBK_JAVA_HOME runtime check with fallback
-            def windowsJavaLogic = '''@rem Resolve a configured, system, or previously managed JDK 25.
+            def windowsJavaLogic = '''@rem Reuse the explicit or persisted SBK_JAVA_HOME selection.
 call "%APP_HOME%\\bin\\sbk-java-bootstrap.bat" false
 if errorlevel 1 goto fail
 

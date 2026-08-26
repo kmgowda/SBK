@@ -47,6 +47,10 @@ public final class SbkGemRemoteAgentMain {
     private static final String DESCRIPTOR = "deployment.properties";
     private static final String CHECKSUMS = "deployment-files.sha256";
     private static final String SHA_256 = "SHA-256";
+    private static final String SBK_JAVA_HOME = "SBK_JAVA_HOME";
+    private static final String JAVA_HOME = "JAVA_HOME";
+    private static final String SBK_JAVA_SOURCE = "SBK_JAVA_SOURCE";
+    private static final String SBK_GEM_REMOTE_JDK = "SBK_GEM_REMOTE_JDK";
     private static final int SOFTWARE_ERROR_EXIT_CODE = 70;
     private static final int BUFFER_SIZE = 64 * 1024;
     private static final int PROBE_VALUE_COUNT = 1;
@@ -214,8 +218,13 @@ public final class SbkGemRemoteAgentMain {
         }
         final Path sbk = runtime.resolve("sbk");
         final List<Path> jars = runtimeJars(sbk, values.get(1));
+        final Path javaHome = Path.of(System.getProperty("java.home")).toAbsolutePath().normalize();
+        final Path javaExecutable = javaHome.resolve("bin/java");
+        if (!Files.isExecutable(javaExecutable)) {
+            throw new IOException("Selected remote Java executable is unavailable: " + javaExecutable);
+        }
         final List<String> command = new ArrayList<>();
-        command.add(Path.of(System.getProperty("java.home"), "bin/java").toString());
+        command.add(javaExecutable.toString());
         command.addAll(values.subList(3, 3 + jvmCount));
         command.add("-Dsbk.applicationName=sbk");
         command.add("-Dsbk.appHome=" + sbk);
@@ -224,9 +233,11 @@ public final class SbkGemRemoteAgentMain {
         command.add(jars.get(0) + System.getProperty("path.separator") + jars.get(1));
         command.add("io.sbk.main.SbkMain");
         command.addAll(values.subList(3 + jvmCount, values.size()));
-        final Process process = new ProcessBuilder(command).directory(Objects.requireNonNull(runtime.getParent(),
-                        "SBK runtime must have a parent directory").toFile())
-                .inheritIO().start();
+        final ProcessBuilder processBuilder = new ProcessBuilder(command).directory(Objects.requireNonNull(
+                        runtime.getParent(), "SBK runtime must have a parent directory").toFile())
+                .inheritIO();
+        configureRemoteJavaEnvironment(processBuilder, javaHome);
+        final Process process = processBuilder.start();
         final Thread cleanup = new Thread(() -> stopProcessTree(process), "sbk-gem-agent-cleanup");
         Runtime.getRuntime().addShutdownHook(cleanup);
         try {
@@ -238,6 +249,14 @@ public final class SbkGemRemoteAgentMain {
                 // JVM shutdown already owns the hook.
             }
         }
+    }
+
+    static ProcessBuilder configureRemoteJavaEnvironment(ProcessBuilder processBuilder, Path javaHome) {
+        final String normalizedJavaHome = javaHome.toAbsolutePath().normalize().toString();
+        processBuilder.environment().put(SBK_JAVA_HOME, normalizedJavaHome);
+        processBuilder.environment().put(JAVA_HOME, normalizedJavaHome);
+        processBuilder.environment().put(SBK_JAVA_SOURCE, SBK_GEM_REMOTE_JDK);
+        return processBuilder;
     }
 
     private static List<Path> runtimeJars(Path sbk, String version) throws IOException {

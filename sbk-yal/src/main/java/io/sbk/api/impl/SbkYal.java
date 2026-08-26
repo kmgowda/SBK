@@ -92,7 +92,7 @@ public final class SbkYal {
         Printer.log.info(SbkYal.DESC);
         Printer.log.info(SbkYal.NAME.toUpperCase() + " Version: " + Objects.requireNonNullElse(version, ""));
         Printer.log.info("Arguments List: " + Arrays.toString(SbkUtils.redactSensitiveOptionValues(args)));
-        Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
+        SbkUtils.logJavaRuntimeDetails();
         Printer.log.info("Operating System: " + SbkUtils.getOperatingSystemDetails());
 
         yalConfig = YalConfig.load(SbkYal.class.getClassLoader(), CONFIG_FILE);

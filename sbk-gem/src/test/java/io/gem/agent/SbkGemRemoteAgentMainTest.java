@@ -10,9 +10,11 @@
 
 package io.gem.agent;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -33,6 +35,22 @@ final class SbkGemRemoteAgentMainTest {
         assertTrue(SbkGemRemoteAgentMain.isJavaCompatible(25, 25));
         assertTrue(SbkGemRemoteAgentMain.isJavaCompatible(26, 25));
         assertFalse(SbkGemRemoteAgentMain.isJavaCompatible(24, 25));
+    }
+
+    @Test
+    void remoteSbkReceivesTheSelectedJavaHomeAndSource() throws Exception {
+        final Path javaHome = Path.of(System.getProperty("java.home")).toAbsolutePath().normalize();
+        final ProcessBuilder processBuilder = new ProcessBuilder(javaExecutable(), "-classpath",
+                System.getProperty("java.class.path"), JavaEnvironmentFixture.class.getName())
+                .redirectErrorStream(true);
+        SbkGemRemoteAgentMain.configureRemoteJavaEnvironment(processBuilder, javaHome);
+
+        final Process process = processBuilder.start();
+        final String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8).trim();
+
+        assertEquals(0, process.waitFor(), output);
+        assertEquals(String.join("|", javaHome.toString(), javaHome.toString(),
+                "SBK_GEM_REMOTE_JDK", javaHome.toString()), output);
     }
 
     @Test
@@ -93,5 +111,23 @@ final class SbkGemRemoteAgentMainTest {
 
     private static String javaExecutable() {
         return Path.of(System.getProperty("java.home"), "bin", "java").toString();
+    }
+
+    static final class JavaEnvironmentFixture {
+        private JavaEnvironmentFixture() {
+        }
+
+        /**
+         * Print the Java environment inherited by the launched process.
+         *
+         * @param args unused
+         */
+        @SuppressFBWarnings(value = "ENV_USE_PROPERTY_INSTEAD_OF_ENV",
+                justification = "This fixture verifies the environment contract passed to remote SBK")
+        public static void main(String[] args) {
+            System.out.print(String.join("|", System.getenv("SBK_JAVA_HOME"), System.getenv("JAVA_HOME"),
+                    System.getenv("SBK_JAVA_SOURCE"),
+                    Path.of(System.getProperty("java.home")).toAbsolutePath().normalize().toString()));
+        }
     }
 }

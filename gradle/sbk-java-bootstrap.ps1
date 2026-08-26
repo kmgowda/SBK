@@ -36,6 +36,15 @@ $downloadRetries = [int]$bootstrapConfig.SBK_JAVA_DOWNLOAD_RETRIES
 $connectTimeoutSeconds = [int]$bootstrapConfig.SBK_JAVA_CONNECT_TIMEOUT_SECONDS
 $downloadTimeoutSeconds = [int]$bootstrapConfig.SBK_JAVA_DOWNLOAD_TIMEOUT_SECONDS
 $lockTimeoutSeconds = [int]$bootstrapConfig.SBK_JAVA_LOCK_TIMEOUT_SECONDS
+$stateFileName = $bootstrapConfig.SBK_JAVA_STATE_FILE
+$cacheRoot = if ($env:SBK_JAVA_CACHE_DIR) {
+    $env:SBK_JAVA_CACHE_DIR
+} else {
+    $localAppData = [Environment]::GetFolderPath('LocalApplicationData')
+    if (-not $localAppData) { $localAppData = Join-Path $env:USERPROFILE '.cache' }
+    Join-Path $localAppData 'SBK\jdks'
+}
+$stateFile = Join-Path $cacheRoot $stateFileName
 
 function Invoke-SbkJavaDownload([string]$Uri, [string]$OutFile) {
     $curl = Get-Command curl.exe -ErrorAction SilentlyContinue
@@ -77,6 +86,12 @@ function Stop-SbkJava([string]$Message) {
 }
 
 function Write-SbkJavaResolution([string]$Source, [string]$Home) {
+    if ($InstallIfMissing -eq 'true') {
+        New-Item -ItemType Directory -Force -Path $cacheRoot | Out-Null
+        $stateTemp = "$stateFile.$PID"
+        [IO.File]::WriteAllText($stateTemp, "SBK_JAVA_HOME=$Home`n", [Text.UTF8Encoding]::new($false))
+        Move-Item -Force $stateTemp $stateFile
+    }
     Write-Output "$Source|$Home"
     exit 0
 }
@@ -87,6 +102,17 @@ if ($env:SBK_JAVA_HOME) {
         Stop-SbkJava "SBK_JAVA_HOME must point to a complete JDK $jdkMajor installation: $candidate"
     }
     Write-SbkJavaResolution 'SBK_JAVA_HOME' $candidate
+}
+
+if (Test-Path $stateFile -PathType Leaf) {
+    $savedHome = Get-Content -LiteralPath $stateFile | Where-Object { $_ -like 'SBK_JAVA_HOME=*' } |
+        Select-Object -First 1
+    if ($savedHome) {
+        $candidate = $savedHome.Substring('SBK_JAVA_HOME='.Length)
+        if (Test-SbkJdk $candidate) {
+            Write-SbkJavaResolution 'SBK_JAVA_HOME_PERSISTED' $candidate
+        }
+    }
 }
 
 if ($env:JAVA_HOME) {
@@ -108,13 +134,6 @@ if ($pathJava) {
     }
 }
 
-$cacheRoot = if ($env:SBK_JAVA_CACHE_DIR) {
-    $env:SBK_JAVA_CACHE_DIR
-} else {
-    $localAppData = [Environment]::GetFolderPath('LocalApplicationData')
-    if (-not $localAppData) { $localAppData = Join-Path $env:USERPROFILE '.cache' }
-    Join-Path $localAppData 'SBK\jdks'
-}
 $target = Join-Path $cacheRoot "openjdk-$jdkVersion-windows-x64"
 if (Test-SbkJdk $target) {
     Write-SbkJavaResolution 'SBK_MANAGED_JDK_CACHE' $target

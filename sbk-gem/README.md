@@ -345,7 +345,9 @@ only when its exact content is absent.
 For each remote launch, the agent starts `io.sbk.main.SbkMain` directly with
 the selected JDK and the verified SBK pathing/main JARs. The deployed shell
 launcher is not executed. A newer remote JDK is accepted because it can execute
-SBK classes built for the controller's Java release.
+SBK classes built for the controller's Java release. The agent passes the
+verified home to remote SBK as both `SBK_JAVA_HOME` and `JAVA_HOME`, marks its
+source as `SBK_GEM_REMOTE_JDK`, and invokes the absolute `bin/java` path.
 
 Before a multi-host run:
 

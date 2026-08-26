@@ -101,7 +101,7 @@ final public class SbkGemYal {
         Printer.log.info(SbkGemYal.DESC);
         Printer.log.info(SbkGemYal.NAME.toUpperCase() + " Version: " + Objects.requireNonNullElse(version, ""));
         Printer.log.info("Arguments List: " + Arrays.toString(SbkUtils.redactSensitiveOptionValues(args)));
-        Printer.log.info("Java Runtime Version: " + System.getProperty("java.runtime.version"));
+        SbkUtils.logJavaRuntimeDetails();
         Printer.log.info("Operating System: " + SbkUtils.getOperatingSystemDetails());
 
         yalConfig = YalConfig.load(SbkGemYal.class.getClassLoader(), CONFIG_FILE);
