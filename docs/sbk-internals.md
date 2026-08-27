@@ -1919,7 +1919,9 @@ sequenceDiagram
     autonumber
     participant User
     participant GEM as SbkGemBenchmark
-    participant SSH as "SshSession[] (Apache Mina SSHD)"
+    participant DEPLOY as DeploymentOrchestrator
+    participant LEASE as RuntimeLeaseManager
+    participant SSH as "RemoteNodeState sessions (Apache Mina SSHD)"
     participant SBM as "SbmBenchmark (local)"
     participant N1 as "Remote node 1"
     participant N2 as "Remote node 2"
@@ -1948,22 +1950,23 @@ sequenceDiagram
         GEM->>SSH: copy Java as a separate content-addressed tree
         GEM->>SSH: verify copied Java through the agent
     end
-    GEM->>GEM: build a full or opt-in driver-scoped SBK archive
-    GEM->>SSH: reserve deployment identities through the Java agent
+    GEM->>DEPLOY: build or reuse a full or driver-scoped SBK archive
+    DEPLOY->>LEASE: reserve deployment identities through the Java agent
     par inspect exact runtime identity
         SSH->>N1: agent verifies content marker and SBK JARs
         SSH->>N2: agent verifies content marker and SBK JARs
     end
     alt exact runtime is missing
-        GEM->>SSH: upload one content-addressed archive
+        DEPLOY->>SSH: upload one content-addressed archive
         SSH->>N1: agent extracts, verifies, and atomically activates SBK
         SSH->>N2: agent extracts, verifies, and atomically activates SBK
     end
-    GEM->>SSH: verify activated Java, SBK, and content identity
+    DEPLOY->>SSH: verify activated Java, SBK, and content identity
     opt packagescleanup is true (default)
         SSH->>N1: agent atomically retires and deletes inactive runtimes
         SSH->>N2: agent atomically retires and deletes inactive runtimes
     end
+    DEPLOY->>LEASE: acquire active runtime leases
 
     GEM->>SBM: sbmBenchmark.start()<br/>(listen on :9717 locally)
     GEM->>SSH: send typed run request to the Java agent
@@ -3354,7 +3357,9 @@ deeper:
 7. `sbk-api/src/main/java/io/sbk/logger/impl/PrometheusLogger.java` — a real logger
 8. `drivers/file/src/main/java/io/sbk/driver/File/File.java` — the simplest real driver
 9. `sbm/src/main/java/io/sbm/api/impl/SbmBenchmark.java` — distributed aggregation
-10. `sbk-gem/src/main/java/io/gem/api/impl/SbkGemBenchmark.java` — SSH orchestration
+10. `sbk-gem/src/main/java/io/gem/api/impl/SbkGemBenchmark.java` — remote-command and SBM coordination
+11. `sbk-gem/src/main/java/io/gem/api/impl/DeploymentOrchestrator.java` — deployment sequencing
+12. `sbk-gem/src/main/java/io/gem/api/impl/RuntimeLeaseManager.java` — runtime lease lifecycle
 
 If you make it through that reading list, you understand SBK as well
 as anyone outside its core maintainers. From there, picking up a
