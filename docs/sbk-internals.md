@@ -2121,7 +2121,20 @@ described below. It is transport/orchestration infrastructure, not part of the
 per-operation measurement path.
 
 SBK-GEM uses **Apache Mina SSHD** (a pure-Java SSH client; no native
-binary, no `ssh` shell-out). Each remote node is a `SshSession`:
+binary, no `ssh` shell-out). Each remote node has an independent `SshSession`,
+authenticated `ClientSession`, and TCP connection. Compatible sessions share
+client-level MINA connector, scheduler, and lifecycle infrastructure through
+`SshClientManager`. The manager groups clients by immutable security policy:
+password-preferred, unverified passwordless, or verified passwordless with the
+same known-hosts file and preferred host-key types. It never shares mutable
+credentials; passwords are installed only on the corresponding node session.
+This keeps the unavoidable socket and cryptographic state per node while
+preventing client-level resources from growing once per node.
+
+Connection cancellation is also session-scoped. A timeout cancels only that
+node's pending `ConnectFuture` or authenticated session and never stops the
+shared client used by healthy peers. Shutdown closes every node session before
+the manager stops its policy-grouped clients.
 
 Host-key verification is disabled by default so unattended passwordless SSH can
 reach agent and key-file authentication without being blocked by stale trust

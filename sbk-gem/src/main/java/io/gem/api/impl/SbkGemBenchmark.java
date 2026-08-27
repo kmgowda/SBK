@@ -17,6 +17,7 @@ import io.gem.api.ConnectionConfig;
 import io.gem.api.GemBenchmark;
 import io.gem.api.RemoteExecutionStatus;
 import io.gem.api.RemoteResponse;
+import io.gem.api.SshClientManager;
 import io.gem.api.SshCommandException;
 import io.gem.api.SshResponse;
 import io.gem.api.SshSession;
@@ -77,6 +78,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
     /** Execution resources separated by orchestration workload. */
     private final SbkGemExecutors executors;
     private final SshSession[] nodes;
+    private final SshClientManager sshClientManager;
     private final String[] remoteEndpointIdentities;
     private final int controllerJavaVersion;
     private final RuntimeCopyPolicy runtimeCopyPolicy;
@@ -125,6 +127,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
                 TransferExecutorSizing.initialThreads(config));
         this.remoteResults = new RemoteResponse[connections.length];
         this.nodes = new SshSession[connections.length];
+        this.sshClientManager = new SshClientManager();
         this.remoteEndpointIdentities = new String[connections.length];
         this.runtimeLeaseLaunched = new boolean[connections.length];
         this.runtimeLeaseActive = new boolean[connections.length];
@@ -133,9 +136,11 @@ final public class SbkGemBenchmark implements GemBenchmark {
         this.runtimeLeaseHeartbeatScheduler = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
                 .name("sbk-gem-lifecycle-scheduler").daemon(true).factory());
         for (int i = 0; i < connections.length; i++) {
-            nodes[i] = new SshSession(connections[i], executors.control(), executors.transfer(), executors.command(),
-                    config.diagnosticBytes, config.sshCopyBufferBytes);
+            nodes[i] = sshClientManager.sessionFor(connections[i], executors.control(), executors.transfer(),
+                    executors.command(), config.diagnosticBytes, config.sshCopyBufferBytes);
         }
+        Printer.log.info("SBK-GEM: Sharing {} Apache MINA SSH client(s) across {} remote node session(s)",
+                sshClientManager.size(), connections.length);
     }
 
     @Override
@@ -1441,6 +1446,11 @@ final public class SbkGemBenchmark implements GemBenchmark {
             } catch (RuntimeException stopFailure) {
                 terminalFailure = combineTerminalFailures(terminalFailure, stopFailure);
             }
+        }
+        try {
+            sshClientManager.close();
+        } catch (RuntimeException stopFailure) {
+            terminalFailure = combineTerminalFailures(terminalFailure, stopFailure);
         }
         final boolean stopSbm = lifecycle.takeSbmStarted();
         if (stopSbm) {

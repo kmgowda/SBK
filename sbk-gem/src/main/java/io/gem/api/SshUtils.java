@@ -65,22 +65,20 @@ public final class SshUtils {
      * @return configured, unstarted SSH client
      */
     public static SshClient createClient(ConnectionConfig connConfig) {
+        return createClient(clientPolicy(connConfig));
+    }
+
+    static SshClient createClient(SshClientPolicy policy) {
         final SshClient client = SshClient.setUpDefaultClient();
-        final boolean passwordSupplied = StringUtils.isNotEmpty(connConfig.getPassword());
-        if (passwordSupplied) {
+        if (policy.acceptAllHostKeys()) {
             client.setServerKeyVerifier(AcceptAllServerKeyVerifier.INSTANCE);
-        } else if (connConfig.isHostKeyCheck()) {
-            final Path knownHosts = (StringUtils.isEmpty(connConfig.getKnownHosts())
-                    ? KnownHostEntry.getDefaultKnownHostsFile()
-                    : Path.of(connConfig.getKnownHosts())).toAbsolutePath().normalize();
-            client.setServerKeyVerifier(KNOWN_HOST_VERIFIERS.computeIfAbsent(knownHosts,
-                    SshUtils::acceptNewKnownHostsVerifier));
-            preferKnownHostAlgorithms(client, connConfig, knownHosts);
         } else {
-            client.setServerKeyVerifier(AcceptAllServerKeyVerifier.INSTANCE);
+            client.setServerKeyVerifier(KNOWN_HOST_VERIFIERS.computeIfAbsent(policy.knownHosts(),
+                    SshUtils::acceptNewKnownHostsVerifier));
+            preferKnownHostAlgorithms(client, policy.preferredHostKeyTypes());
         }
 
-        if (passwordSupplied) {
+        if (policy.passwordPreferred()) {
             preferPasswordAuthentication(client);
         }
 
@@ -89,6 +87,18 @@ public final class SshUtils {
             client.setAgentFactory(new JdkUnixAgentFactory(agentSocket));
         }
         return client;
+    }
+
+    static SshClientPolicy clientPolicy(ConnectionConfig connConfig) {
+        final boolean passwordSupplied = StringUtils.isNotEmpty(connConfig.getPassword());
+        if (passwordSupplied || !connConfig.isHostKeyCheck()) {
+            return new SshClientPolicy(true, passwordSupplied, null, List.of());
+        }
+        final Path knownHosts = (StringUtils.isEmpty(connConfig.getKnownHosts())
+                ? KnownHostEntry.getDefaultKnownHostsFile()
+                : Path.of(connConfig.getKnownHosts())).toAbsolutePath().normalize();
+        return new SshClientPolicy(false, false, knownHosts,
+                knownHostKeyTypes(connConfig, knownHosts));
     }
 
     private static KnownHostsServerKeyVerifier acceptNewKnownHostsVerifier(Path knownHosts) {
@@ -120,13 +130,21 @@ public final class SshUtils {
      */
     public static ClientSession createSession(SshClient client, ConnectionConfig connConfig, long timeoutSeconds)
             throws IOException {
+        return createSession(client, connConfig, timeoutSeconds, new SshConnectionAttempt());
+    }
+
+    static ClientSession createSession(SshClient client, ConnectionConfig connConfig, long timeoutSeconds,
+                                       SshConnectionAttempt attempt) throws IOException {
         // Connect to the server
         final ClientSession session;
         try {
             final ConnectFuture cf = client.connect(connConfig.getUserName(), connConfig.getHost(),
                     connConfig.getPort());
+            attempt.connecting(cf);
             session = cf.verify(timeoutSeconds, TimeUnit.SECONDS).getSession();
+            attempt.connected(session);
         } catch (IOException ex) {
+            attempt.complete();
             throw new IOException("SSH connection failed: " + ex.getMessage(), ex);
         }
 
@@ -141,13 +159,15 @@ public final class SshUtils {
                 throw new IOException("SSH host key verification failed: " + ex.getMessage(), ex);
             }
             throw new IOException("SSH authentication failed: " + ex.getMessage(), ex);
+        } finally {
+            attempt.complete();
         }
         return session;
     }
 
-    private static void preferKnownHostAlgorithms(SshClient client, ConnectionConfig connConfig, Path knownHosts) {
+    private static List<String> knownHostKeyTypes(ConnectionConfig connConfig, Path knownHosts) {
         if (!java.nio.file.Files.isRegularFile(knownHosts)) {
-            return;
+            return List.of();
         }
         try {
             final Set<String> knownKeyTypes = new HashSet<>();
@@ -156,15 +176,19 @@ public final class SshUtils {
                     knownKeyTypes.add(KeyUtils.getCanonicalKeyType(entry.getKeyEntry().getKeyType()));
                 }
             }
-            if (knownKeyTypes.isEmpty()) {
-                return;
-            }
-            final List<NamedFactory<Signature>> signatures = new ArrayList<>(client.getSignatureFactories());
-            signatures.sort(Comparator.comparingInt(signature ->
-                    knownKeyTypes.contains(KeyUtils.getCanonicalKeyType(signature.getName())) ? 0 : 1));
-            client.setSignatureFactories(signatures);
+            return knownKeyTypes.stream().sorted().toList();
         } catch (IOException ex) {
             // The verifier reports an actionable error when it reads the same file during connection establishment.
+            return List.of();
+        }
+    }
+
+    private static void preferKnownHostAlgorithms(SshClient client, List<String> knownKeyTypes) {
+        if (!knownKeyTypes.isEmpty()) {
+            final List<NamedFactory<Signature>> signatures = new ArrayList<>(client.getSignatureFactories());
+            signatures.sort(Comparator.comparingInt(signature -> knownKeyTypes.contains(
+                    KeyUtils.getCanonicalKeyType(signature.getName())) ? 0 : 1));
+            client.setSignatureFactories(signatures);
         }
     }
 
