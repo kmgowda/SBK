@@ -47,7 +47,8 @@ SBK-GEM owns remote launch and aggregate lifecycle. The remote SBK processes sti
 - Network reachability from remote SBK clients back to the GEM/SBM host, normally on port `9717`. By default,
   SBK-GEM advertises the numeric controller address selected by each authenticated SSH route, avoiding a dependency
   on remote DNS. Use `-localhost <address>` only when an explicit shared callback address is required (for example,
-  through NAT or a load balancer).
+  through NAT or a load balancer). The embedded SBM prints its complete set of gRPC performance-data endpoints once
+  after startup; SBK-GEM does not duplicate that host-level endpoint report.
 - Network reachability from remote hosts to the target storage system.
 - A homogeneous operating-system cluster: controller, containers, and all
   remote nodes must use the same supported operating system (`Linux` or

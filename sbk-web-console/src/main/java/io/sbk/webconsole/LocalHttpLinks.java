@@ -33,11 +33,16 @@ public final class LocalHttpLinks {
     public static final String LOCALHOST = "localhost";
     /** Numeric IPv4 loopback address. */
     public static final String IPV4_LOOPBACK = "127.0.0.1";
-    private static final String LOCALHOST_LABEL = "Localhost";
-    private static final String IPV4_LOOPBACK_LABEL = "IPv4 Loopback";
-    private static final String HOSTNAME_LABEL = "Hostname";
-    private static final String PRIVATE_IP_LABEL = "Private IP";
-    private static final String PUBLIC_IP_LABEL = "Public IP";
+    /** Display label for the localhost DNS alias. */
+    public static final String LOCALHOST_LABEL = "Localhost";
+    /** Display label for the numeric IPv4 loopback address. */
+    public static final String IPV4_LOOPBACK_LABEL = "IPv4 Loopback";
+    /** Display label for the discovered local hostname. */
+    public static final String HOSTNAME_LABEL = "Hostname";
+    /** Display label for site-local IPv4 interface addresses. */
+    public static final String PRIVATE_IP_LABEL = "Private IP";
+    /** Display label for non-site-local IPv4 interface addresses. */
+    public static final String PUBLIC_IP_LABEL = "Public IP";
 
     private LocalHttpLinks() {
     }

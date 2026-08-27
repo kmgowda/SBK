@@ -41,7 +41,13 @@ flowchart LR
     R --> O[Prometheus, Local Web Console, or result output]
 ```
 
-The default gRPC port is `9717`. Container configuration also exposes the configured metrics port. Keep the gRPC service on a trusted benchmark network unless an external security layer is provided.
+The default gRPC port is `9717`. After the listener is ready, SBM prints one
+gRPC performance-data endpoint line for each localhost, loopback, hostname,
+private-IP, and public-IP address type, including the listening port. Only
+public addresses assigned to local interfaces can be reported; an address
+supplied by an external NAT gateway is shown as not detected. Container
+configuration also exposes the configured metrics port. Keep the gRPC service
+on a trusted benchmark network unless an external security layer is provided.
 
 ## Build
 

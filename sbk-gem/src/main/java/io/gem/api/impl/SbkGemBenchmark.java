@@ -503,8 +503,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
         waitForDeployment(CompletableFuture.allOf(probes), "remote immutable runtime checks");
         for (int i = 0; i < nodes.length; i++) {
             if (probes[i].get().returnCode == ExitCode.SUCCESS) {
-                Printer.log.info("SBK-GEM: Host '{}' already has immutable runtime {}; skipping copy",
-                        nodes[i].connection.getHost(), bundle.deploymentName());
+                Printer.log.info("SBK-GEM: Host '{}' will use existing SBK installation '{}'; skipping copy",
+                        nodes[i].connection.getHost(), remoteSbkDirectory(deploymentDirectories[i]));
             } else {
                 copyTargets[i] = true;
             }
@@ -512,6 +512,12 @@ final public class SbkGemBenchmark implements GemBenchmark {
         if (hasSelectedTarget(copyTargets)) {
             uploadAndActivateRuntime(bundle, deploymentDirectories, copyTargets, platform);
             verifyRuntimeDeployment(bundle, deploymentDirectories, javaHomes, agentPaths, copyTargets, platform);
+            for (int i = 0; i < nodes.length; i++) {
+                if (copyTargets[i]) {
+                    Printer.log.info("SBK-GEM: Host '{}' will use newly activated SBK installation '{}'",
+                            nodes[i].connection.getHost(), remoteSbkDirectory(deploymentDirectories[i]));
+                }
+            }
         } else {
             Printer.log.info("SBK-GEM: Immutable runtime {} is already available on every host",
                     bundle.deploymentName());
@@ -833,6 +839,14 @@ final public class SbkGemBenchmark implements GemBenchmark {
             Printer.log.info("SBK-GEM: Bulk SCP copying immutable runtime archive {} ({}) to {} unique "
                             + "remote target(s); progress every {} second(s)", bundle.archive().getFileName(),
                     formatTransferSize(archiveBytes), transferCount, config.runtimeProgressIntervalSeconds);
+            for (int i = 0; i < nodes.length; i++) {
+                if (physicalCopyTargets[i]) {
+                    Printer.log.info("SBK-GEM: Host '{}:{}' temporary runtime archive destination: '{}'; "
+                                    + "SBK execution directory after activation: '{}'",
+                            nodes[i].connection.getHost(), nodes[i].connection.getPort(), archivePaths[i],
+                            remoteSbkDirectory(deploymentDirectories[i]));
+                }
+            }
             final long transferSeconds;
             final long copyStartedNanos = System.nanoTime();
             try (LifecycleProgress progress = new LifecycleProgress("Immutable runtime archive copy",
@@ -1474,6 +1488,10 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
     private static String remoteJavaExecutable(String javaHome) {
         return RemotePath.join(javaHome, RemoteDeploymentContract.JAVA_EXECUTABLE);
+    }
+
+    static String remoteSbkDirectory(String runtimeDirectory) {
+        return RemotePath.join(runtimeDirectory, RemoteDeploymentContract.SBK_DIRECTORY);
     }
 
     private record RuntimeDeployment(String[] javaHomes, String[] agentPaths, String[] deploymentDirectories,

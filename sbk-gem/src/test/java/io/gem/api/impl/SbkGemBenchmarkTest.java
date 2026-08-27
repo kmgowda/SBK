@@ -38,6 +38,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 final class SbkGemBenchmarkTest {
     @Test
+    void resolvesRemoteSbkDirectoryInsideActivatedRuntime() {
+        assertEquals("/home/admin/sbk-gem-10.6/sbk-runtime-file/sbk",
+                SbkGemBenchmark.remoteSbkDirectory("/home/admin/sbk-gem-10.6/sbk-runtime-file"));
+    }
+
+    @Test
     void replacesAdvertisedSbmAddressWithoutChangingOtherArguments() {
         final List<String> arguments = new java.util.ArrayList<>(List.of(
                 "-class", "File", "-sbm", "controller-name", "-sbmport", "9717"));

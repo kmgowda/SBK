@@ -210,7 +210,6 @@ final public class SbmBenchmark implements Benchmark {
             return retFuture.toCompletableFuture();
         }
         state = State.RUN;
-        Printer.log.info("SBM Started");
         logger.open(params, params.getStorageName(), params.getAction(), time);
         if (!coordinatedStart) {
             startLatencyAggregation();
@@ -219,6 +218,9 @@ final public class SbmBenchmark implements Benchmark {
             try {
                 server.start();
                 serverStarted = true;
+                SbmListenerDetails.localDetails(server.getPort()).forEach(detail ->
+                        Printer.log.info("SBM gRPC Performance Data Endpoint ({}): {}",
+                                detail.label(), detail.endpoint()));
             } catch (IOException exception) {
                 shutdown(exception, BenchmarkTermination.INTERNAL_FAILURE);
                 throw exception;

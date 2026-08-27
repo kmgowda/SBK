@@ -117,18 +117,26 @@ final public class SbkGem {
                                        String loggerPackageName) throws ParseException, IllegalArgumentException,
             IOException, InterruptedException, InstantiationException, ExecutionException, TimeoutException,
             ClassNotFoundException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        final GemBenchmark benchmark;
+        final SbkGemExecutionTimer executionTimer = SbkGemExecutionTimer.start();
+        Printer.log.info("SBK-GEM Execution Start Time: {}", executionTimer.startTime());
         try {
-            benchmark = buildBenchmark(args, applicationName, storagePackageName, loggerPackageName);
-        } catch (HelpException ex) {
-            return null;
-        }
-        final Thread shutdownHook = ApplicationShutdownHook.register("SBK-GEM", benchmark::stop);
-        try {
-            final CompletableFuture<RemoteResponse[]> ret = benchmark.start();
-            return ret.get();
+            final GemBenchmark benchmark;
+            try {
+                benchmark = buildBenchmark(args, applicationName, storagePackageName, loggerPackageName);
+            } catch (HelpException ex) {
+                return null;
+            }
+            final Thread shutdownHook = ApplicationShutdownHook.register("SBK-GEM", benchmark::stop);
+            try {
+                final CompletableFuture<RemoteResponse[]> ret = benchmark.start();
+                return ret.get();
+            } finally {
+                ApplicationShutdownHook.remove(shutdownHook);
+            }
         } finally {
-            ApplicationShutdownHook.remove(shutdownHook);
+            final SbkGemExecutionTimer.ExecutionSummary summary = executionTimer.finish();
+            Printer.log.info("SBK-GEM Execution End Time: {}", summary.endTime());
+            Printer.log.info("SBK-GEM Total Execution Time: {}", summary.totalTime());
         }
     }
 
