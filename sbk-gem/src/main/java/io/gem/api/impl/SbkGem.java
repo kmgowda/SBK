@@ -62,6 +62,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -83,6 +84,12 @@ final public class SbkGem {
     final static String BANNER_FILE = "gem-banner.txt";
     private static final int MINIMUM_RESULT_SEPARATOR_WIDTH = 80;
     private static final int TOTAL_THROUGHPUT_SCALE = 12;
+    private static final String DISTRIBUTED_STATUS_LABEL = "Distributed Benchmark Status";
+    private static final String EXPECTED_NODES_LABEL = "Expected Nodes";
+    private static final String SUCCESSFUL_NODES_LABEL = "Successful Nodes";
+    private static final String FAILED_NODES_LABEL = "Failed Nodes";
+    private static final String MAXIMUM_REGISTRATIONS_LABEL = "Maximum SBM Registrations";
+    private static final int RESULT_LABEL_WIDTH = DISTRIBUTED_STATUS_LABEL.length();
 
     /**
      * Creates an SBK-GEM orchestration helper.
@@ -594,14 +601,13 @@ final public class SbkGem {
         }
         final String runStatus = distributedRunStatus(results, maximumRegisteredClients);
 
-        final String registrationText = maximumRegisteredClients < 0 ? "unavailable"
-                : maximumRegisteredClients + "/" + results.length;
-        final String summary = "SBK-GEM Distributed Benchmark Status: " + runStatus +
-                "; expected nodes: " + results.length + "; successful nodes: " + successful +
-                "; failed nodes: " + failed + "; maximum SBM registrations: " + registrationText;
+        final List<String> summaryLines = distributedResultSummary(runStatus, results.length, successful, failed,
+                maximumRegisteredClients);
         final String title = "SBK-GEM Distributed Benchmark Final Results";
-        int separatorWidth = Math.max(MINIMUM_RESULT_SEPARATOR_WIDTH,
-                Math.max(title.length(), summary.length()));
+        int separatorWidth = Math.max(MINIMUM_RESULT_SEPARATOR_WIDTH, title.length());
+        for (String summaryLine : summaryLines) {
+            separatorWidth = Math.max(separatorWidth, summaryLine.length());
+        }
         for (int i = 0; i < results.length; i++) {
             separatorWidth = Math.max(separatorWidth, remoteHostSummary(results[i], i).length());
         }
@@ -611,9 +617,9 @@ final public class SbkGem {
         Printer.log.info(title);
         Printer.log.info(separatorText);
         if ("SUCCESS".equals(runStatus)) {
-            Printer.log.info(summary);
+            summaryLines.forEach(Printer.log::info);
         } else {
-            Printer.log.error(summary);
+            summaryLines.forEach(Printer.log::error);
             Printer.log.error("SBK-GEM: Distributed results are incomplete and must not be used as a valid " +
                     "performance comparison");
         }
@@ -640,6 +646,22 @@ final public class SbkGem {
             }
         }
         Printer.log.info(separatorText);
+    }
+
+    static List<String> distributedResultSummary(String runStatus, int expected, int successful, int failed,
+                                                 int maximumRegisteredClients) {
+        final String registrationText = maximumRegisteredClients < 0 ? "unavailable"
+                : maximumRegisteredClients + "/" + expected;
+        return List.of(
+                resultSummaryLine(DISTRIBUTED_STATUS_LABEL, runStatus),
+                resultSummaryLine(EXPECTED_NODES_LABEL, expected),
+                resultSummaryLine(SUCCESSFUL_NODES_LABEL, successful),
+                resultSummaryLine(FAILED_NODES_LABEL, failed),
+                resultSummaryLine(MAXIMUM_REGISTRATIONS_LABEL, registrationText));
+    }
+
+    private static String resultSummaryLine(String label, Object value) {
+        return String.format(Locale.ROOT, "SBK-GEM %-" + RESULT_LABEL_WIDTH + "s : %s", label, value);
     }
 
     private static String remoteHostSummary(RemoteResponse result, int index) {
