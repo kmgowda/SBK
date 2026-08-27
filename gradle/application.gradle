@@ -46,13 +46,13 @@ plugins.withId('application') {
         doLast {
             // For Unix scripts - inject SBK_JAVA_HOME runtime check with fallback
             def unixJavaDetectionLogic = '''# Resolve the same JDK used by the SBK build.
-# Application launchers reuse the explicit or persisted SBK_JAVA_HOME selection;
-# only gradlew performs a first-run download.
-SBK_JAVA_INSTALL=false
+# Application launchers reuse an existing JDK by default. Set
+# SBK_JAVA_INSTALL=true to download the pinned JDK when none is available.
+SBK_JAVA_INSTALL=${SBK_JAVA_INSTALL:-false}
 export SBK_JAVA_INSTALL
 SBK_JAVA_CONFIG_FILE=$APP_HOME/bin/sbk-java-bootstrap.properties
 export SBK_JAVA_CONFIG_FILE
-. "$APP_HOME/bin/sbk-java-bootstrap.sh" || die "Unable to resolve JDK 25. Run gradlew once or set SBK_JAVA_HOME."
+. "$APP_HOME/bin/sbk-java-bootstrap.sh" || die "Unable to resolve JDK 25. Set SBK_JAVA_INSTALL=true, run gradlew once, or set SBK_JAVA_HOME."
 unset SBK_JAVA_INSTALL'''
             
             def startMarker = '# Determine the Java command to use to start the JVM.'
@@ -67,8 +67,9 @@ unset SBK_JAVA_INSTALL'''
             unixScript.text = unixScript.text.substring(0, startIndex) + unixJavaDetectionLogic + '\n\n' + unixScript.text.substring(endIndex)
             
             // For Windows scripts - inject SBK_JAVA_HOME runtime check with fallback
-            def windowsJavaLogic = '''@rem Reuse the explicit or persisted SBK_JAVA_HOME selection.
-call "%APP_HOME%\\bin\\sbk-java-bootstrap.bat" false
+            def windowsJavaLogic = '''@rem Reuse an existing JDK by default; opt in to installation with SBK_JAVA_INSTALL=true.
+if not defined SBK_JAVA_INSTALL set "SBK_JAVA_INSTALL=false"
+call "%APP_HOME%\\bin\\sbk-java-bootstrap.bat" "%SBK_JAVA_INSTALL%"
 if errorlevel 1 goto fail
 
 '''
@@ -94,6 +95,21 @@ if errorlevel 1 goto fail
                 }
                 if (!scriptTask.windowsScript.text.contains('sbk-java-bootstrap.bat')) {
                     throw new GradleException("${scriptTask.path} Windows launcher does not use the SBK JDK resolver")
+                }
+                if (!scriptTask.unixScript.text.contains(
+                        'SBK_JAVA_INSTALL=${SBK_JAVA_INSTALL:-false}')) {
+                    throw new GradleException(
+                            "${scriptTask.path} Unix launcher does not preserve the SBK_JAVA_INSTALL opt-in")
+                }
+                if (!scriptTask.windowsScript.text.contains(
+                        'if not defined SBK_JAVA_INSTALL set "SBK_JAVA_INSTALL=false"')) {
+                    throw new GradleException(
+                            "${scriptTask.path} Windows launcher does not default SBK_JAVA_INSTALL safely")
+                }
+                if (!scriptTask.windowsScript.text.contains(
+                        'sbk-java-bootstrap.bat" "%SBK_JAVA_INSTALL%"')) {
+                    throw new GradleException(
+                            "${scriptTask.path} Windows launcher does not forward the SBK_JAVA_INSTALL opt-in")
                 }
                 rootProject.ext.sbkRuntimeJvmArgs.each { option ->
                     if (!scriptTask.unixScript.text.contains(option)) {

@@ -71,7 +71,8 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for source links, lifecycle det
 
 ## Requirements
 
-- JDK 25, either preinstalled or downloaded automatically by the wrapper
+- JDK 25, either preinstalled, downloaded automatically by the wrapper, or
+  installed on demand by a packaged launcher
 - Git
 - The Gradle wrapper included in the repository; a separate Gradle installation is not required
 - A real backend only when exercising a remote-storage driver
@@ -110,10 +111,45 @@ An invalid explicit `SBK_JAVA_HOME`, or an invalid `JAVA_HOME` when no higher
 priority persisted selection exists, is treated as an error so a selected
 configuration mistake is never hidden by an automatic download.
 
-Generated launchers for `sbk`, `sbk-yal`, `sbm`, `sbk-gem`, `sbk-gem-yal`, and `sbk-web-console`
-use the same persisted selection and export it as `SBK_JAVA_HOME`. They do not
-download Java at application startup; run the Gradle wrapper once to establish
-the persisted selection, or set `SBK_JAVA_HOME`/`JAVA_HOME`.
+Generated launchers for `sbk`, `sbk-yal`, `sbm`, `sbk-gem`, `sbk-gem-yal`, and
+`sbk-web-console` use the same persisted selection and export it as
+`SBK_JAVA_HOME`. By default they do not access the network: run the Gradle
+wrapper once to establish the persisted selection, or set
+`SBK_JAVA_HOME`/`JAVA_HOME`.
+
+### Self-bootstrap a packaged application
+
+The standard `distTar`, `distZip`, and `installDist` outputs contain the Java
+bootstrap scripts and their pinned-version/checksum configuration, but they do
+not embed a JDK. On a supported machine without JDK 25, set
+`SBK_JAVA_INSTALL=true` for the first packaged-application invocation:
+
+```bash
+SBK_JAVA_INSTALL=true ./bin/sbk -class file -writers 1 -size 100 -seconds 60
+SBK_JAVA_INSTALL=true ./bin/sbm -class file -action w
+SBK_JAVA_INSTALL=true ./bin/sbk-gem -nodes "host1 host2" -class file \
+  -writers 1 -size 100 -seconds 60
+```
+
+On Windows Command Prompt, use:
+
+```bat
+set SBK_JAVA_INSTALL=true
+bin\sbk.bat -class file -writers 1 -size 100 -seconds 60
+```
+
+The launcher downloads the pinned JDK, verifies its SHA-256 checksum, installs
+it in the per-user SBK Java cache, persists the selection, and starts the
+requested application. The cache and persisted selection are shared by all
+packaged SBK applications, so later invocations normally require neither the
+environment variable nor another download. An explicit invalid
+`SBK_JAVA_HOME` or `JAVA_HOME` remains an error and is never silently replaced.
+Keep `SBK_JAVA_INSTALL` unset or set it to `false` to retain the default
+offline/no-download behavior.
+
+This setting bootstraps Java for the local application process. After
+`sbk-gem` starts, its independent remote-deployment workflow probes each node
+and provisions the selected compact or full remote Java runtime when required.
 
 ### Runtime JVM and garbage collector defaults
 
