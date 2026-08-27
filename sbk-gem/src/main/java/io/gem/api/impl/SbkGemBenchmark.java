@@ -121,7 +121,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
         if (this.sbkArgsByNode.size() != connections.length) {
             throw new IllegalArgumentException("Remote SBK argument count must match the connection count");
         }
-        executors = SbkGemExecutors.create(config.controlExecutorThreads, config.transferExecutorThreads);
+        executors = SbkGemExecutors.create(config.controlExecutorThreads,
+                TransferExecutorSizing.initialThreads(config));
         this.remoteResults = new RemoteResponse[connections.length];
         this.nodes = new SshSession[connections.length];
         this.remoteEndpointIdentities = new String[connections.length];
@@ -178,6 +179,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
         for (int i = 0; i < nodes.length; i++) {
             remoteEndpointIdentities[i] = nodes[i].getRemoteEndpointIdentity();
         }
+        configureTransferExecutor();
         configureSbmCallbackAddresses();
         Printer.log.info("SBK-GEM: Ssh session establishment Success..");
 
@@ -337,6 +339,22 @@ final public class SbkGemBenchmark implements GemBenchmark {
         });
 
         return retFuture.toCompletableFuture();
+    }
+
+    private void configureTransferExecutor() {
+        final int uniqueTargets = RemoteTargetPlan.createBeforeDirectoryResolution(params.getConnections(),
+                remoteEndpointIdentities).targetCount();
+        final int transferThreads = TransferExecutorSizing.selectedThreads(config, uniqueTargets);
+        executors.configureTransferThreads(transferThreads);
+        if (config.transferExecutorThreads == 0) {
+            Printer.log.info("SBK-GEM: Using {} concurrent deployment transfers for {} unique remote target(s); "
+                            + "configured range: {}-{}; target waves: {}", transferThreads, uniqueTargets,
+                    config.transferExecutorMinimumThreads, config.transferExecutorMaximumThreads,
+                    config.transferTargetWaves);
+        } else {
+            Printer.log.info("SBK-GEM: Using configured {} concurrent deployment transfers for {} unique "
+                    + "remote target(s)", transferThreads, uniqueTargets);
+        }
     }
 
     private Throwable completeSbmAfterRemoteCommands(Throwable commandFailure) {

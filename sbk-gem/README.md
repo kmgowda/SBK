@@ -301,8 +301,14 @@ connections and control-plane operations use a fixed-size platform-thread pool,
 while JDK and SBK data movement uses a smaller independent transfer pool so a
 large copy cannot starve probes, leases, or shutdown work. Remote commands that
 remain open for the complete benchmark use lightweight Java virtual threads
-instead of one platform thread per node. The pool limits are owned by
-`controlExecutorThreads` and `transferExecutorThreads` in `gem.properties`.
+instead of one platform thread per node. The control pool limit is owned by
+`controlExecutorThreads` in `gem.properties`. Deployment transfers use automatic
+concurrency by default: after SSH authentication, GEM counts unique physical
+deployment targets and selects approximately one worker per
+`transferTargetWaves` targets, bounded by `transferExecutorMinimumThreads` and
+`transferExecutorMaximumThreads`. Set `transferExecutorThreads` to a positive
+in-range value to replace automatic sizing with a fixed pool size. These are
+module properties rather than command-line benchmark options.
 Each bulk SCP stream uses the separately configurable `sshCopyBufferBytes`
 read buffer (4 MiB by default); this affects controller memory per active
 transfer but does not change the number of parallel transfers.

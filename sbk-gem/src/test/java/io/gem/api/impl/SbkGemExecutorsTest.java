@@ -16,6 +16,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Verifies that SBK-GEM orchestration workloads use bounded or lightweight execution resources. */
@@ -35,6 +36,20 @@ final class SbkGemExecutorsTest {
                     .startsWith("sbk-gem-transfer-")).get(5, TimeUnit.SECONDS));
             assertTrue(executors.command().submit(() -> Thread.currentThread().isVirtual())
                     .get(5, TimeUnit.SECONDS));
+        }
+    }
+
+    @Test
+    void resizesTheBoundedTransferPool() {
+        try (SbkGemExecutors executors = SbkGemExecutors.create(3, 4)) {
+            executors.configureTransferThreads(16);
+            assertEquals(16, executors.transfer().getCorePoolSize());
+            assertEquals(16, executors.transfer().getMaximumPoolSize());
+
+            executors.configureTransferThreads(8);
+            assertEquals(8, executors.transfer().getCorePoolSize());
+            assertEquals(8, executors.transfer().getMaximumPoolSize());
+            assertThrows(IllegalArgumentException.class, () -> executors.configureTransferThreads(0));
         }
     }
 }

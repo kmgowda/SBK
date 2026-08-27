@@ -26,6 +26,17 @@ public final class GemConfigTest {
         assertEquals(GemConfig.DEFAULT_SSH_COPY_BUFFER_BYTES, GemConfig.load().sshCopyBufferBytes);
     }
 
+    /** Ensures the bundled configuration enables bounded automatic transfer sizing. */
+    @Test
+    public void loadsAutomaticTransferExecutorDefaults() throws IOException {
+        final GemConfig config = GemConfig.load();
+
+        assertEquals(0, config.transferExecutorThreads);
+        assertEquals(4, config.transferExecutorMinimumThreads);
+        assertEquals(64, config.transferExecutorMaximumThreads);
+        assertEquals(8, config.transferTargetWaves);
+    }
+
     /** Ensures diagnostic truncation always retains at least one suffix character. */
     @Test
     public void validatesCompleteDiagnosticTruncationBudget() {
@@ -64,7 +75,7 @@ public final class GemConfigTest {
         assertDoesNotThrow(config::validate);
     }
 
-    /** Ensures both bounded orchestration pools retain at least one worker. */
+    /** Ensures bounded orchestration pools accept auto sizing or a fixed in-range override. */
     @Test
     public void validatesOrchestrationExecutorSizes() {
         final GemConfig config = validConfig();
@@ -73,10 +84,38 @@ public final class GemConfigTest {
         assertThrows(IllegalArgumentException.class, config::validate);
 
         config.controlExecutorThreads = 1;
-        config.transferExecutorThreads = 0;
+        config.transferExecutorThreads = -1;
         assertThrows(IllegalArgumentException.class, config::validate);
 
-        config.transferExecutorThreads = 1;
+        config.transferExecutorThreads = 0;
+        assertDoesNotThrow(config::validate);
+
+        config.transferExecutorThreads = config.transferExecutorMinimumThreads - 1;
+        assertThrows(IllegalArgumentException.class, config::validate);
+
+        config.transferExecutorThreads = config.transferExecutorMaximumThreads + 1;
+        assertThrows(IllegalArgumentException.class, config::validate);
+
+        config.transferExecutorThreads = config.transferExecutorMaximumThreads;
+        assertDoesNotThrow(config::validate);
+    }
+
+    /** Ensures automatic transfer sizing has valid bounds and a positive wave target. */
+    @Test
+    public void validatesAutomaticTransferExecutorConfiguration() {
+        final GemConfig config = validConfig();
+        config.transferExecutorMinimumThreads = 0;
+        assertThrows(IllegalArgumentException.class, config::validate);
+
+        config.transferExecutorMinimumThreads = 4;
+        config.transferExecutorMaximumThreads = 3;
+        assertThrows(IllegalArgumentException.class, config::validate);
+
+        config.transferExecutorMaximumThreads = 64;
+        config.transferTargetWaves = 0;
+        assertThrows(IllegalArgumentException.class, config::validate);
+
+        config.transferTargetWaves = 8;
         assertDoesNotThrow(config::validate);
     }
 
@@ -122,7 +161,10 @@ public final class GemConfigTest {
         config.sbmRegistrationTimeoutSeconds = 1;
         config.timeoutSeconds = 1;
         config.controlExecutorThreads = 1;
-        config.transferExecutorThreads = 1;
+        config.transferExecutorThreads = 0;
+        config.transferExecutorMinimumThreads = 4;
+        config.transferExecutorMaximumThreads = 64;
+        config.transferTargetWaves = 8;
         config.sshCopyBufferBytes = 1;
         config.diagnosticBytes = 1;
         config.maximumAgentResponseBytes = 1;

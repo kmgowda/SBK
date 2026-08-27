@@ -148,8 +148,14 @@ final public class GemConfig {
     public String remoteDir;
     /** Maximum platform threads used for concurrent SSH connection and control operations. */
     public int controlExecutorThreads;
-    /** Maximum platform threads used for concurrent SFTP deployment transfers. */
+    /** Fixed deployment-transfer threads, or zero to size the pool automatically. */
     public int transferExecutorThreads;
+    /** Minimum deployment-transfer threads used by automatic sizing. */
+    public int transferExecutorMinimumThreads;
+    /** Maximum deployment-transfer threads used by automatic sizing. */
+    public int transferExecutorMaximumThreads;
+    /** Desired number of queued transfer waves used by automatic sizing. */
+    public int transferTargetWaves;
     /** Read buffer bytes used by each bulk SCP upload. */
     public int sshCopyBufferBytes;
     /** Maximum stdout/stderr bytes retained per SSH command. */
@@ -190,7 +196,14 @@ final public class GemConfig {
                 || timeoutSeconds > Integer.MAX_VALUE / io.time.Time.MS_PER_SEC
                 || runtimeProgressIntervalSeconds < 1
                 || runtimeCacheDirectory == null || runtimeCacheDirectory.isBlank()
-                || controlExecutorThreads < 1 || transferExecutorThreads < 1 || sshCopyBufferBytes < 1
+                || controlExecutorThreads < 1 || transferExecutorThreads < 0
+                || transferExecutorMinimumThreads < 1
+                || transferExecutorMaximumThreads < transferExecutorMinimumThreads
+                || transferTargetWaves < 1
+                || transferExecutorThreads > 0
+                && (transferExecutorThreads < transferExecutorMinimumThreads
+                || transferExecutorThreads > transferExecutorMaximumThreads)
+                || sshCopyBufferBytes < 1
                 || runtimeManagementLockTimeoutSeconds < 1 || runtimeManagementLockStaleSeconds < 1
                 || runtimeManagementLockStaleSeconds <= deploymentTimeoutSeconds
                 || runtimeLeaseReservationSeconds

@@ -90,6 +90,21 @@ final class RemoteTargetPlan {
     }
 
     /**
+     * Return the number of unique physical deployment targets.
+     *
+     * @return representative target count
+     */
+    int targetCount() {
+        int count = 0;
+        for (int index = 0; index < representatives.length; index++) {
+            if (representatives[index] == index) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
      * Return whether any logical node for this representative is selected.
      *
      * @param representative representative index

@@ -32,6 +32,7 @@ final class RemoteTargetPlanTest {
         assertFalse(plan.isRepresentative(1));
         assertEquals(0, plan.representative(1));
         assertTrue(plan.isRepresentative(2));
+        assertEquals(2, plan.targetCount());
     }
 
     @Test
@@ -42,6 +43,7 @@ final class RemoteTargetPlanTest {
 
         assertTrue(plan.isRepresentative(0));
         assertTrue(plan.isRepresentative(1));
+        assertEquals(2, plan.targetCount());
     }
 
     @Test
@@ -67,6 +69,7 @@ final class RemoteTargetPlanTest {
         assertTrue(plan.isRepresentative(0));
         assertFalse(plan.isRepresentative(1));
         assertEquals(0, plan.representative(1));
+        assertEquals(1, plan.targetCount());
     }
 
     @Test

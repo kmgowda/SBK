@@ -12,6 +12,7 @@ package io.gem.api.impl;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Execution resources separated by SBK-GEM orchestration workload.
@@ -22,20 +23,34 @@ import java.util.concurrent.Executors;
  * and a large node inventory does not create one platform thread per remote benchmark.</p>
  *
  * @param control bounded connection and control-operation executor
- * @param transfer bounded SFTP transfer executor
+ * @param transfer bounded deployment-transfer executor
  * @param command virtual-thread-per-task remote command executor
  */
-record SbkGemExecutors(ExecutorService control, ExecutorService transfer, ExecutorService command)
+record SbkGemExecutors(ExecutorService control, ThreadPoolExecutor transfer, ExecutorService command)
         implements AutoCloseable {
 
     static SbkGemExecutors create(int controlThreads, int transferThreads) {
         return new SbkGemExecutors(
                 Executors.newFixedThreadPool(controlThreads,
                         Thread.ofPlatform().name("sbk-gem-control-", 0).factory()),
-                Executors.newFixedThreadPool(transferThreads,
+                (ThreadPoolExecutor) Executors.newFixedThreadPool(transferThreads,
                         Thread.ofPlatform().name("sbk-gem-transfer-", 0).factory()),
                 Executors.newThreadPerTaskExecutor(
                         Thread.ofVirtual().name("sbk-gem-command-", 0).factory()));
+    }
+
+    void configureTransferThreads(int threads) {
+        if (threads < 1) {
+            throw new IllegalArgumentException("Transfer executor requires at least one thread");
+        }
+        final int currentMaximum = transfer.getMaximumPoolSize();
+        if (threads > currentMaximum) {
+            transfer.setMaximumPoolSize(threads);
+            transfer.setCorePoolSize(threads);
+        } else {
+            transfer.setCorePoolSize(threads);
+            transfer.setMaximumPoolSize(threads);
+        }
     }
 
     @Override
