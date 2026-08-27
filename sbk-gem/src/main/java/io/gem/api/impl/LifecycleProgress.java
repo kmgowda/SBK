@@ -12,6 +12,7 @@ package io.gem.api.impl;
 
 import io.sbk.system.Printer;
 
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -29,8 +30,7 @@ final class LifecycleProgress implements AutoCloseable {
         this.operation = operation;
         this.detail = detail;
         this.startedNanos = System.nanoTime();
-        this.progressTask = scheduler.scheduleWithFixedDelay(this::logProgress, intervalSeconds,
-                intervalSeconds, TimeUnit.SECONDS);
+        this.progressTask = scheduleProgress(scheduler, intervalSeconds);
     }
 
     private void logProgress() {
@@ -48,6 +48,20 @@ final class LifecycleProgress implements AutoCloseable {
 
     @Override
     public void close() {
-        progressTask.cancel(false);
+        if (progressTask != null) {
+            progressTask.cancel(false);
+        }
+    }
+
+    private ScheduledFuture<?> scheduleProgress(ScheduledExecutorService scheduler, int intervalSeconds) {
+        try {
+            return scheduler.scheduleWithFixedDelay(this::logProgress, intervalSeconds,
+                    intervalSeconds, TimeUnit.SECONDS);
+        } catch (RejectedExecutionException exception) {
+            if (!scheduler.isShutdown()) {
+                throw exception;
+            }
+            return null;
+        }
     }
 }

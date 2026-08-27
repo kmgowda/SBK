@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +29,12 @@ import java.util.concurrent.TimeoutException;
 
 /** Owns remote runtime leases, heartbeats, releases, and retired-package cleanup. */
 final class RuntimeLeaseManager {
+    /** Starts one remote benchmark command while atomically transferring lease ownership to it. */
+    @FunctionalInterface
+    interface BenchmarkCommandStarter {
+        CompletableFuture<SshResponse> start() throws ConnectException;
+    }
+
     private static final int LEASE_HEARTBEAT_DIVISOR = 3;
     private static final long MINIMUM_INTERVAL_SECONDS = 1;
 
@@ -111,9 +118,28 @@ final class RuntimeLeaseManager {
     }
 
     CompletableFuture<Void> release(RemoteNodeState node) {
-        if (!deactivate(node) || node.deploymentName() == null) {
+        if (!claimActiveLease(node) || node.deploymentName() == null) {
             return CompletableFuture.completedFuture(null);
         }
+        return releaseClaimed(node);
+    }
+
+    CompletableFuture<SshResponse> launch(RemoteNodeState node, BenchmarkCommandStarter starter)
+            throws ConnectException {
+        synchronized (stateLock) {
+            final CompletableFuture<SshResponse> command = starter.start();
+            node.leaseLaunched(true);
+            return command;
+        }
+    }
+
+    boolean isLaunched(RemoteNodeState node) {
+        synchronized (stateLock) {
+            return node.leaseLaunched();
+        }
+    }
+
+    private CompletableFuture<Void> releaseClaimed(RemoteNodeState node) {
         try {
             return runOperation(node, RemoteAgent.releaseRuntime(node.connectionDirectory(),
                     node.deploymentName(), node.leaseId(), params.isPackagesCleanup(),
@@ -129,9 +155,9 @@ final class RuntimeLeaseManager {
         final CompletableFuture<Void>[] releases = new CompletableFuture[nodes.size()];
         boolean releaseRequired = false;
         for (RemoteNodeState node : nodes) {
-            if (isActive(node) && !node.leaseLaunched()) {
+            if (claimUnlaunchedLease(node)) {
                 releaseRequired = true;
-                releases[node.index()] = release(node);
+                releases[node.index()] = releaseClaimed(node);
             } else {
                 releases[node.index()] = CompletableFuture.completedFuture(null);
             }
@@ -213,8 +239,18 @@ final class RuntimeLeaseManager {
         synchronized (stateLock) {
             heartbeatsPaused = false;
         }
-        heartbeatTask = scheduler.scheduleWithFixedDelay(this::refreshLeases,
-                intervalSeconds, intervalSeconds, TimeUnit.SECONDS);
+        try {
+            heartbeatTask = scheduler.scheduleWithFixedDelay(this::refreshLeases,
+                    intervalSeconds, intervalSeconds, TimeUnit.SECONDS);
+        } catch (RejectedExecutionException exception) {
+            if (!scheduler.isShutdown()) {
+                throw exception;
+            }
+            synchronized (stateLock) {
+                heartbeatsPaused = true;
+            }
+            return;
+        }
         Printer.log.info("SBK-GEM: Managed runtime leases will be refreshed every {} second(s)", intervalSeconds);
     }
 
@@ -321,11 +357,21 @@ final class RuntimeLeaseManager {
         }
     }
 
-    private boolean deactivate(RemoteNodeState node) {
+    private boolean claimActiveLease(RemoteNodeState node) {
         synchronized (stateLock) {
             final boolean active = node.leaseActive();
             node.leaseActive(false);
             return active;
+        }
+    }
+
+    boolean claimUnlaunchedLease(RemoteNodeState node) {
+        synchronized (stateLock) {
+            if (!node.leaseActive() || node.leaseLaunched()) {
+                return false;
+            }
+            node.leaseActive(false);
+            return true;
         }
     }
 }

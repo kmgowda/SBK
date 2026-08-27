@@ -31,15 +31,6 @@ import java.util.concurrent.TimeoutException;
 
 /** Coordinates immutable SBK bundle creation, deployment, activation, and lease acquisition. */
 final class DeploymentOrchestrator {
-    /** Performs the archive transport and post-activation verification. */
-    interface RuntimeTransport {
-        void uploadAndActivate(SbkRuntimeBundle bundle, boolean[] copyTargets, DeploymentPlatform platform)
-                throws ConnectException, InterruptedException, ExecutionException, IOException;
-
-        void verify(SbkRuntimeBundle bundle, boolean[] copyTargets, DeploymentPlatform platform)
-                throws ConnectException, InterruptedException, ExecutionException, IOException;
-    }
-
     private final GemConfig config;
     private final GemParameters params;
     private final List<RemoteNodeState> nodes;
@@ -48,12 +39,12 @@ final class DeploymentOrchestrator {
     private final RuntimeLeaseManager leaseManager;
     private final ScheduledExecutorService scheduler;
     private final String leaseRunId;
-    private final RuntimeTransport transport;
+    private final RuntimeDeploymentTransport transport;
 
     DeploymentOrchestrator(GemConfig config, GemParameters params, List<RemoteNodeState> nodes,
                            int controllerJavaVersion, RuntimeCopyPolicy copyPolicy,
                            RuntimeLeaseManager leaseManager, ScheduledExecutorService scheduler,
-                           String leaseRunId, RuntimeTransport transport) {
+                           String leaseRunId, RuntimeDeploymentTransport transport) {
         this.config = config;
         this.params = params;
         this.nodes = nodes;
@@ -85,7 +76,7 @@ final class DeploymentOrchestrator {
                         + "content SHA-256 {}; archive SHA-256 {}",
                 bundle.archiveReused() ? "Reused cached" : "Built", bundle.archive(),
                 bundle.archiveReused() ? "for" : "from", sourceDirectory, preparationMillis,
-                SbkGemBenchmark.formatTransferSize(Files.size(bundle.archive())), bundle.contentDigest(),
+                DeploymentProgress.formatSize(Files.size(bundle.archive())), bundle.contentDigest(),
                 bundle.archiveDigest());
         deployBundle(bundle, platform);
         if (params.isPackagesCleanup()) {
@@ -117,7 +108,7 @@ final class DeploymentOrchestrator {
         for (RemoteNodeState node : nodes) {
             if (probes[node.index()].get().returnCode == ExitCode.SUCCESS) {
                 Printer.log.info("SBK-GEM: Host '{}' will use existing SBK installation '{}'; skipping copy",
-                        node.host(), SbkGemBenchmark.remoteSbkDirectory(node.deploymentDirectory()));
+                        node.host(), DeploymentSupport.remoteSbkDirectory(node.deploymentDirectory()));
             } else {
                 copyTargets[node.index()] = true;
             }
@@ -128,7 +119,7 @@ final class DeploymentOrchestrator {
             for (RemoteNodeState node : nodes) {
                 if (copyTargets[node.index()]) {
                     Printer.log.info("SBK-GEM: Host '{}' will use newly activated SBK installation '{}'",
-                            node.host(), SbkGemBenchmark.remoteSbkDirectory(node.deploymentDirectory()));
+                            node.host(), DeploymentSupport.remoteSbkDirectory(node.deploymentDirectory()));
                 }
             }
         } else {

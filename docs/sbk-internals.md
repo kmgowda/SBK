@@ -1919,7 +1919,8 @@ sequenceDiagram
     autonumber
     participant User
     participant GEM as SbkGemBenchmark
-    participant DEPLOY as DeploymentOrchestrator
+    participant PREP as RemoteEnvironmentPreparer
+    participant DEPLOY as DeploymentOrchestrator and RuntimeDeploymentTransport
     participant LEASE as RuntimeLeaseManager
     participant SSH as "RemoteNodeState sessions (Apache Mina SSHD)"
     participant SBM as "SbmBenchmark (local)"
@@ -1941,14 +1942,15 @@ sequenceDiagram
         SSH->>N2: SSH + known_hosts + agent/key/password
     end
 
-    GEM->>SSH: resolve directory and verify/install agent in one SFTP operation
-    GEM->>SSH: probe preferred/PATH Java and OS as each target becomes ready
-    Note over GEM: require one homogeneous Linux or macOS operating system
-    GEM->>GEM: validate installDist and Gradle driver runtime metadata
+    GEM->>PREP: prepare remote execution environment
+    PREP->>SSH: resolve directory and verify/install agent in one SFTP operation
+    PREP->>SSH: probe preferred/PATH Java and OS as each target becomes ready
+    Note over PREP: require one homogeneous Linux or macOS operating system
+    PREP->>PREP: validate installDist and Gradle driver runtime metadata
     opt matching Java is unavailable
-        GEM->>GEM: select full JDK or build/reuse compact jlink runtime
-        GEM->>SSH: copy Java as a separate content-addressed tree
-        GEM->>SSH: verify copied Java through the agent
+        PREP->>PREP: select full JDK or build/reuse compact jlink runtime
+        PREP->>SSH: copy Java as a separate content-addressed tree
+        PREP->>SSH: verify copied Java through the agent
     end
     GEM->>DEPLOY: build or reuse a full or driver-scoped SBK archive
     DEPLOY->>LEASE: reserve deployment identities through the Java agent
@@ -3358,8 +3360,10 @@ deeper:
 8. `drivers/file/src/main/java/io/sbk/driver/File/File.java` — the simplest real driver
 9. `sbm/src/main/java/io/sbm/api/impl/SbmBenchmark.java` — distributed aggregation
 10. `sbk-gem/src/main/java/io/gem/api/impl/SbkGemBenchmark.java` — remote-command and SBM coordination
-11. `sbk-gem/src/main/java/io/gem/api/impl/DeploymentOrchestrator.java` — deployment sequencing
-12. `sbk-gem/src/main/java/io/gem/api/impl/RuntimeLeaseManager.java` — runtime lease lifecycle
+11. `sbk-gem/src/main/java/io/gem/api/impl/RemoteEnvironmentPreparer.java` — agent and Java bootstrap
+12. `sbk-gem/src/main/java/io/gem/api/impl/DeploymentOrchestrator.java` — deployment sequencing
+13. `sbk-gem/src/main/java/io/gem/api/impl/RuntimeDeploymentTransport.java` — archive transport and activation
+14. `sbk-gem/src/main/java/io/gem/api/impl/RuntimeLeaseManager.java` — runtime lease lifecycle
 
 If you make it through that reading list, you understand SBK as well
 as anyone outside its core maintainers. From there, picking up a

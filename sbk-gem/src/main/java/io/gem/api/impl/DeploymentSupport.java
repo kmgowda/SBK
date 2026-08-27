@@ -26,6 +26,10 @@ final class DeploymentSupport {
         return RemotePath.join(javaHome, RemoteDeploymentContract.JAVA_EXECUTABLE);
     }
 
+    static String remoteSbkDirectory(String runtimeDirectory) {
+        return RemotePath.join(runtimeDirectory, RemoteDeploymentContract.SBK_DIRECTORY);
+    }
+
     static String diagnosticSummary(String output, GemConfig config) {
         return diagnosticSummary(output, config.maximumDiagnosticCharacters,
                 config.diagnosticPrefixCharacters);

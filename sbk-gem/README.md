@@ -437,10 +437,13 @@ Before a multi-host run:
    numeric controller callback address selected by its SSH route; an explicit `-localhost` value overrides this.
 4. It distributes `-totalrecords` and `-totalthroughput` when requested, creating node-specific `-records` and `-throughput` argument lists.
 5. It constructs the embedded `SbmBenchmark` and `SbkGemBenchmark`.
-6. `SbkGemBenchmark` establishes SSH sessions and delegates immutable runtime
-   deployment to `DeploymentOrchestrator`. Each node's arguments, session, deployment
-   paths, lease state, and result remain together in one `RemoteNodeState`.
-   `RuntimeLeaseManager` owns reservation, heartbeat, release, and package cleanup.
+6. `SbkGemBenchmark` establishes SSH sessions, then delegates remote-agent and Java
+   bootstrap to `RemoteEnvironmentPreparer` and immutable runtime deployment to
+   `DeploymentOrchestrator`. `RuntimeDeploymentTransport` owns archive upload,
+   activation, digest retry, and verification. Each node's arguments, session,
+   deployment paths, lease state, and result remain together in one `RemoteNodeState`.
+   `RuntimeLeaseManager` owns reservation, heartbeat, launch state, release, and
+   package cleanup.
 7. It starts the SBM gRPC service and launches every remote SBK process with its node-specific arguments.
 8. Each remote SBK opens its storage and creates its workers before registering. After every
    prepared client reaches the coordinated-start barrier, GEM starts SBM aggregation and the
@@ -492,7 +495,9 @@ without allowing a noisy remote process to consume unbounded GEM heap.
 | `io.gem.api.impl.SbkGem` | Discovery, argument parsing, remote-command construction |
 | `SbkGemBenchmark` | Remote-command coordination and embedded-SBM lifecycle |
 | `RemoteNodeState` | Per-node arguments, session, deployment, lease, and result state |
-| `DeploymentOrchestrator` | Immutable bundle creation, activation, verification, and deployment sequencing |
+| `DeploymentOrchestrator` | Immutable bundle creation and deployment sequencing |
+| `RemoteEnvironmentPreparer` | Remote-agent bootstrap, Java discovery/provisioning, and platform verification |
+| `RuntimeDeploymentTransport` | Runtime archive upload, activation, integrity retry, and verification |
 | `RuntimeLeaseManager` | Runtime reservation, heartbeat, release, and retired-package cleanup |
 | `SshClientManager` | Policy-grouped Apache MINA SSHD client ownership |
 | `SshSession` | One SSH connection/session abstraction |

@@ -144,6 +144,8 @@ the harness permits.
 - `SbkGemBenchmark`: embedded SBM and remote-command lifecycle.
 - `RemoteNodeState`: cohesive controller state for one configured node.
 - `DeploymentOrchestrator`: immutable runtime deployment sequencing.
+- `RemoteEnvironmentPreparer`: remote-agent and Java environment bootstrap.
+- `RuntimeDeploymentTransport`: runtime archive upload, activation, and verification.
 - `RuntimeLeaseManager`: runtime reservation, heartbeat, release, and cleanup.
 - `SshSession` and `SshUtils`: Apache MINA SSHD integration.
 - `SbkRuntimeBundle` and `ManagedJavaRuntime`: independent content-addressed
