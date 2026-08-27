@@ -82,6 +82,9 @@ final public class SshSession {
      */
     final private SshClient client;
 
+    /** Whether this wrapper owns and must stop its SSH client. */
+    final private boolean ownsClient;
+
     /** Bounded executor for SSH connection and control-plane operations. */
     final private ExecutorService controlExecutor;
 
@@ -165,10 +168,37 @@ final public class SshSession {
     public SshSession(ConnectionConfig conn, ExecutorService controlExecutor,
                       ExecutorService transferExecutor, ExecutorService commandExecutor,
                       int diagnosticBytes, int copyBufferBytes) {
+        this(conn, SshUtils.createClient(conn), true, controlExecutor, transferExecutor, commandExecutor,
+                diagnosticBytes, copyBufferBytes);
+    }
+
+    /**
+     * Create a node session backed by client infrastructure owned by an external manager.
+     *
+     * @param conn SSH connection
+     * @param client shared, started SSH client
+     * @param controlExecutor bounded connection and control-operation executor
+     * @param transferExecutor bounded deployment transfer executor
+     * @param commandExecutor virtual-thread executor for long-running remote commands
+     * @param diagnosticBytes maximum stdout/stderr bytes retained per command
+     * @param copyBufferBytes read buffer bytes used by each bulk SCP upload
+     */
+    SshSession(ConnectionConfig conn, SshClient client, ExecutorService controlExecutor,
+               ExecutorService transferExecutor, ExecutorService commandExecutor,
+               int diagnosticBytes, int copyBufferBytes) {
+        this(conn, client, false, controlExecutor, transferExecutor, commandExecutor, diagnosticBytes,
+                copyBufferBytes);
+    }
+
+    private SshSession(ConnectionConfig conn, SshClient client, boolean ownsClient,
+                       ExecutorService controlExecutor, ExecutorService transferExecutor,
+                       ExecutorService commandExecutor, int diagnosticBytes, int copyBufferBytes) {
         if (copyBufferBytes < 1) {
             throw new IllegalArgumentException("SCP copy buffer must contain at least one byte");
         }
         this.connection = conn;
+        this.client = client;
+        this.ownsClient = ownsClient;
         this.controlExecutor = controlExecutor;
         this.transferExecutor = transferExecutor;
         this.commandExecutor = commandExecutor;
@@ -176,13 +206,12 @@ final public class SshSession {
         this.copyBufferBytes = copyBufferBytes;
         this.sessionLock = new Object();
         this.activeTasks = ConcurrentHashMap.newKeySet();
-        this.client = SshUtils.createClient(conn);
         if (!conn.isHostKeyCheck()) {
             Printer.log.warn("SBK-GEM: SSH host-key verification is disabled for host '" + conn.getHost() + "'");
         }
     }
 
-    private void createSession(long timeoutSeconds) throws IOException {
+    private void createSession(long timeoutSeconds, SshConnectionAttempt attempt) throws IOException {
         Printer.log.info("SBK-GEM: Ssh Connection to host '" + connection.getHost() + "' starting...");
         ClientSession createdSession = null;
         try {
@@ -192,8 +221,10 @@ final public class SshSession {
                             + connection.getHost() + "'");
                 }
             }
-            client.start();
-            createdSession = SshUtils.createSession(client, connection, timeoutSeconds);
+            if (ownsClient) {
+                client.start();
+            }
+            createdSession = SshUtils.createSession(client, connection, timeoutSeconds, attempt);
             synchronized (sessionLock) {
                 if (stopped) {
                     createdSession.close(true);
@@ -245,10 +276,11 @@ final public class SshSession {
      * @return CompletableFuture
      */
     public CompletableFuture<Void> createSessionAsync(long timeoutSeconds) {
+        final SshConnectionAttempt attempt = new SshConnectionAttempt();
         return submitBounded(controlExecutor, () -> {
-            createSession(timeoutSeconds);
+            createSession(timeoutSeconds, attempt);
             return null;
-        }, () -> client.stop(), timeoutSeconds);
+        }, attempt::cancel, timeoutSeconds);
     }
 
     private ClientSession getSession() throws ConnectException {
@@ -563,7 +595,9 @@ final public class SshSession {
      */
     public void stop() {
         closeSession();
-        client.stop();
+        if (ownsClient) {
+            client.stop();
+        }
     }
 
     private final class BoundedTask<T> extends FutureTask<Void> {

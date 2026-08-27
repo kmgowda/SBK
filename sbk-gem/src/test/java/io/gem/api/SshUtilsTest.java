@@ -33,6 +33,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -44,6 +45,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -227,6 +229,99 @@ final class SshUtilsTest {
             assertEquals("active", Files.readString(temporaryDirectory.resolve("runtime-leases/marker")));
         } finally {
             sshSession.stop();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void sharesClientInfrastructureWithoutCouplingNodeSessionLifecycles() throws Exception {
+        final ConnectionConfig firstConfig = new ConnectionConfig("127.0.0.1", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), false, "");
+        final ConnectionConfig secondConfig = new ConnectionConfig("localhost", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), false, "");
+        final var executor = Executors.newFixedThreadPool(2);
+        try (SshClientManager manager = new SshClientManager()) {
+            final SshSession first = manager.sessionFor(firstConfig, executor, executor, executor,
+                    SshResponse.DEFAULT_DIAGNOSTIC_BYTES, 64 * 1024);
+            final SshSession second = manager.sessionFor(secondConfig, executor, executor, executor,
+                    SshResponse.DEFAULT_DIAGNOSTIC_BYTES, 64 * 1024);
+            try {
+                first.createSessionAsync(5).get(5, TimeUnit.SECONDS);
+                second.createSessionAsync(5).get(5, TimeUnit.SECONDS);
+
+                assertEquals(1, manager.size());
+                first.stop();
+                assertEquals("available", second.runRemoteFileOperationAsync(fileSystem -> "available", 5)
+                        .get(5, TimeUnit.SECONDS));
+            } finally {
+                first.stop();
+                second.stop();
+            }
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void separatesClientsWithDifferentSecurityPolicies() throws IOException {
+        final Path knownHosts = writeKnownHosts(hostKey);
+        final ConnectionConfig password = new ConnectionConfig("127.0.0.1", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), false, "");
+        final ConnectionConfig unverifiedKey = new ConnectionConfig("127.0.0.1", USER, "",
+                server.getPort(), temporaryDirectory.toString(), false, "");
+        final ConnectionConfig verifiedKey = connectionConfig(knownHosts);
+        try (SshClientManager manager = new SshClientManager()) {
+            assertSame(manager.clientFor(password), manager.clientFor(password));
+            manager.clientFor(unverifiedKey);
+            manager.clientFor(verifiedKey);
+
+            assertEquals(3, manager.size());
+        }
+    }
+
+    @Test
+    void timedOutNodeAuthenticationDoesNotStopSharedClient() throws Exception {
+        final CountDownLatch slowAuthenticationStarted = new CountDownLatch(1);
+        final CountDownLatch releaseSlowAuthentication = new CountDownLatch(1);
+        server.setPasswordAuthenticator((username, password, session) -> {
+            if ("slow-node".equals(username)) {
+                slowAuthenticationStarted.countDown();
+                try {
+                    releaseSlowAuthentication.await(5, TimeUnit.SECONDS);
+                } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();
+                }
+                return false;
+            }
+            return USER.equals(username) && "sftp-password".equals(password);
+        });
+        final ConnectionConfig healthyConfig = new ConnectionConfig("127.0.0.1", USER, "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), false, "");
+        final ConnectionConfig slowConfig = new ConnectionConfig("127.0.0.1", "slow-node", "sftp-password",
+                server.getPort(), temporaryDirectory.toString(), false, "");
+        final var executor = Executors.newFixedThreadPool(2);
+        try (SshClientManager manager = new SshClientManager()) {
+            final SshSession healthy = manager.sessionFor(healthyConfig, executor, executor, executor,
+                    SshResponse.DEFAULT_DIAGNOSTIC_BYTES, 64 * 1024);
+            final SshSession slow = manager.sessionFor(slowConfig, executor, executor, executor,
+                    SshResponse.DEFAULT_DIAGNOSTIC_BYTES, 64 * 1024);
+            try {
+                healthy.createSessionAsync(5).get(5, TimeUnit.SECONDS);
+                final CompletableFuture<Void> timedOut = slow.createSessionAsync(1);
+                assertTrue(slowAuthenticationStarted.await(2, TimeUnit.SECONDS));
+
+                final ExecutionException failure = assertThrows(ExecutionException.class,
+                        () -> timedOut.get(3, TimeUnit.SECONDS));
+                assertInstanceOf(TimeoutException.class, failure.getCause());
+                assertEquals("available", healthy.runRemoteFileOperationAsync(fileSystem -> "available", 5)
+                        .get(5, TimeUnit.SECONDS));
+            } finally {
+                releaseSlowAuthentication.countDown();
+                healthy.stop();
+                slow.stop();
+            }
+        } finally {
+            releaseSlowAuthentication.countDown();
             executor.shutdownNow();
         }
     }

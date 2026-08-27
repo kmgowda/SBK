@@ -347,6 +347,11 @@ benchmark process launch through local Java filesystem APIs.
 Every SSH/SFTP operation has a bounded deadline. A timeout actively interrupts
 its worker and closes the operation-owned MINA SFTP filesystem; it does not
 merely mark a future failed while transfer work continues in the background.
+Remote nodes retain independent authenticated SSH sessions and TCP connections,
+while compatible authentication and host-key policies share one Apache MINA
+SSHD client. This shares client-level connector and scheduler infrastructure at
+large node counts without sharing credentials or allowing one node's connection
+timeout to close healthy peer sessions.
 Startup holds the lifecycle lock only while changing state, so Ctrl+C or an
 internal failure can cancel connection, deployment, or verification work
 without waiting for the complete startup sequence. Shutdown then releases any
@@ -484,6 +489,7 @@ without allowing a noisy remote process to consume unbounded GEM heap.
 | `io.gem.main.SbkGemMain` | Executable entry point |
 | `io.gem.api.impl.SbkGem` | Discovery, argument parsing, remote-command construction |
 | `SbkGemBenchmark` | Remote sessions and embedded-SBM lifecycle |
+| `SshClientManager` | Policy-grouped Apache MINA SSHD client ownership |
 | `SshSession` | One SSH connection/session abstraction |
 | `SshUtils` | SSH and file-transfer helpers |
 | `ConnectionConfig` | Remote connection model |
