@@ -13,9 +13,6 @@ package io.gem.api.impl;
 import io.gem.agent.RemoteDeploymentContract;
 import io.gem.api.SshSession;
 import io.sbk.config.ExitCode;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.apache.commons.compress.archivers.tar.TarConstants;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -33,7 +30,6 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -312,7 +308,7 @@ final class ManagedJavaRuntime {
                     archiveReused = true;
                     return target;
                 }
-                createArchive(target);
+                        ManagedJavaArchive.create(localHome, target);
                 final Properties updated = new Properties();
                 updated.setProperty(RemoteDeploymentContract.CONTENT_SHA_256_PROPERTY, digest);
                 updated.setProperty(ARCHIVE_BYTES_PROPERTY, Long.toString(Files.size(target)));
@@ -685,11 +681,7 @@ final class ManagedJavaRuntime {
     }
 
     private static MessageDigest newDigest() {
-        try {
-            return MessageDigest.getInstance(SHA_256);
-        } catch (NoSuchAlgorithmException exception) {
-            throw new IllegalStateException(exception);
-        }
+        return DigestSupport.newSha256();
     }
 
     private static MetadataIdentity metadataIdentity(Path home) throws IOException {
@@ -769,68 +761,6 @@ final class ManagedJavaRuntime {
             while ((count = input.read(buffer)) >= 0) {
                 digest.update(buffer, 0, count);
             }
-        }
-    }
-
-    private void createArchive(Path target) throws IOException {
-        final Path temporary = Files.createTempFile(Objects.requireNonNull(target.getParent()),
-                Objects.requireNonNull(target.getFileName()).toString(), ".partial");
-        try {
-            try (OutputStream file = Files.newOutputStream(temporary);
-                 BufferedOutputStream buffered = new BufferedOutputStream(file, COPY_BUFFER_SIZE);
-                 TarArchiveOutputStream output = new TarArchiveOutputStream(buffered)) {
-                output.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
-                output.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
-                try (Stream<Path> paths = Files.walk(localHome)) {
-                    for (Path source : paths.filter(path -> !path.equals(localHome))
-                            .sorted(Comparator.comparing(Path::toString)).toList()) {
-                        final String relative = localHome.relativize(source).toString().replace('\\', '/');
-                        final TarArchiveEntry entry;
-                        if (Files.isSymbolicLink(source)) {
-                            final Path link = Files.readSymbolicLink(source);
-                            final Path resolved = Objects.requireNonNull(source.getParent()).resolve(link).normalize();
-                            if (link.isAbsolute() || !resolved.startsWith(localHome)) {
-                                throw new IOException("Managed JDK symbolic link escapes Java home: " + source);
-                            }
-                            entry = new TarArchiveEntry(relative, TarConstants.LF_SYMLINK);
-                            entry.setLinkName(link.toString().replace('\\', '/'));
-                        } else if (Files.isDirectory(source, LinkOption.NOFOLLOW_LINKS)) {
-                            entry = new TarArchiveEntry(relative + "/");
-                        } else if (Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) {
-                            entry = new TarArchiveEntry(relative);
-                            entry.setSize(Files.size(source));
-                        } else {
-                            throw new IOException("Unsupported managed JDK entry: " + source);
-                        }
-                        entry.setMode(posixMode(source));
-                        output.putArchiveEntry(entry);
-                        if (Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) {
-                            Files.copy(source, output);
-                        }
-                        output.closeArchiveEntry();
-                    }
-                }
-                output.finish();
-            }
-            move(temporary, target, true);
-        } finally {
-            Files.deleteIfExists(temporary);
-        }
-    }
-
-    private static int posixMode(Path path) throws IOException {
-        if (Files.isSymbolicLink(path)) {
-            return SYMBOLIC_LINK_MODE;
-        }
-        try {
-            int mode = 0;
-            for (PosixFilePermission permission : Files.getPosixFilePermissions(path,
-                    LinkOption.NOFOLLOW_LINKS)) {
-                mode |= 1 << (8 - permission.ordinal());
-            }
-            return mode;
-        } catch (UnsupportedOperationException exception) {
-            return Files.isExecutable(path) ? EXECUTABLE_FILE_MODE : REGULAR_FILE_MODE;
         }
     }
 

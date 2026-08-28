@@ -141,10 +141,19 @@ the harness permits.
 
 - `io.gem.main.SbkGemMain`: executable entry point.
 - `io.gem.api.impl.SbkGem`: discovery, argument parsing, and distributed benchmark construction.
-- `SbkGemBenchmark`: embedded SBM and remote-run lifecycle.
+- `DistributedWorkloadPlanner` and `DistributedResultPrinter`: aggregate
+  workload partitioning and terminal result presentation.
+- `SbkGemBenchmark`: embedded SBM and remote-command lifecycle.
+- `RemoteNodeState`: cohesive controller state for one configured node.
+- `DeploymentOrchestrator`: immutable runtime deployment sequencing.
+- `RemoteEnvironmentPreparer`: remote-agent and Java environment bootstrap.
+- `RuntimeDeploymentTransport`: runtime archive upload, activation, and verification.
+- `RuntimeLeaseManager`: runtime reservation, heartbeat, release, and cleanup.
 - `SshSession` and `SshUtils`: Apache MINA SSHD integration.
 - `SbkRuntimeBundle` and `ManagedJavaRuntime`: independent content-addressed
-  SBK/JDK archives, controller caches, and remote provisioning plans.
+  identities, controller caches, and remote provisioning plans.
+- `SbkRuntimeArchive` and `ManagedJavaArchive`: deterministic tar serialization
+  after the domain objects validate their source inventories.
 - `RemoteAgentFiles`: atomic SFTP installation of the small packaged agent.
 - `RemoteAgent` and `RemoteAgentProtocol`: bounded typed controller/agent messages.
 - `io.gem.agent.SbkGemRemoteAgentMain`: remote probe, SBK extraction and
