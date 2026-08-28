@@ -313,6 +313,12 @@ Each bulk SCP stream uses the separately configurable `sshCopyBufferBytes`
 read buffer (4 MiB by default); this affects controller memory per active
 transfer but does not change the number of parallel transfers.
 
+The ordinary pull-request workflow runs the Docker-backed two-node functional
+profile. It exercises remote-agent bootstrap, runtime provisioning, lease
+management, SBM registration, and remote execution through the generated
+launchers. The private release inventory remains the authoritative real-fleet
+qualification gate.
+
 When the controller is also a selected SSH host, its deployment parent may be
 the local SBK distribution directory. GEM reserves `sbk-runtime-*` and
 `.sbk-runtime-*` top-level names for deployment state and excludes those trees
@@ -492,7 +498,9 @@ without allowing a noisy remote process to consume unbounded GEM heap.
 | Class | Responsibility |
 |---|---|
 | `io.gem.main.SbkGemMain` | Executable entry point |
-| `io.gem.api.impl.SbkGem` | Discovery, argument parsing, remote-command construction |
+| `io.gem.api.impl.SbkGem` | Discovery, argument parsing, and benchmark construction |
+| `DistributedWorkloadPlanner` | Aggregate record/throughput partitioning into immutable per-node arguments |
+| `DistributedResultPrinter` | Distributed status calculation and final host-result presentation |
 | `SbkGemBenchmark` | Remote-command coordination and embedded-SBM lifecycle |
 | `RemoteNodeState` | Per-node arguments, session, deployment, lease, and result state |
 | `DeploymentOrchestrator` | Immutable bundle creation and deployment sequencing |
@@ -503,8 +511,10 @@ without allowing a noisy remote process to consume unbounded GEM heap.
 | `SshSession` | One SSH connection/session abstraction |
 | `SshUtils` | SSH and file-transfer helpers |
 | `ConnectionConfig` | Remote connection model |
-| `SbkRuntimeBundle` | Content-addressed SBK archive creation, identity, and local cache management |
-| `ManagedJavaRuntime` | Controller-JDK identity, archive, transfer, extraction, and reuse planning |
+| `SbkRuntimeBundle` | Content-addressed SBK identity, inventory validation, and local cache management |
+| `SbkRuntimeArchive` | Deterministic SBK runtime tar serialization |
+| `ManagedJavaRuntime` | Controller-JDK identity, transfer, extraction, and reuse planning |
+| `ManagedJavaArchive` | Executable- and symbolic-link-preserving Java tar serialization |
 | `RemoteAgentFiles` | Atomic installation of the packaged Java agent through SFTP |
 | `RemoteAgent` and `RemoteAgentProtocol` | Bounded typed requests and responses exchanged with the remote Java agent |
 | `SbkGemRemoteAgentMain` | Remote probe, SBK activation/verification, runtime leases, cleanup, and process launch |

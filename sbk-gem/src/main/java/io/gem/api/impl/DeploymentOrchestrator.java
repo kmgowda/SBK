@@ -11,42 +11,55 @@
 package io.gem.api.impl;
 
 import io.gem.agent.RemotePath;
-import io.gem.api.SshResponse;
 import io.gem.config.GemConfig;
 import io.gem.params.GemParameters;
-import io.sbk.config.ExitCode;
 import io.sbk.system.Printer;
 
 import java.io.IOException;
 import java.net.ConnectException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /** Coordinates immutable SBK bundle creation, deployment, activation, and lease acquisition. */
 final class DeploymentOrchestrator {
     private final GemConfig config;
-    private final GemParameters params;
+    private final Path sourceDirectory;
+    private final boolean packagesCleanup;
     private final List<RemoteNodeState> nodes;
     private final int controllerJavaVersion;
     private final RuntimeCopyPolicy copyPolicy;
-    private final RuntimeLeaseManager leaseManager;
+    private final RuntimeLeaseController leaseManager;
     private final ScheduledExecutorService scheduler;
     private final String leaseRunId;
-    private final RuntimeDeploymentTransport transport;
+    private final DeploymentTransport transport;
 
     DeploymentOrchestrator(GemConfig config, GemParameters params, List<RemoteNodeState> nodes,
                            int controllerJavaVersion, RuntimeCopyPolicy copyPolicy,
-                           RuntimeLeaseManager leaseManager, ScheduledExecutorService scheduler,
-                           String leaseRunId, RuntimeDeploymentTransport transport) {
+                           RuntimeLeaseController leaseManager, ScheduledExecutorService scheduler,
+                           String leaseRunId, DeploymentTransport transport) {
         this.config = config;
-        this.params = params;
+        this.sourceDirectory = Path.of(params.getSbkDir()).toAbsolutePath().normalize();
+        this.packagesCleanup = params.isPackagesCleanup();
+        this.nodes = nodes;
+        this.controllerJavaVersion = controllerJavaVersion;
+        this.copyPolicy = copyPolicy;
+        this.leaseManager = leaseManager;
+        this.scheduler = scheduler;
+        this.leaseRunId = leaseRunId;
+        this.transport = transport;
+    }
+
+    DeploymentOrchestrator(GemConfig config, Path sourceDirectory, boolean packagesCleanup,
+                           List<RemoteNodeState> nodes, int controllerJavaVersion,
+                           RuntimeCopyPolicy copyPolicy, RuntimeLeaseController leaseManager,
+                           ScheduledExecutorService scheduler, String leaseRunId,
+                           DeploymentTransport transport) {
+        this.config = config;
+        this.sourceDirectory = sourceDirectory.toAbsolutePath().normalize();
+        this.packagesCleanup = packagesCleanup;
         this.nodes = nodes;
         this.controllerJavaVersion = controllerJavaVersion;
         this.copyPolicy = copyPolicy;
@@ -58,8 +71,7 @@ final class DeploymentOrchestrator {
 
     void deploy(DeploymentPlatform platform) throws IOException, ConnectException,
             InterruptedException, ExecutionException {
-        final Path cacheDirectory = runtimeCacheDirectory();
-        final Path sourceDirectory = Paths.get(params.getSbkDir()).toAbsolutePath().normalize();
+        final Path cacheDirectory = DeploymentSupport.runtimeCacheDirectory(config);
         Printer.log.info("SBK-GEM: Preparing immutable runtime bundle for {}; progress every {} second(s)",
                 platform.id(), config.runtimeProgressIntervalSeconds);
         final SbkRuntimeBundle bundle;
@@ -79,7 +91,7 @@ final class DeploymentOrchestrator {
                 DeploymentProgress.formatSize(Files.size(bundle.archive())), bundle.contentDigest(),
                 bundle.archiveDigest());
         deployBundle(bundle, platform);
-        if (params.isPackagesCleanup()) {
+        if (packagesCleanup) {
             final int removed = SbkRuntimeBundle.cleanupOtherCachedBundles(cacheDirectory,
                     bundle.deploymentName());
             Printer.log.info("SBK-GEM: Retained local runtime bundle {}; removed {} inactive non-current "
@@ -87,33 +99,22 @@ final class DeploymentOrchestrator {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void deployBundle(SbkRuntimeBundle bundle, DeploymentPlatform platform) throws ConnectException,
             InterruptedException, ExecutionException, IOException {
-        final boolean[] copyTargets = new boolean[nodes.size()];
-        final CompletableFuture<SshResponse>[] probes = new CompletableFuture[nodes.size()];
         for (RemoteNodeState node : nodes) {
             node.deploymentName(bundle.deploymentName());
             node.deploymentDirectory(RemotePath.join(node.connectionDirectory(), bundle.deploymentName()));
             node.leaseId(leaseRunId + "-" + node.index());
         }
         leaseManager.reserve();
+        final boolean[] copyTargets = transport.missingTargets(bundle, platform);
         for (RemoteNodeState node : nodes) {
-            probes[node.index()] = node.session().runCommandAsync(
-                    RemoteAgent.command(DeploymentSupport.remoteJavaExecutable(node.javaHome()), node.agentPath()),
-                    RemoteAgent.verify(node.deploymentDirectory(), bundle.contentDigest(), config.sbkVersion,
-                            platform.operatingSystem()), true, config.remoteTimeoutSeconds);
-        }
-        waitFor(CompletableFuture.allOf(probes), "remote immutable runtime checks");
-        for (RemoteNodeState node : nodes) {
-            if (probes[node.index()].get().returnCode == ExitCode.SUCCESS) {
+            if (!copyTargets[node.index()]) {
                 Printer.log.info("SBK-GEM: Host '{}' will use existing SBK installation '{}'; skipping copy",
                         node.host(), DeploymentSupport.remoteSbkDirectory(node.deploymentDirectory()));
-            } else {
-                copyTargets[node.index()] = true;
             }
         }
-        if (hasSelectedTarget(copyTargets)) {
+        if (DeploymentSupport.hasSelectedTarget(copyTargets)) {
             transport.uploadAndActivate(bundle, copyTargets, platform);
             transport.verify(bundle, copyTargets, platform);
             for (RemoteNodeState node : nodes) {
@@ -129,30 +130,4 @@ final class DeploymentOrchestrator {
         leaseManager.acquire(bundle);
     }
 
-    private Path runtimeCacheDirectory() {
-        final Path configuredCache = Paths.get(config.runtimeCacheDirectory);
-        return configuredCache.isAbsolute() ? configuredCache
-                : Paths.get(System.getProperty("user.home")).resolve(configuredCache);
-    }
-
-    private void waitFor(CompletableFuture<?> future, String operation) throws IOException,
-            InterruptedException, ExecutionException {
-        try {
-            future.get(config.deploymentTimeoutSeconds, TimeUnit.SECONDS);
-        } catch (TimeoutException exception) {
-            final String message = "SBK-GEM: " + operation + " timed out after "
-                    + config.deploymentTimeoutSeconds + " seconds";
-            Printer.log.error(message);
-            throw new IOException(message, exception);
-        }
-    }
-
-    private static boolean hasSelectedTarget(boolean[] selected) {
-        for (boolean value : selected) {
-            if (value) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

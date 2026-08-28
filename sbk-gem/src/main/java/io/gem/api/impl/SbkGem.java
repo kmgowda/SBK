@@ -15,7 +15,6 @@ import io.gem.config.GemConfig;
 import io.gem.exception.SbkGemParameterException;
 import io.gem.api.GemBenchmark;
 import io.gem.api.GemLoggerPackage;
-import io.gem.api.RemoteExecutionStatus;
 import io.gem.api.RemoteResponse;
 import io.gem.logger.GemLogger;
 import io.gem.logger.impl.GemPrometheusLogger;
@@ -24,7 +23,6 @@ import io.gem.params.impl.SbkGemParameters;
 import io.micrometer.core.instrument.util.IOUtils;
 import io.perl.config.PerlConfig;
 import io.perl.api.impl.PerlBuilder;
-import io.perl.data.Bytes;
 import io.sbk.action.Action;
 import io.sbk.api.Storage;
 import io.sbk.api.StoragePackage;
@@ -56,13 +54,11 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -82,14 +78,6 @@ import java.util.concurrent.TimeoutException;
  */
 final public class SbkGem {
     final static String BANNER_FILE = "gem-banner.txt";
-    private static final int MINIMUM_RESULT_SEPARATOR_WIDTH = 80;
-    private static final int TOTAL_THROUGHPUT_SCALE = 12;
-    private static final String DISTRIBUTED_STATUS_LABEL = "Distributed Benchmark Status";
-    private static final String EXPECTED_NODES_LABEL = "Expected Nodes";
-    private static final String SUCCESSFUL_NODES_LABEL = "Successful Nodes";
-    private static final String FAILED_NODES_LABEL = "Failed Nodes";
-    private static final String MAXIMUM_REGISTRATIONS_LABEL = "Maximum SBM Registrations";
-    private static final int RESULT_LABEL_WIDTH = DISTRIBUTED_STATUS_LABEL.length();
 
     /**
      * Creates an SBK-GEM orchestration helper.
@@ -497,72 +485,18 @@ final public class SbkGem {
 
     static List<List<String>> distributeTotalRecords(List<String> commonArguments, long totalRecords, int nodeCount,
                                                       int workers, boolean rateMode) {
-        if (totalRecords <= 0 || nodeCount <= 0 || workers <= 0) {
-            throw new IllegalArgumentException("Total records, node count, and worker count must be positive");
-        }
-        final long allocationUnits = rateMode ? totalRecords / workers : totalRecords;
-        if (rateMode && totalRecords % workers != 0) {
-            throw new IllegalArgumentException("Total records/second must be divisible by the worker count");
-        }
-        if (allocationUnits < nodeCount) {
-            throw new IllegalArgumentException("Total records must allocate at least one unit to every node");
-        }
-        final long unitsPerNode = allocationUnits / nodeCount;
-        final long remainder = allocationUnits % nodeCount;
-        final List<List<String>> argumentsByNode = new ArrayList<>(nodeCount);
-        for (int i = 0; i < nodeCount; i++) {
-            final long nodeUnits = unitsPerNode + (i < remainder ? 1 : 0);
-            if (rateMode && nodeUnits > Integer.MAX_VALUE) {
-                throw new IllegalArgumentException("The per-worker records/second value on node " + (i + 1) +
-                        " exceeds " + Integer.MAX_VALUE);
-            }
-            final long nodeRecords = rateMode ? Math.multiplyExact(nodeUnits, workers) : nodeUnits;
-            final List<String> nodeArguments = new ArrayList<>(commonArguments.size() + 2);
-            nodeArguments.addAll(commonArguments);
-            addOption(nodeArguments, "-records", Long.toString(nodeRecords));
-            argumentsByNode.add(List.copyOf(nodeArguments));
-        }
-        return List.copyOf(argumentsByNode);
+        return DistributedWorkloadPlanner.distributeRecords(commonArguments, totalRecords, nodeCount,
+                workers, rateMode);
     }
 
     static List<List<String>> distributeTotalThroughput(List<List<String>> argumentsByNode,
                                                          BigDecimal totalThroughput, int recordSize, int workers) {
-        if (argumentsByNode.isEmpty() || totalThroughput.signum() <= 0 || recordSize <= 0 || workers <= 0) {
-            throw new IllegalArgumentException(
-                    "Remote arguments, total throughput, record size, and worker count must be positive");
-        }
-        final BigDecimal nodeCount = BigDecimal.valueOf(argumentsByNode.size());
-        final BigDecimal baseThroughput = totalThroughput.divide(nodeCount, TOTAL_THROUGHPUT_SCALE,
-                RoundingMode.DOWN);
-        final BigDecimal remainder = totalThroughput.subtract(baseThroughput.multiply(nodeCount));
-        final List<List<String>> distributedArguments = new ArrayList<>(argumentsByNode.size());
-        for (int i = 0; i < argumentsByNode.size(); i++) {
-            final BigDecimal nodeThroughput = i == 0 ? baseThroughput.add(remainder) : baseThroughput;
-            final double nodeThroughputValue = nodeThroughput.doubleValue();
-            final double recordsPerWorker = nodeThroughputValue * Bytes.BYTES_PER_MB / recordSize / workers;
-            if (!Double.isFinite(nodeThroughputValue) || recordsPerWorker < 1) {
-                throw new IllegalArgumentException("The '-totalthroughput' value must provide at least one " +
-                        "record/second per active worker on every node");
-            }
-            if (!Double.isFinite(recordsPerWorker) || recordsPerWorker > Integer.MAX_VALUE) {
-                throw new IllegalArgumentException("The '-totalthroughput' value exceeds SBK's maximum " +
-                        "record/second rate per active worker");
-            }
-            final List<String> nodeArguments = new ArrayList<>(argumentsByNode.get(i).size() + 2);
-            nodeArguments.addAll(argumentsByNode.get(i));
-            addOption(nodeArguments, "-throughput", nodeThroughput.stripTrailingZeros().toPlainString());
-            distributedArguments.add(List.copyOf(nodeArguments));
-        }
-        return List.copyOf(distributedArguments);
+        return DistributedWorkloadPlanner.distributeThroughput(argumentsByNode, totalThroughput,
+                recordSize, workers);
     }
 
     private static List<List<String>> identicalRemoteArguments(List<String> commonArguments, int nodeCount) {
-        final List<String> immutableArguments = List.copyOf(commonArguments);
-        final List<List<String>> argumentsByNode = new ArrayList<>(nodeCount);
-        for (int i = 0; i < nodeCount; i++) {
-            argumentsByNode.add(immutableArguments);
-        }
-        return List.copyOf(argumentsByNode);
+        return DistributedWorkloadPlanner.identicalArguments(commonArguments, nodeCount);
     }
 
     private static void addOption(List<String> arguments, String option, String value) {
@@ -578,7 +512,7 @@ final public class SbkGem {
      * @param all     boolean
      */
     public static void printRemoteResults(@NotNull RemoteResponse[] results, boolean all) {
-        printRemoteResults(results, all, -1);
+        DistributedResultPrinter.print(results, all, -1);
     }
 
     /**
@@ -590,105 +524,16 @@ final public class SbkGem {
      */
     public static void printRemoteResults(@NotNull RemoteResponse[] results, boolean all,
                                           int maximumRegisteredClients) {
-        int successful = 0;
-        int failed = 0;
-        for (RemoteResponse result : results) {
-            if (result != null && result.status == RemoteExecutionStatus.SUCCESS) {
-                successful++;
-            } else {
-                failed++;
-            }
-        }
-        final String runStatus = distributedRunStatus(results, maximumRegisteredClients);
-
-        final List<String> summaryLines = distributedResultSummary(runStatus, results.length, successful, failed,
-                maximumRegisteredClients);
-        final String title = "SBK-GEM Distributed Benchmark Final Results";
-        int separatorWidth = Math.max(MINIMUM_RESULT_SEPARATOR_WIDTH, title.length());
-        for (String summaryLine : summaryLines) {
-            separatorWidth = Math.max(separatorWidth, summaryLine.length());
-        }
-        for (int i = 0; i < results.length; i++) {
-            separatorWidth = Math.max(separatorWidth, remoteHostSummary(results[i], i).length());
-        }
-        final String separatorText = "-".repeat(separatorWidth);
-
-        Printer.log.info(separatorText);
-        Printer.log.info(title);
-        Printer.log.info(separatorText);
-        if ("SUCCESS".equals(runStatus)) {
-            summaryLines.forEach(Printer.log::info);
-        } else {
-            summaryLines.forEach(Printer.log::error);
-            Printer.log.error("SBK-GEM: Distributed results are incomplete and must not be used as a valid " +
-                    "performance comparison");
-        }
-        for (int i = 0; i < results.length; i++) {
-            final RemoteResponse result = results[i];
-            if (result == null) {
-                Printer.log.error(remoteHostSummary(null, i));
-                continue;
-            }
-            final String hostSummary = remoteHostSummary(result, i);
-            if (result.status == RemoteExecutionStatus.SUCCESS) {
-                Printer.log.info(hostSummary);
-            } else {
-                Printer.log.error(hostSummary);
-                Printer.log.error(result.failureMessage);
-            }
-            if (all || result.status != RemoteExecutionStatus.SUCCESS) {
-                if (!result.stdOutput.isBlank()) {
-                    Printer.log.error("Host '{}' bounded stdout tail:\n{}", result.host, result.stdOutput);
-                }
-                if (!result.errOutput.isBlank()) {
-                    Printer.log.error("Host '{}' bounded stderr tail:\n{}", result.host, result.errOutput);
-                }
-            }
-        }
-        Printer.log.info(separatorText);
+        DistributedResultPrinter.print(results, all, maximumRegisteredClients);
     }
 
     static List<String> distributedResultSummary(String runStatus, int expected, int successful, int failed,
                                                  int maximumRegisteredClients) {
-        final String registrationText = maximumRegisteredClients < 0 ? "unavailable"
-                : maximumRegisteredClients + "/" + expected;
-        return List.of(
-                resultSummaryLine(DISTRIBUTED_STATUS_LABEL, runStatus),
-                resultSummaryLine(EXPECTED_NODES_LABEL, expected),
-                resultSummaryLine(SUCCESSFUL_NODES_LABEL, successful),
-                resultSummaryLine(FAILED_NODES_LABEL, failed),
-                resultSummaryLine(MAXIMUM_REGISTRATIONS_LABEL, registrationText));
-    }
-
-    private static String resultSummaryLine(String label, Object value) {
-        return String.format(Locale.ROOT, "SBK-GEM %-" + RESULT_LABEL_WIDTH + "s : %s", label, value);
-    }
-
-    private static String remoteHostSummary(RemoteResponse result, int index) {
-        if (result == null) {
-            return "Host " + (index + 1) + ": unknown, status: NOT_COMPLETED, return code: unavailable";
-        }
-        final String returnCode = result.returnCode == RemoteResponse.UNKNOWN_RETURN_CODE
-                ? "unavailable" : Integer.toString(result.returnCode);
-        return "Host " + (index + 1) + ": " + result.host + ", status: " + result.status +
-                ", return code: " + returnCode;
+        return DistributedResultPrinter.summary(runStatus, expected, successful, failed,
+                maximumRegisteredClients);
     }
 
     static String distributedRunStatus(RemoteResponse[] results, int maximumRegisteredClients) {
-        int successful = 0;
-        for (RemoteResponse result : results) {
-            if (result != null && result.status == RemoteExecutionStatus.SUCCESS) {
-                successful++;
-            }
-        }
-        final boolean registrationIncomplete = maximumRegisteredClients >= 0 &&
-                maximumRegisteredClients < results.length;
-        if (successful == results.length && !registrationIncomplete) {
-            return "SUCCESS";
-        }
-        if (successful > 0 || maximumRegisteredClients > 0) {
-            return "INCOMPLETE";
-        }
-        return "FAILED";
+        return DistributedResultPrinter.runStatus(results, maximumRegisteredClients);
     }
 }

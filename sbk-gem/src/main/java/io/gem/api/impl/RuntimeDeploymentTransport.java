@@ -22,12 +22,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
 /** Transfers, activates, and verifies immutable SBK runtime bundles. */
-final class RuntimeDeploymentTransport {
+final class RuntimeDeploymentTransport implements DeploymentTransport {
     private final GemConfig config;
     private final GemParameters params;
     private final List<RemoteNodeState> nodes;
@@ -44,8 +42,29 @@ final class RuntimeDeploymentTransport {
     }
 
     @SuppressWarnings("unchecked")
-    void uploadAndActivate(SbkRuntimeBundle bundle, boolean[] copyTargets,
-                           DeploymentPlatform platform) throws ConnectException,
+    public boolean[] missingTargets(SbkRuntimeBundle bundle, DeploymentPlatform platform)
+            throws IOException, InterruptedException, ExecutionException {
+        @SuppressWarnings("unchecked")
+        final CompletableFuture<SshResponse>[] probes = new CompletableFuture[nodes.size()];
+        final boolean[] missing = new boolean[nodes.size()];
+        for (RemoteNodeState node : nodes) {
+            probes[node.index()] = node.session().runCommandAsync(
+                    RemoteAgent.command(DeploymentSupport.remoteJavaExecutable(node.javaHome()), node.agentPath()),
+                    RemoteAgent.verify(node.deploymentDirectory(), bundle.contentDigest(), config.sbkVersion,
+                            platform.operatingSystem()), true, config.remoteTimeoutSeconds);
+        }
+        DeploymentSupport.waitFor(CompletableFuture.allOf(probes), config.deploymentTimeoutSeconds,
+                "remote immutable runtime checks");
+        for (RemoteNodeState node : nodes) {
+            final int index = node.index();
+            missing[index] = probes[index].get().returnCode != ExitCode.SUCCESS;
+        }
+        return missing;
+    }
+
+    @Override
+    public void uploadAndActivate(SbkRuntimeBundle bundle, boolean[] copyTargets,
+                                  DeploymentPlatform platform) throws ConnectException,
             InterruptedException, ExecutionException, IOException {
         final String transferId = Long.toUnsignedString(System.nanoTime());
         final String[] archivePaths = new String[nodes.size()];
@@ -58,15 +77,16 @@ final class RuntimeDeploymentTransport {
             stagingDirectories[index] = node.deploymentDirectory() + "." + transferId + ".staging";
         }
         final RemoteTargetPlan targetPlan = RemoteTargetPlan.create(params.getConnections(),
-                endpointIdentities(), deploymentDirectories);
+                DeploymentSupport.endpointIdentities(nodes), deploymentDirectories);
         final boolean[] physicalCopyTargets = targetPlan.representativeSelection(copyTargets);
 
         copyArchive(bundle, physicalCopyTargets, archivePaths, deploymentDirectories);
         final CompletableFuture<SshResponse>[] activations = activate(bundle, physicalCopyTargets,
                 archivePaths, stagingDirectories, deploymentDirectories, platform);
-        waitFor(CompletableFuture.allOf(activations), "runtime archive activation");
+        DeploymentSupport.waitFor(CompletableFuture.allOf(activations), config.deploymentTimeoutSeconds,
+                "runtime archive activation");
         final boolean[] retryTargets = archiveDigestMismatchTargets(activations, physicalCopyTargets);
-        if (hasSelectedTarget(retryTargets)) {
+        if (DeploymentSupport.hasSelectedTarget(retryTargets)) {
             Printer.log.warn("SBK-GEM: Remote archive integrity verification failed; rebuilding the local "
                     + "runtime archive and retrying affected target(s) once");
             bundle.rebuildArchive();
@@ -78,7 +98,7 @@ final class RuntimeDeploymentTransport {
     }
 
     @SuppressWarnings("unchecked")
-    void verify(SbkRuntimeBundle bundle, boolean[] copyTargets, DeploymentPlatform platform)
+    public void verify(SbkRuntimeBundle bundle, boolean[] copyTargets, DeploymentPlatform platform)
             throws ConnectException, InterruptedException, ExecutionException, IOException {
         final CompletableFuture<SshResponse>[] probes = new CompletableFuture[nodes.size()];
         for (RemoteNodeState node : nodes) {
@@ -89,7 +109,8 @@ final class RuntimeDeploymentTransport {
                             platform.operatingSystem()), true, config.remoteTimeoutSeconds)
                     : CompletableFuture.completedFuture(new SshResponse(true));
         }
-        waitFor(CompletableFuture.allOf(probes), "activated runtime verification");
+        DeploymentSupport.waitFor(CompletableFuture.allOf(probes), config.deploymentTimeoutSeconds,
+                "activated runtime verification");
         requireSuccessful(probes, copyTargets, "Verifying activated immutable runtime");
         Printer.log.info("SBK-GEM: Runtime content {}, Java {} or newer, and SBK {} verified on selected hosts",
                 bundle.contentDigest(), controllerJavaVersion, config.sbkVersion);
@@ -128,7 +149,8 @@ final class RuntimeDeploymentTransport {
                     config.runtimeProgressIntervalSeconds, scheduler,
                     () -> DeploymentProgress.copyStatus(uploads, transferHosts, copiedBytes,
                             archiveBytes, copyStartedNanos, "transfer(s)"))) {
-                waitFor(CompletableFuture.allOf(uploads), "runtime archive upload");
+                DeploymentSupport.waitFor(CompletableFuture.allOf(uploads), config.deploymentTimeoutSeconds,
+                        "runtime archive upload");
                 transferSeconds = progress.elapsedSeconds();
             }
             Printer.log.info("SBK-GEM: Copied immutable runtime archive {} to {} unique remote target(s) "
@@ -192,7 +214,8 @@ final class RuntimeDeploymentTransport {
                         config.deploymentTimeoutSeconds)
                         : CompletableFuture.completedFuture(null);
             }
-            waitFor(CompletableFuture.allOf(retryUploads), "runtime archive integrity retry upload");
+            DeploymentSupport.waitFor(CompletableFuture.allOf(retryUploads), config.deploymentTimeoutSeconds,
+                    "runtime archive integrity retry upload");
         }
         for (RemoteNodeState node : nodes) {
             final int index = node.index();
@@ -201,7 +224,8 @@ final class RuntimeDeploymentTransport {
                         deploymentDirectories[index], platform);
             }
         }
-        waitFor(CompletableFuture.allOf(activations), "runtime archive integrity retry activation");
+        DeploymentSupport.waitFor(CompletableFuture.allOf(activations), config.deploymentTimeoutSeconds,
+                "runtime archive integrity retry activation");
     }
 
     private void requireSuccessful(CompletableFuture<SshResponse>[] futures, boolean[] selected,
@@ -223,22 +247,6 @@ final class RuntimeDeploymentTransport {
         }
     }
 
-    private void waitFor(CompletableFuture<?> future, String operation) throws IOException,
-            InterruptedException, ExecutionException {
-        try {
-            future.get(config.deploymentTimeoutSeconds, TimeUnit.SECONDS);
-        } catch (TimeoutException exception) {
-            final String message = "SBK-GEM: " + operation + " timed out after "
-                    + config.deploymentTimeoutSeconds + " seconds";
-            Printer.log.error(message);
-            throw new IOException(message, exception);
-        }
-    }
-
-    private String[] endpointIdentities() {
-        return nodes.stream().map(RemoteNodeState::endpointIdentity).toArray(String[]::new);
-    }
-
     static boolean[] archiveDigestMismatchTargets(CompletableFuture<SshResponse>[] activations,
                                                    boolean[] selected)
             throws InterruptedException, ExecutionException {
@@ -255,12 +263,4 @@ final class RuntimeDeploymentTransport {
         return retryTargets;
     }
 
-    private static boolean hasSelectedTarget(boolean[] selected) {
-        for (boolean value : selected) {
-            if (value) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

@@ -12,27 +12,18 @@ package io.gem.api.impl;
 
 import io.gem.agent.RemoteDeploymentContract;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.apache.commons.compress.archivers.tar.TarConstants;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.DigestOutputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HexFormat;
@@ -178,10 +169,11 @@ final class SbkRuntimeBundle {
             String archiveDigest = cachedArchiveDigest(archive, archiveDigestFile, archiveSizeFile);
             final boolean archiveReused = archiveDigest != null;
             if (archiveDigest == null) {
-                final List<BundleEntry> entries = driverRuntime == null
+                final List<SbkRuntimeArchive.Entry> entries = driverRuntime == null
                         ? collectRuntimeEntries(normalizedSbkDirectory)
                         : collectDriverRuntimeEntries(normalizedSbkDirectory, sbkVersion, driverRuntime);
-                archiveDigest = createArchive(archive, sbkVersion, javaVersion, platform, contentDigest, entries);
+                archiveDigest = SbkRuntimeArchive.create(archive, sbkVersion, javaVersion, platform,
+                        contentDigest, BUNDLE_FORMAT_VERSION, entries);
                 writeAtomically(archiveDigestFile, archiveDigest + "\n");
                 writeAtomically(archiveSizeFile, Files.size(archive) + "\n");
             }
@@ -245,10 +237,11 @@ final class SbkRuntimeBundle {
         processLock.lock();
         try (FileChannel lockChannel = openLockChannel(cacheLockFile);
              FileLock ignored = lockChannel.lock()) {
-            final List<BundleEntry> entries = driverRuntime == null
+            final List<SbkRuntimeArchive.Entry> entries = driverRuntime == null
                     ? collectRuntimeEntries(sbkDirectory)
                     : collectDriverRuntimeEntries(sbkDirectory, sbkVersion, driverRuntime);
-            archiveDigest = createArchive(archive, sbkVersion, javaVersion, platform, contentDigest, entries);
+            archiveDigest = SbkRuntimeArchive.create(archive, sbkVersion, javaVersion, platform,
+                    contentDigest, BUNDLE_FORMAT_VERSION, entries);
             writeAtomically(archiveDigestFile, archiveDigest + "\n");
             writeAtomically(archiveSizeFile, Files.size(archive) + "\n");
         } finally {
@@ -457,7 +450,8 @@ final class SbkRuntimeBundle {
         return resolved;
     }
 
-    private static void collectEntries(Path sourceRoot, String archiveRoot, List<BundleEntry> entries)
+    private static void collectEntries(Path sourceRoot, String archiveRoot,
+                                       List<SbkRuntimeArchive.Entry> entries)
             throws IOException {
         final Path realSourceRoot = sourceRoot.toRealPath();
         addEntry(sourceRoot, sourceRoot, realSourceRoot, archiveRoot, entries);
@@ -472,46 +466,50 @@ final class SbkRuntimeBundle {
         }
     }
 
-    private static List<BundleEntry> collectRuntimeEntries(Path sbkDirectory) throws IOException {
-        final List<BundleEntry> entries = new ArrayList<>();
-        entries.add(new BundleEntry(sbkDirectory, SBK_DIRECTORY, EntryType.DIRECTORY, 0, "", "",
+    private static List<SbkRuntimeArchive.Entry> collectRuntimeEntries(Path sbkDirectory) throws IOException {
+        final List<SbkRuntimeArchive.Entry> entries = new ArrayList<>();
+        entries.add(new SbkRuntimeArchive.Entry(sbkDirectory, SBK_DIRECTORY,
+                SbkRuntimeArchive.Type.DIRECTORY, 0, "", "",
                 DIRECTORY_MODE));
         collectEntries(sbkDirectory.resolve("bin"), SBK_DIRECTORY + "/bin", entries);
         collectEntries(sbkDirectory.resolve("lib"), SBK_DIRECTORY + "/lib", entries);
         addEntry(sbkDirectory, sbkDirectory.resolve(RUNTIME_IDENTITY_FILE), sbkDirectory.toRealPath(),
                 SBK_DIRECTORY, entries);
-        entries.sort(Comparator.comparing(BundleEntry::relativePath));
+        entries.sort(Comparator.comparing(SbkRuntimeArchive.Entry::relativePath));
         return entries;
     }
 
-    private static List<BundleEntry> collectDriverRuntimeEntries(Path sbkDirectory, String sbkVersion,
-                                                                  DriverRuntimeManifest driverRuntime)
+    private static List<SbkRuntimeArchive.Entry> collectDriverRuntimeEntries(Path sbkDirectory, String sbkVersion,
+                                                                              DriverRuntimeManifest driverRuntime)
             throws IOException {
-        final List<BundleEntry> entries = new ArrayList<>();
-        entries.add(new BundleEntry(sbkDirectory, SBK_DIRECTORY, EntryType.DIRECTORY, 0, "", "",
+        final List<SbkRuntimeArchive.Entry> entries = new ArrayList<>();
+        entries.add(new SbkRuntimeArchive.Entry(sbkDirectory, SBK_DIRECTORY,
+                SbkRuntimeArchive.Type.DIRECTORY, 0, "", "",
                 DIRECTORY_MODE));
-        entries.add(new BundleEntry(sbkDirectory.resolve("lib"), SBK_DIRECTORY + "/lib", EntryType.DIRECTORY,
-                0, "", "", DIRECTORY_MODE));
+        entries.add(new SbkRuntimeArchive.Entry(sbkDirectory.resolve("lib"), SBK_DIRECTORY + "/lib",
+                SbkRuntimeArchive.Type.DIRECTORY, 0, "", "", DIRECTORY_MODE));
         for (Path library : driverRuntime.libraries()) {
             addMappedRegularFile(library, SBK_DIRECTORY + "/lib/" + fileName(library), entries);
         }
         addMappedRegularFile(driverRuntime.pathingJar(),
                 SBK_DIRECTORY + "/lib/sbk-pathing-" + sbkVersion + ".jar", entries);
-        entries.sort(Comparator.comparing(BundleEntry::relativePath));
+        entries.sort(Comparator.comparing(SbkRuntimeArchive.Entry::relativePath));
         return entries;
     }
 
-    private static void addMappedRegularFile(Path source, String archivePath, List<BundleEntry> entries)
+    private static void addMappedRegularFile(Path source, String archivePath,
+                                             List<SbkRuntimeArchive.Entry> entries)
             throws IOException {
         if (!Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) {
             throw new IOException("Driver runtime file is missing: " + source);
         }
-        entries.add(new BundleEntry(source, archivePath, EntryType.REGULAR_FILE, Files.size(source),
+        entries.add(new SbkRuntimeArchive.Entry(source, archivePath, SbkRuntimeArchive.Type.REGULAR_FILE,
+                Files.size(source),
                 sha256(source), "", Files.isExecutable(source) ? EXECUTABLE_FILE_MODE : REGULAR_FILE_MODE));
     }
 
     private static void addEntry(Path sourceRoot, Path path, Path realSourceRoot, String archiveRoot,
-                                 List<BundleEntry> entries) throws IOException {
+                                 List<SbkRuntimeArchive.Entry> entries) throws IOException {
         final Path relative = sourceRoot.relativize(path);
         final String archivePath = relative.toString().isEmpty() ? archiveRoot
                 : archiveRoot + "/" + normalizeRelativePath(relative.toString());
@@ -519,12 +517,14 @@ final class SbkRuntimeBundle {
             final Path symbolicTarget = Files.readSymbolicLink(path);
             validateContainedSymbolicLink(sourceRoot, realSourceRoot, path, symbolicTarget);
             final String linkTarget = symbolicTarget.toString();
-            entries.add(new BundleEntry(path, archivePath, EntryType.SYMBOLIC_LINK, 0,
+            entries.add(new SbkRuntimeArchive.Entry(path, archivePath, SbkRuntimeArchive.Type.SYMBOLIC_LINK, 0,
                     sha256(linkTarget.getBytes(StandardCharsets.UTF_8)), linkTarget, SYMBOLIC_LINK_MODE));
         } else if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
-            entries.add(new BundleEntry(path, archivePath, EntryType.DIRECTORY, 0, "", "", DIRECTORY_MODE));
+            entries.add(new SbkRuntimeArchive.Entry(path, archivePath, SbkRuntimeArchive.Type.DIRECTORY,
+                    0, "", "", DIRECTORY_MODE));
         } else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
-            entries.add(new BundleEntry(path, archivePath, EntryType.REGULAR_FILE, Files.size(path),
+            entries.add(new SbkRuntimeArchive.Entry(path, archivePath, SbkRuntimeArchive.Type.REGULAR_FILE,
+                    Files.size(path),
                     sha256(path), "", Files.isExecutable(path) ? EXECUTABLE_FILE_MODE : REGULAR_FILE_MODE));
         } else {
             throw new IOException("Unsupported runtime bundle filesystem entry: " + path);
@@ -556,106 +556,6 @@ final class SbkRuntimeBundle {
         return HexFormat.of().formatHex(digest.digest());
     }
 
-    private static String createArchive(Path archive, String sbkVersion, int javaVersion,
-                                        DeploymentPlatform platform, String contentDigest,
-                                        List<BundleEntry> entries) throws IOException {
-        final Path archiveParent = Objects.requireNonNull(archive.toAbsolutePath().getParent(),
-                "Runtime archive must have a parent directory");
-        final Path temporaryArchive = Files.createTempFile(archiveParent, fileName(archive), ".partial");
-        final MessageDigest archiveDigest = newDigest();
-        try {
-            try (OutputStream fileOutput = Files.newOutputStream(temporaryArchive);
-                 DigestOutputStream digestOutput = new DigestOutputStream(fileOutput, archiveDigest);
-                 BufferedOutputStream bufferedOutput = new BufferedOutputStream(digestOutput, BUFFER_SIZE);
-                 TarArchiveOutputStream tarOutput = new TarArchiveOutputStream(bufferedOutput)) {
-                tarOutput.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
-                tarOutput.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
-                addDirectoryEntry(tarOutput, ARCHIVE_ROOT + "/");
-                for (BundleEntry entry : entries) {
-                    addFilesystemEntry(tarOutput, entry);
-                }
-                addByteEntry(tarOutput, ARCHIVE_ROOT + "/" + DESCRIPTOR_FILE,
-                        descriptor(sbkVersion, javaVersion, platform, contentDigest));
-                addByteEntry(tarOutput, ARCHIVE_ROOT + "/" + CHECKSUM_FILE, checksums(entries));
-            }
-            moveAtomically(temporaryArchive, archive);
-            return HexFormat.of().formatHex(archiveDigest.digest());
-        } finally {
-            Files.deleteIfExists(temporaryArchive);
-        }
-    }
-
-    private static void addFilesystemEntry(TarArchiveOutputStream output, BundleEntry bundleEntry)
-            throws IOException {
-        String archiveName = ARCHIVE_ROOT + "/" + bundleEntry.relativePath();
-        if (bundleEntry.type() == EntryType.DIRECTORY) {
-            archiveName += "/";
-        }
-        final TarArchiveEntry archiveEntry;
-        if (bundleEntry.type() == EntryType.SYMBOLIC_LINK) {
-            archiveEntry = new TarArchiveEntry(archiveName, TarConstants.LF_SYMLINK);
-            archiveEntry.setLinkName(bundleEntry.linkTarget());
-            archiveEntry.setSize(0);
-        } else {
-            archiveEntry = new TarArchiveEntry(archiveName);
-            archiveEntry.setSize(bundleEntry.size());
-        }
-        archiveEntry.setMode(bundleEntry.mode());
-        output.putArchiveEntry(archiveEntry);
-        if (bundleEntry.type() == EntryType.REGULAR_FILE) {
-            try (BufferedInputStream input = new BufferedInputStream(Files.newInputStream(bundleEntry.source()),
-                    BUFFER_SIZE)) {
-                input.transferTo(output);
-            }
-        }
-        output.closeArchiveEntry();
-    }
-
-    private static void addDirectoryEntry(TarArchiveOutputStream output, String name) throws IOException {
-        final TarArchiveEntry entry = new TarArchiveEntry(name);
-        entry.setMode(DIRECTORY_MODE);
-        output.putArchiveEntry(entry);
-        output.closeArchiveEntry();
-    }
-
-    private static void addByteEntry(TarArchiveOutputStream output, String name, String value) throws IOException {
-        final byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
-        final TarArchiveEntry entry = new TarArchiveEntry(name);
-        entry.setMode(REGULAR_FILE_MODE);
-        entry.setSize(bytes.length);
-        output.putArchiveEntry(entry);
-        output.write(bytes);
-        output.closeArchiveEntry();
-    }
-
-    private static String descriptor(String sbkVersion, int javaVersion, DeploymentPlatform platform,
-                                     String contentDigest) {
-        return RemoteDeploymentContract.FORMAT_VERSION_PROPERTY + "=" + BUNDLE_FORMAT_VERSION + "\n"
-                + RemoteDeploymentContract.SBK_VERSION_PROPERTY + "=" + sbkVersion + "\n"
-                + RemoteDeploymentContract.JAVA_VERSION_PROPERTY + "=" + javaVersion + "\n"
-                + RemoteDeploymentContract.PLATFORM_OS_PROPERTY + "=" + platform.operatingSystem() + "\n"
-                + RemoteDeploymentContract.CONTENT_SHA_256_PROPERTY + "=" + contentDigest + "\n"
-                + RemoteDeploymentContract.INCLUDES_JAVA_PROPERTY + "=false\n";
-    }
-
-    private static String checksums(List<BundleEntry> entries) {
-        final StringBuilder checksums = new StringBuilder();
-        for (BundleEntry entry : entries) {
-            if (entry.type() == EntryType.REGULAR_FILE) {
-                checksums.append(entry.digest()).append("  ").append(entry.relativePath()).append('\n');
-            }
-        }
-        return checksums.toString();
-    }
-
-    private static void moveAtomically(Path source, Path target) throws IOException {
-        try {
-            Files.move(source, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-        } catch (AtomicMoveNotSupportedException ignored) {
-            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
-        }
-    }
-
     private static String cachedArchiveDigest(Path archive, Path digestFile, Path sizeFile) throws IOException {
         if (!Files.isRegularFile(archive) || !Files.isRegularFile(digestFile)
                 || !Files.isRegularFile(sizeFile)) {
@@ -680,7 +580,12 @@ final class SbkRuntimeBundle {
         final Path temporaryFile = Files.createTempFile(parent, fileName(target), ".partial");
         try {
             Files.writeString(temporaryFile, value, StandardCharsets.UTF_8);
-            moveAtomically(temporaryFile, target);
+            try {
+                Files.move(temporaryFile, target, java.nio.file.StandardCopyOption.ATOMIC_MOVE,
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            } catch (java.nio.file.AtomicMoveNotSupportedException ignored) {
+                Files.move(temporaryFile, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
         } finally {
             Files.deleteIfExists(temporaryFile);
         }
@@ -711,25 +616,11 @@ final class SbkRuntimeBundle {
     }
 
     private static MessageDigest newDigest() {
-        try {
-            return MessageDigest.getInstance(SHA_256);
-        } catch (NoSuchAlgorithmException exception) {
-            throw new IllegalStateException(SHA_256 + " is unavailable", exception);
-        }
+        return DigestSupport.newSha256();
     }
 
     private static void update(MessageDigest digest, String value) {
         digest.update(value.getBytes(StandardCharsets.UTF_8));
-    }
-
-    private enum EntryType {
-        DIRECTORY,
-        REGULAR_FILE,
-        SYMBOLIC_LINK
-    }
-
-    private record BundleEntry(Path source, String relativePath, EntryType type, long size,
-                               String digest, String linkTarget, int mode) {
     }
 
     /** Holds the cache lock while the archive is consumed by an asynchronous transfer. */

@@ -13,9 +13,16 @@ package io.gem.api.impl;
 import io.gem.agent.RemoteDeploymentContract;
 import io.gem.agent.RemotePath;
 import io.gem.config.GemConfig;
+import io.sbk.system.Printer;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /** Shared non-stateful deployment helpers. */
 final class DeploymentSupport {
@@ -28,6 +35,37 @@ final class DeploymentSupport {
 
     static String remoteSbkDirectory(String runtimeDirectory) {
         return RemotePath.join(runtimeDirectory, RemoteDeploymentContract.SBK_DIRECTORY);
+    }
+
+    static Path runtimeCacheDirectory(GemConfig config) {
+        final Path configuredCache = Path.of(config.runtimeCacheDirectory);
+        return configuredCache.isAbsolute() ? configuredCache
+                : Path.of(System.getProperty("user.home")).resolve(configuredCache);
+    }
+
+    static String[] endpointIdentities(List<RemoteNodeState> nodes) {
+        return nodes.stream().map(RemoteNodeState::endpointIdentity).toArray(String[]::new);
+    }
+
+    static boolean hasSelectedTarget(boolean[] selected) {
+        for (boolean value : selected) {
+            if (value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static void waitFor(CompletableFuture<?> future, long timeoutSeconds, String operation)
+            throws IOException, InterruptedException, ExecutionException {
+        try {
+            future.get(timeoutSeconds, TimeUnit.SECONDS);
+        } catch (TimeoutException exception) {
+            final String message = "SBK-GEM: " + operation + " timed out after "
+                    + timeoutSeconds + " seconds";
+            Printer.log.error(message);
+            throw new IOException(message, exception);
+        }
     }
 
     static String diagnosticSummary(String output, GemConfig config) {

@@ -41,7 +41,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Coordinates remote SBK execution and local SBM lifecycle.
@@ -156,7 +155,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
         }
         final CompletableFuture<Void> connsFuture = CompletableFuture.allOf(cfArray);
         try {
-            waitForDeployment(connsFuture, "SSH session establishment");
+            DeploymentSupport.waitFor(connsFuture, config.deploymentTimeoutSeconds,
+                    "SSH session establishment");
         } catch (ExecutionException ex) {
             throw remoteSessionFailure(ex);
         }
@@ -309,7 +309,8 @@ final public class SbkGemBenchmark implements GemBenchmark {
                     ? unwrapCompletionFailure(failure) : remoteFailure;
             final Throwable benchmarkFailure = completeSbmAfterRemoteCommands(commandFailure);
             CompletableFuture.allOf(leaseReleases)
-                    .thenCompose(released -> runtimeLeaseManager.cleanupRetired(endpointIdentities()))
+                    .thenCompose(released -> runtimeLeaseManager.cleanupRetired(
+                            DeploymentSupport.endpointIdentities(nodes)))
                     .whenComplete((cleaned, cleanupFailure) -> {
                         if (benchmarkFailure != null) {
                             shutdown(benchmarkFailure, BenchmarkTermination.INTERNAL_FAILURE);
@@ -325,7 +326,7 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
     private void configureTransferExecutor() {
         final int uniqueTargets = RemoteTargetPlan.createBeforeDirectoryResolution(params.getConnections(),
-                endpointIdentities()).targetCount();
+                DeploymentSupport.endpointIdentities(nodes)).targetCount();
         final int transferThreads = TransferExecutorSizing.selectedThreads(config, uniqueTargets);
         executors.configureTransferThreads(transferThreads);
         if (config.transferExecutorThreads == 0) {
@@ -350,10 +351,6 @@ final public class SbkGemBenchmark implements GemBenchmark {
         } catch (RuntimeException sbmFailure) {
             return combineTerminalFailures(commandFailure, sbmFailure);
         }
-    }
-
-    private String[] endpointIdentities() {
-        return nodes.stream().map(RemoteNodeState::endpointIdentity).toArray(String[]::new);
     }
 
     private RemoteResponse[] remoteResults() {
@@ -410,27 +407,6 @@ final public class SbkGemBenchmark implements GemBenchmark {
 
     private void requireRunning(String operation) {
         lifecycle.requireRunning(operation);
-    }
-
-    private void waitForDeployment(CompletableFuture<?> future, String operation) throws IOException,
-            InterruptedException, ExecutionException {
-        try {
-            future.get(config.deploymentTimeoutSeconds, TimeUnit.SECONDS);
-        } catch (TimeoutException exception) {
-            final String message = "SBK-GEM: " + operation + " timed out after "
-                    + config.deploymentTimeoutSeconds + " seconds";
-            Printer.log.error(message);
-            throw new IOException(message, exception);
-        }
-    }
-
-    private static boolean hasSelectedTarget(boolean[] selected) {
-        for (boolean value : selected) {
-            if (value) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static Throwable unwrapCompletionFailure(Throwable failure) {

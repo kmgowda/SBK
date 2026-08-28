@@ -99,6 +99,12 @@ host:
   --no-daemon --rerun-tasks
 ```
 
+Every pull request runs the focused `releasePreflight releaseFunctionalTest`
+portion of this profile as the `SBK-GEM two-node functional test` CI job. It
+uploads its functional report and JUnit evidence even when the test fails. The
+full `releasecheck` profile and private real-host release inventory remain
+separate, stronger qualification gates.
+
 Requirements are Docker with an accessible daemon and the OpenSSH client
 tools `ssh`, `ssh-agent`, `ssh-add`, `ssh-keygen`, and `ssh-keyscan`. The
 fixture lets `ssh-agent` select its own platform-safe Unix-domain-socket path,

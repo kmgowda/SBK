@@ -354,7 +354,7 @@ class ReleaseFunctionalTest {
         if (config.profile.equals("local-docker")) {
             deploymentPattern = logger.equals("GemPrometheusLogger")
                     ? "(?s)Immutable runtime archive verified and atomically activated.*" + deploymentPattern
-                    : "(?s)already has immutable runtime.*skipping copy.*" + deploymentPattern;
+                    : "(?s)will use existing SBK installation.*skipping copy.*" + deploymentPattern;
         }
         expect(config.sbkGem, deploymentPattern, inventory.environment, args.toArray(String[]::new));
     }
@@ -373,7 +373,7 @@ class ReleaseFunctionalTest {
                 .append("\n  out: GemPrometheusLogger\n");
         Files.writeString(file, yaml, StandardCharsets.UTF_8);
         final String expected = config.profile.equals("local-docker")
-                ? "(?s)already has immutable runtime.*skipping copy.*" + inventory.successPattern()
+                ? "(?s)will use existing SBK installation.*skipping copy.*" + inventory.successPattern()
                 : inventory.successPattern();
         expect(config.sbkGemYal, expected, inventory.environment, "-f", file.toString());
     }
@@ -703,8 +703,10 @@ class ReleaseFunctionalTest {
 
         private String successPattern() {
             int nodeCount = (int) Stream.of(nodes.split("[,\\s]+")).filter(node -> !node.isBlank()).count();
-            return "expected nodes: " + nodeCount + "; successful nodes: " + nodeCount
-                    + "; failed nodes: 0; maximum SBM registrations: " + nodeCount + "/" + nodeCount;
+            return "(?s)SBK-GEM Expected Nodes\\s+: " + nodeCount
+                    + ".*SBK-GEM Successful Nodes\\s+: " + nodeCount
+                    + ".*SBK-GEM Failed Nodes\\s+: 0"
+                    + ".*SBK-GEM Maximum SBM Registrations\\s+: " + nodeCount + "/" + nodeCount;
         }
 
         private static String required(final Properties properties, final String name) {

@@ -25,10 +25,9 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /** Owns remote runtime leases, heartbeats, releases, and retired-package cleanup. */
-final class RuntimeLeaseManager {
+final class RuntimeLeaseManager implements RuntimeLeaseController {
     /** Starts one remote benchmark command while atomically transferring lease ownership to it. */
     @FunctionalInterface
     interface BenchmarkCommandStarter {
@@ -57,7 +56,7 @@ final class RuntimeLeaseManager {
     }
 
     @SuppressWarnings("unchecked")
-    void reserve() throws InterruptedException, ExecutionException, IOException {
+    public void reserve() throws InterruptedException, ExecutionException, IOException {
         final CompletableFuture<Void>[] reservations = new CompletableFuture[nodes.size()];
         final String[] targetHosts = new String[nodes.size()];
         for (RemoteNodeState node : nodes) {
@@ -77,14 +76,15 @@ final class RuntimeLeaseManager {
         try (LifecycleProgress progress = new LifecycleProgress("Remote runtime reservation",
                 config.runtimeProgressIntervalSeconds, scheduler,
                 () -> DeploymentProgress.pendingHosts(reservations, targetHosts))) {
-            waitFor(CompletableFuture.allOf(reservations), "runtime deployment reservation");
+            DeploymentSupport.waitFor(CompletableFuture.allOf(reservations), config.deploymentTimeoutSeconds,
+                    "runtime deployment reservation");
         }
         startHeartbeats();
         Printer.log.info("SBK-GEM: Runtime reserved on {} remote host(s)", nodes.size());
     }
 
     @SuppressWarnings("unchecked")
-    void acquire(SbkRuntimeBundle bundle) throws InterruptedException, ExecutionException, IOException {
+    public void acquire(SbkRuntimeBundle bundle) throws InterruptedException, ExecutionException, IOException {
         pauseHeartbeats();
         final CompletableFuture<Void>[] acquisitions = new CompletableFuture[nodes.size()];
         final String[] targetHosts = new String[nodes.size()];
@@ -108,7 +108,8 @@ final class RuntimeLeaseManager {
         try (LifecycleProgress progress = new LifecycleProgress("Remote runtime setup",
                 config.runtimeProgressIntervalSeconds, scheduler,
                 () -> DeploymentProgress.pendingHosts(acquisitions, targetHosts))) {
-            waitFor(CompletableFuture.allOf(acquisitions), "runtime lease acquisition and retirement");
+            DeploymentSupport.waitFor(CompletableFuture.allOf(acquisitions), config.deploymentTimeoutSeconds,
+                    "runtime lease acquisition and retirement");
             acquisitionSeconds = progress.elapsedSeconds();
         }
         startHeartbeats();
@@ -163,7 +164,8 @@ final class RuntimeLeaseManager {
             }
         }
         if (releaseRequired) {
-            waitFor(CompletableFuture.allOf(releases), "unlaunched runtime lease release");
+            DeploymentSupport.waitFor(CompletableFuture.allOf(releases), config.deploymentTimeoutSeconds,
+                    "unlaunched runtime lease release");
         }
     }
 
@@ -273,7 +275,8 @@ final class RuntimeLeaseManager {
         for (int i = 0; i < heartbeats.length; i++) {
             settled[i] = heartbeats[i].handle((ignored, failure) -> null);
         }
-        waitFor(CompletableFuture.allOf(settled), "runtime lease heartbeat pause");
+        DeploymentSupport.waitFor(CompletableFuture.allOf(settled), config.deploymentTimeoutSeconds,
+                "runtime lease heartbeat pause");
     }
 
     private void refreshLeases() {
@@ -331,18 +334,6 @@ final class RuntimeLeaseManager {
             return Long.MAX_VALUE;
         }
         return config.runtimeManagementLockTimeoutSeconds + config.remoteTimeoutSeconds;
-    }
-
-    private void waitFor(CompletableFuture<?> future, String operation) throws IOException,
-            InterruptedException, ExecutionException {
-        try {
-            future.get(config.deploymentTimeoutSeconds, TimeUnit.SECONDS);
-        } catch (TimeoutException exception) {
-            final String message = "SBK-GEM: " + operation + " timed out after "
-                    + config.deploymentTimeoutSeconds + " seconds";
-            Printer.log.error(message);
-            throw new IOException(message, exception);
-        }
     }
 
     private void activate(RemoteNodeState node) {

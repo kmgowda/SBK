@@ -21,35 +21,60 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
 /** Bootstraps the remote agent and provisions a compatible Java runtime when required. */
 final class RemoteEnvironmentPreparer {
+    @FunctionalInterface
+    interface AgentBootstrapper {
+        CompletableFuture<RemoteJavaBootstrap> prepare(RemoteNodeState node, ConnectionConfig connection,
+                                                       Path localAgent, String agentDigest,
+                                                       String configuredJavaHome) throws ConnectException;
+    }
+
     private static final String SYSTEM_JAVA_EXECUTABLE = "java";
 
     private final GemConfig config;
-    private final GemParameters params;
+    private final ConnectionConfig[] connections;
+    private final Path sbkDirectory;
+    private final String configuredJavaHome;
     private final List<RemoteNodeState> nodes;
     private final int controllerJavaVersion;
     private final RuntimeCopyPolicy copyPolicy;
     private final ScheduledExecutorService scheduler;
+    private final AgentBootstrapper agentBootstrapper;
 
     RemoteEnvironmentPreparer(GemConfig config, GemParameters params, List<RemoteNodeState> nodes,
                               int controllerJavaVersion, RuntimeCopyPolicy copyPolicy,
                               ScheduledExecutorService scheduler) {
         this.config = config;
-        this.params = params;
+        this.connections = params.getConnections();
+        this.sbkDirectory = Path.of(params.getSbkDir()).toAbsolutePath().normalize();
+        this.configuredJavaHome = RemotePath.normalize(params.getJavaDir());
         this.nodes = nodes;
         this.controllerJavaVersion = controllerJavaVersion;
         this.copyPolicy = copyPolicy;
         this.scheduler = scheduler;
+        this.agentBootstrapper = this::prepareAgent;
+    }
+
+    RemoteEnvironmentPreparer(GemConfig config, ConnectionConfig[] connections, Path sbkDirectory,
+                              String configuredJavaHome, List<RemoteNodeState> nodes,
+                              int controllerJavaVersion, RuntimeCopyPolicy copyPolicy,
+                              ScheduledExecutorService scheduler, AgentBootstrapper agentBootstrapper) {
+        this.config = config;
+        this.connections = connections.clone();
+        this.sbkDirectory = sbkDirectory.toAbsolutePath().normalize();
+        this.configuredJavaHome = RemotePath.normalize(configuredJavaHome);
+        this.nodes = nodes;
+        this.controllerJavaVersion = controllerJavaVersion;
+        this.copyPolicy = copyPolicy;
+        this.scheduler = scheduler;
+        this.agentBootstrapper = agentBootstrapper;
     }
 
     @SuppressWarnings("unchecked")
@@ -57,17 +82,15 @@ final class RemoteEnvironmentPreparer {
         final DeploymentPlatform localPlatform = DeploymentPlatform.local();
         final Path localAgent = localAgent();
         final String agentDigest = RemoteAgentFiles.digest(localAgent);
-        final ConnectionConfig[] connections = params.getConnections();
         final RemoteTargetPlan targetPlan = RemoteTargetPlan.createBeforeDirectoryResolution(connections,
-                endpointIdentities());
+                DeploymentSupport.endpointIdentities(nodes));
         final CompletableFuture<RemoteJavaBootstrap>[] bootstraps = new CompletableFuture[nodes.size()];
         final String[] targetHosts = new String[nodes.size()];
-        final String configuredJavaHome = RemotePath.normalize(params.getJavaDir());
         for (RemoteNodeState node : nodes) {
             final int index = node.index();
             if (targetPlan.isRepresentative(index)) {
                 targetHosts[index] = node.hostAndPort();
-                bootstraps[index] = prepareAgent(node, connections[index], localAgent,
+                bootstraps[index] = agentBootstrapper.prepare(node, connections[index], localAgent,
                         agentDigest, configuredJavaHome);
             } else {
                 bootstraps[index] = bootstraps[targetPlan.representative(index)];
@@ -76,7 +99,8 @@ final class RemoteEnvironmentPreparer {
         try (LifecycleProgress progress = new LifecycleProgress("Remote Java bootstrap",
                 config.runtimeProgressIntervalSeconds, scheduler,
                 () -> DeploymentProgress.pendingHosts(bootstraps, targetHosts))) {
-            waitFor(CompletableFuture.allOf(bootstraps), "remote Java bootstrap");
+            DeploymentSupport.waitFor(CompletableFuture.allOf(bootstraps), config.deploymentTimeoutSeconds,
+                    "remote Java bootstrap");
         }
 
         final boolean[] unresolved = new boolean[nodes.size()];
@@ -91,10 +115,10 @@ final class RemoteEnvironmentPreparer {
             unresolved[index] = node.javaHome() == null || node.javaHome().isBlank();
         }
 
-        if (hasSelectedTarget(unresolved)) {
+        if (DeploymentSupport.hasSelectedTarget(unresolved)) {
             provisionJava(unresolved, javaProbes);
         }
-        if (hasSelectedTarget(unresolved)) {
+        if (DeploymentSupport.hasSelectedTarget(unresolved)) {
             throw new IOException("SBK-GEM: Java " + controllerJavaVersion
                     + " or newer could not be provisioned");
         }
@@ -102,7 +126,7 @@ final class RemoteEnvironmentPreparer {
     }
 
     private Path localAgent() throws IOException {
-        final Path agent = Path.of(params.getSbkDir(), "lib", "sbk-gem-agent-"
+        final Path agent = sbkDirectory.resolve("lib").resolve("sbk-gem-agent-"
                 + config.sbkVersion + ".jar").toAbsolutePath().normalize();
         if (!Files.isRegularFile(agent)) {
             throw new IOException("SBK-GEM remote agent is missing from the installed distribution: " + agent);
@@ -141,10 +165,9 @@ final class RemoteEnvironmentPreparer {
                         + "content-addressed {} bulk SCP transfer", controllerJavaVersion,
                 javaDeploymentName);
         final Path javaSourceDirectory = Path.of(System.getProperty("java.home")).toAbsolutePath().normalize();
-        final Path localSbkDirectory = Paths.get(params.getSbkDir()).toAbsolutePath().normalize();
         final ManagedJavaRuntime javaRuntime = copyPolicy.createJavaRuntime(
                 new RuntimeCopyPolicy.JavaRuntimeSource(javaSourceDirectory, controllerJavaVersion,
-                        runtimeCacheDirectory(), localSbkDirectory));
+                        DeploymentSupport.runtimeCacheDirectory(config), sbkDirectory));
         final Path javaArchive;
         final long archivePreparationMillis;
         try (LifecycleProgress progress = new LifecycleProgress("Managed " + javaDeploymentName
@@ -162,8 +185,8 @@ final class RemoteEnvironmentPreparer {
         for (RemoteNodeState node : nodes) {
             javaParentDirectories[node.index()] = RemotePath.parent(node.connectionDirectory());
         }
-        final RemoteTargetPlan targetPlan = RemoteTargetPlan.create(params.getConnections(),
-                endpointIdentities(), javaParentDirectories);
+        final RemoteTargetPlan targetPlan = RemoteTargetPlan.create(connections,
+                DeploymentSupport.endpointIdentities(nodes), javaParentDirectories);
         final CompletableFuture<String>[] copies = new CompletableFuture[nodes.size()];
         final AtomicLong[] copiedBytes = new AtomicLong[nodes.size()];
         final String[] copyHosts = new String[nodes.size()];
@@ -186,7 +209,8 @@ final class RemoteEnvironmentPreparer {
                 config.runtimeProgressIntervalSeconds, scheduler,
                 () -> DeploymentProgress.copyStatus(copies, copyHosts, copiedBytes,
                         javaRuntime.archiveBytes(), copyStartedNanos, "Java operation(s)"))) {
-            waitFor(CompletableFuture.allOf(copies), "separate remote Java provisioning");
+            DeploymentSupport.waitFor(CompletableFuture.allOf(copies), config.deploymentTimeoutSeconds,
+                    "separate remote Java provisioning");
             copySeconds = progress.elapsedSeconds();
         }
         Printer.log.info("SBK-GEM: Separate Java provisioning completed in {} second(s); {} transferred",
@@ -213,7 +237,8 @@ final class RemoteEnvironmentPreparer {
                 provisionedProbes[index] = CompletableFuture.completedFuture(javaProbes[index]);
             }
         }
-        waitFor(CompletableFuture.allOf(provisionedProbes), "provisioned Java verification");
+        DeploymentSupport.waitFor(CompletableFuture.allOf(provisionedProbes), config.deploymentTimeoutSeconds,
+                "provisioned Java verification");
         for (RemoteNodeState node : nodes) {
             final int index = node.index();
             javaProbes[index] = provisionedProbes[index].get();
@@ -244,37 +269,6 @@ final class RemoteEnvironmentPreparer {
         return verifiedPlatform;
     }
 
-    private Path runtimeCacheDirectory() {
-        final Path configuredCache = Paths.get(config.runtimeCacheDirectory);
-        return configuredCache.isAbsolute() ? configuredCache
-                : Paths.get(System.getProperty("user.home")).resolve(configuredCache);
-    }
-
-    private void waitFor(CompletableFuture<?> future, String operation) throws IOException,
-            InterruptedException, ExecutionException {
-        try {
-            future.get(config.deploymentTimeoutSeconds, TimeUnit.SECONDS);
-        } catch (TimeoutException exception) {
-            final String message = "SBK-GEM: " + operation + " timed out after "
-                    + config.deploymentTimeoutSeconds + " seconds";
-            Printer.log.error(message);
-            throw new IOException(message, exception);
-        }
-    }
-
-    private String[] endpointIdentities() {
-        return nodes.stream().map(RemoteNodeState::endpointIdentity).toArray(String[]::new);
-    }
-
-    private static boolean hasSelectedTarget(boolean[] selected) {
-        for (boolean value : selected) {
-            if (value) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private record RemoteJavaBootstrap(String directory, String agentPath, SshResponse javaProbe) {
+    record RemoteJavaBootstrap(String directory, String agentPath, SshResponse javaProbe) {
     }
 }

@@ -1992,6 +1992,13 @@ GEM-->>User: printRemoteResults()
 ```
 
 The reconciliation identity is content, not only the displayed SBK version.
+SBK-GEM keeps coordination, planning, presentation, and archive serialization
+separate: `SbkGemBenchmark` coordinates per-node state,
+`DistributedWorkloadPlanner` partitions aggregate limits,
+`DistributedResultPrinter` formats terminal results, and
+`ManagedJavaArchive` / `SbkRuntimeArchive` serialize already-validated
+artifact inventories. Artifact identity, validation, cache locking, and
+lifecycle remain owned by `ManagedJavaRuntime` and `SbkRuntimeBundle`.
 The Gradle build independently derives a transitive runtime closure and pathing
 JAR for every enabled driver and includes that metadata under `worker-runtime/`
 in the otherwise complete `build`, `installDist`, and `distTar` outputs. Thus a
