@@ -35,6 +35,10 @@ final class SbmParametersTest {
 
         assertEquals(configuredMaximum, shared.maxConnections);
         assertEquals(configuredMaximum, second.maxConnections);
+        assertEquals(8, second.exactLatencyPageBits);
+        assertEquals(32, second.exactLatencySparsePageEntries);
+        assertEquals(1024, second.exactLatencyMaxMemoryMB);
+        assertEquals(2048, second.exactTotalLatencyMaxMemoryMB);
     }
 
     @Test

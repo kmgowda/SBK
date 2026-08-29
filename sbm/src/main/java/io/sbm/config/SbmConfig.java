@@ -64,6 +64,18 @@ final public class SbmConfig extends LatencyConfig {
      */
     public int maxRecordSizeMB;
 
+    /** Log2 of the exact nanosecond latency values stored in one hybrid page. */
+    public int exactLatencyPageBits;
+
+    /** Exact values retained sparsely in a page before dense counter promotion. */
+    public int exactLatencySparsePageEntries;
+
+    /** Retained-memory target for exact periodic nanosecond pages, in MiB. */
+    public int exactLatencyMaxMemoryMB;
+
+    /** Retained-memory target for the exact total nanosecond window, in MiB. */
+    public int exactTotalLatencyMaxMemoryMB;
+
     /** Default benchmark action selector. */
     public String defaultAction;
 
@@ -112,7 +124,12 @@ final public class SbmConfig extends LatencyConfig {
         if (port < MIN_PORT || port > MAX_PORT || maxConnections < 1 || maxQueues < 1 || idleMS < 0
                 || idleTimeoutSeconds < 1
                 || maxRecordSizeMB < 1 || maxArraySizeMB < 1 || maxHashMapSizeMB < 1
-                || totalMaxHashMapSizeMB < 1 || defaultAction == null
+                || totalMaxHashMapSizeMB < 1 || exactLatencyPageBits < 1
+                || exactLatencyPageBits > Character.SIZE
+                || exactLatencySparsePageEntries < 1
+                || exactLatencySparsePageEntries >= (1 << exactLatencyPageBits)
+                || exactLatencyMaxMemoryMB < 1 || exactTotalLatencyMaxMemoryMB < 1
+                || defaultAction == null
                 || !defaultAction.matches("(?i)(r|w|wr|wro|rw|rwo)")) {
             throw new IllegalArgumentException("Invalid SBM defaults in " + CONFIG_FILE);
         }

@@ -313,7 +313,7 @@ tasks.register('runLatencyMapPerformanceBenchmark', JavaExec) {
 
 tasks.register('latencyMapPerformanceTest') {
     group = 'verification'
-    description = 'Compares dense-array and primitive-map performance with the boxed map.'
+    description = 'Compares exact latency recorders, hybrid pages, and sparse promotion thresholds.'
     dependsOn tasks.named('runLatencyMapPerformanceBenchmark')
 
     doLast {
@@ -330,6 +330,18 @@ tasks.register('latencyMapPerformanceTest') {
                 throw new GradleException(
                         "Latency-map comparison requires JDK ${expectedJavaMajor}; found "
                                 + value.jdkVersion)
+            }
+            value
+        }
+        def parameterResult = { String benchmark, Map<String, String> expected ->
+            def value = results.find { entry ->
+                entry.benchmark == benchmark && expected.every { key, expectedValue ->
+                    entry.params[key].toString() == expectedValue
+                }
+            }
+            if (value == null) {
+                throw new GradleException(
+                        "Missing parameterized latency-map JMH result: ${benchmark} ${expected}")
             }
             value
         }
@@ -357,6 +369,18 @@ tasks.register('latencyMapPerformanceTest') {
                 'io.perl.benchmark.LatencyMapBenchmark.boxedWindow')
         def primitiveWindow = result(
                 'io.perl.benchmark.LatencyMapBenchmark.primitiveWindow')
+        def hybridPagedWindow = result(
+                'io.perl.benchmark.LatencyMapBenchmark.hybridPagedWindow')
+        def primitiveSparseWindow = result(
+                'io.perl.benchmark.LatencyMapBenchmark.primitiveSparseWindow')
+        def hybridPagedSparseWindow = result(
+                'io.perl.benchmark.LatencyMapBenchmark.hybridPagedSparseWindow')
+        def promotion32 = parameterResult(
+                'io.perl.benchmark.LatencyMapBenchmark.hybridPagedPromotionWindow',
+                [distinctLatencies: '64', sparseEntryLimit: '32'])
+        def promotion128 = parameterResult(
+                'io.perl.benchmark.LatencyMapBenchmark.hybridPagedPromotionWindow',
+                [distinctLatencies: '64', sparseEntryLimit: '128'])
         def allocatedExtraction = result(
                 'io.perl.benchmark.LatencyMapBenchmark'
                         + '.allocatedSortedListExtraction')
@@ -562,6 +586,26 @@ tasks.register('latencyMapPerformanceTest') {
                                 - reusableExtractionAllocation.score) * 100.0
                                 / allocatedExtractionAllocation.score))
         logger.lifecycle(
+                'SBM exact nanosecond hybrid-page comparison (4,096 values):')
+        logger.lifecycle(String.format(
+                '  Clustered primitive/hybrid: %,.3f / %,.3f us/window; %,.3f / %,.3f B/window',
+                primitiveWindow.primaryMetric.score,
+                hybridPagedWindow.primaryMetric.score,
+                primitiveWindowAllocation.score,
+                hybridPagedWindow.secondaryMetrics['gc.alloc.rate.norm'].score))
+        logger.lifecycle(String.format(
+                '  Sparse primitive/hybrid   : %,.3f / %,.3f us/window; %,.3f / %,.3f B/window',
+                primitiveSparseWindow.primaryMetric.score,
+                hybridPagedSparseWindow.primaryMetric.score,
+                primitiveSparseWindow.secondaryMetrics['gc.alloc.rate.norm'].score,
+                hybridPagedSparseWindow.secondaryMetrics['gc.alloc.rate.norm'].score))
+        logger.lifecycle(String.format(
+                '  64 retained pages, threshold 32/128: %,.3f / %,.3f us; %,.3f / %,.3f B',
+                promotion32.primaryMetric.score,
+                promotion128.primaryMetric.score,
+                promotion32.secondaryMetrics['gc.alloc.rate.norm'].score,
+                promotion128.secondaryMetrics['gc.alloc.rate.norm'].score))
+        logger.lifecycle(
                 "JMH report: ${latencyMapPerformanceReport.get().asFile}")
 
         if (primitiveAllocation.score >= boxedAllocation.score) {
@@ -577,6 +621,25 @@ tasks.register('latencyMapPerformanceTest') {
                             + 'sorted-list extraction allocation %.3f B/op',
                     reusableExtractionAllocation.score,
                     allocatedExtractionAllocation.score))
+        }
+        if (hybridPagedWindow.primaryMetric.score
+                >= primitiveWindow.primaryMetric.score
+                || hybridPagedSparseWindow.primaryMetric.score
+                >= primitiveSparseWindow.primaryMetric.score) {
+            throw new GradleException(
+                    'Hybrid pages did not reduce complete-window time for both exact controls')
+        }
+        if (hybridPagedWindow.secondaryMetrics['gc.alloc.rate.norm'].score
+                >= primitiveWindowAllocation.score
+                || hybridPagedSparseWindow.secondaryMetrics['gc.alloc.rate.norm'].score
+                >= primitiveSparseWindow.secondaryMetrics['gc.alloc.rate.norm'].score) {
+            throw new GradleException(
+                    'Hybrid pages did not reduce allocation for both exact controls')
+        }
+        if (promotion32.primaryMetric.score
+                > promotion128.primaryMetric.score * 1.10d) {
+            throw new GradleException(
+                    'The default 32-entry sparse threshold regressed retained-page performance')
         }
     }
 }

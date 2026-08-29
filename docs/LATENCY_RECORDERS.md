@@ -16,11 +16,11 @@ limitations under the License.
 
 # Exact latency recorders in PerL: architecture, memory, and performance
 
-- **System:** Storage Benchmark Kit (SBK) 10.4, Performance Logger (PerL)
+- **System:** Storage Benchmark Kit (SBK) 10.6, Performance Logger (PerL)
 - **Runtime:** JDK 25
-- **Evaluation date:** 2026-07-29
+- **Evaluation date:** 2026-08-29
 - **Implementations:** `ArrayLatencyRecorder`, `HashMapLatencyRecorder`,
-  `LongHashMapLatencyRecorder`
+  `LongHashMapLatencyRecorder`, `HybridPagedLatencyRecorder`
 - **Keywords:** exact percentiles, dense histogram, sparse histogram,
   primitive hash map, boxing, garbage collection, JMH, latency benchmarking
 
@@ -32,7 +32,8 @@ distribution therefore affects the benchmarker's own CPU consumption, heap
 footprint, garbage production, cache locality, and the delay required to
 produce periodic percentiles.
 
-This paper studies PerL's three exact recorders:
+This paper studies PerL's three general exact recorders and SBM's specialized
+exact nanosecond recorder:
 
 - `ArrayLatencyRecorder` is a dense histogram. A latency is translated
   directly into an array index.
@@ -42,6 +43,9 @@ This paper studies PerL's three exact recorders:
 - `LongHashMapLatencyRecorder` is the production sparse implementation backed
   by Eclipse Collections `LongLongHashMap`. It stores primitive keys and
   counts, and reuses its percentile sorting buffer.
+- `HybridPagedLatencyRecorder` is SBM's exact nanosecond aggregator. It keeps
+  low-occupancy regions in sorted primitive arrays, promotes dense regions to
+  counter pages, and sorts only active page identifiers when reporting.
 
 On the measured 16-vCPU Intel Xeon Platinum 8462Y+ virtual machine, JDK 25.0.2
 with ZGC and compact object headers, a 4,096-value update workload produced:
@@ -79,6 +83,7 @@ The authoritative source files are:
 - [`MapLatencyRecorder.java`](../perl/src/main/java/io/perl/api/impl/MapLatencyRecorder.java)
 - [`HashMapLatencyRecorder.java`](../perl/src/main/java/io/perl/api/impl/HashMapLatencyRecorder.java)
 - [`LongHashMapLatencyRecorder.java`](../perl/src/main/java/io/perl/api/impl/LongHashMapLatencyRecorder.java)
+- [`HybridPagedLatencyRecorder.java`](../perl/src/main/java/io/perl/api/impl/HybridPagedLatencyRecorder.java)
 - [`PerlBuilder.java`](../perl/src/main/java/io/perl/api/impl/PerlBuilder.java)
 
 ## 2. Position in the SBK measurement pipeline
@@ -107,14 +112,14 @@ flowchart LR
     class V decision
 ```
 
-This ownership model is essential: all three recorders are deliberately
+This ownership model is essential: all four recorders are deliberately
 `@NotThreadSafe`. The queues provide cross-thread publication; the consumer
 alone mutates a recorder. Adding atomic counters or locks inside the recorder
 would add overhead without improving correctness under the intended topology.
 
 ## 3. Shared semantics
 
-All three classes extend `LatencyRecordWindow`. They share the same validation
+All four classes extend `LatencyRecordWindow`. They share the same validation
 and accounting implemented by the `LatencyRecorder`/`LatencyWindow` hierarchy:
 
 - total records and bytes;
@@ -437,6 +442,93 @@ Use the primitive map when:
 - the whole-run window may contain a large but sparse distribution;
 - fixed memory proportional to the entire theoretical range is unacceptable;
 - exact values are required and approximate histograms are not acceptable.
+
+### 6.6 SBM exact nanosecond hybrid pages
+
+SBM receives already aggregated exact latency/count pairs from every remote
+SBK process. With thousands of clients, the combined nanosecond distribution
+often contains dense local regions plus a small number of sparse outliers.
+A flat primitive map stores every exact value as a hash entry and sorts every
+distinct key before each periodic report.
+
+For nanosecond SBM windows, `HybridPagedLatencyRecorder` divides the signed
+latency domain into configurable power-of-two pages. Each page:
+
+- begins as sorted primitive offset/count arrays;
+- grows without boxing;
+- promotes to a dense `long[]` after the configured sparse-entry threshold;
+- preserves every exact latency and count; and
+- is cleared and retained for allocation-free reuse between normal windows.
+
+Only page identifiers are globally sorted. Sparse offsets are maintained in
+order as they are inserted, while dense pages are scanned directly. The total
+window uses the same exact representation, so periodic and final aggregated
+percentiles have identical precision. If retained page memory exceeds its
+configured target, the completed window is still printed and the retained
+page cache is released before the next window; reporting is never silently
+skipped.
+
+SBM owns this selection. `PerlBuilder` continues to select the dense array or
+primitive map for ordinary local PerL windows. The bundled SBM properties are:
+
+```properties
+exactLatencyPageBits=8
+exactLatencySparsePageEntries=32
+exactLatencyMaxMemoryMB=1024
+exactTotalLatencyMaxMemoryMB=2048
+```
+
+The defaults represent 256 exact values per page and dense promotion on the
+33rd distinct value in that page. A retained-page JMH threshold sweep showed
+why this remains the CPU-oriented default: at 64 values/page, threshold 32
+completed a reporting window in 43.814 us versus 52.368 us for threshold 128;
+at 128 values/page the results were 69.887 us versus 111.127 us. Threshold 128
+avoids early dense allocation and is available to memory-constrained workloads,
+but repeatedly rebuilding its sorted sparse arrays costs more CPU. These are
+configuration properties rather than command-line arguments.
+
+The two exact-memory settings are intentionally independent from
+`maxHashMapSizeMB` and `totalMaxHashMapSizeMB`. The primitive map counts only
+16 bytes of logical key/count payload per distinct latency and does not count
+its backing arrays. Hybrid pages count page objects, estimated outer-map
+entries, primitive-array headers and capacities, and active-page indexes.
+Consequently, equal numeric limits would not represent equal retained heap.
+The 1024/2048 MiB defaults preserve approximately the former periodic/total
+real-heap capacity for the measured mixed nanosecond distribution while making
+the fuller hybrid estimate explicit.
+
+Accounting remains distribution-dependent. A page containing one exact value
+uses approximately 144 estimated bytes for that value, versus the primitive
+map's optimistic 16-byte logical payload. A full 256-value page uses about 8.3
+estimated bytes/value. Promotion at the default threshold temporarily creates
+a memory cliff: a page with 32 values uses about 13.3 estimated bytes/value,
+while its 33-value dense representation uses about 64.7. The dense cost falls
+below the flat map's logical 16 bytes/value near 134 values/page. Sparse
+outliers therefore consume the hybrid budget faster even though realistic
+mixed distributions have measured lower actual heap than the primitive map.
+Operators can raise `exactLatencySparsePageEntries` to trade reporting CPU for
+lower partial-page memory without changing millisecond/microsecond behavior.
+
+Periodic and total policies are also distinct. Periodic cache pressure never
+cuts a reporting interval short: an oversized retained cache is released only
+after the natural report. The total window uses its independent limit to print
+and reset accumulated statistics before releasing the cache. In both cases a
+completed result is printed before recorded data is discarded.
+
+The JDK 25 JMH comparison added with this specialization measures a complete
+4,096-value window, including exact recording and percentile extraction:
+
+| Distribution | Recorder | Time/window | Allocation/window |
+|---|---|---:|---:|
+| contiguous values | `LongHashMapLatencyRecorder` | 32.241 us | 48.316 B |
+| contiguous values | `HybridPagedLatencyRecorder` | 28.133 us | 0.275 B |
+| one value per page | `LongHashMapLatencyRecorder` | 128.002 us | 1,297.251 B |
+| one value per page | `HybridPagedLatencyRecorder` | 57.961 us | 0.568 B |
+
+In that controlled run, hybrid pages reduced complete-window time by 12.7%
+for contiguous values and 54.7% for the sparse control. These measurements are
+environment-specific; the exactness and representation differences are the
+portable properties.
 
 ## 7. Builder selection and production roles
 
@@ -806,7 +898,7 @@ flowchart TD
 
 ## 15. Conclusions
 
-The three recorders occupy distinct architectural roles:
+The four recorders occupy distinct architectural roles:
 
 - `ArrayLatencyRecorder` is the preferred dense-window implementation. It has
   the simplest hot path, deterministic fixed memory, and the highest measured
@@ -817,6 +909,9 @@ The three recorders occupy distinct architectural roles:
 - `HashMapLatencyRecorder` is a valuable reference implementation but is not
   suitable for PerL's production hot path because wrapper and node allocation
   consume CPU, memory bandwidth, and GC capacity.
+- `HybridPagedLatencyRecorder` is the exact SBM nanosecond specialization. It
+  reduces flat-map storage and window-boundary sorting for aggregated remote
+  distributions without changing the general PerL builder policy.
 
 The production policy—array when the range fits, primitive map otherwise—is
 sound. A future density-aware policy could improve decisions for ranges that
@@ -829,6 +924,7 @@ between workload shape and representation:
 ```text
 dense bounded domain  -> direct primitive array
 sparse large domain   -> primitive open-addressed map
+dense/sparse aggregate -> hybrid primitive pages
 boxed object graph    -> reference/testing baseline
 ```
 
