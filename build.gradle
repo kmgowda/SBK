@@ -11,8 +11,6 @@
 
 import org.gradle.internal.jvm.Jvm
 
-import java.util.regex.Matcher
-
 buildscript {
     repositories {
         mavenLocal()
@@ -80,40 +78,52 @@ def launcherJvmOptions = { String applicationName, String className = null ->
     if (className != null) {
         options << '-Dsbk.className=' + className
     }
-    options + ['-Dsbk.appHome=SBK_APP_HOME', '-Dsbk.jmxExport=false']
+    options
 }
 
 def configureSbkStartScripts = { taskProvider, Project targetProject, Object jmxPort ->
     taskProvider.configure {
-        doLast {
-            def pathingJarTask = targetProject.tasks.named('pathingJar').get()
-            def jarTask = targetProject.tasks.named('jar').get()
-            def pathingJarName = pathingJarTask.archiveFileName.get()
-            def jarName = jarTask.archiveFileName.get()
-
-            unixScript.text = unixScript.text.replace('SBK_APP_HOME', '\$APP_HOME')
-            unixScript.text = unixScript.text.replace("-Dsbk.appHome=\$APP_HOME",
-                    "-Dsbk.appHome='\$APP_HOME'")
-            unixScript.text = unixScript.text.replaceAll('CLASSPATH=.*',
-                    Matcher.quoteReplacement(
-                            "CLASSPATH=\$APP_HOME/lib/${pathingJarName}:\$APP_HOME/lib/${jarName}"))
-
-            windowsScript.text = windowsScript.text.replace('SBK_APP_HOME', '%~dp0..')
-            windowsScript.text = windowsScript.text.replace("-Dsbk.appHome=\$APP_HOME",
-                    "-Dsbk.appHome='\$APP_HOME'")
-            windowsScript.text = windowsScript.text.replaceAll('set CLASSPATH=.*',
-                    Matcher.quoteReplacement(
-                            "set CLASSPATH=%APP_HOME%\\lib\\${pathingJarName};%APP_HOME%\\lib\\${jarName}"))
-
-            if (jmxExport.toString().toBoolean()) {
-                def unixAgent = "-Dsbk.jmxExport=true\" \"-javaagent:'\$APP_HOME'/lib/"
-                        + "${jmxAgent}-${jmxPrometheusVersion}.jar=${jmxPort}:'\$APP_HOME'/bin/jmx-config.yml"
-                def windowsAgent = "-Dsbk.jmxExport=true\" \"-javaagent:'\$APP_HOME'\\lib\\"
-                        + "${jmxAgent}-${jmxPrometheusVersion}.jar=${jmxPort}:'\$APP_HOME'\\bin\\jmx-config.yml"
-                unixScript.text = unixScript.text.replace('-Dsbk.jmxExport=false', unixAgent)
-                windowsScript.text = windowsScript.text.replace('-Dsbk.jmxExport=false', windowsAgent)
-            }
+        def pathingJarTask = targetProject.tasks.named('pathingJar')
+        def jarTask = targetProject.tasks.named('jar')
+        def unixTemplate = rootProject.file('gradle/templates/sbkUnixStartScript.txt')
+        def windowsTemplate = rootProject.file('gradle/templates/sbkWindowsStartScript.txt')
+        def jmxEnabled = jmxExport.toString().toBoolean()
+        def jmxJarName = "${jmxAgent}-${jmxPrometheusVersion}.jar"
+        def unixJmxArguments
+        def windowsJmxArguments
+        def unixLineContinuation = '\\\\' + '\n'
+        if (jmxEnabled) {
+            unixJmxArguments = ('        "-Dsbk.jmxExport=true" ' + unixLineContinuation
+                    + '        "-javaagent:\\$APP_HOME/lib/' + jmxJarName + '=' + jmxPort
+                    + ':\\$APP_HOME/bin/jmx-config.yml" ' + unixLineContinuation)
+            windowsJmxArguments = ('"-Dsbk.jmxExport=true" "-javaagent:%APP_HOME%\\\\lib\\\\'
+                    + jmxJarName + '=' + jmxPort + ':%APP_HOME%\\\\bin\\\\jmx-config.yml" ')
+        } else {
+            unixJmxArguments = '        "-Dsbk.jmxExport=false" ' + unixLineContinuation
+            windowsJmxArguments = '"-Dsbk.jmxExport=false" '
         }
+        def renderTemplate = { File template, String token, String replacement ->
+            def source = template.getText('UTF-8')
+            if (source.count(token) != 1) {
+                throw new GradleException("${template} must contain exactly one ${token} token")
+            }
+            source.replace(token, replacement)
+        }
+
+        classpath = targetProject.files(
+                pathingJarTask.flatMap { it.archiveFile },
+                jarTask.flatMap { it.archiveFile })
+        unixStartScriptGenerator.template = targetProject.resources.text.fromString(
+                renderTemplate(unixTemplate, '@SBK_UNIX_JMX_ARGUMENTS@', unixJmxArguments))
+        windowsStartScriptGenerator.template = targetProject.resources.text.fromString(
+                renderTemplate(windowsTemplate, '@SBK_WINDOWS_JMX_ARGUMENTS@', windowsJmxArguments))
+
+        inputs.files(unixTemplate, windowsTemplate)
+                .withPropertyName('sbkLauncherTemplates')
+                .withPathSensitivity(PathSensitivity.RELATIVE)
+        inputs.property('sbkJmxEnabled', jmxEnabled)
+        inputs.property('sbkJmxPort', jmxPort.toString())
+        inputs.property('sbkJmxJarName', jmxJarName)
     }
 }
 
