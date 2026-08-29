@@ -9,13 +9,19 @@
  */
 package io.sbm.api.impl;
 
+import io.perl.api.impl.HybridPagedLatencyRecorder;
+import io.perl.api.impl.LongHashMapLatencyRecorder;
+import io.sbm.config.SbmConfig;
 import io.sbp.grpc.ClientFailure;
+import io.time.MicroSeconds;
+import io.time.NanoSeconds;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -23,6 +29,26 @@ import static org.junit.jupiter.api.Assertions.assertSame;
  * Tests terminal SBM outcome aggregation outside latency ingestion paths.
  */
 final class SbmBenchmarkTest {
+    private static final double[] PERCENTILES = new double[]{0.5, 0.9, 0.99};
+
+    @Test
+    void selectsHybridPagesOnlyForExactNanosecondAggregation() {
+        final SbmConfig config = SbmConfig.load();
+
+        assertInstanceOf(HybridPagedLatencyRecorder.class,
+                SbmBenchmark.createPeriodicLatencyWindow(config, new NanoSeconds(),
+                        0, 180_000_000_000L, PERCENTILES));
+        assertInstanceOf(HybridPagedLatencyRecorder.class,
+                SbmBenchmark.createTotalLatencyWindow(config, new NanoSeconds(),
+                        0, 180_000_000_000L, PERCENTILES));
+        assertInstanceOf(LongHashMapLatencyRecorder.class,
+                SbmBenchmark.createPeriodicLatencyWindow(config, new MicroSeconds(),
+                        0, 180_000_000L, PERCENTILES));
+        assertInstanceOf(LongHashMapLatencyRecorder.class,
+                SbmBenchmark.createTotalLatencyWindow(config, new MicroSeconds(),
+                        0, 180_000_000L, PERCENTILES));
+    }
+
     @Test
     void succeedsWithoutLocalOrClientFailures() {
         assertNull(SbmBenchmark.terminalFailure(null, List.of()));

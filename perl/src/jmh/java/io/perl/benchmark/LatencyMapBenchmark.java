@@ -12,6 +12,7 @@ package io.perl.benchmark;
 import io.perl.api.LatencyPercentiles;
 import io.perl.api.impl.ArrayLatencyRecorder;
 import io.perl.api.impl.HashMapLatencyRecorder;
+import io.perl.api.impl.HybridPagedLatencyRecorder;
 import io.perl.api.impl.LongHashMapLatencyRecorder;
 import io.time.NanoSeconds;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -129,9 +130,11 @@ public class LatencyMapBenchmark {
 
         private ArrayLatencyRecorder array;
         private HashMapLatencyRecorder boxed;
+        private HybridPagedLatencyRecorder hybridPaged;
         private LongHashMapLatencyRecorder primitive;
         private LatencyPercentiles arrayPercentiles;
         private LatencyPercentiles boxedPercentiles;
+        private LatencyPercentiles hybridPagedPercentiles;
         private LatencyPercentiles primitivePercentiles;
 
         /**
@@ -150,8 +153,40 @@ public class LatencyMapBenchmark {
             primitive = new LongHashMapLatencyRecorder(0, highLatency,
                     Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE,
                     PERCENTILES, new NanoSeconds(), 64);
+            hybridPaged = new HybridPagedLatencyRecorder(0, highLatency,
+                    Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE,
+                    PERCENTILES, new NanoSeconds(), 64, 8, 32);
             arrayPercentiles = new LatencyPercentiles(PERCENTILES);
             boxedPercentiles = new LatencyPercentiles(PERCENTILES);
+            hybridPagedPercentiles = new LatencyPercentiles(PERCENTILES);
+            primitivePercentiles = new LatencyPercentiles(PERCENTILES);
+        }
+    }
+
+    /** Thread-private state for exact values distributed one per page. */
+    @State(Scope.Thread)
+    public static class SparseWindowState {
+        /** Number of distinct sparse latency values in each window. */
+        @Param({"4096"})
+        public int distinctLatencies;
+
+        private HybridPagedLatencyRecorder hybridPaged;
+        private LongHashMapLatencyRecorder primitive;
+        private LatencyPercentiles hybridPagedPercentiles;
+        private LatencyPercentiles primitivePercentiles;
+
+        /** Creates exact sparse recorders and percentile holders. */
+        @Setup(Level.Trial)
+        public void setUp() {
+            final long highLatency = BASE_LATENCY
+                    + ((long) distinctLatencies << 8);
+            hybridPaged = new HybridPagedLatencyRecorder(0, highLatency,
+                    Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE,
+                    PERCENTILES, new NanoSeconds(), 64, 8, 32);
+            primitive = new LongHashMapLatencyRecorder(0, highLatency,
+                    Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE,
+                    PERCENTILES, new NanoSeconds(), 64);
+            hybridPagedPercentiles = new LatencyPercentiles(PERCENTILES);
             primitivePercentiles = new LatencyPercentiles(PERCENTILES);
         }
     }
@@ -243,6 +278,53 @@ public class LatencyMapBenchmark {
         }
         state.primitive.copyPercentiles(
                 state.primitivePercentiles, null);
+    }
+
+    /**
+     * Measures one complete exact hybrid-page window.
+     *
+     * @param state thread-private window state
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    public void hybridPagedWindow(WindowState state) {
+        for (int index = 0; index < state.distinctLatencies; index++) {
+            state.hybridPaged.reportLatency(BASE_LATENCY + index, 1);
+        }
+        state.hybridPaged.copyPercentiles(
+                state.hybridPagedPercentiles, null);
+    }
+
+    /**
+     * Measures one primitive-map window with one exact value per hybrid page.
+     *
+     * @param state thread-private sparse-window state
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    public void primitiveSparseWindow(SparseWindowState state) {
+        for (int index = 0; index < state.distinctLatencies; index++) {
+            state.primitive.reportLatency(BASE_LATENCY + ((long) index << 8), 1);
+        }
+        state.primitive.copyPercentiles(state.primitivePercentiles, null);
+    }
+
+    /**
+     * Measures one hybrid-page window with one exact value per page.
+     *
+     * @param state thread-private sparse-window state
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    public void hybridPagedSparseWindow(SparseWindowState state) {
+        for (int index = 0; index < state.distinctLatencies; index++) {
+            state.hybridPaged.reportLatency(BASE_LATENCY + ((long) index << 8), 1);
+        }
+        state.hybridPaged.copyPercentiles(
+                state.hybridPagedPercentiles, null);
     }
 
     /**

@@ -18,6 +18,7 @@ import io.perl.config.LatencyConfig;
 import io.perl.exception.BenchmarkIdleTimeoutException;
 import io.perl.api.LatencyRecordWindow;
 import io.perl.api.impl.CSVExtendedLatencyRecorder;
+import io.perl.api.impl.HybridPagedLatencyRecorder;
 import io.perl.api.impl.LongHashMapLatencyRecorder;
 import io.perl.api.impl.HdrExtendedLatencyRecorder;
 import io.perl.api.impl.PerlBuilder;
@@ -151,17 +152,25 @@ final public class SbmBenchmark implements Benchmark {
      * @return recorder that tracks periodic windows and a backing total window.
      */
     private @NotNull SbmPeriodicRecorder createLatencyRecorder() {
-        final LatencyRecordWindow window = PerlBuilder.buildLatencyRecordWindow(sbmConfig, time,
+        final boolean exactNanosecondPages = time.getTimeUnit() == io.time.TimeUnit.ns;
+        final LatencyRecordWindow window = createPeriodicLatencyWindow(sbmConfig, time,
                 logger.getMinLatency(), logger.getMaxLatency(), percentileFractions);
-        final LatencyRecordWindow totalWindow;
+        final LatencyRecordWindow totalWindow = createTotalLatencyWindow(sbmConfig, time,
+                logger.getMinLatency(), logger.getMaxLatency(), percentileFractions);
         final LatencyRecordWindow totalWindowExtension;
         final Random random = new Random();
 
-        totalWindow = new LongHashMapLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
-                LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX, percentileFractions,
-                time, sbmConfig.totalMaxHashMapSizeMB);
-        Printer.log.info("Total Window Latency Store: PrimitiveLongMap, Size: " +
-                totalWindow.getMaxMemoryBytes() / Bytes.BYTES_PER_MB + " MB");
+        if (exactNanosecondPages) {
+            Printer.log.info("Window Latency Store: ExactHybridPages, Size: {} MB; page values: {}; "
+                            + "sparse entries/page: {}", window.getMaxMemoryBytes() / Bytes.BYTES_PER_MB,
+                    1 << sbmConfig.exactLatencyPageBits, sbmConfig.exactLatencySparsePageEntries);
+            Printer.log.info("Total Window Latency Store: ExactHybridPages, Size: {} MB; page values: {}; "
+                            + "sparse entries/page: {}", totalWindow.getMaxMemoryBytes() / Bytes.BYTES_PER_MB,
+                    1 << sbmConfig.exactLatencyPageBits, sbmConfig.exactLatencySparsePageEntries);
+        } else {
+            Printer.log.info("Total Window Latency Store: PrimitiveLongMap, Size: "
+                    + totalWindow.getMaxMemoryBytes() / Bytes.BYTES_PER_MB + " MB");
+        }
 
         if (sbmConfig.histogram) {
             totalWindowExtension = new HdrExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
@@ -183,6 +192,39 @@ final public class SbmBenchmark implements Benchmark {
 
         return new SbmTotalWindowLatencyPeriodicRecorder(window, totalWindowExtension, logger, logger::printTotal,
                 logger, logger, logger, logger, params.getMaxConnections());
+    }
+
+    static LatencyRecordWindow createPeriodicLatencyWindow(SbmConfig config, Time selectedTime,
+                                                           long minimumLatency, long maximumLatency,
+                                                           double[] selectedPercentiles) {
+        if (selectedTime.getTimeUnit() == io.time.TimeUnit.ns) {
+            return createHybridPagedRecorder(config, selectedTime, minimumLatency, maximumLatency,
+                    selectedPercentiles, config.maxHashMapSizeMB);
+        }
+        return PerlBuilder.buildLatencyRecordWindow(config, selectedTime, minimumLatency, maximumLatency,
+                selectedPercentiles);
+    }
+
+    static LatencyRecordWindow createTotalLatencyWindow(SbmConfig config, Time selectedTime,
+                                                        long minimumLatency, long maximumLatency,
+                                                        double[] selectedPercentiles) {
+        if (selectedTime.getTimeUnit() == io.time.TimeUnit.ns) {
+            return createHybridPagedRecorder(config, selectedTime, minimumLatency, maximumLatency,
+                    selectedPercentiles, config.totalMaxHashMapSizeMB);
+        }
+        return new LongHashMapLatencyRecorder(minimumLatency, maximumLatency,
+                LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX,
+                selectedPercentiles, selectedTime, config.totalMaxHashMapSizeMB);
+    }
+
+    private static LatencyRecordWindow createHybridPagedRecorder(SbmConfig config, Time selectedTime,
+                                                                 long minimumLatency, long maximumLatency,
+                                                                 double[] selectedPercentiles,
+                                                                 int maximumMemorySizeMB) {
+        return new HybridPagedLatencyRecorder(minimumLatency, maximumLatency,
+                LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX,
+                selectedPercentiles, selectedTime, maximumMemorySizeMB, config.exactLatencyPageBits,
+                config.exactLatencySparsePageEntries);
     }
 
     /**
