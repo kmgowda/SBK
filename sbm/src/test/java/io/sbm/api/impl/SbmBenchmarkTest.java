@@ -21,9 +21,11 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests terminal SBM outcome aggregation outside latency ingestion paths.
@@ -47,6 +49,30 @@ final class SbmBenchmarkTest {
         assertInstanceOf(LongHashMapLatencyRecorder.class,
                 SbmBenchmark.createTotalLatencyWindow(config, new MicroSeconds(),
                         0, 180_000_000L, PERCENTILES));
+    }
+
+    @Test
+    void exactPeriodicCachePressureDoesNotShortenItsReportingWindow() {
+        final SbmConfig config = SbmConfig.load();
+        config.exactLatencyMaxMemoryMB = 1;
+        config.exactTotalLatencyMaxMemoryMB = 1;
+        final HybridPagedLatencyRecorder periodic = assertInstanceOf(
+                HybridPagedLatencyRecorder.class,
+                SbmBenchmark.createPeriodicLatencyWindow(config, new NanoSeconds(),
+                        0, 180_000_000_000L, PERCENTILES));
+        final HybridPagedLatencyRecorder total = assertInstanceOf(
+                HybridPagedLatencyRecorder.class,
+                SbmBenchmark.createTotalLatencyWindow(config, new NanoSeconds(),
+                        0, 180_000_000_000L, PERCENTILES));
+
+        for (int page = 0; page < 12_000; page++) {
+            final long latency = (long) page << config.exactLatencyPageBits;
+            periodic.reportLatency(latency, 1);
+            total.reportLatency(latency, 1);
+        }
+
+        assertFalse(periodic.isFull());
+        assertTrue(total.isFull());
     }
 
     @Test

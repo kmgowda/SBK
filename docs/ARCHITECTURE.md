@@ -318,8 +318,11 @@ latency pages remain compact sorted primitive pairs and dense pages promote to
 direct counter arrays. This reduces per-value hash storage and changes
 periodic ordering work from sorting every exact latency to sorting active page
 identifiers, without sampling or reducing percentile precision. Page geometry
-and sparse promotion are configured in `sbm.properties`; other time units keep
-the standard PerL recorder selection.
+and sparse promotion are configured in `sbm.properties`. Independent periodic
+and total exact-memory targets avoid reusing the primitive map's payload-only
+budget semantics. Periodic cache reclamation occurs only after a natural
+reporting boundary, while total-window pressure prints and resets the total
+before reclamation. Other time units keep the standard PerL recorder selection.
 
 SBK-GEM uses Apache MINA SSHD for connection, exact-file transfer, and command execution. It supports password-first authentication with SSH-agent/OpenSSH key fallback, or passwordless public-key authentication when no password is configured. Server host-key verification is disabled by default so stale or changed `known_hosts` entries cannot block unattended authentication. Passwordless deployments can explicitly enable accept-new trust with `-hostkeycheck true`, using the launching user's `~/.ssh/known_hosts` or the path selected by `-knownhosts`: a previously unknown key is recorded on first contact, while a changed key is rejected. Supplying `-gempass` or `SBK_GEM_SSH_PASSWD` always disables host-key verification regardless of that option.
 

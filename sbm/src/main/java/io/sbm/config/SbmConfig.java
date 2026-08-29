@@ -70,6 +70,12 @@ final public class SbmConfig extends LatencyConfig {
     /** Exact values retained sparsely in a page before dense counter promotion. */
     public int exactLatencySparsePageEntries;
 
+    /** Retained-memory target for exact periodic nanosecond pages, in MiB. */
+    public int exactLatencyMaxMemoryMB;
+
+    /** Retained-memory target for the exact total nanosecond window, in MiB. */
+    public int exactTotalLatencyMaxMemoryMB;
+
     /** Default benchmark action selector. */
     public String defaultAction;
 
@@ -122,6 +128,7 @@ final public class SbmConfig extends LatencyConfig {
                 || exactLatencyPageBits > Character.SIZE
                 || exactLatencySparsePageEntries < 1
                 || exactLatencySparsePageEntries >= (1 << exactLatencyPageBits)
+                || exactLatencyMaxMemoryMB < 1 || exactTotalLatencyMaxMemoryMB < 1
                 || defaultAction == null
                 || !defaultAction.matches("(?i)(r|w|wr|wro|rw|rwo)")) {
             throw new IllegalArgumentException("Invalid SBM defaults in " + CONFIG_FILE);

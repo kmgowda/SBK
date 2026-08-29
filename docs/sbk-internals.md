@@ -928,7 +928,11 @@ SBM specializes exact nanosecond aggregation with
 offset/count pairs, dense regions promote to counter arrays, and periodic
 reports sort only active page identifiers. Exact values are preserved for both
 periodic and total results. Millisecond and microsecond SBM modes retain the
-existing array/primitive-map selection.
+existing array/primitive-map selection. Periodic and total nanosecond stores
+use independent memory targets because hybrid retained-memory accounting is
+fuller than the primitive map's logical-payload estimate. Periodic cache
+pressure is reclaimed after the scheduled report and never shortens the
+reporting interval; total pressure prints and resets the total window.
 
 ```mermaid
 flowchart LR

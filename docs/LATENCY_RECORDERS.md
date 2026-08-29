@@ -474,24 +474,59 @@ primitive map for ordinary local PerL windows. The bundled SBM properties are:
 ```properties
 exactLatencyPageBits=8
 exactLatencySparsePageEntries=32
+exactLatencyMaxMemoryMB=1024
+exactTotalLatencyMaxMemoryMB=2048
 ```
 
 The defaults represent 256 exact values per page and dense promotion on the
-33rd distinct value in that page. These are configuration properties rather
-than command-line arguments.
+33rd distinct value in that page. A retained-page JMH threshold sweep showed
+why this remains the CPU-oriented default: at 64 values/page, threshold 32
+completed a reporting window in 43.814 us versus 52.368 us for threshold 128;
+at 128 values/page the results were 69.887 us versus 111.127 us. Threshold 128
+avoids early dense allocation and is available to memory-constrained workloads,
+but repeatedly rebuilding its sorted sparse arrays costs more CPU. These are
+configuration properties rather than command-line arguments.
+
+The two exact-memory settings are intentionally independent from
+`maxHashMapSizeMB` and `totalMaxHashMapSizeMB`. The primitive map counts only
+16 bytes of logical key/count payload per distinct latency and does not count
+its backing arrays. Hybrid pages count page objects, estimated outer-map
+entries, primitive-array headers and capacities, and active-page indexes.
+Consequently, equal numeric limits would not represent equal retained heap.
+The 1024/2048 MiB defaults preserve approximately the former periodic/total
+real-heap capacity for the measured mixed nanosecond distribution while making
+the fuller hybrid estimate explicit.
+
+Accounting remains distribution-dependent. A page containing one exact value
+uses approximately 144 estimated bytes for that value, versus the primitive
+map's optimistic 16-byte logical payload. A full 256-value page uses about 8.3
+estimated bytes/value. Promotion at the default threshold temporarily creates
+a memory cliff: a page with 32 values uses about 13.3 estimated bytes/value,
+while its 33-value dense representation uses about 64.7. The dense cost falls
+below the flat map's logical 16 bytes/value near 134 values/page. Sparse
+outliers therefore consume the hybrid budget faster even though realistic
+mixed distributions have measured lower actual heap than the primitive map.
+Operators can raise `exactLatencySparsePageEntries` to trade reporting CPU for
+lower partial-page memory without changing millisecond/microsecond behavior.
+
+Periodic and total policies are also distinct. Periodic cache pressure never
+cuts a reporting interval short: an oversized retained cache is released only
+after the natural report. The total window uses its independent limit to print
+and reset accumulated statistics before releasing the cache. In both cases a
+completed result is printed before recorded data is discarded.
 
 The JDK 25 JMH comparison added with this specialization measures a complete
 4,096-value window, including exact recording and percentile extraction:
 
 | Distribution | Recorder | Time/window | Allocation/window |
 |---|---|---:|---:|
-| contiguous values | `LongHashMapLatencyRecorder` | 32.842 us | 48.322 B |
-| contiguous values | `HybridPagedLatencyRecorder` | 28.097 us | 0.275 B |
-| one value per page | `LongHashMapLatencyRecorder` | 126.998 us | 1,297.241 B |
-| one value per page | `HybridPagedLatencyRecorder` | 58.868 us | 0.577 B |
+| contiguous values | `LongHashMapLatencyRecorder` | 32.241 us | 48.316 B |
+| contiguous values | `HybridPagedLatencyRecorder` | 28.133 us | 0.275 B |
+| one value per page | `LongHashMapLatencyRecorder` | 128.002 us | 1,297.251 B |
+| one value per page | `HybridPagedLatencyRecorder` | 57.961 us | 0.568 B |
 
-In that controlled run, hybrid pages reduced complete-window time by 14.4%
-for contiguous values and 53.6% for the sparse control. These measurements are
+In that controlled run, hybrid pages reduced complete-window time by 12.7%
+for contiguous values and 54.7% for the sparse control. These measurements are
 environment-specific; the exactness and representation differences are the
 portable properties.
 

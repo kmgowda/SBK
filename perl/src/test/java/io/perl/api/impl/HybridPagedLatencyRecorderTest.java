@@ -12,6 +12,7 @@ package io.perl.api.impl;
 import io.perl.api.LatencyPercentiles;
 import io.perl.api.LatencyRecord;
 import io.perl.api.ReportLatencies;
+import io.perl.api.impl.HybridPagedLatencyRecorder.MemoryLimitPolicy;
 import io.perl.config.LatencyConfig;
 import io.time.NanoSeconds;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,7 @@ final class HybridPagedLatencyRecorderTest {
         final long[] latencies = new long[]{257, -257, 0, 256, -1, 1, -256, 255, 1_000_000_000L};
         final int[] counts = new int[]{2, 3, 5, 7, 11, 13, 17, 19, 23};
 
-        assertEquivalent(latencies, counts, 8, 32);
+        assertReportedEquivalent(latencies, counts, 8, 128);
     }
 
     @Test
@@ -51,7 +52,7 @@ final class HybridPagedLatencyRecorderTest {
     @Test
     void matchesPrimitiveMapAcrossRepeatedRandomWindows() {
         final LongHashMapLatencyRecorder reference = referenceRecorder(64);
-        final HybridPagedLatencyRecorder paged = pagedRecorder(64, 8, 32);
+        final HybridPagedLatencyRecorder paged = pagedRecorder(64, 8, 128);
         final Random random = new Random(4_729_113L);
 
         for (int window = 0; window < 20; window++) {
@@ -70,7 +71,7 @@ final class HybridPagedLatencyRecorderTest {
 
     @Test
     void denseNanosecondRangeRetainsLessThanFlatEntryPayload() {
-        final HybridPagedLatencyRecorder paged = pagedRecorder(64, 8, 32);
+        final HybridPagedLatencyRecorder paged = pagedRecorder(64, 8, 128);
         final int distinctLatencies = 65_536;
 
         for (int latency = 0; latency < distinctLatencies; latency++) {
@@ -85,13 +86,29 @@ final class HybridPagedLatencyRecorderTest {
     }
 
     @Test
-    void releasesRetainedPagesAfterConfiguredMemoryTargetIsExceeded() {
-        final HybridPagedLatencyRecorder paged = pagedRecorder(1, 8, 32);
+    void totalWindowPolicyEndsAndReleasesAnOversizedWindow() {
+        final HybridPagedLatencyRecorder paged = pagedRecorder(1, 8, 128,
+                MemoryLimitPolicy.RESET_WINDOW_WHEN_FULL);
         for (int page = 0; page < 12_000; page++) {
             final long latency = (long) page << 8;
             paged.recordLatency(page, 1, 1, latency);
         }
         assertTrue(paged.isFull());
+
+        paged.copyPercentiles(new LatencyPercentiles(PERCENTILES), null);
+
+        assertEquals(0, paged.getRetainedMemoryBytes());
+        assertFalse(paged.isFull());
+    }
+
+    @Test
+    void periodicWindowPolicyReleasesCacheWithoutEndingTheCurrentWindow() {
+        final HybridPagedLatencyRecorder paged = pagedRecorder(1, 8, 128,
+                MemoryLimitPolicy.RELEASE_AFTER_WINDOW);
+        for (int page = 0; page < 12_000; page++) {
+            paged.reportLatency((long) page << 8, 1);
+        }
+        assertFalse(paged.isFull());
 
         paged.copyPercentiles(new LatencyPercentiles(PERCENTILES), null);
 
@@ -106,6 +123,8 @@ final class HybridPagedLatencyRecorderTest {
         assertThrows(IllegalArgumentException.class, () -> pagedRecorder(64, 17, 32));
         assertThrows(IllegalArgumentException.class, () -> pagedRecorder(64, 8, 0));
         assertThrows(IllegalArgumentException.class, () -> pagedRecorder(64, 8, 256));
+        assertThrows(IllegalArgumentException.class,
+                () -> pagedRecorder(64, 8, 128, null));
     }
 
     private void assertEquivalent(long[] latencies, int[] counts, int pageBits, int sparseEntries) {
@@ -114,6 +133,17 @@ final class HybridPagedLatencyRecorderTest {
         for (int index = 0; index < latencies.length; index++) {
             reference.recordLatency(index, counts[index], counts[index] * 10, latencies[index]);
             paged.recordLatency(index, counts[index], counts[index] * 10, latencies[index]);
+        }
+        assertExtractionEquals(reference, paged);
+    }
+
+    private void assertReportedEquivalent(long[] latencies, int[] counts, int pageBits,
+                                          int sparseEntries) {
+        final LongHashMapLatencyRecorder reference = referenceRecorder(64);
+        final HybridPagedLatencyRecorder paged = pagedRecorder(64, pageBits, sparseEntries);
+        for (int index = 0; index < latencies.length; index++) {
+            reference.reportLatency(latencies[index], counts[index]);
+            paged.reportLatency(latencies[index], counts[index]);
         }
         assertExtractionEquals(reference, paged);
     }
@@ -143,9 +173,17 @@ final class HybridPagedLatencyRecorderTest {
 
     private HybridPagedLatencyRecorder pagedRecorder(int maximumMemoryMiB, int pageBits,
                                                       int sparseEntries) {
+        return pagedRecorder(maximumMemoryMiB, pageBits, sparseEntries,
+                MemoryLimitPolicy.RESET_WINDOW_WHEN_FULL);
+    }
+
+    private HybridPagedLatencyRecorder pagedRecorder(int maximumMemoryMiB, int pageBits,
+                                                      int sparseEntries,
+                                                      MemoryLimitPolicy memoryLimitPolicy) {
         return new HybridPagedLatencyRecorder(MINIMUM_LATENCY, MAXIMUM_LATENCY,
                 Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, PERCENTILES,
-                new NanoSeconds(), maximumMemoryMiB, pageBits, sparseEntries);
+                new NanoSeconds(), maximumMemoryMiB, pageBits, sparseEntries,
+                memoryLimitPolicy);
     }
 
     /** Captures sorted exact buckets copied during percentile extraction. */

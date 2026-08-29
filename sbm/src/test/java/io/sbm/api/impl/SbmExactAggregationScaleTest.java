@@ -12,6 +12,7 @@ package io.sbm.api.impl;
 import io.perl.api.LatencyPercentiles;
 import io.perl.api.ReportLatencies;
 import io.perl.api.impl.HybridPagedLatencyRecorder;
+import io.perl.api.impl.HybridPagedLatencyRecorder.MemoryLimitPolicy;
 import io.perl.logger.Print;
 import io.sbk.logger.ReadRequestsLogger;
 import io.sbk.logger.SetRW;
@@ -34,8 +35,10 @@ final class SbmExactAggregationScaleTest {
 
     @Test
     void aggregatesFiveThousandClientBatchesWithinOneReportingInterval() {
-        final HybridPagedLatencyRecorder window = recorder(64);
-        final HybridPagedLatencyRecorder totalWindow = recorder(128);
+        final HybridPagedLatencyRecorder window = recorder(64,
+                MemoryLimitPolicy.RELEASE_AFTER_WINDOW);
+        final HybridPagedLatencyRecorder totalWindow = recorder(64,
+                MemoryLimitPolicy.RESET_WINDOW_WHEN_FULL);
         final SbmTotalWindowLatencyPeriodicRecorder recorder =
                 new SbmTotalWindowLatencyPeriodicRecorder(window, totalWindow,
                         mock(Print.class), mock(Print.class), mock(ReportLatencies.class), mock(SetRW.class),
@@ -60,10 +63,11 @@ final class SbmExactAggregationScaleTest {
         assertEquals(63, totalPercentiles.latencies[2]);
     }
 
-    private HybridPagedLatencyRecorder recorder(int maximumMemoryMiB) {
+    private HybridPagedLatencyRecorder recorder(int maximumMemoryMiB,
+                                                 MemoryLimitPolicy memoryLimitPolicy) {
         return new HybridPagedLatencyRecorder(0, 180_000_000_000L,
                 Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, PERCENTILES,
-                new NanoSeconds(), maximumMemoryMiB, 8, 32);
+                new NanoSeconds(), maximumMemoryMiB, 8, 32, memoryLimitPolicy);
     }
 
     private MessageLatenciesRecord clientRecord(long clientId) {

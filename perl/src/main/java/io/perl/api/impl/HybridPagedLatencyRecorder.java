@@ -27,7 +27,9 @@ import java.util.Arrays;
  * configured sparse-entry limit is exceeded. Percentile extraction sorts active
  * page identifiers rather than every distinct latency value. This preserves exact
  * nanosecond values while avoiding the hash entry and global-sort cost paid by a
- * flat sparse map for dense regions.</p>
+ * flat sparse map for dense regions. Dense pages deliberately remain dense after
+ * promotion and are retained for reuse until the configured cache budget is
+ * exceeded at a completed window boundary; this avoids promotion/demotion churn.</p>
  */
 final public class HybridPagedLatencyRecorder extends LatencyRecordWindow {
     private static final int INITIAL_SPARSE_CAPACITY = 4;
@@ -44,6 +46,7 @@ final public class HybridPagedLatencyRecorder extends LatencyRecordWindow {
     private final int pageSize;
     private final int pageMask;
     private final int sparseEntryLimit;
+    private final MemoryLimitPolicy memoryLimitPolicy;
     private long[] activePageIds;
     private int activePageCount;
     private long retainedMemoryBytes;
@@ -61,12 +64,14 @@ final public class HybridPagedLatencyRecorder extends LatencyRecordWindow {
      * @param maxMemorySizeMB retained-memory target in MiB
      * @param configuredPageBits log2 of the number of exact values per page
      * @param configuredSparseEntryLimit entries retained sparsely before dense promotion
+     * @param configuredMemoryLimitPolicy action taken when retained memory exceeds its target
      * @throws IllegalArgumentException if the memory target or page geometry is invalid
      */
     public HybridPagedLatencyRecorder(long lowLatency, long highLatency, long totalLatencyMax,
                                       long totalRecordsMax, long bytesMax, double[] percentiles,
                                       Time time, int maxMemorySizeMB, int configuredPageBits,
-                                      int configuredSparseEntryLimit) {
+                                      int configuredSparseEntryLimit,
+                                      MemoryLimitPolicy configuredMemoryLimitPolicy) {
         super(lowLatency, highLatency, totalLatencyMax, totalRecordsMax, bytesMax, percentiles, time);
         if (maxMemorySizeMB < 1 || configuredPageBits < 1
                 || configuredPageBits > Character.SIZE
@@ -74,10 +79,14 @@ final public class HybridPagedLatencyRecorder extends LatencyRecordWindow {
                 || configuredSparseEntryLimit >= (1 << configuredPageBits)) {
             throw new IllegalArgumentException("Invalid hybrid latency page configuration");
         }
+        if (configuredMemoryLimitPolicy == null) {
+            throw new IllegalArgumentException("Hybrid latency memory-limit policy is required");
+        }
         this.pageBits = configuredPageBits;
         this.pageSize = 1 << configuredPageBits;
         this.pageMask = pageSize - 1;
         this.sparseEntryLimit = configuredSparseEntryLimit;
+        this.memoryLimitPolicy = configuredMemoryLimitPolicy;
         this.maxMemoryBytes = (long) maxMemorySizeMB * Bytes.BYTES_PER_MB;
         this.pages = new LongObjectHashMap<>();
         this.activePageIds = EMPTY_PAGE_IDS;
@@ -94,7 +103,8 @@ final public class HybridPagedLatencyRecorder extends LatencyRecordWindow {
 
     @Override
     public boolean isFull() {
-        return retainedMemoryBytes > maxMemoryBytes || super.isOverflow();
+        return (memoryLimitPolicy == MemoryLimitPolicy.RESET_WINDOW_WHEN_FULL
+                && retainedMemoryBytes > maxMemoryBytes) || super.isOverflow();
     }
 
     @Override
@@ -164,7 +174,7 @@ final public class HybridPagedLatencyRecorder extends LatencyRecordWindow {
         final long pageId = latency >> pageBits;
         LatencyPage page = pages.get(pageId);
         if (page == null) {
-            page = new LatencyPage(pageSize, sparseEntryLimit);
+            page = new LatencyPage(sparseEntryLimit);
             pages.put(pageId, page);
             retainedMemoryBytes += PAGE_OBJECT_ESTIMATED_BYTES
                     + PAGE_MAP_ENTRY_ESTIMATED_BYTES + page.retainedArrayBytes();
@@ -172,7 +182,8 @@ final public class HybridPagedLatencyRecorder extends LatencyRecordWindow {
         if (page.isEmpty()) {
             addActivePage(pageId);
         }
-        retainedMemoryBytes += page.add(latency & pageMask, count);
+        retainedMemoryBytes += page.add(latency & pageMask, count, pageSize,
+                sparseEntryLimit);
     }
 
     @Override
@@ -207,23 +218,29 @@ final public class HybridPagedLatencyRecorder extends LatencyRecordWindow {
             pages.clear();
             pages.trimToSize();
             activePageIds = EMPTY_PAGE_IDS;
+            activePageCount = 0;
             retainedMemoryBytes = 0;
         }
     }
 
+    /** Controls whether cache pressure itself ends the current latency window. */
+    public enum MemoryLimitPolicy {
+        /** Reclaim an oversized cache only after the current window is naturally completed. */
+        RELEASE_AFTER_WINDOW,
+
+        /** Mark the window full so its result is printed before the oversized cache is reclaimed. */
+        RESET_WINDOW_WHEN_FULL
+    }
+
     /** One page of exact latency counters with sparse-to-dense promotion. */
     private static final class LatencyPage {
-        private final int pageSize;
-        private final int sparseEntryLimit;
         private char[] sparseOffsets;
         private long[] sparseCounts;
         private int sparseSize;
         private int entryCount;
         private long[] denseCounts;
 
-        private LatencyPage(int configuredPageSize, int configuredSparseEntryLimit) {
-            this.pageSize = configuredPageSize;
-            this.sparseEntryLimit = configuredSparseEntryLimit;
+        private LatencyPage(int configuredSparseEntryLimit) {
             final int initialCapacity = Math.min(INITIAL_SPARSE_CAPACITY, configuredSparseEntryLimit);
             this.sparseOffsets = new char[initialCapacity];
             this.sparseCounts = new long[initialCapacity];
@@ -236,7 +253,8 @@ final public class HybridPagedLatencyRecorder extends LatencyRecordWindow {
             return entryCount == 0;
         }
 
-        private long add(long offsetValue, long count) {
+        private long add(long offsetValue, long count, int configuredPageSize,
+                         int configuredSparseEntryLimit) {
             final int offset = (int) offsetValue;
             if (denseCounts != null) {
                 if (denseCounts[offset] == 0) {
@@ -251,11 +269,11 @@ final public class HybridPagedLatencyRecorder extends LatencyRecordWindow {
                 sparseCounts[searchResult] += count;
                 return 0;
             }
-            if (sparseSize == sparseEntryLimit) {
-                return promoteAndAdd(offset, count);
+            if (sparseSize == configuredSparseEntryLimit) {
+                return promoteAndAdd(offset, count, configuredPageSize);
             }
             final int insertionIndex = -searchResult - 1;
-            final long retainedDelta = ensureSparseCapacity();
+            final long retainedDelta = ensureSparseCapacity(configuredSparseEntryLimit);
             if (insertionIndex < sparseSize) {
                 System.arraycopy(sparseOffsets, insertionIndex, sparseOffsets, insertionIndex + 1,
                         sparseSize - insertionIndex);
@@ -269,20 +287,20 @@ final public class HybridPagedLatencyRecorder extends LatencyRecordWindow {
             return retainedDelta;
         }
 
-        private long ensureSparseCapacity() {
+        private long ensureSparseCapacity(int configuredSparseEntryLimit) {
             if (sparseSize < sparseOffsets.length) {
                 return 0;
             }
             final int oldCapacity = sparseOffsets.length;
-            final int newCapacity = Math.min(sparseEntryLimit, oldCapacity << 1);
+            final int newCapacity = Math.min(configuredSparseEntryLimit, oldCapacity << 1);
             sparseOffsets = Arrays.copyOf(sparseOffsets, newCapacity);
             sparseCounts = Arrays.copyOf(sparseCounts, newCapacity);
             return (long) (newCapacity - oldCapacity) * (CHARACTER_BYTES + LONG_BYTES);
         }
 
-        private long promoteAndAdd(int offset, long count) {
+        private long promoteAndAdd(int offset, long count, int configuredPageSize) {
             final long oldBytes = retainedArrayBytes();
-            denseCounts = new long[pageSize];
+            denseCounts = new long[configuredPageSize];
             for (int index = 0; index < sparseSize; index++) {
                 denseCounts[sparseOffsets[index]] = sparseCounts[index];
             }

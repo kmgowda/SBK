@@ -13,6 +13,7 @@ import io.perl.api.LatencyPercentiles;
 import io.perl.api.impl.ArrayLatencyRecorder;
 import io.perl.api.impl.HashMapLatencyRecorder;
 import io.perl.api.impl.HybridPagedLatencyRecorder;
+import io.perl.api.impl.HybridPagedLatencyRecorder.MemoryLimitPolicy;
 import io.perl.api.impl.LongHashMapLatencyRecorder;
 import io.time.NanoSeconds;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -48,6 +49,8 @@ import java.util.concurrent.TimeUnit;
 @Timeout(time = 30, timeUnit = TimeUnit.SECONDS)
 public class LatencyMapBenchmark {
     private static final long BASE_LATENCY = 1_000;
+    private static final long PROMOTION_BASE_LATENCY = BASE_LATENCY & ~255L;
+    private static final int PROMOTION_PAGES = 64;
     private static final long LATENCY_MASK = 4_095;
     private static final double[] PERCENTILES =
             new double[]{0.5, 0.9, 0.99};
@@ -155,7 +158,8 @@ public class LatencyMapBenchmark {
                     PERCENTILES, new NanoSeconds(), 64);
             hybridPaged = new HybridPagedLatencyRecorder(0, highLatency,
                     Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE,
-                    PERCENTILES, new NanoSeconds(), 64, 8, 32);
+                    PERCENTILES, new NanoSeconds(), 64, 8, 32,
+                    MemoryLimitPolicy.RELEASE_AFTER_WINDOW);
             arrayPercentiles = new LatencyPercentiles(PERCENTILES);
             boxedPercentiles = new LatencyPercentiles(PERCENTILES);
             hybridPagedPercentiles = new LatencyPercentiles(PERCENTILES);
@@ -182,12 +186,40 @@ public class LatencyMapBenchmark {
                     + ((long) distinctLatencies << 8);
             hybridPaged = new HybridPagedLatencyRecorder(0, highLatency,
                     Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE,
-                    PERCENTILES, new NanoSeconds(), 64, 8, 32);
+                    PERCENTILES, new NanoSeconds(), 64, 8, 32,
+                    MemoryLimitPolicy.RELEASE_AFTER_WINDOW);
             primitive = new LongHashMapLatencyRecorder(0, highLatency,
                     Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE,
                     PERCENTILES, new NanoSeconds(), 64);
             hybridPagedPercentiles = new LatencyPercentiles(PERCENTILES);
             primitivePercentiles = new LatencyPercentiles(PERCENTILES);
+        }
+    }
+
+    /** Thread-private state for measuring repeatedly reused hybrid pages. */
+    @State(Scope.Thread)
+    public static class PromotionWindowState {
+        /** Sparse entries retained before the next distinct value promotes the page. */
+        @Param({"32", "128"})
+        public int sparseEntryLimit;
+
+        /** Distinct ascending exact values inserted into each retained page per window. */
+        @Param({"33", "64", "128", "134"})
+        public int distinctLatencies;
+
+        private HybridPagedLatencyRecorder hybridPaged;
+        private LatencyPercentiles percentiles;
+
+        /** Creates pages once; warmup establishes their retained sparse or dense representation. */
+        @Setup(Level.Trial)
+        public void setUp() {
+            final long highLatency = PROMOTION_BASE_LATENCY
+                    + ((long) PROMOTION_PAGES << 8) - 1;
+            hybridPaged = new HybridPagedLatencyRecorder(0, highLatency,
+                    Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE,
+                    PERCENTILES, new NanoSeconds(), 64, 8, sparseEntryLimit,
+                    MemoryLimitPolicy.RELEASE_AFTER_WINDOW);
+            percentiles = new LatencyPercentiles(PERCENTILES);
         }
     }
 
@@ -325,6 +357,24 @@ public class LatencyMapBenchmark {
         }
         state.hybridPaged.copyPercentiles(
                 state.hybridPagedPercentiles, null);
+    }
+
+    /**
+     * Measures retained-page population and extraction around the sparse-to-dense threshold.
+     *
+     * @param state retained pages and threshold parameters
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    public void hybridPagedPromotionWindow(PromotionWindowState state) {
+        for (int page = 0; page < PROMOTION_PAGES; page++) {
+            final long pageBase = PROMOTION_BASE_LATENCY + ((long) page << 8);
+            for (int index = 0; index < state.distinctLatencies; index++) {
+                state.hybridPaged.reportLatency(pageBase + index, 1);
+            }
+        }
+        state.hybridPaged.copyPercentiles(state.percentiles, null);
     }
 
     /**
