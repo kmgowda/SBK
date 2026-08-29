@@ -37,52 +37,11 @@ plugins.withId('application') {
         }
     }
 
-    // Configure every standard and custom start script to use the same JVM
-    // options and explicit/persisted SBK_JAVA_HOME -> JAVA_HOME -> PATH selection order.
+    // Configure every standard and custom start script to use the same JVM options.
+    // Repository-owned templates supply the shared SBK Java bootstrap contract.
     tasks.withType(CreateStartScripts).configureEach {
         doFirst {
             defaultJvmOpts = ((defaultJvmOpts ?: []) + rootProject.ext.sbkRuntimeJvmArgs).unique()
-        }
-        doLast {
-            // For Unix scripts - inject SBK_JAVA_HOME runtime check with fallback
-            def unixJavaDetectionLogic = '''# Resolve the same JDK used by the SBK build.
-# Application launchers reuse an existing JDK by default. Set
-# SBK_JAVA_INSTALL=true to download the pinned JDK when none is available.
-SBK_JAVA_INSTALL=${SBK_JAVA_INSTALL:-false}
-export SBK_JAVA_INSTALL
-SBK_JAVA_CONFIG_FILE=$APP_HOME/bin/sbk-java-bootstrap.properties
-export SBK_JAVA_CONFIG_FILE
-. "$APP_HOME/bin/sbk-java-bootstrap.sh" || die "Unable to resolve JDK 25. Set SBK_JAVA_INSTALL=true, run gradlew once, or set SBK_JAVA_HOME."
-unset SBK_JAVA_INSTALL'''
-            
-            def startMarker = '# Determine the Java command to use to start the JVM.'
-            def sectionEndMarker = '# Increase the maximum file descriptors'
-            
-            def startIndex = unixScript.text.indexOf(startMarker)
-            def endIndex = unixScript.text.indexOf(sectionEndMarker, startIndex)
-            
-            if (startIndex == -1 || endIndex == -1) {
-                throw new GradleException("${path} could not locate the Unix Java detection markers")
-            }
-            unixScript.text = unixScript.text.substring(0, startIndex) + unixJavaDetectionLogic + '\n\n' + unixScript.text.substring(endIndex)
-            
-            // For Windows scripts - inject SBK_JAVA_HOME runtime check with fallback
-            def windowsJavaLogic = '''@rem Reuse an existing JDK by default; opt in to installation with SBK_JAVA_INSTALL=true.
-if not defined SBK_JAVA_INSTALL set "SBK_JAVA_INSTALL=false"
-call "%APP_HOME%\\bin\\sbk-java-bootstrap.bat" "%SBK_JAVA_INSTALL%"
-if errorlevel 1 goto fail
-
-'''
-            def winStartMarker = '@rem Find java.exe'
-            def winEndMarker = ':execute'
-            
-            def winStartIndex = windowsScript.text.indexOf(winStartMarker)
-            def winEndIndex = windowsScript.text.indexOf(winEndMarker, winStartIndex)
-            
-            if (winStartIndex == -1 || winEndIndex == -1) {
-                throw new GradleException("${path} could not locate the Windows Java detection markers")
-            }
-            windowsScript.text = windowsScript.text.substring(0, winStartIndex) + windowsJavaLogic + windowsScript.text.substring(winEndIndex)
         }
     }
 
@@ -90,6 +49,12 @@ if errorlevel 1 goto fail
         dependsOn tasks.withType(CreateStartScripts)
         doLast {
             tasks.withType(CreateStartScripts).each { scriptTask ->
+                def pathingJarName = tasks.named('pathingJar').get().archiveFileName.get()
+                def jarName = tasks.named('jar').get().archiveFileName.get()
+                def expectedUnixClasspath =
+                        "CLASSPATH=\$APP_HOME/lib/${pathingJarName}:\$APP_HOME/lib/${jarName}"
+                def expectedWindowsClasspath =
+                        "set CLASSPATH=%APP_HOME%\\lib\\${pathingJarName};%APP_HOME%\\lib\\${jarName}"
                 if (!scriptTask.unixScript.text.contains('sbk-java-bootstrap.sh')) {
                     throw new GradleException("${scriptTask.path} Unix launcher does not use the SBK JDK resolver")
                 }
@@ -110,6 +75,44 @@ if errorlevel 1 goto fail
                         'sbk-java-bootstrap.bat" "%SBK_JAVA_INSTALL%"')) {
                     throw new GradleException(
                             "${scriptTask.path} Windows launcher does not forward the SBK_JAVA_INSTALL opt-in")
+                }
+                if (!scriptTask.unixScript.text.contains('"-Dsbk.appHome=$APP_HOME"')) {
+                    throw new GradleException(
+                            "${scriptTask.path} Unix launcher does not set the SBK application home")
+                }
+                if (!scriptTask.windowsScript.text.contains('"-Dsbk.appHome=%APP_HOME%"')) {
+                    throw new GradleException(
+                            "${scriptTask.path} Windows launcher does not set the SBK application home")
+                }
+                if (scriptTask.unixScript.text.contains('@SBK_UNIX_JMX_ARGUMENTS@')
+                        || scriptTask.windowsScript.text.contains('@SBK_WINDOWS_JMX_ARGUMENTS@')) {
+                    throw new GradleException(
+                            "${scriptTask.path} launcher contains an unresolved SBK template token")
+                }
+                if (!scriptTask.unixScript.text.contains(expectedUnixClasspath)) {
+                    throw new GradleException(
+                            "${scriptTask.path} Unix launcher does not use only the pathing and application JARs")
+                }
+                if (!scriptTask.windowsScript.text.contains(expectedWindowsClasspath)) {
+                    throw new GradleException(
+                            "${scriptTask.path} Windows launcher does not use only the pathing and application JARs")
+                }
+                if (scriptTask.unixScript.text.contains('# Determine the Java command to use to start the JVM.')
+                        || scriptTask.windowsScript.text.contains('@rem Find java.exe')) {
+                    throw new GradleException(
+                            "${scriptTask.path} launcher still contains Gradle's default Java resolver")
+                }
+                def expectedJmxOption = '-Dsbk.jmxExport=' + jmxExport.toString().toBoolean()
+                if (!scriptTask.unixScript.text.contains(expectedJmxOption)
+                        || !scriptTask.windowsScript.text.contains(expectedJmxOption)) {
+                    throw new GradleException(
+                            "${scriptTask.path} launcher does not contain the configured JMX export mode")
+                }
+                if (jmxExport.toString().toBoolean()
+                        && (!scriptTask.unixScript.text.contains('-javaagent:')
+                        || !scriptTask.windowsScript.text.contains('-javaagent:'))) {
+                    throw new GradleException(
+                            "${scriptTask.path} launcher is missing the configured JMX Java agent")
                 }
                 rootProject.ext.sbkRuntimeJvmArgs.each { option ->
                     if (!scriptTask.unixScript.text.contains(option)) {
