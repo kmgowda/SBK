@@ -299,8 +299,11 @@ JRELEASER_MAVENCENTRAL_STAGE=FULL ./gradlew jreleaserDeploy --no-daemon
 
 JReleaser resolves the private configuration described above. Its source
 default remains `UPLOAD`; setting the stage to `FULL` is the explicit Central
-release operation. SBK uses JReleaser 1.25.0 or newer so these tasks remain
-compatible with the repository-wide Gradle configuration-cache contract.
+release operation. SBK uses JReleaser 1.25.0 or newer and explicitly keeps
+JReleaser tasks outside the Gradle configuration cache because release
+execution consumes live credentials and external service state. Routine build,
+test, and distribution tasks continue to use the repository-wide configuration
+cache.
 
 The published coordinates remain `io.github.kmgowda.sbk:<module>:<version>`.
 External projects can therefore build custom storage benchmarks without an

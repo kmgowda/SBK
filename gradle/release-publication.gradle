@@ -709,12 +709,14 @@ def releasePublicationTaskNames = [
         'verifyDockerHubPublication', 'publishDockerHub',
         'verifyReleaseDispatch', 'publish'
 ] as Set
+def jreleaserTaskPrefix = 'jreleaser'
 
 // Publication reads credentials, remote state, the live Git commit, and
 // external command results during execution. Those operations deliberately
 // remain outside the configuration-cache contract used by routine builds.
 tasks.configureEach { task ->
-    if (task.name in releasePublicationTaskNames) {
+    if (task.name in releasePublicationTaskNames
+            || task.name.startsWith(jreleaserTaskPrefix)) {
         task.notCompatibleWithConfigurationCache(
                 'Release publication uses live credentials, Git, and remote service state')
     }
