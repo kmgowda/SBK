@@ -60,6 +60,22 @@ plugins {
     id 'org.cyclonedx.bom' version "${cycloneDxPluginVersion}" apply false
 }
 
+def sbkBuildCacheDirectory = providers.gradleProperty('sbkBuildCacheDirectory').map {
+    layout.projectDirectory.dir(it)
+}
+def sbkConfigurationCacheDirectory = providers.gradleProperty('sbkConfigurationCacheDirectory').map {
+    layout.projectDirectory.dir(it)
+}
+plugins.withId('base') {
+    tasks.named('clean', Delete).configure {
+        delete sbkBuildCacheDirectory
+        delete sbkConfigurationCacheDirectory
+        description = 'Deletes build outputs and repository-local Gradle caches.'
+        notCompatibleWithConfigurationCache(
+                'Clean deletes the repository-local configuration cache')
+    }
+}
+
 /*
  * to get the dependency for the drivers : ./gradlew dependencyUpdates -Drevision=release --no-parallel -PincludeDriversDeps=true
  */

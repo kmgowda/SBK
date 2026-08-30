@@ -11,6 +11,13 @@
 
 rootProject.name = 'sbk'
 
+def sbkBuildCacheDirectory = providers.gradleProperty('sbkBuildCacheDirectory').get()
+buildCache {
+    local {
+        directory = file(sbkBuildCacheDirectory)
+    }
+}
+
 include 'perl'
 include 'sbk-web-console'
 include 'sbk-api'
@@ -23,4 +30,3 @@ include 'sbk-gem-yal'
 //include 'drivers:sbktemplate'
 
 apply from: "settings-drivers.gradle"
-

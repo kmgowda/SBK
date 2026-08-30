@@ -242,6 +242,13 @@ matches every driver's `installDist` task and creates dozens of standalone
 driver distributions that are not needed for the complete SBK package.
 Gradle's build cache and configuration cache are enabled by default. For local
 iteration, prefer the narrowest module task; CI retains the full `check` gate.
+SBK keeps reusable build outputs in `.gradle/sbk-build-cache`. The root
+`./gradlew clean` task removes that cache, the repository-local configuration
+cache, and every project build directory. It deliberately preserves shared
+dependency, wrapper, and toolchain caches under `~/.gradle`, which may belong
+to unrelated projects. A separate `./gradlew check` after `clean` therefore
+executes all standard test tasks that have test sources instead of restoring
+their previous outputs from the build cache.
 
 ChromaDB, HaloDB, and Ignite are present in the source tree but are not enabled in the aggregate build. ChromaDB's Java client adds an approximately 829 MiB all-platform local-embedding dependency closure; enable it explicitly only for ChromaDB benchmarks. HaloDB depends on a GitHub Packages artifact that may require credentials. The `sbktemplate` directory is a scaffold, not a runtime driver.
 
