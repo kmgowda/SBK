@@ -105,19 +105,22 @@ uploads its functional report and JUnit evidence even when the test fails. The
 full `releasecheck` profile and private real-host release inventory remain
 separate, stronger qualification gates.
 
-Requirements are Docker with an accessible daemon and the OpenSSH client
-tools `ssh`, `ssh-agent`, `ssh-add`, `ssh-keygen`, and `ssh-keyscan`. The
-fixture lets `ssh-agent` select its own platform-safe Unix-domain-socket path,
-avoiding the shorter socket-path limit on macOS when the repository is checked
-out beneath a long directory name. The gate:
+Requirements are Docker with an accessible daemon and the OpenSSH
+`ssh-keygen` client tool. The fixture runs SBK-GEM and SBK-GEM-YAL in a
+dedicated Linux controller container, so Docker's Linux SSH nodes satisfy the
+normal homogeneous-deployment contract even when Gradle itself runs on macOS.
+The controller and nodes share an isolated Docker network; the controller owns
+the disposable SSH agent and callback address, so the test does not depend on
+host SSH-agent sockets, published node ports, or Docker Desktop host aliases.
+The gate:
 
 1. builds a JDK 25 fixture image;
-2. creates an ephemeral Ed25519 key and isolated SSH agent;
-3. starts two non-root SSH nodes on `127.0.0.1`, each with an independently
-   assigned ephemeral host port, so macOS does not require extra loopback
-   aliases;
-4. verifies both generated `known_hosts` entries and the homogeneous remote
-   platform/tool preflight;
+2. creates an ephemeral Ed25519 key and isolated Docker network;
+3. starts a Linux SBK-GEM controller and two non-root Linux SSH nodes on that
+   network;
+4. starts an SSH agent in the controller, verifies both generated
+   `known_hosts` entries, and verifies the homogeneous remote platform/tool
+   preflight;
 5. runs `GemPrometheusLogger`, `GemWebLogger`, and SBK-GEM-YAL through the
    immutable SBK-plus-JDK archive creation, SHA-256 verified copy, atomic
    activation/reuse, managed-runtime lease and inactive-version cleanup,
@@ -127,8 +130,8 @@ out beneath a long directory name. The gate:
    the timed Prometheus case uses `-totalrecords`, the Web case combines
    per-client `-records` with `-totalthroughput`, and the fixed-count YAL case
    combines `totalrecords` with `totalthroughput`;
-6. force-removes both containers, the SSH agent, and ephemeral credentials on both
-   success and failure.
+6. force-removes the controller, both nodes, their private network, and
+   ephemeral credentials on both success and failure.
 
 No inventory, persistent SSH key, exposed fixed port, or manual container
 setup is needed. The fixture proves two-node fan-out, coordinated SBM startup,
