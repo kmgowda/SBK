@@ -67,12 +67,33 @@ def sbkConfigurationCacheDirectory = providers.gradleProperty('sbkConfigurationC
     layout.projectDirectory.dir(it)
 }
 plugins.withId('base') {
-    tasks.named('clean', Delete).configure {
+    def rootCleanTask = tasks.named('clean', Delete)
+    rootCleanTask.configure {
         delete sbkBuildCacheDirectory
         delete sbkConfigurationCacheDirectory
         description = 'Deletes build outputs and repository-local Gradle caches.'
         notCompatibleWithConfigurationCache(
                 'Clean deletes the repository-local configuration cache')
+        doLast {
+            def buildCacheDirectory = sbkBuildCacheDirectory.get().asFile
+            if (!buildCacheDirectory.mkdirs() && !buildCacheDirectory.isDirectory()) {
+                throw new GradleException(
+                        "Unable to recreate repository-local build cache: ${buildCacheDirectory}")
+            }
+        }
+    }
+
+    // The aggregate root clean waits for every subproject clean. Without this
+    // ordering rule, Gradle may start compilation or verification in parallel
+    // while root clean is still pending, then delete the repository-local
+    // build cache underneath those tasks. The constraint is inert unless both
+    // root clean and the other task are present in the same invocation.
+    allprojects {
+        tasks.configureEach { task ->
+            if (task != rootCleanTask.get()) {
+                task.mustRunAfter(rootCleanTask)
+            }
+        }
     }
 }
 
