@@ -39,7 +39,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -419,12 +418,19 @@ class ReleaseFunctionalTest {
 
     private RunningProcess start(final String name, final Path executable,
                                  final Map<String, String> environment, final String... args) throws IOException {
-        List<String> command = new ArrayList<>();
-        command.add(executable.toString());
-        command.addAll(List.of(args));
+        List<String> command;
+        if (dockerFixture != null && dockerFixture.usesController(executable)) {
+            command = dockerFixture.controllerCommand(executable, environment, args);
+        } else {
+            command = new ArrayList<>();
+            command.add(executable.toString());
+            command.addAll(List.of(args));
+        }
         Path log = config.logDir.resolve(name + ".log");
         ProcessBuilder builder = new ProcessBuilder(command).redirectErrorStream(true).redirectOutput(log.toFile());
-        builder.environment().putAll(environment);
+        if (dockerFixture == null || !dockerFixture.usesController(executable)) {
+            builder.environment().putAll(environment);
+        }
         RunningProcess running = new RunningProcess(builder.start(), log);
         processes.add(running);
         return running;
@@ -638,8 +644,7 @@ class ReleaseFunctionalTest {
                           int dockerNodeCount, int dockerSshReadyAttempts, Path reportDir, Path workDir,
                           Path logDir, Path inventory, Path sbk, Path sbkYal, Path sbm, Path sbkGem,
                           Path sbkGemYal, Path webConsole, int socketConnectTimeoutMillis,
-                          String sshPort, String dockerSshUser, String dockerHostAlias,
-                          String dockerJdkImage) {
+                          String sshPort, String dockerSshUser, String dockerJdkImage) {
         private static Config load() {
             Path root = Path.of(required("sbk.release.root"));
             Path report = Path.of(required("sbk.release.reportDir"));
@@ -660,8 +665,7 @@ class ReleaseFunctionalTest {
                     root.resolve("build/install/sbk/bin/sbk-gem-yal"),
                     root.resolve("sbk-web-console/build/install/sbk-web-console/bin/sbk-web-console"),
                     (int) number("socketConnectTimeoutMillis"), required("sbk.release.sshPort"),
-                    required("sbk.release.dockerSshUser"), required("sbk.release.dockerHostAlias"),
-                    required("sbk.release.dockerJdkImage"));
+                    required("sbk.release.dockerSshUser"), required("sbk.release.dockerJdkImage"));
         }
 
         private static String required(final String name) {
@@ -717,23 +721,26 @@ class ReleaseFunctionalTest {
     }
 
     private static final class DockerFixture implements AutoCloseable {
+        private static final String CONTROLLER_AGENT_SOCKET = "/tmp/sbk-controller-agent.sock";
+        private static final String SSH_AUTH_SOCKET = "SSH_AUTH_SOCK";
+
         private final Config config;
         private final CommandRunner runner;
         private final Path directory;
         private final List<String> containers;
-        private final long agentPid;
-        private final Map<String, String> agentEnvironment;
+        private final String network;
+        private final String controller;
         private final Inventory inventory;
 
         private DockerFixture(final Config config, final CommandRunner runner, final Path directory,
-                              final List<String> containers, final long agentPid,
-                              final Map<String, String> agentEnvironment, final Inventory inventory) {
+                              final List<String> containers, final String network,
+                              final String controller, final Inventory inventory) {
             this.config = config;
             this.runner = runner;
             this.directory = directory;
             this.containers = containers;
-            this.agentPid = agentPid;
-            this.agentEnvironment = agentEnvironment;
+            this.network = network;
+            this.controller = controller;
             this.inventory = inventory;
         }
 
@@ -741,65 +748,55 @@ class ReleaseFunctionalTest {
             Path directory = Files.createTempDirectory(config.workDir, "docker-gem.");
             String suffix = Long.toUnsignedString(System.nanoTime());
             require(config.dockerNodeCount > 0, "local-docker requires at least one GEM node");
-            List<String> containers = IntStream.range(0, config.dockerNodeCount)
+            List<String> nodes = IntStream.range(0, config.dockerNodeCount)
                     .mapToObj(index -> "sbk-release-gem-" + suffix + "-" + (index + 1))
                     .toList();
+            String controller = "sbk-release-gem-controller-" + suffix;
+            String network = "sbk-release-gem-network-" + suffix;
+            List<String> containers = new ArrayList<>();
+            containers.add(controller);
+            containers.addAll(nodes);
             String image = "sbk-release-gem-fixture:" + config.version;
             command(runner, config, directory, Map.of(), "ssh-keygen", "ssh-keygen", "-q", "-t", "ed25519",
                     "-N", "", "-C", "sbk-release-qualification", "-f",
                     directory.resolve("id_ed25519").toString());
-            ProcessOutcome agent = command(runner, config, directory, Map.of(), "ssh-agent",
-                    "ssh-agent", "-s");
-            String agentOutput = Files.readString(agent.log);
-            var socketMatcher = Pattern.compile("SSH_AUTH_SOCK=([^;\\r\\n]+);").matcher(agentOutput);
-            var pidMatcher = Pattern.compile("SSH_AGENT_PID=([0-9]+);").matcher(agentOutput);
-            boolean socketFound = socketMatcher.find();
-            boolean pidFound = pidMatcher.find();
-            if (!socketFound || !pidFound) {
-                if (pidFound) {
-                    ProcessHandle.of(Long.parseLong(pidMatcher.group(1))).ifPresent(ProcessHandle::destroy);
-                }
-                throw new IllegalStateException(
-                        "Unable to read release qualification SSH agent environment; see " + agent.log);
-            }
-            String socket = socketMatcher.group(1);
-            long agentPid = Long.parseLong(pidMatcher.group(1));
-            Map<String, String> environment = Map.of("SSH_AUTH_SOCK", socket,
-                    "SSH_AGENT_PID", Long.toString(agentPid));
             DockerFixture fixture = new DockerFixture(config, runner, directory, containers,
-                    agentPid, environment, null);
+                    network, controller, null);
             try {
-                command(runner, config, directory, environment, "ssh-add", "ssh-add",
-                        directory.resolve("id_ed25519").toString());
-                command(runner, config, directory, environment, "docker-build", "docker", "build",
+                command(runner, config, directory, Map.of(), "docker-build", "docker", "build",
                         "--build-arg", "SBK_RELEASE_JDK_IMAGE=" + config.dockerJdkImage,
                         "--build-arg", "SBK_RELEASE_SSH_USER=" + config.dockerSshUser,
                         "--build-arg", "SBK_RELEASE_SSH_PORT=" + config.sshPort,
                         "--tag", image, config.root.resolve("scripts/release-gem-docker").toString());
-                List<String> nodePorts = new ArrayList<>(config.dockerNodeCount);
+                command(runner, config, directory, Map.of(), "docker-network", "docker", "network", "create",
+                        network);
+                startController(runner, config, directory, image, network, controller);
+                command(runner, config, directory, Map.of(), "controller-ssh-agent", "docker", "exec",
+                        controller, "ssh-agent", "-a", CONTROLLER_AGENT_SOCKET);
+                command(runner, config, directory, Map.of(), "controller-ssh-add", "docker", "exec",
+                        "--env", SSH_AUTH_SOCKET + "=" + CONTROLLER_AGENT_SOCKET, controller, "ssh-add",
+                        directory.resolve("id_ed25519").toString());
                 for (int index = 0; index < config.dockerNodeCount; index++) {
-                    startContainer(runner, config, directory, environment, image, containers.get(index));
-                    ProcessOutcome portResult = command(runner, config, directory, environment,
-                            "docker-port-" + index, "docker", "port", containers.get(index),
-                            config.sshPort + "/tcp");
-                    nodePorts.add(publishedPort(portResult));
+                    startNode(runner, config, directory, image, network, nodes.get(index));
                 }
                 Path knownHosts = directory.resolve("known_hosts");
                 Files.writeString(knownHosts, "", StandardCharsets.UTF_8);
                 for (int index = 0; index < config.dockerNodeCount; index++) {
-                    String port = nodePorts.get(index);
+                    String node = nodes.get(index);
                     Path nodeKnownHosts = directory.resolve("known-hosts-" + index);
                     boolean ready = false;
                     for (int attempt = 0; attempt < config.dockerSshReadyAttempts; attempt++) {
-                        ProcessOutcome scan = run(runner, config, directory, environment,
-                                "ssh-keyscan-" + index, List.of("ssh-keyscan", "-p", port, LOOPBACK));
+                        ProcessOutcome scan = run(runner, config, directory, Map.of(),
+                                "ssh-keyscan-" + index, List.of("docker", "exec", controller,
+                                        "ssh-keyscan", "-p", config.sshPort, node));
                         if (scan.exitCode == 0 && Files.size(scan.log) > 0) {
                             Files.copy(scan.log, nodeKnownHosts, StandardCopyOption.REPLACE_EXISTING);
-                            ProcessOutcome probe = run(runner, config, directory, environment,
-                                    "ssh-probe-" + index, List.of("ssh", "-p", port, "-o", "BatchMode=yes",
+                            ProcessOutcome probe = run(runner, config, directory, Map.of(),
+                                    "ssh-probe-" + index, List.of("docker", "exec", "--env",
+                                            SSH_AUTH_SOCKET + "=" + CONTROLLER_AGENT_SOCKET, controller,
+                                            "ssh", "-p", config.sshPort, "-o", "BatchMode=yes",
                                             "-o", "UserKnownHostsFile=" + nodeKnownHosts,
-                                            config.dockerSshUser + "@" + LOOPBACK,
-                                            "java", "-version"));
+                                            config.dockerSshUser + "@" + node, "java", "-version"));
                             if (probe.exitCode == 0) {
                                 ready = true;
                                 break;
@@ -807,42 +804,57 @@ class ReleaseFunctionalTest {
                         }
                         Thread.sleep(Duration.ofSeconds(config.shutdownPollSeconds));
                     }
-                    require(ready, "Docker GEM fixture node did not become ready: " + LOOPBACK + ":" + port);
+                    require(ready, "Docker GEM fixture node did not become ready: " + node + ":"
+                            + config.sshPort);
                     Files.writeString(knownHosts, Files.readString(nodeKnownHosts), StandardCharsets.UTF_8,
                             StandardOpenOption.APPEND);
                 }
                 Path inventoryFile = directory.resolve("inventory.properties");
-                String nodes = nodePorts.stream().map(port -> LOOPBACK + ":" + port)
-                        .collect(Collectors.joining(","));
-                Files.writeString(inventoryFile, "gem.nodes=" + nodes + "\ngem.user=" + config.dockerSshUser
+                String nodeList = String.join(",", nodes);
+                Files.writeString(inventoryFile, "gem.nodes=" + nodeList + "\ngem.user=" + config.dockerSshUser
                         + "\ngem.knownHosts=" + knownHosts + "\ngem.port=" + config.sshPort
-                        + "\ngem.localhost=" + config.dockerHostAlias + "\n", StandardCharsets.UTF_8);
-                Inventory inventory = Inventory.load(inventoryFile, environment, config.sshPort);
-                System.out.println("SBK local-docker GEM fixture ready: " + config.dockerSshUser + "@{" + nodes
-                        + "} (" + config.dockerNodeCount + " clients)");
+                        + "\ngem.localhost=" + controller + "\n", StandardCharsets.UTF_8);
+                Inventory inventory = Inventory.load(inventoryFile, Map.of(), config.sshPort);
+                System.out.println("SBK local-docker GEM fixture ready: Linux controller '" + controller
+                        + "', " + config.dockerSshUser + "@{" + nodeList + "} (" + config.dockerNodeCount
+                        + " clients)");
                 return new DockerFixture(config, runner, directory, containers,
-                        agentPid, environment, inventory);
+                        network, controller, inventory);
             } catch (Throwable throwable) {
                 fixture.close();
                 throw throwable;
             }
         }
 
-        private static void startContainer(final CommandRunner runner, final Config config,
-                                           final Path directory, final Map<String, String> environment,
-                                           final String image, final String container) throws Exception {
-            command(runner, config, directory, environment, "docker-run-" + container, "docker", "run",
-                    "--detach", "--name", container, "--add-host",
-                    config.dockerHostAlias + ":host-gateway", "--publish",
-                    LOOPBACK + "::" + config.sshPort, "--volume",
+        private static void startController(final CommandRunner runner, final Config config,
+                                            final Path directory, final String image,
+                                            final String network, final String controller) throws Exception {
+            command(runner, config, directory, Map.of(), "docker-run-" + controller, "docker", "run",
+                    "--detach", "--name", controller, "--network", network, "--volume",
+                    config.root + ":" + config.root + ":ro", "--volume", directory + ":" + directory,
+                    "--entrypoint", "/bin/sleep", image, "infinity");
+        }
+
+        private static void startNode(final CommandRunner runner, final Config config,
+                                      final Path directory, final String image,
+                                      final String network, final String container) throws Exception {
+            command(runner, config, directory, Map.of(), "docker-run-" + container, "docker", "run",
+                    "--detach", "--name", container, "--network", network, "--volume",
                     directory.resolve("id_ed25519.pub") + ":/run/sbk/authorized_key:ro", image);
         }
 
-        private static String publishedPort(ProcessOutcome portResult) throws IOException {
-            final String portText = Files.readString(portResult.log).trim();
-            final String port = portText.substring(portText.lastIndexOf(':') + 1);
-            require(port.matches("[0-9]+"), "Unable to determine fixture SSH port: " + portText);
-            return port;
+        private boolean usesController(final Path executable) {
+            return executable.equals(config.sbkGem) || executable.equals(config.sbkGemYal);
+        }
+
+        private List<String> controllerCommand(final Path executable, final Map<String, String> environment,
+                                               final String... args) {
+            List<String> command = new ArrayList<>(List.of("docker", "exec", "--env",
+                    SSH_AUTH_SOCKET + "=" + CONTROLLER_AGENT_SOCKET));
+            environment.forEach((name, value) -> command.addAll(List.of("--env", name + "=" + value)));
+            command.addAll(List.of("--workdir", config.root.toString(), controller, executable.toString()));
+            command.addAll(List.of(args));
+            return command;
         }
 
         private static ProcessOutcome command(final CommandRunner runner, final Config config,
@@ -866,19 +878,18 @@ class ReleaseFunctionalTest {
             for (String container : containers) {
                 try {
                     runner.run("docker-cleanup", config.logDir.resolve("docker-cleanup-" + container + ".log"),
-                            agentEnvironment, List.of("docker", "rm", "--force", container),
+                            Map.of(), List.of("docker", "rm", "--force", container),
                             config.killGraceSeconds);
                 } catch (Exception ignored) {
                     // Best-effort cleanup; the original qualification failure remains authoritative.
                 }
             }
             try {
-                runner.run("ssh-agent-cleanup", config.logDir.resolve("ssh-agent-cleanup.log"),
-                        agentEnvironment, List.of("ssh-agent", "-k"), config.killGraceSeconds);
+                runner.run("docker-network-cleanup", config.logDir.resolve("docker-network-cleanup.log"),
+                        Map.of(), List.of("docker", "network", "rm", network), config.killGraceSeconds);
             } catch (Exception ignored) {
-                // Fall through to the process-handle cleanup below.
+                // Best-effort cleanup; the original qualification failure remains authoritative.
             }
-            ProcessHandle.of(agentPid).filter(ProcessHandle::isAlive).ifPresent(ProcessHandle::destroy);
             try (Stream<Path> paths = Files.walk(directory)) {
                 paths.sorted(Comparator.reverseOrder()).forEach(path -> {
                     try {

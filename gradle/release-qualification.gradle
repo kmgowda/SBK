@@ -120,7 +120,7 @@ tasks.register('releasePreflight') {
             def pathDirectories = (System.getenv('PATH') ?: '').split(File.pathSeparator)
             def executableSuffixes = System.getProperty('os.name').toLowerCase().contains('windows')
                     ? ['', '.exe', '.cmd', '.bat'] : ['']
-            ['docker', 'ssh-agent', 'ssh-add', 'ssh-keygen', 'ssh-keyscan', 'ssh'].each { command ->
+            ['docker', 'ssh-keygen'].each { command ->
                 def executableFound = pathDirectories.any { directory ->
                     executableSuffixes.any { suffix ->
                         new File(directory, command + suffix).isFile()
@@ -204,7 +204,7 @@ tasks.register('releaseFunctionalTest', Test) {
      'shutdownPollSeconds', 'eofRecords', 'eofBenchmarkSeconds', 'eofMaximumSeconds',
      'smokeBenchmarkSeconds', 'sbmSettleSeconds', 'dockerNodeCount',
      'dockerSshReadyAttempts', 'socketConnectTimeoutMillis', 'sshPort',
-     'dockerSshUser', 'dockerHostAlias', 'dockerJdkImage'].each { name ->
+     'dockerSshUser', 'dockerJdkImage'].each { name ->
         systemProperty "sbk.release.${name}", qualificationValue(name)
     }
     systemProperty 'sbk.release.reportDir', qualificationReportDir.get().asFile.absolutePath
