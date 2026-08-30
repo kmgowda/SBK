@@ -43,6 +43,24 @@ def releaseMavenProjects = [
 def expectedReleaseMavenProjectPaths = [
         ':perl', ':sbk-web-console', ':sbk-api', ':sbm', ':sbk-yal', ':sbk-gem', ':sbk-gem-yal'
 ] as Set
+def configuredReleaseMavenProjectPaths = releaseMavenProjects.collect { it.path } as Set
+def stagedCorePublications = releaseMavenProjects.collect { publicationProject ->
+    def publicationName = publicationProject.name
+    def artifactDirectory = publicationProject.layout.buildDirectory.dir(
+            "${releaseMavenStagingDirectory}/${sbkGroup.replace('.', '/')}/" +
+                    "${publicationName}/${sbkVersion}").get().asFile.absolutePath
+    [
+            projectPath: publicationProject.path,
+            artifactDirectory: artifactDirectory,
+            requiredFiles: [
+                    "${publicationName}-${sbkVersion}.pom",
+                    "${publicationName}-${sbkVersion}.jar",
+                    "${publicationName}-${sbkVersion}-sources.jar",
+                    "${publicationName}-${sbkVersion}-javadoc.jar",
+                    "${publicationName}-${sbkVersion}-docs.jar"
+            ].asImmutable()
+    ].asImmutable()
+}.asImmutable()
 def releaseImageNames = ['kmgowda/sbk', 'ghcr.io/kmgowda/sbk']
 def releasePlatforms = ['linux/amd64', 'linux/arm64']
 
@@ -199,26 +217,40 @@ def releaseCoreSboms = tasks.register('releaseCoreSboms') {
 def verifyReleasePublicationScope = tasks.register('verifyReleasePublicationScope') {
     group = 'verification'
     description = 'Proves that standalone release publication is restricted to core modules.'
-    doLast {
-        def configuredPaths = releaseMavenProjects.collect { it.path } as Set
-        if (configuredPaths != expectedReleaseMavenProjectPaths) {
-            throw new GradleException("Unexpected Maven release project set: ${configuredPaths}")
-        }
-        def publishableDriverProjects = rootProject.allprojects.findAll {
-            it.path.startsWith(':drivers:') && it.pluginManager.hasPlugin('maven-publish')
-        }
-        if (!publishableDriverProjects.isEmpty()) {
-            throw new GradleException('Drivers must not apply maven-publish: '
-                    + publishableDriverProjects.collect { it.path }.join(', '))
-        }
-        def gradleMavenSigningTasks = releaseMavenProjects.collectMany { publicationProject ->
-            publicationProject.tasks.matching {
-                it.name == 'signMavenJavaPublication'
-            }.toList()
-        }
-        if (!gradleMavenSigningTasks.isEmpty()) {
-            throw new GradleException('JReleaser must be the sole Maven publication signer: '
-                    + gradleMavenSigningTasks.collect { it.path }.join(', '))
+}
+
+// Inspect the Gradle model once after every project is configured. The task
+// action receives only immutable path strings, never live Project or Task
+// objects, so local publication staging remains configuration-cache safe.
+gradle.projectsEvaluated {
+    def publishableDriverProjectPaths = rootProject.allprojects.findAll {
+        it.path.startsWith(':drivers:') && it.pluginManager.hasPlugin('maven-publish')
+    }.collect { it.path }.sort().asImmutable()
+    def gradleMavenSigningTaskPaths = releaseMavenProjects.collectMany { publicationProject ->
+        publicationProject.tasks.matching {
+            it.name == 'signMavenJavaPublication'
+        }.collect { it.path }
+    }.sort().asImmutable()
+    verifyReleasePublicationScope.configure {
+        inputs.property('configuredReleaseMavenProjectPaths',
+                configuredReleaseMavenProjectPaths.sort())
+        inputs.property('expectedReleaseMavenProjectPaths',
+                expectedReleaseMavenProjectPaths.sort())
+        inputs.property('publishableDriverProjectPaths', publishableDriverProjectPaths)
+        inputs.property('gradleMavenSigningTaskPaths', gradleMavenSigningTaskPaths)
+        doLast {
+            if (configuredReleaseMavenProjectPaths != expectedReleaseMavenProjectPaths) {
+                throw new GradleException('Unexpected Maven release project set: '
+                        + configuredReleaseMavenProjectPaths)
+            }
+            if (!publishableDriverProjectPaths.isEmpty()) {
+                throw new GradleException('Drivers must not apply maven-publish: '
+                        + publishableDriverProjectPaths.join(', '))
+            }
+            if (!gradleMavenSigningTaskPaths.isEmpty()) {
+                throw new GradleException('JReleaser must be the sole Maven publication signer: '
+                        + gradleMavenSigningTaskPaths.join(', '))
+            }
         }
     }
 }
@@ -242,24 +274,14 @@ def verifyCorePublicationStaging = tasks.register('verifyCorePublicationStaging'
     description = 'Validates the core Maven artifacts staged for JReleaser deployment.'
     dependsOn releaseStageCorePublications
     doLast {
-        releaseMavenProjects.each { publicationProject ->
-            def artifactDirectory = publicationProject.layout.buildDirectory.dir(
-                    "${releaseMavenStagingDirectory}/${sbkGroup.replace('.', '/')}/" +
-                            "${publicationProject.name}/${sbkVersion}")
-                    .get().asFile
-            def requiredFiles = [
-                    "${publicationProject.name}-${sbkVersion}.pom",
-                    "${publicationProject.name}-${sbkVersion}.jar",
-                    "${publicationProject.name}-${sbkVersion}-sources.jar",
-                    "${publicationProject.name}-${sbkVersion}-javadoc.jar",
-                    "${publicationProject.name}-${sbkVersion}-docs.jar"
-            ]
-            def missingFiles = requiredFiles.findAll {
+        stagedCorePublications.each { publication ->
+            def artifactDirectory = new File(publication.artifactDirectory)
+            def missingFiles = publication.requiredFiles.findAll {
                 def artifact = new File(artifactDirectory, it)
                 !artifact.isFile() || artifact.length() == 0L
             }
             if (!missingFiles.isEmpty()) {
-                throw new GradleException("Missing staged artifacts for ${publicationProject.path}: "
+                throw new GradleException("Missing staged artifacts for ${publication.projectPath}: "
                         + missingFiles.join(', '))
             }
         }
@@ -700,9 +722,7 @@ tasks.register('publish') {
 }
 
 def releasePublicationTaskNames = [
-        'releaseCoreSboms', 'verifyReleasePublicationScope',
-        'releaseStageCorePublications', 'releasePublishCoreToGitHubPackages',
-        'verifyCorePublicationStaging', 'verifyExistingCoreGitHubPackages',
+        'releasePublishCoreToGitHubPackages', 'verifyExistingCoreGitHubPackages',
         'releaseAgentDocs', 'collectReleaseAssets', 'generateReleaseManifest',
         'finalizeReleaseManifest', 'prepareReleaseContainer',
         'releasePublicationAssets', 'releasePublicationDryRun',
