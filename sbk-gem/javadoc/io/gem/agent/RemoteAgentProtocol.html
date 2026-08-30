@@ -61,6 +61,17 @@ loadScripts(document, 'script');</script>
 <li><a href="#MAGIC" tabindex="0">MAGIC</a></li>
 <li><a href="#MAX_VALUES" tabindex="0">MAX_VALUES</a></li>
 <li><a href="#MAX_STRING_BYTES" tabindex="0">MAX_STRING_BYTES</a></li>
+<li><a href="#MAX_REQUEST_BYTES" tabindex="0">MAX_REQUEST_BYTES</a></li>
+<li><a href="#ARCHIVE_DIGEST_MISMATCH" tabindex="0">ARCHIVE_DIGEST_MISMATCH</a></li>
+<li><a href="#PROBE" tabindex="0">PROBE</a></li>
+<li><a href="#ACTIVATE" tabindex="0">ACTIVATE</a></li>
+<li><a href="#VERIFY" tabindex="0">VERIFY</a></li>
+<li><a href="#CLEANUP" tabindex="0">CLEANUP</a></li>
+<li><a href="#RUNTIME_RESERVE" tabindex="0">RUNTIME_RESERVE</a></li>
+<li><a href="#RUNTIME_ACQUIRE" tabindex="0">RUNTIME_ACQUIRE</a></li>
+<li><a href="#RUNTIME_HEARTBEAT" tabindex="0">RUNTIME_HEARTBEAT</a></li>
+<li><a href="#RUNTIME_RELEASE" tabindex="0">RUNTIME_RELEASE</a></li>
+<li><a href="#RUN" tabindex="0">RUN</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -116,9 +127,29 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Field</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#MAGIC" class="member-name-link">MAGIC</a></code></div>
+<div class="col-second even-row-color"><code><a href="#ACTIVATE" class="member-name-link">ACTIVATE</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Runtime activation operation.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#ARCHIVE_DIGEST_MISMATCH" class="member-name-link">ARCHIVE_DIGEST_MISMATCH</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Stable diagnostic emitted when a transferred runtime archive fails integrity verification.</div>
+</div>
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#CLEANUP" class="member-name-link">CLEANUP</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Retired-runtime cleanup operation.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#MAGIC" class="member-name-link">MAGIC</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Protocol magic.</div>
+</div>
+<div class="col-first even-row-color"><code>static final int</code></div>
+<div class="col-second even-row-color"><code><a href="#MAX_REQUEST_BYTES" class="member-name-link">MAX_REQUEST_BYTES</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Maximum aggregate encoded request size.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final int</code></div>
 <div class="col-second odd-row-color"><code><a href="#MAX_STRING_BYTES" class="member-name-link">MAX_STRING_BYTES</a></code></div>
@@ -129,6 +160,41 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color"><code><a href="#MAX_VALUES" class="member-name-link">MAX_VALUES</a></code></div>
 <div class="col-last even-row-color">
 <div class="block">Maximum request values.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#PROBE" class="member-name-link">PROBE</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Probe operation.</div>
+</div>
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#RUN" class="member-name-link">RUN</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Remote benchmark execution operation.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#RUNTIME_ACQUIRE" class="member-name-link">RUNTIME_ACQUIRE</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Runtime lease acquisition operation.</div>
+</div>
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#RUNTIME_HEARTBEAT" class="member-name-link">RUNTIME_HEARTBEAT</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Runtime lease heartbeat operation.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#RUNTIME_RELEASE" class="member-name-link">RUNTIME_RELEASE</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Runtime lease release operation.</div>
+</div>
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#RUNTIME_RESERVE" class="member-name-link">RUNTIME_RESERVE</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Runtime reservation operation.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#VERIFY" class="member-name-link">VERIFY</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Runtime verification operation.</div>
 </div>
 </div>
 </section>
@@ -217,6 +283,193 @@ loadScripts(document, 'script');</script>
 <dd>
 <ul class="tag-list">
 <li><a href="../../../constant-values.html#io.gem.agent.RemoteAgentProtocol.MAX_STRING_BYTES">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="MAX_REQUEST_BYTES">
+<h3>MAX_REQUEST_BYTES</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">MAX_REQUEST_BYTES</span></div>
+<div class="block">Maximum aggregate encoded request size.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.gem.agent.RemoteAgentProtocol.MAX_REQUEST_BYTES">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ARCHIVE_DIGEST_MISMATCH">
+<h3>ARCHIVE_DIGEST_MISMATCH</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">ARCHIVE_DIGEST_MISMATCH</span></div>
+<div class="block">Stable diagnostic emitted when a transferred runtime archive fails integrity verification.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.gem.agent.RemoteAgentProtocol.ARCHIVE_DIGEST_MISMATCH">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="PROBE">
+<h3>PROBE</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">PROBE</span></div>
+<div class="block">Probe operation.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.gem.agent.RemoteAgentProtocol.PROBE">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ACTIVATE">
+<h3>ACTIVATE</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">ACTIVATE</span></div>
+<div class="block">Runtime activation operation.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.gem.agent.RemoteAgentProtocol.ACTIVATE">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="VERIFY">
+<h3>VERIFY</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">VERIFY</span></div>
+<div class="block">Runtime verification operation.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.gem.agent.RemoteAgentProtocol.VERIFY">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="CLEANUP">
+<h3>CLEANUP</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">CLEANUP</span></div>
+<div class="block">Retired-runtime cleanup operation.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.gem.agent.RemoteAgentProtocol.CLEANUP">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RUNTIME_RESERVE">
+<h3>RUNTIME_RESERVE</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">RUNTIME_RESERVE</span></div>
+<div class="block">Runtime reservation operation.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.gem.agent.RemoteAgentProtocol.RUNTIME_RESERVE">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RUNTIME_ACQUIRE">
+<h3>RUNTIME_ACQUIRE</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">RUNTIME_ACQUIRE</span></div>
+<div class="block">Runtime lease acquisition operation.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.gem.agent.RemoteAgentProtocol.RUNTIME_ACQUIRE">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RUNTIME_HEARTBEAT">
+<h3>RUNTIME_HEARTBEAT</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">RUNTIME_HEARTBEAT</span></div>
+<div class="block">Runtime lease heartbeat operation.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.gem.agent.RemoteAgentProtocol.RUNTIME_HEARTBEAT">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RUNTIME_RELEASE">
+<h3>RUNTIME_RELEASE</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">RUNTIME_RELEASE</span></div>
+<div class="block">Runtime lease release operation.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.gem.agent.RemoteAgentProtocol.RUNTIME_RELEASE">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RUN">
+<h3>RUN</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">RUN</span></div>
+<div class="block">Remote benchmark execution operation.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.gem.agent.RemoteAgentProtocol.RUN">Constant Field Values</a></li>
 </ul>
 </dd>
 </dl>

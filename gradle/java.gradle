@@ -37,6 +37,20 @@ plugins.withId('java') {
     apply plugin: 'jacoco'
     apply plugin: 'signing'
 
+    // Modules that publish checked-in API documentation expose a single,
+    // configuration-cache-safe synchronization task. Sync also removes stale
+    // Javadoc files that no longer exist in the generated output.
+    def checkedInJavadocDirectory = layout.projectDirectory.dir('javadoc')
+    if (checkedInJavadocDirectory.asFile.isDirectory()) {
+        tasks.register('updateDocs', Sync) {
+            group = 'documentation'
+            description = 'Synchronizes generated Javadocs with the checked-in documentation.'
+            dependsOn tasks.named('javadoc')
+            from layout.buildDirectory.dir('docs/javadoc')
+            into checkedInJavadocDirectory
+        }
+    }
+
     def configuredJavaVersion = rootProject.ext.sbkJavaMajorVersion
 
     // Configure Java toolchain

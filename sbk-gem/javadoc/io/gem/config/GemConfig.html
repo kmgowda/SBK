@@ -59,6 +59,10 @@ loadScripts(document, 'script');</script>
 <li><a href="#field-detail" tabindex="0">Field Details</a>
 <ol class="toc-list">
 <li><a href="#DIAGNOSTIC_TRUNCATION_MARKER" tabindex="0">DIAGNOSTIC_TRUNCATION_MARKER</a></li>
+<li><a href="#DEFAULT_DIAGNOSTIC_BYTES" tabindex="0">DEFAULT_DIAGNOSTIC_BYTES</a></li>
+<li><a href="#DEFAULT_MAXIMUM_DIAGNOSTIC_CHARACTERS" tabindex="0">DEFAULT_MAXIMUM_DIAGNOSTIC_CHARACTERS</a></li>
+<li><a href="#DEFAULT_DIAGNOSTIC_PREFIX_CHARACTERS" tabindex="0">DEFAULT_DIAGNOSTIC_PREFIX_CHARACTERS</a></li>
+<li><a href="#DEFAULT_SSH_COPY_BUFFER_BYTES" tabindex="0">DEFAULT_SSH_COPY_BUFFER_BYTES</a></li>
 <li><a href="#SBK_GEM_APP_NAME" tabindex="0">SBK_GEM_APP_NAME</a></li>
 <li><a href="#NAME" tabindex="0">NAME</a></li>
 <li><a href="#DESC" tabindex="0">DESC</a></li>
@@ -77,7 +81,9 @@ loadScripts(document, 'script');</script>
 <li><a href="#sbkdir" tabindex="0">sbkdir</a></li>
 <li><a href="#sbkVersion" tabindex="0">sbkVersion</a></li>
 <li><a href="#javadir" tabindex="0">javadir</a></li>
-<li><a href="#runtimecleanup" tabindex="0">runtimecleanup</a></li>
+<li><a href="#packagescleanup" tabindex="0">packagescleanup</a></li>
+<li><a href="#fullcopy" tabindex="0">fullcopy</a></li>
+<li><a href="#driverClass" tabindex="0">driverClass</a></li>
 <li><a href="#remoteTimeoutSeconds" tabindex="0">remoteTimeoutSeconds</a></li>
 <li><a href="#deploymentTimeoutSeconds" tabindex="0">deploymentTimeoutSeconds</a></li>
 <li><a href="#runtimeProgressIntervalSeconds" tabindex="0">runtimeProgressIntervalSeconds</a></li>
@@ -87,10 +93,13 @@ loadScripts(document, 'script');</script>
 <li><a href="#runtimeLeaseReservationSeconds" tabindex="0">runtimeLeaseReservationSeconds</a></li>
 <li><a href="#sbmRegistrationTimeoutSeconds" tabindex="0">sbmRegistrationTimeoutSeconds</a></li>
 <li><a href="#timeoutSeconds" tabindex="0">timeoutSeconds</a></li>
-<li><a href="#maxIterations" tabindex="0">maxIterations</a></li>
 <li><a href="#remoteDir" tabindex="0">remoteDir</a></li>
-<li><a href="#fork" tabindex="0">fork</a></li>
-<li><a href="#executorThreadReserve" tabindex="0">executorThreadReserve</a></li>
+<li><a href="#controlExecutorThreads" tabindex="0">controlExecutorThreads</a></li>
+<li><a href="#transferExecutorThreads" tabindex="0">transferExecutorThreads</a></li>
+<li><a href="#transferExecutorMinimumThreads" tabindex="0">transferExecutorMinimumThreads</a></li>
+<li><a href="#transferExecutorMaximumThreads" tabindex="0">transferExecutorMaximumThreads</a></li>
+<li><a href="#transferTargetWaves" tabindex="0">transferTargetWaves</a></li>
+<li><a href="#sshCopyBufferBytes" tabindex="0">sshCopyBufferBytes</a></li>
 <li><a href="#diagnosticBytes" tabindex="0">diagnosticBytes</a></li>
 <li><a href="#maximumAgentResponseBytes" tabindex="0">maximumAgentResponseBytes</a></li>
 <li><a href="#maximumDiagnosticCharacters" tabindex="0">maximumDiagnosticCharacters</a></li>
@@ -145,95 +154,115 @@ management, and SBM coordination.</div>
 <div class="col-last even-row-color">
 <div class="block"><code>String BIN_DIR = "bin"</code>.</div>
 </div>
-<div class="col-first odd-row-color"><code>long</code></div>
-<div class="col-second odd-row-color"><code><a href="#deploymentTimeoutSeconds" class="member-name-link">deploymentTimeoutSeconds</a></code></div>
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#controlExecutorThreads" class="member-name-link">controlExecutorThreads</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Maximum platform threads used for concurrent SSH connection and control operations.</div>
+</div>
+<div class="col-first even-row-color"><code>static final int</code></div>
+<div class="col-second even-row-color"><code><a href="#DEFAULT_DIAGNOSTIC_BYTES" class="member-name-link">DEFAULT_DIAGNOSTIC_BYTES</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Default maximum stdout/stderr bytes retained per SSH command.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final int</code></div>
+<div class="col-second odd-row-color"><code><a href="#DEFAULT_DIAGNOSTIC_PREFIX_CHARACTERS" class="member-name-link">DEFAULT_DIAGNOSTIC_PREFIX_CHARACTERS</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Default diagnostic prefix retained before the truncation marker.</div>
+</div>
+<div class="col-first even-row-color"><code>static final int</code></div>
+<div class="col-second even-row-color"><code><a href="#DEFAULT_MAXIMUM_DIAGNOSTIC_CHARACTERS" class="member-name-link">DEFAULT_MAXIMUM_DIAGNOSTIC_CHARACTERS</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Default maximum characters retained in a diagnostic summary.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final int</code></div>
+<div class="col-second odd-row-color"><code><a href="#DEFAULT_SSH_COPY_BUFFER_BYTES" class="member-name-link">DEFAULT_SSH_COPY_BUFFER_BYTES</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Backward-compatible SCP copy buffer for direct <code>SshSession</code> construction.</div>
+</div>
+<div class="col-first even-row-color"><code>long</code></div>
+<div class="col-second even-row-color"><code><a href="#deploymentTimeoutSeconds" class="member-name-link">deploymentTimeoutSeconds</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Maximum runtime bundle creation, transfer, and activation duration in seconds.</div>
 </div>
-<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#DESC" class="member-name-link">DESC</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#DESC" class="member-name-link">DESC</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block"><code>String DESC = "Storage Benchmark Kit - Group Execution Monitor"</code>.</div>
 </div>
-<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#DIAGNOSTIC_TRUNCATION_MARKER" class="member-name-link">DIAGNOSTIC_TRUNCATION_MARKER</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#DIAGNOSTIC_TRUNCATION_MARKER" class="member-name-link">DIAGNOSTIC_TRUNCATION_MARKER</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Marker inserted between retained diagnostic prefix and suffix text.</div>
 </div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#diagnosticBytes" class="member-name-link">diagnosticBytes</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#diagnosticBytes" class="member-name-link">diagnosticBytes</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Maximum stdout/stderr bytes retained per SSH command.</div>
 </div>
-<div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#diagnosticPrefixCharacters" class="member-name-link">diagnosticPrefixCharacters</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#diagnosticPrefixCharacters" class="member-name-link">diagnosticPrefixCharacters</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Prefix characters retained when a remote diagnostic is truncated.</div>
 </div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#executorThreadReserve" class="member-name-link">executorThreadReserve</a></code></div>
-<div class="col-last even-row-color">
-<div class="block">Executor threads reserved for orchestration and embedded services.</div>
-</div>
-<div class="col-first odd-row-color"><code>boolean</code></div>
-<div class="col-second odd-row-color"><code><a href="#fork" class="member-name-link">fork</a></code></div>
-<div class="col-last odd-row-color">
-<div class="block">Whether to fork a <code>ForkJoinPool</code> for execution (vs fixed thread pool).</div>
-</div>
-<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#GEM_PASS_OPTION" class="member-name-link">GEM_PASS_OPTION</a></code></div>
-<div class="col-last even-row-color">
-<div class="block">Command-line option name used to supply the SSH password.</div>
-</div>
 <div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#gempass" class="member-name-link">gempass</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#driverClass" class="member-name-link">driverClass</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">SSH password.</div>
-</div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#gemport" class="member-name-link">gemport</a></code></div>
-<div class="col-last even-row-color">
-<div class="block">SSH port.</div>
-</div>
-<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#gemuser" class="member-name-link">gemuser</a></code></div>
-<div class="col-last odd-row-color">
-<div class="block">SSH user name.</div>
+<div class="block">Resolved driver class selected for this invocation; assigned after driver discovery.</div>
 </div>
 <div class="col-first even-row-color"><code>boolean</code></div>
-<div class="col-second even-row-color"><code><a href="#hostkeycheck" class="member-name-link">hostkeycheck</a></code></div>
+<div class="col-second even-row-color"><code><a href="#fullcopy" class="member-name-link">fullcopy</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Whether remote SSH host keys must match an entry in <a href="#knownhosts"><code>knownhosts</code></a>.</div>
-</div>
-<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#javadir" class="member-name-link">javadir</a></code></div>
-<div class="col-last odd-row-color">
-<div class="block">Optional remote Java home containing <code>bin/java</code>.</div>
-</div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#knownhosts" class="member-name-link">knownhosts</a></code></div>
-<div class="col-last even-row-color">
-<div class="block">Optional known-hosts file path; an empty value uses the launching user's default file.</div>
+<div class="block">Whether complete JDK and SBK distribution copies replace the default minimal copies.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#LOCAL_HOST" class="member-name-link">LOCAL_HOST</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#GEM_PASS_OPTION" class="member-name-link">GEM_PASS_OPTION</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block"><code>String LOCAL_HOST = "localhost"</code>.</div>
+<div class="block">Command-line option name used to supply the SSH password.</div>
 </div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#maximumAgentResponseBytes" class="member-name-link">maximumAgentResponseBytes</a></code></div>
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#gempass" class="member-name-link">gempass</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Maximum accepted OpenSSH-agent response frame bytes.</div>
+<div class="block">SSH password.</div>
 </div>
 <div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#maximumDiagnosticCharacters" class="member-name-link">maximumDiagnosticCharacters</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#gemport" class="member-name-link">gemport</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">Maximum characters retained in a summarized remote diagnostic.</div>
+<div class="block">SSH port.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#gemuser" class="member-name-link">gemuser</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">SSH user name.</div>
+</div>
+<div class="col-first odd-row-color"><code>boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#hostkeycheck" class="member-name-link">hostkeycheck</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Whether remote SSH host keys must match an entry in <a href="#knownhosts"><code>knownhosts</code></a>.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#javadir" class="member-name-link">javadir</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Optional remote Java home containing <code>bin/java</code>.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#knownhosts" class="member-name-link">knownhosts</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Optional known-hosts file path; an empty value uses the launching user's default file.</div>
+</div>
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#LOCAL_HOST" class="member-name-link">LOCAL_HOST</a></code></div>
+<div class="col-last even-row-color">
+<div class="block"><code>String LOCAL_HOST = "localhost"</code>.</div>
+</div>
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#maximumAgentResponseBytes" class="member-name-link">maximumAgentResponseBytes</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Maximum accepted OpenSSH-agent response frame bytes.</div>
 </div>
 <div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#maxIterations" class="member-name-link">maxIterations</a></code></div>
+<div class="col-second even-row-color"><code><a href="#maximumDiagnosticCharacters" class="member-name-link">maximumDiagnosticCharacters</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Maximum number of iterations to wait/retry for remote operations.</div>
+<div class="block">Maximum characters retained in a summarized remote diagnostic.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#NAME" class="member-name-link">NAME</a></code></div>
@@ -245,25 +274,25 @@ management, and SBM coordination.</div>
 <div class="col-last even-row-color">
 <div class="block"><code>String nodes</code>.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#remoteDir" class="member-name-link">remoteDir</a></code></div>
+<div class="col-first odd-row-color"><code>boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#packagescleanup" class="member-name-link">packagescleanup</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Whether inactive non-current managed runtimes and local cached bundles are removed automatically.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#remoteDir" class="member-name-link">remoteDir</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Remote working directory on each host (derived from app name/version).</div>
 </div>
-<div class="col-first even-row-color"><code>long</code></div>
-<div class="col-second even-row-color"><code><a href="#remoteTimeoutSeconds" class="member-name-link">remoteTimeoutSeconds</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>long</code></div>
+<div class="col-second odd-row-color"><code><a href="#remoteTimeoutSeconds" class="member-name-link">remoteTimeoutSeconds</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Timeout value used for remote operations (seconds).</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#runtimeCacheDirectory" class="member-name-link">runtimeCacheDirectory</a></code></div>
-<div class="col-last odd-row-color">
-<div class="block">Local content-addressed runtime bundle cache directory, absolute or relative to the user's home.</div>
-</div>
-<div class="col-first even-row-color"><code>boolean</code></div>
-<div class="col-second even-row-color"><code><a href="#runtimecleanup" class="member-name-link">runtimecleanup</a></code></div>
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#runtimeCacheDirectory" class="member-name-link">runtimeCacheDirectory</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Whether inactive non-current managed runtimes and local cached bundles are removed automatically.</div>
+<div class="block">Local content-addressed runtime bundle cache directory, absolute or relative to the user's home.</div>
 </div>
 <div class="col-first odd-row-color"><code>long</code></div>
 <div class="col-second odd-row-color"><code><a href="#runtimeLeaseReservationSeconds" class="member-name-link">runtimeLeaseReservationSeconds</a></code></div>
@@ -321,9 +350,34 @@ management, and SBM coordination.</div>
 <div class="block">Maximum time to wait for all remote SBK clients to register with SBM (seconds).</div>
 </div>
 <div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#timeoutSeconds" class="member-name-link">timeoutSeconds</a></code></div>
+<div class="col-second even-row-color"><code><a href="#sshCopyBufferBytes" class="member-name-link">sshCopyBufferBytes</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Read buffer bytes used by each bulk SCP upload.</div>
+</div>
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#timeoutSeconds" class="member-name-link">timeoutSeconds</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Per-iteration wait timeout used during async joins (seconds).</div>
+</div>
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#transferExecutorMaximumThreads" class="member-name-link">transferExecutorMaximumThreads</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Maximum deployment-transfer threads used by automatic sizing.</div>
+</div>
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#transferExecutorMinimumThreads" class="member-name-link">transferExecutorMinimumThreads</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Minimum deployment-transfer threads used by automatic sizing.</div>
+</div>
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#transferExecutorThreads" class="member-name-link">transferExecutorThreads</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Fixed deployment-transfer threads, or zero to size the pool automatically.</div>
+</div>
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#transferTargetWaves" class="member-name-link">transferTargetWaves</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Desired number of queued transfer waves used by automatic sizing.</div>
 </div>
 </div>
 </section>
@@ -387,6 +441,74 @@ management, and SBM coordination.</div>
 <dd>
 <ul class="tag-list">
 <li><a href="../../../constant-values.html#io.gem.config.GemConfig.DIAGNOSTIC_TRUNCATION_MARKER">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="DEFAULT_DIAGNOSTIC_BYTES">
+<h3>DEFAULT_DIAGNOSTIC_BYTES</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">DEFAULT_DIAGNOSTIC_BYTES</span></div>
+<div class="block">Default maximum stdout/stderr bytes retained per SSH command.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.gem.config.GemConfig.DEFAULT_DIAGNOSTIC_BYTES">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="DEFAULT_MAXIMUM_DIAGNOSTIC_CHARACTERS">
+<h3>DEFAULT_MAXIMUM_DIAGNOSTIC_CHARACTERS</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">DEFAULT_MAXIMUM_DIAGNOSTIC_CHARACTERS</span></div>
+<div class="block">Default maximum characters retained in a diagnostic summary.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.gem.config.GemConfig.DEFAULT_MAXIMUM_DIAGNOSTIC_CHARACTERS">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="DEFAULT_DIAGNOSTIC_PREFIX_CHARACTERS">
+<h3>DEFAULT_DIAGNOSTIC_PREFIX_CHARACTERS</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">DEFAULT_DIAGNOSTIC_PREFIX_CHARACTERS</span></div>
+<div class="block">Default diagnostic prefix retained before the truncation marker.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.gem.config.GemConfig.DEFAULT_DIAGNOSTIC_PREFIX_CHARACTERS">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="DEFAULT_SSH_COPY_BUFFER_BYTES">
+<h3>DEFAULT_SSH_COPY_BUFFER_BYTES</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">DEFAULT_SSH_COPY_BUFFER_BYTES</span></div>
+<div class="block">Backward-compatible SCP copy buffer for direct <code>SshSession</code> construction.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#io.gem.config.GemConfig.DEFAULT_SSH_COPY_BUFFER_BYTES">Constant Field Values</a></li>
 </ul>
 </dd>
 </dl>
@@ -467,14 +589,6 @@ management, and SBM coordination.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">SBK_COMMAND</span></div>
 <div class="block">Standard SBK launcher relative to an installed distribution.</div>
-<dl class="notes">
-<dt>See Also:</dt>
-<dd>
-<ul class="tag-list">
-<li><a href="../../../constant-values.html#io.gem.config.GemConfig.SBK_COMMAND">Constant Field Values</a></li>
-</ul>
-</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -628,11 +742,29 @@ management, and SBM coordination.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="runtimecleanup">
-<h3>runtimecleanup</h3>
+<section class="detail" id="packagescleanup">
+<h3>packagescleanup</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">runtimecleanup</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">packagescleanup</span></div>
 <div class="block">Whether inactive non-current managed runtimes and local cached bundles are removed automatically.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="fullcopy">
+<h3>fullcopy</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">fullcopy</span></div>
+<div class="block">Whether complete JDK and SBK distribution copies replace the default minimal copies.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="driverClass">
+<h3>driverClass</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">driverClass</span></div>
+<div class="block">Resolved driver class selected for this invocation; assigned after driver discovery.</div>
 </div>
 </section>
 </li>
@@ -718,15 +850,6 @@ management, and SBM coordination.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="maxIterations">
-<h3>maxIterations</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">maxIterations</span></div>
-<div class="block">Maximum number of iterations to wait/retry for remote operations.</div>
-</div>
-</section>
-</li>
-<li>
 <section class="detail" id="remoteDir">
 <h3>remoteDir</h3>
 <div class="horizontal-scroll">
@@ -736,20 +859,56 @@ management, and SBM coordination.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="fork">
-<h3>fork</h3>
+<section class="detail" id="controlExecutorThreads">
+<h3>controlExecutorThreads</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">fork</span></div>
-<div class="block">Whether to fork a <code>ForkJoinPool</code> for execution (vs fixed thread pool).</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">controlExecutorThreads</span></div>
+<div class="block">Maximum platform threads used for concurrent SSH connection and control operations.</div>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="executorThreadReserve">
-<h3>executorThreadReserve</h3>
+<section class="detail" id="transferExecutorThreads">
+<h3>transferExecutorThreads</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">executorThreadReserve</span></div>
-<div class="block">Executor threads reserved for orchestration and embedded services.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">transferExecutorThreads</span></div>
+<div class="block">Fixed deployment-transfer threads, or zero to size the pool automatically.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="transferExecutorMinimumThreads">
+<h3>transferExecutorMinimumThreads</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">transferExecutorMinimumThreads</span></div>
+<div class="block">Minimum deployment-transfer threads used by automatic sizing.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="transferExecutorMaximumThreads">
+<h3>transferExecutorMaximumThreads</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">transferExecutorMaximumThreads</span></div>
+<div class="block">Maximum deployment-transfer threads used by automatic sizing.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="transferTargetWaves">
+<h3>transferTargetWaves</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">transferTargetWaves</span></div>
+<div class="block">Desired number of queued transfer waves used by automatic sizing.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="sshCopyBufferBytes">
+<h3>sshCopyBufferBytes</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">sshCopyBufferBytes</span></div>
+<div class="block">Read buffer bytes used by each bulk SCP upload.</div>
 </div>
 </section>
 </li>

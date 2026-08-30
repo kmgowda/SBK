@@ -98,6 +98,24 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Constructor ArrayLatencyRecorder initialize all values.</div>
 </dd>
+<dt><a href="io/perl/api/impl/ArrayWindowLatencyPeriodicRecorder.html" class="type-name-link" title="class in io.perl.api.impl">ArrayWindowLatencyPeriodicRecorder</a> - Class in <a href="io/perl/api/impl/package-summary.html">io.perl.api.impl</a></dt>
+<dd>
+<div class="block">Periodic recorder specialized for PerL's bounded array window and a logger
+that consumes individual latency values.</div>
+</dd>
+<dt><a href="io/perl/api/impl/ArrayWindowLatencyPeriodicRecorder.html#%3Cinit%3E(io.perl.api.impl.ArrayLatencyRecorder,io.perl.api.LatencyRecordWindow,io.perl.logger.Print,io.perl.logger.Print,io.perl.logger.ReportLatency,io.time.Time)" class="member-name-link">ArrayWindowLatencyPeriodicRecorder(ArrayLatencyRecorder, LatencyRecordWindow, Print, Print, ReportLatency, Time)</a> - Constructor for class io.perl.api.impl.<a href="io/perl/api/impl/ArrayWindowLatencyPeriodicRecorder.html" title="class in io.perl.api.impl">ArrayWindowLatencyPeriodicRecorder</a></dt>
+<dd>
+<div class="block">Creates an array-window recorder with an individual-latency callback.</div>
+</dd>
+<dt><a href="io/perl/api/impl/ArrayWindowPeriodicRecorder.html" class="type-name-link" title="class in io.perl.api.impl">ArrayWindowPeriodicRecorder</a> - Class in <a href="io/perl/api/impl/package-summary.html">io.perl.api.impl</a></dt>
+<dd>
+<div class="block">Periodic recorder specialized for PerL's bounded array window and loggers
+that do not consume individual latency values.</div>
+</dd>
+<dt><a href="io/perl/api/impl/ArrayWindowPeriodicRecorder.html#%3Cinit%3E(io.perl.api.impl.ArrayLatencyRecorder,io.perl.api.LatencyRecordWindow,io.perl.logger.Print,io.perl.logger.Print,io.time.Time)" class="member-name-link">ArrayWindowPeriodicRecorder(ArrayLatencyRecorder, LatencyRecordWindow, Print, Print, Time)</a> - Constructor for class io.perl.api.impl.<a href="io/perl/api/impl/ArrayWindowPeriodicRecorder.html" title="class in io.perl.api.impl">ArrayWindowPeriodicRecorder</a></dt>
+<dd>
+<div class="block">Creates an array-window recorder without an individual-latency callback.</div>
+</dd>
 <dt><a href="io/perl/api/impl/AtomicQueue.html" class="type-name-link" title="class in io.perl.api.impl">AtomicQueue&lt;T&gt;</a> - Class in <a href="io/perl/api/impl/package-summary.html">io.perl.api.impl</a></dt>
 <dd>
 <div class="block">Concurrent Queue Implementation using Atomic References.</div>
@@ -322,6 +340,8 @@ predecessor batch so the queue can be reused.</div>
 <dt><a href="io/perl/api/impl/CSVExtendedLatencyRecorder.html#copyPercentiles(io.perl.api.LatencyPercentiles,io.perl.api.ReportLatencies)" class="member-name-link">copyPercentiles(LatencyPercentiles, ReportLatencies)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/CSVExtendedLatencyRecorder.html" title="class in io.perl.api.impl">CSVExtendedLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/HdrExtendedLatencyRecorder.html#copyPercentiles(io.perl.api.LatencyPercentiles,io.perl.api.ReportLatencies)" class="member-name-link">copyPercentiles(LatencyPercentiles, ReportLatencies)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/HdrExtendedLatencyRecorder.html" title="class in io.perl.api.impl">HdrExtendedLatencyRecorder</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/perl/api/impl/HybridPagedLatencyRecorder.html#copyPercentiles(io.perl.api.LatencyPercentiles,io.perl.api.ReportLatencies)" class="member-name-link">copyPercentiles(LatencyPercentiles, ReportLatencies)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/HybridPagedLatencyRecorder.html" title="class in io.perl.api.impl">HybridPagedLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/LongHashMapLatencyRecorder.html#copyPercentiles(io.perl.api.LatencyPercentiles,io.perl.api.ReportLatencies)" class="member-name-link">copyPercentiles(LatencyPercentiles, ReportLatencies)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/LongHashMapLatencyRecorder.html" title="class in io.perl.api.impl">LongHashMapLatencyRecorder</a></dt>
 <dd>
@@ -549,6 +569,8 @@ caller code.</div>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/HdrExtendedLatencyRecorder.html#getMaxMemoryBytes()" class="member-name-link">getMaxMemoryBytes()</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/HdrExtendedLatencyRecorder.html" title="class in io.perl.api.impl">HdrExtendedLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/perl/api/impl/HybridPagedLatencyRecorder.html#getMaxMemoryBytes()" class="member-name-link">getMaxMemoryBytes()</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/HybridPagedLatencyRecorder.html" title="class in io.perl.api.impl">HybridPagedLatencyRecorder</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/LongHashMapLatencyRecorder.html#getMaxMemoryBytes()" class="member-name-link">getMaxMemoryBytes()</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/LongHashMapLatencyRecorder.html" title="class in io.perl.api.impl">LongHashMapLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/MapLatencyRecorder.html#getMaxMemoryBytes()" class="member-name-link">getMaxMemoryBytes()</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/MapLatencyRecorder.html" title="class in io.perl.api.impl">MapLatencyRecorder</a></dt>
@@ -661,6 +683,18 @@ benchmarking events.</div>
 <dd>
 <div class="block">Whether histogram output is enabled.</div>
 </dd>
+<dt><a href="io/perl/api/impl/HybridPagedLatencyRecorder.html" class="type-name-link" title="class in io.perl.api.impl">HybridPagedLatencyRecorder</a> - Class in <a href="io/perl/api/impl/package-summary.html">io.perl.api.impl</a></dt>
+<dd>
+<div class="block">Exact latency-frequency recorder optimized for clustered, high-resolution values.</div>
+</dd>
+<dt><a href="io/perl/api/impl/HybridPagedLatencyRecorder.html#%3Cinit%3E(long,long,long,long,long,double%5B%5D,io.time.Time,int,int,int,io.perl.api.impl.HybridPagedLatencyRecorder.MemoryLimitPolicy)" class="member-name-link">HybridPagedLatencyRecorder(long, long, long, long, long, double[], Time, int, int, int, HybridPagedLatencyRecorder.MemoryLimitPolicy)</a> - Constructor for class io.perl.api.impl.<a href="io/perl/api/impl/HybridPagedLatencyRecorder.html" title="class in io.perl.api.impl">HybridPagedLatencyRecorder</a></dt>
+<dd>
+<div class="block">Creates an exact hybrid paged latency recorder.</div>
+</dd>
+<dt><a href="io/perl/api/impl/HybridPagedLatencyRecorder.MemoryLimitPolicy.html" class="type-name-link" title="enum class in io.perl.api.impl">HybridPagedLatencyRecorder.MemoryLimitPolicy</a> - Enum Class in <a href="io/perl/api/impl/package-summary.html">io.perl.api.impl</a></dt>
+<dd>
+<div class="block">Controls whether cache pressure itself ends the current latency window.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:I">I</h2>
 <dl class="index">
@@ -721,6 +755,8 @@ benchmarking events.</div>
 <dt><a href="io/perl/api/impl/CSVExtendedLatencyRecorder.html#isFull()" class="member-name-link">isFull()</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/CSVExtendedLatencyRecorder.html" title="class in io.perl.api.impl">CSVExtendedLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/HdrExtendedLatencyRecorder.html#isFull()" class="member-name-link">isFull()</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/HdrExtendedLatencyRecorder.html" title="class in io.perl.api.impl">HdrExtendedLatencyRecorder</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/perl/api/impl/HybridPagedLatencyRecorder.html#isFull()" class="member-name-link">isFull()</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/HybridPagedLatencyRecorder.html" title="class in io.perl.api.impl">HybridPagedLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/LongHashMapLatencyRecorder.html#isFull()" class="member-name-link">isFull()</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/LongHashMapLatencyRecorder.html" title="class in io.perl.api.impl">LongHashMapLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
@@ -1214,6 +1250,10 @@ using an embedded <a href="io/perl/logger/impl/PrometheusServer.html" title="cla
 <dd>
 <div class="block">Receive the benchmarking timestamp.</div>
 </dd>
+<dt><a href="io/perl/api/impl/ArrayWindowLatencyPeriodicRecorder.html#record(long,long,int,int)" class="member-name-link">record(long, long, int, int)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/ArrayWindowLatencyPeriodicRecorder.html" title="class in io.perl.api.impl">ArrayWindowLatencyPeriodicRecorder</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/perl/api/impl/ArrayWindowPeriodicRecorder.html#record(long,long,int,int)" class="member-name-link">record(long, long, int, int)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/ArrayWindowPeriodicRecorder.html" title="class in io.perl.api.impl">ArrayWindowPeriodicRecorder</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/TotalWindowLatencyPeriodicRecorder.html#record(long,long,int,int)" class="member-name-link">record(long, long, int, int)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/TotalWindowLatencyPeriodicRecorder.html" title="class in io.perl.api.impl">TotalWindowLatencyPeriodicRecorder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/TotalWindowPeriodicRecorder.html#record(long,long,int,int)" class="member-name-link">record(long, long, int, int)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/TotalWindowPeriodicRecorder.html" title="class in io.perl.api.impl">TotalWindowPeriodicRecorder</a></dt>
@@ -1233,6 +1273,8 @@ using an embedded <a href="io/perl/logger/impl/PrometheusServer.html" title="cla
 <dt><a href="io/perl/api/impl/CSVExtendedLatencyRecorder.html#recordLatency(long,int,int,long)" class="member-name-link">recordLatency(long, int, int, long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/CSVExtendedLatencyRecorder.html" title="class in io.perl.api.impl">CSVExtendedLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/HdrExtendedLatencyRecorder.html#recordLatency(long,int,int,long)" class="member-name-link">recordLatency(long, int, int, long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/HdrExtendedLatencyRecorder.html" title="class in io.perl.api.impl">HdrExtendedLatencyRecorder</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/perl/api/impl/HybridPagedLatencyRecorder.html#recordLatency(long,int,int,long)" class="member-name-link">recordLatency(long, int, int, long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/HybridPagedLatencyRecorder.html" title="class in io.perl.api.impl">HybridPagedLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/LongHashMapLatencyRecorder.html#recordLatency(long,int,int,long)" class="member-name-link">recordLatency(long, int, int, long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/LongHashMapLatencyRecorder.html" title="class in io.perl.api.impl">LongHashMapLatencyRecorder</a></dt>
 <dd>
@@ -1282,6 +1324,10 @@ using an embedded <a href="io/perl/logger/impl/PrometheusServer.html" title="cla
 <dd>
 <div class="block"><code>MeterRegistry registry</code>.</div>
 </dd>
+<dt><a href="io/perl/api/impl/HybridPagedLatencyRecorder.MemoryLimitPolicy.html#RELEASE_AFTER_WINDOW" class="member-name-link">RELEASE_AFTER_WINDOW</a> - Enum constant in enum class io.perl.api.impl.<a href="io/perl/api/impl/HybridPagedLatencyRecorder.MemoryLimitPolicy.html" title="enum class in io.perl.api.impl">HybridPagedLatencyRecorder.MemoryLimitPolicy</a></dt>
+<dd>
+<div class="block">Reclaim an oversized cache only after the current window is naturally completed.</div>
+</dd>
 <dt><a href="io/perl/api/ReportLatencies.html" class="type-name-link" title="interface in io.perl.api">ReportLatencies</a> - Interface in <a href="io/perl/api/package-summary.html">io.perl.api</a></dt>
 <dd>
 <div class="block">Interface used by latency windows to retrieve percentile values from a
@@ -1292,6 +1338,8 @@ backing latency store.</div>
 <dt><a href="io/perl/api/impl/CSVExtendedLatencyRecorder.html#reportLatency(long,long)" class="member-name-link">reportLatency(long, long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/CSVExtendedLatencyRecorder.html" title="class in io.perl.api.impl">CSVExtendedLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/HdrExtendedLatencyRecorder.html#reportLatency(long,long)" class="member-name-link">reportLatency(long, long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/HdrExtendedLatencyRecorder.html" title="class in io.perl.api.impl">HdrExtendedLatencyRecorder</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/perl/api/impl/HybridPagedLatencyRecorder.html#reportLatency(long,long)" class="member-name-link">reportLatency(long, long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/HybridPagedLatencyRecorder.html" title="class in io.perl.api.impl">HybridPagedLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/LongHashMapLatencyRecorder.html#reportLatency(long,long)" class="member-name-link">reportLatency(long, long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/LongHashMapLatencyRecorder.html" title="class in io.perl.api.impl">LongHashMapLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
@@ -1311,6 +1359,8 @@ samples or aggregated latency events.</div>
 <dt><a href="io/perl/api/impl/CSVExtendedLatencyRecorder.html#reportLatencyRecord(io.perl.api.LatencyRecord)" class="member-name-link">reportLatencyRecord(LatencyRecord)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/CSVExtendedLatencyRecorder.html" title="class in io.perl.api.impl">CSVExtendedLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/HdrExtendedLatencyRecorder.html#reportLatencyRecord(io.perl.api.LatencyRecord)" class="member-name-link">reportLatencyRecord(LatencyRecord)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/HdrExtendedLatencyRecorder.html" title="class in io.perl.api.impl">HdrExtendedLatencyRecorder</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/perl/api/impl/HybridPagedLatencyRecorder.html#reportLatencyRecord(io.perl.api.LatencyRecord)" class="member-name-link">reportLatencyRecord(LatencyRecord)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/HybridPagedLatencyRecorder.html" title="class in io.perl.api.impl">HybridPagedLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/LongHashMapLatencyRecorder.html#reportLatencyRecord(io.perl.api.LatencyRecord)" class="member-name-link">reportLatencyRecord(LatencyRecord)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/LongHashMapLatencyRecorder.html" title="class in io.perl.api.impl">LongHashMapLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
@@ -1334,6 +1384,8 @@ samples or aggregated latency events.</div>
 <dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/HdrExtendedLatencyRecorder.html#reset(long)" class="member-name-link">reset(long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/HdrExtendedLatencyRecorder.html" title="class in io.perl.api.impl">HdrExtendedLatencyRecorder</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/perl/api/impl/HybridPagedLatencyRecorder.html#reset(long)" class="member-name-link">reset(long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/HybridPagedLatencyRecorder.html" title="class in io.perl.api.impl">HybridPagedLatencyRecorder</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/perl/api/impl/LongHashMapLatencyRecorder.html#reset(long)" class="member-name-link">reset(long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/LongHashMapLatencyRecorder.html" title="class in io.perl.api.impl">LongHashMapLatencyRecorder</a></dt>
 <dd>
 <div class="block">Resets counters and clears any latency buckets retained from the
@@ -1349,6 +1401,10 @@ records count.</div>
 <dt><a href="io/perl/api/LatencyWindow.html#reset(long)" class="member-name-link">reset(long)</a> - Method in class io.perl.api.<a href="io/perl/api/LatencyWindow.html" title="class in io.perl.api">LatencyWindow</a></dt>
 <dd>
 <div class="block">Reset the window state and set the start time.</div>
+</dd>
+<dt><a href="io/perl/api/impl/HybridPagedLatencyRecorder.MemoryLimitPolicy.html#RESET_WINDOW_WHEN_FULL" class="member-name-link">RESET_WINDOW_WHEN_FULL</a> - Enum constant in enum class io.perl.api.impl.<a href="io/perl/api/impl/HybridPagedLatencyRecorder.MemoryLimitPolicy.html" title="enum class in io.perl.api.impl">HybridPagedLatencyRecorder.MemoryLimitPolicy</a></dt>
+<dd>
+<div class="block">Mark the window full so its result is printed before the oversized cache is reclaimed.</div>
 </dd>
 <dt><a href="io/perl/api/BenchmarkTermination.html#resolve(io.perl.api.BenchmarkTermination,java.lang.Throwable)" class="member-name-link">resolve(BenchmarkTermination, Throwable)</a> - Static method in enum class io.perl.api.<a href="io/perl/api/BenchmarkTermination.html" title="enum class in io.perl.api">BenchmarkTermination</a></dt>
 <dd>
@@ -1724,6 +1780,10 @@ checks whether the window storage is full to trigger periodic resets.</div>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
+<dt><a href="io/perl/api/impl/HybridPagedLatencyRecorder.MemoryLimitPolicy.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class io.perl.api.impl.<a href="io/perl/api/impl/HybridPagedLatencyRecorder.MemoryLimitPolicy.html" title="enum class in io.perl.api.impl">HybridPagedLatencyRecorder.MemoryLimitPolicy</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
 <dt><a href="io/state/State.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class io.state.<a href="io/state/State.html" title="enum class in io.state">State</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
@@ -1733,6 +1793,11 @@ checks whether the window storage is full to trigger periodic resets.</div>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
 <dt><a href="io/perl/api/BenchmarkTermination.html#values()" class="member-name-link">values()</a> - Static method in enum class io.perl.api.<a href="io/perl/api/BenchmarkTermination.html" title="enum class in io.perl.api">BenchmarkTermination</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
+<dt><a href="io/perl/api/impl/HybridPagedLatencyRecorder.MemoryLimitPolicy.html#values()" class="member-name-link">values()</a> - Static method in enum class io.perl.api.impl.<a href="io/perl/api/impl/HybridPagedLatencyRecorder.MemoryLimitPolicy.html" title="enum class in io.perl.api.impl">HybridPagedLatencyRecorder.MemoryLimitPolicy</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>

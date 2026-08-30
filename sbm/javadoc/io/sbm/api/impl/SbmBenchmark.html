@@ -64,12 +64,14 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#start()" tabindex="0">start()</a></li>
+<li><a href="#startLatencyAggregation()" tabindex="0">startLatencyAggregation()</a></li>
 <li><a href="#stop()" tabindex="0">stop()</a></li>
 <li><a href="#completeSuccessfully(long,long)" tabindex="0">completeSuccessfully(long, long)</a></li>
 <li><a href="#abortPendingRegistrations(java.lang.String)" tabindex="0">abortPendingRegistrations(String)</a></li>
 <li><a href="#getMaximumRegisteredClients()" tabindex="0">getMaximumRegisteredClients()</a></li>
 <li><a href="#getRegistrationFailure()" tabindex="0">getRegistrationFailure()</a></li>
 <li><a href="#awaitCoordinatedStart(long,java.util.concurrent.TimeUnit)" tabindex="0">awaitCoordinatedStart(long, TimeUnit)</a></li>
+<li><a href="#releaseCoordinatedStart()" tabindex="0">releaseCoordinatedStart()</a></li>
 </ol>
 </li>
 </ol>
@@ -166,10 +168,20 @@ implements io.sbk.api.Benchmark</span></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Return the coordinated-start failure reported by the controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html" title="class or interface in java.util.concurrent" class="external-link">CompletableFuture</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Void.html" title="class or interface in java.lang" class="external-link">Void</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#start()" class="member-name-link">start</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#releaseCoordinatedStart()" class="member-name-link">releaseCoordinatedStart</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Release prepared remote clients after latency aggregation has started.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html" title="class or interface in java.util.concurrent" class="external-link">CompletableFuture</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Void.html" title="class or interface in java.lang" class="external-link">Void</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#start()" class="member-name-link">start</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Start SBM server benchmark and gRPC service.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startLatencyAggregation()" class="member-name-link">startLatencyAggregation</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Start latency aggregation after an orchestrated client-registration barrier.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stop()" class="member-name-link">stop</a>()</code></div>
@@ -277,6 +289,28 @@ future that completes when the benchmark is shutdown.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="startLatencyAggregation()">
+<h3>startLatencyAggregation</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">startLatencyAggregation</span>()
+                             throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ExecutionException.html" title="class or interface in java.util.concurrent" class="external-link">ExecutionException</a>,
+<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/InterruptedException.html" title="class or interface in java.lang" class="external-link">InterruptedException</a>,
+<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></span></div>
+<div class="block">Start latency aggregation after an orchestrated client-registration barrier.
+
+<p>Standalone SBM starts aggregation from <a href="#start()"><code>start()</code></a>. SBK-GEM uses this
+method only after every prepared remote SBK client has registered, so deployment
+and remote storage preparation are excluded from the benchmark reporting clock.</div>
+<dl class="notes">
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ExecutionException.html" title="class or interface in java.util.concurrent" class="external-link">ExecutionException</a></code> - if latency aggregation fails during startup</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/InterruptedException.html" title="class or interface in java.lang" class="external-link">InterruptedException</a></code> - if interrupted while inspecting startup completion</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if SBM is not running</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="stop()">
 <h3>stop</h3>
 <div class="horizontal-scroll">
@@ -366,6 +400,21 @@ closes the storage device/client.</div>
 <dd>true when all expected remote clients registered</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/InterruptedException.html" title="class or interface in java.lang" class="external-link">InterruptedException</a></code> - if the controller thread is interrupted</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="releaseCoordinatedStart()">
+<h3>releaseCoordinatedStart</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">releaseCoordinatedStart</span>()</div>
+<div class="block">Release prepared remote clients after latency aggregation has started.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>number of coordinated clients released</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - when the registration barrier is not ready</dd>
 </dl>
 </div>
 </section>

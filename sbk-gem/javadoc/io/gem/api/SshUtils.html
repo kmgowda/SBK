@@ -66,7 +66,6 @@ loadScripts(document, 'script');</script>
 <li><a href="#createSession(org.apache.sshd.client.SshClient,io.gem.api.ConnectionConfig,long)" tabindex="0">createSession(SshClient, ConnectionConfig, long)</a></li>
 <li><a href="#runCommand(org.apache.sshd.client.session.ClientSession,java.lang.String,long,io.gem.api.SshResponse)" tabindex="0">runCommand(ClientSession, String, long, SshResponse)</a></li>
 <li><a href="#runCommand(org.apache.sshd.client.session.ClientSession,java.lang.String,byte%5B%5D,long,io.gem.api.SshResponse)" tabindex="0">runCommand(ClientSession, String, byte[], long, SshResponse)</a></li>
-<li><a href="#copyFile(org.apache.sshd.client.session.ClientSession,java.lang.String,java.lang.String)" tabindex="0">copyFile(ClientSession, String, String)</a></li>
 </ol>
 </li>
 </ol>
@@ -84,7 +83,7 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public final class </span><span class="element-name type-name-label">SshUtils</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">SSH utility methods for session creation, command execution, and SCP copy.
+<div class="block">SSH utility methods for session creation and command execution.
 
 <p>Wraps Apache Mina SSHD primitives to provide simpler operations used by SBK-GEM
 for orchestrating remote SBK runs.</div>
@@ -118,40 +117,33 @@ for orchestrating remote SBK runs.</div>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#copyFile(org.apache.sshd.client.session.ClientSession,java.lang.String,java.lang.String)" class="member-name-link">copyFile</a><wbr>(org.apache.sshd.client.session.ClientSession&nbsp;session,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;srcPath,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;dstPath)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.apache.sshd.client.SshClient</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#createClient(io.gem.api.ConnectionConfig)" class="member-name-link">createClient</a><wbr>(<a href="ConnectionConfig.html" title="class in io.gem.api">ConnectionConfig</a>&nbsp;connConfig)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Copy one local file to an exact remote path using SCP.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.apache.sshd.client.SshClient</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#createClient(io.gem.api.ConnectionConfig)" class="member-name-link">createClient</a><wbr>(<a href="ConnectionConfig.html" title="class in io.gem.api">ConnectionConfig</a>&nbsp;connConfig)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Create an SSH client configured for host-key and optional SSH-agent authentication.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.apache.sshd.client.session.ClientSession</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#createSession(org.apache.sshd.client.SshClient,io.gem.api.ConnectionConfig,long)" class="member-name-link">createSession</a><wbr>(org.apache.sshd.client.SshClient&nbsp;client,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.apache.sshd.client.session.ClientSession</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#createSession(org.apache.sshd.client.SshClient,io.gem.api.ConnectionConfig,long)" class="member-name-link">createSession</a><wbr>(org.apache.sshd.client.SshClient&nbsp;client,
  <a href="ConnectionConfig.html" title="class in io.gem.api">ConnectionConfig</a>&nbsp;connConfig,
  long&nbsp;timeoutSeconds)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Create and authenticate an SSH <code>ClientSession</code>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#runCommand(org.apache.sshd.client.session.ClientSession,java.lang.String,byte%5B%5D,long,io.gem.api.SshResponse)" class="member-name-link">runCommand</a><wbr>(@NotNull org.apache.sshd.client.session.ClientSession&nbsp;session,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#runCommand(org.apache.sshd.client.session.ClientSession,java.lang.String,byte%5B%5D,long,io.gem.api.SshResponse)" class="member-name-link">runCommand</a><wbr>(@NotNull org.apache.sshd.client.session.ClientSession&nbsp;session,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cmd,
  byte[]&nbsp;input,
  long&nbsp;timeoutSeconds,
  @NotNull <a href="SshResponse.html" title="class in io.gem.api">SshResponse</a>&nbsp;response)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Execute a command over SSH and provide a bounded binary request on stdin.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#runCommand(org.apache.sshd.client.session.ClientSession,java.lang.String,long,io.gem.api.SshResponse)" class="member-name-link">runCommand</a><wbr>(@NotNull org.apache.sshd.client.session.ClientSession&nbsp;session,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#runCommand(org.apache.sshd.client.session.ClientSession,java.lang.String,long,io.gem.api.SshResponse)" class="member-name-link">runCommand</a><wbr>(@NotNull org.apache.sshd.client.session.ClientSession&nbsp;session,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cmd,
  long&nbsp;timeoutSeconds,
  @NotNull <a href="SshResponse.html" title="class in io.gem.api">SshResponse</a>&nbsp;response)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Execute a command over SSH, wiring stdout/stderr to the provided response streams.</div>
 </div>
 </div>
@@ -273,26 +265,6 @@ for orchestrating remote SBK runs.</div>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - on timeout or channel errors</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/net/SocketTimeoutException.html" title="class or interface in java.net" class="external-link">SocketTimeoutException</a></code> - when the remote command exceeds its deadline</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="copyFile(org.apache.sshd.client.session.ClientSession,java.lang.String,java.lang.String)">
-<h3>copyFile</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">copyFile</span><wbr><span class="parameters">(org.apache.sshd.client.session.ClientSession&nbsp;session,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;srcPath,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;dstPath)</span>
-                     throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
-<div class="block">Copy one local file to an exact remote path using SCP.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>session</code> - SSH session</dd>
-<dd><code>srcPath</code> - local source file</dd>
-<dd><code>dstPath</code> - remote destination file</dd>
-<dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></code> - on copy failure</dd>
 </dl>
 </div>
 </section>

@@ -79,13 +79,24 @@ loadScripts(document, 'script');</script>
 </li>
 <li>
 <div id="class-summary">
-<div class="caption"><span>Classes</span></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="class-summary-tab0" role="tab" aria-selected="true" aria-controls="class-summary.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="class-summary-tab2" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab2', 2)" class="table-tab">Classes</button><button id="class-summary-tab3" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab3', 2)" class="table-tab">Enum Classes</button></div>
+<div id="class-summary.tabpanel" role="tabpanel" aria-labelledby="class-summary-tab0">
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Class</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="ArrayLatencyRecorder.html" title="class in io.perl.api.impl">ArrayLatencyRecorder</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">class for Performance statistics.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="ArrayWindowLatencyPeriodicRecorder.html" title="class in io.perl.api.impl">ArrayWindowLatencyPeriodicRecorder</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Periodic recorder specialized for PerL's bounded array window and a logger
+that consumes individual latency values.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="ArrayWindowPeriodicRecorder.html" title="class in io.perl.api.impl">ArrayWindowPeriodicRecorder</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Periodic recorder specialized for PerL's bounded array window and loggers
+that do not consume individual latency values.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="AtomicQueue.html" title="class in io.perl.api.impl">AtomicQueue</a>&lt;T&gt;</div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
@@ -122,6 +133,14 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="HdrExtendedLatencyRecorder.html" title="class in io.perl.api.impl">HdrExtendedLatencyRecorder</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Class HdrExtendedLatencyRecorder.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="HybridPagedLatencyRecorder.html" title="class in io.perl.api.impl">HybridPagedLatencyRecorder</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Exact latency-frequency recorder optimized for clustered, high-resolution values.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab3"><a href="HybridPagedLatencyRecorder.MemoryLimitPolicy.html" title="enum class in io.perl.api.impl">HybridPagedLatencyRecorder.MemoryLimitPolicy</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab3">
+<div class="block">Controls whether cache pressure itself ends the current latency window.</div>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="LongHashMapLatencyRecorder.html" title="class in io.perl.api.impl">LongHashMapLatencyRecorder</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
@@ -174,6 +193,7 @@ checks whether the window storage is full to trigger periodic resets.</div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="TotalWindowPeriodicRecorder.html" title="class in io.perl.api.impl">TotalWindowPeriodicRecorder</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Periodic recorder for loggers that do not consume individual latency values.</div>
+</div>
 </div>
 </div>
 </div>

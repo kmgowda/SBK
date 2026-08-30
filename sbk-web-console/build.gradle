@@ -28,15 +28,3 @@ dependencies {
     implementation "org.jetbrains:annotations:$jetbrainVersion"
     runtimeOnly "org.slf4j:slf4j-simple:$slf4jVersion"
 }
-
-tasks.register('updateDocs') {
-    dependsOn javadoc
-    doLast {
-        println "Update $projectDir Javadocs"
-        delete "$projectDir/javadoc"
-        copy {
-            from "$projectDir/build/docs/javadoc"
-            into "$projectDir/javadoc"
-        }
-    }
-}

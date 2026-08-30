@@ -15,6 +15,7 @@
  */
 
 import groovy.json.JsonOutput
+import groovy.io.FileType
 import java.security.MessageDigest
 import org.gradle.api.tasks.testing.Test
 
@@ -215,9 +216,34 @@ tasks.register('releaseFunctionalTest', Test) {
     outputs.upToDateWhen { false }
 }
 
+def releaseDocumentationModules = [
+        project(':perl'), project(':sbk-api'), project(':sbk-web-console'), project(':sbm'),
+        project(':sbk-yal'), project(':sbk-gem'), project(':sbk-gem-yal')
+].collect { appProject ->
+    [path: appProject.path, directory: appProject.file('javadoc')].asImmutable()
+}.asImmutable()
+def releaseDocumentationVersion = sbkVersion.toString()
+def releaseDocumentationLimit = qualificationValue('staleDocumentLimit').toInteger()
+def releaseRepositoryDirectory = rootDir
+
+def releaseDocsWhitespaceCheck = tasks.register('releaseDocsWhitespaceCheck', Exec) {
+    group = 'verification'
+    description = 'Rejects malformed repository whitespace outside generated Javadocs.'
+    workingDir releaseRepositoryDirectory
+    commandLine 'git', 'diff', '--check', '--', '.',
+            ':(exclude)perl/javadoc/**',
+            ':(exclude)sbk-api/javadoc/**',
+            ':(exclude)sbk-web-console/javadoc/**',
+            ':(exclude)sbm/javadoc/**',
+            ':(exclude)sbk-yal/javadoc/**',
+            ':(exclude)sbk-gem/javadoc/**',
+            ':(exclude)sbk-gem-yal/javadoc/**'
+}
+
 tasks.register('releaseDocsCheck') {
     group = 'verification'
     description = 'Rejects stale generated API documentation and malformed repository whitespace.'
+    dependsOn releaseDocsWhitespaceCheck
     dependsOn applicationProjects.findAll { it != project }.collect { appProject ->
         "${appProject.path}:javadoc"
     }
@@ -225,39 +251,30 @@ tasks.register('releaseDocsCheck') {
     dependsOn ':sbk-api:javadoc'
     doLast {
         def stalePages = []
-        [project(':perl'), project(':sbk-api'), project(':sbk-web-console'), project(':sbm'),
-         project(':sbk-yal'), project(':sbk-gem'), project(':sbk-gem-yal')].each { appProject ->
-            def docs = appProject.file('javadoc')
+        releaseDocumentationModules.each { module ->
+            def docs = module.directory
             if (!docs.isDirectory()) {
-                stalePages << "${appProject.path}: missing tracked javadoc directory"
+                stalePages << "${module.path}: missing tracked javadoc directory"
                 return
             }
-            fileTree(docs) {
-                include '**/*.html'
-            }.matching {
-                include '**/index.html', '**/*Logger.html', '**/*Main.html'
-            }.files.each { page ->
+            docs.eachFileRecurse(FileType.FILES) { page ->
+                if (!(page.name == 'index.html'
+                        || page.name.endsWith('Logger.html')
+                        || page.name.endsWith('Main.html'))) {
+                    return
+                }
                 def text = page.getText('UTF-8')
                 def matcher = text =~ /<title>[^<]+ ([0-9]+\.[0-9]+) API<\/title>/
-                if (matcher.find() && matcher.group(1) != sbkVersion.toString()) {
-                    stalePages << "${relativePath(page)}: ${matcher.group(1)}"
+                if (matcher.find() && matcher.group(1) != releaseDocumentationVersion) {
+                    def relativePage = releaseRepositoryDirectory.toPath().relativize(page.toPath())
+                    stalePages << "${relativePage}: ${matcher.group(1)}"
                 }
             }
         }
         if (!stalePages.isEmpty()) {
             throw new GradleException('Stale generated Javadocs; run ./gradlew updateDocs:\n'
-                    + stalePages.take(qualificationValue('staleDocumentLimit').toInteger()).join('\n'))
+                    + stalePages.take(releaseDocumentationLimit).join('\n'))
         }
-        providers.exec {
-            commandLine 'git', 'diff', '--check', '--', '.',
-                    ':(exclude)perl/javadoc/**',
-                    ':(exclude)sbk-api/javadoc/**',
-                    ':(exclude)sbk-web-console/javadoc/**',
-                    ':(exclude)sbm/javadoc/**',
-                    ':(exclude)sbk-yal/javadoc/**',
-                    ':(exclude)sbk-gem/javadoc/**',
-                    ':(exclude)sbk-gem-yal/javadoc/**'
-        }.result.get().assertNormalExitValue()
     }
 }
 
@@ -358,7 +375,7 @@ tasks.register('releasecheck') {
 
 def releaseQualificationTaskNames = [
         'releasePreflight', 'releaseBuild', 'releaseConcurrency', 'releasePerformance',
-        'releasePackaging', 'releaseFunctionalTest', 'releaseDocsCheck',
+        'releasePackaging', 'releaseFunctionalTest',
         'releasePublicationTest', 'releasecheck'
 ] as Set
 

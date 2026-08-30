@@ -67,7 +67,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#getTotalRecords()" tabindex="0">getTotalRecords()</a></li>
 <li><a href="#getSbkDir()" tabindex="0">getSbkDir()</a></li>
 <li><a href="#getJavaDir()" tabindex="0">getJavaDir()</a></li>
-<li><a href="#isRuntimeCleanup()" tabindex="0">isRuntimeCleanup()</a></li>
+<li><a href="#isPackagesCleanup()" tabindex="0">isPackagesCleanup()</a></li>
 </ol>
 </li>
 </ol>
@@ -107,7 +107,7 @@ instances for each target node.
 <p>Supported options (help text shows defaults from <a href="../../config/GemConfig.html" title="class in io.gem.config"><code>GemConfig</code></a>):
 - -nodes: comma/space/newline-separated hostnames or host:port endpoints
 - -gemuser, -gempass, -gemport
-- -runtimecleanup, -javadir
+- -packagescleanup, -fullcopy, -javadir
 - -localhost
 - -sbmport, -sbmsleepms
 - -totalrecords
@@ -172,7 +172,7 @@ instances for each target node.
 <div class="block">Get the configured record value.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isRuntimeCleanup()" class="member-name-link">isRuntimeCleanup</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isPackagesCleanup()" class="member-name-link">isPackagesCleanup</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Check whether every inactive non-current SBK-GEM-managed runtime and local cached bundle should be removed.</div>
 </div>
@@ -198,7 +198,7 @@ instances for each target node.
 <code>getAction</code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.gem.params.GemParameters">Methods inherited from interface&nbsp;<a href="../GemParameters.html#method-summary" title="interface in io.gem.params">GemParameters</a></h3>
-<code><a href="../GemParameters.html#getConnections()" title="getConnections()">getConnections</a>, <a href="../GemParameters.html#getLocalHost()" title="getLocalHost()">getLocalHost</a>, <a href="../GemParameters.html#getSbmIdleSleepMilliSeconds()" title="getSbmIdleSleepMilliSeconds()">getSbmIdleSleepMilliSeconds</a>, <a href="../GemParameters.html#getSbmPort()" title="getSbmPort()">getSbmPort</a>, <a href="../GemParameters.html#getTotalThroughput()" title="getTotalThroughput()">getTotalThroughput</a>, <a href="../GemParameters.html#isTotalRecordsOption()" title="isTotalRecordsOption()">isTotalRecordsOption</a>, <a href="../GemParameters.html#isTotalThroughputOption()" title="isTotalThroughputOption()">isTotalThroughputOption</a></code></div>
+<code><a href="../GemParameters.html#getConnections()" title="getConnections()">getConnections</a>, <a href="../GemParameters.html#getLocalHost()" title="getLocalHost()">getLocalHost</a>, <a href="../GemParameters.html#getSbmIdleSleepMilliSeconds()" title="getSbmIdleSleepMilliSeconds()">getSbmIdleSleepMilliSeconds</a>, <a href="../GemParameters.html#getSbmPort()" title="getSbmPort()">getSbmPort</a>, <a href="../GemParameters.html#getTotalThroughput()" title="getTotalThroughput()">getTotalThroughput</a>, <a href="../GemParameters.html#isLocalHostOption()" title="isLocalHostOption()">isLocalHostOption</a>, <a href="../GemParameters.html#isTotalRecordsOption()" title="isTotalRecordsOption()">isTotalRecordsOption</a>, <a href="../GemParameters.html#isTotalThroughputOption()" title="isTotalThroughputOption()">isTotalThroughputOption</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.gem.params.GetArguments">Methods inherited from interface&nbsp;<a href="../GetArguments.html#method-summary" title="interface in io.gem.params">GetArguments</a></h3>
 <code><a href="../GetArguments.html#getOptionsArgs()" title="getOptionsArgs()">getOptionsArgs</a>, <a href="../GetArguments.html#getParsedArgs()" title="getParsedArgs()">getParsedArgs</a></code></div>
@@ -336,15 +336,15 @@ otherwise, this returns the standard SBK record value. The aggregate value is a 
 </section>
 </li>
 <li>
-<section class="detail" id="isRuntimeCleanup()">
-<h3>isRuntimeCleanup</h3>
+<section class="detail" id="isPackagesCleanup()">
+<h3>isPackagesCleanup</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isRuntimeCleanup</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../GemParameters.html#isRuntimeCleanup()">GemParameters</a></code></span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isPackagesCleanup</span>()</div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../GemParameters.html#isPackagesCleanup()">GemParameters</a></code></span></div>
 <div class="block">Check whether every inactive non-current SBK-GEM-managed runtime and local cached bundle should be removed.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../GemParameters.html#isRuntimeCleanup()">isRuntimeCleanup</a></code>&nbsp;in interface&nbsp;<code><a href="../GemParameters.html" title="interface in io.gem.params">GemParameters</a></code></dd>
+<dd><code><a href="../GemParameters.html#isPackagesCleanup()">isPackagesCleanup</a></code>&nbsp;in interface&nbsp;<code><a href="../GemParameters.html" title="interface in io.gem.params">GemParameters</a></code></dd>
 <dt>Returns:</dt>
 <dd>true when managed runtime cleanup is enabled</dd>
 </dl>

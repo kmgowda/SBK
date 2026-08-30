@@ -68,15 +68,112 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Constant Field</div>
 <div class="table-header col-last">Value</div>
-<div class="col-first even-row-color"><code id="io.gem.agent.RemoteAgentProtocol.MAGIC">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="io/gem/agent/RemoteAgentProtocol.html#MAGIC">MAGIC</a></code></div>
-<div class="col-last even-row-color"><code>"SBK_GEM_AGENT_V1"</code></div>
+<div class="col-first even-row-color"><code id="io.gem.agent.RemoteAgentProtocol.ACTIVATE">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/agent/RemoteAgentProtocol.html#ACTIVATE">ACTIVATE</a></code></div>
+<div class="col-last even-row-color"><code>"activate"</code></div>
+<div class="col-first odd-row-color"><code id="io.gem.agent.RemoteAgentProtocol.ARCHIVE_DIGEST_MISMATCH">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="io/gem/agent/RemoteAgentProtocol.html#ARCHIVE_DIGEST_MISMATCH">ARCHIVE_DIGEST_MISMATCH</a></code></div>
+<div class="col-last odd-row-color"><code>"SBK archive SHA-256 mismatch"</code></div>
+<div class="col-first even-row-color"><code id="io.gem.agent.RemoteAgentProtocol.CLEANUP">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/agent/RemoteAgentProtocol.html#CLEANUP">CLEANUP</a></code></div>
+<div class="col-last even-row-color"><code>"cleanup"</code></div>
+<div class="col-first odd-row-color"><code id="io.gem.agent.RemoteAgentProtocol.MAGIC">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="io/gem/agent/RemoteAgentProtocol.html#MAGIC">MAGIC</a></code></div>
+<div class="col-last odd-row-color"><code>"SBK_GEM_AGENT_V1"</code></div>
+<div class="col-first even-row-color"><code id="io.gem.agent.RemoteAgentProtocol.MAX_REQUEST_BYTES">public&nbsp;static&nbsp;final&nbsp;int</code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/agent/RemoteAgentProtocol.html#MAX_REQUEST_BYTES">MAX_REQUEST_BYTES</a></code></div>
+<div class="col-last even-row-color"><code>67108864</code></div>
 <div class="col-first odd-row-color"><code id="io.gem.agent.RemoteAgentProtocol.MAX_STRING_BYTES">public&nbsp;static&nbsp;final&nbsp;int</code></div>
 <div class="col-second odd-row-color"><code><a href="io/gem/agent/RemoteAgentProtocol.html#MAX_STRING_BYTES">MAX_STRING_BYTES</a></code></div>
 <div class="col-last odd-row-color"><code>16777216</code></div>
 <div class="col-first even-row-color"><code id="io.gem.agent.RemoteAgentProtocol.MAX_VALUES">public&nbsp;static&nbsp;final&nbsp;int</code></div>
 <div class="col-second even-row-color"><code><a href="io/gem/agent/RemoteAgentProtocol.html#MAX_VALUES">MAX_VALUES</a></code></div>
 <div class="col-last even-row-color"><code>16384</code></div>
+<div class="col-first odd-row-color"><code id="io.gem.agent.RemoteAgentProtocol.PROBE">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="io/gem/agent/RemoteAgentProtocol.html#PROBE">PROBE</a></code></div>
+<div class="col-last odd-row-color"><code>"probe"</code></div>
+<div class="col-first even-row-color"><code id="io.gem.agent.RemoteAgentProtocol.RUN">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/agent/RemoteAgentProtocol.html#RUN">RUN</a></code></div>
+<div class="col-last even-row-color"><code>"run"</code></div>
+<div class="col-first odd-row-color"><code id="io.gem.agent.RemoteAgentProtocol.RUNTIME_ACQUIRE">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="io/gem/agent/RemoteAgentProtocol.html#RUNTIME_ACQUIRE">RUNTIME_ACQUIRE</a></code></div>
+<div class="col-last odd-row-color"><code>"runtime-acquire"</code></div>
+<div class="col-first even-row-color"><code id="io.gem.agent.RemoteAgentProtocol.RUNTIME_HEARTBEAT">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/agent/RemoteAgentProtocol.html#RUNTIME_HEARTBEAT">RUNTIME_HEARTBEAT</a></code></div>
+<div class="col-last even-row-color"><code>"runtime-heartbeat"</code></div>
+<div class="col-first odd-row-color"><code id="io.gem.agent.RemoteAgentProtocol.RUNTIME_RELEASE">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="io/gem/agent/RemoteAgentProtocol.html#RUNTIME_RELEASE">RUNTIME_RELEASE</a></code></div>
+<div class="col-last odd-row-color"><code>"runtime-release"</code></div>
+<div class="col-first even-row-color"><code id="io.gem.agent.RemoteAgentProtocol.RUNTIME_RESERVE">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/agent/RemoteAgentProtocol.html#RUNTIME_RESERVE">RUNTIME_RESERVE</a></code></div>
+<div class="col-last even-row-color"><code>"runtime-reserve"</code></div>
+<div class="col-first odd-row-color"><code id="io.gem.agent.RemoteAgentProtocol.VERIFY">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="io/gem/agent/RemoteAgentProtocol.html#VERIFY">VERIFY</a></code></div>
+<div class="col-last odd-row-color"><code>"verify"</code></div>
+</div>
+</li>
+<li>
+<div class="caption"><span>io.gem.agent.<a href="io/gem/agent/RemoteDeploymentContract.html" title="class in io.gem.agent">RemoteDeploymentContract</a></span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Constant Field</div>
+<div class="table-header col-last">Value</div>
+<div class="col-first even-row-color"><code id="io.gem.agent.RemoteDeploymentContract.ARCHIVE_ROOT">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/agent/RemoteDeploymentContract.html#ARCHIVE_ROOT">ARCHIVE_ROOT</a></code></div>
+<div class="col-last even-row-color"><code>"runtime"</code></div>
+<div class="col-first odd-row-color"><code id="io.gem.agent.RemoteDeploymentContract.CHECKSUM_FILE">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="io/gem/agent/RemoteDeploymentContract.html#CHECKSUM_FILE">CHECKSUM_FILE</a></code></div>
+<div class="col-last odd-row-color"><code>"deployment-files.sha256"</code></div>
+<div class="col-first even-row-color"><code id="io.gem.agent.RemoteDeploymentContract.CONTENT_SHA_256_PROPERTY">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/agent/RemoteDeploymentContract.html#CONTENT_SHA_256_PROPERTY">CONTENT_SHA_256_PROPERTY</a></code></div>
+<div class="col-last even-row-color"><code>"content.sha256"</code></div>
+<div class="col-first odd-row-color"><code id="io.gem.agent.RemoteDeploymentContract.DESCRIPTOR_FILE">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="io/gem/agent/RemoteDeploymentContract.html#DESCRIPTOR_FILE">DESCRIPTOR_FILE</a></code></div>
+<div class="col-last odd-row-color"><code>"deployment.properties"</code></div>
+<div class="col-first even-row-color"><code id="io.gem.agent.RemoteDeploymentContract.FORMAT_VERSION_PROPERTY">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/agent/RemoteDeploymentContract.html#FORMAT_VERSION_PROPERTY">FORMAT_VERSION_PROPERTY</a></code></div>
+<div class="col-last even-row-color"><code>"format.version"</code></div>
+<div class="col-first odd-row-color"><code id="io.gem.agent.RemoteDeploymentContract.INCLUDES_JAVA_PROPERTY">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="io/gem/agent/RemoteDeploymentContract.html#INCLUDES_JAVA_PROPERTY">INCLUDES_JAVA_PROPERTY</a></code></div>
+<div class="col-last odd-row-color"><code>"includes.java"</code></div>
+<div class="col-first even-row-color"><code id="io.gem.agent.RemoteDeploymentContract.JAVA_COMPILER">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/agent/RemoteDeploymentContract.html#JAVA_COMPILER">JAVA_COMPILER</a></code></div>
+<div class="col-last even-row-color"><code>"bin/javac"</code></div>
+<div class="col-first odd-row-color"><code id="io.gem.agent.RemoteDeploymentContract.JAVA_EXECUTABLE">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="io/gem/agent/RemoteDeploymentContract.html#JAVA_EXECUTABLE">JAVA_EXECUTABLE</a></code></div>
+<div class="col-last odd-row-color"><code>"bin/java"</code></div>
+<div class="col-first even-row-color"><code id="io.gem.agent.RemoteDeploymentContract.JAVA_VERSION_PROPERTY">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/agent/RemoteDeploymentContract.html#JAVA_VERSION_PROPERTY">JAVA_VERSION_PROPERTY</a></code></div>
+<div class="col-last even-row-color"><code>"java.version"</code></div>
+<div class="col-first odd-row-color"><code id="io.gem.agent.RemoteDeploymentContract.PLATFORM_OS_PROPERTY">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="io/gem/agent/RemoteDeploymentContract.html#PLATFORM_OS_PROPERTY">PLATFORM_OS_PROPERTY</a></code></div>
+<div class="col-last odd-row-color"><code>"platform.os"</code></div>
+<div class="col-first even-row-color"><code id="io.gem.agent.RemoteDeploymentContract.REMOTE_DIGEST_FILE">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/agent/RemoteDeploymentContract.html#REMOTE_DIGEST_FILE">REMOTE_DIGEST_FILE</a></code></div>
+<div class="col-last even-row-color"><code>".sbk-runtime.sha256"</code></div>
+<div class="col-first odd-row-color"><code id="io.gem.agent.RemoteDeploymentContract.RUNTIME_PREFIX">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="io/gem/agent/RemoteDeploymentContract.html#RUNTIME_PREFIX">RUNTIME_PREFIX</a></code></div>
+<div class="col-last odd-row-color"><code>"sbk-runtime-"</code></div>
+<div class="col-first even-row-color"><code id="io.gem.agent.RemoteDeploymentContract.SBK_DIRECTORY">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/agent/RemoteDeploymentContract.html#SBK_DIRECTORY">SBK_DIRECTORY</a></code></div>
+<div class="col-last even-row-color"><code>"sbk"</code></div>
+<div class="col-first odd-row-color"><code id="io.gem.agent.RemoteDeploymentContract.SBK_VERSION_PROPERTY">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="io/gem/agent/RemoteDeploymentContract.html#SBK_VERSION_PROPERTY">SBK_VERSION_PROPERTY</a></code></div>
+<div class="col-last odd-row-color"><code>"sbk.version"</code></div>
+<div class="col-first even-row-color"><code id="io.gem.agent.RemoteDeploymentContract.SHA_256">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/agent/RemoteDeploymentContract.html#SHA_256">SHA_256</a></code></div>
+<div class="col-last even-row-color"><code>"SHA-256"</code></div>
+</div>
+</li>
+<li>
+<div class="caption"><span>io.gem.agent.<a href="io/gem/agent/RemotePath.html" title="class in io.gem.agent">RemotePath</a></span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Constant Field</div>
+<div class="table-header col-last">Value</div>
+<div class="col-first even-row-color"><code id="io.gem.agent.RemotePath.ROOT">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/agent/RemotePath.html#ROOT">ROOT</a></code></div>
+<div class="col-last even-row-color"><code>"/"</code></div>
 </div>
 </li>
 </ul>
@@ -92,6 +189,17 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color"><code>-1</code></div>
 </div>
 </li>
+<li>
+<div class="caption"><span>io.gem.api.<a href="io/gem/api/SshResponse.html" title="class in io.gem.api">SshResponse</a></span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Constant Field</div>
+<div class="table-header col-last">Value</div>
+<div class="col-first even-row-color"><code id="io.gem.api.SshResponse.DEFAULT_DIAGNOSTIC_BYTES">public&nbsp;static&nbsp;final&nbsp;int</code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/api/SshResponse.html#DEFAULT_DIAGNOSTIC_BYTES">DEFAULT_DIAGNOSTIC_BYTES</a></code></div>
+<div class="col-last even-row-color"><code>262144</code></div>
+</div>
+</li>
 </ul>
 <ul class="block-list">
 <li>
@@ -103,6 +211,18 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code id="io.gem.config.GemConfig.BIN_DIR">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="io/gem/config/GemConfig.html#BIN_DIR">BIN_DIR</a></code></div>
 <div class="col-last even-row-color"><code>"bin"</code></div>
+<div class="col-first odd-row-color"><code id="io.gem.config.GemConfig.DEFAULT_DIAGNOSTIC_BYTES">public&nbsp;static&nbsp;final&nbsp;int</code></div>
+<div class="col-second odd-row-color"><code><a href="io/gem/config/GemConfig.html#DEFAULT_DIAGNOSTIC_BYTES">DEFAULT_DIAGNOSTIC_BYTES</a></code></div>
+<div class="col-last odd-row-color"><code>262144</code></div>
+<div class="col-first even-row-color"><code id="io.gem.config.GemConfig.DEFAULT_DIAGNOSTIC_PREFIX_CHARACTERS">public&nbsp;static&nbsp;final&nbsp;int</code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/config/GemConfig.html#DEFAULT_DIAGNOSTIC_PREFIX_CHARACTERS">DEFAULT_DIAGNOSTIC_PREFIX_CHARACTERS</a></code></div>
+<div class="col-last even-row-color"><code>320</code></div>
+<div class="col-first odd-row-color"><code id="io.gem.config.GemConfig.DEFAULT_MAXIMUM_DIAGNOSTIC_CHARACTERS">public&nbsp;static&nbsp;final&nbsp;int</code></div>
+<div class="col-second odd-row-color"><code><a href="io/gem/config/GemConfig.html#DEFAULT_MAXIMUM_DIAGNOSTIC_CHARACTERS">DEFAULT_MAXIMUM_DIAGNOSTIC_CHARACTERS</a></code></div>
+<div class="col-last odd-row-color"><code>512</code></div>
+<div class="col-first even-row-color"><code id="io.gem.config.GemConfig.DEFAULT_SSH_COPY_BUFFER_BYTES">public&nbsp;static&nbsp;final&nbsp;int</code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/config/GemConfig.html#DEFAULT_SSH_COPY_BUFFER_BYTES">DEFAULT_SSH_COPY_BUFFER_BYTES</a></code></div>
+<div class="col-last even-row-color"><code>4194304</code></div>
 <div class="col-first odd-row-color"><code id="io.gem.config.GemConfig.DESC">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color"><code><a href="io/gem/config/GemConfig.html#DESC">DESC</a></code></div>
 <div class="col-last odd-row-color"><code>"Storage Benchmark Kit - Group Execution Monitor"</code></div>
@@ -118,18 +238,15 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color"><code id="io.gem.config.GemConfig.NAME">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color"><code><a href="io/gem/config/GemConfig.html#NAME">NAME</a></code></div>
 <div class="col-last odd-row-color"><code>"sbk-gem"</code></div>
-<div class="col-first even-row-color"><code id="io.gem.config.GemConfig.SBK_COMMAND">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="io/gem/config/GemConfig.html#SBK_COMMAND">SBK_COMMAND</a></code></div>
-<div class="col-last even-row-color"><code>"bin/sbk"</code></div>
-<div class="col-first odd-row-color"><code id="io.gem.config.GemConfig.SBK_GEM_APP_NAME">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="io/gem/config/GemConfig.html#SBK_GEM_APP_NAME">SBK_GEM_APP_NAME</a></code></div>
-<div class="col-last odd-row-color"><code>"sbk.gem.applicationName"</code></div>
-<div class="col-first even-row-color"><code id="io.gem.config.GemConfig.SBK_GEM_LOGGER_PACKAGE_NAME">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="io/gem/config/GemConfig.html#SBK_GEM_LOGGER_PACKAGE_NAME">SBK_GEM_LOGGER_PACKAGE_NAME</a></code></div>
-<div class="col-last even-row-color"><code>"io.gem.logger"</code></div>
-<div class="col-first odd-row-color"><code id="io.gem.config.GemConfig.SBK_GEM_SSH_PASSWD">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="io/gem/config/GemConfig.html#SBK_GEM_SSH_PASSWD">SBK_GEM_SSH_PASSWD</a></code></div>
-<div class="col-last odd-row-color"><code>"SBK_GEM_SSH_PASSWD"</code></div>
+<div class="col-first even-row-color"><code id="io.gem.config.GemConfig.SBK_GEM_APP_NAME">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/config/GemConfig.html#SBK_GEM_APP_NAME">SBK_GEM_APP_NAME</a></code></div>
+<div class="col-last even-row-color"><code>"sbk.gem.applicationName"</code></div>
+<div class="col-first odd-row-color"><code id="io.gem.config.GemConfig.SBK_GEM_LOGGER_PACKAGE_NAME">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="io/gem/config/GemConfig.html#SBK_GEM_LOGGER_PACKAGE_NAME">SBK_GEM_LOGGER_PACKAGE_NAME</a></code></div>
+<div class="col-last odd-row-color"><code>"io.gem.logger"</code></div>
+<div class="col-first even-row-color"><code id="io.gem.config.GemConfig.SBK_GEM_SSH_PASSWD">public&nbsp;static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="io/gem/config/GemConfig.html#SBK_GEM_SSH_PASSWD">SBK_GEM_SSH_PASSWD</a></code></div>
+<div class="col-last even-row-color"><code>"SBK_GEM_SSH_PASSWD"</code></div>
 </div>
 </li>
 </ul>

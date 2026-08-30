@@ -70,6 +70,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#registerClient(io.sbp.grpc.Config,io.grpc.stub.StreamObserver)" tabindex="0">registerClient(Config, StreamObserver)</a></li>
 <li><a href="#abortPendingRegistrations(java.lang.String)" tabindex="0">abortPendingRegistrations(String)</a></li>
 <li><a href="#awaitCoordinatedStart(long,java.util.concurrent.TimeUnit)" tabindex="0">awaitCoordinatedStart(long, TimeUnit)</a></li>
+<li><a href="#releaseCoordinatedStart()" tabindex="0">releaseCoordinatedStart()</a></li>
 <li><a href="#getMaximumRegisteredClients()" tabindex="0">getMaximumRegisteredClients()</a></li>
 <li><a href="#getRegistrationFailure()" tabindex="0">getRegistrationFailure()</a></li>
 <li><a href="#reportClientFailure(io.sbp.grpc.ClientFailure,io.grpc.stub.StreamObserver)" tabindex="0">reportClientFailure(ClientFailure, StreamObserver)</a></li>
@@ -211,15 +212,20 @@ records to an <a href="../SbmRegistry.html" title="interface in io.sbm.api"><cod
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registerClient(io.sbp.grpc.Config,io.grpc.stub.StreamObserver)" class="member-name-link">registerClient</a><wbr>(io.sbp.grpc.Config&nbsp;request,
  io.grpc.stub.StreamObserver&lt;io.sbp.grpc.ClientID&gt;&nbsp;responseObserver)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reportClientFailure(io.sbp.grpc.ClientFailure,io.grpc.stub.StreamObserver)" class="member-name-link">reportClientFailure</a><wbr>(io.sbp.grpc.ClientFailure&nbsp;request,
- io.grpc.stub.StreamObserver&lt;com.google.protobuf.Empty&gt;&nbsp;responseObserver)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#releaseCoordinatedStart()" class="member-name-link">releaseCoordinatedStart</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Release every prepared client after the controller has started latency aggregation.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reportClientFailure(io.sbp.grpc.ClientFailure,io.grpc.stub.StreamObserver)" class="member-name-link">reportClientFailure</a><wbr>(io.sbp.grpc.ClientFailure&nbsp;request,
+ io.grpc.stub.StreamObserver&lt;com.google.protobuf.Empty&gt;&nbsp;responseObserver)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Records and acknowledges a terminal failure reported by an SBK client.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>io.grpc.stub.StreamObserver<wbr>&lt;io.sbp.grpc.MessageLatenciesRecord&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#streamLatencies(io.grpc.stub.StreamObserver)" class="member-name-link">streamLatencies</a><wbr>(io.grpc.stub.StreamObserver&lt;com.google.protobuf.Empty&gt;&nbsp;responseObserver)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>io.grpc.stub.StreamObserver<wbr>&lt;io.sbp.grpc.MessageLatenciesRecord&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#streamLatencies(io.grpc.stub.StreamObserver)" class="member-name-link">streamLatencies</a><wbr>(io.grpc.stub.StreamObserver&lt;com.google.protobuf.Empty&gt;&nbsp;responseObserver)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Opens a persistent ordered latency stream for an SBK client.</div>
 </div>
 </div>
@@ -393,9 +399,24 @@ process fails before all expected clients have registered.</div>
 <dd><code>timeout</code> - maximum wait duration</dd>
 <dd><code>unit</code> - timeout unit</dd>
 <dt>Returns:</dt>
-<dd>true when the coordinated-start barrier was released normally</dd>
+<dd>true when every expected client is registered and waiting for release</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/InterruptedException.html" title="class or interface in java.lang" class="external-link">InterruptedException</a></code> - if the waiting controller thread is interrupted</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="releaseCoordinatedStart()">
+<h3>releaseCoordinatedStart</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">releaseCoordinatedStart</span>()</div>
+<div class="block">Release every prepared client after the controller has started latency aggregation.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>number of coordinated clients released</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - when all expected clients have not registered</dd>
 </dl>
 </div>
 </section>

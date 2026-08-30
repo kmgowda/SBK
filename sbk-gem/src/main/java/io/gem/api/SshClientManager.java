@@ -28,6 +28,12 @@ public final class SshClientManager implements AutoCloseable {
     private boolean closed;
 
     /**
+     * Create an empty manager that starts shared SSH clients on demand.
+     */
+    public SshClientManager() {
+    }
+
+    /**
      * Return the started client for a connection's immutable security policy.
      *
      * @param connection remote connection configuration

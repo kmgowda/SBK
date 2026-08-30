@@ -49,7 +49,7 @@ loadScripts(document, 'script');</script>
 <div class="header">
 <h1>Index</h1>
 </div>
-<a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a>
+<a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a>
 <h2 class="title" id="I:A">A</h2>
 <dl class="index">
 <dt><a href="io/sbm/api/impl/SbmBenchmark.html#abortPendingRegistrations(java.lang.String)" class="member-name-link">abortPendingRegistrations(String)</a> - Method in class io.sbm.api.impl.<a href="io/sbm/api/impl/SbmBenchmark.html" title="class in io.sbm.api.impl">SbmBenchmark</a></dt>
@@ -155,6 +155,22 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/sbm/api/SbmRegistry.html#enQueue(io.sbp.grpc.MessageLatenciesRecord)" class="member-name-link">enQueue(MessageLatenciesRecord)</a> - Method in interface io.sbm.api.<a href="io/sbm/api/SbmRegistry.html" title="interface in io.sbm.api">SbmRegistry</a></dt>
 <dd>
 <div class="block">Queue the records.</div>
+</dd>
+<dt><a href="io/sbm/config/SbmConfig.html#exactLatencyMaxMemoryMB" class="member-name-link">exactLatencyMaxMemoryMB</a> - Variable in class io.sbm.config.<a href="io/sbm/config/SbmConfig.html" title="class in io.sbm.config">SbmConfig</a></dt>
+<dd>
+<div class="block">Retained-memory target for exact periodic nanosecond pages, in MiB.</div>
+</dd>
+<dt><a href="io/sbm/config/SbmConfig.html#exactLatencyPageBits" class="member-name-link">exactLatencyPageBits</a> - Variable in class io.sbm.config.<a href="io/sbm/config/SbmConfig.html" title="class in io.sbm.config">SbmConfig</a></dt>
+<dd>
+<div class="block">Log2 of the exact nanosecond latency values stored in one hybrid page.</div>
+</dd>
+<dt><a href="io/sbm/config/SbmConfig.html#exactLatencySparsePageEntries" class="member-name-link">exactLatencySparsePageEntries</a> - Variable in class io.sbm.config.<a href="io/sbm/config/SbmConfig.html" title="class in io.sbm.config">SbmConfig</a></dt>
+<dd>
+<div class="block">Exact values retained sparsely in a page before dense counter promotion.</div>
+</dd>
+<dt><a href="io/sbm/config/SbmConfig.html#exactTotalLatencyMaxMemoryMB" class="member-name-link">exactTotalLatencyMaxMemoryMB</a> - Variable in class io.sbm.config.<a href="io/sbm/config/SbmConfig.html" title="class in io.sbm.config">SbmConfig</a></dt>
+<dd>
+<div class="block">Retained-memory target for the exact total nanosecond window, in MiB.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:F">F</h2>
@@ -296,6 +312,13 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/sbm/api/impl/SbmGrpcService.html#isVersionSupported(io.sbp.grpc.Version,io.grpc.stub.StreamObserver)" class="member-name-link">isVersionSupported(Version, StreamObserver)</a> - Method in class io.sbm.api.impl.<a href="io/sbm/api/impl/SbmGrpcService.html" title="class in io.sbm.api.impl">SbmGrpcService</a></dt>
 <dd>&nbsp;</dd>
 </dl>
+<h2 class="title" id="I:L">L</h2>
+<dl class="index">
+<dt><a href="io/sbm/config/SbmConfig.html#load()" class="member-name-link">load()</a> - Static method in class io.sbm.config.<a href="io/sbm/config/SbmConfig.html" title="class in io.sbm.config">SbmConfig</a></dt>
+<dd>
+<div class="block">Loads a new validated SBM configuration from the bundled properties.</div>
+</dd>
+</dl>
 <h2 class="title" id="I:M">M</h2>
 <dl class="index">
 <dt><a href="io/sbm/config/SbmConfig.html#maxConnections" class="member-name-link">maxConnections</a> - Variable in class io.sbm.config.<a href="io/sbm/config/SbmConfig.html" title="class in io.sbm.config">SbmConfig</a></dt>
@@ -420,6 +443,14 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/sbm/api/impl/SbmGrpcService.html#registerClient(io.sbp.grpc.Config,io.grpc.stub.StreamObserver)" class="member-name-link">registerClient(Config, StreamObserver)</a> - Method in class io.sbm.api.impl.<a href="io/sbm/api/impl/SbmGrpcService.html" title="class in io.sbm.api.impl">SbmGrpcService</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/sbm/api/impl/SbmBenchmark.html#releaseCoordinatedStart()" class="member-name-link">releaseCoordinatedStart()</a> - Method in class io.sbm.api.impl.<a href="io/sbm/api/impl/SbmBenchmark.html" title="class in io.sbm.api.impl">SbmBenchmark</a></dt>
+<dd>
+<div class="block">Release prepared remote clients after latency aggregation has started.</div>
+</dd>
+<dt><a href="io/sbm/api/impl/SbmGrpcService.html#releaseCoordinatedStart()" class="member-name-link">releaseCoordinatedStart()</a> - Method in class io.sbm.api.impl.<a href="io/sbm/api/impl/SbmGrpcService.html" title="class in io.sbm.api.impl">SbmGrpcService</a></dt>
+<dd>
+<div class="block">Release every prepared client after the controller has started latency aggregation.</div>
+</dd>
 <dt><a href="io/sbm/api/impl/SbmGrpcService.html#reportClientFailure(io.sbp.grpc.ClientFailure,io.grpc.stub.StreamObserver)" class="member-name-link">reportClientFailure(ClientFailure, StreamObserver)</a> - Method in class io.sbm.api.impl.<a href="io/sbm/api/impl/SbmGrpcService.html" title="class in io.sbm.api.impl">SbmGrpcService</a></dt>
 <dd>
 <div class="block">Records and acknowledges a terminal failure reported by an SBK client.</div>
@@ -564,6 +595,10 @@ and calling its super class.</div>
 <dd>
 <div class="block">Starts the SBM latency consumer on its dedicated platform thread.</div>
 </dd>
+<dt><a href="io/sbm/api/impl/SbmBenchmark.html#startLatencyAggregation()" class="member-name-link">startLatencyAggregation()</a> - Method in class io.sbm.api.impl.<a href="io/sbm/api/impl/SbmBenchmark.html" title="class in io.sbm.api.impl">SbmBenchmark</a></dt>
+<dd>
+<div class="block">Start latency aggregation after an orchestrated client-registration barrier.</div>
+</dd>
 <dt><a href="io/sbm/api/impl/SbmBenchmark.html#stop()" class="member-name-link">stop()</a> - Method in class io.sbm.api.impl.<a href="io/sbm/api/impl/SbmBenchmark.html" title="class in io.sbm.api.impl">SbmBenchmark</a></dt>
 <dd>
 <div class="block">Stop/shutdown SBK Server Benchmark.</div>
@@ -579,7 +614,7 @@ and calling its super class.</div>
 <div class="block">Opens a persistent ordered latency stream for an SBK client.</div>
 </dd>
 </dl>
-<a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a></main>
+<a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a></main>
 </div>
 </body>
 </html>

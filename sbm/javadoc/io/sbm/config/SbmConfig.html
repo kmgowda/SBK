@@ -67,6 +67,10 @@ loadScripts(document, 'script');</script>
 <li><a href="#idleMS" tabindex="0">idleMS</a></li>
 <li><a href="#idleTimeoutSeconds" tabindex="0">idleTimeoutSeconds</a></li>
 <li><a href="#maxRecordSizeMB" tabindex="0">maxRecordSizeMB</a></li>
+<li><a href="#exactLatencyPageBits" tabindex="0">exactLatencyPageBits</a></li>
+<li><a href="#exactLatencySparsePageEntries" tabindex="0">exactLatencySparsePageEntries</a></li>
+<li><a href="#exactLatencyMaxMemoryMB" tabindex="0">exactLatencyMaxMemoryMB</a></li>
+<li><a href="#exactTotalLatencyMaxMemoryMB" tabindex="0">exactTotalLatencyMaxMemoryMB</a></li>
 <li><a href="#defaultAction" tabindex="0">defaultAction</a></li>
 </ol>
 </li>
@@ -78,6 +82,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#get()" tabindex="0">get()</a></li>
+<li><a href="#load()" tabindex="0">load()</a></li>
 </ol>
 </li>
 </ol>
@@ -120,6 +125,26 @@ loadScripts(document, 'script');</script>
 <div class="col-second odd-row-color"><code><a href="#DESC" class="member-name-link">DESC</a></code></div>
 <div class="col-last odd-row-color">
 <div class="block"><code>String DESC = "Storage Benchmark Monitorr"</code>.</div>
+</div>
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#exactLatencyMaxMemoryMB" class="member-name-link">exactLatencyMaxMemoryMB</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Retained-memory target for exact periodic nanosecond pages, in MiB.</div>
+</div>
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#exactLatencyPageBits" class="member-name-link">exactLatencyPageBits</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Log2 of the exact nanosecond latency values stored in one hybrid page.</div>
+</div>
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#exactLatencySparsePageEntries" class="member-name-link">exactLatencySparsePageEntries</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Exact values retained sparsely in a page before dense counter promotion.</div>
+</div>
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#exactTotalLatencyMaxMemoryMB" class="member-name-link">exactTotalLatencyMaxMemoryMB</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Retained-memory target for the exact total nanosecond window, in MiB.</div>
 </div>
 <div class="col-first even-row-color"><code>int</code></div>
 <div class="col-second even-row-color"><code><a href="#idleMS" class="member-name-link">idleMS</a></code></div>
@@ -197,6 +222,11 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#get()" class="member-name-link">get</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Returns the validated bundled SBM configuration.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="SbmConfig.html" title="class in io.sbm.config">SbmConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#load()" class="member-name-link">load</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Loads a new validated SBM configuration from the bundled properties.</div>
 </div>
 </div>
 </div>
@@ -321,6 +351,42 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="exactLatencyPageBits">
+<h3>exactLatencyPageBits</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">exactLatencyPageBits</span></div>
+<div class="block">Log2 of the exact nanosecond latency values stored in one hybrid page.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="exactLatencySparsePageEntries">
+<h3>exactLatencySparsePageEntries</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">exactLatencySparsePageEntries</span></div>
+<div class="block">Exact values retained sparsely in a page before dense counter promotion.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="exactLatencyMaxMemoryMB">
+<h3>exactLatencyMaxMemoryMB</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">exactLatencyMaxMemoryMB</span></div>
+<div class="block">Retained-memory target for exact periodic nanosecond pages, in MiB.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="exactTotalLatencyMaxMemoryMB">
+<h3>exactTotalLatencyMaxMemoryMB</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">exactTotalLatencyMaxMemoryMB</span></div>
+<div class="block">Retained-memory target for the exact total nanosecond window, in MiB.</div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="defaultAction">
 <h3>defaultAction</h3>
 <div class="horizontal-scroll">
@@ -363,6 +429,23 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>shared SBM configuration</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="load()">
+<h3>load</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="SbmConfig.html" title="class in io.sbm.config">SbmConfig</a></span>&nbsp;<span class="element-name">load</span>()</div>
+<div class="block">Loads a new validated SBM configuration from the bundled properties.
+
+<p>Callers that customize configuration for one benchmark should use
+this method so that they do not mutate the shared defaults returned by
+<a href="#get()"><code>get()</code></a>.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>independent validated SBM configuration</dd>
 </dl>
 </div>
 </section>

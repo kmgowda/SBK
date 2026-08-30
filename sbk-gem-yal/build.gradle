@@ -33,15 +33,3 @@ dependencies {
     implementation "org.jetbrains:annotations:$jetbrainVersion"
     api project(":sbk-gem")
 }
-
-tasks.register('updateDocs') {
-    dependsOn javadoc
-    doLast {
-        println "Update $projectDir Javadocs"
-        delete "$projectDir/javadoc"
-        copy {
-            from "$projectDir/build/docs/javadoc"
-            into "$projectDir/javadoc"
-        }
-    }
-}

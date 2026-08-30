@@ -60,6 +60,18 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Creates a GEM logger backed by the SBM Prometheus logger.</div>
 </dd>
+<dt><a href="io/gem/agent/RemoteAgentProtocol.html#ACTIVATE" class="member-name-link">ACTIVATE</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteAgentProtocol.html" title="class in io.gem.agent">RemoteAgentProtocol</a></dt>
+<dd>
+<div class="block">Runtime activation operation.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteAgentProtocol.html#ARCHIVE_DIGEST_MISMATCH" class="member-name-link">ARCHIVE_DIGEST_MISMATCH</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteAgentProtocol.html" title="class in io.gem.agent">RemoteAgentProtocol</a></dt>
+<dd>
+<div class="block">Stable diagnostic emitted when a transferred runtime archive fails integrity verification.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteDeploymentContract.html#ARCHIVE_ROOT" class="member-name-link">ARCHIVE_ROOT</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteDeploymentContract.html" title="class in io.gem.agent">RemoteDeploymentContract</a></dt>
+<dd>
+<div class="block">Runtime archive root directory.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:B">B</h2>
 <dl class="index">
@@ -74,9 +86,25 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:C">C</h2>
 <dl class="index">
+<dt><a href="io/gem/api/SshSession.html#cancelActiveOperations()" class="member-name-link">cancelActiveOperations()</a> - Method in class io.gem.api.<a href="io/gem/api/SshSession.html" title="class in io.gem.api">SshSession</a></dt>
+<dd>
+<div class="block">Cancel all currently running operations without permanently closing this session.</div>
+</dd>
 <dt><a href="io/gem/api/RemoteExecutionStatus.html#CANCELLED" class="member-name-link">CANCELLED</a> - Enum constant in enum class io.gem.api.<a href="io/gem/api/RemoteExecutionStatus.html" title="enum class in io.gem.api">RemoteExecutionStatus</a></dt>
 <dd>
 <div class="block">The command was cancelled because another node failed.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteDeploymentContract.html#CHECKSUM_FILE" class="member-name-link">CHECKSUM_FILE</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteDeploymentContract.html" title="class in io.gem.agent">RemoteDeploymentContract</a></dt>
+<dd>
+<div class="block">Runtime file checksum manifest.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteAgentProtocol.html#CLEANUP" class="member-name-link">CLEANUP</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteAgentProtocol.html" title="class in io.gem.agent">RemoteAgentProtocol</a></dt>
+<dd>
+<div class="block">Retired-runtime cleanup operation.</div>
+</dd>
+<dt><a href="io/gem/api/SshClientManager.html#close()" class="member-name-link">close()</a> - Method in class io.gem.api.<a href="io/gem/api/SshClientManager.html" title="class in io.gem.api">SshClientManager</a></dt>
+<dd>
+<div class="block">Stop every managed client after its node sessions have closed.</div>
 </dd>
 <dt><a href="io/gem/api/SshSession.html#connection" class="member-name-link">connection</a> - Variable in class io.gem.api.<a href="io/gem/api/SshSession.html" title="class in io.gem.api">SshSession</a></dt>
 <dd>
@@ -90,13 +118,21 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Create a connection configuration.</div>
 </dd>
-<dt><a href="io/gem/api/SshUtils.html#copyFile(org.apache.sshd.client.session.ClientSession,java.lang.String,java.lang.String)" class="member-name-link">copyFile(ClientSession, String, String)</a> - Static method in class io.gem.api.<a href="io/gem/api/SshUtils.html" title="class in io.gem.api">SshUtils</a></dt>
+<dt><a href="io/gem/agent/RemoteDeploymentContract.html#CONTENT_SHA_256_PROPERTY" class="member-name-link">CONTENT_SHA_256_PROPERTY</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteDeploymentContract.html" title="class in io.gem.agent">RemoteDeploymentContract</a></dt>
 <dd>
-<div class="block">Copy one local file to an exact remote path using SCP.</div>
+<div class="block">Descriptor content-digest property.</div>
+</dd>
+<dt><a href="io/gem/config/GemConfig.html#controlExecutorThreads" class="member-name-link">controlExecutorThreads</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Maximum platform threads used for concurrent SSH connection and control operations.</div>
 </dd>
 <dt><a href="io/gem/api/SshSession.html#copyFileAsync(java.lang.String,java.lang.String,long)" class="member-name-link">copyFileAsync(String, String, long)</a> - Method in class io.gem.api.<a href="io/gem/api/SshSession.html" title="class in io.gem.api">SshSession</a></dt>
 <dd>
-<div class="block">Copy one local file to an exact remote path asynchronously.</div>
+<div class="block">Copy one local file to an exact remote path with bulk SCP.</div>
+</dd>
+<dt><a href="io/gem/api/SshSession.html#copyFileAsync(java.lang.String,java.lang.String,long,java.util.function.LongConsumer)" class="member-name-link">copyFileAsync(String, String, long, LongConsumer)</a> - Method in class io.gem.api.<a href="io/gem/api/SshSession.html" title="class in io.gem.api">SshSession</a></dt>
+<dd>
+<div class="block">Copy one local file to an exact remote path and report transferred bytes.</div>
 </dd>
 <dt><a href="io/gem/api/SshUtils.html#createClient(io.gem.api.ConnectionConfig)" class="member-name-link">createClient(ConnectionConfig)</a> - Static method in class io.gem.api.<a href="io/gem/api/SshUtils.html" title="class in io.gem.api">SshUtils</a></dt>
 <dd>
@@ -117,6 +153,22 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Maximum stdout or stderr bytes retained for one remote command.</div>
 </dd>
+<dt><a href="io/gem/config/GemConfig.html#DEFAULT_DIAGNOSTIC_BYTES" class="member-name-link">DEFAULT_DIAGNOSTIC_BYTES</a> - Static variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Default maximum stdout/stderr bytes retained per SSH command.</div>
+</dd>
+<dt><a href="io/gem/config/GemConfig.html#DEFAULT_DIAGNOSTIC_PREFIX_CHARACTERS" class="member-name-link">DEFAULT_DIAGNOSTIC_PREFIX_CHARACTERS</a> - Static variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Default diagnostic prefix retained before the truncation marker.</div>
+</dd>
+<dt><a href="io/gem/config/GemConfig.html#DEFAULT_MAXIMUM_DIAGNOSTIC_CHARACTERS" class="member-name-link">DEFAULT_MAXIMUM_DIAGNOSTIC_CHARACTERS</a> - Static variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Default maximum characters retained in a diagnostic summary.</div>
+</dd>
+<dt><a href="io/gem/config/GemConfig.html#DEFAULT_SSH_COPY_BUFFER_BYTES" class="member-name-link">DEFAULT_SSH_COPY_BUFFER_BYTES</a> - Static variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Backward-compatible SCP copy buffer for direct <code>SshSession</code> construction.</div>
+</dd>
 <dt><a href="io/gem/config/GemConfig.html#deploymentTimeoutSeconds" class="member-name-link">deploymentTimeoutSeconds</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
 <div class="block">Maximum runtime bundle creation, transfer, and activation duration in seconds.</div>
@@ -124,6 +176,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/gem/config/GemConfig.html#DESC" class="member-name-link">DESC</a> - Static variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
 <div class="block"><code>String DESC = "Storage Benchmark Kit - Group Execution Monitor"</code>.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteDeploymentContract.html#DESCRIPTOR_FILE" class="member-name-link">DESCRIPTOR_FILE</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteDeploymentContract.html" title="class in io.gem.agent">RemoteDeploymentContract</a></dt>
+<dd>
+<div class="block">Runtime deployment descriptor.</div>
 </dd>
 <dt><a href="io/gem/config/GemConfig.html#DIAGNOSTIC_TRUNCATION_MARKER" class="member-name-link">DIAGNOSTIC_TRUNCATION_MARKER</a> - Static variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
@@ -136,6 +192,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/gem/config/GemConfig.html#diagnosticPrefixCharacters" class="member-name-link">diagnosticPrefixCharacters</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
 <div class="block">Prefix characters retained when a remote diagnostic is truncated.</div>
+</dd>
+<dt><a href="io/gem/config/GemConfig.html#driverClass" class="member-name-link">driverClass</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Resolved driver class selected for this invocation; assigned after driver discovery.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:E">E</h2>
@@ -156,10 +216,6 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Execute the operation.</div>
 </dd>
-<dt><a href="io/gem/config/GemConfig.html#executorThreadReserve" class="member-name-link">executorThreadReserve</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
-<dd>
-<div class="block">Executor threads reserved for orchestration and embedded services.</div>
-</dd>
 <dt><a href="io/gem/api/RemoteExecutionStatus.html#EXIT_FAILURE" class="member-name-link">EXIT_FAILURE</a> - Enum constant in enum class io.gem.api.<a href="io/gem/api/RemoteExecutionStatus.html" title="enum class in io.gem.api">RemoteExecutionStatus</a></dt>
 <dd>
 <div class="block">The remote command completed with a non-zero exit code.</div>
@@ -171,9 +227,13 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Host-tagged failure description, empty for successful commands.</div>
 </dd>
-<dt><a href="io/gem/config/GemConfig.html#fork" class="member-name-link">fork</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dt><a href="io/gem/agent/RemoteDeploymentContract.html#FORMAT_VERSION_PROPERTY" class="member-name-link">FORMAT_VERSION_PROPERTY</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteDeploymentContract.html" title="class in io.gem.agent">RemoteDeploymentContract</a></dt>
 <dd>
-<div class="block">Whether to fork a <code>ForkJoinPool</code> for execution (vs fixed thread pool).</div>
+<div class="block">Descriptor format-version property.</div>
+</dd>
+<dt><a href="io/gem/config/GemConfig.html#fullcopy" class="member-name-link">fullcopy</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Whether complete JDK and SBK distribution copies replace the default minimal copies.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:G">G</h2>
@@ -266,6 +326,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">to get local host.</div>
 </dd>
+<dt><a href="io/gem/api/SshSession.html#getLocalRouteAddress()" class="member-name-link">getLocalRouteAddress()</a> - Method in class io.gem.api.<a href="io/gem/api/SshSession.html" title="class in io.gem.api">SshSession</a></dt>
+<dd>
+<div class="block">Return the numeric controller address selected by the authenticated SSH route.</div>
+</dd>
 <dt><a href="io/gem/logger/impl/AbstractGemLogger.html#getOptionsArgs()" class="member-name-link">getOptionsArgs()</a> - Method in class io.gem.logger.impl.<a href="io/gem/logger/impl/AbstractGemLogger.html" title="class in io.gem.logger.impl">AbstractGemLogger</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/gem/logger/impl/GemPrometheusLogger.html#getOptionsArgs()" class="member-name-link">getOptionsArgs()</a> - Method in class io.gem.logger.impl.<a href="io/gem/logger/impl/GemPrometheusLogger.html" title="class in io.gem.logger.impl">GemPrometheusLogger</a></dt>
@@ -290,6 +354,10 @@ remote SBK command line.</div>
 <dt><a href="io/gem/params/GetArguments.html#getParsedArgs()" class="member-name-link">getParsedArgs()</a> - Method in interface io.gem.params.<a href="io/gem/params/GetArguments.html" title="interface in io.gem.params">GetArguments</a></dt>
 <dd>
 <div class="block">to get Parsed options provided as arguments.</div>
+</dd>
+<dt><a href="io/gem/api/SshSession.html#getRemoteEndpointIdentity()" class="member-name-link">getRemoteEndpointIdentity()</a> - Method in class io.gem.api.<a href="io/gem/api/SshSession.html" title="class in io.gem.api">SshSession</a></dt>
+<dd>
+<div class="block">Return the authenticated network endpoint used by this SSH session.</div>
 </dd>
 <dt><a href="io/gem/api/SshCommandException.html#getResponse()" class="member-name-link">getResponse()</a> - Method in exception class io.gem.api.<a href="io/gem/api/SshCommandException.html" title="class in io.gem.api">SshCommandException</a></dt>
 <dd>
@@ -339,6 +407,10 @@ remote SBK command line.</div>
 </dl>
 <h2 class="title" id="I:I">I</h2>
 <dl class="index">
+<dt><a href="io/gem/agent/RemoteDeploymentContract.html#INCLUDES_JAVA_PROPERTY" class="member-name-link">INCLUDES_JAVA_PROPERTY</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteDeploymentContract.html" title="class in io.gem.agent">RemoteDeploymentContract</a></dt>
+<dd>
+<div class="block">Descriptor embedded-Java property.</div>
+</dd>
 <dt><a href="io/gem/agent/package-summary.html">io.gem.agent</a> - package io.gem.agent</dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/gem/api/package-summary.html">io.gem.api</a> - package io.gem.api</dt>
@@ -359,11 +431,23 @@ remote SBK command line.</div>
 <dd>&nbsp;</dd>
 <dt><a href="io/gem/params/impl/package-summary.html">io.gem.params.impl</a> - package io.gem.params.impl</dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/gem/params/GemParameters.html#isRuntimeCleanup()" class="member-name-link">isRuntimeCleanup()</a> - Method in interface io.gem.params.<a href="io/gem/params/GemParameters.html" title="interface in io.gem.params">GemParameters</a></dt>
+<dt><a href="io/gem/agent/RemotePath.html#isAbsolute(java.lang.String)" class="member-name-link">isAbsolute(String)</a> - Static method in class io.gem.agent.<a href="io/gem/agent/RemotePath.html" title="class in io.gem.agent">RemotePath</a></dt>
+<dd>
+<div class="block">Test whether a remote path is absolute according to the POSIX remote-node contract.</div>
+</dd>
+<dt><a href="io/gem/params/GemParameters.html#isLocalHostOption()" class="member-name-link">isLocalHostOption()</a> - Method in interface io.gem.params.<a href="io/gem/params/GemParameters.html" title="interface in io.gem.params">GemParameters</a></dt>
+<dd>
+<div class="block">Check whether the SBM callback address was explicitly supplied.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteRuntimeFiles.html#isManagedArtifact(java.lang.String)" class="member-name-link">isManagedArtifact(String)</a> - Static method in class io.gem.agent.<a href="io/gem/agent/RemoteRuntimeFiles.html" title="class in io.gem.agent">RemoteRuntimeFiles</a></dt>
+<dd>
+<div class="block">Identify an SBK-GEM-managed runtime artifact.</div>
+</dd>
+<dt><a href="io/gem/params/GemParameters.html#isPackagesCleanup()" class="member-name-link">isPackagesCleanup()</a> - Method in interface io.gem.params.<a href="io/gem/params/GemParameters.html" title="interface in io.gem.params">GemParameters</a></dt>
 <dd>
 <div class="block">Check whether every inactive non-current SBK-GEM-managed runtime and local cached bundle should be removed.</div>
 </dd>
-<dt><a href="io/gem/params/impl/SbkGemParameters.html#isRuntimeCleanup()" class="member-name-link">isRuntimeCleanup()</a> - Method in class io.gem.params.impl.<a href="io/gem/params/impl/SbkGemParameters.html" title="class in io.gem.params.impl">SbkGemParameters</a></dt>
+<dt><a href="io/gem/params/impl/SbkGemParameters.html#isPackagesCleanup()" class="member-name-link">isPackagesCleanup()</a> - Method in class io.gem.params.impl.<a href="io/gem/params/impl/SbkGemParameters.html" title="class in io.gem.params.impl">SbkGemParameters</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/gem/api/SshCommandException.html#isTimeout()" class="member-name-link">isTimeout()</a> - Method in exception class io.gem.api.<a href="io/gem/api/SshCommandException.html" title="class in io.gem.api">SshCommandException</a></dt>
 <dd>
@@ -380,9 +464,25 @@ remote SBK command line.</div>
 </dl>
 <h2 class="title" id="I:J">J</h2>
 <dl class="index">
+<dt><a href="io/gem/agent/RemoteDeploymentContract.html#JAVA_COMPILER" class="member-name-link">JAVA_COMPILER</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteDeploymentContract.html" title="class in io.gem.agent">RemoteDeploymentContract</a></dt>
+<dd>
+<div class="block">Java compiler path relative to a Java home.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteDeploymentContract.html#JAVA_EXECUTABLE" class="member-name-link">JAVA_EXECUTABLE</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteDeploymentContract.html" title="class in io.gem.agent">RemoteDeploymentContract</a></dt>
+<dd>
+<div class="block">Java executable path relative to a Java home.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteDeploymentContract.html#JAVA_VERSION_PROPERTY" class="member-name-link">JAVA_VERSION_PROPERTY</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteDeploymentContract.html" title="class in io.gem.agent">RemoteDeploymentContract</a></dt>
+<dd>
+<div class="block">Descriptor Java-version property.</div>
+</dd>
 <dt><a href="io/gem/config/GemConfig.html#javadir" class="member-name-link">javadir</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
 <div class="block">Optional remote Java home containing <code>bin/java</code>.</div>
+</dd>
+<dt><a href="io/gem/agent/RemotePath.html#join(java.lang.String,java.lang.String...)" class="member-name-link">join(String, String...)</a> - Static method in class io.gem.agent.<a href="io/gem/agent/RemotePath.html" title="class in io.gem.agent">RemotePath</a></dt>
+<dd>
+<div class="block">Join a remote parent and one or more relative path segments.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:K">K</h2>
@@ -394,6 +494,10 @@ remote SBK command line.</div>
 </dl>
 <h2 class="title" id="I:L">L</h2>
 <dl class="index">
+<dt><a href="io/gem/agent/RemoteRuntimeFiles.html#leasePath(java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">leasePath(String, String, String)</a> - Static method in class io.gem.agent.<a href="io/gem/agent/RemoteRuntimeFiles.html" title="class in io.gem.agent">RemoteRuntimeFiles</a></dt>
+<dd>
+<div class="block">Return the path of a managed runtime lease.</div>
+</dd>
 <dt><a href="io/gem/config/GemConfig.html#load()" class="member-name-link">load()</a> - Static method in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
 <div class="block">Loads the module-owned GEM configuration.</div>
@@ -413,6 +517,10 @@ remote SBK command line.</div>
 <dd>
 <div class="block">Execute one request supplied on standard input.</div>
 </dd>
+<dt><a href="io/gem/agent/RemoteAgentProtocol.html#MAX_REQUEST_BYTES" class="member-name-link">MAX_REQUEST_BYTES</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteAgentProtocol.html" title="class in io.gem.agent">RemoteAgentProtocol</a></dt>
+<dd>
+<div class="block">Maximum aggregate encoded request size.</div>
+</dd>
 <dt><a href="io/gem/agent/RemoteAgentProtocol.html#MAX_STRING_BYTES" class="member-name-link">MAX_STRING_BYTES</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteAgentProtocol.html" title="class in io.gem.agent">RemoteAgentProtocol</a></dt>
 <dd>
 <div class="block">Maximum encoded string size.</div>
@@ -429,10 +537,6 @@ remote SBK command line.</div>
 <dd>
 <div class="block">Maximum characters retained in a summarized remote diagnostic.</div>
 </dd>
-<dt><a href="io/gem/config/GemConfig.html#maxIterations" class="member-name-link">maxIterations</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
-<dd>
-<div class="block">Maximum number of iterations to wait/retry for remote operations.</div>
-</dd>
 </dl>
 <h2 class="title" id="I:N">N</h2>
 <dl class="index">
@@ -443,6 +547,10 @@ remote SBK command line.</div>
 <dt><a href="io/gem/config/GemConfig.html#nodes" class="member-name-link">nodes</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
 <div class="block"><code>String nodes</code>.</div>
+</dd>
+<dt><a href="io/gem/agent/RemotePath.html#normalize(java.lang.String)" class="member-name-link">normalize(String)</a> - Static method in class io.gem.agent.<a href="io/gem/agent/RemotePath.html" title="class in io.gem.agent">RemotePath</a></dt>
+<dd>
+<div class="block">Remove trailing separators from a remote path while preserving the POSIX root.</div>
 </dd>
 <dt><a href="io/gem/api/RemoteExecutionStatus.html#NOT_COMPLETED" class="member-name-link">NOT_COMPLETED</a> - Enum constant in enum class io.gem.api.<a href="io/gem/api/RemoteExecutionStatus.html" title="enum class in io.gem.api">RemoteExecutionStatus</a></dt>
 <dd>
@@ -458,9 +566,21 @@ remote SBK command line.</div>
 </dl>
 <h2 class="title" id="I:P">P</h2>
 <dl class="index">
+<dt><a href="io/gem/config/GemConfig.html#packagescleanup" class="member-name-link">packagescleanup</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Whether inactive non-current managed runtimes and local cached bundles are removed automatically.</div>
+</dd>
+<dt><a href="io/gem/agent/RemotePath.html#parent(java.lang.String)" class="member-name-link">parent(String)</a> - Static method in class io.gem.agent.<a href="io/gem/agent/RemotePath.html" title="class in io.gem.agent">RemotePath</a></dt>
+<dd>
+<div class="block">Return the parent of a normalized POSIX remote path.</div>
+</dd>
 <dt><a href="io/gem/params/impl/SbkGemParameters.html#parseArgs(java.lang.String%5B%5D)" class="member-name-link">parseArgs(String[])</a> - Method in class io.gem.params.impl.<a href="io/gem/params/impl/SbkGemParameters.html" title="class in io.gem.params.impl">SbkGemParameters</a></dt>
 <dd>
 <div class="block">Parse GEM options, validate the launcher-selected SBK distribution, and build the connection set.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteDeploymentContract.html#PLATFORM_OS_PROPERTY" class="member-name-link">PLATFORM_OS_PROPERTY</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteDeploymentContract.html" title="class in io.gem.agent">RemoteDeploymentContract</a></dt>
+<dd>
+<div class="block">Descriptor operating-system property.</div>
 </dd>
 <dt><a href="io/gem/logger/impl/AbstractGemLogger.html#print(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">print(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.gem.logger.impl.<a href="io/gem/logger/impl/AbstractGemLogger.html" title="class in io.gem.logger.impl">AbstractGemLogger</a></dt>
 <dd>&nbsp;</dd>
@@ -482,12 +602,20 @@ remote SBK command line.</div>
 <dd>&nbsp;</dd>
 <dt><a href="io/gem/logger/impl/GemWebLogger.html#printTotal(int,int,int,int,long,double,long,double,long,double,long,double,long,long,long,long,long,long,long,double,long,double,double,long,long,double,double,double,long,long,long,long,long,long,long,long%5B%5D,long%5B%5D)" class="member-name-link">printTotal(int, int, int, int, long, double, long, double, long, double, long, double, long, long, long, long, long, long, long, double, long, double, double, long, long, double, double, double, long, long, long, long, long, long, long, long[], long[])</a> - Method in class io.gem.logger.impl.<a href="io/gem/logger/impl/GemWebLogger.html" title="class in io.gem.logger.impl">GemWebLogger</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/gem/agent/RemoteAgentProtocol.html#PROBE" class="member-name-link">PROBE</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteAgentProtocol.html" title="class in io.gem.agent">RemoteAgentProtocol</a></dt>
+<dd>
+<div class="block">Probe operation.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:R">R</h2>
 <dl class="index">
 <dt><a href="io/gem/agent/RemoteAgentProtocol.html#read(java.io.DataInputStream)" class="member-name-link">read(DataInputStream)</a> - Static method in class io.gem.agent.<a href="io/gem/agent/RemoteAgentProtocol.html" title="class in io.gem.agent">RemoteAgentProtocol</a></dt>
 <dd>
 <div class="block">Read a request.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteDeploymentContract.html#REMOTE_DIGEST_FILE" class="member-name-link">REMOTE_DIGEST_FILE</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteDeploymentContract.html" title="class in io.gem.agent">RemoteDeploymentContract</a></dt>
+<dd>
+<div class="block">Activated runtime content marker.</div>
 </dd>
 <dt><a href="io/gem/agent/RemoteAgentProtocol.html" class="type-name-link" title="class in io.gem.agent">RemoteAgentProtocol</a> - Class in <a href="io/gem/agent/package-summary.html">io.gem.agent</a></dt>
 <dd>
@@ -497,6 +625,10 @@ remote SBK command line.</div>
 <dd>
 <div class="block">Decoded immutable request.</div>
 </dd>
+<dt><a href="io/gem/agent/RemoteDeploymentContract.html" class="type-name-link" title="class in io.gem.agent">RemoteDeploymentContract</a> - Class in <a href="io/gem/agent/package-summary.html">io.gem.agent</a></dt>
+<dd>
+<div class="block">Shared filesystem and metadata contract between SBK-GEM and its remote agent.</div>
+</dd>
 <dt><a href="io/gem/config/GemConfig.html#remoteDir" class="member-name-link">remoteDir</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
 <div class="block">Remote working directory on each host (derived from app name/version).</div>
@@ -504,6 +636,10 @@ remote SBK command line.</div>
 <dt><a href="io/gem/api/RemoteExecutionStatus.html" class="type-name-link" title="enum class in io.gem.api">RemoteExecutionStatus</a> - Enum Class in <a href="io/gem/api/package-summary.html">io.gem.api</a></dt>
 <dd>
 <div class="block">Terminal outcome of an SBK command submitted to one remote host.</div>
+</dd>
+<dt><a href="io/gem/agent/RemotePath.html" class="type-name-link" title="class in io.gem.agent">RemotePath</a> - Class in <a href="io/gem/agent/package-summary.html">io.gem.agent</a></dt>
+<dd>
+<div class="block">POSIX path operations for supported Linux and macOS remote nodes.</div>
 </dd>
 <dt><a href="io/gem/api/RemoteResponse.html" class="type-name-link" title="class in io.gem.api">RemoteResponse</a> - Class in <a href="io/gem/api/package-summary.html">io.gem.api</a></dt>
 <dd>
@@ -517,9 +653,17 @@ remote SBK command line.</div>
 <dd>
 <div class="block">Create a fully classified remote response snapshot.</div>
 </dd>
+<dt><a href="io/gem/agent/RemoteRuntimeFiles.html" class="type-name-link" title="class in io.gem.agent">RemoteRuntimeFiles</a> - Class in <a href="io/gem/agent/package-summary.html">io.gem.agent</a></dt>
+<dd>
+<div class="block">Implements managed-runtime ownership using local file-system operations on the remote node.</div>
+</dd>
 <dt><a href="io/gem/config/GemConfig.html#remoteTimeoutSeconds" class="member-name-link">remoteTimeoutSeconds</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
 <div class="block">Timeout value used for remote operations (seconds).</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteRuntimeFiles.html#resolveDirectory(java.nio.file.FileSystem,java.lang.String)" class="member-name-link">resolveDirectory(FileSystem, String)</a> - Static method in class io.gem.agent.<a href="io/gem/agent/RemoteRuntimeFiles.html" title="class in io.gem.agent">RemoteRuntimeFiles</a></dt>
+<dd>
+<div class="block">Resolve and create a remote working directory through its file-system provider.</div>
 </dd>
 <dt><a href="io/gem/api/RemoteResponse.html#returnCode" class="member-name-link">returnCode</a> - Variable in class io.gem.api.<a href="io/gem/api/RemoteResponse.html" title="class in io.gem.api">RemoteResponse</a></dt>
 <dd>
@@ -529,9 +673,21 @@ remote SBK command line.</div>
 <dd>
 <div class="block"><code>int returnCode</code>.</div>
 </dd>
+<dt><a href="io/gem/agent/RemotePath.html#ROOT" class="member-name-link">ROOT</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemotePath.html" title="class in io.gem.agent">RemotePath</a></dt>
+<dd>
+<div class="block">POSIX root and path separator.</div>
+</dd>
 <dt><a href="io/gem/api/impl/SbkGem.html#run(java.lang.String%5B%5D,java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">run(String[], String, String, String)</a> - Static method in class io.gem.api.impl.<a href="io/gem/api/impl/SbkGem.html" title="class in io.gem.api.impl">SbkGem</a></dt>
 <dd>
 <div class="block">Run the Performance Benchmarking .</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteAgentProtocol.html#RUN" class="member-name-link">RUN</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteAgentProtocol.html" title="class in io.gem.agent">RemoteAgentProtocol</a></dt>
+<dd>
+<div class="block">Remote benchmark execution operation.</div>
+</dd>
+<dt><a href="io/gem/api/SshSession.html#runBenchmarkCommandAsync(java.lang.String,byte%5B%5D,java.lang.Boolean,long)" class="member-name-link">runBenchmarkCommandAsync(String, byte[], Boolean, long)</a> - Method in class io.gem.api.<a href="io/gem/api/SshSession.html" title="class in io.gem.api">SshSession</a></dt>
+<dd>
+<div class="block">Run a remote command that remains active for the duration of a benchmark on a virtual thread.</div>
 </dd>
 <dt><a href="io/gem/api/SshUtils.html#runCommand(org.apache.sshd.client.session.ClientSession,java.lang.String,byte%5B%5D,long,io.gem.api.SshResponse)" class="member-name-link">runCommand(ClientSession, String, byte[], long, SshResponse)</a> - Static method in class io.gem.api.<a href="io/gem/api/SshUtils.html" title="class in io.gem.api">SshUtils</a></dt>
 <dd>
@@ -553,13 +709,33 @@ remote SBK command line.</div>
 <dd>
 <div class="block">Execute a remote file-system operation through Apache MINA SFTP.</div>
 </dd>
+<dt><a href="io/gem/api/SshSession.html#runRemoteTransferOperationAsync(io.gem.api.SshSession.RemoteFileOperation,long)" class="member-name-link">runRemoteTransferOperationAsync(SshSession.RemoteFileOperation, long)</a> - Method in class io.gem.api.<a href="io/gem/api/SshSession.html" title="class in io.gem.api">SshSession</a></dt>
+<dd>
+<div class="block">Execute deployment data movement through Apache MINA SFTP on the bounded transfer executor.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteAgentProtocol.html#RUNTIME_ACQUIRE" class="member-name-link">RUNTIME_ACQUIRE</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteAgentProtocol.html" title="class in io.gem.agent">RemoteAgentProtocol</a></dt>
+<dd>
+<div class="block">Runtime lease acquisition operation.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteAgentProtocol.html#RUNTIME_HEARTBEAT" class="member-name-link">RUNTIME_HEARTBEAT</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteAgentProtocol.html" title="class in io.gem.agent">RemoteAgentProtocol</a></dt>
+<dd>
+<div class="block">Runtime lease heartbeat operation.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteDeploymentContract.html#RUNTIME_PREFIX" class="member-name-link">RUNTIME_PREFIX</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteDeploymentContract.html" title="class in io.gem.agent">RemoteDeploymentContract</a></dt>
+<dd>
+<div class="block">Managed runtime directory prefix.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteAgentProtocol.html#RUNTIME_RELEASE" class="member-name-link">RUNTIME_RELEASE</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteAgentProtocol.html" title="class in io.gem.agent">RemoteAgentProtocol</a></dt>
+<dd>
+<div class="block">Runtime lease release operation.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteAgentProtocol.html#RUNTIME_RESERVE" class="member-name-link">RUNTIME_RESERVE</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteAgentProtocol.html" title="class in io.gem.agent">RemoteAgentProtocol</a></dt>
+<dd>
+<div class="block">Runtime reservation operation.</div>
+</dd>
 <dt><a href="io/gem/config/GemConfig.html#runtimeCacheDirectory" class="member-name-link">runtimeCacheDirectory</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
 <div class="block">Local content-addressed runtime bundle cache directory, absolute or relative to the user's home.</div>
-</dd>
-<dt><a href="io/gem/config/GemConfig.html#runtimecleanup" class="member-name-link">runtimecleanup</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
-<dd>
-<div class="block">Whether inactive non-current managed runtimes and local cached bundles are removed automatically.</div>
 </dd>
 <dt><a href="io/gem/config/GemConfig.html#runtimeLeaseReservationSeconds" class="member-name-link">runtimeLeaseReservationSeconds</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
@@ -584,6 +760,10 @@ remote SBK command line.</div>
 <dd>
 <div class="block">Standard SBK launcher relative to an installed distribution.</div>
 </dd>
+<dt><a href="io/gem/agent/RemoteDeploymentContract.html#SBK_DIRECTORY" class="member-name-link">SBK_DIRECTORY</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteDeploymentContract.html" title="class in io.gem.agent">RemoteDeploymentContract</a></dt>
+<dd>
+<div class="block">SBK installation directory inside the runtime archive.</div>
+</dd>
 <dt><a href="io/gem/config/GemConfig.html#SBK_GEM_APP_NAME" class="member-name-link">SBK_GEM_APP_NAME</a> - Static variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
 <div class="block"><code>String SBK_GEM_APP_NAME = "sbk.gem.applicationName</code>.</div>
@@ -595,6 +775,10 @@ remote SBK command line.</div>
 <dt><a href="io/gem/config/GemConfig.html#SBK_GEM_SSH_PASSWD" class="member-name-link">SBK_GEM_SSH_PASSWD</a> - Static variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
 <div class="block">Environment variable name from which to read the SSH password if not provided in properties.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteDeploymentContract.html#SBK_VERSION_PROPERTY" class="member-name-link">SBK_VERSION_PROPERTY</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteDeploymentContract.html" title="class in io.gem.agent">RemoteDeploymentContract</a></dt>
+<dd>
+<div class="block">Descriptor SBK-version property.</div>
 </dd>
 <dt><a href="io/gem/config/GemConfig.html#sbkdir" class="member-name-link">sbkdir</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
 <dd>
@@ -652,9 +836,29 @@ remote SBK command line.</div>
 <dd>
 <div class="block">Maximum time to wait for all remote SBK clients to register with SBM (seconds).</div>
 </dd>
+<dt><a href="io/gem/api/SshClientManager.html#sessionFor(io.gem.api.ConnectionConfig,java.util.concurrent.ExecutorService,java.util.concurrent.ExecutorService,java.util.concurrent.ExecutorService,int,int)" class="member-name-link">sessionFor(ConnectionConfig, ExecutorService, ExecutorService, ExecutorService, int, int)</a> - Method in class io.gem.api.<a href="io/gem/api/SshClientManager.html" title="class in io.gem.api">SshClientManager</a></dt>
+<dd>
+<div class="block">Create an independently managed node session backed by the appropriate shared client.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteDeploymentContract.html#SHA_256" class="member-name-link">SHA_256</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteDeploymentContract.html" title="class in io.gem.agent">RemoteDeploymentContract</a></dt>
+<dd>
+<div class="block">SHA-256 message-digest algorithm name.</div>
+</dd>
+<dt><a href="io/gem/api/SshClientManager.html#size()" class="member-name-link">size()</a> - Method in class io.gem.api.<a href="io/gem/api/SshClientManager.html" title="class in io.gem.api">SshClientManager</a></dt>
+<dd>
+<div class="block">Return the number of distinct client policy groups, primarily for lifecycle diagnostics and tests.</div>
+</dd>
 <dt><a href="io/gem/api/RemoteExecutionStatus.html#SSH_ERROR" class="member-name-link">SSH_ERROR</a> - Enum constant in enum class io.gem.api.<a href="io/gem/api/RemoteExecutionStatus.html" title="enum class in io.gem.api">RemoteExecutionStatus</a></dt>
 <dd>
 <div class="block">The SSH transport failed before a usable exit code was received.</div>
+</dd>
+<dt><a href="io/gem/api/SshClientManager.html" class="type-name-link" title="class in io.gem.api">SshClientManager</a> - Class in <a href="io/gem/api/package-summary.html">io.gem.api</a></dt>
+<dd>
+<div class="block">Owns the small set of Apache SSHD clients shared by compatible SBK-GEM connections.</div>
+</dd>
+<dt><a href="io/gem/api/SshClientManager.html#%3Cinit%3E()" class="member-name-link">SshClientManager()</a> - Constructor for class io.gem.api.<a href="io/gem/api/SshClientManager.html" title="class in io.gem.api">SshClientManager</a></dt>
+<dd>
+<div class="block">Create an empty manager that starts shared SSH clients on demand.</div>
 </dd>
 <dt><a href="io/gem/api/SshCommandException.html" class="type-name-link" title="class in io.gem.api">SshCommandException</a> - Exception Class in <a href="io/gem/api/package-summary.html">io.gem.api</a></dt>
 <dd>
@@ -663,6 +867,10 @@ remote SBK command line.</div>
 <dt><a href="io/gem/api/SshCommandException.html#%3Cinit%3E(java.lang.String,io.gem.api.SshResponse,boolean,java.io.IOException)" class="member-name-link">SshCommandException(String, SshResponse, boolean, IOException)</a> - Constructor for exception class io.gem.api.<a href="io/gem/api/SshCommandException.html" title="class in io.gem.api">SshCommandException</a></dt>
 <dd>
 <div class="block">Create a remote command failure.</div>
+</dd>
+<dt><a href="io/gem/config/GemConfig.html#sshCopyBufferBytes" class="member-name-link">sshCopyBufferBytes</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Read buffer bytes used by each bulk SCP upload.</div>
 </dd>
 <dt><a href="io/gem/api/SshResponse.html" class="type-name-link" title="class in io.gem.api">SshResponse</a> - Class in <a href="io/gem/api/package-summary.html">io.gem.api</a></dt>
 <dd>
@@ -684,13 +892,25 @@ remote SBK command line.</div>
 <dd>
 <div class="block">This Constructor initializes all values.</div>
 </dd>
+<dt><a href="io/gem/api/SshSession.html#%3Cinit%3E(io.gem.api.ConnectionConfig,java.util.concurrent.ExecutorService,int)" class="member-name-link">SshSession(ConnectionConfig, ExecutorService, int)</a> - Constructor for class io.gem.api.<a href="io/gem/api/SshSession.html" title="class in io.gem.api">SshSession</a></dt>
+<dd>
+<div class="block">This constructor initializes all values with an explicit diagnostic limit.</div>
+</dd>
+<dt><a href="io/gem/api/SshSession.html#%3Cinit%3E(io.gem.api.ConnectionConfig,java.util.concurrent.ExecutorService,java.util.concurrent.ExecutorService,java.util.concurrent.ExecutorService,int)" class="member-name-link">SshSession(ConnectionConfig, ExecutorService, ExecutorService, ExecutorService, int)</a> - Constructor for class io.gem.api.<a href="io/gem/api/SshSession.html" title="class in io.gem.api">SshSession</a></dt>
+<dd>
+<div class="block">This constructor assigns separate execution resources to control, transfer, and long-running commands.</div>
+</dd>
+<dt><a href="io/gem/api/SshSession.html#%3Cinit%3E(io.gem.api.ConnectionConfig,java.util.concurrent.ExecutorService,java.util.concurrent.ExecutorService,java.util.concurrent.ExecutorService,int,int)" class="member-name-link">SshSession(ConnectionConfig, ExecutorService, ExecutorService, ExecutorService, int, int)</a> - Constructor for class io.gem.api.<a href="io/gem/api/SshSession.html" title="class in io.gem.api">SshSession</a></dt>
+<dd>
+<div class="block">This constructor assigns separate execution resources and an explicit SCP copy buffer.</div>
+</dd>
 <dt><a href="io/gem/api/SshSession.RemoteFileOperation.html" class="type-name-link" title="interface in io.gem.api">SshSession.RemoteFileOperation&lt;T&gt;</a> - Interface in <a href="io/gem/api/package-summary.html">io.gem.api</a></dt>
 <dd>
 <div class="block">A bounded operation performed against the remote Apache MINA SFTP file system.</div>
 </dd>
 <dt><a href="io/gem/api/SshUtils.html" class="type-name-link" title="class in io.gem.api">SshUtils</a> - Class in <a href="io/gem/api/package-summary.html">io.gem.api</a></dt>
 <dd>
-<div class="block">SSH utility methods for session creation, command execution, and SCP copy.</div>
+<div class="block">SSH utility methods for session creation and command execution.</div>
 </dd>
 <dt><a href="io/gem/api/SshUtils.html#%3Cinit%3E()" class="member-name-link">SshUtils()</a> - Constructor for class io.gem.api.<a href="io/gem/api/SshUtils.html" title="class in io.gem.api">SshUtils</a></dt>
 <dd>
@@ -739,6 +959,22 @@ remote SBK command line.</div>
 <dd>
 <div class="block">Per-iteration wait timeout used during async joins (seconds).</div>
 </dd>
+<dt><a href="io/gem/config/GemConfig.html#transferExecutorMaximumThreads" class="member-name-link">transferExecutorMaximumThreads</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Maximum deployment-transfer threads used by automatic sizing.</div>
+</dd>
+<dt><a href="io/gem/config/GemConfig.html#transferExecutorMinimumThreads" class="member-name-link">transferExecutorMinimumThreads</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Minimum deployment-transfer threads used by automatic sizing.</div>
+</dd>
+<dt><a href="io/gem/config/GemConfig.html#transferExecutorThreads" class="member-name-link">transferExecutorThreads</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Fixed deployment-transfer threads, or zero to size the pool automatically.</div>
+</dd>
+<dt><a href="io/gem/config/GemConfig.html#transferTargetWaves" class="member-name-link">transferTargetWaves</a> - Variable in class io.gem.config.<a href="io/gem/config/GemConfig.html" title="class in io.gem.config">GemConfig</a></dt>
+<dd>
+<div class="block">Desired number of queued transfer waves used by automatic sizing.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:U">U</h2>
 <dl class="index">
@@ -761,6 +997,10 @@ remote SBK command line.</div>
 <dd>
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>
+</dd>
+<dt><a href="io/gem/agent/RemoteAgentProtocol.html#VERIFY" class="member-name-link">VERIFY</a> - Static variable in class io.gem.agent.<a href="io/gem/agent/RemoteAgentProtocol.html" title="class in io.gem.agent">RemoteAgentProtocol</a></dt>
+<dd>
+<div class="block">Runtime verification operation.</div>
 </dd>
 </dl>
 <a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:J">J</a>&nbsp;<a href="#I:K">K</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a></main>

@@ -59,13 +59,14 @@ loadScripts(document, 'script');</script>
 <li><a href="#getConnections()" tabindex="0">getConnections()</a></li>
 <li><a href="#getSbkDir()" tabindex="0">getSbkDir()</a></li>
 <li><a href="#getLocalHost()" tabindex="0">getLocalHost()</a></li>
+<li><a href="#isLocalHostOption()" tabindex="0">isLocalHostOption()</a></li>
 <li><a href="#getSbmPort()" tabindex="0">getSbmPort()</a></li>
 <li><a href="#getSbmIdleSleepMilliSeconds()" tabindex="0">getSbmIdleSleepMilliSeconds()</a></li>
 <li><a href="#isTotalRecordsOption()" tabindex="0">isTotalRecordsOption()</a></li>
 <li><a href="#isTotalThroughputOption()" tabindex="0">isTotalThroughputOption()</a></li>
 <li><a href="#getTotalThroughput()" tabindex="0">getTotalThroughput()</a></li>
 <li><a href="#getJavaDir()" tabindex="0">getJavaDir()</a></li>
-<li><a href="#isRuntimeCleanup()" tabindex="0">isRuntimeCleanup()</a></li>
+<li><a href="#isPackagesCleanup()" tabindex="0">isPackagesCleanup()</a></li>
 </ol>
 </li>
 </ol>
@@ -145,18 +146,23 @@ extends io.sbk.params.Parameters</span>
 <div class="block">Get the aggregate throughput requested for all remote SBK clients.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isRuntimeCleanup()" class="member-name-link">isRuntimeCleanup</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isLocalHostOption()" class="member-name-link">isLocalHostOption</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Check whether every inactive non-current SBK-GEM-managed runtime and local cached bundle should be removed.</div>
+<div class="block">Check whether the SBM callback address was explicitly supplied.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isTotalRecordsOption()" class="member-name-link">isTotalRecordsOption</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isPackagesCleanup()" class="member-name-link">isPackagesCleanup</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Check whether the record value is an aggregate across all remote SBK clients.</div>
+<div class="block">Check whether every inactive non-current SBK-GEM-managed runtime and local cached bundle should be removed.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isTotalThroughputOption()" class="member-name-link">isTotalThroughputOption</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isTotalRecordsOption()" class="member-name-link">isTotalRecordsOption</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Check whether the record value is an aggregate across all remote SBK clients.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isTotalThroughputOption()" class="member-name-link">isTotalThroughputOption</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Check whether throughput is an aggregate across all remote SBK clients.</div>
 </div>
 </div>
@@ -217,6 +223,19 @@ extends io.sbk.params.Parameters</span>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>the local host.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isLocalHostOption()">
+<h3>isLocalHostOption</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type">boolean</span>&nbsp;<span class="element-name">isLocalHostOption</span>()</div>
+<div class="block">Check whether the SBM callback address was explicitly supplied.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>true when <code>-localhost</code> was supplied by the user or YML launcher</dd>
 </dl>
 </div>
 </section>
@@ -300,10 +319,10 @@ extends io.sbk.params.Parameters</span>
 </section>
 </li>
 <li>
-<section class="detail" id="isRuntimeCleanup()">
-<h3>isRuntimeCleanup</h3>
+<section class="detail" id="isPackagesCleanup()">
+<h3>isPackagesCleanup</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="return-type">boolean</span>&nbsp;<span class="element-name">isRuntimeCleanup</span>()</div>
+<div class="member-signature"><span class="return-type">boolean</span>&nbsp;<span class="element-name">isPackagesCleanup</span>()</div>
 <div class="block">Check whether every inactive non-current SBK-GEM-managed runtime and local cached bundle should be removed.</div>
 <dl class="notes">
 <dt>Returns:</dt>
