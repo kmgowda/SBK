@@ -52,6 +52,9 @@ def applicationProjects = [
         project(':sbm'),
         project(':sbk-web-console')
 ]
+def applicationDistributionDirectories = applicationProjects.collect { applicationProject ->
+    applicationProject.layout.buildDirectory.dir('distributions').get().asFile.absolutePath
+}.asImmutable()
 
 sourceSets {
     releaseFunctionalTest {
@@ -225,6 +228,15 @@ def releaseDocumentationModules = [
 def releaseDocumentationVersion = sbkVersion.toString()
 def releaseDocumentationLimit = qualificationValue('staleDocumentLimit').toInteger()
 def releaseRepositoryDirectory = rootDir
+def releaseRepositoryPath = releaseRepositoryDirectory.absolutePath
+def releaseQualificationReportFile = layout.buildDirectory.file(
+        'reports/release-qualification/qualification.json')
+def releaseArtifactBufferBytes = qualificationValue('artifactBufferBytes').toInteger()
+def releaseQualificationVersion = sbkVersion.toString()
+def releaseCommit = providers.exec {
+    workingDir releaseRepositoryDirectory
+    commandLine 'git', 'rev-parse', 'HEAD'
+}.standardOutput.asText.map { it.trim() }
 
 def releaseDocsWhitespaceCheck = tasks.register('releaseDocsWhitespaceCheck', Exec) {
     group = 'verification'
@@ -334,42 +346,53 @@ tasks.register('releasecheck') {
     dependsOn tasks.named('releaseFunctionalTest')
     dependsOn tasks.named('releaseDocsCheck')
     dependsOn tasks.named('releasePublicationTest')
+    inputs.files(applicationDistributionDirectories)
+            .withPropertyName('applicationDistributions')
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.property('releaseCommit', releaseCommit)
+    outputs.file(releaseQualificationReportFile)
+    // Qualification is authoritative for the current environment; always
+    // regenerate its report after every dependency gate has completed.
+    outputs.upToDateWhen { false }
     doLast {
-        def reportDirectory = qualificationReportDir.get().asFile
+        def reportFile = releaseQualificationReportFile.get().asFile
+        def reportDirectory = reportFile.parentFile
         reportDirectory.mkdirs()
         def digest = MessageDigest.getInstance('SHA-256')
         def artifacts = []
-        applicationProjects.each { appProject ->
-            fileTree(appProject.layout.buildDirectory.dir('distributions')) {
-                include '*.zip', '*.tar'
-            }.files.sort().each { artifact ->
+        applicationDistributionDirectories.each { distributionDirectory ->
+            def directory = new File(distributionDirectory)
+            def distributionArtifacts = directory.listFiles()?.findAll { artifact ->
+                artifact.isFile()
+                        && (artifact.name.endsWith('.zip') || artifact.name.endsWith('.tar'))
+            }?.sort { left, right -> left.name <=> right.name } ?: []
+            distributionArtifacts.each { artifact ->
                 digest.reset()
                 artifact.withInputStream { stream ->
-                    byte[] buffer = new byte[qualificationValue('artifactBufferBytes').toInteger()]
+                    byte[] buffer = new byte[releaseArtifactBufferBytes]
                     int count
                     while ((count = stream.read(buffer)) > 0) {
                         digest.update(buffer, 0, count)
                     }
                 }
-                artifacts << [path: relativePath(artifact),
+                def relativeArtifact = new File(releaseRepositoryPath).toPath()
+                        .relativize(artifact.toPath()).toString().replace(File.separatorChar, '/' as char)
+                artifacts << [path: relativeArtifact,
                               sha256: digest.digest().encodeHex().toString()]
             }
         }
-        def commitOutput = providers.exec {
-            commandLine 'git', 'rev-parse', 'HEAD'
-        }.standardOutput.asText.get().trim()
         def report = [
                 status: 'QUALIFIED',
-                version: sbkVersion.toString(),
-                commit: commitOutput,
+                version: releaseQualificationVersion,
+                commit: releaseCommit.get(),
                 profile: qualificationProfile,
                 javaVersion: System.getProperty('java.runtime.version'),
                 artifacts: artifacts
         ]
-        new File(reportDirectory, 'qualification.json').text =
+        reportFile.text =
                 JsonOutput.prettyPrint(JsonOutput.toJson(report)) + System.lineSeparator()
-        logger.lifecycle("SBK ${sbkVersion} release qualification: QUALIFIED")
-        logger.lifecycle("Report: ${new File(reportDirectory, 'qualification.json')}")
+        logger.lifecycle("SBK ${releaseQualificationVersion} release qualification: QUALIFIED")
+        logger.lifecycle("Report: ${reportFile}")
     }
 }
 
