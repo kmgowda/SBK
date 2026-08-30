@@ -172,7 +172,7 @@ Do not enable HaloDB without confirming access to its GitHub Packages artifact.
 ./gradlew check
 
 # Runtime packaging and discovery
-./gradlew clean :pathingJar installDist --rerun-tasks
+./gradlew clean :pathingJar :installDist --rerun-tasks
 ./build/install/sbk/bin/sbk -class <name> -help
 
 # Backend smoke test; use non-production data and credentials

@@ -113,7 +113,7 @@ Agents should prefer read-only discovery, scoped edits, Gradle wrapper commands,
 ```bash
 ./gradlew :<affected-module>:check  # source changes
 ./gradlew check                     # cross-module source/build changes
-./gradlew installDist               # runtime packaging/discovery changes
+./gradlew :installDist              # runtime packaging/discovery changes
 git diff --check
 ```
 

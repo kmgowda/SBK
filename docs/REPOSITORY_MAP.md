@@ -194,4 +194,4 @@ Because many vendor drivers require external services, their strongest verificat
 | Local Web Console | `sbk-web-console`, `WebLogger`, `SbmWebLogger`, `GemWebLogger` | `./gradlew :sbk-web-console:check :sbk-api:check :sbm:check :sbk-gem:check` |
 | gRPC aggregation | Proto definitions, `GrpcLogger`, `SbmGrpcService` | `./gradlew :sbm:check` |
 | Remote launch | `SbkGem`, `SbkGemBenchmark`, SSH classes | `./gradlew :sbk-gem:check` |
-| Distribution dependency | Root build and pathing JAR | `./gradlew clean :pathingJar installDist --rerun-tasks` |
+| Distribution dependency | Root build and pathing JAR | `./gradlew clean :pathingJar :installDist --rerun-tasks` |

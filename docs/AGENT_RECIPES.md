@@ -164,7 +164,7 @@ options into an unrelated driver.
 ./gradlew check
 
 # 4. Build the distribution and confirm the driver is loadable
-./gradlew installDist
+./gradlew :installDist
 ./build/install/sbk/bin/sbk -help 2>&1 | grep -i acmekv
 # (expected: "acmekv" appears in the storage driver list)
 
@@ -175,7 +175,7 @@ options into an unrelated driver.
 ### 1.5 Success criteria
 
 - [ ] `./gradlew check` passes.
-- [ ] `./gradlew installDist` produces a working `sbk` script.
+- [ ] `./gradlew :installDist` produces a working `sbk` script.
 - [ ] `sbk -help` lists the new driver.
 - [ ] A benchmark against a real or mock backend reports records/sec
       and latency percentiles for at least 30 seconds without errors.
@@ -308,7 +308,7 @@ for a concrete reference of how much you need to override.
 
 ```bash
 ./gradlew :sbk-api:check
-./gradlew installDist
+./gradlew :installDist
 
 # Run any benchmark with the new logger:
 ./build/install/sbk/bin/sbk -class file -file /tmp/sbk.bin \
@@ -363,7 +363,7 @@ String getMyFlag();
 
 ```bash
 ./gradlew :sbk-api:check
-./gradlew installDist
+./gradlew :installDist
 ./build/install/sbk/bin/sbk -class file -help 2>&1 | grep my-flag
 ```
 
@@ -383,9 +383,9 @@ through them top-to-bottom.
 - **No.** The driver is not in the distribution. Check:
   - Was it included in [`settings-drivers.gradle`](../settings-drivers.gradle)
     and [`build-drivers.gradle`](../build-drivers.gradle)?
-  - Did you actually run `./gradlew installDist` after the change?
+  - Did you actually run `./gradlew :installDist` after the change?
   - Did the pathing JAR get rebuilt? Run
-    `./gradlew clean :pathingJar installDist --rerun-tasks`.
+    `./gradlew clean :pathingJar :installDist --rerun-tasks`.
 
 ### 5.2 Does the JVM find all classes?
 
@@ -400,7 +400,7 @@ stale-pathing-JAR bug (see [AGENTS.md](../AGENTS.md#44-the-pathing-jar-carries-t
 Fix with:
 
 ```bash
-./gradlew clean :pathingJar installDist --rerun-tasks
+./gradlew clean :pathingJar :installDist --rerun-tasks
 ```
 
 ### 5.3 Is the endpoint actually the storage protocol?
@@ -533,7 +533,7 @@ Common breakage modes:
 A compile-clean upgrade can still break at runtime. Always:
 
 ```bash
-./gradlew clean :pathingJar installDist --rerun-tasks
+./gradlew clean :pathingJar :installDist --rerun-tasks
 ./build/install/sbk/bin/sbk -class <name> ... -writers 1 -seconds 30
 ```
 
@@ -555,7 +555,7 @@ declaring an integration "done".
 
 ```bash
 # Build
-./gradlew installDist
+./gradlew :installDist
 
 # Confirm the binary works at all
 ./build/install/sbk/bin/sbk -help | head -10
@@ -622,10 +622,10 @@ A red flag run has any of:
 ./gradlew check
 
 # Build the launchable distribution
-./gradlew installDist
+./gradlew :installDist
 
 # Clean rebuild (use after pathing-jar staleness, classpath changes)
-./gradlew clean :pathingJar installDist --rerun-tasks
+./gradlew clean :pathingJar :installDist --rerun-tasks
 
 # List drivers visible to the launcher
 ./build/install/sbk/bin/sbk -help 2>&1 | head -25

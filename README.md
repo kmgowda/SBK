@@ -212,7 +212,7 @@ Clone and build the project:
 git clone https://github.com/kmgowda/SBK.git
 cd SBK
 ./gradlew check
-./gradlew installDist
+./gradlew :installDist
 ```
 
 The installed launcher is created at:
@@ -231,11 +231,17 @@ Useful development commands:
 ./gradlew :drivers:minio:check
 
 # Generate launch scripts and runtime libraries
-./gradlew installDist
+./gradlew :installDist
 
 # Rebuild the pathing JAR after dependency changes
-./gradlew clean :pathingJar installDist --rerun-tasks
+./gradlew clean :pathingJar :installDist --rerun-tasks
 ```
+
+The leading `:` selects only the root distribution task. Omitting it also
+matches every driver's `installDist` task and creates dozens of standalone
+driver distributions that are not needed for the complete SBK package.
+Gradle's build cache and configuration cache are enabled by default. For local
+iteration, prefer the narrowest module task; CI retains the full `check` gate.
 
 ChromaDB, HaloDB, and Ignite are present in the source tree but are not enabled in the aggregate build. ChromaDB's Java client adds an approximately 829 MiB all-platform local-embedding dependency closure; enable it explicitly only for ChromaDB benchmarks. HaloDB depends on a GitHub Packages artifact that may require credentials. The `sbktemplate` directory is a scaffold, not a runtime driver.
 
@@ -510,7 +516,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing code. The minimum verifi
 ```bash
 ./gradlew :<module>:check
 ./gradlew check
-./gradlew installDist
+./gradlew :installDist
 ```
 
 Driver changes also require a smoke test against the relevant backend. Pull requests target `master`. Do not re-enable HaloDB or upgrade the intentionally pinned MinIO SDK without discussing the compatibility implications.

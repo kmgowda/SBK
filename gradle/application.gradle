@@ -9,6 +9,8 @@
  *
  */
 plugins.withId('application') {
+    def configuredRuntimeJvmArgs = rootProject.ext.sbkRuntimeJvmArgs.collect { it.toString() }
+
     afterEvaluate {
         configurations.archives.artifacts.removeAll {
             it.hasProperty('archiveTask') && (it.archiveTask == distZip || it.archiveTask == distTar)
@@ -20,6 +22,14 @@ plugins.withId('application') {
     tasks.register('pathingJar', Jar) {
         archiveAppendix = 'pathing'
 
+        def runtimeJarNames = configurations.runtimeClasspath.elements.map { runtimeFiles ->
+            runtimeFiles.collect { it.asFile.name }
+        }
+        def applicationJarName = tasks.named('jar', Jar).flatMap { it.archiveFileName }
+        def runtimeManifestClasspath = runtimeJarNames.zip(applicationJarName) { dependencies, mainJar ->
+            (dependencies + mainJar).join(' ')
+        }
+
         // The manifest is the runtime dependency graph. Declaring the classpath
         // as an input prevents Gradle from reusing a stale pathing JAR after a
         // dependency is added, removed, or changed.
@@ -27,104 +37,145 @@ plugins.withId('application') {
                 .withPropertyName('runtimeClasspath')
                 .withPathSensitivity(PathSensitivity.NAME_ONLY)
 
-        // Delay configuring the manifest to avoid resolving the configuration
-        doFirst {
-            manifest {
-                attributes("Class-Path":
-                        configurations.runtimeClasspath.collect { it.name }.join(' ') + " " + jar.archiveFileName.get()
-                )
-            }
+        // Keep dependency resolution lazy while avoiding execution-time access
+        // to the Gradle project model, which is incompatible with the
+        // configuration cache.
+        manifest {
+            attributes('Class-Path': runtimeManifestClasspath)
         }
     }
 
     // Configure every standard and custom start script to use the same JVM options.
     // Repository-owned templates supply the shared SBK Java bootstrap contract.
     tasks.withType(CreateStartScripts).configureEach {
-        doFirst {
-            defaultJvmOpts = ((defaultJvmOpts ?: []) + rootProject.ext.sbkRuntimeJvmArgs).unique()
+        doFirst { scriptTask ->
+            scriptTask.defaultJvmOpts = ((scriptTask.defaultJvmOpts ?: []) + configuredRuntimeJvmArgs).unique()
         }
     }
 
+    def launcherScriptTasks = tasks.withType(CreateStartScripts)
+    def launcherScriptsDirectoryPath = layout.buildDirectory.dir('scripts').get().asFile.absolutePath
+    def launcherVerificationMarker = layout.buildDirectory.file(
+            'verification/sbk-java-home-start-scripts.verified')
+    def launcherVerificationMarkerPath = launcherVerificationMarker.get().asFile.absolutePath
+    def launcherVersion = version.toString()
+    def launcherJmxEnabled = jmxExport.toString().toBoolean()
+    def launcherRuntimeJvmArgs = rootProject.ext.sbkRuntimeJvmArgs.collect { it.toString() }
+
     def verifySbkJavaHomeStartScripts = tasks.register('verifySbkJavaHomeStartScripts') {
-        dependsOn tasks.withType(CreateStartScripts)
+        dependsOn launcherScriptTasks
+        inputs.dir(launcherScriptsDirectoryPath)
+                .withPropertyName('generatedLaunchers')
+                .withPathSensitivity(PathSensitivity.RELATIVE)
+        inputs.property('applicationVersion', launcherVersion)
+        inputs.property('jmxEnabled', launcherJmxEnabled)
+        inputs.property('runtimeJvmArgs', launcherRuntimeJvmArgs)
+        outputs.file(launcherVerificationMarkerPath)
+        outputs.cacheIf('Launcher verification is reproducible from generated script inputs') { true }
         doLast {
-            tasks.withType(CreateStartScripts).each { scriptTask ->
-                def pathingJarName = tasks.named('pathingJar').get().archiveFileName.get()
-                def jarName = tasks.named('jar').get().archiveFileName.get()
-                def expectedUnixClasspath =
-                        "CLASSPATH=\$APP_HOME/lib/${pathingJarName}:\$APP_HOME/lib/${jarName}"
-                def expectedWindowsClasspath =
-                        "set CLASSPATH=%APP_HOME%\\lib\\${pathingJarName};%APP_HOME%\\lib\\${jarName}"
-                if (!scriptTask.unixScript.text.contains('sbk-java-bootstrap.sh')) {
-                    throw new GradleException("${scriptTask.path} Unix launcher does not use the SBK JDK resolver")
+            def scriptsDirectory = new File(launcherScriptsDirectoryPath)
+            def unixLaunchers = scriptsDirectory.listFiles()?.findAll {
+                it.isFile() && !it.name.endsWith('.bat') && !it.name.endsWith('.yml')
+            }?.sort { it.name } ?: []
+            if (unixLaunchers.isEmpty()) {
+                throw new GradleException("No generated launchers found under ${scriptsDirectory}")
+            }
+            unixLaunchers.each { unixLauncher ->
+                def windowsLauncher = new File(scriptsDirectory, unixLauncher.name + '.bat')
+                if (!windowsLauncher.isFile()) {
+                    throw new GradleException("Missing Windows launcher paired with ${unixLauncher}")
                 }
-                if (!scriptTask.windowsScript.text.contains('sbk-java-bootstrap.bat')) {
-                    throw new GradleException("${scriptTask.path} Windows launcher does not use the SBK JDK resolver")
+                def launcherName = unixLauncher.name
+                def unixScript = unixLauncher.getText('UTF-8')
+                def windowsScript = windowsLauncher.getText('UTF-8')
+                def unixClasspath = unixScript.readLines().find { it.startsWith('CLASSPATH=') }
+                def unixEntries = unixClasspath == null ? []
+                        : unixClasspath.substring('CLASSPATH='.length()).split(':').toList()
+                def pathingSuffix = "-pathing-${launcherVersion}.jar"
+                def validUnixClasspath = unixEntries.size() == 2
+                        && unixEntries.every { it.startsWith('\$APP_HOME/lib/') }
+                        && unixEntries[0].endsWith(pathingSuffix)
+                        && unixEntries[1] == unixEntries[0].substring(0,
+                        unixEntries[0].length() - pathingSuffix.length()) + "-${launcherVersion}.jar"
+                def expectedWindowsClasspath = validUnixClasspath
+                        ? ('set CLASSPATH=%APP_HOME%\\lib\\'
+                        + unixEntries[0].substring('\$APP_HOME/lib/'.length())
+                        + ';%APP_HOME%\\lib\\'
+                        + unixEntries[1].substring('\$APP_HOME/lib/'.length()))
+                        : ''
+                if (!unixScript.contains('sbk-java-bootstrap.sh')) {
+                    throw new GradleException("${launcherName} Unix launcher does not use the SBK JDK resolver")
                 }
-                if (!scriptTask.unixScript.text.contains(
+                if (!windowsScript.contains('sbk-java-bootstrap.bat')) {
+                    throw new GradleException("${launcherName} Windows launcher does not use the SBK JDK resolver")
+                }
+                if (!unixScript.contains(
                         'SBK_JAVA_INSTALL=${SBK_JAVA_INSTALL:-false}')) {
                     throw new GradleException(
-                            "${scriptTask.path} Unix launcher does not preserve the SBK_JAVA_INSTALL opt-in")
+                            "${launcherName} Unix launcher does not preserve the SBK_JAVA_INSTALL opt-in")
                 }
-                if (!scriptTask.windowsScript.text.contains(
+                if (!windowsScript.contains(
                         'if not defined SBK_JAVA_INSTALL set "SBK_JAVA_INSTALL=false"')) {
                     throw new GradleException(
-                            "${scriptTask.path} Windows launcher does not default SBK_JAVA_INSTALL safely")
+                            "${launcherName} Windows launcher does not default SBK_JAVA_INSTALL safely")
                 }
-                if (!scriptTask.windowsScript.text.contains(
+                if (!windowsScript.contains(
                         'sbk-java-bootstrap.bat" "%SBK_JAVA_INSTALL%"')) {
                     throw new GradleException(
-                            "${scriptTask.path} Windows launcher does not forward the SBK_JAVA_INSTALL opt-in")
+                            "${launcherName} Windows launcher does not forward the SBK_JAVA_INSTALL opt-in")
                 }
-                if (!scriptTask.unixScript.text.contains('"-Dsbk.appHome=$APP_HOME"')) {
+                if (!unixScript.contains('"-Dsbk.appHome=$APP_HOME"')) {
                     throw new GradleException(
-                            "${scriptTask.path} Unix launcher does not set the SBK application home")
+                            "${launcherName} Unix launcher does not set the SBK application home")
                 }
-                if (!scriptTask.windowsScript.text.contains('"-Dsbk.appHome=%APP_HOME%"')) {
+                if (!windowsScript.contains('"-Dsbk.appHome=%APP_HOME%"')) {
                     throw new GradleException(
-                            "${scriptTask.path} Windows launcher does not set the SBK application home")
+                            "${launcherName} Windows launcher does not set the SBK application home")
                 }
-                if (scriptTask.unixScript.text.contains('@SBK_UNIX_JMX_ARGUMENTS@')
-                        || scriptTask.windowsScript.text.contains('@SBK_WINDOWS_JMX_ARGUMENTS@')) {
+                if (unixScript.contains('@SBK_UNIX_JMX_ARGUMENTS@')
+                        || windowsScript.contains('@SBK_WINDOWS_JMX_ARGUMENTS@')) {
                     throw new GradleException(
-                            "${scriptTask.path} launcher contains an unresolved SBK template token")
+                            "${launcherName} launcher contains an unresolved SBK template token")
                 }
-                if (!scriptTask.unixScript.text.contains(expectedUnixClasspath)) {
+                if (!validUnixClasspath) {
                     throw new GradleException(
-                            "${scriptTask.path} Unix launcher does not use only the pathing and application JARs")
+                            "${launcherName} Unix launcher does not use only the pathing and application JARs")
                 }
-                if (!scriptTask.windowsScript.text.contains(expectedWindowsClasspath)) {
+                if (!windowsScript.contains(expectedWindowsClasspath)) {
                     throw new GradleException(
-                            "${scriptTask.path} Windows launcher does not use only the pathing and application JARs")
+                            "${launcherName} Windows launcher does not use only the pathing and application JARs")
                 }
-                if (scriptTask.unixScript.text.contains('# Determine the Java command to use to start the JVM.')
-                        || scriptTask.windowsScript.text.contains('@rem Find java.exe')) {
+                if (unixScript.contains('# Determine the Java command to use to start the JVM.')
+                        || windowsScript.contains('@rem Find java.exe')) {
                     throw new GradleException(
-                            "${scriptTask.path} launcher still contains Gradle's default Java resolver")
+                            "${launcherName} launcher still contains Gradle's default Java resolver")
                 }
-                def expectedJmxOption = '-Dsbk.jmxExport=' + jmxExport.toString().toBoolean()
-                if (!scriptTask.unixScript.text.contains(expectedJmxOption)
-                        || !scriptTask.windowsScript.text.contains(expectedJmxOption)) {
+                def expectedJmxOption = '-Dsbk.jmxExport=' + launcherJmxEnabled
+                if (!unixScript.contains(expectedJmxOption)
+                        || !windowsScript.contains(expectedJmxOption)) {
                     throw new GradleException(
-                            "${scriptTask.path} launcher does not contain the configured JMX export mode")
+                            "${launcherName} launcher does not contain the configured JMX export mode")
                 }
-                if (jmxExport.toString().toBoolean()
-                        && (!scriptTask.unixScript.text.contains('-javaagent:')
-                        || !scriptTask.windowsScript.text.contains('-javaagent:'))) {
+                if (launcherJmxEnabled
+                        && (!unixScript.contains('-javaagent:')
+                        || !windowsScript.contains('-javaagent:'))) {
                     throw new GradleException(
-                            "${scriptTask.path} launcher is missing the configured JMX Java agent")
+                            "${launcherName} launcher is missing the configured JMX Java agent")
                 }
-                rootProject.ext.sbkRuntimeJvmArgs.each { option ->
-                    if (!scriptTask.unixScript.text.contains(option)) {
+                launcherRuntimeJvmArgs.each { option ->
+                    if (!unixScript.contains(option)) {
                         throw new GradleException(
-                                "${scriptTask.path} Unix launcher is missing runtime JVM option ${option}")
+                                "${launcherName} Unix launcher is missing runtime JVM option ${option}")
                     }
-                    if (!scriptTask.windowsScript.text.contains(option)) {
+                    if (!windowsScript.contains(option)) {
                         throw new GradleException(
-                                "${scriptTask.path} Windows launcher is missing runtime JVM option ${option}")
+                                "${launcherName} Windows launcher is missing runtime JVM option ${option}")
                     }
                 }
             }
+            def marker = new File(launcherVerificationMarkerPath)
+            marker.parentFile.mkdirs()
+            marker.setText('verified\n', 'UTF-8')
         }
     }
 

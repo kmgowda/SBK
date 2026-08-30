@@ -404,7 +404,7 @@ The root distribution includes `sbk-api` and all drivers declared as API depende
 The generated launcher uses a pathing JAR whose manifest points at runtime dependencies. After changing dependencies, force regeneration:
 
 ```bash
-./gradlew clean :pathingJar installDist --rerun-tasks
+./gradlew clean :pathingJar :installDist --rerun-tasks
 ```
 
 A driver can compile successfully yet be unavailable at runtime if either registration file is missing or the distribution/pathing JAR is stale.

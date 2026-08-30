@@ -62,7 +62,7 @@ after a benchmark exits, subject to SBK Dashboard's retention setting.
 Build the distribution, then run a filesystem benchmark with the logger selected explicitly:
 
 ```bash
-./gradlew installDist
+./gradlew :installDist
 
 ./build/install/sbk/bin/sbk \
   -class file -file /tmp/sbk-prometheus.dat \

@@ -54,8 +54,8 @@ tasks.register('rat', JavaExec) {
         exclude ratExcludes
     })
     outputs.file(ratReport)
+    outputs.cacheIf('Apache RAT reports are reproducible from declared source inputs') { true }
     ignoreExitValue = true
-    standardOutput = OutputStream.nullOutputStream()
 
     args '--input-exclude'
     args ratExcludes

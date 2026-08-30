@@ -70,7 +70,7 @@ recipe).**
 ./gradlew check
 
 # Build the launchable scripts at ./build/install/sbk/bin/sbk
-./gradlew installDist
+./gradlew :installDist
 
 # Build a single driver (much faster while iterating)
 ./gradlew :drivers:minio:check
@@ -98,7 +98,7 @@ Verification is proportional to the affected surface:
 1. Run the narrowest affected module check, such as
    `./gradlew :drivers:<name>:check`, `:sbk-api:check`, or `:perl:check`.
 2. Run `./gradlew check` for source, dependency, or build-logic changes.
-3. Run `./gradlew installDist` when runtime packaging, discovery, launchers,
+3. Run `./gradlew :installDist` when runtime packaging, discovery, launchers,
    drivers, or loggers are affected.
 4. For driver behavior, run the installed CLI against a controlled real or
    mock backend (or `play.min.io` for S3). Compile-clean is not sufficient.
@@ -328,7 +328,7 @@ changes invalidate the manifest during incremental builds.
 If files under an existing distribution were manually changed or copied,
 regenerate it with:
 ```bash
-./gradlew clean :pathingJar installDist --rerun-tasks
+./gradlew clean :pathingJar :installDist --rerun-tasks
 ```
 
 The symptom of a manually inconsistent distribution is `NoClassDefFoundError`
