@@ -172,7 +172,7 @@ plugins.withId('java') {
         testLogging.showCauses = true
         testLogging.showExceptions = true
         testLogging.showStackTraces = true
-        testLogging.events = ["FAILED", "SKIPPED"]
+        testLogging.events = ["PASSED", "FAILED", "SKIPPED"]
         maxParallelForks = providers.gradleProperty('testMaxParallelForks').map { configuredForks ->
             def forks = configuredForks.toInteger()
             if (forks < 1) {
