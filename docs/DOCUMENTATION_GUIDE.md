@@ -68,7 +68,7 @@ For Mermaid changes, use Mermaid CLI 11 or later when available. Render every ch
 For command changes, prefer exercising the actual command. At minimum, verify the task exists and that option names match the code. Driver help is generated only after discovery, so use:
 
 ```bash
-./gradlew installDist
+./gradlew :installDist
 ./build/install/sbk/bin/sbk -class <driver> -help
 ```
 

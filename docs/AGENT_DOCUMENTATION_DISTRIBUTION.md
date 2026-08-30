@@ -20,7 +20,7 @@ SBK distributes human and agent documentation with executable and library releas
 
 ## Gradle application distributions
 
-`./gradlew installDist`, `distZip`, and `distTar` use the root `applicationDistribution` configuration.
+`./gradlew :installDist`, `:distZip`, and `:distTar` use the root `applicationDistribution` configuration.
 
 The distribution root contains:
 
@@ -39,7 +39,7 @@ The `docs/` directory contains the engineering index, architecture, repository m
 Verify locally:
 
 ```bash
-./gradlew installDist
+./gradlew :installDist
 find build/install/sbk -maxdepth 2 -type f | sort
 ```
 

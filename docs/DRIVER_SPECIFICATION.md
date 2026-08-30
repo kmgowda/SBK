@@ -105,7 +105,7 @@ The driver MUST:
 - [ ] For each supported direction, handle one worker and `N` concurrent
       workers without sharing unsafe per-worker state.
 - [ ] Pass `./gradlew :drivers:<name>:check` (compile + checkstyle).
-- [ ] Pass `./gradlew installDist` and show up under
+- [ ] Pass `./gradlew :installDist` and show up under
       `sbk -help`.
 - [ ] Run a bounded smoke benchmark against a controlled target and emit the
       normal SBK throughput and latency summary for each supported direction.
@@ -282,7 +282,7 @@ docker run -d --name acme1 -p 1234:1234 acme/acme-kv:latest
 
 - [ ] `./gradlew :drivers:<name>:check` exits 0.
 - [ ] `./gradlew check` exits 0 (no other module regresses).
-- [ ] `./gradlew installDist` produces a working `sbk` script.
+- [ ] `./gradlew :installDist` produces a working `sbk` script.
 - [ ] `sbk -class <name> -help` lists every flag in §3.
 - [ ] All applicable §5.2 smoke tests pass against a controlled target.
 - [ ] `drivers/<name>/README.md` exists, contains:
@@ -514,7 +514,7 @@ driver-implementation work and present it to the user.
 |---|---|
 | `./gradlew :drivers:<name>:check` passes | ☐ |
 | `./gradlew check` passes (no regression elsewhere) | ☐ |
-| `./gradlew installDist` produces a working binary | ☐ |
+| `./gradlew :installDist` produces a working binary | ☐ |
 | `sbk -class <name> -help` lists every spec'd flag | ☐ |
 | Every smoke test in §5.2 of the spec succeeds | ☐ |
 | Failure-mode tests (§5.3) produce one-line diagnostics, not stack traces | ☐ |

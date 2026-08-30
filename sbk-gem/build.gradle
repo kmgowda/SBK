@@ -90,10 +90,11 @@ tasks.register('updateDocs') {
     }
 }
 
+def sbkGemJarFile = tasks.named('jar', Jar).flatMap { it.archiveFile }
 tasks.named('test') {
-    dependsOn tasks.named('jar')
-    inputs.file(tasks.named('jar').flatMap { it.archiveFile })
-    doFirst {
-        systemProperty 'io.sbk.test.jar', tasks.named('jar').get().archiveFile.get().asFile.absolutePath
+    dependsOn sbkGemJarFile
+    inputs.file(sbkGemJarFile)
+    doFirst { testTask ->
+        testTask.systemProperty 'io.sbk.test.jar', sbkGemJarFile.get().asFile.absolutePath
     }
 }

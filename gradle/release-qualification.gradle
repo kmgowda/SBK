@@ -356,6 +356,23 @@ tasks.register('releasecheck') {
     }
 }
 
+def releaseQualificationTaskNames = [
+        'releasePreflight', 'releaseBuild', 'releaseConcurrency', 'releasePerformance',
+        'releasePackaging', 'releaseFunctionalTest', 'releaseDocsCheck',
+        'releasePublicationTest', 'releasecheck'
+] as Set
+
+// Release qualification intentionally inspects the live Git tree, private
+// inventory, task graph, and generated publication state at execution time.
+// Keep that authoritative behavior while allowing routine check/build tasks
+// to use the configuration cache.
+tasks.configureEach { task ->
+    if (task.name in releaseQualificationTaskNames) {
+        task.notCompatibleWithConfigurationCache(
+                'Release qualification validates live repository and publication state')
+    }
+}
+
 [
         'releaseBuild', 'releaseConcurrency', 'releasePerformance', 'releasePackaging',
         'releaseFunctionalTest', 'releaseDocsCheck', 'releasePublicationTest', 'releasecheck'

@@ -138,6 +138,15 @@ allprojects {
         return
     }
 
+    def sbkProjectName = project.name
+    def sbkClass = project.name
+    if (project.parent?.name == 'drivers') {
+        sbkProjectName = rootProject.name + '-' + sbkProjectName
+    }
+
+    group = sbkGroup
+    version = sbkVersion
+
     repositories {
         mavenLocal()
         mavenCentral()
@@ -159,8 +168,6 @@ allprojects {
             }
         }
     }
-    group = sbkGroup
-
     apply plugin: 'java'
     apply plugin: 'idea'
     apply plugin: 'eclipse'
@@ -170,6 +177,10 @@ allprojects {
     // Disable graalvm builds
     //apply plugin: "com.palantir.graal"
 
+    base {
+        archivesName = sbkProjectName
+    }
+
     apply from: "$rootDir/gradle/java.gradle"
     apply from: "$rootDir/gradle/application.gradle"
     apply from: "$rootDir/gradle/checkstyle.gradle"
@@ -177,26 +188,12 @@ allprojects {
     apply from: "$rootDir/gradle/idea.gradle"
     apply from: "$rootDir/gradle/jacoco.gradle"
 
-    def sbkProjectName = project.name
-    def sbkClass = project.name
-    if (project.parent) {
-        if (project.parent.name == "drivers") {
-            sbkProjectName = rootProject.name + "-" + sbkProjectName
-        }
-    }
-
-    base {
-        archivesName = sbkProjectName
-    }
-
-    version = sbkVersion
-
-    configurations.all {
+    configurations.configureEach {
         exclude group: sbkGroup, module: "sbktemplate"
     }
 
 
-    jar {
+    tasks.named('jar', Jar).configure {
         manifest {
             attributes 'Name': sbkProjectName.toUpperCase(),
                     'Specification-Title': "Storage Benchmark Kit",
@@ -242,9 +239,11 @@ allprojects {
     def projectJmxPort = project.path.startsWith(':driver-') || project.name == rootProject.name
             || project.name.startsWith('sbk-api') ? jmxSbkPort : jmxSbmPort
     configureSbkStartScripts(tasks.named('startScripts'), project, projectJmxPort)
-    copy {
-        from "$rootDir/jmx-config.yml"
-        into tasks.named('startScripts').get().outputDir
+    application {
+        applicationDistribution.from(rootProject.file('jmx-config.yml')) {
+            into 'bin'
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
     }
 
     /*
@@ -488,6 +487,16 @@ evaluationDependsOn(':sbk-gem')
 
 def sbkRuntimeIdentityFile = layout.buildDirectory.file(
         'generated/sbk-runtime-identity/sbk-runtime-identity.properties')
+def sbkRuntimeIdentityVersion = sbkVersion.toString()
+def sbkRuntimeClasspathFiles = configurations.runtimeClasspath
+def sbkMainJarFile = tasks.named('jar', Jar).flatMap { it.archiveFile }
+def sbkPathingJarFile = tasks.named('pathingJar', Jar).flatMap { it.archiveFile }
+def sbkRemoteAgentJarFile = project(':sbk-gem').tasks.named('remoteAgentJar', Jar)
+        .flatMap { it.archiveFile }
+def sbkLauncherScriptsDirectory = layout.buildDirectory.dir('scripts')
+def sbkLauncherScriptFiles = fileTree(sbkLauncherScriptsDirectory) {
+    exclude '*.yml'
+}
 def sbkBootstrapFiles = files(
         'gradle/sbk-java-bootstrap.sh',
         'gradle/sbk-java-bootstrap.bat',
@@ -498,25 +507,26 @@ def generateSbkRuntimeIdentity = tasks.register('generateSbkRuntimeIdentity') {
             project(':sbk-gem').tasks.named('remoteAgentJar')
     inputs.property('runtimeIdentityFormat', 1)
     inputs.property('sbkVersion', sbkVersion.toString())
-    inputs.files(configurations.runtimeClasspath)
+    inputs.files(sbkRuntimeClasspathFiles)
             .withPropertyName('runtimeClasspath')
             .withPathSensitivity(PathSensitivity.NAME_ONLY)
-    inputs.file(tasks.named('jar').flatMap { it.archiveFile })
+    inputs.file(sbkMainJarFile)
             .withPropertyName('sbkJar')
             .withPathSensitivity(PathSensitivity.NAME_ONLY)
-    inputs.file(tasks.named('pathingJar').flatMap { it.archiveFile })
+    inputs.file(sbkPathingJarFile)
             .withPropertyName('pathingJar')
             .withPathSensitivity(PathSensitivity.NAME_ONLY)
-    inputs.file(project(':sbk-gem').tasks.named('remoteAgentJar').flatMap { it.archiveFile })
+    inputs.file(sbkRemoteAgentJarFile)
             .withPropertyName('remoteAgentJar')
             .withPathSensitivity(PathSensitivity.NAME_ONLY)
-    inputs.files(tasks.withType(CreateStartScripts))
+    inputs.files(sbkLauncherScriptFiles)
             .withPropertyName('launchers')
             .withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.files(sbkBootstrapFiles)
             .withPropertyName('javaBootstrap')
             .withPathSensitivity(PathSensitivity.NAME_ONLY)
     outputs.file(sbkRuntimeIdentityFile)
+    outputs.cacheIf('Runtime identity is reproducible from the packaged runtime inputs') { true }
 
     doLast {
         def digest = java.security.MessageDigest.getInstance('SHA-256')
@@ -531,18 +541,19 @@ def generateSbkRuntimeIdentity = tasks.register('generateSbkRuntimeIdentity') {
                 }
             }
         }
-        configurations.runtimeClasspath.files.sort { it.name }.each {
+        sbkRuntimeClasspathFiles.files.sort { it.name }.each {
             updateDigest("lib/${it.name}", it)
         }
-        [tasks.named('jar').get().archiveFile.get().asFile,
-         tasks.named('pathingJar').get().archiveFile.get().asFile,
-         project(':sbk-gem').tasks.named('remoteAgentJar').get().archiveFile.get().asFile]
+        [sbkMainJarFile.get().asFile,
+         sbkPathingJarFile.get().asFile,
+         sbkRemoteAgentJarFile.get().asFile]
                 .sort { it.name }
                 .each { updateDigest("lib/${it.name}", it) }
-        tasks.withType(CreateStartScripts).sort { it.name }.each { scriptTask ->
-            fileTree(scriptTask.outputDir).files.sort { it.name }.each {
-                updateDigest("bin/${it.name}", it)
-            }
+        sbkLauncherScriptsDirectory.get().asFile.listFiles().findAll {
+            it.isFile() && !it.name.endsWith('.yml')
+        }
+                .sort { it.name }.each {
+            updateDigest("bin/${it.name}", it)
         }
         sbkBootstrapFiles.files.sort { it.name }.each {
             updateDigest("bin/${it.name}", it)
@@ -550,7 +561,8 @@ def generateSbkRuntimeIdentity = tasks.register('generateSbkRuntimeIdentity') {
         def identity = java.util.HexFormat.of().formatHex(digest.digest())
         def output = sbkRuntimeIdentityFile.get().asFile
         output.parentFile.mkdirs()
-        output.setText("format.version=1\nsbk.version=${sbkVersion}\nbuild.sha256=${identity}\n", 'UTF-8')
+        output.setText("format.version=1\nsbk.version=${sbkRuntimeIdentityVersion}"
+                + "\nbuild.sha256=${identity}\n", 'UTF-8')
     }
 }
 

@@ -699,6 +699,27 @@ tasks.register('publish') {
     }
 }
 
+def releasePublicationTaskNames = [
+        'releaseCoreSboms', 'verifyReleasePublicationScope',
+        'releaseStageCorePublications', 'releasePublishCoreToGitHubPackages',
+        'verifyCorePublicationStaging', 'verifyExistingCoreGitHubPackages',
+        'releaseAgentDocs', 'collectReleaseAssets', 'generateReleaseManifest',
+        'finalizeReleaseManifest', 'prepareReleaseContainer',
+        'releasePublicationAssets', 'releasePublicationDryRun',
+        'verifyDockerHubPublication', 'publishDockerHub',
+        'verifyReleaseDispatch', 'publish'
+] as Set
+
+// Publication reads credentials, remote state, the live Git commit, and
+// external command results during execution. Those operations deliberately
+// remain outside the configuration-cache contract used by routine builds.
+tasks.configureEach { task ->
+    if (task.name in releasePublicationTaskNames) {
+        task.notCompatibleWithConfigurationCache(
+                'Release publication uses live credentials, Git, and remote service state')
+    }
+}
+
 gradle.projectsEvaluated {
     if (rootReleasePublishRequested) {
         releaseMavenProjects.each { publicationProject ->

@@ -48,14 +48,14 @@ Before requesting review, run:
 
 ```bash
 ./gradlew check
-./gradlew installDist
+./gradlew :installDist
 git diff --check
 ```
 
 Dependency or distribution changes require:
 
 ```bash
-./gradlew clean :pathingJar installDist --rerun-tasks
+./gradlew clean :pathingJar :installDist --rerun-tasks
 ```
 
 Driver changes also require a real-backend smoke test. State the target version and exact sanitized command in the pull request.
