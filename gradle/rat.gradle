@@ -56,6 +56,10 @@ tasks.register('rat', JavaExec) {
     outputs.file(ratReport)
     outputs.cacheIf('Apache RAT reports are reproducible from declared source inputs') { true }
     ignoreExitValue = true
+    // RAT prints its INFO banner before parsing --log-level. Set the startup
+    // level through its supported environment contract while retaining WARN
+    // and ERROR diagnostics.
+    environment 'RAT_DEFAULT_LOG_LEVEL', 'WARN'
 
     args '--input-exclude'
     args ratExcludes
