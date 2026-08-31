@@ -12,6 +12,7 @@ package io.sbk.api.impl;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.data.DataType;
+import io.sbk.exception.BenchmarkCleanupTimeoutException;
 import io.sbk.logger.RWLogger;
 import io.sbk.params.impl.SbkParameters;
 import io.time.MilliSeconds;
@@ -33,6 +34,9 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -148,6 +152,34 @@ final class SbkBenchmarkTest {
 
         assertEquals(0, releaseWorker.getCount());
         assertTrue(workerExited.await(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    void forcedCleanupFailsCompletionAndPreservesTheInitiatingFailure() throws Exception {
+        final IOException initiatingFailure = new IOException("remote operation failed");
+        final SbkBenchmark benchmark = benchmarkWithWriter(() -> { });
+
+        final CompletionException completionFailure = assertThrows(CompletionException.class,
+                () -> benchmark.forceShutdownCompletion(initiatingFailure).join());
+
+        final BenchmarkCleanupTimeoutException timeoutFailure = assertInstanceOf(
+                BenchmarkCleanupTimeoutException.class, completionFailure.getCause());
+        assertSame(initiatingFailure, timeoutFailure.getCause());
+        assertTrue(timeoutFailure.getMessage().contains("cleanup exceeded 5 seconds"));
+        assertTrue(timeoutFailure.getMessage().contains("final aggregate results may be incomplete"));
+    }
+
+    @Test
+    void orderlyShutdownCannotBecomeSuccessfulWhenForcedCleanupWins() throws Exception {
+        final SbkBenchmark benchmark = benchmarkWithWriter(() -> { });
+
+        final CompletionException completionFailure = assertThrows(CompletionException.class,
+                () -> benchmark.forceShutdownCompletion(null).join());
+
+        final BenchmarkCleanupTimeoutException timeoutFailure = assertInstanceOf(
+                BenchmarkCleanupTimeoutException.class, completionFailure.getCause());
+        assertNull(timeoutFailure.getCause());
+        assertTrue(timeoutFailure.getMessage().contains("cleanup exceeded 5 seconds"));
     }
 
     @SuppressWarnings("unchecked")

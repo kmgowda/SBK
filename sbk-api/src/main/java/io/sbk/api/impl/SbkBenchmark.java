@@ -26,6 +26,7 @@ import io.sbk.params.ParameterOptions;
 import io.sbk.params.impl.SbkParameters;
 import io.sbk.api.Storage;
 import io.sbk.data.DataType;
+import io.sbk.exception.BenchmarkCleanupTimeoutException;
 import io.sbk.logger.RWLogger;
 import io.sbk.system.Printer;
 import io.sbk.thread.ThreadType;
@@ -517,19 +518,25 @@ final public class SbkBenchmark implements Benchmark {
      * so a driver or SDK blocked in close cannot extend a timed run indefinitely.
      *
      * @param failure failure that initiated shutdown, or {@code null} for an orderly shutdown
+     * @return authoritative benchmark completion, failed when this deadline wins
      */
-    private void forceShutdownCompletion(Throwable failure) {
-        final Throwable terminalFailure = unwrapCompletionFailure(failure);
-        final boolean completed = terminalFailure == null
-                ? retFuture.complete(null) : retFuture.completeExceptionally(terminalFailure);
+    CompletableFuture<Void> forceShutdownCompletion(Throwable failure) {
+        final Throwable initiatingFailure = unwrapCompletionFailure(failure);
+        final BenchmarkCleanupTimeoutException timeoutFailure =
+                new BenchmarkCleanupTimeoutException(
+                        RUNTIME_CONFIG.forcedShutdownGraceSeconds, initiatingFailure);
+        final boolean completed = retFuture.completeExceptionally(timeoutFailure);
         if (completed) {
             Printer.log.warn("SBK benchmark cleanup exceeded "
                     + RUNTIME_CONFIG.forcedShutdownGraceSeconds
-                    + " seconds; forcing application exit");
+                    + " seconds; final aggregate results may be incomplete; "
+                    + "forcing application exit with failure status");
             executor.shutdownNow();
             perlExecutor.shutdownNow();
             lifecycleExecutor.shutdownNow();
+            timeoutExecutor.shutdownNow();
         }
+        return retFuture;
     }
 
     /**
