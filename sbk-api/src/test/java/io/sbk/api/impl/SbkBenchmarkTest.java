@@ -9,18 +9,35 @@
  */
 package io.sbk.api.impl;
 
+import io.sbk.api.DataWriter;
+import io.sbk.api.Storage;
+import io.sbk.data.DataType;
+import io.sbk.logger.RWLogger;
+import io.sbk.params.impl.SbkParameters;
+import io.time.MilliSeconds;
+import io.time.Time;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 
 /**
  * Tests benchmark lifecycle calculations that must be independent of a storage driver.
@@ -79,5 +96,110 @@ final class SbkBenchmarkTest {
 
         assertEquals(failure, shutdownFailure[0]);
         assertEquals(failure, exception.getCause());
+    }
+
+    @Test
+    void closesDriverOnlyAfterInterruptedWorkersExit() throws Exception {
+        final AtomicBoolean workerExited = new AtomicBoolean();
+        final AtomicBoolean closedAfterWorkerExit = new AtomicBoolean();
+        final CountDownLatch workerStarted = new CountDownLatch(1);
+        final SbkBenchmark benchmark = benchmarkWithWriter(() ->
+                closedAfterWorkerExit.set(workerExited.get()));
+        final ExecutorService executor = workerExecutor(benchmark);
+        setWorkerCompletion(benchmark, CompletableFuture.runAsync(() -> {
+            workerStarted.countDown();
+            try {
+                Thread.sleep(TimeUnit.MINUTES.toMillis(1));
+            } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
+            } finally {
+                workerExited.set(true);
+            }
+        }, executor));
+        assertTrue(workerStarted.await(1, TimeUnit.SECONDS));
+
+        benchmark.stop();
+
+        assertTrue(workerExited.get());
+        assertTrue(closedAfterWorkerExit.get());
+    }
+
+    @Test
+    void closesDriverToUnblockAnInterruptIgnoringWorkerWithinBound() throws Exception {
+        final CountDownLatch releaseWorker = new CountDownLatch(1);
+        final CountDownLatch workerExited = new CountDownLatch(1);
+        final CountDownLatch workerStarted = new CountDownLatch(1);
+        final SbkBenchmark benchmark = benchmarkWithWriter(releaseWorker::countDown);
+        final ExecutorService executor = workerExecutor(benchmark);
+        setWorkerCompletion(benchmark, CompletableFuture.runAsync(() -> {
+            workerStarted.countDown();
+            while (releaseWorker.getCount() > 0) {
+                try {
+                    releaseWorker.await();
+                } catch (InterruptedException ignored) {
+                    // Deliberately model an SDK operation that ignores interruption.
+                }
+            }
+            workerExited.countDown();
+        }, executor));
+        assertTrue(workerStarted.await(1, TimeUnit.SECONDS));
+
+        assertTimeout(Duration.ofSeconds(3), benchmark::stop);
+
+        assertEquals(0, releaseWorker.getCount());
+        assertTrue(workerExited.await(1, TimeUnit.SECONDS));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static SbkBenchmark benchmarkWithWriter(IoCloseAction closeAction) throws Exception {
+        final SbkParameters params = new SbkParameters("shutdown-order-test");
+        params.parseArgs(new String[]{"-writers", "1", "-size", "10", "-seconds", "60",
+                "-thread", "p"});
+        final Storage<Object> storage = mock(Storage.class);
+        final DataType<Object> dataType = mock(DataType.class);
+        final Time time = new MilliSeconds();
+        final RWLogger logger = mock(RWLogger.class, CALLS_REAL_METHODS);
+        final SbkBenchmark benchmark = new SbkBenchmark(params, storage, dataType, logger, time);
+        final Field writersField = SbkBenchmark.class.getDeclaredField("writers");
+        writersField.setAccessible(true);
+        final List<DataWriter<Object>> writers = (List<DataWriter<Object>>) writersField.get(benchmark);
+        writers.add(new TestDataWriter(closeAction));
+        return benchmark;
+    }
+
+    private static ExecutorService workerExecutor(SbkBenchmark benchmark) throws Exception {
+        final Field executorField = SbkBenchmark.class.getDeclaredField("executor");
+        executorField.setAccessible(true);
+        return (ExecutorService) executorField.get(benchmark);
+    }
+
+    private static void setWorkerCompletion(SbkBenchmark benchmark,
+                                            CompletableFuture<Void> completion) throws Exception {
+        final Field completionField = SbkBenchmark.class.getDeclaredField("workerCompletion");
+        completionField.setAccessible(true);
+        completionField.set(benchmark, completion);
+    }
+
+    @FunctionalInterface
+    private interface IoCloseAction {
+        void close() throws IOException;
+    }
+
+    private static final class TestDataWriter implements io.sbk.api.Writer<Object> {
+        private final IoCloseAction closeAction;
+
+        private TestDataWriter(IoCloseAction closeAction) {
+            this.closeAction = closeAction;
+        }
+
+        @Override
+        public CompletableFuture<?> writeAsync(Object data) {
+            return null;
+        }
+
+        @Override
+        public void close() throws IOException {
+            closeAction.close();
+        }
     }
 }
