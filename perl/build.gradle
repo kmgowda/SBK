@@ -749,17 +749,45 @@ tasks.register('cqueuePerformanceTest') {
     }
 }
 
+def gcSoakJavaLauncher = javaToolchains.launcherFor {
+    languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
+}
+def gcSoakJavaRuntimeInputs = [
+        javaRuntimeVersion: gcSoakJavaLauncher.map { it.metadata.javaRuntimeVersion },
+        javaVmVersion     : gcSoakJavaLauncher.map { it.metadata.jvmVersion },
+        javaVendor        : gcSoakJavaLauncher.map { it.metadata.vendor.toString() },
+        operatingSystem   : providers.systemProperty('os.name'),
+        osArchitecture    : providers.systemProperty('os.arch')
+]
+def configureGcSoakCaching = { JavaExec task, String markerName ->
+    def verificationMarker = layout.buildDirectory.file("verification/${markerName}.verified")
+    def verificationMarkerPath = verificationMarker.get().asFile.absolutePath
+    def verifiedMainClass = task.mainClass.get()
+    gcSoakJavaRuntimeInputs.each { propertyName, propertyValue ->
+        task.inputs.property(propertyName, propertyValue)
+    }
+    task.outputs.file(verificationMarker)
+    task.outputs.cacheIf(
+            'GC reclamation is reproducible from the test runtime classpath and Java environment') {
+        true
+    }
+    task.doLast {
+        def markerFile = new File(verificationMarkerPath)
+        markerFile.parentFile.mkdirs()
+        markerFile.text = "${verifiedMainClass} verified${System.lineSeparator()}"
+    }
+}
+
 tasks.register('cqueueGcTest', JavaExec) {
     group = 'verification'
     description = 'Verifies CQueue reclamation and payload release in a constrained 32 MB JVM.'
     dependsOn tasks.named('testClasses')
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'io.perl.api.impl.CQueueGcSoak'
-    javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
-    }
+    javaLauncher = gcSoakJavaLauncher
     jvmArgs rootProject.ext.sbkRuntimeJvmArgs
     jvmArgs '-Xms32m', '-Xmx32m', '-XX:+ExitOnOutOfMemoryError'
+    configureGcSoakCaching(delegate, 'cqueue-gc-soak')
 }
 
 tasks.register('timeStampMpscQueueGcTest', JavaExec) {
@@ -768,13 +796,12 @@ tasks.register('timeStampMpscQueueGcTest', JavaExec) {
     dependsOn tasks.named('testClasses')
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'io.perl.api.impl.TimeStampMpscQueueGcSoak'
-    javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
-    }
+    javaLauncher = gcSoakJavaLauncher
     jvmArgs rootProject.ext.sbkRuntimeJvmArgs
     jvmArgs '-Xms32m', '-Xmx32m', '-XX:+ExitOnOutOfMemoryError',
             '-XX:-DisableExplicitGC'
     shouldRunAfter tasks.named('test')
+    configureGcSoakCaching(delegate, 'timestamp-mpsc-queue-gc-soak')
 }
 
 tasks.named('check') {

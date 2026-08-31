@@ -97,6 +97,55 @@ plugins.withId('base') {
     }
 }
 
+def wrapperConfigurationCachePolicyMarker = layout.buildDirectory.file(
+        'verification/gradle-wrapper-configuration-cache-policy.verified')
+def wrapperConfigurationCachePolicyMarkerPath =
+        wrapperConfigurationCachePolicyMarker.get().asFile.absolutePath
+def unixGradleWrapperPath = layout.projectDirectory.file('gradlew').asFile.absolutePath
+def windowsGradleWrapperPath = layout.projectDirectory.file('gradlew.bat').asFile.absolutePath
+def verifyGradleWrapperConfigurationCachePolicy = tasks.register(
+        'verifyGradleWrapperConfigurationCachePolicy') {
+    group = 'verification'
+    description = 'Verifies that clean and releasecheck bypass the configuration cache.'
+    inputs.files(unixGradleWrapperPath, windowsGradleWrapperPath)
+            .withPropertyName('gradleWrapperScripts')
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+    outputs.file(wrapperConfigurationCachePolicyMarker)
+    outputs.cacheIf('Wrapper policy verification is reproducible from wrapper script inputs') {
+        true
+    }
+    doLast {
+        def requiredFragments = [
+                (unixGradleWrapperPath): [
+                        'sbk_configuration_cache_disabled=false',
+                        'clean | :clean | *:clean | releasecheck | :releasecheck | *:releasecheck',
+                        'set -- "$@" --no-configuration-cache'
+                ],
+                (windowsGradleWrapperPath): [
+                        'set "SBK_CONFIGURATION_CACHE_OPTION="',
+                        'if /I "%%~A"=="clean" set "SBK_CONFIGURATION_CACHE_OPTION=--no-configuration-cache"',
+                        'if /I "%%~A"==":clean" set "SBK_CONFIGURATION_CACHE_OPTION=--no-configuration-cache"',
+                        'if /I "%%~A"=="releasecheck" set "SBK_CONFIGURATION_CACHE_OPTION=--no-configuration-cache"',
+                        'if /I "%%~A"==":releasecheck" set "SBK_CONFIGURATION_CACHE_OPTION=--no-configuration-cache"',
+                        '%* %SBK_CONFIGURATION_CACHE_OPTION%'
+                ]
+        ]
+        requiredFragments.each { scriptPath, fragments ->
+            def script = new File(scriptPath)
+            def scriptText = script.getText('UTF-8')
+            def missingFragments = fragments.findAll { !scriptText.contains(it) }
+            if (!missingFragments.isEmpty()) {
+                throw new GradleException(
+                        "${script.name} is missing the SBK configuration-cache opt-out policy; "
+                                + 'restore the policy after regenerating the Gradle wrapper')
+            }
+        }
+        def markerFile = new File(wrapperConfigurationCachePolicyMarkerPath)
+        markerFile.parentFile.mkdirs()
+        markerFile.text = "Gradle wrapper configuration-cache policy verified${System.lineSeparator()}"
+    }
+}
+
 /*
  * to get the dependency for the drivers : ./gradlew dependencyUpdates -Drevision=release --no-parallel -PincludeDriversDeps=true
  */
@@ -829,3 +878,10 @@ apply from: "gradle/driver-runtime.gradle"
 
 apply from: "gradle/release-qualification.gradle"
 apply from: "gradle/release-publication.gradle"
+
+tasks.named('check') {
+    dependsOn verifyGradleWrapperConfigurationCachePolicy
+}
+tasks.named('wrapper') {
+    finalizedBy verifyGradleWrapperConfigurationCachePolicy
+}
