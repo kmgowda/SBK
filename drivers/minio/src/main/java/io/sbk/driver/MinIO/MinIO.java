@@ -104,10 +104,8 @@ public class MinIO implements Storage<byte[]> {
         }
 
         // Connection
-        params.addOption("url",      true, "S3 endpoint URL; values without a scheme use plain HTTP,"
-                + " default: " + config.url);
-        params.addOption("endpoints", true, "Comma-separated S3 endpoints distributed across workers,"
-                + " default: '" + nullToEmpty(config.endpoints) + "'");
+        params.addOption("url", true, "S3 endpoint URL or comma-separated endpoint URLs distributed"
+                + " across workers; values without a scheme use plain HTTP, default: " + config.url);
         params.addOption("bucket",   true, "Bucket name, default: " + config.bucketName);
         params.addOption("key",      true, "Access key, default: "
                 + (nullToEmpty(config.accessKey).isEmpty() ? "not configured" : "configured")
@@ -238,7 +236,7 @@ public class MinIO implements Storage<byte[]> {
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         // Connection
         config.url        = params.getOptionValue("url",      config.url);
-        config.endpoints = params.getOptionValue("endpoints", nullToEmpty(config.endpoints));
+        configuredEndpoints();
         config.bucketName = params.getOptionValue("bucket",   config.bucketName);
         config.accessKey = params.getOptionValue("key",
                 credentialDefault(System.getenv(ACCESS_KEY_ENV), config.accessKey));
@@ -784,10 +782,7 @@ public class MinIO implements Storage<byte[]> {
 
     private void logFeatureBanner() {
         Printer.log.info("MinIO/S3 driver features:");
-        Printer.log.info("  endpoint        = " + config.url);
-        if (clients.size() > 1) {
-            Printer.log.info("  endpoints       = " + configuredEndpoints());
-        }
+        Printer.log.info("  endpoint(s)     = " + configuredEndpoints());
         Printer.log.info("  bucket          = " + config.bucketName);
         Printer.log.info("  write operation = " + writeOperation);
         Printer.log.info("  read operation  = " + readOperation);
@@ -913,10 +908,18 @@ public class MinIO implements Storage<byte[]> {
     }
 
     private List<String> configuredEndpoints() {
-        List<String> values = parseList(config.endpoints);
-        return (values.isEmpty() ? List.of(config.url) : values).stream()
+        return configuredEndpoints(config.url);
+    }
+
+    static List<String> configuredEndpoints(String url) {
+        List<String> endpoints = parseList(url).stream()
                 .map(MinIO::normalizeEndpoint)
+                .distinct()
                 .toList();
+        if (endpoints.isEmpty()) {
+            throw new IllegalArgumentException("-url must contain at least one S3 endpoint");
+        }
+        return endpoints;
     }
 
     static String normalizeEndpoint(String endpoint) {

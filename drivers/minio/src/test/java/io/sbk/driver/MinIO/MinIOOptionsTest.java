@@ -14,6 +14,8 @@ import io.sbk.params.InputParameterOptions;
 import io.sbk.params.impl.SbkDriversParameters;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -98,6 +100,26 @@ public class MinIOOptionsTest {
         assertEquals("http://node1:9000", MinIO.normalizeEndpoint("node1:9000"));
         assertEquals("http://node2:9000", MinIO.normalizeEndpoint(" http://node2:9000 "));
         assertEquals("https://node3:9443", MinIO.normalizeEndpoint("https://node3:9443"));
+    }
+
+    @Test
+    public void urlAcceptsOneOrMoreOrderedUniqueEndpoints() {
+        assertEquals(List.of("http://node1:9000"),
+                MinIO.configuredEndpoints("node1:9000"));
+        assertEquals(List.of("http://node1:9000", "https://node2:9443"),
+                MinIO.configuredEndpoints(
+                        "node1:9000, https://node2:9443, http://node1:9000"));
+        assertDoesNotThrow(() -> parse("-writers", "4", "-size", "100", "-seconds", "1",
+                "-url", "node1:9000,node2:9000"));
+    }
+
+    @Test
+    public void urlRejectsAnEmptyEndpointList() {
+        assertThrows(IllegalArgumentException.class,
+                () -> MinIO.configuredEndpoints(" , "));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-writers", "1", "-size", "100", "-seconds", "1",
+                        "-url", " , "));
     }
 
     @Test

@@ -277,8 +277,7 @@ description explicitly says they validate something.
 
 | Flag | Default | Purpose |
 |---|---|---|
-| `-url <url>` | `http://play.min.io` | S3 endpoint URL. Plain HTTP is the default; a value without a scheme is prefixed with `http://`. Use an explicit `https://` URL to enable TLS. |
-| `-endpoints <csv>` | empty | Optional endpoint pool. Values without schemes use plain HTTP. Workers are assigned round-robin; setup and catalog discovery use the first endpoint. |
+| `-url <url[,url...]>` | `http://play.min.io` | One S3 endpoint or a comma-separated endpoint pool. Values without schemes use plain HTTP. With multiple endpoints, workers are assigned round-robin while setup and catalog discovery use the first endpoint. |
 | `-bucket <name>` | `sbk` | Bucket to read / write |
 | `-key <access-key>` | `SBK_S3_ACCESS_KEY`, then properties default | S3 access key. An explicit option takes precedence over the environment. |
 | `-secret <secret-key>` | `SBK_S3_SECRET_KEY`, then properties default | S3 secret key. An explicit option takes precedence over the environment. The value is never echoed by `-help`. |
@@ -505,7 +504,7 @@ the last column when the backend state itself must be proven.
 | Option | Prerequisite | A successful run confirms | Independent check or limitation |
 |---|---|---|---|
 | `-url` | Reachable S3 data-plane URL | DNS/IP routing, selected HTTP/HTTPS transport, and S3 protocol compatibility | `curl` should return S3 XML, not a management page |
-| `-endpoints` | Every CSV endpoint serves the same S3 namespace/buckets | Workers can operate through the round-robin endpoint pool | Compare per-node server metrics; SBK reports the aggregate |
+| `-url` with multiple URLs | Every CSV endpoint serves the same S3 namespace/buckets | Workers can operate through the round-robin endpoint pool | Compare per-node server metrics; SBK reports the aggregate |
 | `-key` | Valid S3 access key | The supplied identity can authenticate | Does not prove permissions for operations not run |
 | `-secret` | Secret paired with `-key` | SigV4 request signing succeeds | Keep it out of shell history and committed YAML |
 | `-region` | Region accepted by the target | Requests are accepted with the selected SigV4 scope | For AWS, use the bucket's actual region |
@@ -989,12 +988,12 @@ recursively erases them as part of `bucket-delete`.
 
 ### Multiple endpoints, distributed partitions, and object manifests
 
-Use `-endpoints` only when every address exposes the same S3 cluster,
+Use multiple URLs in `-url` only when every address exposes the same S3 cluster,
 credentials, bucket, and namespace. SBK assigns workers round-robin:
 
 ```bash
 $SBK -class minio \
-  -endpoints 'http://s3-node-1:9000,http://s3-node-2:9000,http://s3-node-3:9000' \
+  -url 'http://s3-node-1:9000,http://s3-node-2:9000,http://s3-node-3:9000' \
   -key "$ACCESS_KEY" -secret "$SECRET_KEY" -bucket "$BUCKET" \
   -writers 12 -size 1048576 -seconds 180 \
   -async true -async-depth 4 \
