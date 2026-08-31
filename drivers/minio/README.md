@@ -15,6 +15,17 @@ You may obtain a copy of the License at
 > runs against three real backends (MinIO, AWS S3, Dell ObjectScale / ECS)
 > and ends with troubleshooting for the issues you will hit in practice.
 
+Focused guides:
+
+- [Dell ECS/ObjectScale benchmark runbook](docs/ECS_OBS_BENCHMARK_RUNBOOK.md):
+  qualification, workload matrices, exact commands, acceptance rules, and
+  confirmed lab results.
+- [Driver implementation](docs/IMPLEMENTATION.md): request lifecycle, measurement
+  boundaries, async/memory bounds, catalog, multipart, retry, and shutdown.
+- [Software-agent ECS/OBS workflow](docs/ECS_OBS_AGENT_RUNBOOK.md):
+  deterministic and safe execution for Devin, Windsurf, Codex, Cursor, and
+  other agents.
+
 ---
 
 ## What is S3 performance benchmarking?
@@ -134,9 +145,9 @@ What it does **not** do:
   later GET body with the original generated payload.
 - SigV2 (legacy S3 signing). Only SigV4 is implemented.
 - Username / password login. S3 protocol has no such concept — only access
-  key + secret key. If you have an admin username (e.g. ObjectScale
-  `root`/`ChangeMe`), use it to log in to the management UI and generate
-  S3 keys for an Object User.
+  key + secret key. Use an authorized management identity in the ECS UI to
+  create or inspect S3 keys for an Object User; never pass management
+  credentials to SBK.
 
 ---
 
@@ -701,13 +712,13 @@ miss; the driver supports them all:
    endpoint (no DNS), the only way to send it is the `x-emc-namespace` HTTP
    header — wire it in with `-extra-headers`.
 3. **Credentials are S3 access/secret keys belonging to an Object User**,
-   not the cluster admin's `root` / `ChangeMe`. Log in to the ObjectScale
+   not the cluster administrator's management credentials. Log in to the ObjectScale
    management UI to view or generate them.
 
 #### Getting your S3 credentials
 
-In a browser: open `https://<cluster-ip>/`, log in as a cluster admin (e.g.
-`root` / `ChangeMe`), navigate to **Object Users**, pick or create one, and
+In a browser: open `https://<cluster-ip>/`, log in with an authorized cluster
+management identity, navigate to **Object Users**, pick or create one, and
 **Generate Secret Key**. Note:
 
 - The **Object User name** is your **S3 access key**.
@@ -719,9 +730,12 @@ REST API on port **4443**:
 
 ```bash
 # 1) Authenticate, capture the session token
-TOKEN=$(curl -sk -u root:ChangeMe -X GET -D - \
+read -r -p 'ECS management user: ' ECS_ADMIN_USER
+read -r -s -p 'ECS management password: ' ECS_ADMIN_PASSWORD
+TOKEN=$(curl -sk -u "$ECS_ADMIN_USER:$ECS_ADMIN_PASSWORD" -X GET -D - \
   "https://<cluster-ip>:4443/login" \
   | awk -F': *' '/^X-SDS-AUTH-TOKEN:/{print $2}' | tr -d '\r\n')
+unset ECS_ADMIN_PASSWORD
 
 # 2) List namespaces & users
 curl -sk -H "X-SDS-AUTH-TOKEN: $TOKEN" -H "Accept: application/json" \

@@ -54,6 +54,12 @@ plugins.withId('maven-publish') {
             include 'WEB_LOGGER.md'
             into 'docs'
         }
+        from(rootProject.file('drivers/minio')) {
+            include 'README.md'
+            include 'docs/**/*.md'
+            include 'examples/**/*'
+            into 'drivers/minio'
+        }
         from(rootProject.file('.devin/skills')) {
             into 'devin-skills'
         }

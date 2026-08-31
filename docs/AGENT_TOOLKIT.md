@@ -100,6 +100,7 @@ version automatically loads it. If automatic discovery is uncertain, include
 | Remote orchestration | SBK-GEM README, GEM source, failure-domain section |
 | Run SBK or SBK-YAL benchmark | `sbk-benchmark-runner` skill and selected driver README |
 | Run SBM, SBK-GEM, or SBK-GEM-YAL | `sbk-distributed-benchmark-runner` skill, SBM/GEM README |
+| Run Dell ECS/ObjectScale S3 benchmark | `drivers/minio/docs/ECS_OBS_AGENT_RUNBOOK.md`, `drivers/minio/docs/ECS_OBS_BENCHMARK_RUNBOOK.md`, `drivers/minio/docs/IMPLEMENTATION.md` |
 | Documentation | `DOCUMENTATION_GUIDE.md`, recipe 6 |
 
 ## Permissions and safety

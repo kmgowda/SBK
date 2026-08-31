@@ -690,6 +690,13 @@ application {
             include "WEB_LOGGER.md"
         }
     }
+    applicationDistribution.into("drivers/minio") {
+        from("drivers/minio") {
+            include "README.md"
+            include "docs/**/*.md"
+            include "examples/**/*"
+        }
+    }
 
     // Include AGENTS.md, INSTRUCTIONS.md, and README.md at the root of the distribution
     applicationDistribution.from("AGENTS.md")

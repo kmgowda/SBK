@@ -97,6 +97,11 @@ Generate current options and read `drivers/minio/README.md` first:
 ./build/install/sbk/bin/sbk -class minio -help
 ```
 
+For Dell ECS/ObjectScale, use
+[`drivers/minio/docs/ECS_OBS_BENCHMARK_RUNBOOK.md`](../../../../drivers/minio/docs/ECS_OBS_BENCHMARK_RUNBOOK.md)
+instead of adapting the generic example below. It covers ECS data-plane ports,
+namespace routing, qualification, performance matrices, and result acceptance.
+
 Use an approved secret manager or protected launcher to populate
 `SBK_S3_ACCESS_KEY` and `SBK_S3_SECRET_KEY` in the process environment. When
 `-key` or `-secret` is explicitly supplied it takes precedence, but placing
