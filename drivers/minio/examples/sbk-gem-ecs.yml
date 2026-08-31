@@ -26,7 +26,8 @@ sbkGemArgs:
   secret: REPLACE_AT_RUNTIME
   writers: 1
   size: 4096
-  records: 100
+  # Aggregate record target distributed across all remote SBK clients.
+  totalrecords: 100
   time: mcs
   endpoint-metrics: true
   out: GemPrometheusLogger
