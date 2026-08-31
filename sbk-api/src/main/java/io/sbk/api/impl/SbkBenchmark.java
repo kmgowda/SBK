@@ -26,6 +26,7 @@ import io.sbk.params.ParameterOptions;
 import io.sbk.params.impl.SbkParameters;
 import io.sbk.api.Storage;
 import io.sbk.data.DataType;
+import io.sbk.exception.BenchmarkCleanupTimeoutException;
 import io.sbk.logger.RWLogger;
 import io.sbk.system.Printer;
 import io.sbk.thread.ThreadType;
@@ -497,9 +498,12 @@ final public class SbkBenchmark implements Benchmark {
         if (idleTimeout != null) {
             Printer.log.warn("SBK benchmark idle timeout: {}", idleTimeout.getMessage());
         }
+        final long cleanupGraceNanos = TimeUnit.SECONDS.toNanos(
+                RUNTIME_CONFIG.forcedShutdownGraceSeconds);
+        final long cleanupDeadlineNanos = System.nanoTime() + cleanupGraceNanos;
         timeoutExecutor.schedule(() -> forceShutdownCompletion(ex),
-                RUNTIME_CONFIG.forcedShutdownGraceSeconds, TimeUnit.SECONDS);
-        lifecycleExecutor.execute(() -> shutdown(ex, requestedTermination));
+                cleanupGraceNanos, TimeUnit.NANOSECONDS);
+        lifecycleExecutor.execute(() -> shutdown(ex, requestedTermination, cleanupDeadlineNanos));
     }
 
     /**
@@ -517,19 +521,25 @@ final public class SbkBenchmark implements Benchmark {
      * so a driver or SDK blocked in close cannot extend a timed run indefinitely.
      *
      * @param failure failure that initiated shutdown, or {@code null} for an orderly shutdown
+     * @return authoritative benchmark completion, failed when this deadline wins
      */
-    private void forceShutdownCompletion(Throwable failure) {
-        final Throwable terminalFailure = unwrapCompletionFailure(failure);
-        final boolean completed = terminalFailure == null
-                ? retFuture.complete(null) : retFuture.completeExceptionally(terminalFailure);
+    CompletableFuture<Void> forceShutdownCompletion(Throwable failure) {
+        final Throwable initiatingFailure = unwrapCompletionFailure(failure);
+        final BenchmarkCleanupTimeoutException timeoutFailure =
+                new BenchmarkCleanupTimeoutException(
+                        RUNTIME_CONFIG.forcedShutdownGraceSeconds, initiatingFailure);
+        final boolean completed = retFuture.completeExceptionally(timeoutFailure);
         if (completed) {
             Printer.log.warn("SBK benchmark cleanup exceeded "
                     + RUNTIME_CONFIG.forcedShutdownGraceSeconds
-                    + " seconds; forcing application exit");
+                    + " seconds; final aggregate results may be incomplete; "
+                    + "forcing application exit with failure status");
             executor.shutdownNow();
             perlExecutor.shutdownNow();
             lifecycleExecutor.shutdownNow();
+            timeoutExecutor.shutdownNow();
         }
+        return retFuture;
     }
 
     /**
@@ -540,9 +550,11 @@ final public class SbkBenchmark implements Benchmark {
      *
      * @param ex Throwable exception
      * @param requestedTermination lifecycle completion expected by the caller
+     * @param cleanupDeadlineNanos absolute monotonic cleanup deadline
      */
     @Synchronized
-    private void shutdown(Throwable ex, BenchmarkTermination requestedTermination) {
+    private void shutdown(Throwable ex, BenchmarkTermination requestedTermination,
+                          long cleanupDeadlineNanos) {
         if (state == State.END) {
             return;
         }
@@ -558,7 +570,8 @@ final public class SbkBenchmark implements Benchmark {
         executor.shutdownNow();
         boolean workersClosed = false;
         boolean storageClosed = false;
-        WorkerCompletion workers = awaitWorkers();
+        WorkerCompletion workers = awaitWorkers(cleanupDeadlineNanos,
+                TimeUnit.SECONDS.toNanos(RUNTIME_CONFIG.workerTerminationSeconds));
         terminalFailure = retainFailure(terminalFailure, workers.failure());
         if (!workers.completed()) {
             Printer.log.warn("SBK workers did not stop within {} second(s); "
@@ -569,11 +582,11 @@ final public class SbkBenchmark implements Benchmark {
             workersClosed = true;
             terminalFailure = closeStorage(terminalFailure);
             storageClosed = true;
-            workers = awaitWorkers();
+            workers = awaitWorkers(cleanupDeadlineNanos, Long.MAX_VALUE);
             terminalFailure = retainFailure(terminalFailure, workers.failure());
             if (!workers.completed()) {
-                terminalFailure = retainFailure(terminalFailure,
-                        new IllegalStateException("SBK workers remained active after forced driver close"));
+                forceShutdownCompletion(terminalFailure);
+                return;
             }
         }
         stopPerformanceRecorders(requestedTermination);
@@ -608,12 +621,16 @@ final public class SbkBenchmark implements Benchmark {
 
     }
 
-    private WorkerCompletion awaitWorkers() {
+    private WorkerCompletion awaitWorkers(long cleanupDeadlineNanos, long maximumWaitNanos) {
         if (workerCompletion == null) {
             return new WorkerCompletion(true, null);
         }
+        final long remainingNanos = cleanupDeadlineNanos - System.nanoTime();
+        if (remainingNanos <= 0) {
+            return new WorkerCompletion(false, null);
+        }
         try {
-            workerCompletion.get(RUNTIME_CONFIG.workerTerminationSeconds, TimeUnit.SECONDS);
+            workerCompletion.get(Math.min(remainingNanos, maximumWaitNanos), TimeUnit.NANOSECONDS);
             return new WorkerCompletion(true, null);
         } catch (ExecutionException | CancellationException exception) {
             return new WorkerCompletion(true, unwrapCompletionFailure(exception));

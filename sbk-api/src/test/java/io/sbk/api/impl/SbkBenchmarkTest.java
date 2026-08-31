@@ -12,6 +12,7 @@ package io.sbk.api.impl;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.data.DataType;
+import io.sbk.exception.BenchmarkCleanupTimeoutException;
 import io.sbk.logger.RWLogger;
 import io.sbk.params.impl.SbkParameters;
 import io.time.MilliSeconds;
@@ -26,13 +27,19 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -150,6 +157,87 @@ final class SbkBenchmarkTest {
         assertTrue(workerExited.await(1, TimeUnit.SECONDS));
     }
 
+    @Test
+    void usesRemainingCleanupDeadlineAfterDriverClose() throws Exception {
+        final CountDownLatch releaseWorker = new CountDownLatch(1);
+        final CountDownLatch workerStarted = new CountDownLatch(1);
+        final ScheduledExecutorService delayedRelease = Executors.newSingleThreadScheduledExecutor();
+        final SbkBenchmark benchmark = benchmarkWithWriter(() -> delayedRelease.schedule(
+                releaseWorker::countDown, 1250, TimeUnit.MILLISECONDS));
+        final ExecutorService executor = workerExecutor(benchmark);
+        setWorkerCompletion(benchmark, CompletableFuture.runAsync(() -> {
+            workerStarted.countDown();
+            while (releaseWorker.getCount() > 0) {
+                try {
+                    releaseWorker.await();
+                } catch (InterruptedException ignored) {
+                    // Model a driver operation that finishes after close, but before the hard deadline.
+                }
+            }
+        }, executor));
+        assertTrue(workerStarted.await(1, TimeUnit.SECONDS));
+
+        try {
+            assertTimeout(Duration.ofSeconds(4), benchmark::stop);
+            assertDoesNotThrow(() -> completionFuture(benchmark).join());
+        } finally {
+            delayedRelease.shutdownNow();
+        }
+    }
+
+    @Test
+    void hardDeadlineReleasesBenchmarkWhenDriverCloseIsStuck() throws Exception {
+        final CountDownLatch releaseClose = new CountDownLatch(1);
+        final SbkBenchmark benchmark = benchmarkWithWriter(() -> {
+            while (releaseClose.getCount() > 0) {
+                try {
+                    releaseClose.await();
+                } catch (InterruptedException ignored) {
+                    // Deliberately model a driver close that ignores interruption.
+                }
+            }
+        });
+        setWorkerCompletion(benchmark, new CompletableFuture<>());
+
+        try {
+            assertTimeout(Duration.ofSeconds(6), benchmark::stop);
+            final CompletionException completionFailure = assertThrows(CompletionException.class,
+                    () -> completionFuture(benchmark).join());
+            assertInstanceOf(BenchmarkCleanupTimeoutException.class,
+                    completionFailure.getCause());
+        } finally {
+            releaseClose.countDown();
+        }
+    }
+
+    @Test
+    void forcedCleanupFailsCompletionAndPreservesTheInitiatingFailure() throws Exception {
+        final IOException initiatingFailure = new IOException("remote operation failed");
+        final SbkBenchmark benchmark = benchmarkWithWriter(() -> { });
+
+        final CompletionException completionFailure = assertThrows(CompletionException.class,
+                () -> benchmark.forceShutdownCompletion(initiatingFailure).join());
+
+        final BenchmarkCleanupTimeoutException timeoutFailure = assertInstanceOf(
+                BenchmarkCleanupTimeoutException.class, completionFailure.getCause());
+        assertSame(initiatingFailure, timeoutFailure.getCause());
+        assertTrue(timeoutFailure.getMessage().contains("cleanup exceeded 5 seconds"));
+        assertTrue(timeoutFailure.getMessage().contains("final aggregate results may be incomplete"));
+    }
+
+    @Test
+    void orderlyShutdownCannotBecomeSuccessfulWhenForcedCleanupWins() throws Exception {
+        final SbkBenchmark benchmark = benchmarkWithWriter(() -> { });
+
+        final CompletionException completionFailure = assertThrows(CompletionException.class,
+                () -> benchmark.forceShutdownCompletion(null).join());
+
+        final BenchmarkCleanupTimeoutException timeoutFailure = assertInstanceOf(
+                BenchmarkCleanupTimeoutException.class, completionFailure.getCause());
+        assertNull(timeoutFailure.getCause());
+        assertTrue(timeoutFailure.getMessage().contains("cleanup exceeded 5 seconds"));
+    }
+
     @SuppressWarnings("unchecked")
     private static SbkBenchmark benchmarkWithWriter(IoCloseAction closeAction) throws Exception {
         final SbkParameters params = new SbkParameters("shutdown-order-test");
@@ -178,6 +266,13 @@ final class SbkBenchmarkTest {
         final Field completionField = SbkBenchmark.class.getDeclaredField("workerCompletion");
         completionField.setAccessible(true);
         completionField.set(benchmark, completion);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static CompletableFuture<Void> completionFuture(SbkBenchmark benchmark) throws Exception {
+        final Field completionField = SbkBenchmark.class.getDeclaredField("retFuture");
+        completionField.setAccessible(true);
+        return (CompletableFuture<Void>) completionField.get(benchmark);
     }
 
     @FunctionalInterface
