@@ -284,7 +284,7 @@ description explicitly says they validate something.
 | `-region <region>` | empty; effective `us-east-1` | AWS region for SigV4 signing. An empty value uses `us-east-1`, so the SDK skips `GetBucketLocation`, which many non-AWS backends mishandle. Set the actual bucket region for AWS or any backend that requires another region. |
 | `-recreate true|false` | `false` | Destructively empty and recreate the bucket before a writer run. Mixed writer/reader runs do not override this safety setting. |
 | `-insecure true|false` | `false` | Skip certificate validation for explicit HTTPS endpoints. This does not select HTTP; transport is controlled by each endpoint URL scheme. |
-| `-auth-version 2|4` | `4` | S3 signature version. The MinIO SDK is **always SigV4**; `2` is accepted but logs a warning and falls back to SigV4. |
+| `-auth-version 4` | `4` | S3 signature version. The MinIO SDK implements SigV4; any other value is rejected during argument validation. |
 
 SBK masks `-key`, `-secret`, and other common credential options in its own
 argument logs. Explicit CLI values can still be visible to operating-system
@@ -298,6 +298,8 @@ single-host MinIO runs.
 | `-fs-access true|false` | `false` | Spread keys across a 2-level hex directory tree (`aa/bb/sbk-<run>-<writer>-<sequence>`), mimicking how applications like Apache Hadoop S3A create paths. Helps test ListObjects / prefix-scan behavior. |
 | `-prefix <p>` | `""` | Prepend `<p>/` to every generated object key |
 | `-copy-prefix <p>` | `sbk-copy` | Destination-key prefix for server-side COPY |
+| `-key-distribution sequential|hashed|random` | `sequential` | Select sequential suffixes, uniformly hashed two-level prefixes, or seeded random suffixes for generated object keys. |
+| `-object-size-distribution <spec>` | `fixed` | Select `fixed`, seeded random `uniform:min:max`, deterministic sequential `sweep:min:max`, or `weighted:size=weight,...` object sizes. Both range bounds are inclusive. The largest configured size participates in the startup memory guard. |
 
 ### S3 operation selection
 
@@ -327,7 +329,7 @@ mutating operations and reader mixes only read operations.
 | `-read-operation stat` | `statObject` (S3 HEAD) | Existing objects and metadata/read permission | Object metadata was resolved without downloading the body |
 | `-read-operation tag-get` | `getObjectTags` | Existing objects and tag-read permission | The backend returned the object's tag set |
 | `-read-operation list` | `listObjects`, consuming at most `-list-max-keys` entries | List-bucket permission | A prefix listing completed and its returned entries were consumed |
-| `-read-operation bucket-stat` | `bucketExists` | Bucket visibility permission; optional explicit targets | Bucket-existence API latency was measured; the current implementation measures completion, not a required `true` result |
+| `-read-operation bucket-stat` | `bucketExists` | Bucket visibility permission; optional explicit targets | Bucket-existence API completed and returned `true`; a missing bucket fails the record |
 | `-read-operation bucket-list` | `listBuckets` | Account-level list-buckets permission | The account's bucket-list API completed |
 
 `create`, `overwrite`, `head`, and `range-read` are accepted aliases for
@@ -353,8 +355,10 @@ timing begins. Thus the
 reported latency measures the remote S3 operation rather than local waiting
 for a concurrency slot. Memory remains bounded by `-async-max-inflight`, and
 startup rejects an obviously unsafe buffer budget before connecting. PUT
-retains one object payload per in-flight request; GET retains a reusable
-64 KiB drain buffer per in-flight request. Start with a small depth such as 4
+retains one pooled object payload per in-flight request; buffers are reused
+only after their SDK futures complete. GET retains a reusable 64 KiB drain
+buffer per in-flight request. Multipart streams use bounded views of the same
+payload rather than allocating one part buffer per request. Start with a small depth such as 4
 or 8 and increase it until throughput stops improving or tail latency becomes
 unacceptable.
 
@@ -382,6 +386,7 @@ either request-limit option is zero.
 | `-catalog-max-objects <n>` | `1000000` | Bound discovered or manifest object references retained in memory. |
 | `-partition-count <n>` | `1` | Split existing-object catalogs by stable key hash across distributed SBK/SBK-GEM processes. |
 | `-partition-index <0..n-1>` | `0` | Partition owned by this process. Generated keys include the partition when count is greater than one. |
+| `-partition-by-prefix true|false` | `false` | Put every generated partition under `partition-<index>/` and use that prefix in server-side LIST filtering. This avoids downloading the full catalog on every distributed client. |
 | `-run-manifest <path>` | empty | Write a credential-free JSON record of the effective endpoint count, bucket, operations, workers, size, async mode, and partition. |
 | `-bucket-targets <csv>` | empty | Explicit buckets for delete/stat; required for bucket delete |
 | `-bucket-prefix <p>` | `sbk-benchmark` | Prefix for unique bucket-create names |
@@ -427,7 +432,7 @@ small correctness/lifecycle checks.
 | Flag | Default | Purpose |
 |---|---|---|
 | `-part-size <bytes>` | `0` (disabled) | Trigger multipart upload when object size ≥ part size. Valid range: **5 MiB ≤ partSize ≤ 5 GiB** (S3 spec). |
-| `-mpu-concurrent-parts <n>` | `0` | Reserved for a future public MinIO SDK concurrent-parts API. It is currently information-only; MinIO SDK 8.5.17 uploads the parts of one `putObject` sequentially. Use multiple SBK writers or async object operations for parallelism. |
+| `-mpu-concurrent-parts <0..1024>` | `0` | Values above one use the SDK's public low-level multipart API and upload bounded waves of parts per object. `0`/`1` retain normal SDK behavior. Requires `-part-size`; incompatible with whole-object `-checksum`. |
 
 ### S3 checksum validation
 
@@ -466,7 +471,9 @@ Useful when benchmarking storage with inline compression or deduplication.
 |---|---|---|
 | `-retry-max-attempts <n>` | `1` | Total attempts for network I/O, HTTP 429, and HTTP 5xx failures. One disables retries. |
 | `-retry-backoff-ms <ms>` | `0` | Fixed delay between retry attempts. |
-| `-warmup-requests <n>` | `0` | Untimed `bucketExists` requests distributed across configured endpoints to establish HTTP/TLS connections before catalog discovery and measurement. |
+| `-warmup-requests <n>` | `0` | Number of untimed requests distributed across configured endpoints before measurement. |
+| `-warmup-operation connection|put|get|put-get` | `connection` | Warm only connection/authentication, or execute data-plane PUT, GET, or PUT+GET requests. Temporary warm-up objects are removed before measurement. |
+| `-endpoint-metrics true|false` | `false` | Attribute completed operations, bytes, retries, and terminal failures to each configured endpoint. Disabled by default to keep the hot path minimal. |
 
 When retries are enabled, all attempts and backoff remain one logical timed
 SBK operation. This reports application-observed latency; use one attempt when
@@ -511,7 +518,7 @@ the last column when the backend state itself must be proven.
 | `-bucket` | S3-valid name and required permissions | Main-bucket setup and selected object workload complete | Writer runs may create a missing bucket |
 | `-recreate` | Dedicated disposable bucket; delete/create permission | Existing contents/versions can be emptied and the bucket recreated before timing | **Destructive**; never use on shared data |
 | `-insecure` | Explicit HTTPS endpoint with an untrusted certificate | TLS traffic works without certificate verification | Does not make HTTP secure and must not be used as a production security test |
-| `-auth-version` | Value `2` or `4` | `4` confirms SigV4; `2` only confirms fallback because SDK 8.5.17 is SigV4-only | SigV2 is not implemented |
+| `-auth-version` | Value `4` | SigV4 authentication succeeds | Unsupported signature versions fail fast before connecting |
 | `-extra-headers` | Backend documents the header and signing behavior | Requests with injected vendor/tenant headers are accepted | Confirm tenant routing in backend audit logs |
 
 ### Operation, catalog, and key-layout options
@@ -525,10 +532,13 @@ the last column when the backend state itself must be proven.
 | `-prefix` | Keys exist under the prefix for existing-object workloads | Generated PUT keys use the prefix or discovery is restricted to it | LIST the prefix to inspect keys |
 | `-fs-access` | No special prerequisite | Hierarchical two-level generated keys are accepted | LIST to confirm distribution across leaf prefixes |
 | `-copy-prefix` | Existing source objects and copy permission | COPY destinations under the configured prefix are accepted | LIST the destination prefix |
+| `-key-distribution` | Sequential, hashed, or random | Generated keys use the requested namespace shape | Use the same seed for reproducible random-key comparisons |
+| `-object-size-distribution` | Valid fixed, uniform, sweep, or weighted specification | The timed workload includes the requested object-size mix | SBK reports aggregate results; split runs when per-size percentiles are required |
 | `-object-file` | Readable local `key,size[,versionId]` CSV matching the target bucket | Operations can run from a supplied catalog without startup LIST discovery | Stale/missing entries fail when used |
 | `-catalog-max-objects` | Positive value; enough heap for retained references | Discovery or manifest loading remains bounded at the selected count | It caps client coverage; it does not cap bucket size |
 | `-partition-count` | Same count on all distributed clients | Stable key-hash partitioning is enabled | Use one unique index for every process |
 | `-partition-index` | Value from zero through `count - 1` | This process operates only on its assigned catalog/key partition | Duplicate indices duplicate work; missing indices leave gaps |
+| `-partition-by-prefix` | Unique partition index on every process | Catalog discovery is server-filtered to this process's generated partition prefix | Existing objects must already follow the same partition-prefix convention |
 | `-run-manifest` | Writable local parent directory | A credential-free JSON record of the effective run is written | The manifest is configuration evidence, not an object result manifest |
 
 ### Async, multipart, HTTP, retry, and warm-up options
@@ -540,7 +550,7 @@ the last column when the backend state itself must be proven.
 | `-async-max-inflight` | Nonnegative process limit | All workers obey a shared in-flight ceiling | `0` derives workers × depth |
 | `-async-max-memory-mb` | Nonnegative MiB budget | Startup's conservative async-buffer estimate fits the budget | It is a guard estimate, not a heap profiler |
 | `-part-size` | `0`, or 5 MiB through 5 GiB; object large enough to split | SDK multipart PUT completes with the selected stream part size | Inspect backend multipart metrics if exact part behavior matters |
-| `-mpu-concurrent-parts` | Nonnegative value | The option is parsed and reported | SDK 8.5.17 exposes no public per-object concurrency control; information-only |
+| `-mpu-concurrent-parts` | `2..1024`, nonzero `-part-size`, no whole-object checksum | Parts upload in bounded concurrent waves and successful parts are not restarted after a retry | Each logical PUT still contributes one SBK latency sample |
 | `-connect-timeout-ms` | Nonnegative milliseconds | Connections complete inside the configured client timeout | `0` uses the SDK/OkHttp default |
 | `-read-timeout-ms` | Nonnegative milliseconds | Response reads avoid the configured inactivity timeout | This is not an end-to-end operation deadline |
 | `-write-timeout-ms` | Nonnegative milliseconds | Request-body writes avoid the configured inactivity timeout | This is not an end-to-end operation deadline |
@@ -550,7 +560,8 @@ the last column when the backend state itself must be proven.
 | `-http-keepalive-seconds` | Positive seconds | Reused connections remain eligible for the selected idle period | Server/load-balancer idle timeout may be lower |
 | `-retry-max-attempts` | Positive total attempt count | Transient I/O, HTTP 429, or HTTP 5xx failures can be retried within one measured operation | Retries inflate application-observed latency; use `1` for raw service latency |
 | `-retry-backoff-ms` | Nonnegative delay | Retry delay is included in logical operation latency | Fixed delay only; not exponential backoff |
-| `-warmup-requests` | Nonnegative count and bucket-exists permission | Untimed endpoint connection/TLS warm-up requests complete before measurement | Does not warm object data caches |
+| `-warmup-requests` | Nonnegative count and permissions for the selected warm-up operation | Untimed warm-up requests complete before measurement | Data warm-up uses temporary objects and removes them before timing |
+| `-endpoint-metrics` | Multiple endpoints when per-node attribution is useful | Per-endpoint completion/byte/retry/failure totals are printed at shutdown | Adds opt-in counters to completed-operation and retry paths |
 
 ### Range, listing, buckets, integrity, and data options
 
@@ -1104,14 +1115,17 @@ Enable it by setting `-part-size`:
   -url http://127.0.0.1:9000 -key minioadmin -secret minioadmin \
   -bucket sbk -recreate true \
   -writers 1 -size 268435456 -seconds 60 \
-  -part-size 8388608     # 8 MiB parts, ~32 parts per 256-MiB object
+  -part-size 8388608 -mpu-concurrent-parts 8
 ```
 
-MinIO SDK 8.5.17 controls the multipart sequence inside one `putObject` call
-and does not expose a public per-object concurrent-parts setting. Obtain
-parallelism with multiple `-writers`, or with multiple bounded async object
-operations. The `-mpu-concurrent-parts` flag is accepted for forward
-compatibility but is logged as information-only.
+With `-mpu-concurrent-parts 2` or greater, SBK uses MinIO SDK 8.5.17's public
+low-level multipart API. It creates one upload, submits bounded waves of parts,
+retries only failed parts, completes them in part-number order, and aborts the
+upload after a terminal failure. The full payload remains one logical SBK
+operation and therefore produces one latency sample. Values `0` and `1` retain
+the SDK's normal `putObject` behavior. Concurrent multipart uploads require a
+nonzero `-part-size` and cannot be combined with the driver's whole-object
+`-checksum` option.
 
 ### S3 checksum validation
 
@@ -1369,11 +1383,11 @@ notes.
   completion latency for objects published by completed PUT/COPY operations.
   Run writers and readers separately when you need isolated PUT and GET
   service latency.
-- **SigV2** is not supported (the MinIO SDK is SigV4-only). The
-  `-auth-version 2` flag is accepted but logs a warning and falls back.
-- **`-mpu-concurrent-parts`** is accepted but is info-only with the current
-  SDK version. Multipart parallelism is managed internally based on
-  `-part-size`.
+- **SigV2** is not supported (the MinIO SDK is SigV4-only). Unsupported
+  `-auth-version` values fail during argument validation.
+- **Concurrent multipart plus whole-object checksum** is rejected because the
+  low-level multipart contract requires per-part checksum semantics that the
+  current driver does not expose.
 - **SSE-KMS** and **SSE-C** are not exposed by CLI flag.
 - **`-data-compressibility 100 -data-dedupable false`** produces objects
   that are *mostly* compressible but still defeat dedup. Pure all-zeros

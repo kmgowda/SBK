@@ -121,6 +121,90 @@ public class S3OperationSupportTest {
     }
 
     @Test
+    public void uniformObjectSizesAreReproducibleAndSampleTheCompleteRange() {
+        final int minimum = 1024;
+        final int maximum = 1048576;
+        final int samples = 100000;
+        S3ObjectSizeSelector first = S3ObjectSizeSelector.parse(
+                "uniform:" + minimum + ":" + maximum, 7);
+        S3ObjectSizeSelector second = S3ObjectSizeSelector.parse(
+                "uniform:" + minimum + ":" + maximum, 7);
+        S3ObjectSizeSelector otherWorker = S3ObjectSizeSelector.parse(
+                "uniform:" + minimum + ":" + maximum, 8);
+        long sum = 0;
+        int observedMinimum = Integer.MAX_VALUE;
+        int observedMaximum = Integer.MIN_VALUE;
+        boolean workersDiffer = false;
+        for (int sample = 0; sample < samples; sample++) {
+            int value = first.next(1);
+            assertEquals(value, second.next(1));
+            workersDiffer |= value != otherWorker.next(1);
+            assertTrue(value >= minimum && value <= maximum);
+            sum += value;
+            observedMinimum = Math.min(observedMinimum, value);
+            observedMaximum = Math.max(observedMaximum, value);
+        }
+        double expectedMean = (minimum + maximum) / 2.0;
+        assertEquals(expectedMean, sum / (double) samples, expectedMean * 0.01);
+        assertTrue(observedMinimum < minimum + (maximum - minimum) / 100);
+        assertTrue(observedMaximum > maximum - (maximum - minimum) / 100);
+        assertTrue(workersDiffer);
+        assertEquals(maximum, first.maximum(1));
+    }
+
+    @Test
+    public void sweepAndWeightedObjectSizesRetainDeterministicCycles() {
+        S3ObjectSizeSelector sweep = S3ObjectSizeSelector.parse("sweep:10:12", 0);
+        assertEquals(List.of(10, 11, 12, 10),
+                java.util.stream.IntStream.range(0, 4).map(ignored -> sweep.next(1))
+                        .boxed().toList());
+        assertEquals(12, sweep.maximum(1));
+
+        S3ObjectSizeSelector weighted = S3ObjectSizeSelector.parse(
+                "weighted:64=2,1024=1", 0);
+        assertEquals(List.of(64, 64, 1024, 64),
+                java.util.stream.IntStream.range(0, 4).map(ignored -> weighted.next(1))
+                        .boxed().toList());
+        assertEquals(1024, weighted.maximum(1));
+        assertThrows(IllegalArgumentException.class,
+                () -> S3ObjectSizeSelector.parse("uniform:12:10", 0));
+        assertThrows(IllegalArgumentException.class,
+                () -> S3ObjectSizeSelector.parse("sweep:12:10", 0));
+    }
+
+    @Test
+    public void generatedKeysSupportHashedRandomAndPartitionPrefixes() {
+        MinIOConfig config = new MinIOConfig();
+        config.bucketName = "bucket";
+        config.prefix = "objects";
+        config.partitionCount = 4;
+        config.partitionIndex = 2;
+        config.partitionByPrefix = true;
+        config.keyDistribution = "hashed";
+        config.dataSeed = 42;
+        S3ObjectKey hashed = new S3ObjectKey(config, 0, "run");
+        assertTrue(hashed.next().startsWith("objects/partition-2/"));
+        assertEquals("objects/partition-2/", S3ObjectKey.partitionPrefix(config));
+
+        config.keyDistribution = "random";
+        S3ObjectKey random = new S3ObjectKey(config, 0, "run");
+        assertNotEquals(random.next(), random.next());
+        assertThrows(IllegalArgumentException.class,
+                () -> S3ObjectKey.validateDistribution("zipf"));
+    }
+
+    @Test
+    public void endpointMetricsAttributeCompletionsRetriesAndFailures() {
+        S3EndpointMetrics metrics = new S3EndpointMetrics("http://node:9020");
+        metrics.success(1024);
+        metrics.retry();
+        metrics.failure();
+
+        assertEquals("endpoint=http://node:9020, operations=1, bytes=1024, retries=1, failures=1",
+                metrics.summary());
+    }
+
+    @Test
     public void asyncExecutorSurfacesSdkFailures() throws Exception {
         S3AsyncExecutor executor = new S3AsyncExecutor(1);
         executor.acquire();
@@ -203,7 +287,8 @@ public class S3OperationSupportTest {
     @Test
     public void retryPolicyRetriesOnlyWithinItsBound() throws Exception {
         AtomicInteger synchronousAttempts = new AtomicInteger();
-        S3RetryPolicy policy = new S3RetryPolicy(3, 0);
+        AtomicInteger retries = new AtomicInteger();
+        S3RetryPolicy policy = new S3RetryPolicy(3, 0, retries::incrementAndGet);
         String result = policy.execute(() -> {
             if (synchronousAttempts.incrementAndGet() < 3) {
                 throw new IOException("temporary");
@@ -212,6 +297,7 @@ public class S3OperationSupportTest {
         });
         assertEquals("ok", result);
         assertEquals(3, synchronousAttempts.get());
+        assertEquals(2, retries.get());
 
         AtomicInteger asynchronousAttempts = new AtomicInteger();
         String asyncResult = policy.executeAsync(() ->

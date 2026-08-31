@@ -60,6 +60,7 @@ public class MinIOReader implements Reader<byte[]> {
     private final List<String> listPrefixes;
     private final S3AsyncExecutor asyncExecutor;
     private final S3RetryPolicy retryPolicy;
+    private final S3EndpointMetrics endpointMetrics;
     private final ExecutorService responseExecutor;
     private long objectSequence;
     private long bucketSequence;
@@ -78,10 +79,12 @@ public class MinIOReader implements Reader<byte[]> {
      * @param catalog shared object catalog
      * @param bucketTargets optional explicit bucket targets
      * @param globalAsyncPermits shared process-wide async permits
+     * @param endpointMetrics optional endpoint attribution
      */
     public MinIOReader(int id, ParameterOptions params, MinIOConfig config, S3Operation operation,
                        MinioClient client, MinioAsyncClient asyncClient, S3ObjectCatalog catalog,
-                       List<String> bucketTargets, Semaphore globalAsyncPermits) {
+                       List<String> bucketTargets, Semaphore globalAsyncPermits,
+                       S3EndpointMetrics endpointMetrics) {
         this.id = id;
         readerCount = Math.max(1, params.getReadersCount());
         configuredSize = params.getRecordSize();
@@ -96,10 +99,16 @@ public class MinIOReader implements Reader<byte[]> {
         this.asyncClient = asyncClient;
         this.catalog = catalog;
         this.bucketTargets = bucketTargets;
+        this.endpointMetrics = endpointMetrics;
         listPrefixes = parseList(config.listPrefixes);
         asyncExecutor = config.async
                 ? new S3AsyncExecutor(config.asyncDepth, globalAsyncPermits) : null;
-        retryPolicy = new S3RetryPolicy(config.retryMaxAttempts, config.retryBackoffMs);
+        retryPolicy = new S3RetryPolicy(config.retryMaxAttempts, config.retryBackoffMs,
+                () -> {
+                    if (endpointMetrics != null) {
+                        endpointMetrics.retry();
+                    }
+                });
         responseExecutor = config.async
                 ? Executors.newThreadPerTaskExecutor(Thread.ofVirtual()
                         .name("sbk-minio-response-" + id + "-", 0).factory())
@@ -177,11 +186,13 @@ public class MinIOReader implements Reader<byte[]> {
                 status.bytes = bytes;
                 status.endTime = time.getCurrentTime();
                 channel.send(status.startTime, status.endTime, 1, bytes);
+                recordSuccess(bytes);
             } catch (Exception ex) {
                 if (S3AsyncExecutor.isCleanShutdown(ex)) {
                     markStopped(status, time);
                     return;
                 }
+                recordFailure();
                 throw operationFailure(ex);
             }
             return;
@@ -191,9 +202,11 @@ public class MinIOReader implements Reader<byte[]> {
         try {
             asyncExecutor.track(executeAsync(prepared), (bytes, thrown) -> {
                 if (thrown != null && !S3AsyncExecutor.isCleanShutdown(thrown)) {
+                    recordFailure();
                     channel.throwException(thrown);
                 } else if (thrown == null) {
                     channel.send(startTime, time.getCurrentTime(), 1, bytes);
+                    recordSuccess(bytes);
                 }
             });
         } catch (Exception ex) {
@@ -202,6 +215,7 @@ public class MinIOReader implements Reader<byte[]> {
                 markStopped(status, time);
                 return;
             }
+            recordFailure();
             throw operationFailure(ex);
         }
         status.endTime = time.getCurrentTime();
@@ -265,7 +279,8 @@ public class MinIOReader implements Reader<byte[]> {
             }
             case LIST -> listObjects();
             case BUCKET_STAT -> {
-                client.bucketExists(BucketExistsArgs.builder().bucket(prepared.key).build());
+                requireExistingBucket(prepared.key, client.bucketExists(
+                        BucketExistsArgs.builder().bucket(prepared.key).build()));
                 yield 0;
             }
             case BUCKET_LIST -> {
@@ -304,7 +319,10 @@ public class MinIOReader implements Reader<byte[]> {
                 }
             }, responseExecutor);
             case BUCKET_STAT -> asyncClient.bucketExists(
-                    BucketExistsArgs.builder().bucket(prepared.key).build()).thenApply(ignored -> 0);
+                    BucketExistsArgs.builder().bucket(prepared.key).build()).thenApply(exists -> {
+                        requireExistingBucket(prepared.key, exists);
+                        return 0;
+                    });
             case BUCKET_LIST -> asyncClient.listBuckets().thenApply(ignored -> 0);
             default -> throw new IllegalStateException("Unsupported reader operation "
                     + prepared.operation);
@@ -397,6 +415,13 @@ public class MinIOReader implements Reader<byte[]> {
         }
     }
 
+    private static void requireExistingBucket(String bucket, boolean exists) {
+        if (!exists) {
+            throw new S3CompletionException(new IOException(
+                    "S3 bucket-stat target '" + bucket + "' does not exist"));
+        }
+    }
+
     private String nextBucketTarget() {
         if (bucketTargets.isEmpty()) {
             return config.bucketName;
@@ -427,6 +452,18 @@ public class MinIOReader implements Reader<byte[]> {
             throw new S3CompletionException(new IOException("S3 " + prepared.operation
                     + " response length " + actualBytes + " does not match expected "
                     + prepared.bytes + " bytes for '" + prepared.key + "'"));
+        }
+    }
+
+    private void recordSuccess(int bytes) {
+        if (endpointMetrics != null) {
+            endpointMetrics.success(bytes);
+        }
+    }
+
+    private void recordFailure() {
+        if (endpointMetrics != null) {
+            endpointMetrics.failure();
         }
     }
 

@@ -32,6 +32,9 @@ public final class S3ObjectKey {
     private final int writerId;
     private final int partitionIndex;
     private final int partitionCount;
+    private final boolean partitionByPrefix;
+    private final KeyDistribution distribution;
+    private final java.util.SplittableRandom random;
     private long counter;
 
     /**
@@ -48,6 +51,10 @@ public final class S3ObjectKey {
         this.writerId = writerId;
         partitionIndex = cfg.partitionIndex;
         partitionCount = cfg.partitionCount;
+        partitionByPrefix = cfg.partitionByPrefix;
+        distribution = KeyDistribution.parse(cfg.keyDistribution);
+        random = new java.util.SplittableRandom((cfg.dataSeed == 0 ? System.nanoTime()
+                : cfg.dataSeed) + writerId);
         this.runToken = runToken;
         counter = 0;
     }
@@ -66,15 +73,59 @@ public final class S3ObjectKey {
                 sb.append('/');
             }
         }
-        if (fsAccess) {
-            sb.append(HEX[(int) (n >> 4) & 0xF]).append(HEX[(int) n & 0xF]).append('/');
-            sb.append(HEX[(int) (n >> 12) & 0xF]).append(HEX[(int) (n >> 8) & 0xF]).append('/');
+        if (partitionCount > 1 && partitionByPrefix) {
+            sb.append("partition-").append(partitionIndex).append('/');
+        }
+        long keyValue = distribution == KeyDistribution.RANDOM ? random.nextLong() : n;
+        if (fsAccess || distribution == KeyDistribution.HASHED) {
+            long hash = mix64(keyValue);
+            sb.append(HEX[(int) (hash >> 4) & 0xF]).append(HEX[(int) hash & 0xF]).append('/');
+            sb.append(HEX[(int) (hash >> 12) & 0xF]).append(HEX[(int) (hash >> 8) & 0xF])
+                    .append('/');
         }
         sb.append(bucketTag).append('-').append(runToken).append('-').append(writerId);
         if (partitionCount > 1) {
             sb.append("-p").append(partitionIndex);
         }
-        sb.append('-').append(Long.toUnsignedString(n, 36));
+        sb.append('-').append(Long.toUnsignedString(keyValue, 36));
         return sb.toString();
+    }
+
+    static String partitionPrefix(MinIOConfig config) {
+        String prefix = config.prefix == null ? "" : config.prefix.trim();
+        StringBuilder value = new StringBuilder(prefix);
+        if (!value.isEmpty() && value.charAt(value.length() - 1) != '/') {
+            value.append('/');
+        }
+        value.append("partition-").append(config.partitionIndex).append('/');
+        return value.toString();
+    }
+
+    static void validateDistribution(String specification) {
+        KeyDistribution.parse(specification);
+    }
+
+    private static long mix64(long value) {
+        value = (value ^ (value >>> 30)) * 0xbf58476d1ce4e5b9L;
+        value = (value ^ (value >>> 27)) * 0x94d049bb133111ebL;
+        return value ^ (value >>> 31);
+    }
+
+    private enum KeyDistribution {
+        SEQUENTIAL,
+        HASHED,
+        RANDOM;
+
+        static KeyDistribution parse(String specification) {
+            if (specification == null || specification.isBlank()) {
+                return SEQUENTIAL;
+            }
+            try {
+                return valueOf(specification.trim().toUpperCase(java.util.Locale.ROOT));
+            } catch (IllegalArgumentException ex) {
+                throw new IllegalArgumentException(
+                        "key-distribution must be sequential, hashed, or random", ex);
+            }
+        }
     }
 }

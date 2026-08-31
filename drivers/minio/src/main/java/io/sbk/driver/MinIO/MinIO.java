@@ -10,9 +10,12 @@
 package io.sbk.driver.MinIO;
 
 import io.minio.BucketExistsArgs;
+import io.minio.GetObjectArgs;
+import io.minio.GetObjectResponse;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioAsyncClient;
 import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 import io.minio.RemoveBucketArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.SetBucketVersioningArgs;
@@ -40,6 +43,7 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 
 import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -70,6 +74,8 @@ public class MinIO implements Storage<byte[]> {
     private static final long MIN_PART_SIZE = 5L * 1024 * 1024;            // 5 MiB
     private static final long MAX_PART_SIZE = 5L * 1024 * 1024 * 1024;     // 5 GiB
     private static final int MAX_ASYNC_DEPTH = 1024;
+    private static final int MAX_CONCURRENT_PARTS = 1024;
+    private static final long RESPONSE_BUFFER_BYTES = 64L * 1024;
 
     private MinIOConfig config;
     private MinioClient mclient;
@@ -86,6 +92,7 @@ public class MinIO implements Storage<byte[]> {
     private final Queue<String> createdBuckets = new ConcurrentLinkedQueue<>();
     private String runToken;
     private Semaphore globalAsyncPermits;
+    private List<S3EndpointMetrics> endpointMetrics = Collections.emptyList();
 
     public String getConfigFile() {
         return CONFIGFILE;
@@ -158,6 +165,15 @@ public class MinIO implements Storage<byte[]> {
         params.addOption("catalog-max-objects", true,
                 "Maximum startup object references retained, default: "
                         + config.catalogMaxObjects);
+        params.addOption("object-size-distribution", true,
+                "Object sizes: fixed, uniform:min:max, sweep:min:max, or weighted:size=weight,...; default: '"
+                        + config.objectSizeDistribution + "'");
+        params.addOption("key-distribution", true,
+                "Generated keys [sequential|hashed|random], default: "
+                        + config.keyDistribution);
+        params.addOption("partition-by-prefix", true,
+                "Use a server-filterable prefix per distributed partition, default: "
+                        + config.partitionByPrefix);
 
         // Multipart
         params.addOption("part-size",            true, "Multipart part size in bytes (0=disabled, min 5MiB), default: " + config.partSize);
@@ -169,7 +185,8 @@ public class MinIO implements Storage<byte[]> {
                         + nullToEmpty(config.checksumAlgorithm) + "'");
 
         // Auth
-        params.addOption("auth-version", true, "S3 signature version (2 or 4), default: " + config.authVersion);
+        params.addOption("auth-version", true, "S3 signature version (only 4 is supported), default: "
+                + config.authVersion);
 
         // Tagging
         params.addOption("tagging-enabled", true, "Enable object tagging, default: " + config.taggingEnabled);
@@ -201,6 +218,12 @@ public class MinIO implements Storage<byte[]> {
         params.addOption("warmup-requests", true,
                 "Untimed bucket-existence requests before measurement, default: "
                         + config.warmupRequests);
+        params.addOption("warmup-operation", true,
+                "Untimed warmup [connection|put|get|put-get], default: "
+                        + config.warmupOperation);
+        params.addOption("endpoint-metrics", true,
+                "Collect completion totals by configured endpoint, default: "
+                        + config.endpointMetrics);
         params.addOption("partition-count", true,
                 "Distributed object partitions, default: " + config.partitionCount);
         params.addOption("partition-index", true,
@@ -304,6 +327,14 @@ public class MinIO implements Storage<byte[]> {
         if (config.catalogMaxObjects < 1) {
             throw new IllegalArgumentException("catalog-max-objects must be at least 1");
         }
+        config.objectSizeDistribution = params.getOptionValue("object-size-distribution",
+                nullToEmpty(config.objectSizeDistribution));
+        S3ObjectSizeSelector.parse(config.objectSizeDistribution, 0);
+        config.keyDistribution = params.getOptionValue("key-distribution",
+                nullToEmpty(config.keyDistribution));
+        S3ObjectKey.validateDistribution(config.keyDistribution);
+        config.partitionByPrefix = Boolean.parseBoolean(params.getOptionValue(
+                "partition-by-prefix", String.valueOf(config.partitionByPrefix)));
 
         // Multipart
         config.partSize          = Long.parseLong(params.getOptionValue("part-size",            String.valueOf(config.partSize)));
@@ -313,22 +344,29 @@ public class MinIO implements Storage<byte[]> {
                     "part-size must be between " + MIN_PART_SIZE + " and " + MAX_PART_SIZE
                             + " bytes; got " + config.partSize);
         }
-        if (config.mpuConcurrentParts < 0) {
-            throw new IllegalArgumentException("mpu-concurrent-parts must not be negative");
+        if (config.mpuConcurrentParts < 0 || config.mpuConcurrentParts > MAX_CONCURRENT_PARTS) {
+            throw new IllegalArgumentException("mpu-concurrent-parts must be between 0 and "
+                    + MAX_CONCURRENT_PARTS);
+        }
+        if (config.mpuConcurrentParts > 1 && config.partSize == 0) {
+            throw new IllegalArgumentException(
+                    "mpu-concurrent-parts greater than 1 requires a non-zero part-size");
         }
 
         // Checksum
         config.checksumAlgorithm = params.getOptionValue("checksum", nullToEmpty(config.checksumAlgorithm));
         // Validate (throws IllegalArgumentException for bad input)
         S3ChecksumUtil.Algorithm.fromString(config.checksumAlgorithm);
+        if (config.mpuConcurrentParts > 1 && !config.checksumAlgorithm.isEmpty()) {
+            throw new IllegalArgumentException("Concurrent multipart uploads do not support the "
+                    + "whole-object -checksum option; use one of these features at a time");
+        }
 
         // Auth
         config.authVersion = Integer.parseInt(params.getOptionValue("auth-version", String.valueOf(config.authVersion)));
-        if (config.authVersion != 2 && config.authVersion != 4) {
-            throw new IllegalArgumentException("auth-version must be 2 or 4, got " + config.authVersion);
-        }
-        if (config.authVersion == 2) {
-            Printer.log.warn("SigV2 is not supported by the MinIO Java SDK; falling back to SigV4");
+        if (config.authVersion != 4) {
+            throw new IllegalArgumentException("auth-version must be 4 because the MinIO Java SDK "
+                    + "does not support SigV2; got " + config.authVersion);
         }
 
         // Tagging
@@ -369,6 +407,15 @@ public class MinIO implements Storage<byte[]> {
         if (config.warmupRequests < 0) {
             throw new IllegalArgumentException("warmup-requests must not be negative");
         }
+        config.warmupOperation = params.getOptionValue("warmup-operation",
+                nullToEmpty(config.warmupOperation)).trim().toLowerCase(java.util.Locale.ROOT);
+        if (!List.of("connection", "put", "get", "put-get")
+                .contains(config.warmupOperation)) {
+            throw new IllegalArgumentException(
+                    "warmup-operation must be connection, put, get, or put-get");
+        }
+        config.endpointMetrics = Boolean.parseBoolean(params.getOptionValue("endpoint-metrics",
+                String.valueOf(config.endpointMetrics)));
         config.partitionCount = Integer.parseInt(params.getOptionValue("partition-count",
                 String.valueOf(config.partitionCount)));
         config.partitionIndex = Integer.parseInt(params.getOptionValue("partition-index",
@@ -417,9 +464,14 @@ public class MinIO implements Storage<byte[]> {
     public void openStorage(final ParameterOptions params) throws IOException {
         try {
             List<String> endpoints = configuredEndpoints();
-            clients = endpoints.stream().map(endpoint -> buildClient(params, endpoint)).toList();
+            endpointMetrics = config.endpointMetrics
+                    ? endpoints.stream().map(S3EndpointMetrics::new).toList()
+                    : Collections.emptyList();
+            clients = config.async
+                    ? List.of(buildClient(params, endpoints.getFirst()))
+                    : endpoints.stream().map(endpoint -> buildClient(params, endpoint)).toList();
             mclient = clients.getFirst();
-            asyncClients = config.async
+            asyncClients = config.async || config.mpuConcurrentParts > 1
                     ? endpoints.stream().map(endpoint -> buildAsyncClient(params, endpoint)).toList()
                     : Collections.emptyList();
             asyncClient = asyncClients.isEmpty() ? null : asyncClients.getFirst();
@@ -476,7 +528,7 @@ public class MinIO implements Storage<byte[]> {
                                         /* mfaDelete */ null))
                                 .build());
             }
-            warmUpConnections();
+            warmUpConnections(params);
             objectCatalog = requiresObjectCatalog(params)
                     ? loadObjectCatalog() : new S3ObjectCatalog(Collections.emptyList());
             validateCatalog(params);
@@ -539,8 +591,10 @@ public class MinIO implements Storage<byte[]> {
                 .bucket(config.bucketName)
                 .recursive(true)
                 .includeVersions(config.versioningEnabled);
-        if (config.prefix != null && !config.prefix.isEmpty()) {
-            builder.prefix(config.prefix);
+        String catalogPrefix = config.partitionByPrefix && config.partitionCount > 1
+                ? S3ObjectKey.partitionPrefix(config) : config.prefix;
+        if (catalogPrefix != null && !catalogPrefix.isEmpty()) {
+            builder.prefix(catalogPrefix);
         }
         for (Result<Item> result : mclient.listObjects(builder.build())) {
             Item item = result.get();
@@ -560,17 +614,88 @@ public class MinIO implements Storage<byte[]> {
         return new S3ObjectCatalog(objects);
     }
 
-    private void warmUpConnections() throws Exception {
+    private void warmUpConnections(ParameterOptions params) throws Exception {
         if (config.warmupRequests == 0) {
             return;
         }
-        Printer.log.info("Warming S3 HTTP/TLS connections with " + config.warmupRequests
-                + " untimed bucket-existence requests");
-        for (int request = 0; request < config.warmupRequests; request++) {
-            MinioClient configuredClient = clients.get(request % clients.size());
-            configuredClient.bucketExists(
-                    BucketExistsArgs.builder().bucket(config.bucketName).build());
+        Printer.log.info("Warming S3 " + config.warmupOperation + " path with "
+                + config.warmupRequests + " untimed request(s)");
+        if ("connection".equals(config.warmupOperation)) {
+            warmUpConnectionsOnly();
+            return;
         }
+        byte[] payload = new byte[params.getRecordSize()];
+        List<String> warmupKeys = new ArrayList<>();
+        int endpointCount = asyncClients.isEmpty() ? clients.size() : asyncClients.size();
+        try {
+            if ("get".equals(config.warmupOperation)) {
+                for (int endpoint = 0; endpoint < endpointCount; endpoint++) {
+                    String key = warmupKey(endpoint, 0);
+                    warmupPut(endpoint, key, payload);
+                    warmupKeys.add(key);
+                }
+            }
+            for (int request = 0; request < config.warmupRequests; request++) {
+                int endpoint = request % endpointCount;
+                String key = "get".equals(config.warmupOperation)
+                        ? warmupKey(endpoint, 0) : warmupKey(endpoint, request);
+                if (!"get".equals(config.warmupOperation)) {
+                    warmupPut(endpoint, key, payload);
+                    warmupKeys.add(key);
+                }
+                if (!"put".equals(config.warmupOperation)) {
+                    warmupGet(endpoint, key);
+                }
+            }
+        } finally {
+            for (int index = 0; index < warmupKeys.size(); index++) {
+                warmupDelete(index % endpointCount, warmupKeys.get(index));
+            }
+        }
+    }
+
+    private void warmUpConnectionsOnly() throws Exception {
+        BucketExistsArgs args = BucketExistsArgs.builder().bucket(config.bucketName).build();
+        if (asyncClients.isEmpty()) {
+            for (int request = 0; request < config.warmupRequests; request++) {
+                clients.get(request % clients.size()).bucketExists(args);
+            }
+        } else {
+            for (int request = 0; request < config.warmupRequests; request++) {
+                asyncClients.get(request % asyncClients.size()).bucketExists(args).get();
+            }
+        }
+    }
+
+    private void warmupPut(int endpoint, String key, byte[] payload) throws Exception {
+        PutObjectArgs args = PutObjectArgs.builder().bucket(config.bucketName).object(key)
+                .stream(new ByteArrayInputStream(payload), payload.length, -1).build();
+        if (asyncClients.isEmpty()) {
+            clients.get(endpoint).putObject(args);
+        } else {
+            asyncClients.get(endpoint).putObject(args).get();
+        }
+    }
+
+    private void warmupGet(int endpoint, String key) throws Exception {
+        GetObjectArgs args = GetObjectArgs.builder().bucket(config.bucketName).object(key).build();
+        try (GetObjectResponse response = asyncClients.isEmpty()
+                ? clients.get(endpoint).getObject(args) : asyncClients.get(endpoint).getObject(args).get()) {
+            response.transferTo(java.io.OutputStream.nullOutputStream());
+        }
+    }
+
+    private void warmupDelete(int endpoint, String key) throws Exception {
+        RemoveObjectArgs args = RemoveObjectArgs.builder().bucket(config.bucketName).object(key).build();
+        if (asyncClients.isEmpty()) {
+            clients.get(endpoint).removeObject(args);
+        } else {
+            asyncClients.get(endpoint).removeObject(args).get();
+        }
+    }
+
+    private String warmupKey(int endpoint, int request) {
+        return "__sbk-warmup/" + runToken + "/" + endpoint + "/" + request;
     }
 
     private S3ObjectCatalog loadObjectManifest(Path path) throws IOException {
@@ -608,8 +733,13 @@ public class MinIO implements Storage<byte[]> {
     }
 
     private boolean belongsToPartition(String key) {
-        return config.partitionCount == 1
-                || Math.floorMod(key.hashCode(), config.partitionCount) == config.partitionIndex;
+        if (config.partitionCount == 1) {
+            return true;
+        }
+        if (config.partitionByPrefix) {
+            return key.startsWith(S3ObjectKey.partitionPrefix(config));
+        }
+        return Math.floorMod(key.hashCode(), config.partitionCount) == config.partitionIndex;
     }
 
     private void writeRunManifest(ParameterOptions params) throws IOException {
@@ -625,6 +755,9 @@ public class MinIO implements Storage<byte[]> {
                 + "  \"writers\": " + params.getWritersCount() + ",\n"
                 + "  \"readers\": " + params.getReadersCount() + ",\n"
                 + "  \"recordSize\": " + params.getRecordSize() + ",\n"
+                + "  \"objectSizeDistribution\": \""
+                + jsonEscape(config.objectSizeDistribution) + "\",\n"
+                + "  \"keyDistribution\": \"" + jsonEscape(config.keyDistribution) + "\",\n"
                 + "  \"async\": " + config.async + ",\n"
                 + "  \"partitionCount\": " + config.partitionCount + ",\n"
                 + "  \"partitionIndex\": " + config.partitionIndex + "\n"
@@ -803,7 +936,8 @@ public class MinIO implements Storage<byte[]> {
         }
         if (config.mpuConcurrentParts > 0) {
             Printer.log.info("  mpuConcurrent   = " + config.mpuConcurrentParts
-                    + " (info only; not exposed by MinIO SDK 8.5.x)");
+                    + (config.mpuConcurrentParts > 1
+                    ? " (bounded parallel parts per object)" : " (sequential parts)"));
         }
         if (!nullToEmpty(config.checksumAlgorithm).isEmpty()) {
             Printer.log.info("  checksum        = " + config.checksumAlgorithm);
@@ -816,6 +950,15 @@ public class MinIO implements Storage<byte[]> {
         }
         if (config.dataCompressibility > 0) {
             Printer.log.info("  compressibility = " + config.dataCompressibility + "%");
+        }
+        if (!"fixed".equalsIgnoreCase(config.objectSizeDistribution)) {
+            Printer.log.info("  size distribution= " + config.objectSizeDistribution);
+        }
+        if (!"sequential".equalsIgnoreCase(config.keyDistribution)) {
+            Printer.log.info("  key distribution = " + config.keyDistribution);
+        }
+        if (config.partitionByPrefix && config.partitionCount > 1) {
+            Printer.log.info("  partition prefix = " + S3ObjectKey.partitionPrefix(config));
         }
         if (!config.dataDedupable) {
             Printer.log.info("  anti-dedup      = enabled");
@@ -868,6 +1011,9 @@ public class MinIO implements Storage<byte[]> {
                 }
             }
         }
+        for (S3EndpointMetrics metrics : endpointMetrics) {
+            Printer.log.info("MinIO/S3 endpoint totals: " + metrics.summary());
+        }
         for (MinioClient configuredClient : clients) {
             try {
                 configuredClient.close();
@@ -885,17 +1031,21 @@ public class MinIO implements Storage<byte[]> {
     @Override
     public DataWriter<byte[]> createWriter(final int id, final ParameterOptions params) {
         return new MinIOWriter(id, params, config, writeOperation,
-                clients.get(Math.floorMod(id, clients.size())),
+                clients.get(config.async ? 0 : Math.floorMod(id, clients.size())),
                 asyncClients.isEmpty() ? null : asyncClients.get(Math.floorMod(id, asyncClients.size())),
-                objectCatalog, bucketTargets, createdBuckets, runToken, globalAsyncPermits);
+                objectCatalog, bucketTargets, createdBuckets, runToken, globalAsyncPermits,
+                endpointMetrics.isEmpty() ? null
+                        : endpointMetrics.get(Math.floorMod(id, endpointMetrics.size())));
     }
 
     @Override
     public DataReader<byte[]> createReader(final int id, final ParameterOptions params) {
         return new MinIOReader(id, params, config, readOperation,
-                clients.get(Math.floorMod(id, clients.size())),
+                clients.get(config.async ? 0 : Math.floorMod(id, clients.size())),
                 asyncClients.isEmpty() ? null : asyncClients.get(Math.floorMod(id, asyncClients.size())),
-                objectCatalog, bucketTargets, globalAsyncPermits);
+                objectCatalog, bucketTargets, globalAsyncPermits,
+                endpointMetrics.isEmpty() ? null
+                        : endpointMetrics.get(Math.floorMod(id, endpointMetrics.size())));
     }
 
     @Override
@@ -941,17 +1091,22 @@ public class MinIO implements Storage<byte[]> {
     }
 
     private void validateAsyncCapacity(ParameterOptions params) {
-        if (!config.async) {
+        if (!config.async && config.mpuConcurrentParts <= 1) {
             globalAsyncPermits = null;
             return;
         }
         int workers = Math.max(1, params.getWritersCount() + params.getReadersCount());
         long derived = (long) workers * config.asyncDepth;
-        int limit = config.asyncMaxInflight > 0 ? config.asyncMaxInflight
-                : (int) Math.min(Integer.MAX_VALUE, derived);
-        config.asyncMaxInflight = limit;
-        long largestBuffer = Math.max(params.getRecordSize(), 64L * 1024);
-        long estimatedBytes = Math.multiplyExact((long) limit, largestBuffer);
+        int limit = config.async ? (config.asyncMaxInflight > 0 ? config.asyncMaxInflight
+                : (int) Math.min(Integer.MAX_VALUE, derived)) : params.getWritersCount();
+        if (config.async) {
+            config.asyncMaxInflight = limit;
+        }
+        int largestObject = S3ObjectSizeSelector.parse(config.objectSizeDistribution, 0)
+                .maximum(params.getRecordSize());
+        long estimatedBytes = estimateBufferBytes(params.getWritersCount(), params.getReadersCount(),
+                largestObject, config.async ? config.asyncDepth : 1, limit,
+                config.async);
         if (config.asyncMaxMemoryMb > 0
                 && estimatedBytes > config.asyncMaxMemoryMb * 1024L * 1024L) {
             throw new IllegalArgumentException("Estimated async S3 buffers require "
@@ -959,6 +1114,17 @@ public class MinIO implements Storage<byte[]> {
                     + " MiB, exceeding -async-max-memory-mb " + config.asyncMaxMemoryMb
                     + "; reduce -async-depth/-async-max-inflight or object size");
         }
-        globalAsyncPermits = new Semaphore(limit);
+        globalAsyncPermits = config.async ? new Semaphore(limit) : null;
+    }
+
+    static long estimateBufferBytes(int writers, int readers, int recordSize, int asyncDepth,
+                                    int processLimit, boolean async) {
+        long writerSlots = async
+                ? Math.min((long) processLimit, (long) writers * asyncDepth) : writers;
+        long payloadBytes = Math.multiplyExact(writerSlots, recordSize);
+        long responseBytes = async
+                ? Math.multiplyExact(Math.multiplyExact((long) readers, asyncDepth),
+                RESPONSE_BUFFER_BYTES) : Math.multiplyExact((long) readers, RESPONSE_BUFFER_BYTES);
+        return Math.addExact(payloadBytes, responseBytes);
     }
 }

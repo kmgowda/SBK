@@ -65,6 +65,12 @@ public class MinIOConfig {
     public String objectFile;
     /** Maximum object references retained in the startup catalog. */
     public int catalogMaxObjects;
+    /** Object size selection: fixed, uniform:min:max, sweep:min:max, or weighted:size=weight,... */
+    public String objectSizeDistribution;
+    /** Generated key selection: sequential, hashed, or random. */
+    public String keyDistribution;
+    /** Put each distributed partition under its own server-filterable prefix. */
+    public boolean partitionByPrefix;
 
     // ----- Multipart upload (SPT: --part-size, --mpu-concurrent-parts) -----
     /** Part size in bytes; 0 disables multipart. SDK requires 5 MiB .. 5 GiB. */
@@ -77,7 +83,7 @@ public class MinIOConfig {
     public String checksumAlgorithm;
 
     // ----- Auth (SPT: --auth-version) -----
-    /** 2 or 4. Default 4 (SigV4). The MinIO SDK uses SigV4 by default. */
+    /** Signature version. Only SigV4 is supported by the MinIO SDK. */
     public int authVersion;
 
     // ----- Object tagging (SPT: --tagging-*) -----
@@ -111,6 +117,10 @@ public class MinIOConfig {
     public long retryBackoffMs;
     /** Untimed bucket-existence requests used to warm connections before catalog discovery. */
     public int warmupRequests;
+    /** Warmup operation: connection, put, get, or put-get. */
+    public String warmupOperation;
+    /** Collect completion, byte, retry, and failure totals by configured endpoint. */
+    public boolean endpointMetrics;
     /** Total distributed partitions sharing the benchmark bucket. */
     public int partitionCount;
     /** Zero-based partition assigned to this process. */

@@ -11,6 +11,8 @@
 package io.sbk.driver.MinIO;
 
 import io.minio.MinioClient;
+import io.minio.CopyObjectArgs;
+import io.minio.ObjectWriteResponse;
 import io.minio.PutObjectArgs;
 import io.minio.SetObjectTagsArgs;
 import io.sbk.params.InputParameterOptions;
@@ -22,6 +24,7 @@ import org.mockito.ArgumentCaptor;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,6 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Verifies the actual MinIO SDK argument objects emitted by writer operations.
@@ -79,6 +83,25 @@ public class MinIOSdkArgumentsTest {
         assertEquals("verification", args.tags().get().get("phase"));
     }
 
+    @Test
+    public void copyRetriesUseOneStableDestination() throws Exception {
+        MinioClient client = mock(MinioClient.class);
+        MinIOConfig config = baseConfig();
+        config.retryMaxAttempts = 2;
+        S3ObjectRef source = new S3ObjectRef("objects/source", null, 16, 0);
+        MinIOWriter writer = writer(config, S3Operation.COPY, client,
+                new S3ObjectCatalog(List.of(source)));
+        when(client.copyObject(any(CopyObjectArgs.class)))
+                .thenThrow(new IOException("retryable"))
+                .thenReturn(mock(ObjectWriteResponse.class));
+
+        writer.writeAsync(new byte[1]);
+
+        ArgumentCaptor<CopyObjectArgs> captor = ArgumentCaptor.forClass(CopyObjectArgs.class);
+        verify(client, times(2)).copyObject(captor.capture());
+        assertEquals(captor.getAllValues().get(0).object(), captor.getAllValues().get(1).object());
+    }
+
     private static MinIOWriter writer(MinIOConfig config, S3Operation operation,
                                       MinioClient client, S3ObjectCatalog catalog) throws Exception {
         InputParameterOptions parsed = new SbkDriversParameters(
@@ -87,7 +110,7 @@ public class MinIOSdkArgumentsTest {
         ParameterOptions params = parsed;
         Queue<String> createdBuckets = new ConcurrentLinkedQueue<>();
         return new MinIOWriter(0, params, config, operation, client, null, catalog,
-                List.of(), createdBuckets, "test-run", null);
+                List.of(), createdBuckets, "test-run", null, null);
     }
 
     private static MinIOConfig baseConfig() {
@@ -99,12 +122,15 @@ public class MinIOSdkArgumentsTest {
         config.async = false;
         config.asyncDepth = 1;
         config.partSize = 0;
+        config.mpuConcurrentParts = 0;
         config.taggingEnabled = false;
         config.taggingTags = "";
         config.checksumAlgorithm = "";
         config.dataCompressibility = 0;
         config.dataDedupable = true;
         config.retryMaxAttempts = 1;
+        config.objectSizeDistribution = "fixed";
+        config.keyDistribution = "sequential";
         return config;
     }
 }
