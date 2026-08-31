@@ -166,7 +166,7 @@ public class MinIO implements Storage<byte[]> {
                 "Maximum startup object references retained, default: "
                         + config.catalogMaxObjects);
         params.addOption("object-size-distribution", true,
-                "Object sizes: fixed, uniform:min:max, or weighted:size=weight,...; default: '"
+                "Object sizes: fixed, uniform:min:max, sweep:min:max, or weighted:size=weight,...; default: '"
                         + config.objectSizeDistribution + "'");
         params.addOption("key-distribution", true,
                 "Generated keys [sequential|hashed|random], default: "

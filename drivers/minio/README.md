@@ -299,7 +299,7 @@ single-host MinIO runs.
 | `-prefix <p>` | `""` | Prepend `<p>/` to every generated object key |
 | `-copy-prefix <p>` | `sbk-copy` | Destination-key prefix for server-side COPY |
 | `-key-distribution sequential|hashed|random` | `sequential` | Select sequential suffixes, uniformly hashed two-level prefixes, or seeded random suffixes for generated object keys. |
-| `-object-size-distribution <spec>` | `fixed` | Select `fixed`, `uniform:min:max`, or `weighted:size=weight,...` object sizes. The largest configured size participates in the startup memory guard. |
+| `-object-size-distribution <spec>` | `fixed` | Select `fixed`, seeded random `uniform:min:max`, deterministic sequential `sweep:min:max`, or `weighted:size=weight,...` object sizes. Both range bounds are inclusive. The largest configured size participates in the startup memory guard. |
 
 ### S3 operation selection
 
@@ -533,7 +533,7 @@ the last column when the backend state itself must be proven.
 | `-fs-access` | No special prerequisite | Hierarchical two-level generated keys are accepted | LIST to confirm distribution across leaf prefixes |
 | `-copy-prefix` | Existing source objects and copy permission | COPY destinations under the configured prefix are accepted | LIST the destination prefix |
 | `-key-distribution` | Sequential, hashed, or random | Generated keys use the requested namespace shape | Use the same seed for reproducible random-key comparisons |
-| `-object-size-distribution` | Valid fixed, uniform, or weighted specification | The timed workload includes the requested object-size mix | SBK reports aggregate results; split runs when per-size percentiles are required |
+| `-object-size-distribution` | Valid fixed, uniform, sweep, or weighted specification | The timed workload includes the requested object-size mix | SBK reports aggregate results; split runs when per-size percentiles are required |
 | `-object-file` | Readable local `key,size[,versionId]` CSV matching the target bucket | Operations can run from a supplied catalog without startup LIST discovery | Stale/missing entries fail when used |
 | `-catalog-max-objects` | Positive value; enough heap for retained references | Discovery or manifest loading remains bounded at the selected count | It caps client coverage; it does not cap bucket size |
 | `-partition-count` | Same count on all distributed clients | Stable key-hash partitioning is enabled | Use one unique index for every process |

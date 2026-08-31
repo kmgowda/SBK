@@ -12,20 +12,24 @@ package io.sbk.driver.MinIO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SplittableRandom;
 
-/** Selects deterministic object sizes without random allocation in the operation path. */
+/** Selects reproducible object sizes without allocation in the operation path. */
 final class S3ObjectSizeSelector {
     private final int uniformMinimum;
     private final int uniformSpan;
+    private final SplittableRandom uniformRandom;
     private final int[] weightedSizes;
     private final int[] cumulativeWeights;
     private final int totalWeight;
     private long sequence;
 
-    private S3ObjectSizeSelector(int uniformMinimum, int uniformSpan, int[] weightedSizes,
-                                 int[] cumulativeWeights, int totalWeight, long sequence) {
+    private S3ObjectSizeSelector(int uniformMinimum, int uniformSpan, boolean randomUniform,
+                                 int[] weightedSizes, int[] cumulativeWeights,
+                                 int totalWeight, long sequence) {
         this.uniformMinimum = uniformMinimum;
         this.uniformSpan = uniformSpan;
+        this.uniformRandom = randomUniform ? new SplittableRandom(sequence) : null;
         this.weightedSizes = weightedSizes;
         this.cumulativeWeights = cumulativeWeights;
         this.totalWeight = totalWeight;
@@ -35,7 +39,8 @@ final class S3ObjectSizeSelector {
     static S3ObjectSizeSelector parse(String specification, long initialSequence) {
         if (specification == null || specification.isBlank()
                 || specification.equalsIgnoreCase("fixed")) {
-            return new S3ObjectSizeSelector(0, 0, null, null, 0, initialSequence);
+            return new S3ObjectSizeSelector(0, 0, false,
+                    null, null, 0, initialSequence);
         }
         String normalized = specification.trim().toLowerCase(java.util.Locale.ROOT);
         if (normalized.startsWith("uniform:")) {
@@ -51,7 +56,23 @@ final class S3ObjectSizeSelector {
                         "object-size-distribution maximum must be at least its minimum");
             }
             int span = Math.addExact(Math.subtractExact(maximum, minimum), 1);
-            return new S3ObjectSizeSelector(minimum, span,
+            return new S3ObjectSizeSelector(minimum, span, true,
+                    null, null, 0, initialSequence);
+        }
+        if (normalized.startsWith("sweep:")) {
+            String[] bounds = normalized.substring("sweep:".length()).split(":", 2);
+            if (bounds.length != 2) {
+                throw new IllegalArgumentException(
+                        "object-size-distribution sweep syntax is sweep:min:max");
+            }
+            int minimum = positiveSize(bounds[0]);
+            int maximum = positiveSize(bounds[1]);
+            if (maximum < minimum) {
+                throw new IllegalArgumentException(
+                        "object-size-distribution maximum must be at least its minimum");
+            }
+            int span = Math.addExact(Math.subtractExact(maximum, minimum), 1);
+            return new S3ObjectSizeSelector(minimum, span, false,
                     null, null, 0, initialSequence);
         }
         if (normalized.startsWith("weighted:")) {
@@ -73,13 +94,13 @@ final class S3ObjectSizeSelector {
                 sizes.add(size);
                 weights.add(total);
             }
-            return new S3ObjectSizeSelector(0, 0,
+            return new S3ObjectSizeSelector(0, 0, false,
                     sizes.stream().mapToInt(Integer::intValue).toArray(),
                     weights.stream().mapToInt(Integer::intValue).toArray(), total,
                     initialSequence);
         }
         throw new IllegalArgumentException("object-size-distribution must be fixed, "
-                + "uniform:min:max, or weighted:size=weight,...");
+                + "uniform:min:max, sweep:min:max, or weighted:size=weight,...");
     }
 
     int next(int fixedSize) {
@@ -90,6 +111,9 @@ final class S3ObjectSizeSelector {
                     return weightedSizes[index];
                 }
             }
+        }
+        if (uniformRandom != null) {
+            return uniformMinimum + uniformRandom.nextInt(uniformSpan);
         }
         if (uniformSpan > 0) {
             return uniformMinimum + (int) Math.floorMod(sequence++, uniformSpan);

@@ -121,12 +121,44 @@ public class S3OperationSupportTest {
     }
 
     @Test
-    public void objectSizeSelectorsProduceDeterministicBoundedValues() {
-        S3ObjectSizeSelector uniform = S3ObjectSizeSelector.parse("uniform:10:12", 0);
+    public void uniformObjectSizesAreReproducibleAndSampleTheCompleteRange() {
+        final int minimum = 1024;
+        final int maximum = 1048576;
+        final int samples = 100000;
+        S3ObjectSizeSelector first = S3ObjectSizeSelector.parse(
+                "uniform:" + minimum + ":" + maximum, 7);
+        S3ObjectSizeSelector second = S3ObjectSizeSelector.parse(
+                "uniform:" + minimum + ":" + maximum, 7);
+        S3ObjectSizeSelector otherWorker = S3ObjectSizeSelector.parse(
+                "uniform:" + minimum + ":" + maximum, 8);
+        long sum = 0;
+        int observedMinimum = Integer.MAX_VALUE;
+        int observedMaximum = Integer.MIN_VALUE;
+        boolean workersDiffer = false;
+        for (int sample = 0; sample < samples; sample++) {
+            int value = first.next(1);
+            assertEquals(value, second.next(1));
+            workersDiffer |= value != otherWorker.next(1);
+            assertTrue(value >= minimum && value <= maximum);
+            sum += value;
+            observedMinimum = Math.min(observedMinimum, value);
+            observedMaximum = Math.max(observedMaximum, value);
+        }
+        double expectedMean = (minimum + maximum) / 2.0;
+        assertEquals(expectedMean, sum / (double) samples, expectedMean * 0.01);
+        assertTrue(observedMinimum < minimum + (maximum - minimum) / 100);
+        assertTrue(observedMaximum > maximum - (maximum - minimum) / 100);
+        assertTrue(workersDiffer);
+        assertEquals(maximum, first.maximum(1));
+    }
+
+    @Test
+    public void sweepAndWeightedObjectSizesRetainDeterministicCycles() {
+        S3ObjectSizeSelector sweep = S3ObjectSizeSelector.parse("sweep:10:12", 0);
         assertEquals(List.of(10, 11, 12, 10),
-                java.util.stream.IntStream.range(0, 4).map(ignored -> uniform.next(1))
+                java.util.stream.IntStream.range(0, 4).map(ignored -> sweep.next(1))
                         .boxed().toList());
-        assertEquals(12, uniform.maximum(1));
+        assertEquals(12, sweep.maximum(1));
 
         S3ObjectSizeSelector weighted = S3ObjectSizeSelector.parse(
                 "weighted:64=2,1024=1", 0);
@@ -136,6 +168,8 @@ public class S3OperationSupportTest {
         assertEquals(1024, weighted.maximum(1));
         assertThrows(IllegalArgumentException.class,
                 () -> S3ObjectSizeSelector.parse("uniform:12:10", 0));
+        assertThrows(IllegalArgumentException.class,
+                () -> S3ObjectSizeSelector.parse("sweep:12:10", 0));
     }
 
     @Test

@@ -65,7 +65,7 @@ public class MinIOConfig {
     public String objectFile;
     /** Maximum object references retained in the startup catalog. */
     public int catalogMaxObjects;
-    /** Object size selection: fixed, uniform:min:max, or weighted:size=weight,... */
+    /** Object size selection: fixed, uniform:min:max, sweep:min:max, or weighted:size=weight,... */
     public String objectSizeDistribution;
     /** Generated key selection: sequential, hashed, or random. */
     public String keyDistribution;
