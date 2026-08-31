@@ -52,13 +52,12 @@ plugins.withId('maven-publish') {
             include 'RELEASE_PUBLICATION.md'
             include 'PROMETHEUS_LOGGER.md'
             include 'WEB_LOGGER.md'
-            include 'ECS_OBS_BENCHMARK_RUNBOOK.md'
-            include 'ECS_OBS_AGENT_RUNBOOK.md'
-            include 'MINIO_DRIVER_IMPLEMENTATION.md'
             into 'docs'
         }
         from(rootProject.file('drivers/minio')) {
             include 'README.md'
+            include 'docs/**/*.md'
+            include 'examples/**/*'
             into 'drivers/minio'
         }
         from(rootProject.file('.devin/skills')) {

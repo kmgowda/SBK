@@ -13,16 +13,16 @@ You may obtain a copy of the License at
 This document gives Devin, Windsurf, Codex, Cursor, Aider, and other software
 agents a deterministic workflow for building and running Dell ECS/ObjectScale
 S3 benchmarks with SBK. It supplements, and never weakens, the repository
-rules in [`AGENTS.md`](../AGENTS.md).
+rules in [`AGENTS.md`](../../../AGENTS.md).
 
 An agent executing a benchmark must also read completely:
 
 1. [ECS/OBS benchmark runbook](ECS_OBS_BENCHMARK_RUNBOOK.md)
-2. [MinIO/S3 driver implementation](MINIO_DRIVER_IMPLEMENTATION.md)
-3. [Benchmark methodology and results](../.devin/skills/sbk-benchmark-runner/references/methodology-and-results.md)
-4. [SBK benchmark runner skill](../.devin/skills/sbk-benchmark-runner/SKILL.md)
+2. [MinIO/S3 driver implementation](IMPLEMENTATION.md)
+3. [Benchmark methodology and results](../../../.devin/skills/sbk-benchmark-runner/references/methodology-and-results.md)
+4. [SBK benchmark runner skill](../../../.devin/skills/sbk-benchmark-runner/SKILL.md)
 5. For multiple load hosts only, the
-   [distributed benchmark runner skill](../.devin/skills/sbk-distributed-benchmark-runner/SKILL.md)
+   [distributed benchmark runner skill](../../../.devin/skills/sbk-distributed-benchmark-runner/SKILL.md)
 
 ## 1. Decide whether execution is authorized
 
@@ -86,7 +86,7 @@ For distributed load:
 ```
 
 Read the checked-in
-[`minio.properties`](../drivers/minio/src/main/resources/minio.properties).
+[`minio.properties`](../src/main/resources/minio.properties).
 Never invent a MinIO option or reuse an option from a different driver. The
 single endpoint/pool option is `-url`; there is no separate `-endpoints` flag.
 
@@ -246,7 +246,7 @@ for large existing-object catalogs.
 
 Do not commit `gempass`, SSH private keys, storage credentials, or production
 inventories. The portable template lives at
-[`example-sbk-gem-minio.yml`](../.devin/skills/sbk-distributed-benchmark-runner/references/example-sbk-gem-minio.yml).
+[`sbk-gem-ecs.yml`](../examples/sbk-gem-ecs.yml).
 
 ## 9. Machine-checkable acceptance
 
@@ -308,8 +308,8 @@ When an agent changes the MinIO implementation or options, it must update:
 
 1. generated `-help` text in `MinIO.addArgs()`;
 2. `minio.properties` defaults/comments;
-3. [driver README](../drivers/minio/README.md);
-4. [implementation guide](MINIO_DRIVER_IMPLEMENTATION.md);
+3. [driver README](../README.md);
+4. [implementation guide](IMPLEMENTATION.md);
 5. this runbook or the operator runbook when workflows change;
 6. unit tests and real-backend verification evidence.
 

@@ -2,7 +2,7 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# TEMPLATE ONLY. Replace every REPLACE_* value in an untracked runtime copy.
+# ECS/ObjectScale TEMPLATE ONLY. Replace every REPLACE_* value in an untracked runtime copy.
 # Never commit real credentials or a production host inventory.
 
 sbkGemArgs:

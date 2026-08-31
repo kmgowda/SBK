@@ -386,6 +386,8 @@ def releaseAgentDocs = tasks.register('releaseAgentDocs', Tar) {
     }
     from('drivers/minio') {
         include 'README.md'
+        include 'docs/**/*.md'
+        include 'examples/**/*'
         into 'drivers/minio'
     }
 }

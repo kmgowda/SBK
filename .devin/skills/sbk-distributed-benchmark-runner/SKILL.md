@@ -26,8 +26,8 @@ Use [distributed-validation.md](references/distributed-validation.md) to
 preflight and judge the result.
 
 For distributed Dell ECS/ObjectScale S3 load, also read
-[`docs/ECS_OBS_AGENT_RUNBOOK.md`](../../../docs/ECS_OBS_AGENT_RUNBOOK.md) and
-[`docs/ECS_OBS_BENCHMARK_RUNBOOK.md`](../../../docs/ECS_OBS_BENCHMARK_RUNBOOK.md)
+[`drivers/minio/docs/ECS_OBS_AGENT_RUNBOOK.md`](../../../drivers/minio/docs/ECS_OBS_AGENT_RUNBOOK.md) and
+[`drivers/minio/docs/ECS_OBS_BENCHMARK_RUNBOOK.md`](../../../drivers/minio/docs/ECS_OBS_BENCHMARK_RUNBOOK.md)
 completely. Qualify the same ordinary MinIO-driver command on every load node
 before adding GEM orchestration.
 
@@ -74,5 +74,5 @@ before adding GEM orchestration.
   failure isolation, and acceptance criteria.
 - [example-sbk-gem-null-smoke.yml](references/example-sbk-gem-null-smoke.yml):
   non-storage orchestration smoke template.
-- [example-sbk-gem-minio.yml](references/example-sbk-gem-minio.yml): S3
+- [sbk-gem-ecs.yml](../../../drivers/minio/examples/sbk-gem-ecs.yml): S3
   distributed workload template with explicit placeholders.

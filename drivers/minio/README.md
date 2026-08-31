@@ -17,12 +17,12 @@ You may obtain a copy of the License at
 
 Focused guides:
 
-- [Dell ECS/ObjectScale benchmark runbook](../../docs/ECS_OBS_BENCHMARK_RUNBOOK.md):
+- [Dell ECS/ObjectScale benchmark runbook](docs/ECS_OBS_BENCHMARK_RUNBOOK.md):
   qualification, workload matrices, exact commands, acceptance rules, and
   confirmed lab results.
-- [Driver implementation](../../docs/MINIO_DRIVER_IMPLEMENTATION.md): request lifecycle, measurement
+- [Driver implementation](docs/IMPLEMENTATION.md): request lifecycle, measurement
   boundaries, async/memory bounds, catalog, multipart, retry, and shutdown.
-- [Software-agent ECS/OBS workflow](../../docs/ECS_OBS_AGENT_RUNBOOK.md):
+- [Software-agent ECS/OBS workflow](docs/ECS_OBS_AGENT_RUNBOOK.md):
   deterministic and safe execution for Devin, Windsurf, Codex, Cursor, and
   other agents.
 

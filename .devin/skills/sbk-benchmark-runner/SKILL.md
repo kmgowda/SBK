@@ -26,8 +26,8 @@ for commands and YML examples. Read
 making performance claims.
 
 For Dell ECS/ObjectScale, also read the repository-level
-[`docs/ECS_OBS_AGENT_RUNBOOK.md`](../../../docs/ECS_OBS_AGENT_RUNBOOK.md) and
-[`docs/ECS_OBS_BENCHMARK_RUNBOOK.md`](../../../docs/ECS_OBS_BENCHMARK_RUNBOOK.md)
+[`drivers/minio/docs/ECS_OBS_AGENT_RUNBOOK.md`](../../../drivers/minio/docs/ECS_OBS_AGENT_RUNBOOK.md) and
+[`drivers/minio/docs/ECS_OBS_BENCHMARK_RUNBOOK.md`](../../../drivers/minio/docs/ECS_OBS_BENCHMARK_RUNBOOK.md)
 completely before constructing or executing a workload.
 
 ## Run safely

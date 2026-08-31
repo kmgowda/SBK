@@ -17,7 +17,7 @@ engineers who need to know exactly what a reported operation measures.
 For operating procedures, use the
 [ECS/OBS benchmark runbook](ECS_OBS_BENCHMARK_RUNBOOK.md). For the
 complete command-line reference and backend tutorials, use the
-[driver README](../drivers/minio/README.md). Software agents must also follow the
+[driver README](../README.md). Software agents must also follow the
 [ECS/OBS agent workflow](ECS_OBS_AGENT_RUNBOOK.md).
 
 ## Runtime stack
@@ -50,7 +50,7 @@ and response consumption complete. The asynchronous path reports from the
 tracked completion callback.
 
 The SDK is intentionally pinned to 8.5.17 in
-[`build.gradle`](../drivers/minio/build.gradle). Later SDK behavior can add checksum
+[`build.gradle`](../build.gradle). Later SDK behavior can add checksum
 announcement headers that older ECS/ObjectScale and other S3-compatible
 releases reject. An SDK upgrade is therefore a compatibility change, not a
 routine dependency refresh.
@@ -59,19 +59,19 @@ routine dependency refresh.
 
 | Class | Responsibility |
 |---|---|
-| [`MinIO`](../drivers/minio/src/main/java/io/sbk/driver/MinIO/MinIO.java) | CLI/configuration binding, client construction, bucket setup, warm-up, catalog discovery, endpoint assignment, manifests, and lifecycle |
-| [`MinIOWriter`](../drivers/minio/src/main/java/io/sbk/driver/MinIO/MinIOWriter.java) | PUT, update, copy, delete, tag mutation, and bucket mutation operations |
-| [`MinIOReader`](../drivers/minio/src/main/java/io/sbk/driver/MinIO/MinIOReader.java) | GET, Range GET, stat, tag read, LIST, bucket stat, and bucket list operations |
-| [`S3AsyncExecutor`](../drivers/minio/src/main/java/io/sbk/driver/MinIO/S3AsyncExecutor.java) | Per-worker and process-wide in-flight bounds; retains futures until their measurement callback completes |
-| [`S3MultipartUploader`](../drivers/minio/src/main/java/io/sbk/driver/MinIO/S3MultipartUploader.java) | Bounded multipart waves, ordered completion, per-part retry, and abort after terminal failure |
-| [`S3ObjectCatalog`](../drivers/minio/src/main/java/io/sbk/driver/MinIO/S3ObjectCatalog.java) | Bounded existing-object inventory, reader partitioning, delete claims, and completed-PUT publication |
-| [`S3ObjectKey`](../drivers/minio/src/main/java/io/sbk/driver/MinIO/S3ObjectKey.java) | Sequential, hashed, random, filesystem-style, and distributed-partition key layouts |
-| [`S3ObjectSizeSelector`](../drivers/minio/src/main/java/io/sbk/driver/MinIO/S3ObjectSizeSelector.java) | Fixed, seeded uniform, deterministic sweep, and deterministic weighted object sizes |
-| [`S3OperationMix`](../drivers/minio/src/main/java/io/sbk/driver/MinIO/S3OperationMix.java) | Exact repeating weighted operation cycles; no random selection noise |
-| [`S3RetryPolicy`](../drivers/minio/src/main/java/io/sbk/driver/MinIO/S3RetryPolicy.java) | Optional retries for network I/O, HTTP 429, and HTTP 5xx responses |
-| [`S3DataGenerator`](../drivers/minio/src/main/java/io/sbk/driver/MinIO/S3DataGenerator.java) | Reproducible payload content, compressibility, and anti-dedup stamping |
-| [`S3PayloadPool`](../drivers/minio/src/main/java/io/sbk/driver/MinIO/S3PayloadPool.java) | Reuses arrays while regenerating object content; buffers are not reused until SDK completion |
-| [`S3EndpointMetrics`](../drivers/minio/src/main/java/io/sbk/driver/MinIO/S3EndpointMetrics.java) | Optional completed-operation, logical-byte, retry, and terminal-failure totals per configured endpoint |
+| [`MinIO`](../src/main/java/io/sbk/driver/MinIO/MinIO.java) | CLI/configuration binding, client construction, bucket setup, warm-up, catalog discovery, endpoint assignment, manifests, and lifecycle |
+| [`MinIOWriter`](../src/main/java/io/sbk/driver/MinIO/MinIOWriter.java) | PUT, update, copy, delete, tag mutation, and bucket mutation operations |
+| [`MinIOReader`](../src/main/java/io/sbk/driver/MinIO/MinIOReader.java) | GET, Range GET, stat, tag read, LIST, bucket stat, and bucket list operations |
+| [`S3AsyncExecutor`](../src/main/java/io/sbk/driver/MinIO/S3AsyncExecutor.java) | Per-worker and process-wide in-flight bounds; retains futures until their measurement callback completes |
+| [`S3MultipartUploader`](../src/main/java/io/sbk/driver/MinIO/S3MultipartUploader.java) | Bounded multipart waves, ordered completion, per-part retry, and abort after terminal failure |
+| [`S3ObjectCatalog`](../src/main/java/io/sbk/driver/MinIO/S3ObjectCatalog.java) | Bounded existing-object inventory, reader partitioning, delete claims, and completed-PUT publication |
+| [`S3ObjectKey`](../src/main/java/io/sbk/driver/MinIO/S3ObjectKey.java) | Sequential, hashed, random, filesystem-style, and distributed-partition key layouts |
+| [`S3ObjectSizeSelector`](../src/main/java/io/sbk/driver/MinIO/S3ObjectSizeSelector.java) | Fixed, seeded uniform, deterministic sweep, and deterministic weighted object sizes |
+| [`S3OperationMix`](../src/main/java/io/sbk/driver/MinIO/S3OperationMix.java) | Exact repeating weighted operation cycles; no random selection noise |
+| [`S3RetryPolicy`](../src/main/java/io/sbk/driver/MinIO/S3RetryPolicy.java) | Optional retries for network I/O, HTTP 429, and HTTP 5xx responses |
+| [`S3DataGenerator`](../src/main/java/io/sbk/driver/MinIO/S3DataGenerator.java) | Reproducible payload content, compressibility, and anti-dedup stamping |
+| [`S3PayloadPool`](../src/main/java/io/sbk/driver/MinIO/S3PayloadPool.java) | Reuses arrays while regenerating object content; buffers are not reused until SDK completion |
+| [`S3EndpointMetrics`](../src/main/java/io/sbk/driver/MinIO/S3EndpointMetrics.java) | Optional completed-operation, logical-byte, retry, and terminal-failure totals per configured endpoint |
 
 ## Startup sequence
 

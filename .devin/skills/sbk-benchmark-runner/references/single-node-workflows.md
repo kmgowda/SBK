@@ -98,7 +98,7 @@ Generate current options and read `drivers/minio/README.md` first:
 ```
 
 For Dell ECS/ObjectScale, use
-[`docs/ECS_OBS_BENCHMARK_RUNBOOK.md`](../../../../docs/ECS_OBS_BENCHMARK_RUNBOOK.md)
+[`drivers/minio/docs/ECS_OBS_BENCHMARK_RUNBOOK.md`](../../../../drivers/minio/docs/ECS_OBS_BENCHMARK_RUNBOOK.md)
 instead of adapting the generic example below. It covers ECS data-plane ports,
 namespace routing, qualification, performance matrices, and result acceptance.
 

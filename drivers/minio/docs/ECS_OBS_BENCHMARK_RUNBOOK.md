@@ -17,13 +17,13 @@ defines when a result is valid.
 
 Use these companion documents:
 
-- [MinIO/S3 driver README](../drivers/minio/README.md): complete driver option
+- [MinIO/S3 driver README](../README.md): complete driver option
   reference and non-ECS backends.
-- [MinIO/S3 implementation](MINIO_DRIVER_IMPLEMENTATION.md): exact request,
+- [MinIO/S3 implementation](IMPLEMENTATION.md): exact request,
   byte, concurrency, memory, retry, and lifecycle semantics.
 - [ECS/OBS agent runbook](ECS_OBS_AGENT_RUNBOOK.md): deterministic workflow for
   Devin, Windsurf, Codex, Cursor, and other software agents.
-- [Distributed benchmark runner](../.devin/skills/sbk-distributed-benchmark-runner/SKILL.md):
+- [Distributed benchmark runner](../../../.devin/skills/sbk-distributed-benchmark-runner/SKILL.md):
   SBK-GEM topology and remote-load-generator safety.
 
 ## 1. Safety and validity rules
@@ -430,9 +430,9 @@ and call it an aggregate target without checking GEM's distribution output.
 ## 8. Complete option map
 
 The following is the complete MinIO-driver option inventory. Defaults are in
-[`minio.properties`](../drivers/minio/src/main/resources/minio.properties),
+[`minio.properties`](../src/main/resources/minio.properties),
 and detailed constraints are in the
-[driver README](../drivers/minio/README.md#full-cli-flag-reference).
+[driver README](../README.md#full-cli-flag-reference).
 
 | Category | Options |
 |---|---|

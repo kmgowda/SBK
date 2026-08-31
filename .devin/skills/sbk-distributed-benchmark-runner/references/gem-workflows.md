@@ -103,5 +103,5 @@ After the Null smoke succeeds:
 The MinIO template is illustrative. Generate
 `sbk-gem -class minio -help` and read `drivers/minio/README.md` before use.
 For Dell ECS/ObjectScale, follow
-[`docs/ECS_OBS_BENCHMARK_RUNBOOK.md`](../../../../docs/ECS_OBS_BENCHMARK_RUNBOOK.md)
+[`drivers/minio/docs/ECS_OBS_BENCHMARK_RUNBOOK.md`](../../../../drivers/minio/docs/ECS_OBS_BENCHMARK_RUNBOOK.md)
 and its staged one-node-to-GEM workflow.

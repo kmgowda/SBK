@@ -688,14 +688,13 @@ application {
             include "RELEASE_PUBLICATION.md"
             include "PROMETHEUS_LOGGER.md"
             include "WEB_LOGGER.md"
-            include "ECS_OBS_BENCHMARK_RUNBOOK.md"
-            include "ECS_OBS_AGENT_RUNBOOK.md"
-            include "MINIO_DRIVER_IMPLEMENTATION.md"
         }
     }
     applicationDistribution.into("drivers/minio") {
         from("drivers/minio") {
             include "README.md"
+            include "docs/**/*.md"
+            include "examples/**/*"
         }
     }
 
