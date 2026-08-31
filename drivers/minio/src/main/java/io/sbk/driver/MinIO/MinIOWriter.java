@@ -60,11 +60,15 @@ public class MinIOWriter implements Writer<byte[]> {
     private final S3DataGenerator dataGenerator;
     private final S3ChecksumUtil.Algorithm checksumAlgorithm;
     private final S3ObjectKey keyGenerator;
+    private final S3ObjectSizeSelector sizeSelector;
     private final S3BucketName bucketNameGenerator;
     private final Map<String, String> objectTags;
     private final ServerSideEncryption sse;
     private final S3AsyncExecutor asyncExecutor;
     private final S3RetryPolicy retryPolicy;
+    private final S3MultipartUploader multipartUploader;
+    private final S3PayloadPool payloadPool;
+    private final S3EndpointMetrics endpointMetrics;
     private long copySequence;
     private long bucketTargetSequence;
     private byte[] reusablePayload;
@@ -83,12 +87,13 @@ public class MinIOWriter implements Writer<byte[]> {
      * @param createdBuckets generated buckets to clean up
      * @param runToken run discriminator
      * @param globalAsyncPermits shared process-wide async permits
+     * @param endpointMetrics optional endpoint attribution
      * @throws IllegalArgumentException when tagging is enabled without tags
      */
     public MinIOWriter(int id, ParameterOptions params, MinIOConfig config, S3Operation operation,
                        MinioClient client, MinioAsyncClient asyncClient, S3ObjectCatalog catalog,
                        List<String> bucketTargets, Queue<String> createdBuckets, String runToken,
-                       Semaphore globalAsyncPermits) {
+                       Semaphore globalAsyncPermits, S3EndpointMetrics endpointMetrics) {
         this.id = id;
         writerCount = Math.max(1, params.getWritersCount());
         this.config = config;
@@ -98,17 +103,28 @@ public class MinIOWriter implements Writer<byte[]> {
         this.catalog = catalog;
         this.bucketTargets = bucketTargets;
         this.createdBuckets = createdBuckets;
+        this.endpointMetrics = endpointMetrics;
         long seed = config.dataSeed == 0 ? System.nanoTime() : config.dataSeed + id;
         dataGenerator = new S3DataGenerator(config.dataCompressibility, config.dataDedupable, seed);
         operationMix = S3OperationMix.parse(config.writeMix, operation, true, id);
         checksumAlgorithm = S3ChecksumUtil.Algorithm.fromString(config.checksumAlgorithm);
         keyGenerator = new S3ObjectKey(config, id, runToken);
+        sizeSelector = S3ObjectSizeSelector.parse(config.objectSizeDistribution, id);
         bucketNameGenerator = new S3BucketName(config.bucketPrefix, runToken, id);
         objectTags = parseTags(config.taggingTags);
         sse = config.sseEnabled ? new ServerSideEncryptionS3() : null;
+        retryPolicy = new S3RetryPolicy(config.retryMaxAttempts, config.retryBackoffMs,
+                () -> {
+                    if (endpointMetrics != null) {
+                        endpointMetrics.retry();
+                    }
+                });
         asyncExecutor = config.async
                 ? new S3AsyncExecutor(config.asyncDepth, globalAsyncPermits) : null;
-        retryPolicy = new S3RetryPolicy(config.retryMaxAttempts, config.retryBackoffMs);
+        multipartUploader = config.mpuConcurrentParts > 1
+                ? new S3MultipartUploader(asyncClient, config.bucketName, effectiveRegion(config),
+                config.partSize, config.mpuConcurrentParts, retryPolicy) : null;
+        payloadPool = config.async ? new S3PayloadPool() : null;
         copySequence = 0;
         bucketTargetSequence = 0;
         reusablePayload = null;
@@ -132,8 +148,19 @@ public class MinIOWriter implements Writer<byte[]> {
 
     private void record(DataType<byte[]> dataType, int size, Time time, Status status,
                         PerlChannel channel, WriteRequestsLogger logger) throws IOException {
-        PreparedOperation prepared = prepare(size);
+        boolean asyncSlotAcquired = acquireAsyncSlot(status, time);
+        if (config.async && !asyncSlotAcquired) {
+            return;
+        }
+        final PreparedOperation prepared;
+        try {
+            prepared = prepare(size);
+        } catch (RuntimeException ex) {
+            releaseFailedAsyncStart();
+            throw ex;
+        }
         if (prepared == null) {
+            releaseFailedAsyncStart();
             status.records = 0;
             status.bytes = 0;
             status.startTime = time.getCurrentTime();
@@ -142,17 +169,6 @@ public class MinIOWriter implements Writer<byte[]> {
             return;
         }
 
-        if (config.async) {
-            try {
-                asyncExecutor.acquire();
-            } catch (IOException ex) {
-                if (S3AsyncExecutor.isCleanShutdown(ex)) {
-                    markStopped(status, time);
-                    return;
-                }
-                throw ex;
-            }
-        }
         status.startTime = time.getCurrentTime();
         status.bytes = prepared.bytes;
         status.records = 1;
@@ -166,11 +182,13 @@ public class MinIOWriter implements Writer<byte[]> {
                 status.endTime = time.getCurrentTime();
                 channel.send(status.startTime, status.endTime, 1, result.bytes);
                 publish(result, status.startTime);
+                recordSuccess(result.bytes);
             } catch (Exception ex) {
                 if (S3AsyncExecutor.isCleanShutdown(ex)) {
                     markStopped(status, time);
                     return;
                 }
+                recordFailure();
                 throw operationFailure(ex);
             }
             return;
@@ -179,20 +197,28 @@ public class MinIOWriter implements Writer<byte[]> {
         final long startTime = status.startTime;
         try {
             asyncExecutor.track(executeAsync(prepared), (result, thrown) -> {
-                if (thrown != null && !S3AsyncExecutor.isCleanShutdown(thrown)) {
-                    channel.throwException(thrown);
-                } else if (thrown == null) {
-                    long endTime = time.getCurrentTime();
-                    channel.send(startTime, endTime, 1, result.bytes);
-                    publish(result, startTime);
+                try {
+                    if (thrown != null && !S3AsyncExecutor.isCleanShutdown(thrown)) {
+                        recordFailure();
+                        channel.throwException(thrown);
+                    } else if (thrown == null) {
+                        long endTime = time.getCurrentTime();
+                        channel.send(startTime, endTime, 1, result.bytes);
+                        publish(result, startTime);
+                        recordSuccess(result.bytes);
+                    }
+                } finally {
+                    releasePayload(prepared);
                 }
             });
         } catch (Exception ex) {
             asyncExecutor.releaseFailedStart();
+            releasePayload(prepared);
             if (S3AsyncExecutor.isCleanShutdown(ex)) {
                 markStopped(status, time);
                 return;
             }
+            recordFailure();
             throw operationFailure(ex);
         }
         status.endTime = time.getCurrentTime();
@@ -200,19 +226,22 @@ public class MinIOWriter implements Writer<byte[]> {
 
     private PreparedOperation prepare(int size) {
         S3Operation selected = operationMix.next();
+        int selectedSize = selected == S3Operation.PUT || selected == S3Operation.UPDATE
+                ? sizeSelector.next(size) : size;
         return switch (selected) {
-            case PUT -> new PreparedOperation(selected, nextPayload(size),
-                    keyGenerator.next(), null, size);
-            case UPDATE -> objectOperation(selected, nextPayload(size), catalog.nextShared(), size);
-            case COPY -> objectOperation(selected, null, catalog.nextShared(), -1);
+            case PUT -> new PreparedOperation(selected, nextPayload(selectedSize),
+                    keyGenerator.next(), null, null, selectedSize);
+            case UPDATE -> objectOperation(selected, nextPayload(selectedSize), catalog.nextShared(),
+                    selectedSize);
+            case COPY -> copyOperation(catalog.nextShared());
             case DELETE, TAG_SET, TAG_DELETE -> objectOperation(selected, null,
                     selected == S3Operation.DELETE ? catalog.claimDelete() : catalog.nextShared(), 0);
             case BUCKET_CREATE -> new PreparedOperation(selected, null,
-                    bucketNameGenerator.next(), null, 0);
+                    bucketNameGenerator.next(), null, null, 0);
             case BUCKET_DELETE -> {
                 String bucket = nextBucketTarget();
                 yield bucket == null ? null
-                        : new PreparedOperation(selected, null, bucket, null, 0);
+                        : new PreparedOperation(selected, null, bucket, null, null, 0);
             }
             default -> throw new IllegalStateException("Unsupported writer operation " + selected);
         };
@@ -225,14 +254,22 @@ public class MinIOWriter implements Writer<byte[]> {
         }
         int effectiveBytes = safeBytes(bytes < 0 ? object.size() : bytes);
         return new PreparedOperation(selected, payload, object.key(),
-                object.versionId(), effectiveBytes);
+                object.versionId(), null, effectiveBytes);
+    }
+
+    private PreparedOperation copyOperation(S3ObjectRef object) {
+        if (object == null) {
+            return null;
+        }
+        return new PreparedOperation(S3Operation.COPY, null, object.key(), object.versionId(),
+                copyDestination(), safeBytes(object.size()));
     }
 
     private byte[] nextPayload(int size) {
-        dataGenerator.newObject();
         if (config.async) {
-            return dataGenerator.generate(size);
+            return payloadPool.acquire(size, dataGenerator);
         }
+        dataGenerator.newObject();
         if (reusablePayload == null || reusablePayload.length != size) {
             reusablePayload = new byte[size];
         }
@@ -241,20 +278,28 @@ public class MinIOWriter implements Writer<byte[]> {
     }
 
     private OperationResult executeSync(PreparedOperation prepared) throws Exception {
+        if (usesConcurrentMultipart(prepared)) {
+            return executeSyncOnce(prepared);
+        }
         return retryPolicy.execute(() -> executeSyncOnce(prepared));
     }
 
     private OperationResult executeSyncOnce(PreparedOperation prepared) throws Exception {
         return switch (prepared.operation) {
             case PUT, UPDATE -> {
-                client.putObject(putArgs(prepared).build());
+                if (usesConcurrentMultipart(prepared)) {
+                    multipartUploader.upload(prepared.key, prepared.payload,
+                            putArgs(prepared).build().genHeaders()).get();
+                } else {
+                    client.putObject(putArgs(prepared).build());
+                }
                 yield new OperationResult(prepared.operation, prepared.key,
                         prepared.versionId, prepared.bytes);
             }
             case COPY -> {
-                String destination = copyDestination();
-                client.copyObject(copyArgs(prepared, destination).build());
-                yield new OperationResult(prepared.operation, destination, null, prepared.bytes);
+                client.copyObject(copyArgs(prepared, prepared.destination).build());
+                yield new OperationResult(prepared.operation, prepared.destination, null,
+                        prepared.bytes);
             }
             case DELETE -> {
                 client.removeObject(removeArgs(prepared).build());
@@ -283,6 +328,9 @@ public class MinIOWriter implements Writer<byte[]> {
     }
 
     private CompletableFuture<OperationResult> executeAsync(PreparedOperation prepared) throws Exception {
+        if (usesConcurrentMultipart(prepared)) {
+            return executeAsyncOnce(prepared);
+        }
         return retryPolicy.executeAsync(() -> executeAsyncOnce(prepared));
     }
 
@@ -290,15 +338,18 @@ public class MinIOWriter implements Writer<byte[]> {
             PreparedOperation prepared) throws Exception {
         return switch (prepared.operation) {
             case PUT, UPDATE -> {
-                yield asyncClient.putObject(putArgs(prepared).build()).thenApply(ignored ->
+                CompletableFuture<?> upload = usesConcurrentMultipart(prepared)
+                        ? multipartUploader.upload(prepared.key, prepared.payload,
+                        putArgs(prepared).build().genHeaders())
+                        : asyncClient.putObject(putArgs(prepared).build());
+                yield upload.thenApply(ignored ->
                         new OperationResult(prepared.operation, prepared.key,
                                 prepared.versionId, prepared.bytes));
             }
             case COPY -> {
-                String destination = copyDestination();
-                yield asyncClient.copyObject(copyArgs(prepared, destination).build())
+                yield asyncClient.copyObject(copyArgs(prepared, prepared.destination).build())
                         .thenApply(ignored -> new OperationResult(prepared.operation,
-                                destination, null, prepared.bytes));
+                                prepared.destination, null, prepared.bytes));
             }
             case DELETE -> asyncClient.removeObject(removeArgs(prepared).build())
                     .thenApply(ignored -> new OperationResult(prepared.operation, null, null, 0));
@@ -336,6 +387,11 @@ public class MinIOWriter implements Writer<byte[]> {
                     S3ChecksumUtil.computeBase64(prepared.payload, checksumAlgorithm)));
         }
         return builder;
+    }
+
+    private boolean usesConcurrentMultipart(PreparedOperation prepared) {
+        return multipartUploader != null && prepared.payload != null
+                && prepared.payload.length > config.partSize;
     }
 
     private CopyObjectArgs.Builder copyArgs(PreparedOperation prepared, String destination) {
@@ -425,6 +481,50 @@ public class MinIOWriter implements Writer<byte[]> {
         status.endTime = time.getCurrentTime();
     }
 
+    private boolean acquireAsyncSlot(Status status, Time time) throws IOException {
+        if (!config.async) {
+            return false;
+        }
+        try {
+            asyncExecutor.acquire();
+            return true;
+        } catch (IOException ex) {
+            if (S3AsyncExecutor.isCleanShutdown(ex)) {
+                markStopped(status, time);
+                return false;
+            }
+            throw ex;
+        }
+    }
+
+    private void releaseFailedAsyncStart() {
+        if (asyncExecutor != null) {
+            asyncExecutor.releaseFailedStart();
+        }
+    }
+
+    private void releasePayload(PreparedOperation prepared) {
+        if (payloadPool != null) {
+            payloadPool.release(prepared.payload);
+        }
+    }
+
+    private void recordSuccess(int bytes) {
+        if (endpointMetrics != null) {
+            endpointMetrics.success(bytes);
+        }
+    }
+
+    private void recordFailure() {
+        if (endpointMetrics != null) {
+            endpointMetrics.failure();
+        }
+    }
+
+    private static String effectiveRegion(MinIOConfig config) {
+        return config.region == null || config.region.isEmpty() ? "us-east-1" : config.region;
+    }
+
     private static int safeBytes(long bytes) {
         return (int) Math.max(0, Math.min(Integer.MAX_VALUE, bytes));
     }
@@ -449,26 +549,42 @@ public class MinIOWriter implements Writer<byte[]> {
 
     @Override
     public CompletableFuture<?> writeAsync(byte[] data) throws IOException {
-        PreparedOperation prepared = prepare(data.length);
-        if (prepared == null) {
-            return null;
-        }
         try {
             if (config.async) {
                 asyncExecutor.acquire();
+                PreparedOperation prepared = prepare(data.length);
+                if (prepared == null) {
+                    asyncExecutor.releaseFailedStart();
+                    return null;
+                }
                 try {
-                    return asyncExecutor.track(executeAsync(prepared));
+                    return asyncExecutor.track(executeAsync(prepared)
+                            .whenComplete((result, thrown) -> {
+                                releasePayload(prepared);
+                                if (thrown == null) {
+                                    recordSuccess(result.bytes);
+                                } else if (!S3AsyncExecutor.isCleanShutdown(thrown)) {
+                                    recordFailure();
+                                }
+                            }));
                 } catch (Exception ex) {
                     asyncExecutor.releaseFailedStart();
+                    releasePayload(prepared);
                     throw ex;
                 }
             }
-            executeSync(prepared);
+            PreparedOperation prepared = prepare(data.length);
+            if (prepared == null) {
+                return null;
+            }
+            OperationResult result = executeSync(prepared);
+            recordSuccess(result.bytes);
             return null;
         } catch (Exception ex) {
             if (S3AsyncExecutor.isCleanShutdown(ex)) {
                 return null;
             }
+            recordFailure();
             throw operationFailure(ex);
         }
     }
@@ -486,7 +602,7 @@ public class MinIOWriter implements Writer<byte[]> {
     }
 
     private record PreparedOperation(S3Operation operation, byte[] payload, String key,
-                                     String versionId, int bytes) {
+                                     String versionId, String destination, int bytes) {
     }
 
     private record OperationResult(S3Operation operation, String key, String versionId, int bytes) {

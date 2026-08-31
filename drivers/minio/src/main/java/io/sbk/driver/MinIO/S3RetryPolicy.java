@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 public final class S3RetryPolicy {
     private final int maxAttempts;
     private final long backoffMs;
+    private final Runnable retryListener;
 
     /**
      * Create a retry policy.
@@ -35,11 +36,24 @@ public final class S3RetryPolicy {
      * @throws IllegalArgumentException when attempts or delay are invalid
      */
     public S3RetryPolicy(int maxAttempts, long backoffMs) {
+        this(maxAttempts, backoffMs, () -> { });
+    }
+
+    /**
+     * Create a retry policy with a slow-path retry observer.
+     *
+     * @param maxAttempts total attempts including the first
+     * @param backoffMs fixed delay between attempts
+     * @param retryListener action invoked only when another attempt will run
+     * @throws IllegalArgumentException when attempts or delay are invalid
+     */
+    public S3RetryPolicy(int maxAttempts, long backoffMs, Runnable retryListener) {
         if (maxAttempts < 1 || backoffMs < 0) {
             throw new IllegalArgumentException("retry attempts must be positive and delay non-negative");
         }
         this.maxAttempts = maxAttempts;
         this.backoffMs = backoffMs;
+        this.retryListener = retryListener;
     }
 
     /**
@@ -59,6 +73,7 @@ public final class S3RetryPolicy {
                 if (attempt++ >= maxAttempts || !isRetryable(ex)) {
                     throw ex;
                 }
+                retryListener.run();
                 delay();
             }
         }
@@ -97,6 +112,7 @@ public final class S3RetryPolicy {
         if (attempt >= maxAttempts || !isRetryable(thrown)) {
             return CompletableFuture.failedFuture(thrown);
         }
+        retryListener.run();
         return CompletableFuture.supplyAsync(() -> null,
                         CompletableFuture.delayedExecutor(backoffMs, TimeUnit.MILLISECONDS))
                 .thenCompose(ignored -> attemptAsync(supplier, attempt + 1));

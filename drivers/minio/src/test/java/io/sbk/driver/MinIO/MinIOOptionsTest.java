@@ -58,6 +58,11 @@ public class MinIOOptionsTest {
                 "-write-mix", "put=80,copy=20",
                 "-read-mix", "get=90,stat=10",
                 "-data-seed", "42", "-verify-read-size", "true"));
+        assertDoesNotThrow(() -> parse("-writers", "1", "-size", "100", "-seconds", "1",
+                "-object-size-distribution", "weighted:64=3,1024=1",
+                "-key-distribution", "hashed", "-partition-count", "2",
+                "-partition-index", "1", "-partition-by-prefix", "true",
+                "-warmup-operation", "put-get", "-endpoint-metrics", "true"));
         assertThrows(IllegalArgumentException.class,
                 () -> parse("-writers", "1", "-size", "100", "-seconds", "1",
                         "-write-mix", "put=0"));
@@ -93,6 +98,13 @@ public class MinIOOptionsTest {
         assertThrows(IllegalArgumentException.class,
                 () -> parse("-readers", "1", "-size", "100", "-seconds", "1",
                         "-partition-count", "2", "-partition-index", "2"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-writers", "1", "-size", "10485760", "-seconds", "1",
+                        "-mpu-concurrent-parts", "2"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-writers", "1", "-size", "10485760", "-seconds", "1",
+                        "-part-size", "5242880", "-mpu-concurrent-parts", "2",
+                        "-checksum", "sha256"));
     }
 
     @Test
@@ -100,6 +112,23 @@ public class MinIOOptionsTest {
         assertEquals("http://node1:9000", MinIO.normalizeEndpoint("node1:9000"));
         assertEquals("http://node2:9000", MinIO.normalizeEndpoint(" http://node2:9000 "));
         assertEquals("https://node3:9443", MinIO.normalizeEndpoint("https://node3:9443"));
+    }
+
+    @Test
+    public void rejectsUnsupportedSignatureVersionInsteadOfFallingBack() {
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-writers", "1", "-size", "100", "-seconds", "1",
+                        "-auth-version", "2"));
+    }
+
+    @Test
+    public void asyncMemoryEstimateIncludesReusablePayloadsAndResponseBuffers() {
+        assertEquals(20L * 1024 * 1024,
+                MinIO.estimateBufferBytes(2, 0, 10 * 1024 * 1024, 2, 2, true));
+        assertEquals(4L * 64 * 1024,
+                MinIO.estimateBufferBytes(0, 2, 1024, 2, 4, true));
+        assertEquals(20L * 1024 * 1024,
+                MinIO.estimateBufferBytes(1, 0, 20 * 1024 * 1024, 1, 1, true));
     }
 
     @Test
