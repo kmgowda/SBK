@@ -212,6 +212,21 @@ DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m" "-Duser.timezone=Asia/Kolkata" "--enable-n
 #   * For example: A user cannot expect ${Hostname} to be expanded, as it is an environment variable and will be
 #     treated as '${Hostname}' itself on the command line.
 
+# SBK clean deliberately removes repository-local caches, while releasecheck
+# deliberately validates live Git, infrastructure, and publication state.
+# Neither task graph is a valid configuration-cache candidate, so disable
+# configuration-cache participation before Gradle evaluates either graph.
+sbk_configuration_cache_disabled=false
+for arg do
+    case $arg in #(
+      clean | :clean | *:clean | releasecheck | :releasecheck | *:releasecheck)
+        sbk_configuration_cache_disabled=true ;;
+    esac
+done
+if "$sbk_configuration_cache_disabled" ; then
+    set -- "$@" --no-configuration-cache
+fi
+
 set -- \
         "-Dorg.gradle.appname=$APP_BASE_NAME" \
         -jar "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" \

@@ -73,12 +73,22 @@ echo location of your Java installation. 1>&2
 :execute
 @rem Setup the command line
 
+@rem SBK clean removes repository-local caches, while releasecheck validates
+@rem live Git, infrastructure, and publication state. Neither task graph is a
+@rem valid configuration-cache candidate, so disable it before Gradle starts.
+set "SBK_CONFIGURATION_CACHE_OPTION="
+for %%A in (%*) do (
+    if /I "%%~A"=="clean" set "SBK_CONFIGURATION_CACHE_OPTION=--no-configuration-cache"
+    if /I "%%~A"==":clean" set "SBK_CONFIGURATION_CACHE_OPTION=--no-configuration-cache"
+    if /I "%%~A"=="releasecheck" set "SBK_CONFIGURATION_CACHE_OPTION=--no-configuration-cache"
+    if /I "%%~A"==":releasecheck" set "SBK_CONFIGURATION_CACHE_OPTION=--no-configuration-cache"
+)
 
 
 @rem Execute gradlew
 @rem endlocal doesn't take effect until after the line is parsed and variables are expanded
 @rem which allows us to clear the local environment before executing the java command
-endlocal & "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %* & call :exitWithErrorLevel
+endlocal & "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %* %SBK_CONFIGURATION_CACHE_OPTION% & call :exitWithErrorLevel
 
 :exitWithErrorLevel
 @rem Use "%COMSPEC%" /c exit to allow operators to work properly in scripts
