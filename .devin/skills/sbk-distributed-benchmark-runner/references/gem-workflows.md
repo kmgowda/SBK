@@ -59,7 +59,8 @@ inventory and SSH trust.
 
 | Option | Meaning |
 |---|---|
-| `-runtimecleanup true` | Retire inactive non-current GEM-managed SBK runtimes while retaining current and leased identities |
+| `-packagescleanup true` | Retire inactive non-current GEM-managed SBK runtimes and local cached bundles while retaining current and leased identities |
+| `-fullcopy true` | Provision the complete controller JDK and SBK distribution instead of the default compact JDK and selected-driver closure |
 | `-javadir <home>` | Optional remote Java home containing `bin/java` |
 
 Defaults come from generated help and may change. GEM always deploys the SBK
@@ -101,3 +102,6 @@ After the Null smoke succeeds:
 
 The MinIO template is illustrative. Generate
 `sbk-gem -class minio -help` and read `drivers/minio/README.md` before use.
+For Dell ECS/ObjectScale, follow
+[`docs/ECS_OBS_BENCHMARK_RUNBOOK.md`](../../../../docs/ECS_OBS_BENCHMARK_RUNBOOK.md)
+and its staged one-node-to-GEM workflow.

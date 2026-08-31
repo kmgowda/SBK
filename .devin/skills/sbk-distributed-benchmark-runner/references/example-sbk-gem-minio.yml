@@ -11,17 +11,16 @@ sbkGemArgs:
   hostkeycheck: true
   localhost: REPLACE_GEM_CONTROLLER_REACHABLE_ADDRESS
   sbmport: 9717
-  sbkdir: /absolute/path/to/SBK/build/install/sbk
-  copy: true
-  delete: true
-  deleteafter: false
-  javacopy: true
-  javaversion: 25
+  # GEM provisions a compact JDK and the selected driver runtime when needed.
+  # Set fullcopy=true only when the complete controller distribution is needed.
+  fullcopy: false
+  packagescleanup: true
   class: minio
   # Use https:// for credential-bearing remote endpoints. Plain http:// is
   # appropriate only for an isolated local/trusted-lab endpoint without TLS.
   url: https://REPLACE_S3_ENDPOINT
   bucket: REPLACE_DEDICATED_BUCKET
+  extra-headers: x-emc-namespace=REPLACE_ECS_NAMESPACE
   prefix: sbk-distributed-trial-001/
   key: REPLACE_AT_RUNTIME
   secret: REPLACE_AT_RUNTIME
@@ -29,4 +28,5 @@ sbkGemArgs:
   size: 4096
   records: 100
   time: mcs
+  endpoint-metrics: true
   out: GemPrometheusLogger

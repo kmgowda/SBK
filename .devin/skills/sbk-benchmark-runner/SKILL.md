@@ -25,6 +25,11 @@ for commands and YML examples. Read
 [methodology-and-results.md](references/methodology-and-results.md) before
 making performance claims.
 
+For Dell ECS/ObjectScale, also read the repository-level
+[`docs/ECS_OBS_AGENT_RUNBOOK.md`](../../../docs/ECS_OBS_AGENT_RUNBOOK.md) and
+[`docs/ECS_OBS_BENCHMARK_RUNBOOK.md`](../../../docs/ECS_OBS_BENCHMARK_RUNBOOK.md)
+completely before constructing or executing a workload.
+
 ## Run safely
 
 1. Confirm JDK 25 and build the distribution when it is absent or stale:

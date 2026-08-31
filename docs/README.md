@@ -23,10 +23,11 @@ This directory contains the authoritative engineering documentation for Storage 
 ### New user
 
 1. [Project README](../README.md): requirements, build, first benchmark, and module overview.
-2. [WebLogger guide](WEB_LOGGER.md): the dependency-free SBK Local Web Console for SBK, SBM, and SBK-GEM.
-3. [PrometheusLogger and SBK Dashboard guide](PROMETHEUS_LOGGER.md): persistent Prometheus metrics and Grafana dashboards for direct and distributed runs.
-4. The README under the selected `drivers/<name>/` directory: backend prerequisites and examples.
-5. [Architecture and code flow](ARCHITECTURE.md): what happens after the command starts.
+2. [ECS/ObjectScale benchmark runbook](ECS_OBS_BENCHMARK_RUNBOOK.md): safe qualification and performance workflows for Dell ECS/OBS using the MinIO driver.
+3. [WebLogger guide](WEB_LOGGER.md): the dependency-free SBK Local Web Console for SBK, SBM, and SBK-GEM.
+4. [PrometheusLogger and SBK Dashboard guide](PROMETHEUS_LOGGER.md): persistent Prometheus metrics and Grafana dashboards for direct and distributed runs.
+5. The README under the selected `drivers/<name>/` directory: backend prerequisites and examples.
+6. [Architecture and code flow](ARCHITECTURE.md): what happens after the command starts.
 
 ### New contributor
 
@@ -56,6 +57,7 @@ This directory contains the authoritative engineering documentation for Storage 
    the shared workflow for Codex, Windsurf, Devin, Cursor, Aider, and others.
 3. [Engineering recipes](AGENT_RECIPES.md): deterministic task playbooks.
 4. [Driver specification template](DRIVER_SPECIFICATION.md): spec-driven driver work.
+5. [ECS/OBS agent runbook](ECS_OBS_AGENT_RUNBOOK.md): authorized, staged, machine-checkable ECS/ObjectScale performance workflows.
 
 `INSTRUCTIONS.md` is a compact compatibility pointer for tools that do not
 discover `AGENTS.md` directly; it does not replace the full guide.
@@ -79,12 +81,15 @@ discover `AGENTS.md` directly; it does not replace the full guide.
 | [DOCUMENTATION_GUIDE.md](DOCUMENTATION_GUIDE.md) | Documentation ownership, required content, and validation |
 | [WEB_LOGGER.md](WEB_LOGGER.md) | SBK Local Web Console usage, lifecycle, options, security, and troubleshooting |
 | [PROMETHEUS_LOGGER.md](PROMETHEUS_LOGGER.md) | PrometheusLogger, SBM/GEM aggregate exporters, and standalone SBK Dashboard deployment and operation |
+| [ECS_OBS_BENCHMARK_RUNBOOK.md](ECS_OBS_BENCHMARK_RUNBOOK.md) | Dell ECS/ObjectScale S3 qualification, workload design, commands, option map, result acceptance, and validated examples |
+| [ECS_OBS_AGENT_RUNBOOK.md](ECS_OBS_AGENT_RUNBOOK.md) | Safe deterministic ECS/OBS benchmark execution and reporting for software agents |
 | [sbk-internals.md](sbk-internals.md) | Detailed design rationale and research-oriented treatment |
 | [TIMESTAMP_MPSC_QUEUE.md](TIMESTAMP_MPSC_QUEUE.md) | Intrusive timestamp queue architecture, JDK comparison, correctness evidence, and research methodology |
 | [LATENCY_RECORDERS.md](LATENCY_RECORDERS.md) | Exact array and sparse-map latency storage, complexity, memory accounting, correctness, and reproducible JMH results |
 | [PerlBench driver](../drivers/perlbench/README.md) | End-to-end timestamp-queue comparison using exact-count, timed, and rate-controlled SBK workloads |
 | Component READMEs | Component operation and component-specific examples |
 | Driver READMEs | Backend prerequisites, properties, limitations, and example commands |
+| [MINIO_DRIVER_IMPLEMENTATION.md](MINIO_DRIVER_IMPLEMENTATION.md) | MinIO/S3 request, measurement, concurrency, memory, catalog, retry, and shutdown semantics |
 
 When documents disagree, source code and generated `-help` output are authoritative. Correct the nearest authoritative document instead of copying a workaround into several READMEs.
 

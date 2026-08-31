@@ -25,6 +25,12 @@ run. Use [gem-workflows.md](references/gem-workflows.md) for GEM/GEM-YAL and
 Use [distributed-validation.md](references/distributed-validation.md) to
 preflight and judge the result.
 
+For distributed Dell ECS/ObjectScale S3 load, also read
+[`docs/ECS_OBS_AGENT_RUNBOOK.md`](../../../docs/ECS_OBS_AGENT_RUNBOOK.md) and
+[`docs/ECS_OBS_BENCHMARK_RUNBOOK.md`](../../../docs/ECS_OBS_BENCHMARK_RUNBOOK.md)
+completely. Qualify the same ordinary MinIO-driver command on every load node
+before adding GEM orchestration.
+
 ## Required workflow
 
 1. Build the installed distribution with `./gradlew installDist`. For
@@ -50,9 +56,10 @@ preflight and judge the result.
   must be reachable from every node and must not be loopback for remote nodes.
 - Remote processes use `GrpcLogger`; choose `GemPrometheusLogger` or
   `GemWebLogger` for the controller-side aggregate.
-- Confirm `-runtimecleanup` and any preferred remote `-javadir` before allowing
-  remote filesystem changes. Missing SBK content and an insufficient remote JDK
-  are provisioned automatically from the launcher-selected controller distribution.
+- Confirm `-packagescleanup`, `-fullcopy`, and any preferred remote `-javadir`
+  before allowing remote filesystem changes. Missing SBK content and an
+  insufficient remote JDK are provisioned automatically from the
+  launcher-selected controller distribution.
 - Treat any failed remote return code, missing SBM connection, timeout, invalid
   latency, or unexplained discarded latency as a failed/qualified run.
 

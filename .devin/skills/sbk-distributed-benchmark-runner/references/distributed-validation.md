@@ -32,8 +32,8 @@ failures.
 |---|---|
 | SSH connect/authentication failure | account, route, port, agent/key, `authorized_keys` |
 | Host key rejected | correct user's `known_hosts`, changed/unknown server key |
-| Java discovery/copy timeout | remote command exit/stderr, permissions, space, `javaversion`, `javadir` |
-| SBK mismatch/copy failure | local `sbkdir`, remote permissions/space, `copy`, `delete` |
+| Java discovery/copy timeout | remote command exit/stderr, permissions, space, `javadir`, `fullcopy` |
+| SBK mismatch/copy failure | launcher-selected local distribution, remote permissions/space, runtime verification |
 | Remote command starts but SBM sees no client | advertised `localhost`, port 9717 route/firewall, GrpcLogger |
 | Some nodes return no records | per-host stdout/stderr and return code, backend reachability |
 | Backend errors only at scale | throttling, connection limits, namespace collision, network saturation |

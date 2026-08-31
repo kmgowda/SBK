@@ -34,7 +34,12 @@ pointer, the Aider configuration, and the portable skills under
 `.devin/skills/`. Windsurf and Codex consume the root `AGENTS.md` directly and
 do not need duplicate repository rules.
 
-The `docs/` directory contains the engineering index, architecture, repository map, driver guide, maintenance guide, recipes, specification template, toolkit, distribution guide, and detailed internals.
+The `docs/` directory contains the engineering index, architecture, repository
+map, driver guide, maintenance guide, recipes, specification template,
+toolkit, distribution guide, detailed internals, and the ECS/ObjectScale
+operator, agent, and MinIO implementation runbooks. The complete driver
+reference is included as `drivers/minio/README.md` so links from those runbooks
+remain usable outside a source checkout.
 
 Verify locally:
 
@@ -67,8 +72,8 @@ The guarded release workflow:
    and the Local Web Console. Release qualification is a separate maintainer
    gate and is intentionally not invoked or consumed by this workflow.
 2. Creates `sbk-agent-docs.tar.gz` from root entry points, the complete `docs/`
-   directory, and agent configurations while preserving discovery paths such
-   as `.cursor/rules/` and `.devin/skills/`.
+   directory, the MinIO driver reference, and agent configurations while
+   preserving discovery paths such as `.cursor/rules/` and `.devin/skills/`.
 3. Adds checksums, the release manifest, and direct CycloneDX SBOMs for the
    publishable core modules to the contracted asset directory. Qualification
    evidence remains under `build/reports/release-qualification/` and must be

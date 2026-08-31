@@ -384,6 +384,10 @@ def releaseAgentDocs = tasks.register('releaseAgentDocs', Tar) {
     from('docs') {
         into 'docs'
     }
+    from('drivers/minio') {
+        include 'README.md'
+        into 'drivers/minio'
+    }
 }
 
 def collectReleaseAssets = tasks.register('collectReleaseAssets', Sync) {

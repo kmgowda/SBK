@@ -11,8 +11,10 @@ sbkGemArgs:
   hostkeycheck: true
   localhost: gem-controller.example.com
   sbmport: 9717
-  runtimecleanup: true
-  class: null
+  fullcopy: false
+  packagescleanup: true
+  # Quote the driver name because unquoted YAML null is a null value.
+  class: "null"
   writers: 1
   size: 100
   records: 10000
