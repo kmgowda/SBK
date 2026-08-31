@@ -19,9 +19,8 @@ package io.sbk.driver.MinIO;
 public class MinIOConfig {
 
     // ----- Connection / credentials -----
+    /** One S3 endpoint or a comma-separated endpoint list distributed across workers. */
     public String url;
-    /** Optional comma-separated endpoints distributed across workers. */
-    public String endpoints;
     public String accessKey;
     public String secretKey;
     public String bucketName;
