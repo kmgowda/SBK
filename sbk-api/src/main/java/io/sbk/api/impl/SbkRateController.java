@@ -83,7 +83,7 @@ final public class SbkRateController implements RateController {
                 final long sleepNs = toSleepNs - (sleepMs * Time.NS_PER_MS);
                 Thread.sleep(sleepMs, (int) sleepNs);
             } catch (InterruptedException e) {
-                // will be taken care in finally block
+                Thread.currentThread().interrupt();
             } finally {
                 // in case of short sleeps or oversleep ;adjust it for next sleep duration
                 final long sleptNS = System.nanoTime() - sleepStart;

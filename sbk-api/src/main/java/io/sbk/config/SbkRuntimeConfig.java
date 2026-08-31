@@ -20,7 +20,7 @@ public final class SbkRuntimeConfig {
     private static final String CONFIG_FILE = "sbk-runtime.properties";
     private static final SbkRuntimeConfig INSTANCE = loadConfig();
 
-    /** Grace period after the requested benchmark duration. */
+    /** Maximum graceful-cleanup period before application completion is forced. */
     public long forcedShutdownGraceSeconds;
     /** Executor threads reserved for lifecycle and measurement tasks. */
     public int workerExecutorReserve;
