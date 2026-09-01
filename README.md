@@ -32,6 +32,7 @@ Choose the guide that matches your task:
 | Goal | Documentation |
 |---|---|
 | Build and run SBK | This README |
+| Build driver-scoped Docker images | [Docker build and operations guide](containers/README.md) |
 | Understand modules and runtime flow | [Architecture and code flow](docs/ARCHITECTURE.md) |
 | Browse all documentation | [Documentation index](docs/README.md) |
 | View live graphs without Docker | [WebLogger guide](docs/WEB_LOGGER.md) |

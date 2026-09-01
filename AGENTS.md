@@ -389,6 +389,7 @@ do, document it in the driver's README.
 | Step-by-step recipes (add a driver, add a logger, debug failures) | [docs/AGENT_RECIPES.md](docs/AGENT_RECIPES.md) |
 | Driver spec template for spec-driven development | [docs/DRIVER_SPECIFICATION.md](docs/DRIVER_SPECIFICATION.md) |
 | Dell ECS/ObjectScale benchmarking | [operator runbook](drivers/minio/docs/ECS_OBS_BENCHMARK_RUNBOOK.md), [agent runbook](drivers/minio/docs/ECS_OBS_AGENT_RUNBOOK.md), [MinIO implementation](drivers/minio/docs/IMPLEMENTATION.md) |
+| Driver-scoped Docker builds | [Docker build and operations guide](containers/README.md) |
 | Original design papers | `docs/sbk.pdf`, `docs/sbp.pdf`, `docs/sbk-slc.pdf` |
 
 ---
