@@ -15,12 +15,36 @@ def containerOutputDirectory = layout.buildDirectory.dir('generated/sbk-containe
 def containerSourceDirectory = file('containers')
 def containerDriversProperty = providers.gradleProperty('containerDrivers').orElse('minio')
 def containerRepositoryProperty = providers.gradleProperty('containerRepository').orElse('sbk-local')
-def containerRuntimeImageProperty = providers.gradleProperty('containerRuntimeImage')
-        .orElse(runtimeContainerImage.toString())
+def commonContainerRuntimeImage = providers.gradleProperty('containerRuntimeImage')
+def containerJreRuntimeImageProperty = commonContainerRuntimeImage
+        .orElse(providers.gradleProperty('containerJreRuntimeImage'))
+        .orElse('eclipse-temurin:25-jre-ubi10-minimal')
+def containerJdkRuntimeImageProperty = commonContainerRuntimeImage
+        .orElse(providers.gradleProperty('containerJdkRuntimeImage'))
+        .orElse('container-registry.oracle.com/java/openjdk:25')
+def commonContainerJavaHome = providers.gradleProperty('containerJavaHome')
+def containerJreJavaHomeProperty = commonContainerJavaHome
+        .orElse(providers.gradleProperty('containerJreJavaHome'))
+        .orElse('/opt/java/openjdk')
+def containerJdkJavaHomeProperty = commonContainerJavaHome
+        .orElse(providers.gradleProperty('containerJdkJavaHome'))
+        .orElse('/usr/java/jdk-25')
 def containerVersion = sbkVersion.toString()
-def containerRevision = providers.exec {
-    commandLine 'git', 'rev-parse', '--verify', 'HEAD'
-}.standardOutput.asText.map { it.trim() }.orElse('unknown')
+def detectedContainerRevision
+if (file('.git').exists()) {
+    def gitRevisionOutput = providers.exec {
+        commandLine 'git', 'rev-parse', '--verify', 'HEAD'
+        ignoreExitValue = true
+    }
+    detectedContainerRevision = gitRevisionOutput.result.zip(gitRevisionOutput.standardOutput.asText) {
+        result, output ->
+            def revision = output.trim()
+            result.exitValue == 0 && !revision.isEmpty() ? revision : 'unknown'
+    }
+} else {
+    detectedContainerRevision = providers.provider { 'unknown' }
+}
+def containerRevision = providers.gradleProperty('containerRevision').orElse(detectedContainerRevision)
 def containerInstallDirectory = layout.buildDirectory.dir('install/sbk')
 def containerDriverRuntimeDirectory = layout.buildDirectory.dir('generated/sbk-driver-runtimes')
 def containerEnabledDrivers = subprojects.findAll {
@@ -36,6 +60,7 @@ def rolePathingJars = roleProjects.collectEntries { role, roleProject ->
 }
 def remoteAgentJar = project(':sbk-gem').tasks.named('remoteAgentJar', Jar).flatMap { it.archiveFile }
 def sbmScriptsDirectory = project(':sbm').layout.buildDirectory.dir('scripts')
+def sbmStartScripts = project(':sbm').tasks.named('startScripts')
 
 def selectedContainerDrivers = containerDriversProperty.map { configured ->
     def requested = configured.split(',').collect { it.trim() }.findAll { !it.isEmpty() }
@@ -107,10 +132,13 @@ def prepareContainerBuild = tasks.register('prepareContainerBuild') {
     group = 'distribution'
     description = 'Prepares driver-scoped SBK Docker contexts and a Buildx Bake plan without building images.'
     dependsOn tasks.named('installDist'), tasks.named('verifySbkDriverRuntimes'),
-            roleProjects.values().collect { it.tasks.named('pathingJar') }, remoteAgentJar
+            roleProjects.values().collect { it.tasks.named('pathingJar') }, remoteAgentJar, sbmStartScripts
     inputs.property('containerDrivers', selectedContainerDrivers)
     inputs.property('containerRepository', containerRepositoryProperty)
-    inputs.property('containerRuntimeImage', containerRuntimeImageProperty)
+    inputs.property('containerJreRuntimeImage', containerJreRuntimeImageProperty)
+    inputs.property('containerJdkRuntimeImage', containerJdkRuntimeImageProperty)
+    inputs.property('containerJreJavaHome', containerJreJavaHomeProperty)
+    inputs.property('containerJdkJavaHome', containerJdkJavaHomeProperty)
     inputs.property('containerVersion', containerVersion)
     inputs.property('containerRevision', containerRevision)
     inputs.files(containerSourceDirectory)
@@ -121,6 +149,9 @@ def prepareContainerBuild = tasks.register('prepareContainerBuild') {
             .withPathSensitivity(PathSensitivity.NAME_ONLY)
     inputs.file(remoteAgentJar)
             .withPropertyName('remoteAgentJar')
+            .withPathSensitivity(PathSensitivity.NAME_ONLY)
+    inputs.file(sbmStartScripts.map { new File(it.outputDir, 'sbm') })
+            .withPropertyName('sbmLauncher')
             .withPathSensitivity(PathSensitivity.NAME_ONLY)
     inputs.dir(containerDriverRuntimeDirectory)
             .withPropertyName('driverRuntimes')
@@ -209,6 +240,10 @@ def prepareContainerBuild = tasks.register('prepareContainerBuild') {
         def bake = new StringBuilder('group "selected" {\n  targets = [')
         bake.append(targets.collect { "\"${it.name}\"" }.join(', ')).append(']\n}\n\n')
         targets.each { target ->
+            def runtimeImage = target.role == 'sbk-gem-yal'
+                    ? containerJdkRuntimeImageProperty.get() : containerJreRuntimeImageProperty.get()
+            def javaHome = target.role == 'sbk-gem-yal'
+                    ? containerJdkJavaHomeProperty.get() : containerJreJavaHomeProperty.get()
             bake.append("target \"${target.name}\" {\n")
                     .append("  context = \"build/generated/sbk-containers\"\n")
                     .append("  dockerfile = \"Dockerfile\"\n")
@@ -217,14 +252,19 @@ def prepareContainerBuild = tasks.register('prepareContainerBuild') {
                     .append("    SBK_DRIVER = \"${target.driver}\"\n")
                     .append("    SBK_VERSION = \"${containerVersion}\"\n")
                     .append("    SBK_REVISION = \"${containerRevision.get()}\"\n")
-                    .append("    SBK_RUNTIME_IMAGE = \"${containerRuntimeImageProperty.get()}\"\n")
+                    .append("    SBK_JAVA_REQUIRE_JDK = \"${target.role == 'sbk-gem-yal'}\"\n")
+                    .append("    SBK_JAVA_HOME_PATH = \"${javaHome}\"\n")
+                    .append("    SBK_RUNTIME_IMAGE = \"${runtimeImage}\"\n")
                     .append("  }\n  tags = [\"${target.tag}\"]\n}\n\n")
         }
         writeText(new File(output, 'docker-bake.hcl'), bake.toString())
+        def targetMappings = targets.collect { target ->
+            "target.${target.name}.role=${target.role}\ntarget.${target.name}.driver=${target.driver}\n"
+        }.join('')
         writeText(new File(output, 'container-plan.properties'),
                 "format.version=1\nsbk.version=${containerVersion}\nrevision=${containerRevision.get()}\n"
                         + "drivers=${selectedDrivers.join(',')}\ntargets=${targets.collect { it.name }.join(',')}\n"
-                        + "release.integration=false\n")
+                        + targetMappings + "release.integration=false\n")
     }
 }
 
@@ -246,9 +286,11 @@ tasks.register('verifyContainerBuild') {
         }
         def targets = plan.getProperty('targets').split(',').toList()
         targets.each { target ->
-            def separator = target.lastIndexOf('-')
-            def role = target == 'sbm' ? 'sbm' : target.substring(0, separator)
-            def driver = target == 'sbm' ? 'none' : target.substring(separator + 1)
+            def role = plan.getProperty("target.${target}.role", '')
+            def driver = plan.getProperty("target.${target}.driver", '')
+            if (role.isBlank() || driver.isBlank()) {
+                throw new GradleException("Missing role or driver mapping for container target ${target}")
+            }
             def launcher = new File(output, "roles/${role}/bin/${role}")
             if (!launcher.isFile()) {
                 throw new GradleException("Missing container launcher ${launcher}")

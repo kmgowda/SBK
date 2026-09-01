@@ -54,7 +54,10 @@ sbk_java_valid_home() {
     else
         return 1
     fi
-    if [ ! -x "$sbk_java_validated_home/bin/javac" ] &&
+    # Runtime-only container images opt out explicitly; regular launchers keep
+    # the complete-JDK requirement by default.
+    if [ "${SBK_JAVA_REQUIRE_JDK:-true}" != "false" ] &&
+        [ ! -x "$sbk_java_validated_home/bin/javac" ] &&
         [ ! -x "$sbk_java_validated_home/bin/javac.exe" ]; then
         return 1
     fi

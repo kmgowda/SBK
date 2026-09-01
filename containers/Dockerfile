@@ -8,6 +8,8 @@ ARG SBK_ROLE
 ARG SBK_DRIVER
 ARG SBK_VERSION
 ARG SBK_REVISION=unknown
+ARG SBK_JAVA_REQUIRE_JDK=true
+ARG SBK_JAVA_HOME_PATH=/opt/java/openjdk
 
 LABEL org.opencontainers.image.title="SBK ${SBK_ROLE} (${SBK_DRIVER})" \
       org.opencontainers.image.description="Driver-scoped Storage Benchmark Kit runtime" \
@@ -17,7 +19,8 @@ LABEL org.opencontainers.image.title="SBK ${SBK_ROLE} (${SBK_DRIVER})" \
       org.opencontainers.image.licenses="Apache-2.0"
 
 ENV SBK_ROLE=${SBK_ROLE} \
-    SBK_JAVA_HOME=/opt/java/openjdk \
+    SBK_JAVA_HOME=${SBK_JAVA_HOME_PATH} \
+    SBK_JAVA_REQUIRE_JDK=${SBK_JAVA_REQUIRE_JDK} \
     SBK_JAVA_INSTALL=false
 
 COPY common/ /opt/sbk/

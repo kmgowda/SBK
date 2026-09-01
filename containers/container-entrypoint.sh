@@ -13,4 +13,10 @@ case "${SBK_ROLE:-}" in
         ;;
 esac
 
-exec "/opt/sbk/bin/${SBK_ROLE}" "$@"
+launcher="/opt/sbk/bin/${SBK_ROLE}"
+if [ ! -x "$launcher" ]; then
+    echo "SBK role launcher is not installed in this image: $launcher" >&2
+    exit 64
+fi
+
+exec "$launcher" "$@"
