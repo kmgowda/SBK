@@ -24,10 +24,11 @@ This directory contains the authoritative engineering documentation for Storage 
 
 1. [Project README](../README.md): requirements, build, first benchmark, and module overview.
 2. [ECS/ObjectScale benchmark runbook](../drivers/minio/docs/ECS_OBS_BENCHMARK_RUNBOOK.md): safe qualification and performance workflows for Dell ECS/OBS using the MinIO driver.
-3. [WebLogger guide](WEB_LOGGER.md): the dependency-free SBK Local Web Console for SBK, SBM, and SBK-GEM.
-4. [PrometheusLogger and SBK Dashboard guide](PROMETHEUS_LOGGER.md): persistent Prometheus metrics and Grafana dashboards for direct and distributed runs.
-5. The README under the selected `drivers/<name>/` directory: backend prerequisites and examples.
-6. [Architecture and code flow](ARCHITECTURE.md): what happens after the command starts.
+3. [Docker build and operations guide](../containers/README.md): driver-scoped SBK, SBK-YAL, SBM, and SBK-GEM-YAL images built independently of release publication.
+4. [WebLogger guide](WEB_LOGGER.md): the dependency-free SBK Local Web Console for SBK, SBM, and SBK-GEM.
+5. [PrometheusLogger and SBK Dashboard guide](PROMETHEUS_LOGGER.md): persistent Prometheus metrics and Grafana dashboards for direct and distributed runs.
+6. The README under the selected `drivers/<name>/` directory: backend prerequisites and examples.
+7. [Architecture and code flow](ARCHITECTURE.md): what happens after the command starts.
 
 ### New contributor
 
@@ -81,6 +82,7 @@ discover `AGENTS.md` directly; it does not replace the full guide.
 | [DOCUMENTATION_GUIDE.md](DOCUMENTATION_GUIDE.md) | Documentation ownership, required content, and validation |
 | [WEB_LOGGER.md](WEB_LOGGER.md) | SBK Local Web Console usage, lifecycle, options, security, and troubleshooting |
 | [PROMETHEUS_LOGGER.md](PROMETHEUS_LOGGER.md) | PrometheusLogger, SBM/GEM aggregate exporters, and standalone SBK Dashboard deployment and operation |
+| [Docker build and operations guide](../containers/README.md) | Standalone driver-scoped Docker context generation, image builds, runtime procedures, and validation |
 | [MinIO ECS/OBS operator runbook](../drivers/minio/docs/ECS_OBS_BENCHMARK_RUNBOOK.md) | Dell ECS/ObjectScale S3 qualification, workload design, commands, option map, result acceptance, and validated examples |
 | [MinIO ECS/OBS agent runbook](../drivers/minio/docs/ECS_OBS_AGENT_RUNBOOK.md) | Safe deterministic ECS/OBS benchmark execution and reporting for software agents |
 | [sbk-internals.md](sbk-internals.md) | Detailed design rationale and research-oriented treatment |
