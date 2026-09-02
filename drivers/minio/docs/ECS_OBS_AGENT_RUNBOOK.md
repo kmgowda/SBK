@@ -188,6 +188,11 @@ Use a nonzero `-data-seed` for A/B reproducibility. Set
 inline dedup benefit. Set the application-representative
 `-data-compressibility` explicitly.
 
+`-data-dedupable true` means that SBK does not add anti-dedup stamps; it does
+not make random payload portions identical. Use
+`-data-compressibility 100 -data-dedupable true` when the requested workload
+requires identical all-zero payloads.
+
 ### Preserve overload visibility
 
 For a saturation baseline:
@@ -198,7 +203,9 @@ For a saturation baseline:
 
 HTTP 429/5xx retries can convert a capacity limit into higher apparent
 latency. Enable retries in a separate run only when reproducing application
-policy. Report retry count with throughput and latency.
+policy. Report retry count with throughput and latency. When retries are
+enabled, the aggregate retry total is always printed; endpoint metrics add
+per-URL attribution.
 
 ### Bound async memory and concurrency
 

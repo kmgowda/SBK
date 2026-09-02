@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * Per-worker MinIO SDK writer for mutating S3 operations.
@@ -88,12 +89,14 @@ public class MinIOWriter implements Writer<byte[]> {
      * @param runToken run discriminator
      * @param globalAsyncPermits shared process-wide async permits
      * @param endpointMetrics optional endpoint attribution
+     * @param retryCount process-wide retry counter updated only on retry paths
      * @throws IllegalArgumentException when tagging is enabled without tags
      */
     public MinIOWriter(int id, ParameterOptions params, MinIOConfig config, S3Operation operation,
                        MinioClient client, MinioAsyncClient asyncClient, S3ObjectCatalog catalog,
                        List<String> bucketTargets, Queue<String> createdBuckets, String runToken,
-                       Semaphore globalAsyncPermits, S3EndpointMetrics endpointMetrics) {
+                       Semaphore globalAsyncPermits, S3EndpointMetrics endpointMetrics,
+                       LongAdder retryCount) {
         this.id = id;
         writerCount = Math.max(1, params.getWritersCount());
         this.config = config;
@@ -115,6 +118,7 @@ public class MinIOWriter implements Writer<byte[]> {
         sse = config.sseEnabled ? new ServerSideEncryptionS3() : null;
         retryPolicy = new S3RetryPolicy(config.retryMaxAttempts, config.retryBackoffMs,
                 () -> {
+                    retryCount.increment();
                     if (endpointMetrics != null) {
                         endpointMetrics.retry();
                     }
@@ -122,13 +126,14 @@ public class MinIOWriter implements Writer<byte[]> {
         asyncExecutor = config.async
                 ? new S3AsyncExecutor(config.asyncDepth, globalAsyncPermits) : null;
         multipartUploader = config.mpuConcurrentParts > 1
-                ? new S3MultipartUploader(asyncClient, config.bucketName, effectiveRegion(config),
+                ? new S3MultipartUploader(asyncClient, config.bucketName, MinIO.effectiveRegion(config),
                 config.partSize, config.mpuConcurrentParts, retryPolicy) : null;
         payloadPool = config.async ? new S3PayloadPool() : null;
         copySequence = 0;
         bucketTargetSequence = 0;
         reusablePayload = null;
-        if ((operation == S3Operation.TAG_SET || config.taggingEnabled) && objectTags.isEmpty()) {
+        if ((operationMix.contains(S3Operation.TAG_SET) || config.taggingEnabled)
+                && objectTags.isEmpty()) {
             throw new IllegalArgumentException("S3 tagging requires non-empty -tagging-tags");
         }
     }
@@ -189,7 +194,7 @@ public class MinIOWriter implements Writer<byte[]> {
                     return;
                 }
                 recordFailure();
-                throw operationFailure(ex);
+                throw operationFailure(prepared.operation, ex);
             }
             return;
         }
@@ -219,7 +224,7 @@ public class MinIOWriter implements Writer<byte[]> {
                 return;
             }
             recordFailure();
-            throw operationFailure(ex);
+            throw operationFailure(prepared.operation, ex);
         }
         status.endTime = time.getCurrentTime();
     }
@@ -521,27 +526,28 @@ public class MinIOWriter implements Writer<byte[]> {
         }
     }
 
-    private static String effectiveRegion(MinIOConfig config) {
-        return config.region == null || config.region.isEmpty() ? "us-east-1" : config.region;
-    }
-
     private static int safeBytes(long bytes) {
         return (int) Math.max(0, Math.min(Integer.MAX_VALUE, bytes));
     }
 
-    private IOException operationFailure(Exception ex) {
-        return new IOException("MinIO " + operation + " operation failed: " + ex.getMessage(), ex);
+    private IOException operationFailure(S3Operation selected, Exception ex) {
+        return new IOException("MinIO " + selected + " operation failed: " + ex.getMessage(), ex);
     }
 
-    private static Map<String, String> parseTags(String csv) {
+    static Map<String, String> parseTags(String csv) {
         Map<String, String> tags = new LinkedHashMap<>();
         if (csv == null || csv.isBlank()) {
             return tags;
         }
-        for (String pair : csv.split(",")) {
+        for (String pair : csv.split(",", -1)) {
             String[] keyValue = pair.split("=", 2);
-            if (keyValue.length == 2 && !keyValue[0].trim().isEmpty()) {
-                tags.put(keyValue[0].trim(), keyValue[1].trim());
+            String key = keyValue[0].trim();
+            if (keyValue.length != 2 || key.isEmpty()) {
+                throw new IllegalArgumentException("Invalid -tagging-tags entry '" + pair
+                        + "'; expected non-empty key=value");
+            }
+            if (tags.putIfAbsent(key, keyValue[1].trim()) != null) {
+                throw new IllegalArgumentException("Duplicate -tagging-tags key '" + key + "'");
             }
         }
         return tags;
@@ -585,7 +591,7 @@ public class MinIOWriter implements Writer<byte[]> {
                 return null;
             }
             recordFailure();
-            throw operationFailure(ex);
+            throw operationFailure(operation, ex);
         }
     }
 

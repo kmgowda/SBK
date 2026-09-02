@@ -14,6 +14,8 @@ import io.sbk.params.InputParameterOptions;
 import io.sbk.params.impl.SbkDriversParameters;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -105,6 +107,37 @@ public class MinIOOptionsTest {
                 () -> parse("-writers", "1", "-size", "10485760", "-seconds", "1",
                         "-part-size", "5242880", "-mpu-concurrent-parts", "2",
                         "-checksum", "sha256"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-writers", "1", "-size", "100", "-seconds", "1",
+                        "-async", "ture"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-readers", "1", "-size", "100", "-seconds", "1",
+                        "-range-length", "2147483648"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-writers", "1", "-size", "100", "-seconds", "1",
+                        "-extra-headers", "x-emc-namespace=ns,broken"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-writers", "1", "-size", "100", "-seconds", "1",
+                        "-extra-headers", "x-emc-namespace=one,x-emc-namespace=two"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-writers", "1", "-size", "100", "-seconds", "1",
+                        "-extra-headers", "X-EMC-Namespace=one,x-emc-namespace=two"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-writers", "1", "-size", "100", "-seconds", "1",
+                        "-write-mix", "put=1,tag-set=1", "-tagging-tags", "broken"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-writers", "1", "-size", "100", "-seconds", "1",
+                        "-write-mix", "put=1,put=2"));
+    }
+
+    @Test
+    public void mixedBucketOperationsValidateTheirOwnRequiredArguments() {
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-writers", "1", "-size", "1", "-seconds", "1",
+                        "-write-operation", "put", "-write-mix", "bucket-delete=1"));
+        assertDoesNotThrow(() -> parse("-writers", "1", "-size", "1", "-seconds", "1",
+                "-write-operation", "put", "-write-mix", "bucket-delete=1",
+                "-bucket-targets", "one,two"));
     }
 
     @Test
@@ -112,6 +145,15 @@ public class MinIOOptionsTest {
         assertEquals("http://node1:9000", MinIO.normalizeEndpoint("node1:9000"));
         assertEquals("http://node2:9000", MinIO.normalizeEndpoint(" http://node2:9000 "));
         assertEquals("https://node3:9443", MinIO.normalizeEndpoint("https://node3:9443"));
+        assertEquals("http://[2001:db8::1]:9000", MinIO.normalizeEndpoint("[2001:db8::1]:9000"));
+        assertThrows(IllegalArgumentException.class,
+                () -> MinIO.normalizeEndpoint("ftp://node1:9000"));
+        assertThrows(IllegalArgumentException.class,
+                () -> MinIO.normalizeEndpoint("http://user:secret@node1:9000"));
+        assertThrows(IllegalArgumentException.class,
+                () -> MinIO.normalizeEndpoint("http://node1:9000/s3"));
+        assertThrows(IllegalArgumentException.class,
+                () -> MinIO.normalizeEndpoint("http://node1:9000?test=true"));
     }
 
     @Test
@@ -159,6 +201,23 @@ public class MinIOOptionsTest {
                 MinIO.credentialDefault("", "configured-access"));
         assertEquals("configured-access",
                 MinIO.credentialDefault(null, "configured-access"));
+    }
+
+    @Test
+    public void objectManifestEntriesAreStrictAndRetainOptionalVersions() throws Exception {
+        Path path = Path.of("objects.csv");
+        assertEquals(new S3ObjectRef("prefix/object", "v1", 1024, 0),
+                MinIO.parseManifestEntry(path, "prefix/object,1024,v1", 1));
+        assertEquals(new S3ObjectRef("prefix/object", null, 0, 0),
+                MinIO.parseManifestEntry(path, "prefix/object,0", 2));
+        assertThrows(IOException.class,
+                () -> MinIO.parseManifestEntry(path, "missing-size", 3));
+        assertThrows(IOException.class,
+                () -> MinIO.parseManifestEntry(path, "object,-1", 4));
+        assertThrows(IOException.class,
+                () -> MinIO.parseManifestEntry(path, "object,not-a-number", 5));
+        assertThrows(IOException.class,
+                () -> MinIO.parseManifestEntry(path, "key,with,comma,1", 6));
     }
 
     private static void parse(String... args) throws Exception {

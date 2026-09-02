@@ -20,28 +20,30 @@ import java.util.Locale;
  * worker paths; it does not implement the S3 protocol.
  */
 public enum S3Operation {
-    PUT(true, false),
-    UPDATE(true, true),
-    COPY(true, true),
-    DELETE(true, true),
-    TAG_SET(true, true),
-    TAG_DELETE(true, true),
-    GET(false, true),
-    RANGE_GET(false, true),
-    STAT(false, true),
-    TAG_GET(false, true),
-    LIST(false, false),
-    BUCKET_CREATE(true, false),
-    BUCKET_DELETE(true, false),
-    BUCKET_STAT(false, false),
-    BUCKET_LIST(false, false);
+    PUT(true, false, true),
+    UPDATE(true, true, true),
+    COPY(true, true, true),
+    DELETE(true, true, true),
+    TAG_SET(true, true, true),
+    TAG_DELETE(true, true, true),
+    GET(false, true, true),
+    RANGE_GET(false, true, true),
+    STAT(false, true, true),
+    TAG_GET(false, true, true),
+    LIST(false, false, true),
+    BUCKET_CREATE(true, false, false),
+    BUCKET_DELETE(true, false, false),
+    BUCKET_STAT(false, false, false),
+    BUCKET_LIST(false, false, false);
 
     private final boolean writerOperation;
     private final boolean objectCatalogRequired;
+    private final boolean mainBucketUsed;
 
-    S3Operation(boolean writerOperation, boolean objectCatalogRequired) {
+    S3Operation(boolean writerOperation, boolean objectCatalogRequired, boolean mainBucketUsed) {
         this.writerOperation = writerOperation;
         this.objectCatalogRequired = objectCatalogRequired;
+        this.mainBucketUsed = mainBucketUsed;
     }
 
     /**
@@ -89,6 +91,15 @@ public enum S3Operation {
      */
     public boolean requiresObjectCatalog() {
         return objectCatalogRequired;
+    }
+
+    /**
+     * Return whether this operation uses the configured main object bucket.
+     *
+     * @return true for object and LIST operations; false for independent bucket operations
+     */
+    public boolean usesMainBucket() {
+        return mainBucketUsed;
     }
 
     /**

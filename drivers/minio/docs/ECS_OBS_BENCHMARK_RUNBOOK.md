@@ -240,6 +240,8 @@ For each representative object size, test `1, 2, 4, 8, 16, ...` workers until:
 Do not begin with retries. Keep `-retry-max-attempts 1` and enable
 `-endpoint-metrics true` so ECS saturation remains visible. Run a separate
 production-behavior series with retries only if the application retries.
+When retries are enabled, SBK prints a process-wide retry total even without
+endpoint metrics; endpoint metrics remain necessary for URL-level attribution.
 
 Baseline timed PUT:
 
@@ -470,6 +472,13 @@ Relevant common SBK controls are:
 | `-idletimeoutseconds` | Fixed-record no-progress failure deadline |
 | `-out` | `SystemLogger`, `CSVLogger`, `PrometheusLogger`, `WebLogger`, or `GrpcLogger` as appropriate |
 | `-help` | Generate the effective common + MinIO contract |
+
+Boolean values are strict (`true` or `false`), and duplicate operation-mix,
+tag, or header keys are rejected. A nonempty `-write-mix`/`-read-mix` is the
+effective operation contract; the corresponding single-operation option is
+only the fallback. For fixed-record destructive or mixed workloads, SBK
+validates target capacity before timing so exhausted DELETE/bucket-delete or
+publication queues cannot turn into an indefinite run.
 
 Driver operations are:
 

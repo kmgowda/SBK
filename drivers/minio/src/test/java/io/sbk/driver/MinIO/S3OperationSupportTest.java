@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.nio.charset.StandardCharsets;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -45,7 +47,26 @@ public class S3OperationSupportTest {
         assertFalse(S3Operation.BUCKET_LIST.isWriterOperation());
         assertTrue(S3Operation.COPY.requiresObjectCatalog());
         assertFalse(S3Operation.LIST.requiresObjectCatalog());
+        assertTrue(S3Operation.LIST.usesMainBucket());
+        assertFalse(S3Operation.BUCKET_CREATE.usesMainBucket());
         assertThrows(IllegalArgumentException.class, () -> S3Operation.fromString("compose"));
+    }
+
+    @Test
+    public void checksumAlgorithmsMatchStandardKnownVectors() {
+        byte[] input = "123456789".getBytes(StandardCharsets.US_ASCII);
+
+        assertArrayEquals(HexFormat.of().parseHex("cbf43926"),
+                S3ChecksumUtil.compute(input, S3ChecksumUtil.Algorithm.CRC32));
+        assertArrayEquals(HexFormat.of().parseHex("e3069283"),
+                S3ChecksumUtil.compute(input, S3ChecksumUtil.Algorithm.CRC32C));
+        assertArrayEquals(HexFormat.of().parseHex("f7c3bc1d808e04732adf679965ccc34ca7ae3441"),
+                S3ChecksumUtil.compute(input, S3ChecksumUtil.Algorithm.SHA1));
+        assertArrayEquals(HexFormat.of().parseHex(
+                        "15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225"),
+                S3ChecksumUtil.compute(input, S3ChecksumUtil.Algorithm.SHA256));
+        assertArrayEquals(HexFormat.of().parseHex("ae8b14860a799888"),
+                S3ChecksumUtil.compute(input, S3ChecksumUtil.Algorithm.CRC64NVME));
     }
 
     @Test
@@ -118,6 +139,32 @@ public class S3OperationSupportTest {
         assertEquals(S3Operation.COPY, mix.next());
         assertEquals(S3Operation.PUT, mix.next());
         assertTrue(mix.requiresObjectCatalog());
+        assertTrue(mix.usesMainBucket());
+        assertEquals(2, mix.countOccurrences(S3Operation.COPY, 8, 0));
+        assertEquals(2, mix.countOccurrences(S3Operation.COPY, 8, 1));
+        assertEquals(1, mix.countOccurrences(S3Operation.COPY, 5, 1));
+    }
+
+    @Test
+    public void weightedOccurrenceCountingHandlesWrappedIntervals() {
+        S3OperationMix mix = S3OperationMix.parse("put=3,copy=3,delete=2",
+                S3Operation.PUT, true, 0);
+
+        assertEquals(6, mix.countOccurrences(S3Operation.PUT, 16, 0));
+        assertEquals(6, mix.countOccurrences(S3Operation.COPY, 16, 0));
+        assertEquals(4, mix.countOccurrences(S3Operation.DELETE, 16, 0));
+        assertEquals(3, mix.countOccurrences(S3Operation.PUT, 7, 7));
+        assertEquals(0, mix.countOccurrences(S3Operation.GET, Long.MAX_VALUE, 0));
+    }
+
+    @Test
+    public void tagParsingRejectsMalformedAndDuplicateEntries() {
+        assertEquals(java.util.Map.of("team", "storage", "phase", "test"),
+                MinIOWriter.parseTags("team=storage,phase=test"));
+        assertThrows(IllegalArgumentException.class,
+                () -> MinIOWriter.parseTags("team=storage,broken"));
+        assertThrows(IllegalArgumentException.class,
+                () -> MinIOWriter.parseTags("team=storage,team=duplicate"));
     }
 
     @Test

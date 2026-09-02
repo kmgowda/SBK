@@ -323,7 +323,15 @@ Use `-write-mix "put=80,copy=20"` or
 `-read-mix "get=90,stat=10"` for deterministic weighted workloads. Weights
 need not add to 100. Each worker follows an exact repeating weighted cycle,
 with a worker-specific starting position; writer mixes may contain only
-mutating operations and reader mixes only read operations.
+mutating operations and reader mixes only read operations. A mix is
+authoritative when present; `-write-operation` or `-read-operation` is only its
+fallback. Repeating the same operation in one mix is rejected rather than
+creating two ambiguous weighted intervals.
+
+`-fs-access` and `-key-distribution` are related but not duplicate controls.
+`-fs-access true` adds the hierarchical two-level layout to sequential or
+random suffixes. `-key-distribution hashed` selects that layout together with
+deterministic sequential identities as a single workload shape.
 
 | Flag/value | SDK operation and measured work | Prerequisite | What a successful record confirms |
 |---|---|---|---|
@@ -351,6 +359,10 @@ Pure PUT, LIST, and bucket workloads avoid that startup scan. This prevents an
 unmeasured LIST or HEAD request from being added before every timed GET without
 making write-only startup proportional to the bucket size. In a combined
 PUT/GET run, completed PUTs are published to readers through a blocking queue.
+For fixed-record workloads, startup also proves that one-shot DELETE and
+bucket-delete targets, and mixed-run published objects, are sufficient for the
+requested record count. An impossible finite workload fails before timing
+instead of waiting indefinitely after its target set is exhausted.
 
 ### Bounded asynchronous mode
 
@@ -393,12 +405,12 @@ either request-limit option is zero.
 | `-range-length <bytes>` | `0` | Bytes per ranged GET; zero uses SBK `-size` |
 | `-list-max-keys <1..1000>` | `1000` | Maximum entries consumed by each timed LIST |
 | `-list-prefixes <csv>` | empty | Prefixes assigned round-robin across LIST readers, preventing every reader from scanning the same keyspace. |
-| `-object-file <path>` | empty | Load the startup catalog from local `key,size[,versionId]` CSV instead of listing S3. Blank lines and `#` comments are allowed. |
+| `-object-file <path>` | empty | Load the startup catalog from strict local `key,size[,versionId]` CSV instead of listing S3. Size must be a nonnegative integer; keys cannot contain commas; blank lines and `#` comments are allowed. |
 | `-catalog-max-objects <n>` | `1000000` | Bound discovered or manifest object references retained in memory. |
 | `-partition-count <n>` | `1` | Split existing-object catalogs by stable key hash across distributed SBK/SBK-GEM processes. |
 | `-partition-index <0..n-1>` | `0` | Partition owned by this process. Generated keys include the partition when count is greater than one. |
 | `-partition-by-prefix true|false` | `false` | Put every generated partition under `partition-<index>/` and use that prefix in server-side LIST filtering. This avoids downloading the full catalog on every distributed client. |
-| `-run-manifest <path>` | empty | Write a credential-free JSON record of the effective endpoint count, bucket, operations, workers, size, async mode, and partition. |
+| `-run-manifest <path>` | empty | Write a credential-free JSON record of the effective workload, data shape, integrity, retry, warm-up, HTTP, async, and partition settings. Endpoint URLs, access/secret keys, and header values are excluded. |
 | `-bucket-targets <csv>` | empty | Explicit buckets for delete/stat; required for bucket delete |
 | `-bucket-prefix <p>` | `sbk-benchmark` | Prefix for unique bucket-create names |
 | `-cleanup-created-buckets true|false` | `true` | Remove successfully generated empty buckets at shutdown |
@@ -462,7 +474,7 @@ small correctness/lifecycle checks.
 
 | Flag | Default | Purpose |
 |---|---|---|
-| `-versioning-enabled true|false` | `false` | Enable versioning on the bucket. Reads will include version IDs when listing. |
+| `-versioning-enabled true|false` | `false` | With writers, enable versioning on the bucket; with readers only, discover and address existing versions without mutating bucket configuration. |
 
 ### Data-shape controls
 
@@ -472,7 +484,7 @@ Useful when benchmarking storage with inline compression or deduplication.
 | Flag | Default | Purpose |
 |---|---|---|
 | `-data-compressibility <0..100>` | `0` | Target compressibility percentage. Each 4 KiB chunk is split: `100-N`% random bytes (incompressible), `N`% zero bytes (highly compressible). `0` = fully random, `100` = all zeros. |
-| `-data-dedupable true|false` | `true` | When `false`, stamps every 4 KiB chunk with a 16-byte `(objectId, chunkOffset)` header that defeats inline deduplication. |
+| `-data-dedupable true|false` | `true` | When `false`, stamps every 4 KiB chunk with a 16-byte `(objectId, chunkOffset)` anti-dedup marker. When `true`, no marker is added; random portions still vary, so identical payloads require `-data-compressibility 100`. |
 | `-data-seed <long>` | `0` (random) | Non-zero seed makes generated payload streams reproducible for controlled comparisons. |
 | `-verify-read-size true|false` | `false` | Fail a GET/range-GET whose consumed response bytes differ from catalog/range metadata. |
 
@@ -488,7 +500,9 @@ Useful when benchmarking storage with inline compression or deduplication.
 
 When retries are enabled, all attempts and backoff remain one logical timed
 SBK operation. This reports application-observed latency; use one attempt when
-you need raw single-request service latency.
+you need raw single-request service latency. A process-wide retry total is
+always printed when attempts are enabled. `-endpoint-metrics true` additionally
+attributes retries, completions, logical bytes, and terminal failures by URL.
 
 ### Server-side encryption
 

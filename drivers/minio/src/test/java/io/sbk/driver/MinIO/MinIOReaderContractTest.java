@@ -42,7 +42,8 @@ public class MinIOReaderContractTest {
         MinIOConfig config = baseConfig();
         MinIOReader reader = new MinIOReader(0, parameters(), config,
                 S3Operation.BUCKET_STAT, client, null, new S3ObjectCatalog(List.of()),
-                List.of("missing-bucket"), null, null);
+                List.of("missing-bucket"), null, null,
+                new java.util.concurrent.atomic.LongAdder());
 
         IOException failure = assertThrows(IOException.class, () -> reader.recordRead(
                 new ByteArray(), 1, new NanoSeconds(), new Status(), mock(PerlChannel.class)));
