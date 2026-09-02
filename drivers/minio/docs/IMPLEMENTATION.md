@@ -83,14 +83,17 @@ path:
 2. Build sync and/or async SDK clients and dedicated OkHttp dispatchers.
 3. Apply explicit timeouts, connection-pool limits, TLS policy, and extra
    headers such as ECS `x-emc-namespace`.
-4. Check the main bucket when the selected operations use it.
+4. Check the main bucket when any operation in the effective mix uses it.
 5. Optionally empty and recreate the bucket. This is destructive and happens
    only when writers are configured and `-recreate true` is explicit.
-6. Optionally enable bucket versioning.
+6. Optionally enable bucket versioning for writer runs. Reader-only runs never
+   mutate bucket configuration; they only include existing version IDs in the
+   catalog.
 7. Run the selected untimed warm-up and remove its temporary objects.
 8. Build an object catalog only when an operation needs existing objects.
-9. Validate prerequisites such as a nonempty catalog or a Range GET-eligible
-   object.
+9. Validate prerequisites such as a nonempty catalog, a Range GET-eligible
+   object, and enough one-shot targets/publications to finish a fixed-record
+   workload.
 10. Optionally write the credential-free run manifest.
 
 Pure PUT, LIST, bucket-create, bucket-delete, bucket-stat, and bucket-list
@@ -102,6 +105,9 @@ bounded by `-catalog-max-objects`. `-object-file` avoids that startup LIST by
 loading `key,size[,versionId]` records from a local file. With
 `-partition-by-prefix true`, distributed clients use a server-filterable
 `partition-N/` prefix; otherwise each client receives keys by stable Java hash.
+Manifest parsing is intentionally strict: every non-comment line has exactly
+two or three comma-separated fields, size is nonnegative, and object keys may
+not contain commas.
 
 ## Operation and byte semantics
 
@@ -123,6 +129,13 @@ The LIST `MB/sec` value is therefore **not LIST response-wire bandwidth**. It
 is the logical size represented by returned entries. Judge LIST primarily by
 operations/sec and latency, and retain `-list-max-keys` plus the populated
 object count with the result.
+
+SBK's byte count for one operation is an `int`. Startup rejects GET/COPY
+catalog entries and Range GET lengths above `Integer.MAX_VALUE` rather than
+silently truncating their accounting. LIST can represent more logical bytes
+than this in one response; its record value saturates at `Integer.MAX_VALUE`,
+which is another reason to use LIST operations/sec and latency as the primary
+metrics.
 
 `-verify-read-size true` checks GET and Range GET response lengths. It does not
 compare response content with the original payload. `-checksum` asks the S3
@@ -189,12 +202,43 @@ allowed for network `IOException`, HTTP 429, and HTTP 5xx. The entire retry
 sequence remains one latency sample, so retry delay and additional attempts
 increase the reported operation latency.
 
+When retries are enabled, a process-wide retry count is printed at shutdown
+without adding bookkeeping to successful requests. `-endpoint-metrics true`
+adds the opt-in per-endpoint success/byte/failure counters to the completion
+path and also attributes retries by URL.
+
 `-endpoint-metrics true` creates one counter group for each configured URL.
 The shutdown summary contains completed logical operations/bytes, retry
 attempts, and terminal failures. These are SDK completion counters rather than
 PerL reporting-window counters: async completions at a timed boundary can make
 them differ slightly from the final timed record count. A fixed-record
 qualification should have exact completed-operation parity and zero failures.
+
+## Stability and hot-path boundary
+
+Argument parsing resolves operation mixes, validates all booleans, headers,
+tags, endpoints, catalog limits, and finite target capacity before workers are
+created. A configured mix is authoritative; the single-operation option is
+only the fallback for an empty mix. Duplicate operation entries are rejected.
+This keeps configuration ambiguity and exhaustion checks out of measured
+requests.
+
+The successful writer and reader paths deliberately retain their existing
+shape: one preselected operation, one prepared request, one SDK completion,
+and one SBK measurement. This hardening does not add a branch, counter, lock,
+clock read, or allocation to successful per-operation execution. The shared
+retry counter is touched only after a retryable failure. Detailed endpoint
+metrics remain opt-in because their completion counters do add bookkeeping.
+
+If startup fails after any SDK client has been constructed, all constructed
+sync and async clients are closed and close failures are suppressed onto the
+primary startup exception. Warm-up cleanup follows the same rule: failure to
+remove a temporary object cannot hide the request failure that caused cleanup.
+
+The JSON run manifest records the effective non-secret workload, sizing,
+integrity, retry, warm-up, HTTP, async, and partition configuration. It omits
+endpoint URLs, credentials, and extra-header values. This is a run-configuration
+record, not an object-result manifest.
 
 ## ECS/ObjectScale integration
 

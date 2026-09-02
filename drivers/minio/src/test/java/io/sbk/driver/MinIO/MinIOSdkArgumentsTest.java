@@ -110,7 +110,8 @@ public class MinIOSdkArgumentsTest {
         ParameterOptions params = parsed;
         Queue<String> createdBuckets = new ConcurrentLinkedQueue<>();
         return new MinIOWriter(0, params, config, operation, client, null, catalog,
-                List.of(), createdBuckets, "test-run", null, null);
+                List.of(), createdBuckets, "test-run", null, null,
+                new java.util.concurrent.atomic.LongAdder());
     }
 
     private static MinIOConfig baseConfig() {

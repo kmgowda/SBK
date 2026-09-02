@@ -154,10 +154,13 @@ public final class S3ChecksumUtil {
     }
 
     private static byte[] crc64nvme(byte[] data) {
-        long crc = 0L;
+        // CRC-64/NVME uses all-one initialization and final XOR. With the
+        // reflected implementation these are the bitwise inversions below.
+        long crc = ~0L;
         for (byte b : data) {
             crc = CRC64_NVME_TABLE[(int) ((crc ^ b) & 0xFF)] ^ (crc >>> 8);
         }
+        crc = ~crc;
         byte[] bytes = new byte[Long.BYTES];
         for (int i = Long.BYTES - 1; i >= 0; i--) {
             bytes[i] = (byte) crc;

@@ -11,6 +11,7 @@
 package io.sbk.driver.MinIO;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -50,6 +51,7 @@ public final class S3OperationMix {
         }
         List<S3Operation> parsed = new ArrayList<>();
         List<Integer> weights = new ArrayList<>();
+        EnumSet<S3Operation> selected = EnumSet.noneOf(S3Operation.class);
         int total = 0;
         for (String entry : specification.split(",")) {
             String[] fields = entry.trim().split("=", 2);
@@ -61,6 +63,10 @@ public final class S3OperationMix {
             if (operation.isWriterOperation() != writerMix) {
                 throw new IllegalArgumentException("Operation " + operation + " is not valid in "
                         + (writerMix ? "write-mix" : "read-mix"));
+            }
+            if (!selected.add(operation)) {
+                throw new IllegalArgumentException("Duplicate S3 operation " + operation
+                        + " in " + (writerMix ? "write-mix" : "read-mix"));
             }
             int weight = Integer.parseInt(fields[1].trim());
             if (weight < 1) {
@@ -107,5 +113,68 @@ public final class S3OperationMix {
      */
     public boolean contains(S3Operation operation) {
         return operations.contains(operation);
+    }
+
+    /**
+     * Check whether the mix contains any operation that uses the main object bucket.
+     *
+     * @return true when setup must prepare the configured main bucket
+     */
+    public boolean usesMainBucket() {
+        return operations.stream().anyMatch(S3Operation::usesMainBucket);
+    }
+
+    /**
+     * Count exact occurrences of one operation in a finite deterministic selection.
+     *
+     * <p>The calculation operates on weighted intervals rather than iterating over
+     * every requested record, so startup validation remains bounded even for very
+     * large fixed-record benchmarks.
+     *
+     * @param operation operation to count
+     * @param selections number of selections made by one worker
+     * @param initialSequence worker-specific initial sequence
+     * @return exact occurrence count
+     */
+    public long countOccurrences(S3Operation operation, long selections, long initialSequence) {
+        if (selections <= 0) {
+            return 0;
+        }
+        long operationWeight = 0;
+        int lower = 0;
+        for (int index = 0; index < operations.size(); index++) {
+            int upper = cumulativeWeights[index];
+            if (operations.get(index) == operation) {
+                operationWeight += upper - lower;
+            }
+            lower = upper;
+        }
+        long fullCycles = selections / totalWeight;
+        int remainder = (int) (selections % totalWeight);
+        long count = Math.multiplyExact(fullCycles, operationWeight);
+        if (remainder == 0 || operationWeight == 0) {
+            return count;
+        }
+        int start = Math.floorMod(initialSequence, totalWeight);
+        int firstLength = Math.min(remainder, totalWeight - start);
+        count = Math.addExact(count, countInRange(operation, start, start + firstLength));
+        if (firstLength < remainder) {
+            count = Math.addExact(count,
+                    countInRange(operation, 0, remainder - firstLength));
+        }
+        return count;
+    }
+
+    private long countInRange(S3Operation operation, int start, int end) {
+        long count = 0;
+        int lower = 0;
+        for (int index = 0; index < operations.size(); index++) {
+            int upper = cumulativeWeights[index];
+            if (operations.get(index) == operation) {
+                count += Math.max(0, Math.min(end, upper) - Math.max(start, lower));
+            }
+            lower = upper;
+        }
+        return count;
     }
 }

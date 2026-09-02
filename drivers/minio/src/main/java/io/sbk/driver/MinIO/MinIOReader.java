@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * Per-worker MinIO SDK reader for GET, range GET, stat, tagging, and listing.
@@ -80,11 +81,12 @@ public class MinIOReader implements Reader<byte[]> {
      * @param bucketTargets optional explicit bucket targets
      * @param globalAsyncPermits shared process-wide async permits
      * @param endpointMetrics optional endpoint attribution
+     * @param retryCount process-wide retry counter updated only on retry paths
      */
     public MinIOReader(int id, ParameterOptions params, MinIOConfig config, S3Operation operation,
                        MinioClient client, MinioAsyncClient asyncClient, S3ObjectCatalog catalog,
                        List<String> bucketTargets, Semaphore globalAsyncPermits,
-                       S3EndpointMetrics endpointMetrics) {
+                       S3EndpointMetrics endpointMetrics, LongAdder retryCount) {
         this.id = id;
         readerCount = Math.max(1, params.getReadersCount());
         configuredSize = params.getRecordSize();
@@ -105,6 +107,7 @@ public class MinIOReader implements Reader<byte[]> {
                 ? new S3AsyncExecutor(config.asyncDepth, globalAsyncPermits) : null;
         retryPolicy = new S3RetryPolicy(config.retryMaxAttempts, config.retryBackoffMs,
                 () -> {
+                    retryCount.increment();
                     if (endpointMetrics != null) {
                         endpointMetrics.retry();
                     }
@@ -193,7 +196,7 @@ public class MinIOReader implements Reader<byte[]> {
                     return;
                 }
                 recordFailure();
-                throw operationFailure(ex);
+                throw operationFailure(prepared.operation, ex);
             }
             return;
         }
@@ -216,7 +219,7 @@ public class MinIOReader implements Reader<byte[]> {
                 return;
             }
             recordFailure();
-            throw operationFailure(ex);
+            throw operationFailure(prepared.operation, ex);
         }
         status.endTime = time.getCurrentTime();
     }
@@ -434,14 +437,11 @@ public class MinIOReader implements Reader<byte[]> {
         if (csv == null || csv.isBlank()) {
             return List.of();
         }
-        return java.util.Arrays.stream(csv.split(","))
-                .map(String::trim)
-                .filter(value -> !value.isEmpty())
-                .toList();
+        return MinIO.parseList(csv);
     }
 
-    private IOException operationFailure(Exception ex) {
-        return new IOException("MinIO " + operation + " operation failed: " + ex.getMessage(), ex);
+    private IOException operationFailure(S3Operation selected, Exception ex) {
+        return new IOException("MinIO " + selected + " operation failed: " + ex.getMessage(), ex);
     }
 
     private void verifyBytes(PreparedOperation prepared, int actualBytes) {
