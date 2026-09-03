@@ -29,18 +29,9 @@ import java.util.concurrent.atomic.AtomicLong;
  * logic while leaving the concrete 'consume' method for driver-specific
  * payload handling.
  *
- * <p>Callback delivery is controlled by the storage client rather than an
- * SBK read loop. Rate control and read-request logging are therefore rejected
- * before callback delivery starts instead of being silently ignored or adding
- * coordination to the callback hot path.
- *
  * @param <T> storage record type
  */
 public abstract non-sealed class AbstractCallbackReader<T> implements DataReader<T> {
-    private static final String REQUEST_LOGGING_UNSUPPORTED =
-            "Callback readers do not support read-request logging";
-    private static final String RATE_CONTROL_UNSUPPORTED =
-            "Callback readers do not support rate control";
     private DataType<T> dataType;
     private Time time;
     private CompletableFuture<Void> ret;
@@ -242,7 +233,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
      */
     public void RecordsReader(Worker reader, long recordsCount, DataType<T> dType, Time time,
                               ReadRequestsLogger logger) throws EOFException, IOException {
-        throw new IOException(REQUEST_LOGGING_UNSUPPORTED);
+        RecordsReader(reader, recordsCount, dType, time);
     }
 
     /**
@@ -275,7 +266,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
     public void RecordsReaderRW(Worker reader, long recordsCount, DataType<T> dType, Time time,
                                 ReadRequestsLogger logger) throws EOFException,
             IOException {
-        throw new IOException(REQUEST_LOGGING_UNSUPPORTED);
+        RecordsReaderRW(reader, recordsCount, dType, time);
     }
 
 
@@ -307,7 +298,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
      */
     public void RecordsTimeReader(Worker reader, long secondsToRun, DataType<T> dType, Time time,
                                   ReadRequestsLogger logger) throws EOFException, IOException {
-        throw new IOException(REQUEST_LOGGING_UNSUPPORTED);
+        RecordsTimeReader(reader, secondsToRun, dType, time);
     }
 
     /**
@@ -337,7 +328,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
      */
     public void RecordsTimeReaderRW(Worker reader, long secondsToRun, DataType<T> dType, Time time,
                                     ReadRequestsLogger logger) throws EOFException, IOException {
-        throw new IOException(REQUEST_LOGGING_UNSUPPORTED);
+        RecordsTimeReaderRW(reader, secondsToRun, dType, time);
     }
 
 
@@ -354,7 +345,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
      */
     public void RecordsReaderRateControl(Worker reader, long recordsCount, DataType<T> dType, Time time,
                                          RateController rController) throws EOFException, IOException {
-        throw new IOException(RATE_CONTROL_UNSUPPORTED);
+        run(reader, 0, recordsCount, dType, time, new ConsumeRead());
     }
 
 
@@ -374,7 +365,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
     public void RecordsReaderRateControl(Worker reader, long recordsCount, DataType<T> dType, Time time,
                                          RateController rController, ReadRequestsLogger logger)
             throws EOFException, IOException {
-        throw new IOException(RATE_CONTROL_UNSUPPORTED);
+        RecordsReaderRateControl(reader, recordsCount, dType, time, rController);
     }
 
 
@@ -392,7 +383,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
      */
     public void RecordsReaderRWRateControl(Worker reader, long recordsCount, DataType<T> dType, Time time,
                                            RateController rController) throws EOFException, IOException {
-        throw new IOException(RATE_CONTROL_UNSUPPORTED);
+        run(reader, 0, recordsCount, dType, time, new ConsumeRW());
     }
 
     /**
@@ -411,7 +402,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
     public void RecordsReaderRWRateControl(Worker reader, long recordsCount, DataType<T> dType, Time time,
                                            RateController rController, ReadRequestsLogger logger)
             throws EOFException, IOException {
-        throw new IOException(RATE_CONTROL_UNSUPPORTED);
+        RecordsReaderRWRateControl(reader, recordsCount, dType, time, rController);
     }
 
     /**
@@ -427,7 +418,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
      */
     public void RecordsTimeReaderRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
                                              RateController rController) throws EOFException, IOException {
-        throw new IOException(RATE_CONTROL_UNSUPPORTED);
+        run(reader, secondsToRun, 0, dType, time, new ConsumeRead());
     }
 
     /**
@@ -445,7 +436,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
     public void RecordsTimeReaderRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
                                              RateController rController, ReadRequestsLogger logger)
             throws EOFException, IOException {
-        throw new IOException(RATE_CONTROL_UNSUPPORTED);
+        RecordsTimeReaderRateControl(reader, secondsToRun, dType, time, rController);
     }
 
     /**
@@ -462,7 +453,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
      */
     public void RecordsTimeReaderRWRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
                                                RateController rController) throws EOFException, IOException {
-        throw new IOException(RATE_CONTROL_UNSUPPORTED);
+        run(reader, secondsToRun, 0, dType, time, new ConsumeRW());
     }
 
 
@@ -482,7 +473,7 @@ public abstract non-sealed class AbstractCallbackReader<T> implements DataReader
     public void RecordsTimeReaderRWRateControl(Worker reader, long secondsToRun, DataType<T> dType, Time time,
                                                RateController rController, ReadRequestsLogger logger)
             throws EOFException, IOException {
-        throw new IOException(RATE_CONTROL_UNSUPPORTED);
+        RecordsTimeReaderRWRateControl(reader, secondsToRun, dType, time, rController);
     }
 
 
