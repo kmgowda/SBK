@@ -728,7 +728,45 @@ Run:
 
 ```bash
 ./gradlew :perl:latencyMapPerformanceTest
+./gradlew :perl:percentilePerformanceTest
 ```
+
+The second task runs `PercentileRecorderBenchmark`, an explicit comparison of
+PerL's dense-array and primitive-map exact recorders with HdrHistogram using
+PerL's production three-significant-digit setting. It reports two independent
+dimensions with the GC profiler enabled:
+
+- isolated frequency-update throughput and allocation; and
+- a complete 65,536-observation window containing recording, percentile
+  extraction, clearing/reset, and allocation.
+
+The summary identifies the mean winner for each PerL-versus-HdrHistogram
+comparison and uses the JMH 99.9% confidence intervals to classify the result
+as statistically better or inconclusive. This avoids declaring a winner when
+measurement uncertainty overlaps.
+
+All implementations receive the same precomputed input. The benchmark runs an
+explicitly labelled sequential baseline and a deterministic clustered-lognormal
+distribution. The latter concentrates observations near a mode while retaining
+a sparse long tail, which better represents an unsorted latency stream and
+prevents sequential hardware prefetch from deciding the dense-array result.
+It sweeps 4,096, 262,144, and 4,194,304 latency slots (32 KiB, 2 MiB, and
+32 MiB of array-counter payload) while holding each complete window at 65,536
+observations. This exposes cache/range crossovers without conflating them with
+window cardinality.
+
+PerL's `copyPercentiles` obtains all requested percentiles and clears occupied
+array slots in one fused traversal. The idiomatic HdrHistogram API calls
+`getValueAtPercentile` once for each of the five requested percentiles, so its
+window result includes five histogram traversals followed by `reset`. The
+window comparison therefore measures each implementation's normal public API
+lifecycle, not a storage-only primitive with identical traversal structure.
+
+The task deliberately reports rather than gates which implementation is
+faster: PerL retains exact integer values, while HdrHistogram quantizes values
+to obtain a bounded footprint, so the results have different precision
+semantics. The generated JSON evidence is written to
+`perl/build/reports/jmh/percentile-performance.json`.
 
 The task:
 
@@ -884,8 +922,9 @@ flowchart TD
    collectors, heap sizes, or JDK builds can change throughput.
 3. The benchmark has one recorder thread because production ownership is
    single-threaded. It does not measure unsupported concurrent mutation.
-4. The update workload has 4,096 repeating values. Different cardinality,
-   hash distribution, and density change cache behavior.
+4. The percentile comparison covers sequential and clustered-lognormal input
+   across three range sizes. Other distribution parameters, cardinalities,
+   correlations, and tail shapes can still change cache behavior.
 5. `gc.alloc.rate.norm` values near zero are profiler/harness noise and should
    be interpreted as "no structural per-operation allocation," not literally
    a fractional object.

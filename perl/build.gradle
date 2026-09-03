@@ -82,7 +82,6 @@ dependencies {
 }
 
 jmh {
-    jvmArgs = ["-Djmh.blackhole.autoDetect=false"]
     excludes = ['org.openjdk.jmh.benchmarks',]
 }
 
@@ -92,6 +91,8 @@ def timeStampQueuePerformanceReport = layout.buildDirectory.file(
         "reports/jmh/timestamp-queue-performance.json")
 def latencyMapPerformanceReport = layout.buildDirectory.file(
         "reports/jmh/latency-map-performance.json")
+def percentilePerformanceReport = layout.buildDirectory.file(
+        "reports/jmh/percentile-performance.json")
 def periodicRecorderPerformanceReport = layout.buildDirectory.file(
         "reports/jmh/periodic-recorder-performance.json")
 
@@ -308,6 +309,156 @@ tasks.register('runLatencyMapPerformanceBenchmark', JavaExec) {
     doFirst {
         latencyMapPerformanceReport.get().asFile.parentFile.mkdirs()
         delete latencyMapPerformanceReport
+    }
+}
+
+tasks.register('runPercentilePerformanceBenchmark', JavaExec) {
+    group = 'verification'
+    description = 'Benchmarks PerL exact percentile recorders against HdrHistogram.'
+    dependsOn tasks.named('jmhJar')
+    classpath = files(tasks.named('jmhJar').flatMap { it.archiveFile })
+    mainClass = 'org.openjdk.jmh.Main'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.sbkJavaMajorVersion)
+    }
+    jvmArgs rootProject.ext.sbkRuntimeJvmArgs
+    args 'io.perl.benchmark.PercentileRecorderBenchmark.*',
+            '-prof', 'gc',
+            '-jvmArgs', rootProject.ext.sbkRuntimeJvmArgs.join(' '),
+            '-rf', 'json',
+            '-rff', percentilePerformanceReport.get().asFile.absolutePath
+    outputs.file(percentilePerformanceReport)
+    outputs.upToDateWhen { false }
+    doFirst {
+        def reportFile = percentilePerformanceReport.get().asFile
+        reportFile.parentFile.mkdirs()
+        reportFile.delete()
+    }
+}
+
+tasks.register('percentilePerformanceTest') {
+    group = 'verification'
+    description = 'Reports PerL exact versus HdrHistogram recording and percentile performance.'
+    dependsOn tasks.named('runPercentilePerformanceBenchmark')
+
+    doLast {
+        def results = new groovy.json.JsonSlurper().parse(
+                percentilePerformanceReport.get().asFile)
+        def result = { String benchmark, Map expectedParams ->
+            def value = results.find { entry ->
+                entry.benchmark.tokenize('.').last() == benchmark
+                        && expectedParams.every { key, expectedValue ->
+                            entry.params[key].toString() == expectedValue.toString()
+                        }
+            }
+            if (value == null) {
+                throw new GradleException(
+                        "Missing percentile JMH result: ${benchmark} ${expectedParams}")
+            }
+            if (!value.jdkVersion.toString().startsWith(expectedJavaMajor)) {
+                throw new GradleException(
+                        "Percentile comparison requires JDK ${expectedJavaMajor}; found "
+                                + value.jdkVersion)
+            }
+            value
+        }
+        def metric = { entry -> entry.primaryMetric }
+        def allocation = { entry ->
+            entry.secondaryMetrics['gc.alloc.rate.norm']
+        }
+        def printResult = { String label, entry, String unit ->
+            logger.lifecycle(String.format(
+                    '  %-31s %,12.3f %s; %,10.3f B/op', label,
+                    metric(entry).score, unit,
+                    allocation(entry).score))
+        }
+        def printWinner = { leftLabel, leftEntry, rightLabel,
+                            rightEntry, higherIsBetter, measurement ->
+                def left = metric(leftEntry)
+                def right = metric(rightEntry)
+                def leftWins = higherIsBetter
+                        ? left.scoreConfidence[0] > right.scoreConfidence[1]
+                        : left.scoreConfidence[1] < right.scoreConfidence[0]
+                def rightWins = higherIsBetter
+                        ? right.scoreConfidence[0] > left.scoreConfidence[1]
+                        : right.scoreConfidence[1] < left.scoreConfidence[0]
+                def meanWinner = higherIsBetter
+                        ? (left.score >= right.score ? leftLabel : rightLabel)
+                        : (left.score <= right.score ? leftLabel : rightLabel)
+                def winnerScore = higherIsBetter
+                        ? Math.max(left.score, right.score)
+                        : Math.min(left.score, right.score)
+                def loserScore = higherIsBetter
+                        ? Math.min(left.score, right.score)
+                        : Math.max(left.score, right.score)
+                def difference = loserScore == 0.0d
+                        ? 0.0d
+                        : Math.abs(winnerScore - loserScore) * 100.0d / loserScore
+                def direction = higherIsBetter ? 'higher' : 'lower'
+                def confidence
+                if (leftWins) {
+                    confidence = "${leftLabel} is statistically better"
+                } else if (rightWins) {
+                    confidence = "${rightLabel} is statistically better"
+                } else {
+                    confidence = 'INCONCLUSIVE: 99.9% confidence intervals overlap'
+                }
+                logger.lifecycle(String.format(
+                        '    - %s vs %s: %s; %s has %.2f%% %s mean %s',
+                        leftLabel, rightLabel, confidence, meanWinner,
+                        difference, direction, measurement))
+        }
+
+        logger.lifecycle('PerL exact versus HdrHistogram JMH comparison')
+        def combinations = results.findAll {
+            it.benchmark.endsWith('.arrayFrequencyUpdate')
+        }.collect {
+            [distribution: it.params.distribution,
+             distinctLatencies: it.params.distinctLatencies]
+        }.toSorted { left, right ->
+            def distributionOrder = left.distribution <=> right.distribution
+            distributionOrder != 0
+                    ? distributionOrder
+                    : left.distinctLatencies.toInteger()
+                    <=> right.distinctLatencies.toInteger()
+        }
+        combinations.each { params ->
+            def arrayUpdate = result('arrayFrequencyUpdate', params)
+            def primitiveUpdate = result('primitiveFrequencyUpdate', params)
+            def hdrUpdate = result('hdrFrequencyUpdate', params)
+            def windowParams = params + [observations: '65536']
+            def arrayWindow = result('arrayPercentileWindow', windowParams)
+            def primitiveWindow = result('primitivePercentileWindow',
+                    windowParams)
+            def hdrWindow = result('hdrPercentileWindow', windowParams)
+            def slots = params.distinctLatencies.toInteger()
+            logger.lifecycle(String.format(
+                    '%s distribution; %,d latency slots (%,.2f MiB array):',
+                    params.distribution, slots, slots * 8.0d / (1024 * 1024)))
+            logger.lifecycle(' Frequency-update throughput (higher is better):')
+            printResult('ArrayLatencyRecorder', arrayUpdate, 'ops/s')
+            printResult('LongHashMapLatencyRecorder', primitiveUpdate, 'ops/s')
+            printResult('HdrHistogram (3 digits)', hdrUpdate, 'ops/s')
+            logger.lifecycle('  Winner analysis against HdrHistogram:')
+            printWinner('ArrayLatencyRecorder', arrayUpdate,
+                    'HdrHistogram', hdrUpdate, true, 'throughput')
+            printWinner('LongHashMapLatencyRecorder', primitiveUpdate,
+                    'HdrHistogram', hdrUpdate, true, 'throughput')
+            logger.lifecycle(' Complete 65,536-observation percentile window '
+                    + '(lower is better):')
+            printResult('ArrayLatencyRecorder', arrayWindow, 'us/window')
+            printResult('LongHashMapLatencyRecorder', primitiveWindow,
+                    'us/window')
+            printResult('HdrHistogram (3 digits)', hdrWindow, 'us/window')
+            logger.lifecycle('  Winner analysis against HdrHistogram:')
+            printWinner('ArrayLatencyRecorder', arrayWindow,
+                    'HdrHistogram', hdrWindow, false, 'window time')
+            printWinner('LongHashMapLatencyRecorder', primitiveWindow,
+                    'HdrHistogram', hdrWindow, false, 'window time')
+        }
+        logger.lifecycle('Performance is reported, not gated: exact retention '
+                + 'and HdrHistogram quantization have different semantics.')
+        logger.lifecycle("JMH report: ${percentilePerformanceReport.get().asFile}")
     }
 }
 
