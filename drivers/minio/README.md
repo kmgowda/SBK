@@ -364,8 +364,12 @@ must read objects created by the same run; completed PUTs/COPYs then flow
 through a blocking queue. For fixed-record published workloads, startup proves
 that the writer mix can publish enough objects. Keep producer and consumer
 rates balanced because published mode intentionally adds no locks or bounded
-waits to PUT completion. Startup also validates one-shot DELETE and
-bucket-delete capacity.
+waits to PUT completion. A published-mode reader can therefore wait indefinitely
+when writers finish before supplying all expected objects. Always set the common
+SBK `-idletimeoutseconds` option to a finite operational limit for this mode and
+reject a run that reaches it. Startup also validates one-shot DELETE and
+bucket-delete capacity. Do not add a MinIO-specific idle timeout; the common
+option already provides the benchmark-wide no-progress contract.
 
 ### Bounded asynchronous mode
 
@@ -417,7 +421,7 @@ either request-limit option is zero.
 | `-list-api-version 1|2` | `2` | Select legacy ListObjects V1 or ListObjectsV2. |
 | `-list-fetch-owner true|false` | `false` | Request owner fields in LIST results. |
 | `-list-include-user-metadata true|false` | `false` | Request user metadata on compatible S3 implementations. |
-| `-mixed-read-source catalog|published` | `catalog` | In mixed writer/reader runs, read the bounded startup snapshot by default or explicitly consume objects completed by this run. |
+| `-mixed-read-source catalog|published` | `catalog` | In mixed writer/reader runs, read the bounded startup snapshot by default or explicitly consume objects completed by this run. Published mode requires balanced producers/consumers and a finite common `-idletimeoutseconds` guard. |
 | `-object-file <path>` | empty | Load the startup catalog from strict local `key,size[,versionId]` CSV instead of listing S3. Size must be a nonnegative integer; keys cannot contain commas; blank lines and `#` comments are allowed. |
 | `-catalog-max-objects <n>` | `1000000` | Bound discovered or manifest object references retained in memory. |
 | `-partition-count <n>` | `1` | Split existing-object catalogs by stable key hash across distributed SBK/SBK-GEM processes. |

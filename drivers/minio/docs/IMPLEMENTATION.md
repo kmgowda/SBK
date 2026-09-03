@@ -201,8 +201,10 @@ allowed for network `IOException`, HTTP 429, and HTTP 5xx. The entire retry
 sequence remains one latency sample, so retry delay and additional attempts
 increase the reported operation latency. Fixed delay preserves compatibility;
 exponential delay, an optional cap, and full jitter model production clients
-and avoid coordinated retry waves. Socket timeouts remain retryable errors;
-only interruption caused by benchmark shutdown is treated as clean shutdown.
+and avoid coordinated retry waves. The timeout-classification change makes
+active socket timeouts eligible for retry and prevents their classification as
+clean shutdown. Only interruption caused by benchmark shutdown is treated as
+clean shutdown.
 
 When retries are enabled, a process-wide retry count is printed at shutdown
 without adding bookkeeping to successful requests. `-endpoint-metrics true`

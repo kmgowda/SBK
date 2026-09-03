@@ -480,8 +480,16 @@ Boolean values are strict (`true` or `false`), and duplicate operation-mix,
 tag, or header keys are rejected. A nonempty `-write-mix`/`-read-mix` is the
 effective operation contract; the corresponding single-operation option is
 only the fallback. For fixed-record destructive or mixed workloads, SBK
-validates target capacity before timing so exhausted DELETE/bucket-delete or
-publication queues cannot turn into an indefinite run.
+validates aggregate target capacity before timing. That validation cannot
+guarantee publication timing or per-reader delivery.
+
+For mixed writer/reader tests, prefer the default
+`-mixed-read-source catalog`. The explicit `published` mode consumes only
+objects completed by the same run and can wait indefinitely if writers finish
+without supplying every reader operation. Use a finite common SBK guard such
+as `-idletimeoutseconds 60`, keep publication and consumption rates balanced,
+and reject any run terminated by that no-progress timeout. There is no separate
+MinIO idle-timeout option because that would duplicate the harness control.
 
 Driver operations are:
 
