@@ -131,7 +131,7 @@ final public class SbkBenchmark implements Benchmark {
 
         this.executor = switch (params.getThreadType()) {
             case ThreadType.ForkJoin -> new ForkJoinPool(threadCount);
-            case ThreadType.Virtual -> Executors.newFixedThreadPool(threadCount, Thread.ofVirtual().factory());
+            case ThreadType.Virtual -> Executors.newVirtualThreadPerTaskExecutor();
             default -> Executors.newFixedThreadPool(threadCount);
         };
 

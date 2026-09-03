@@ -605,7 +605,7 @@ The recorder thread runs the loop in
 while (doWork) {
     notFound = true;
     for (int i = 0; doWork && (i < channels.length); i++) {
-        t = channels[i].receive(windowIntervalMS);
+        t = channels[i].receive(0);
         if (t != null) {
             notFound = false;
             dataSinceIdle = true;
@@ -845,7 +845,7 @@ There is one more clock-saving trick. Look at the recorder loop:
 
 ```java
 for (Channel ch : channels) {
-    t = ch.receive(...);
+    t = ch.receive(0);
     if (t != null) {
         ctime = t.endTime;              // <-- the WORKER's timestamp, NOT a new clock call
         recorder.record(t.startTime, t.endTime, ...);
@@ -1239,7 +1239,7 @@ public SbkBenchmark(ParameterOptions params, Storage<Object> storage,
             + runtimeConfig.workerExecutorReserve;
     this.executor = switch (params.getThreadType()) {
         case ForkJoin -> new ForkJoinPool(threadCount);
-        case Virtual  -> Executors.newFixedThreadPool(threadCount, Thread.ofVirtual().factory());
+        case Virtual  -> Executors.newVirtualThreadPerTaskExecutor();
         default       -> Executors.newFixedThreadPool(threadCount);
     };
     this.perlExecutor = new ForkJoinPool(runtimeConfig.perlExecutorParallelism);
@@ -2300,9 +2300,9 @@ three modes:
 
 | CLI | Executor | Best fit |
 |---|---|---|
-| `-thread p` | Fixed platform-thread pool | Default; predictable OS-thread behavior. |
+| `-thread p` | Fixed platform-thread pool | Predictable OS-thread behavior. |
 | `-thread f` | `ForkJoinPool` | CPU-oriented or fork/join-friendly work. |
-| `-thread v` | Fixed executor creating virtual threads | Many blocking I/O tasks, subject to driver behavior and JVM carrier availability. |
+| `-thread v` | Virtual thread per task (default) | Many blocking I/O tasks, subject to driver behavior and JVM carrier availability. |
 
 Increasing `-writers` or `-readers` exposes more independent operations to the
 JVM and storage client. It can use additional CPU cores and outstanding I/O
@@ -2876,7 +2876,7 @@ sequenceDiagram
     Ch->>Q: enqueue TimeStamp
 
     Note over R: meanwhile, recorder loop:
-    Q-->>R: receive() (CAS on head)
+    Q-->>R: receive(0) (CAS on head)
     R->>Win: record(start, end, 1, size)
     Note over Win: ++histogram[end - start]<br/>totalBytes += size
 ```

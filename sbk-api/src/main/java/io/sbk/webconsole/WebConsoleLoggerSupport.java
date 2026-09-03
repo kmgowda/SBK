@@ -14,6 +14,7 @@ import io.sbk.api.impl.Sbk;
 import io.sbk.params.InputOptions;
 import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
+import io.sbk.utils.SbkUtils;
 import io.time.TimeUnit;
 
 import java.io.IOException;
@@ -73,7 +74,8 @@ public final class WebConsoleLoggerSupport implements AutoCloseable {
     public void parseArgs(ParsedOptions params) {
         ensureConfig();
         config.port = Integer.parseInt(params.getOptionValue(PORT_OPTION, Integer.toString(config.port)));
-        config.open = Boolean.parseBoolean(params.getOptionValue(OPEN_OPTION, Boolean.toString(config.open)));
+        config.open = SbkUtils.parseBooleanOption(OPEN_OPTION,
+                params.getOptionValue(OPEN_OPTION, Boolean.toString(config.open)));
         config.snapshotMinutes = Integer.parseInt(params.getOptionValue(SNAPSHOT_MINUTES_OPTION,
                 Integer.toString(config.snapshotMinutes)));
         config.timeoutMinutes = Integer.parseInt(params.getOptionValue(TIMEOUT_OPTION,

@@ -18,6 +18,7 @@ import io.sbk.config.SbkRuntimeConfig;
 import io.sbk.exception.HelpException;
 import io.sbk.params.InputParameterOptions;
 import io.sbk.thread.ThreadType;
+import io.sbk.utils.SbkUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
@@ -131,6 +132,7 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         addOption("throughput", true,
                 """
                         If > 0, throughput in MB/s
+                        Positive targets must provide at least one whole record/s per worker
                         If 0, writes/reads 'records'
                         If -1, get the maximum throughput (default: -1)""");
         addOption("wstep", true,
@@ -183,7 +185,7 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
     public void parseArgs(String[] args) throws ParseException, IllegalArgumentException, HelpException {
         super.parseArgs(args);
         final SbkConfig defaults = SbkConfig.get();
-        final boolean writeReadOnly = Boolean.parseBoolean(getOptionValue("ro",
+        final boolean writeReadOnly = SbkUtils.parseBooleanOption("ro", getOptionValue("ro",
                 Boolean.toString(defaults.defaultReadOnly)));
         writersCount = Integer.parseInt(getOptionValue("writers", Integer.toString(defaults.defaultWriters)));
         readersCount = Integer.parseInt(getOptionValue("readers", Integer.toString(defaults.defaultReaders)));
@@ -219,6 +221,12 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         } else {
             throughput = defaults.defaultThroughput;
         }
+        if (!Double.isFinite(throughput)) {
+            throw new IllegalArgumentException("Error: The throughput must be a finite number");
+        }
+        if (throughput < 0.0d && throughput != -1.0d) {
+            throw new IllegalArgumentException("Error: The throughput must be -1, 0, or greater than zero");
+        }
 
         writersStep = Integer.parseInt(getOptionValue("wstep", Integer.toString(defaults.defaultWriterStep)));
         writersStepSeconds = Integer.parseInt(getOptionValue("wsec",
@@ -247,7 +255,17 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
             }
             recordsPerSec = (int) recsPerSec;
         } else if (throughput > 0) {
-            recordsPerSec = (int) (((throughput * Bytes.BYTES_PER_MB) / recordSize) / workersCnt);
+            final double recordsPerSecond = ((throughput * Bytes.BYTES_PER_MB) / recordSize) / workersCnt;
+            if (!Double.isFinite(recordsPerSecond) || recordsPerSecond > Integer.MAX_VALUE) {
+                throw new IllegalArgumentException("Error: The requested throughput produces more than "
+                        + Integer.MAX_VALUE + " records per second per worker");
+            }
+            if (recordsPerSecond < 1.0d) {
+                throw new IllegalArgumentException("Error: The requested throughput is too low for "
+                        + workersCnt + " worker(s) and " + recordSize
+                        + "-byte records; each worker must receive at least one record per second");
+            }
+            recordsPerSec = (int) recordsPerSecond;
         } else {
             recordsPerSec = 0;
         }
@@ -264,9 +282,11 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
 
         String threadString = getOptionValue("thread", defaults.defaultThreadType);
         threadType = switch (threadString.toLowerCase()) {
+            case "p" -> ThreadType.Platform;
             case "f" -> ThreadType.ForkJoin;
             case "v" -> ThreadType.Virtual;
-            default -> ThreadType.Platform;
+            default -> throw new IllegalArgumentException(
+                    "Error: The option '-thread' must be p, f, or v; got '" + threadString + "'");
         };
 
     }
@@ -274,12 +294,7 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
     private void parseMpscQueueOption() {
         final String queueEnabled = getOptionValue(MPSC_QUEUE_OPTION,
                 Boolean.toString(mpscQueueEnabled));
-        if (!"true".equalsIgnoreCase(queueEnabled)
-                && !"false".equalsIgnoreCase(queueEnabled)) {
-            throw new IllegalArgumentException("Error: The option '-"
-                    + MPSC_QUEUE_OPTION + "' must be true or false");
-        }
-        mpscQueueEnabled = Boolean.parseBoolean(queueEnabled);
+        mpscQueueEnabled = SbkUtils.parseBooleanOption(MPSC_QUEUE_OPTION, queueEnabled);
     }
 
     /**

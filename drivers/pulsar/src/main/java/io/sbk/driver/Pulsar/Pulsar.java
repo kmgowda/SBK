@@ -17,6 +17,7 @@ import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.params.InputOptions;
+import io.sbk.utils.SbkUtils;
 import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
 
@@ -75,8 +76,8 @@ public class Pulsar implements Storage<byte[]> {
         config.ensembleSize = Integer.parseInt(params.getOptionValue("ensembleSize", String.valueOf(config.ensembleSize)));
         config.writeQuorum = Integer.parseInt(params.getOptionValue("writeQuorum", String.valueOf(config.writeQuorum)));
         config.ackQuorum = Integer.parseInt(params.getOptionValue("ackQuorum", String.valueOf(config.ackQuorum)));
-        config.deduplicationEnabled = Boolean.parseBoolean(params.getOptionValue("recreate",
-                String.valueOf(config.deduplicationEnabled)));
+        config.deduplicationEnabled = SbkUtils.parseBooleanOption("recreate",
+                params.getOptionValue("recreate", String.valueOf(config.deduplicationEnabled)));
 
         final String[] names = config.topicName.split("[/]");
         try {

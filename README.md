@@ -299,13 +299,17 @@ Driver-specific options are added after SBK discovers `-class`. Use the selected
 | `-size BYTES` | Payload size per record |
 | `-seconds N` | Time-based run duration |
 | `-records N` | Total records in count mode, or the per-second target in timed mode |
-| `-throughput MBPS` | Throughput target; `-1` requests maximum throughput |
+| `-throughput MBPS` | Throughput target; `-1` requests maximum throughput. A positive target must provide at least one whole record/s per worker. |
 | `-idletimeoutseconds N` | In fixed-record mode, fail after `N` continuous seconds without a performance event; must exceed the logger reporting interval; default: `600` |
 | `-mpscqueue true\|false` | Select intrusive `TimeStampMpscQueue` or the JDK `ConcurrentLinkedQueue` fallback; default comes from `sbk.properties` |
 | `-sync N` | Records per flush/sync or transaction |
 | `-ro true` | With readers and writers configured, read without writing new records |
 | `-thread p\|f\|v` | Platform, fork-join, or virtual worker executor; default: virtual (`v`) |
 | `-out NAME` | Output logger, such as `SystemLogger`, `CSVLogger`, `WebLogger`, `PrometheusLogger`, or `GrpcLogger` |
+
+Boolean options accept only `true` or `false`; misspellings fail during
+startup instead of silently selecting `false`. Thread mode likewise accepts
+only `p`, `f`, or `v`.
 
 Always treat `-help` as authoritative because drivers and loggers add their own options at runtime.
 

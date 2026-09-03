@@ -17,9 +17,9 @@ package io.perl.api;
  *
  * <p>Semantics:
  * <ul>
- *     <li>{@link #receive(int)} blocks up to <code>timeout</code> milliseconds
- *     waiting for the next {@link TimeStamp} to be available. If no data is
- *     available within the timeout it may return <code>null</code>.</li>
+ *     <li>{@link #receive(int)} returns the next {@link TimeStamp} immediately, or
+ *     {@code null} when no data is available. Waiting policy belongs to the
+ *     recorder loop rather than the queue abstraction.</li>
  *     <li>{@link #sendEndTime(long)} is used to notify the channel consumers
  *     that the benchmark is ending; implementations should use this to unblock
  *     waiting consumers where appropriate.</li>
@@ -34,10 +34,10 @@ package io.perl.api;
 public non-sealed interface Channel extends GetPerlChannel {
 
     /**
-     * Receive the benchmarking timestamp.
+     * Poll for the next benchmarking timestamp.
      *
-     * @param timeout maximum time in milliseconds to wait for the data.
-     * @return TimeStamp    Time stamp data or {@code null} if none available within the timeout
+     * @param timeout ignored; retained for source compatibility
+     * @return the next timestamp, or {@code null} when no timestamp is available
      */
     TimeStamp receive(int timeout);
 

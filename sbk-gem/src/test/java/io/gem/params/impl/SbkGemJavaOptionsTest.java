@@ -102,6 +102,16 @@ final class SbkGemJavaOptionsTest {
     }
 
     @Test
+    void rejectsInvalidBooleanOptions() throws Exception {
+        createSbkCommand();
+        final SbkGemParameters parameters = parameters();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> parameters.parseArgs(new String[]{"-nodes", "node-a", "-writers", "1",
+                    "-records", "1", "-size", "1", "-hostkeycheck", "yes"}));
+    }
+
+    @Test
     void detectsExplicitSbmCallbackAddressOverride() throws Exception {
         createSbkCommand();
         final SbkGemParameters parameters = parameters();

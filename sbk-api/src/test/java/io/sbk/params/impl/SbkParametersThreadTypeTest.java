@@ -14,6 +14,7 @@ import io.sbk.thread.ThreadType;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests SBK worker-thread option defaults and explicit overrides.
@@ -43,6 +44,13 @@ public class SbkParametersThreadTypeTest {
         assertEquals(ThreadType.Platform, parseThreadType(withThreadType("p")));
         assertEquals(ThreadType.ForkJoin, parseThreadType(withThreadType("f")));
         assertEquals(ThreadType.Virtual, parseThreadType(withThreadType("v")));
+    }
+
+    /** Reject misspelled thread types instead of silently selecting platform threads. */
+    @Test
+    public void rejectsUnknownThreadType() {
+        assertThrows(IllegalArgumentException.class,
+                () -> parseThreadType(withThreadType("virtual")));
     }
 
     private static ThreadType parseThreadType(String[] args) throws Exception {

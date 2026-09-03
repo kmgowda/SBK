@@ -107,6 +107,25 @@ public final class SbkUtils {
     }
 
     /**
+     * Parse a command-line boolean without silently treating a typo as false.
+     *
+     * @param option option name used in an actionable error message
+     * @param value configured option value
+     * @return parsed boolean
+     * @throws IllegalArgumentException if the value is not {@code true} or {@code false}
+     */
+    public static boolean parseBooleanOption(String option, String value) {
+        if ("true".equalsIgnoreCase(value)) {
+            return true;
+        }
+        if ("false".equalsIgnoreCase(value)) {
+            return false;
+        }
+        throw new IllegalArgumentException("Error: The option '-" + option
+                + "' must be true or false; got '" + value + "'");
+    }
+
+    /**
      * Returns the operating-system name, version, and architecture reported by the JVM.
      *
      * @return operating-system details suitable for startup diagnostics

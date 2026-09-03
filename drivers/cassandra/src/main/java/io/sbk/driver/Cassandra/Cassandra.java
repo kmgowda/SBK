@@ -20,6 +20,7 @@ import io.sbk.api.Storage;
 import io.sbk.data.DataType;
 import io.sbk.data.impl.SbkString;
 import io.sbk.params.InputOptions;
+import io.sbk.utils.SbkUtils;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -59,7 +60,8 @@ public class Cassandra implements Storage<String> {
         config.table = params.getOptionValue("table", config.table);
         config.replicationStrategy = params.getOptionValue("rs", config.replicationStrategy);
         config.replicationFactor = params.getOptionValue("rf", config.replicationFactor);
-        config.reCreate = Boolean.parseBoolean(params.getOptionValue("recreate", String.valueOf(config.reCreate)));
+        config.reCreate = SbkUtils.parseBooleanOption("recreate",
+                params.getOptionValue("recreate", String.valueOf(config.reCreate)));
 
     }
 

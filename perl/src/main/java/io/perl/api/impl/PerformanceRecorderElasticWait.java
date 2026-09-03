@@ -86,7 +86,7 @@ public final class PerformanceRecorderElasticWait extends PerformanceRecorder {
         while (doWork) {
             notFound = true;
             for (int i = 0; doWork && (i < channels.length); i++) {
-                t = channels[i].receive(windowIntervalMS);
+                t = channels[i].receive(0);
                 if (t != null) {
                     notFound = false;
                     dataSinceIdle = true;
@@ -157,7 +157,7 @@ public final class PerformanceRecorderElasticWait extends PerformanceRecorder {
         while (doWork) {
             notFound = true;
             for (int i = 0; doWork && (i < channels.length); i++) {
-                t = channels[i].receive(windowIntervalMS);
+                t = channels[i].receive(0);
                 if (t != null) {
                     notFound = false;
                     dataSinceIdle = true;

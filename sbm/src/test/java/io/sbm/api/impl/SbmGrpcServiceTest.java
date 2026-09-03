@@ -85,6 +85,30 @@ final class SbmGrpcServiceTest {
     }
 
     @Test
+    void invokesExternalObserversOutsideTheServiceMonitor() throws Exception {
+        final SbmParameters params = new SbmParameters("test", 0, 1, 0, null);
+        params.parseArgs(new String[]{"-class", "file", "-action", "r", "-max", "1"});
+        final SbmRegistry registry = mock(SbmRegistry.class);
+        when(registry.getID()).thenReturn(7L, 8L);
+        final SbmGrpcService service = new SbmGrpcService(params, new MilliSeconds(), 0, 1000,
+                mock(CountConnections.class), registry, true);
+        final MonitorCheckingObserver<ClientID> registration = new MonitorCheckingObserver<>(service);
+
+        service.registerClient(Config.getDefaultInstance(), registration);
+        assertEquals(1, service.releaseCoordinatedStart());
+        service.reportClientFailure(clientFailure(7, "sbk", "failed"),
+                new MonitorCheckingObserver<>(service));
+        service.closeClient(ClientID.newBuilder().setId(7).build(),
+                new MonitorCheckingObserver<>(service));
+
+        final SbmGrpcService abortedService = new SbmGrpcService(params, new MilliSeconds(), 0, 1000,
+                mock(CountConnections.class), registry, true);
+        abortedService.registerClient(Config.getDefaultInstance(),
+                new MonitorCheckingObserver<>(abortedService));
+        assertEquals(1, abortedService.abortPendingRegistrations("startup failed"));
+    }
+
+    @Test
     void atomicallyRejectsRegistrationsBeyondTheConnectionCap() throws Exception {
         final SbmParameters params = new SbmParameters("test", 0, 2, 0, null);
         params.parseArgs(new String[]{"-class", "file", "-action", "r", "-max", "2"});
@@ -499,6 +523,29 @@ final class SbmGrpcServiceTest {
         @Override
         public void onCompleted() {
             completed = true;
+        }
+    }
+
+    private static final class MonitorCheckingObserver<T> implements StreamObserver<T> {
+        private final Object monitor;
+
+        private MonitorCheckingObserver(Object monitor) {
+            this.monitor = monitor;
+        }
+
+        @Override
+        public void onNext(T value) {
+            assertFalse(Thread.holdsLock(monitor));
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            assertFalse(Thread.holdsLock(monitor));
+        }
+
+        @Override
+        public void onCompleted() {
+            assertFalse(Thread.holdsLock(monitor));
         }
     }
 }

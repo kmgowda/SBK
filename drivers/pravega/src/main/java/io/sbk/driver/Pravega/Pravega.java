@@ -24,6 +24,7 @@ import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.params.InputOptions;
+import io.sbk.utils.SbkUtils;
 
 import java.io.IOException;
 import java.net.URI;
@@ -70,12 +71,12 @@ public class Pravega implements Storage<byte[]> {
         config.controllerUri = params.getOptionValue("controller", config.controllerUri);
         config.segmentCount = Integer.parseInt(params.getOptionValue("segments", Integer.toString(config.segmentCount)));
         if (params.hasOptionValue("recreate")) {
-            config.recreate = Boolean.parseBoolean(params.getOptionValue("recreate"));
+            config.recreate = SbkUtils.parseBooleanOption("recreate", params.getOptionValue("recreate"));
         } else {
             config.recreate = params.getWritersCount() > 0 && params.getReadersCount() > 0;
         }
-        config.connPooling = Boolean.parseBoolean(params.getOptionValue("connpool",
-                Boolean.toString(config.connPooling)));
+        config.connPooling = SbkUtils.parseBooleanOption("connpool",
+                params.getOptionValue("connpool", Boolean.toString(config.connPooling)));
 
         if (config.recreate) {
             rdGrpName = config.streamName + System.currentTimeMillis();

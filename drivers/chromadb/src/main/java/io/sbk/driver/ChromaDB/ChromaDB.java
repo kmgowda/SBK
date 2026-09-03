@@ -22,6 +22,7 @@ import io.sbk.api.Storage;
 import io.sbk.data.DataType;
 import io.sbk.data.impl.ByteArray;
 import io.sbk.params.InputOptions;
+import io.sbk.utils.SbkUtils;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -74,7 +75,8 @@ public class ChromaDB implements Storage<byte[]> {
         config.collectionName = params.getOptionValue("collectionName", config.collectionName);
         config.embeddingDimension = Integer.parseInt(params.getOptionValue("embeddingDimension", String.valueOf(config.embeddingDimension)));
         config.distanceFunction = params.getOptionValue("distanceFunction", config.distanceFunction);
-        config.ssl = Boolean.parseBoolean(params.getOptionValue("ssl", String.valueOf(config.ssl)));
+        config.ssl = SbkUtils.parseBooleanOption("ssl",
+                params.getOptionValue("ssl", String.valueOf(config.ssl)));
         config.authToken = params.getOptionValue("authToken", config.authToken);
         config.timeoutSeconds = Integer.parseInt(params.getOptionValue("timeoutSeconds", String.valueOf(config.timeoutSeconds)));
         config.maxRetries = Integer.parseInt(params.getOptionValue("maxRetries", String.valueOf(config.maxRetries)));
