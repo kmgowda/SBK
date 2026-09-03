@@ -37,6 +37,8 @@ public class MinIOConfig {
     public String writeMix;
     /** Weighted reader mix, for example get=90,stat=10. */
     public String readMix;
+    /** Object source for readers when writers and readers run together. */
+    public String mixedReadSource;
     /** Use MinioAsyncClient with bounded in-flight operations. */
     public boolean async;
     /** Maximum async operations in flight per SBK worker. */
@@ -57,10 +59,28 @@ public class MinIOConfig {
     public long rangeOffset;
     /** Length used by ranged GET operations; 0 means the configured record size. */
     public long rangeLength;
-    /** Maximum objects requested by each list benchmark operation. */
+    /** Ranged GET offset selection: fixed, sequential, or random. */
+    public String rangeOffsetDistribution;
+    /** Size of the selectable range-offset window; zero uses the remaining object. */
+    public long rangeWindowLength;
+    /** Alignment in bytes for generated ranged GET offsets. */
+    public long rangeAlignment;
+    /** Maximum objects requested from S3 in each LIST response page. */
     public int listMaxKeys;
+    /** Maximum entries consumed by one timed LIST operation across response pages. */
+    public int listMaxEntries;
     /** Optional comma-separated LIST prefixes assigned across reader workers. */
     public String listPrefixes;
+    /** Optional key after which a LIST V2 operation begins. */
+    public String listStartAfter;
+    /** Optional LIST delimiter; empty performs a recursive flat listing. */
+    public String listDelimiter;
+    /** S3 LIST API version, either 1 or 2. */
+    public int listApiVersion;
+    /** Request owner metadata in LIST responses. */
+    public boolean listFetchOwner;
+    /** Request user metadata where the backend and SDK support it. */
+    public boolean listIncludeUserMetadata;
     /** Optional local object manifest used instead of an S3 startup listing. */
     public String objectFile;
     /** Maximum object references retained in the startup catalog. */
@@ -115,12 +135,20 @@ public class MinIOConfig {
     public int retryMaxAttempts;
     /** Fixed delay between retry attempts in milliseconds. */
     public long retryBackoffMs;
+    /** Retry delay strategy: fixed or exponential. */
+    public String retryStrategy;
+    /** Maximum exponential retry delay in milliseconds; zero means unbounded. */
+    public long retryMaxBackoffMs;
+    /** Randomize retry delay in the range [0, calculated delay]. */
+    public boolean retryJitter;
     /** Untimed bucket-existence requests used to warm connections before catalog discovery. */
     public int warmupRequests;
     /** Warmup operation: connection, put, get, or put-get. */
     public String warmupOperation;
     /** Collect completion, byte, retry, and failure totals by configured endpoint. */
     public boolean endpointMetrics;
+    /** Endpoint validation scope before measurement: primary or all. */
+    public String endpointPreflight;
     /** Total distributed partitions sharing the benchmark bucket. */
     public int partitionCount;
     /** Zero-based partition assigned to this process. */

@@ -51,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
@@ -69,6 +70,8 @@ import java.util.concurrent.atomic.LongAdder;
  * keys, data shaping, SSE-S3 encryption, and HTTP-client tuning.
  */
 public class MinIO implements Storage<byte[]> {
+    static final int RESPONSE_BUFFER_BYTES = 64 * 1024;
+
     private static final String ACCESS_KEY_ENV = "SBK_S3_ACCESS_KEY";
     private static final String SECRET_KEY_ENV = "SBK_S3_SECRET_KEY";
 
@@ -77,8 +80,6 @@ public class MinIO implements Storage<byte[]> {
     private static final long MAX_PART_SIZE = 5L * 1024 * 1024 * 1024;     // 5 GiB
     private static final int MAX_ASYNC_DEPTH = 1024;
     private static final int MAX_CONCURRENT_PARTS = 1024;
-    private static final long RESPONSE_BUFFER_BYTES = 64L * 1024;
-
     private MinIOConfig config;
     private MinioClient mclient;
     private MinioAsyncClient asyncClient;
@@ -130,8 +131,9 @@ public class MinIO implements Storage<byte[]> {
                 + " default: " + config.insecure);
 
         // Workload
-        params.addOption("write-operation", true, "Writer S3 operation [put|update|copy|delete|tag-set"
-                + "|tag-delete|bucket-create|bucket-delete], default: " + config.writeOperation);
+        params.addOption("write-operation", true, "Writer S3 operation [put|update|copy|delete"
+                + "|tag-set|tag-delete|bucket-create|bucket-delete], default: "
+                + config.writeOperation);
         params.addOption("read-operation", true, "Reader S3 operation [get|range-get|stat|tag-get|list"
                 + "|bucket-stat|bucket-list], default: " + config.readOperation);
         params.addOption("write-mix", true,
@@ -140,6 +142,9 @@ public class MinIO implements Storage<byte[]> {
         params.addOption("read-mix", true,
                 "Weighted reader operations, e.g. get=90,stat=10, default: '"
                         + nullToEmpty(config.readMix) + "'");
+        params.addOption("mixed-read-source", true,
+                "Mixed-run reader source [catalog|published], default: "
+                        + config.mixedReadSource);
         params.addOption("async", true, "Use bounded MinioAsyncClient operations, default: " + config.async);
         params.addOption("async-depth", true, "Maximum in-flight operations per worker, default: "
                 + config.asyncDepth);
@@ -158,11 +163,35 @@ public class MinIO implements Storage<byte[]> {
         params.addOption("range-offset", true, "Ranged GET byte offset, default: " + config.rangeOffset);
         params.addOption("range-length", true, "Ranged GET length (0 uses -size), default: "
                 + config.rangeLength);
-        params.addOption("list-max-keys", true, "Maximum objects consumed by each LIST operation, default: "
+        params.addOption("range-offset-distribution", true,
+                "Ranged GET offsets [fixed|sequential|random], default: "
+                        + config.rangeOffsetDistribution);
+        params.addOption("range-window-length", true,
+                "Selectable range-offset window bytes (0=object remainder), default: "
+                        + config.rangeWindowLength);
+        params.addOption("range-alignment", true,
+                "Generated range-offset alignment bytes, default: " + config.rangeAlignment);
+        params.addOption("list-max-keys", true, "S3 LIST response page size, default: "
                 + config.listMaxKeys);
+        params.addOption("list-max-entries", true,
+                "Maximum entries consumed by one LIST operation across pages, default: "
+                        + config.listMaxEntries);
         params.addOption("list-prefixes", true,
                 "Comma-separated LIST prefixes assigned across readers, default: '"
                         + nullToEmpty(config.listPrefixes) + "'");
+        params.addOption("list-start-after", true,
+                "Start listing after this key (V2 StartAfter; V1 marker), default: '"
+                        + nullToEmpty(config.listStartAfter) + "'");
+        params.addOption("list-delimiter", true,
+                "LIST delimiter (empty=recursive), default: '"
+                        + nullToEmpty(config.listDelimiter) + "'");
+        params.addOption("list-api-version", true,
+                "S3 LIST API version [1|2], default: " + config.listApiVersion);
+        params.addOption("list-fetch-owner", true,
+                "Request owner metadata in LIST responses, default: " + config.listFetchOwner);
+        params.addOption("list-include-user-metadata", true,
+                "Request user metadata in LIST responses, default: "
+                        + config.listIncludeUserMetadata);
         params.addOption("object-file", true,
                 "Local CSV object manifest key,size[,versionId], default: '"
                         + nullToEmpty(config.objectFile) + "'");
@@ -219,6 +248,14 @@ public class MinIO implements Storage<byte[]> {
                 "Total attempts for transient failures, default: " + config.retryMaxAttempts);
         params.addOption("retry-backoff-ms", true,
                 "Delay between retry attempts in ms, default: " + config.retryBackoffMs);
+        params.addOption("retry-strategy", true,
+                "Retry delay strategy [fixed|exponential], default: " + config.retryStrategy);
+        params.addOption("retry-max-backoff-ms", true,
+                "Maximum exponential retry delay ms (0=uncapped), default: "
+                        + config.retryMaxBackoffMs);
+        params.addOption("retry-jitter", true,
+                "Randomize retry delays to avoid synchronized retries, default: "
+                        + config.retryJitter);
         params.addOption("warmup-requests", true,
                 "Untimed requests using -warmup-operation before measurement, default: "
                         + config.warmupRequests);
@@ -228,6 +265,9 @@ public class MinIO implements Storage<byte[]> {
         params.addOption("endpoint-metrics", true,
                 "Collect completion totals by configured endpoint, default: "
                         + config.endpointMetrics);
+        params.addOption("endpoint-preflight", true,
+                "Validate [primary|all] configured endpoints before timing, default: "
+                        + config.endpointPreflight);
         params.addOption("partition-count", true,
                 "Distributed object partitions, default: " + config.partitionCount);
         params.addOption("partition-index", true,
@@ -290,6 +330,9 @@ public class MinIO implements Storage<byte[]> {
         }
         configuredWriteMix = S3OperationMix.parse(config.writeMix, writeOperation, true, 0);
         configuredReadMix = S3OperationMix.parse(config.readMix, readOperation, false, 0);
+        config.mixedReadSource = params.getOptionValue("mixed-read-source",
+                nullToEmpty(config.mixedReadSource));
+        S3MixedReadSource.parse(config.mixedReadSource);
         config.async = booleanOption(params, "async", config.async);
         config.asyncDepth = Integer.parseInt(params.getOptionValue("async-depth",
                 String.valueOf(config.asyncDepth)));
@@ -314,10 +357,22 @@ public class MinIO implements Storage<byte[]> {
                 String.valueOf(config.rangeOffset)));
         config.rangeLength = Long.parseLong(params.getOptionValue("range-length",
                 String.valueOf(config.rangeLength)));
+        config.rangeOffsetDistribution = params.getOptionValue("range-offset-distribution",
+                nullToEmpty(config.rangeOffsetDistribution));
+        config.rangeWindowLength = Long.parseLong(params.getOptionValue("range-window-length",
+                String.valueOf(config.rangeWindowLength)));
+        config.rangeAlignment = Long.parseLong(params.getOptionValue("range-alignment",
+                String.valueOf(config.rangeAlignment)));
         config.listMaxKeys = Integer.parseInt(params.getOptionValue("list-max-keys",
                 String.valueOf(config.listMaxKeys)));
-        if (config.rangeOffset < 0 || config.rangeLength < 0) {
-            throw new IllegalArgumentException("range-offset and range-length must not be negative");
+        config.listMaxEntries = Integer.parseInt(params.getOptionValue("list-max-entries",
+                String.valueOf(config.listMaxEntries)));
+        if (config.rangeOffset < 0 || config.rangeLength < 0 || config.rangeWindowLength < 0) {
+            throw new IllegalArgumentException(
+                    "range-offset, range-length, and range-window-length must not be negative");
+        }
+        if (config.rangeAlignment < 1) {
+            throw new IllegalArgumentException("range-alignment must be positive");
         }
         if (config.rangeLength > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("range-length must not exceed "
@@ -326,8 +381,31 @@ public class MinIO implements Storage<byte[]> {
         if (config.listMaxKeys < 1 || config.listMaxKeys > 1000) {
             throw new IllegalArgumentException("list-max-keys must be between 1 and 1000");
         }
+        if (config.listMaxEntries < 1) {
+            throw new IllegalArgumentException("list-max-entries must be positive");
+        }
+        new S3RangeOffsetSelector(config.rangeOffsetDistribution, config.rangeOffset,
+                config.rangeWindowLength, config.rangeAlignment, 0);
         config.listPrefixes = params.getOptionValue("list-prefixes",
                 nullToEmpty(config.listPrefixes));
+        config.listStartAfter = params.getOptionValue("list-start-after",
+                nullToEmpty(config.listStartAfter));
+        config.listDelimiter = params.getOptionValue("list-delimiter",
+                nullToEmpty(config.listDelimiter));
+        config.listApiVersion = Integer.parseInt(params.getOptionValue("list-api-version",
+                String.valueOf(config.listApiVersion)));
+        config.listFetchOwner = booleanOption(params, "list-fetch-owner",
+                config.listFetchOwner);
+        config.listIncludeUserMetadata = booleanOption(params, "list-include-user-metadata",
+                config.listIncludeUserMetadata);
+        if (config.listApiVersion != 1 && config.listApiVersion != 2) {
+            throw new IllegalArgumentException("list-api-version must be 1 or 2");
+        }
+        if (config.listApiVersion == 1
+                && (config.listFetchOwner || config.listIncludeUserMetadata)) {
+            throw new IllegalArgumentException("list-fetch-owner and list-include-user-metadata "
+                    + "require list-api-version 2");
+        }
         config.objectFile = params.getOptionValue("object-file", nullToEmpty(config.objectFile));
         config.catalogMaxObjects = Integer.parseInt(params.getOptionValue("catalog-max-objects",
                 String.valueOf(config.catalogMaxObjects)));
@@ -359,7 +437,6 @@ public class MinIO implements Storage<byte[]> {
             throw new IllegalArgumentException(
                     "mpu-concurrent-parts greater than 1 requires a non-zero part-size");
         }
-
         // Checksum
         config.checksumAlgorithm = params.getOptionValue("checksum", nullToEmpty(config.checksumAlgorithm));
         // Validate (throws IllegalArgumentException for bad input)
@@ -406,23 +483,32 @@ public class MinIO implements Storage<byte[]> {
                 String.valueOf(config.retryMaxAttempts)));
         config.retryBackoffMs = Long.parseLong(params.getOptionValue("retry-backoff-ms",
                 String.valueOf(config.retryBackoffMs)));
-        if (config.retryMaxAttempts < 1 || config.retryBackoffMs < 0) {
+        config.retryStrategy = params.getOptionValue("retry-strategy",
+                nullToEmpty(config.retryStrategy));
+        config.retryMaxBackoffMs = Long.parseLong(params.getOptionValue("retry-max-backoff-ms",
+                String.valueOf(config.retryMaxBackoffMs)));
+        config.retryJitter = booleanOption(params, "retry-jitter", config.retryJitter);
+        if (config.retryMaxAttempts < 1 || config.retryBackoffMs < 0
+                || config.retryMaxBackoffMs < 0) {
             throw new IllegalArgumentException(
-                    "retry-max-attempts must be positive and retry-backoff-ms non-negative");
+                    "retry-max-attempts must be positive and retry delays non-negative");
         }
+        S3RetryPolicy.Strategy.parse(config.retryStrategy);
         config.warmupRequests = Integer.parseInt(params.getOptionValue("warmup-requests",
                 String.valueOf(config.warmupRequests)));
         if (config.warmupRequests < 0) {
             throw new IllegalArgumentException("warmup-requests must not be negative");
         }
         config.warmupOperation = params.getOptionValue("warmup-operation",
-                nullToEmpty(config.warmupOperation)).trim().toLowerCase(java.util.Locale.ROOT);
+                nullToEmpty(config.warmupOperation)).trim().toLowerCase(Locale.ROOT);
         if (!List.of("connection", "put", "get", "put-get")
                 .contains(config.warmupOperation)) {
             throw new IllegalArgumentException(
                     "warmup-operation must be connection, put, get, or put-get");
         }
         config.endpointMetrics = booleanOption(params, "endpoint-metrics", config.endpointMetrics);
+        config.endpointPreflight = EndpointPreflight.parse(params.getOptionValue(
+                "endpoint-preflight", nullToEmpty(config.endpointPreflight))).optionValue;
         config.partitionCount = Integer.parseInt(params.getOptionValue("partition-count",
                 String.valueOf(config.partitionCount)));
         config.partitionIndex = Integer.parseInt(params.getOptionValue("partition-index",
@@ -503,6 +589,8 @@ public class MinIO implements Storage<byte[]> {
                     configuredClient.ignoreCertCheck();
                 }
             }
+
+            preflightEndpoints(endpoints);
 
             if (!usesMainBucket(params)) {
                 objectCatalog = new S3ObjectCatalog(Collections.emptyList());
@@ -597,9 +685,7 @@ public class MinIO implements Storage<byte[]> {
     private boolean requiresObjectCatalog(ParameterOptions params) {
         boolean writerNeedsObjects = params.getWritersCount() > 0
                 && configuredWriteMix.requiresObjectCatalog();
-        boolean mixedPutRead = params.getWritersCount() > 0 && params.getReadersCount() > 0
-                && configuredWriteMix.contains(S3Operation.PUT)
-                && configuredReadMix.requiresObjectCatalog();
+        boolean mixedPutRead = usesPublishedReads(params);
         boolean readerNeedsStartupObjects = params.getReadersCount() > 0
                 && configuredReadMix.requiresObjectCatalog() && !mixedPutRead;
         return writerNeedsObjects || readerNeedsStartupObjects;
@@ -610,9 +696,7 @@ public class MinIO implements Storage<byte[]> {
                 && configuredWriteMix.requiresObjectCatalog();
         boolean readerNeedsObjects = params.getReadersCount() > 0
                 && configuredReadMix.requiresObjectCatalog();
-        boolean mixedPutRead = params.getWritersCount() > 0 && params.getReadersCount() > 0
-                && configuredWriteMix.contains(S3Operation.PUT)
-                && configuredReadMix.requiresObjectCatalog();
+        boolean mixedPutRead = usesPublishedReads(params);
         if (objectCatalog.size() == 0
                 && (writerNeedsObjects || (readerNeedsObjects && !mixedPutRead))) {
             throw new IOException("S3 " + (writerNeedsObjects ? writeOperation : readOperation)
@@ -652,7 +736,7 @@ public class MinIO implements Storage<byte[]> {
                     + " bucket-delete targets, but -bucket-targets contains "
                     + bucketTargets.size());
         }
-        boolean publishedReads = params.getWritersCount() > 0 && params.getReadersCount() > 0
+        boolean publishedReads = usesPublishedReads(params)
                 && (configuredWriteMix.contains(S3Operation.PUT)
                 || configuredWriteMix.contains(S3Operation.COPY));
         if (!publishedReads) {
@@ -686,6 +770,34 @@ public class MinIO implements Storage<byte[]> {
                     mix.countOccurrences(operation, workerRecords, worker));
         }
         return count;
+    }
+
+    private boolean usesPublishedReads(ParameterOptions params) {
+        return params.getWritersCount() > 0 && params.getReadersCount() > 0
+                && S3MixedReadSource.parse(config.mixedReadSource) == S3MixedReadSource.PUBLISHED
+                && (configuredWriteMix.contains(S3Operation.PUT)
+                || configuredWriteMix.contains(S3Operation.COPY))
+                && configuredReadMix.requiresObjectCatalog();
+    }
+
+    private void preflightEndpoints(List<String> endpoints) throws Exception {
+        if (EndpointPreflight.parse(config.endpointPreflight) != EndpointPreflight.ALL) {
+            return;
+        }
+        BucketExistsArgs args = BucketExistsArgs.builder().bucket(config.bucketName).build();
+        Printer.log.info("Validating all " + endpoints.size() + " configured S3 endpoints");
+        for (int index = 0; index < endpoints.size(); index++) {
+            try {
+                if (asyncClients.isEmpty()) {
+                    clients.get(index).bucketExists(args);
+                } else {
+                    asyncClients.get(index).bucketExists(args).get();
+                }
+            } catch (Exception ex) {
+                throw new IOException("S3 endpoint preflight failed for '"
+                        + endpoints.get(index) + "': " + explain(ex), ex);
+            }
+        }
     }
 
     private S3ObjectCatalog loadObjectCatalog() throws Exception {
@@ -887,6 +999,7 @@ public class MinIO implements Storage<byte[]> {
         values.put("readOperation", readOperation.toString());
         values.put("writeMix", nullToEmpty(config.writeMix));
         values.put("readMix", nullToEmpty(config.readMix));
+        values.put("mixedReadSource", config.mixedReadSource);
         values.put("writers", params.getWritersCount());
         values.put("readers", params.getReadersCount());
         values.put("seconds", params.getTotalSecondsToRun());
@@ -896,8 +1009,17 @@ public class MinIO implements Storage<byte[]> {
         values.put("copyPrefix", nullToEmpty(config.copyPrefix));
         values.put("rangeOffset", config.rangeOffset);
         values.put("rangeLength", config.rangeLength);
+        values.put("rangeOffsetDistribution", config.rangeOffsetDistribution);
+        values.put("rangeWindowLength", config.rangeWindowLength);
+        values.put("rangeAlignment", config.rangeAlignment);
         values.put("listMaxKeys", config.listMaxKeys);
+        values.put("listMaxEntries", config.listMaxEntries);
         values.put("listPrefixes", parseList(config.listPrefixes));
+        values.put("listStartAfter", config.listStartAfter);
+        values.put("listDelimiter", config.listDelimiter);
+        values.put("listApiVersion", config.listApiVersion);
+        values.put("listFetchOwner", config.listFetchOwner);
+        values.put("listIncludeUserMetadata", config.listIncludeUserMetadata);
         values.put("catalogMaxObjects", config.catalogMaxObjects);
         values.put("objectSizeDistribution", config.objectSizeDistribution);
         values.put("keyDistribution", config.keyDistribution);
@@ -913,9 +1035,13 @@ public class MinIO implements Storage<byte[]> {
         values.put("verifyReadSize", config.verifyReadSize);
         values.put("retryMaxAttempts", config.retryMaxAttempts);
         values.put("retryBackoffMs", config.retryBackoffMs);
+        values.put("retryStrategy", config.retryStrategy);
+        values.put("retryMaxBackoffMs", config.retryMaxBackoffMs);
+        values.put("retryJitter", config.retryJitter);
         values.put("warmupRequests", config.warmupRequests);
         values.put("warmupOperation", config.warmupOperation);
         values.put("endpointMetrics", config.endpointMetrics);
+        values.put("endpointPreflight", config.endpointPreflight);
         values.put("partitionCount", config.partitionCount);
         values.put("partitionIndex", config.partitionIndex);
         values.put("partitionByPrefix", config.partitionByPrefix);
@@ -1299,6 +1425,27 @@ public class MinIO implements Storage<byte[]> {
 
     static String effectiveRegion(MinIOConfig config) {
         return config.region == null || config.region.isEmpty() ? "us-east-1" : config.region;
+    }
+
+    private enum EndpointPreflight {
+        PRIMARY("primary"),
+        ALL("all");
+
+        private final String optionValue;
+
+        EndpointPreflight(String optionValue) {
+            this.optionValue = optionValue;
+        }
+
+        static EndpointPreflight parse(String value) {
+            String normalized = value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
+            for (EndpointPreflight selection : values()) {
+                if (selection.optionValue.equals(normalized)) {
+                    return selection;
+                }
+            }
+            throw new IllegalArgumentException("endpoint-preflight must be primary or all");
+        }
     }
 
     private int globalAsyncLimit() {

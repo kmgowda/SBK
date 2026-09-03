@@ -64,7 +64,18 @@ public class MinIOOptionsTest {
                 "-object-size-distribution", "weighted:64=3,1024=1",
                 "-key-distribution", "hashed", "-partition-count", "2",
                 "-partition-index", "1", "-partition-by-prefix", "true",
-                "-warmup-operation", "put-get", "-endpoint-metrics", "true"));
+                "-warmup-operation", "put-get", "-endpoint-metrics", "true",
+                "-retry-max-attempts", "4", "-retry-backoff-ms", "10",
+                "-retry-strategy", "exponential", "-retry-max-backoff-ms", "1000",
+                "-retry-jitter", "true", "-endpoint-preflight", "all"));
+        assertDoesNotThrow(() -> parse("-readers", "1", "-size", "4096", "-seconds", "1",
+                "-read-operation", "range-get", "-range-offset", "1024",
+                "-range-length", "1024", "-range-offset-distribution", "random",
+                "-range-window-length", "8192", "-range-alignment", "4096",
+                "-list-max-keys", "100", "-list-max-entries", "10000",
+                "-list-api-version", "2", "-list-start-after", "marker",
+                "-list-delimiter", "/", "-list-fetch-owner", "true",
+                "-list-include-user-metadata", "true", "-mixed-read-source", "catalog"));
         assertThrows(IllegalArgumentException.class,
                 () -> parse("-writers", "1", "-size", "100", "-seconds", "1",
                         "-write-mix", "put=0"));
@@ -128,6 +139,21 @@ public class MinIOOptionsTest {
         assertThrows(IllegalArgumentException.class,
                 () -> parse("-writers", "1", "-size", "100", "-seconds", "1",
                         "-write-mix", "put=1,put=2"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-readers", "1", "-size", "100", "-seconds", "1",
+                        "-range-offset-distribution", "zipf"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-readers", "1", "-size", "100", "-seconds", "1",
+                        "-list-api-version", "3"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-readers", "1", "-size", "100", "-seconds", "1",
+                        "-list-api-version", "1", "-list-fetch-owner", "true"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-readers", "1", "-size", "100", "-seconds", "1",
+                        "-endpoint-preflight", "some"));
+        assertThrows(IllegalArgumentException.class,
+                () -> parse("-readers", "1", "-size", "100", "-seconds", "1",
+                        "-retry-strategy", "linear"));
     }
 
     @Test

@@ -117,6 +117,8 @@ public class MinIOWriter implements Writer<byte[]> {
         objectTags = parseTags(config.taggingTags);
         sse = config.sseEnabled ? new ServerSideEncryptionS3() : null;
         retryPolicy = new S3RetryPolicy(config.retryMaxAttempts, config.retryBackoffMs,
+                S3RetryPolicy.Strategy.parse(config.retryStrategy), config.retryMaxBackoffMs,
+                config.retryJitter,
                 () -> {
                     retryCount.increment();
                     if (endpointMetrics != null) {
