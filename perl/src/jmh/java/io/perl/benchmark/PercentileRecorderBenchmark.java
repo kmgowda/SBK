@@ -26,9 +26,11 @@ import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Timeout;
 import org.openjdk.jmh.annotations.Warmup;
 
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,6 +49,11 @@ import java.util.concurrent.TimeUnit;
 public class PercentileRecorderBenchmark {
     private static final long BASE_LATENCY_NS = 1_000_000L;
     private static final long MAX_TRACKABLE_LATENCY_NS = 180_000_000_000L;
+    private static final int UPDATE_SAMPLE_COUNT = 65_536;
+    private static final int UPDATE_SAMPLE_MASK = UPDATE_SAMPLE_COUNT - 1;
+    private static final long DATA_SEED = 0x5B6C_7D8E_9F01_2345L;
+    private static final double LOGNORMAL_RANGE_DIVISOR = 64.0;
+    private static final double LOGNORMAL_SIGMA = 1.5;
     private static final int HDR_SIGNIFICANT_DIGITS =
             LatencyConfig.HDR_SIGNIFICANT_DIGITS;
     private static final double[] PERCENTILE_FRACTIONS =
@@ -54,22 +61,38 @@ public class PercentileRecorderBenchmark {
     private static final double[] PERCENTILE_PERCENTAGES =
             new double[]{50.0, 90.0, 99.0, 99.9, 99.99};
 
+    /** Deterministic input shapes used by every recorder. */
+    public enum Distribution {
+        /** Ordered dense values retained as a prefetch-friendly baseline. */
+        SEQUENTIAL,
+        /** Lognormal values clustered near the mode with a sparse long tail. */
+        CLUSTERED_LOGNORMAL
+    }
+
     /** Thread-private state for isolated frequency updates. */
     @State(Scope.Thread)
     public static class UpdateState {
-        /** Number of distinct latency values repeatedly recorded. */
-        @Param({"4096"})
+        /** Number of addressable latency slots in the recorder range. */
+        @Param({"4096", "262144", "4194304"})
         public int distinctLatencies;
+
+        /** Shape of the deterministic latency input stream. */
+        @Param({"SEQUENTIAL", "CLUSTERED_LOGNORMAL"})
+        public Distribution distribution;
 
         private ArrayLatencyRecorder array;
         private LongHashMapLatencyRecorder primitive;
         private Histogram histogram;
-        private long arraySequence;
-        private long primitiveSequence;
-        private long histogramSequence;
+        private LatencyPercentiles arrayPercentiles;
+        private LatencyPercentiles primitivePercentiles;
+        private final Random inputRandom = new Random(DATA_SEED);
+        private long[] latencies;
+        private int arrayIndex;
+        private int primitiveIndex;
+        private int histogramIndex;
 
-        /** Creates empty recorders before each measurement iteration. */
-        @Setup(Level.Iteration)
+        /** Creates reusable recorders and the shared input before each trial. */
+        @Setup(Level.Trial)
         public void setUp() {
             final long highLatency = BASE_LATENCY_NS
                     + distinctLatencies - 1L;
@@ -82,9 +105,29 @@ public class PercentileRecorderBenchmark {
                     64);
             histogram = new Histogram(MAX_TRACKABLE_LATENCY_NS,
                     HDR_SIGNIFICANT_DIGITS);
-            arraySequence = 0;
-            primitiveSequence = 0;
-            histogramSequence = 0;
+            arrayPercentiles = new LatencyPercentiles(PERCENTILE_FRACTIONS);
+            primitivePercentiles = new LatencyPercentiles(
+                    PERCENTILE_FRACTIONS);
+            latencies = createLatencies(UPDATE_SAMPLE_COUNT,
+                    distinctLatencies, distribution, inputRandom);
+        }
+
+        /** Restarts each recorder at the beginning of the shared input. */
+        @Setup(Level.Iteration)
+        public void restartInput() {
+            arrayIndex = 0;
+            primitiveIndex = 0;
+            histogramIndex = 0;
+        }
+
+        /** Clears accumulated frequencies outside the measured update loop. */
+        @TearDown(Level.Iteration)
+        public void clearRecorders() {
+            array.copyPercentiles(arrayPercentiles, null);
+            array.reset(0);
+            primitive.copyPercentiles(primitivePercentiles, null);
+            primitive.reset(0);
+            histogram.reset();
         }
     }
 
@@ -95,29 +138,28 @@ public class PercentileRecorderBenchmark {
         @Param({"65536"})
         public int observations;
 
-        /** Number of distinct latency values represented by the observations. */
-        @Param({"4096"})
+        /** Number of addressable latency slots in the recorder range. */
+        @Param({"4096", "262144", "4194304"})
         public int distinctLatencies;
+
+        /** Shape of the deterministic latency input stream. */
+        @Param({"SEQUENTIAL", "CLUSTERED_LOGNORMAL"})
+        public Distribution distribution;
 
         private ArrayLatencyRecorder array;
         private LongHashMapLatencyRecorder primitive;
         private Histogram histogram;
         private LatencyPercentiles arrayPercentiles;
         private LatencyPercentiles primitivePercentiles;
+        private final Random inputRandom = new Random(DATA_SEED);
         private long[] latencies;
 
         /**
          * Creates reusable recorders and the shared deterministic dataset.
          *
-         * @throws IllegalArgumentException when the distinct-value count is
-         *                                  not a power of two
          */
         @Setup(Level.Trial)
         public void setUp() {
-            if (Integer.bitCount(distinctLatencies) != 1) {
-                throw new IllegalArgumentException(
-                        "distinctLatencies must be a power of two");
-            }
             final long highLatency = BASE_LATENCY_NS
                     + distinctLatencies - 1L;
             array = new ArrayLatencyRecorder(BASE_LATENCY_NS, highLatency,
@@ -133,14 +175,8 @@ public class PercentileRecorderBenchmark {
                     PERCENTILE_FRACTIONS);
             primitivePercentiles = new LatencyPercentiles(
                     PERCENTILE_FRACTIONS);
-            latencies = new long[observations];
-            final int mask = distinctLatencies - 1;
-            for (int index = 0; index < observations; index++) {
-                // Multiplication by an odd number permutes every power-of-two
-                // range before repeating and avoids an already sorted input.
-                latencies[index] = BASE_LATENCY_NS
-                        + ((index * 2_653) & mask);
-            }
+            latencies = createLatencies(observations, distinctLatencies,
+                    distribution, inputRandom);
         }
     }
 
@@ -153,8 +189,8 @@ public class PercentileRecorderBenchmark {
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.SECONDS)
     public void arrayFrequencyUpdate(UpdateState state) {
-        final long latency = BASE_LATENCY_NS
-                + state.arraySequence++ % state.distinctLatencies;
+        final long latency = state.latencies[
+                state.arrayIndex++ & UPDATE_SAMPLE_MASK];
         state.array.reportLatency(latency, 1);
     }
 
@@ -167,8 +203,8 @@ public class PercentileRecorderBenchmark {
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.SECONDS)
     public void primitiveFrequencyUpdate(UpdateState state) {
-        final long latency = BASE_LATENCY_NS
-                + state.primitiveSequence++ % state.distinctLatencies;
+        final long latency = state.latencies[
+                state.primitiveIndex++ & UPDATE_SAMPLE_MASK];
         state.primitive.reportLatency(latency, 1);
     }
 
@@ -181,8 +217,8 @@ public class PercentileRecorderBenchmark {
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.SECONDS)
     public void hdrFrequencyUpdate(UpdateState state) {
-        final long latency = BASE_LATENCY_NS
-                + state.histogramSequence++ % state.distinctLatencies;
+        final long latency = state.latencies[
+                state.histogramIndex++ & UPDATE_SAMPLE_MASK];
         state.histogram.recordValue(latency);
     }
 
@@ -252,5 +288,35 @@ public class PercentileRecorderBenchmark {
             result = 31 * result + value;
         }
         return result;
+    }
+
+    private static long[] createLatencies(int observations,
+                                          int distinctLatencies,
+                                          Distribution distribution,
+                                          Random random) {
+        if (distinctLatencies <= 0) {
+            throw new IllegalArgumentException(
+                    "distinctLatencies must be positive");
+        }
+        final long[] values = new long[observations];
+        if (distribution == Distribution.SEQUENTIAL) {
+            for (int index = 0; index < observations; index++) {
+                values[index] = BASE_LATENCY_NS
+                        + index % distinctLatencies;
+            }
+            return values;
+        }
+
+        final double median = Math.max(1.0,
+                distinctLatencies / LOGNORMAL_RANGE_DIVISOR);
+        final double location = Math.log(median);
+        for (int index = 0; index < observations; index++) {
+            final double sample = Math.exp(location
+                    + LOGNORMAL_SIGMA * random.nextGaussian());
+            final long offset = Math.min(distinctLatencies - 1L,
+                    Math.max(0L, Math.round(sample) - 1L));
+            values[index] = BASE_LATENCY_NS + offset;
+        }
+        return values;
     }
 }
