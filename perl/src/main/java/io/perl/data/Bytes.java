@@ -25,7 +25,7 @@ public final class Bytes {
     final public static int BYTES_PER_MB = BYTES_PER_KB * BYTES_PER_KB;
 
     /** Number of bytes per gigabyte. */
-    final public static long BYTES_PER_GB = ((long) BYTES_PER_MB) * BYTES_PER_MB;
+    final public static long BYTES_PER_GB = ((long) BYTES_PER_MB) * BYTES_PER_KB;
 
     /** Creates a byte-size conversion helper. */
     public Bytes() {
