@@ -241,8 +241,9 @@ final class RuntimeLeaseManager implements RuntimeLeaseController {
         synchronized (stateLock) {
             heartbeatsPaused = false;
         }
+        final ScheduledFuture<?> scheduledHeartbeat;
         try {
-            heartbeatTask = scheduler.scheduleWithFixedDelay(this::refreshLeases,
+            scheduledHeartbeat = scheduler.scheduleWithFixedDelay(this::refreshLeases,
                     intervalSeconds, intervalSeconds, TimeUnit.SECONDS);
         } catch (RejectedExecutionException exception) {
             if (!scheduler.isShutdown()) {
@@ -253,15 +254,25 @@ final class RuntimeLeaseManager implements RuntimeLeaseController {
             }
             return;
         }
+        synchronized (stateLock) {
+            if (heartbeatsPaused) {
+                scheduledHeartbeat.cancel(false);
+                return;
+            }
+            heartbeatTask = scheduledHeartbeat;
+        }
         Printer.log.info("SBK-GEM: Managed runtime leases will be refreshed every {} second(s)", intervalSeconds);
     }
 
     private void pauseHeartbeats() throws InterruptedException, ExecutionException, IOException {
+        final ScheduledFuture<?> task;
         synchronized (stateLock) {
             heartbeatsPaused = true;
+            task = heartbeatTask;
+            heartbeatTask = null;
         }
-        if (heartbeatTask != null) {
-            heartbeatTask.cancel(false);
+        if (task != null) {
+            task.cancel(false);
         }
         final CompletableFuture<?>[] heartbeats = new CompletableFuture<?>[nodes.size()];
         synchronized (stateLock) {

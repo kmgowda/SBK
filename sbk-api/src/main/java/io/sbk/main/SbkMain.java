@@ -46,7 +46,10 @@ public abstract class SbkMain {
             System.exit(ExitCode.FAILURE);
         } catch (UnrecognizedOptionException ex) {
             System.exit(ExitCode.INVALID_ARGUMENT);
-        } catch (ParseException | IllegalArgumentException | IOException | TimeoutException | InterruptedException |
+        } catch (ParseException | IllegalArgumentException ex) {
+            System.err.println(ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage());
+            System.exit(ExitCode.INVALID_ARGUMENT);
+        } catch (IOException | TimeoutException | InterruptedException |
                 ExecutionException | InstantiationException | ClassNotFoundException | InvocationTargetException |
                 NoSuchMethodException | IllegalAccessException ex) {
             ex.printStackTrace();

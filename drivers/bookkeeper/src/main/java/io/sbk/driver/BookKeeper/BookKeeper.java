@@ -14,6 +14,7 @@ import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.params.InputOptions;
+import io.sbk.utils.SbkUtils;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.distributedlog.DistributedLogConfiguration;
@@ -73,7 +74,7 @@ public class BookKeeper implements Storage<byte[]> {
         conf.loadConf(propsConf);
         conf.setReadAheadWaitTime(params.getTimeoutMS());
         if (params.hasOptionValue("recreate")) {
-            recreate = Boolean.parseBoolean(params.getOptionValue("recreate"));
+            recreate = SbkUtils.parseBooleanOption("recreate", params.getOptionValue("recreate"));
         } else {
             recreate = params.getWritersCount() > 0 && params.getReadersCount() > 0;
         }

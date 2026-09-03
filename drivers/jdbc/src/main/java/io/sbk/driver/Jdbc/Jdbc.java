@@ -21,6 +21,7 @@ import io.sbk.data.DataType;
 import io.sbk.data.impl.SbkString;
 import io.sbk.params.InputOptions;
 import io.sbk.system.Printer;
+import io.sbk.utils.SbkUtils;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -179,8 +180,10 @@ public class Jdbc implements Storage<String> {
         config.url = params.getOptionValue("url", config.url);
         config.user = params.getOptionValue("user", config.user);
         config.password = params.getOptionValue("password", config.password);
-        config.reCreate = Boolean.parseBoolean(params.getOptionValue("recreate", String.valueOf(config.reCreate)));
-        config.createDb = Boolean.parseBoolean(params.getOptionValue("recreate", String.valueOf(config.createDb)));
+        config.reCreate = SbkUtils.parseBooleanOption("recreate",
+                params.getOptionValue("recreate", String.valueOf(config.reCreate)));
+        config.createDb = SbkUtils.parseBooleanOption("createdb",
+                params.getOptionValue("createdb", String.valueOf(config.createDb)));
     }
 
 

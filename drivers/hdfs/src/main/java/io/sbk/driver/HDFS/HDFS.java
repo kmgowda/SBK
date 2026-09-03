@@ -14,6 +14,7 @@ import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.params.InputOptions;
+import io.sbk.utils.SbkUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -46,7 +47,7 @@ public class HDFS implements Storage<byte[]> {
         fsType = params.getOptionValue("fs", FSTYPE);
         fileName = params.getOptionValue("file", null);
         uri = params.getOptionValue("uri", null);
-        recreate = Boolean.parseBoolean(params.getOptionValue("recreate", "false"));
+        recreate = SbkUtils.parseBooleanOption("recreate", params.getOptionValue("recreate", "false"));
 
         if (uri == null) {
             throw new IllegalArgumentException("Error: Must specify URI IP");

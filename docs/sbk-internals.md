@@ -1239,7 +1239,7 @@ public SbkBenchmark(ParameterOptions params, Storage<Object> storage,
             + runtimeConfig.workerExecutorReserve;
     this.executor = switch (params.getThreadType()) {
         case ForkJoin -> new ForkJoinPool(threadCount);
-        case Virtual  -> Executors.newFixedThreadPool(threadCount, Thread.ofVirtual().factory());
+        case Virtual  -> Executors.newVirtualThreadPerTaskExecutor();
         default       -> Executors.newFixedThreadPool(threadCount);
     };
     this.perlExecutor = new ForkJoinPool(runtimeConfig.perlExecutorParallelism);
@@ -2300,9 +2300,9 @@ three modes:
 
 | CLI | Executor | Best fit |
 |---|---|---|
-| `-thread p` | Fixed platform-thread pool | Default; predictable OS-thread behavior. |
+| `-thread p` | Fixed platform-thread pool | Predictable OS-thread behavior. |
 | `-thread f` | `ForkJoinPool` | CPU-oriented or fork/join-friendly work. |
-| `-thread v` | Fixed executor creating virtual threads | Many blocking I/O tasks, subject to driver behavior and JVM carrier availability. |
+| `-thread v` | Virtual thread per task (default) | Many blocking I/O tasks, subject to driver behavior and JVM carrier availability. |
 
 Increasing `-writers` or `-readers` exposes more independent operations to the
 JVM and storage client. It can use additional CPU cores and outstanding I/O

@@ -192,33 +192,40 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     }
 
     @Override
-    public synchronized void registerClient(io.sbp.grpc.Config request,
-                                            @NotNull io.grpc.stub.StreamObserver<io.sbp.grpc.ClientID>
-                                                    responseObserver) {
-        if (registrationFailure != null) {
-            responseObserver.onError(Status.ABORTED.withDescription(registrationFailure).asRuntimeException());
-            return;
+    public void registerClient(io.sbp.grpc.Config request,
+                               @NotNull io.grpc.stub.StreamObserver<io.sbp.grpc.ClientID> responseObserver) {
+        ClientID completedClientID = null;
+        Status failure = null;
+        synchronized (this) {
+            if (registrationFailure != null) {
+                failure = Status.ABORTED.withDescription(registrationFailure);
+            } else {
+                final int registered = connections.incrementAndGet();
+                if (registered > params.getMaxConnections()) {
+                    connections.decrementAndGet();
+                    failure = Status.RESOURCE_EXHAUSTED.withDescription(
+                            "SBM maximum client connections reached: " + params.getMaxConnections());
+                } else {
+                    final ClientID clientID = ClientID.newBuilder().setId(registry.getID()).build();
+                    registeredClientIDs.add(clientID.getId());
+                    countConnections.incrementConnections();
+                    maximumRegisteredClients = Math.max(maximumRegisteredClients, registered);
+                    if (startReleased) {
+                        completedClientID = clientID;
+                    } else {
+                        pendingRegistrations.add(new PendingRegistration(responseObserver, clientID));
+                        if (registered >= params.getMaxConnections()) {
+                            startReady = true;
+                            notifyAll();
+                        }
+                    }
+                }
+            }
         }
-        final int registered = connections.incrementAndGet();
-        if (registered > params.getMaxConnections()) {
-            connections.decrementAndGet();
-            responseObserver.onError(Status.RESOURCE_EXHAUSTED
-                    .withDescription("SBM maximum client connections reached: " + params.getMaxConnections())
-                    .asRuntimeException());
-            return;
-        }
-        final ClientID clientID = ClientID.newBuilder().setId(registry.getID()).build();
-        registeredClientIDs.add(clientID.getId());
-        countConnections.incrementConnections();
-        maximumRegisteredClients = Math.max(maximumRegisteredClients, registered);
-        if (startReleased) {
-            completeRegistration(responseObserver, clientID);
-            return;
-        }
-        pendingRegistrations.add(new PendingRegistration(responseObserver, clientID));
-        if (registered >= params.getMaxConnections()) {
-            startReady = true;
-            notifyAll();
+        if (failure != null) {
+            responseObserver.onError(failure.asRuntimeException());
+        } else if (completedClientID != null) {
+            completeRegistration(responseObserver, completedClientID);
         }
     }
 
@@ -231,21 +238,27 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
      * @param reason host-tagged distributed-run failure
      * @return number of pending registrations failed
      */
-    public synchronized int abortPendingRegistrations(String reason) {
-        if (startReleased || registrationFailure != null) {
-            return 0;
+    public int abortPendingRegistrations(String reason) {
+        final List<PendingRegistration> abortedRegistrations;
+        synchronized (this) {
+            if (startReleased || registrationFailure != null) {
+                return 0;
+            }
+            registrationFailure = reason;
+            abortedRegistrations = List.copyOf(pendingRegistrations);
+            for (PendingRegistration registration : abortedRegistrations) {
+                registeredClientIDs.remove(registration.clientID().getId());
+                countConnections.decrementConnections();
+            }
+            connections.addAndGet(-abortedRegistrations.size());
+            pendingRegistrations.clear();
+            notifyAll();
         }
-        registrationFailure = reason;
         final Status status = Status.ABORTED.withDescription(reason);
-        final int aborted = pendingRegistrations.size();
-        for (PendingRegistration registration : pendingRegistrations) {
+        for (PendingRegistration registration : abortedRegistrations) {
             registration.observer().onError(status.asRuntimeException());
-            registeredClientIDs.remove(registration.clientID().getId());
-            countConnections.decrementConnections();
         }
-        connections.addAndGet(-aborted);
-        pendingRegistrations.clear();
-        notifyAll();
+        final int aborted = abortedRegistrations.size();
         return aborted;
     }
 
@@ -274,23 +287,27 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
      * @return number of coordinated clients released
      * @throws IllegalStateException when all expected clients have not registered
      */
-    public synchronized int releaseCoordinatedStart() {
-        if (registrationFailure != null) {
-            throw new IllegalStateException("SBM coordinated start was aborted: " + registrationFailure);
+    public int releaseCoordinatedStart() {
+        final List<PendingRegistration> releasedRegistrations;
+        synchronized (this) {
+            if (registrationFailure != null) {
+                throw new IllegalStateException("SBM coordinated start was aborted: " + registrationFailure);
+            }
+            if (!startReady) {
+                throw new IllegalStateException("SBM coordinated start is not ready for release");
+            }
+            if (startReleased) {
+                return 0;
+            }
+            startReleased = true;
+            releasedRegistrations = List.copyOf(pendingRegistrations);
+            pendingRegistrations.clear();
+            notifyAll();
         }
-        if (!startReady) {
-            throw new IllegalStateException("SBM coordinated start is not ready for release");
-        }
-        if (startReleased) {
-            return 0;
-        }
-        startReleased = true;
-        final int released = pendingRegistrations.size();
-        for (PendingRegistration registration : pendingRegistrations) {
+        for (PendingRegistration registration : releasedRegistrations) {
             completeRegistration(registration.observer(), registration.clientID());
         }
-        pendingRegistrations.clear();
-        notifyAll();
+        final int released = releasedRegistrations.size();
         return released;
     }
 
@@ -319,36 +336,38 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
      * @param responseObserver acknowledgement observer
      */
     @Override
-    public synchronized void reportClientFailure(ClientFailure request,
-                                                  StreamObserver<Empty> responseObserver) {
+    public void reportClientFailure(ClientFailure request,
+                                    StreamObserver<Empty> responseObserver) {
         final long clientID = request.getClientID();
-        if (!registeredClientIDs.contains(clientID)) {
-            responseObserver.onError(Status.FAILED_PRECONDITION
-                    .withDescription("SBM terminal failure has an unregistered client ID")
-                    .asRuntimeException());
-            return;
+        Status failure = null;
+        boolean logFailure = false;
+        synchronized (this) {
+            if (!registeredClientIDs.contains(clientID)) {
+                failure = Status.FAILED_PRECONDITION
+                        .withDescription("SBM terminal failure has an unregistered client ID");
+            } else if (!isValidFailureText(request.getComponent(), SbpFailureLimits.COMPONENT_CHARACTERS)
+                    || !isValidFailureText(request.getMessage(), SbpFailureLimits.MESSAGE_CHARACTERS)) {
+                failure = Status.INVALID_ARGUMENT
+                        .withDescription("SBM terminal failure contains invalid or oversized text");
+            } else if (!clientFailures.containsKey(clientID)) {
+                if (clientFailures.size() >= params.getMaxConnections()) {
+                    failure = Status.RESOURCE_EXHAUSTED
+                            .withDescription("SBM terminal failure retention limit reached");
+                } else {
+                    clientFailures.put(clientID, request);
+                    logFailure = true;
+                }
+            }
         }
-        if (!isValidFailureText(request.getComponent(), SbpFailureLimits.COMPONENT_CHARACTERS)
-                || !isValidFailureText(request.getMessage(), SbpFailureLimits.MESSAGE_CHARACTERS)) {
-            responseObserver.onError(Status.INVALID_ARGUMENT
-                    .withDescription("SBM terminal failure contains invalid or oversized text")
-                    .asRuntimeException());
-            return;
-        }
-        if (clientFailures.containsKey(clientID)) {
+        if (failure != null) {
+            responseObserver.onError(failure.asRuntimeException());
+        } else {
+            if (logFailure) {
+                Printer.log.error("SBM received terminal failure from " + request.getComponent()
+                        + " client " + clientID + ": " + request.getMessage());
+            }
             acknowledge(responseObserver);
-            return;
         }
-        if (clientFailures.size() >= params.getMaxConnections()) {
-            responseObserver.onError(Status.RESOURCE_EXHAUSTED
-                    .withDescription("SBM terminal failure retention limit reached")
-                    .asRuntimeException());
-            return;
-        }
-        clientFailures.put(clientID, request);
-        Printer.log.error("SBM received terminal failure from " + request.getComponent()
-                + " client " + clientID + ": " + request.getMessage());
-        acknowledge(responseObserver);
     }
 
     /**
@@ -454,12 +473,14 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
     }
 
     @Override
-    public synchronized void closeClient(io.sbp.grpc.ClientID request,
-                                         io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+    public void closeClient(io.sbp.grpc.ClientID request,
+                            io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         // Decrement counters upon client disconnect and acknowledge
-        if (registeredClientIDs.remove(request.getId())) {
-            countConnections.decrementConnections();
-            connections.decrementAndGet();
+        synchronized (this) {
+            if (registeredClientIDs.remove(request.getId())) {
+                countConnections.decrementConnections();
+                connections.decrementAndGet();
+            }
         }
         if (responseObserver != null) {
             responseObserver.onNext(Empty.getDefaultInstance());

@@ -18,6 +18,7 @@ import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.params.InputOptions;
+import io.sbk.utils.SbkUtils;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.TopicConfig;
 import org.apache.rocketmq.tools.admin.DefaultMQAdminExt;
@@ -73,7 +74,7 @@ public class RocketMQ implements Storage<byte[]> {
         subscriptionName = topicName + getRandomString();
         clusterName = params.getOptionValue("cluster", DEFAULT_CLUSTER);
         partitions = Integer.parseInt(params.getOptionValue("partitions", "1"));
-        async = Boolean.parseBoolean(params.getOptionValue("async", "false"));
+        async = SbkUtils.parseBooleanOption("async", params.getOptionValue("async", "false"));
         final ObjectMapper mapper = new ObjectMapper(new JavaPropsFactory());
         try {
             rmqClientConfig = mapper.readValue(getClass().getClassLoader().getResourceAsStream(CONFIGFILE),

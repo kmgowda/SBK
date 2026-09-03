@@ -20,6 +20,7 @@ import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.params.InputOptions;
+import io.sbk.utils.SbkUtils;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -55,7 +56,8 @@ public class FoundationDB implements Storage<byte[]> {
     @Override
     public void parseArgs(final ParameterOptions params) throws IllegalArgumentException {
         config.cFile = params.getOptionValue("cfile", config.cFile);
-        config.multiClient = Boolean.parseBoolean(params.getOptionValue("multiclient", Boolean.toString(config.multiClient)));
+        config.multiClient = SbkUtils.parseBooleanOption("multiclient",
+                params.getOptionValue("multiclient", Boolean.toString(config.multiClient)));
     }
 
     @Override

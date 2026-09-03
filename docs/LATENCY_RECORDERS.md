@@ -40,9 +40,9 @@ exact nanosecond recorder:
 - `HashMapLatencyRecorder` is a sparse reference implementation backed by JDK
   `HashMap<Long, Long>`. It is retained for equivalence tests and performance
   comparison, but is no longer selected by the production builder.
-- `LongHashMapLatencyRecorder` is the production sparse implementation backed
-  by Eclipse Collections `LongLongHashMap`. It stores primitive keys and
-  counts, and reuses its percentile sorting buffer.
+- `LongHashMapLatencyRecorder` is the production sparse implementation backed by
+  Eclipse Collections `LongLongHashMap`. It stores primitive keys and counts,
+  and reuses its percentile sorting buffer.
 - `HybridPagedLatencyRecorder` is SBM's exact nanosecond aggregator. It keeps
   low-occupancy regions in sorted primitive arrays, promotes dense regions to
   counter pages, and sorts only active page identifiers when reporting.
@@ -732,9 +732,9 @@ Run:
 ```
 
 The second task runs `PercentileRecorderBenchmark`, an explicit comparison of
-PerL's dense-array and primitive-map exact recorders with HdrHistogram using
-PerL's production three-significant-digit setting. It reports two independent
-dimensions with the GC profiler enabled:
+PerL's dense-array, primitive-map, and hybrid-page exact recorders with
+HdrHistogram using PerL's production three-significant-digit setting. It
+reports two independent dimensions with the GC profiler enabled:
 
 - isolated frequency-update throughput and allocation; and
 - a complete 65,536-observation window containing recording, percentile
@@ -768,6 +768,24 @@ to obtain a bounded footprint, so the results have different precision
 semantics. The generated JSON evidence is written to
 `perl/build/reports/jmh/percentile-performance.json`.
 
+### 10.1 Production-selection decision
+
+The September 2026 JDK 25 matrix added `HybridPagedLatencyRecorder` to test
+whether PerL should replace its primitive-map fallback. It should not. With the
+clustered-lognormal workload, hybrid update throughput fell from 173.7 million
+operations/s at 4,096 slots to 43.5 million operations/s at 4,194,304 slots.
+The corresponding primitive-map results were 212.0 million and 83.3 million
+operations/s. At the widest range, the complete hybrid window also took
+2,635.8 microseconds versus 2,475.7 microseconds for the primitive map.
+
+Hybrid pages remain valuable for SBM's aggregated nanosecond workload, but
+the evidence does not support adding their extra page lookup and promotion
+work to every PerL record. `PerlBuilder` therefore keeps the array for a range
+that fits its configured budget and `LongHashMapLatencyRecorder` otherwise.
+This is a deliberate hot-path decision, not an unmeasured default. Revisit it
+only with a representative end-to-end PerL result as well as this isolated
+recorder matrix.
+
 The task:
 
 - builds with JDK 25;
@@ -787,7 +805,7 @@ Values are outside the small boxed-`Long` cache. It measures:
 2. complete 4,096-value record-and-extract windows;
 3. allocating versus reusable primitive key extraction for 65,536 keys.
 
-### 10.1 Environment
+### 10.2 Environment
 
 | Component | Measured value |
 |---|---|

@@ -11,6 +11,7 @@ package io.perl.benchmark;
 
 import io.perl.api.LatencyPercentiles;
 import io.perl.api.impl.ArrayLatencyRecorder;
+import io.perl.api.impl.HybridPagedLatencyRecorder;
 import io.perl.api.impl.LongHashMapLatencyRecorder;
 import io.perl.config.LatencyConfig;
 import io.time.NanoSeconds;
@@ -51,6 +52,9 @@ public class PercentileRecorderBenchmark {
     private static final long MAX_TRACKABLE_LATENCY_NS = 180_000_000_000L;
     private static final int UPDATE_SAMPLE_COUNT = 65_536;
     private static final int UPDATE_SAMPLE_MASK = UPDATE_SAMPLE_COUNT - 1;
+    private static final int RECORDER_MEMORY_MIB = 64;
+    private static final int HYBRID_PAGE_BITS = 8;
+    private static final int HYBRID_SPARSE_PAGE_ENTRIES = 32;
     private static final long DATA_SEED = 0x5B6C_7D8E_9F01_2345L;
     private static final double LOGNORMAL_RANGE_DIVISOR = 64.0;
     private static final double LOGNORMAL_SIGMA = 1.5;
@@ -82,13 +86,16 @@ public class PercentileRecorderBenchmark {
 
         private ArrayLatencyRecorder array;
         private LongHashMapLatencyRecorder primitive;
+        private HybridPagedLatencyRecorder hybrid;
         private Histogram histogram;
         private LatencyPercentiles arrayPercentiles;
         private LatencyPercentiles primitivePercentiles;
+        private LatencyPercentiles hybridPercentiles;
         private final Random inputRandom = new Random(DATA_SEED);
         private long[] latencies;
         private int arrayIndex;
         private int primitiveIndex;
+        private int hybridIndex;
         private int histogramIndex;
 
         /** Creates reusable recorders and the shared input before each trial. */
@@ -102,12 +109,19 @@ public class PercentileRecorderBenchmark {
             primitive = new LongHashMapLatencyRecorder(BASE_LATENCY_NS,
                     highLatency, Long.MAX_VALUE, Long.MAX_VALUE,
                     Long.MAX_VALUE, PERCENTILE_FRACTIONS, new NanoSeconds(),
-                    64);
+                    RECORDER_MEMORY_MIB);
+            hybrid = new HybridPagedLatencyRecorder(BASE_LATENCY_NS,
+                    highLatency, Long.MAX_VALUE, Long.MAX_VALUE,
+                    Long.MAX_VALUE, PERCENTILE_FRACTIONS, new NanoSeconds(),
+                    RECORDER_MEMORY_MIB, HYBRID_PAGE_BITS,
+                    HYBRID_SPARSE_PAGE_ENTRIES,
+                    HybridPagedLatencyRecorder.MemoryLimitPolicy.RELEASE_AFTER_WINDOW);
             histogram = new Histogram(MAX_TRACKABLE_LATENCY_NS,
                     HDR_SIGNIFICANT_DIGITS);
             arrayPercentiles = new LatencyPercentiles(PERCENTILE_FRACTIONS);
             primitivePercentiles = new LatencyPercentiles(
                     PERCENTILE_FRACTIONS);
+            hybridPercentiles = new LatencyPercentiles(PERCENTILE_FRACTIONS);
             latencies = createLatencies(UPDATE_SAMPLE_COUNT,
                     distinctLatencies, distribution, inputRandom);
         }
@@ -117,6 +131,7 @@ public class PercentileRecorderBenchmark {
         public void restartInput() {
             arrayIndex = 0;
             primitiveIndex = 0;
+            hybridIndex = 0;
             histogramIndex = 0;
         }
 
@@ -127,6 +142,8 @@ public class PercentileRecorderBenchmark {
             array.reset(0);
             primitive.copyPercentiles(primitivePercentiles, null);
             primitive.reset(0);
+            hybrid.copyPercentiles(hybridPercentiles, null);
+            hybrid.reset(0);
             histogram.reset();
         }
     }
@@ -148,9 +165,11 @@ public class PercentileRecorderBenchmark {
 
         private ArrayLatencyRecorder array;
         private LongHashMapLatencyRecorder primitive;
+        private HybridPagedLatencyRecorder hybrid;
         private Histogram histogram;
         private LatencyPercentiles arrayPercentiles;
         private LatencyPercentiles primitivePercentiles;
+        private LatencyPercentiles hybridPercentiles;
         private final Random inputRandom = new Random(DATA_SEED);
         private long[] latencies;
 
@@ -168,13 +187,20 @@ public class PercentileRecorderBenchmark {
             primitive = new LongHashMapLatencyRecorder(BASE_LATENCY_NS,
                     highLatency, Long.MAX_VALUE, Long.MAX_VALUE,
                     Long.MAX_VALUE, PERCENTILE_FRACTIONS, new NanoSeconds(),
-                    64);
+                    RECORDER_MEMORY_MIB);
+            hybrid = new HybridPagedLatencyRecorder(BASE_LATENCY_NS,
+                    highLatency, Long.MAX_VALUE, Long.MAX_VALUE,
+                    Long.MAX_VALUE, PERCENTILE_FRACTIONS, new NanoSeconds(),
+                    RECORDER_MEMORY_MIB, HYBRID_PAGE_BITS,
+                    HYBRID_SPARSE_PAGE_ENTRIES,
+                    HybridPagedLatencyRecorder.MemoryLimitPolicy.RELEASE_AFTER_WINDOW);
             histogram = new Histogram(MAX_TRACKABLE_LATENCY_NS,
                     HDR_SIGNIFICANT_DIGITS);
             arrayPercentiles = new LatencyPercentiles(
                     PERCENTILE_FRACTIONS);
             primitivePercentiles = new LatencyPercentiles(
                     PERCENTILE_FRACTIONS);
+            hybridPercentiles = new LatencyPercentiles(PERCENTILE_FRACTIONS);
             latencies = createLatencies(observations, distinctLatencies,
                     distribution, inputRandom);
         }
@@ -206,6 +232,20 @@ public class PercentileRecorderBenchmark {
         final long latency = state.latencies[
                 state.primitiveIndex++ & UPDATE_SAMPLE_MASK];
         state.primitive.reportLatency(latency, 1);
+    }
+
+    /**
+     * Measures one exact hybrid-page frequency update.
+     *
+     * @param state thread-private update state
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.Throughput)
+    @OutputTimeUnit(TimeUnit.SECONDS)
+    public void hybridFrequencyUpdate(UpdateState state) {
+        final long latency = state.latencies[
+                state.hybridIndex++ & UPDATE_SAMPLE_MASK];
+        state.hybrid.reportLatency(latency, 1);
     }
 
     /**
@@ -257,6 +297,25 @@ public class PercentileRecorderBenchmark {
         state.primitive.copyPercentiles(state.primitivePercentiles, null);
         final long result = checksum(state.primitivePercentiles.latencies);
         state.primitive.reset(0);
+        return result;
+    }
+
+    /**
+     * Measures an exact hybrid-page window including percentile extraction.
+     *
+     * @param state thread-private complete-window state
+     * @return checksum consuming the calculated percentile values
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    public long hybridPercentileWindow(WindowState state) {
+        for (long latency : state.latencies) {
+            state.hybrid.recordLatency(0, 1, 0, latency);
+        }
+        state.hybrid.copyPercentiles(state.hybridPercentiles, null);
+        final long result = checksum(state.hybridPercentiles.latencies);
+        state.hybrid.reset(0);
         return result;
     }
 

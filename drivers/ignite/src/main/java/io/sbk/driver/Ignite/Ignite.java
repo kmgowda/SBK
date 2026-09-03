@@ -18,6 +18,7 @@ import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.params.InputOptions;
+import io.sbk.utils.SbkUtils;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.client.ClientCache;
@@ -68,7 +69,8 @@ public class Ignite implements Storage<byte[]> {
         } else {
             config.cFile = null;
         }
-        config.isClient = Boolean.parseBoolean(params.getOptionValue("client", Boolean.toString(config.isClient)));
+        config.isClient = SbkUtils.parseBooleanOption("client",
+                params.getOptionValue("client", Boolean.toString(config.isClient)));
     }
 
     @Override

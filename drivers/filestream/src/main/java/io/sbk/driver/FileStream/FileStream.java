@@ -17,6 +17,7 @@ import io.sbk.api.DataWriter;
 import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.params.InputOptions;
+import io.sbk.utils.SbkUtils;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -56,9 +57,12 @@ public class FileStream implements Storage<byte[]> {
             throw new IllegalArgumentException("Specify either Writer or readers ; both are not allowed");
         }
         config.fileName = params.getOptionValue("file", config.fileName);
-        config.isAppend = Boolean.parseBoolean(params.getOptionValue("append", String.valueOf(config.isAppend)));
-        config.reCreate = Boolean.parseBoolean(params.getOptionValue("recreate", String.valueOf(config.reCreate)));
-        config.isBuffered = Boolean.parseBoolean(params.getOptionValue("buffer", String.valueOf(config.isBuffered)));
+        config.isAppend = SbkUtils.parseBooleanOption("append",
+                params.getOptionValue("append", String.valueOf(config.isAppend)));
+        config.reCreate = SbkUtils.parseBooleanOption("recreate",
+                params.getOptionValue("recreate", String.valueOf(config.reCreate)));
+        config.isBuffered = SbkUtils.parseBooleanOption("buffer",
+                params.getOptionValue("buffer", String.valueOf(config.isBuffered)));
     }
 
     @Override

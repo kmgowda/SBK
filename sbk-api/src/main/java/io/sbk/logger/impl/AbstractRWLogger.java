@@ -23,6 +23,7 @@ import io.sbk.logger.SetRW;
 import io.sbk.params.InputOptions;
 import io.sbk.params.ParsedOptions;
 import io.sbk.system.Printer;
+import io.sbk.utils.SbkUtils;
 import io.time.MicroSeconds;
 import io.time.MilliSeconds;
 import io.time.NanoSeconds;
@@ -220,8 +221,10 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         }
         setMinLatency(Long.parseLong(params.getOptionValue("minlatency", Long.toString(getMinLatency()))));
         setMaxLatency(Long.parseLong(params.getOptionValue("maxlatency", Long.toString(getMaxLatency()))));
-        isRequestWrites = Boolean.parseBoolean(params.getOptionValue("wq", Boolean.toString(isRequestWrites)));
-        isRequestReads = Boolean.parseBoolean(params.getOptionValue("rq", Boolean.toString(isRequestReads)));
+        isRequestWrites = SbkUtils.parseBooleanOption("wq",
+                params.getOptionValue("wq", Boolean.toString(isRequestWrites)));
+        isRequestReads = SbkUtils.parseBooleanOption("rq",
+                params.getOptionValue("rq", Boolean.toString(isRequestReads)));
         if (isRequestWrites) {
             maxWriterRequestIds = Integer.parseInt(params.getOptionValue("writers", "0"));
         }

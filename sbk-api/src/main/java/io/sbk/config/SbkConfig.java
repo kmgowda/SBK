@@ -123,7 +123,8 @@ public final class SbkConfig {
 
     private static void validatePerlConfig(PerlConfig config) {
         if (config.qPerWorker < PerlConfig.MIN_Q_PER_WORKER || config.maxQs < 0
-                || config.idleTimeoutSeconds < 1) {
+                || config.idleTimeoutSeconds < 1 || config.maxArraySizeMB < 0
+                || config.maxHashMapSizeMB < 1 || config.totalMaxHashMapSizeMB < 1) {
             throw new IllegalArgumentException("Invalid PerL defaults in " + PERL_CONFIG_FILE);
         }
     }

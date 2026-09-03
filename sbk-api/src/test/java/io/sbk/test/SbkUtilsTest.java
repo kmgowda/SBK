@@ -21,9 +21,19 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 public class SbkUtilsTest {
+
+    /** Parse valid boolean spellings and reject ambiguous values. */
+    @Test
+    public void parsesBooleanOptionsStrictly() {
+        assertTrue(SbkUtils.parseBooleanOption("flag", "TRUE"));
+        assertFalse(SbkUtils.parseBooleanOption("flag", "false"));
+        assertThrows(IllegalArgumentException.class,
+                () -> SbkUtils.parseBooleanOption("flag", "yes"));
+    }
 
     @Test
     public void testRemoveOptionArgsAndValues() {

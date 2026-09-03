@@ -425,11 +425,13 @@ tasks.register('percentilePerformanceTest') {
         combinations.each { params ->
             def arrayUpdate = result('arrayFrequencyUpdate', params)
             def primitiveUpdate = result('primitiveFrequencyUpdate', params)
+            def hybridUpdate = result('hybridFrequencyUpdate', params)
             def hdrUpdate = result('hdrFrequencyUpdate', params)
             def windowParams = params + [observations: '65536']
             def arrayWindow = result('arrayPercentileWindow', windowParams)
             def primitiveWindow = result('primitivePercentileWindow',
                     windowParams)
+            def hybridWindow = result('hybridPercentileWindow', windowParams)
             def hdrWindow = result('hdrPercentileWindow', windowParams)
             def slots = params.distinctLatencies.toInteger()
             logger.lifecycle(String.format(
@@ -438,22 +440,29 @@ tasks.register('percentilePerformanceTest') {
             logger.lifecycle(' Frequency-update throughput (higher is better):')
             printResult('ArrayLatencyRecorder', arrayUpdate, 'ops/s')
             printResult('LongHashMapLatencyRecorder', primitiveUpdate, 'ops/s')
+            printResult('HybridPagedLatencyRecorder', hybridUpdate, 'ops/s')
             printResult('HdrHistogram (3 digits)', hdrUpdate, 'ops/s')
             logger.lifecycle('  Winner analysis against HdrHistogram:')
             printWinner('ArrayLatencyRecorder', arrayUpdate,
                     'HdrHistogram', hdrUpdate, true, 'throughput')
             printWinner('LongHashMapLatencyRecorder', primitiveUpdate,
                     'HdrHistogram', hdrUpdate, true, 'throughput')
+            printWinner('HybridPagedLatencyRecorder', hybridUpdate,
+                    'HdrHistogram', hdrUpdate, true, 'throughput')
             logger.lifecycle(' Complete 65,536-observation percentile window '
                     + '(lower is better):')
             printResult('ArrayLatencyRecorder', arrayWindow, 'us/window')
             printResult('LongHashMapLatencyRecorder', primitiveWindow,
+                    'us/window')
+            printResult('HybridPagedLatencyRecorder', hybridWindow,
                     'us/window')
             printResult('HdrHistogram (3 digits)', hdrWindow, 'us/window')
             logger.lifecycle('  Winner analysis against HdrHistogram:')
             printWinner('ArrayLatencyRecorder', arrayWindow,
                     'HdrHistogram', hdrWindow, false, 'window time')
             printWinner('LongHashMapLatencyRecorder', primitiveWindow,
+                    'HdrHistogram', hdrWindow, false, 'window time')
+            printWinner('HybridPagedLatencyRecorder', hybridWindow,
                     'HdrHistogram', hdrWindow, false, 'window time')
         }
         logger.lifecycle('Performance is reported, not gated: exact retention '

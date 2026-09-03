@@ -16,6 +16,7 @@ import io.gem.params.GemParameterOptions;
 import io.sbk.exception.HelpException;
 import io.sbk.params.impl.SbkDriversParameters;
 import io.sbk.system.Printer;
+import io.sbk.utils.SbkUtils;
 import io.time.Time;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -211,8 +212,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         String[] nodes = nodeString.split("[ ,\n]+");
         config.gemuser = getOptionValue(GEM_USER_OPTION, config.gemuser);
         config.gempass = getOptionValue(GemConfig.GEM_PASS_OPTION, config.gempass);
-        config.hostkeycheck = Boolean.parseBoolean(getOptionValue(HOST_KEY_CHECK_OPTION,
-                Boolean.toString(config.hostkeycheck)));
+        config.hostkeycheck = SbkUtils.parseBooleanOption(HOST_KEY_CHECK_OPTION,
+                getOptionValue(HOST_KEY_CHECK_OPTION, Boolean.toString(config.hostkeycheck)));
         config.knownhosts = getOptionValue(KNOWN_HOSTS_OPTION, Objects.requireNonNullElse(config.knownhosts, ""));
         config.gemport = Integer.parseInt(getOptionValue(GEM_PORT_OPTION, Integer.toString(config.gemport)));
         validatePort(config.gemport, option(GEM_PORT_OPTION));
@@ -221,10 +222,10 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
         sbmIdleSleepMilliSeconds = Integer.parseInt(getOptionValue(SBM_SLEEP_OPTION,
                 Integer.toString(sbmIdleSleepMilliSeconds)));
         config.javadir = getOptionValue(JAVA_DIRECTORY_OPTION, Objects.requireNonNullElse(config.javadir, ""));
-        config.packagescleanup = Boolean.parseBoolean(getOptionValue(PACKAGES_CLEANUP_OPTION,
-                Boolean.toString(config.packagescleanup)));
-        config.fullcopy = Boolean.parseBoolean(getOptionValue(FULL_COPY_OPTION,
-                Boolean.toString(config.fullcopy)));
+        config.packagescleanup = SbkUtils.parseBooleanOption(PACKAGES_CLEANUP_OPTION,
+                getOptionValue(PACKAGES_CLEANUP_OPTION, Boolean.toString(config.packagescleanup)));
+        config.fullcopy = SbkUtils.parseBooleanOption(FULL_COPY_OPTION,
+                getOptionValue(FULL_COPY_OPTION, Boolean.toString(config.fullcopy)));
 
         parsedArgs = new String[]{option(NODES_OPTION), nodeString, option(GEM_USER_OPTION), config.gemuser,
                 option(HOST_KEY_CHECK_OPTION), Boolean.toString(config.hostkeycheck), option(KNOWN_HOSTS_OPTION),

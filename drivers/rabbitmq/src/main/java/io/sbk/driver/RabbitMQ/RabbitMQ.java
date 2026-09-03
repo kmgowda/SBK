@@ -17,6 +17,7 @@ import io.sbk.params.ParameterOptions;
 import io.sbk.api.Storage;
 import io.sbk.params.InputOptions;
 import io.sbk.system.Printer;
+import io.sbk.utils.SbkUtils;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -57,10 +58,10 @@ public class RabbitMQ implements Storage<byte[]> {
         if (topicName == null) {
             throw new IllegalArgumentException("Error: Must specify Topic Name");
         }
-        isPersist = Boolean.parseBoolean(params.getOptionValue("persist", "false"));
+        isPersist = SbkUtils.parseBooleanOption("persist", params.getOptionValue("persist", "false"));
         user = params.getOptionValue("user", USER);
         password = params.getOptionValue("password", PASSWORD);
-        async = Boolean.parseBoolean(params.getOptionValue("async", "false"));
+        async = SbkUtils.parseBooleanOption("async", params.getOptionValue("async", "false"));
     }
 
     @Override

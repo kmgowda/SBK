@@ -52,6 +52,20 @@ import static org.mockito.Mockito.CALLS_REAL_METHODS;
 final class SbkBenchmarkTest {
 
     @Test
+    void virtualModeUsesVirtualThreadsWithoutAPlatformThreadPool() throws Exception {
+        final SbkParameters params = new SbkParameters("virtual-executor-test");
+        params.parseArgs(new String[]{"-writers", "1", "-size", "1", "-records", "1", "-thread", "v"});
+        final SbkBenchmark benchmark = new SbkBenchmark(params, mock(Storage.class), mock(DataType.class),
+                mock(RWLogger.class, CALLS_REAL_METHODS), new MilliSeconds());
+        final ExecutorService executor = workerExecutor(benchmark);
+        try {
+            assertTrue(executor.submit(() -> Thread.currentThread().isVirtual()).get());
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
     void distributesRemainderAcrossWorkers() {
         long[] shares = IntStream.range(0, 3)
                 .mapToLong(index -> SbkBenchmark.recordsForWorker(10, 3, index))
