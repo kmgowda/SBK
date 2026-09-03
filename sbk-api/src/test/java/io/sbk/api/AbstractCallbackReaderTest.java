@@ -11,6 +11,7 @@ package io.sbk.api;
 
 import io.perl.api.PerlChannel;
 import io.sbk.data.impl.ByteArray;
+import io.sbk.logger.ReadRequestsLogger;
 import io.time.MicroSeconds;
 import io.time.MilliSeconds;
 import io.time.NanoSeconds;
@@ -24,6 +25,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Verifies callback-reader count and duration completion semantics.
@@ -72,6 +76,72 @@ final class AbstractCallbackReaderTest {
         assertEquals(7, channel.records.get());
     }
 
+    @Test
+    void rejectsReadRequestLoggingInsteadOfSilentlyIgnoringIt() {
+        final TestCallbackReader callbackReader = new TestCallbackReader();
+        final TestWorker worker = new TestWorker(new CapturingChannel());
+        final ByteArray dataType = new ByteArray();
+        final Time time = new NanoSeconds();
+        final ReadRequestsLogger logger = mock(ReadRequestsLogger.class);
+
+        assertUnsupported("read-request logging",
+                () -> callbackReader.RecordsReader(worker, 1, dataType, time, logger));
+        assertUnsupported("read-request logging",
+                () -> callbackReader.RecordsReaderRW(worker, 1, dataType, time, logger));
+        assertUnsupported("read-request logging",
+                () -> callbackReader.RecordsTimeReader(worker, 1, dataType, time, logger));
+        assertUnsupported("read-request logging",
+                () -> callbackReader.RecordsTimeReaderRW(worker, 1, dataType, time, logger));
+        assertEquals(0, callbackReader.startCalls.get());
+        verifyNoInteractions(logger);
+    }
+
+    @Test
+    void rejectsRateControlInsteadOfSilentlyIgnoringIt() {
+        final TestCallbackReader callbackReader = new TestCallbackReader();
+        final TestWorker worker = new TestWorker(new CapturingChannel());
+        final ByteArray dataType = new ByteArray();
+        final Time time = new NanoSeconds();
+        final RateController rateController = mock(RateController.class);
+
+        assertUnsupported("rate control",
+                () -> callbackReader.RecordsReaderRateControl(worker, 1, dataType, time, rateController));
+        assertUnsupported("rate control",
+                () -> callbackReader.RecordsReaderRWRateControl(worker, 1, dataType, time, rateController));
+        assertUnsupported("rate control",
+                () -> callbackReader.RecordsTimeReaderRateControl(worker, 1, dataType, time, rateController));
+        assertUnsupported("rate control",
+                () -> callbackReader.RecordsTimeReaderRWRateControl(worker, 1, dataType, time, rateController));
+        assertEquals(0, callbackReader.startCalls.get());
+        verifyNoInteractions(rateController);
+    }
+
+    @Test
+    void rejectsCombinedRateControlAndRequestLogging() {
+        final TestCallbackReader callbackReader = new TestCallbackReader();
+        final TestWorker worker = new TestWorker(new CapturingChannel());
+        final ByteArray dataType = new ByteArray();
+        final Time time = new NanoSeconds();
+        final RateController rateController = mock(RateController.class);
+        final ReadRequestsLogger logger = mock(ReadRequestsLogger.class);
+
+        assertUnsupported("rate control", () -> callbackReader.RecordsReaderRateControl(
+                worker, 1, dataType, time, rateController, logger));
+        assertUnsupported("rate control", () -> callbackReader.RecordsReaderRWRateControl(
+                worker, 1, dataType, time, rateController, logger));
+        assertUnsupported("rate control", () -> callbackReader.RecordsTimeReaderRateControl(
+                worker, 1, dataType, time, rateController, logger));
+        assertUnsupported("rate control", () -> callbackReader.RecordsTimeReaderRWRateControl(
+                worker, 1, dataType, time, rateController, logger));
+        assertEquals(0, callbackReader.startCalls.get());
+        verifyNoInteractions(rateController, logger);
+    }
+
+    private static void assertUnsupported(String control, ThrowingOperation operation) {
+        final IOException exception = assertThrows(IOException.class, operation::run);
+        assertEquals("Callback readers do not support " + control, exception.getMessage());
+    }
+
     private static void verifyDuration(Time time, long unitsPerSecond)
             throws Exception {
         CapturingChannel channel = new CapturingChannel();
@@ -103,8 +173,15 @@ final class AbstractCallbackReaderTest {
         });
     }
 
+    @FunctionalInterface
+    private interface ThrowingOperation {
+        void run() throws IOException;
+    }
+
     private static final class TestCallbackReader
             extends AbstractCallbackReader<byte[]> {
+        private final AtomicInteger startCalls = new AtomicInteger();
+
         /**
          * Accepts the callback without starting an external consumer.
          *
@@ -112,6 +189,7 @@ final class AbstractCallbackReaderTest {
          */
         @Override
         public void start(Callback<byte[]> callback) {
+            startCalls.incrementAndGet();
         }
 
         /**
