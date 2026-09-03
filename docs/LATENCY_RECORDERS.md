@@ -728,7 +728,29 @@ Run:
 
 ```bash
 ./gradlew :perl:latencyMapPerformanceTest
+./gradlew :perl:percentilePerformanceTest
 ```
+
+The second task runs `PercentileRecorderBenchmark`, an explicit comparison of
+PerL's dense-array and primitive-map exact recorders with HdrHistogram using
+PerL's production three-significant-digit setting. It reports two independent
+dimensions with the GC profiler enabled:
+
+- isolated frequency-update throughput and allocation; and
+- a complete 65,536-observation window containing recording, percentile
+  extraction, clearing/reset, and allocation.
+
+The summary identifies the mean winner for each PerL-versus-HdrHistogram
+comparison and uses the JMH 99.9% confidence intervals to classify the result
+as statistically better or inconclusive. This avoids declaring a winner when
+measurement uncertainty overlaps.
+
+All implementations receive the same deterministic 4,096-value nanosecond
+distribution. The task deliberately reports rather than gates which
+implementation is faster: PerL retains exact integer values, while
+HdrHistogram quantizes values to obtain a bounded footprint, so the two
+results have different precision semantics. The generated JSON evidence is
+written to `perl/build/reports/jmh/percentile-performance.json`.
 
 The task:
 
