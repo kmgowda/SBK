@@ -605,7 +605,7 @@ The recorder thread runs the loop in
 while (doWork) {
     notFound = true;
     for (int i = 0; doWork && (i < channels.length); i++) {
-        t = channels[i].receive(0);
+        t = channels[i].receive(windowIntervalMS);
         if (t != null) {
             notFound = false;
             dataSinceIdle = true;
@@ -845,7 +845,7 @@ There is one more clock-saving trick. Look at the recorder loop:
 
 ```java
 for (Channel ch : channels) {
-    t = ch.receive(0);
+    t = ch.receive(...);
     if (t != null) {
         ctime = t.endTime;              // <-- the WORKER's timestamp, NOT a new clock call
         recorder.record(t.startTime, t.endTime, ...);
@@ -2876,7 +2876,7 @@ sequenceDiagram
     Ch->>Q: enqueue TimeStamp
 
     Note over R: meanwhile, recorder loop:
-    Q-->>R: receive(0) (CAS on head)
+    Q-->>R: receive() (CAS on head)
     R->>Win: record(start, end, 1, size)
     Note over Win: ++histogram[end - start]<br/>totalBytes += size
 ```

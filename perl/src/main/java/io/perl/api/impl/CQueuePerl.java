@@ -321,7 +321,8 @@ final public class CQueuePerl implements Perl {
         /**
          * {@inheritDoc}
          *
-         * @param timeout unused compatibility parameter
+         * @param timeout unused polling timeout retained by the
+         *                {@link Channel} contract
          * @return the next available timestamp, or {@code null}
          */
         @Override

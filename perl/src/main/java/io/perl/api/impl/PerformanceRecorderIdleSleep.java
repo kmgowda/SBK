@@ -76,7 +76,7 @@ public class PerformanceRecorderIdleSleep extends PerformanceRecorder {
         while (doWork) {
             notFound = true;
             for (int i = 0; doWork && (i < channels.length); i++) {
-                t = channels[i].receive(0);
+                t = channels[i].receive(windowIntervalMS);
                 if (t != null) {
                     notFound = false;
                     ctime = t.endTime;
@@ -135,7 +135,7 @@ public class PerformanceRecorderIdleSleep extends PerformanceRecorder {
         while (doWork) {
             notFound = true;
             for (int i = 0; doWork && (i < channels.length); i++) {
-                t = channels[i].receive(0);
+                t = channels[i].receive(windowIntervalMS);
                 if (t != null) {
                     notFound = false;
                     ctime = t.endTime;
