@@ -12,6 +12,7 @@ package io.sbk.driver.MinIO;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.SocketTimeoutException;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -178,6 +179,12 @@ public final class S3AsyncExecutor {
     public static boolean isCleanShutdown(Throwable thrown) {
         Throwable cause = thrown;
         while (cause != null) {
+            // A socket deadline is an active transport failure even though the
+            // JDK models it as an InterruptedIOException. Keep it visible to
+            // retry and terminal-error handling.
+            if (cause instanceof SocketTimeoutException) {
+                return false;
+            }
             if (cause instanceof InterruptedException
                     || cause instanceof InterruptedIOException
                     || cause instanceof RejectedExecutionException) {

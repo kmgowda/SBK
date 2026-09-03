@@ -59,6 +59,8 @@ public class MinIOReader implements Reader<byte[]> {
     private final S3ObjectCatalog catalog;
     private final List<String> bucketTargets;
     private final List<String> listPrefixes;
+    private final ListObjectsArgs listArgs;
+    private final S3RangeOffsetSelector rangeOffsetSelector;
     private final S3AsyncExecutor asyncExecutor;
     private final S3RetryPolicy retryPolicy;
     private final S3EndpointMetrics endpointMetrics;
@@ -93,6 +95,7 @@ public class MinIOReader implements Reader<byte[]> {
         S3OperationMix writerMix = S3OperationMix.parse(config.writeMix,
                 S3Operation.fromString(config.writeOperation), true, id);
         mixedWorkload = params.getWritersCount() > 0
+                && S3MixedReadSource.parse(config.mixedReadSource) == S3MixedReadSource.PUBLISHED
                 && (writerMix.contains(S3Operation.PUT) || writerMix.contains(S3Operation.COPY));
         this.config = config;
         this.operation = operation;
@@ -103,9 +106,15 @@ public class MinIOReader implements Reader<byte[]> {
         this.bucketTargets = bucketTargets;
         this.endpointMetrics = endpointMetrics;
         listPrefixes = parseList(config.listPrefixes);
+        listArgs = buildListArgs();
+        long rangeSeed = config.dataSeed == 0 ? System.nanoTime() : config.dataSeed + id;
+        rangeOffsetSelector = new S3RangeOffsetSelector(config.rangeOffsetDistribution,
+                config.rangeOffset, config.rangeWindowLength, config.rangeAlignment, rangeSeed);
         asyncExecutor = config.async
                 ? new S3AsyncExecutor(config.asyncDepth, globalAsyncPermits) : null;
         retryPolicy = new S3RetryPolicy(config.retryMaxAttempts, config.retryBackoffMs,
+                S3RetryPolicy.Strategy.parse(config.retryStrategy), config.retryMaxBackoffMs,
+                config.retryJitter,
                 () -> {
                     retryCount.increment();
                     if (endpointMetrics != null) {
@@ -118,11 +127,11 @@ public class MinIOReader implements Reader<byte[]> {
                 : null;
         objectSequence = 0;
         bucketSequence = 0;
-        drainBuffer = new byte[64 * 1024];
+        drainBuffer = new byte[MinIO.RESPONSE_BUFFER_BYTES];
         asyncDrainBuffers = config.async ? new ArrayBlockingQueue<>(config.asyncDepth) : null;
         if (asyncDrainBuffers != null) {
             for (int i = 0; i < config.asyncDepth; i++) {
-                asyncDrainBuffers.add(new byte[64 * 1024]);
+                asyncDrainBuffers.add(new byte[MinIO.RESPONSE_BUFFER_BYTES]);
             }
         }
     }
@@ -252,9 +261,9 @@ public class MinIOReader implements Reader<byte[]> {
         long bytes = object.size();
         long offset = 0;
         if (selected == S3Operation.RANGE_GET) {
-            offset = config.rangeOffset;
             long requestedLength = config.rangeLength > 0 ? config.rangeLength
                     : (requestedSize > 0 ? requestedSize : configuredSize);
+            offset = rangeOffsetSelector.next(object.size(), requestedLength);
             bytes = Math.max(0, Math.min(requestedLength, object.size() - offset));
         }
         return new PreparedOperation(selected, object.key(), object.versionId(), offset,
@@ -368,30 +377,46 @@ public class MinIOReader implements Reader<byte[]> {
     }
 
     private int listObjects() throws Exception {
+        int count = 0;
+        Iterable<Result<Item>> results = config.async
+                ? asyncClient.listObjects(listArgs) : client.listObjects(listArgs);
+        for (Result<Item> result : results) {
+            result.get();
+            if (++count >= config.listMaxEntries) {
+                break;
+            }
+        }
+        return 0;
+    }
+
+    private ListObjectsArgs buildListArgs() {
         ListObjectsArgs.Builder builder = ListObjectsArgs.builder()
                 .bucket(config.bucketName)
-                .recursive(true)
                 .maxKeys(config.listMaxKeys)
-                .includeVersions(config.versioningEnabled);
+                .includeVersions(config.versioningEnabled)
+                .useApiVersion1(config.listApiVersion == 1);
+        if (config.listApiVersion == 2) {
+            builder.fetchOwner(config.listFetchOwner)
+                    .includeUserMetadata(config.listIncludeUserMetadata);
+        }
         String selectedPrefix = listPrefixes.isEmpty()
                 ? config.prefix : listPrefixes.get(Math.floorMod(id, listPrefixes.size()));
         if (selectedPrefix != null && !selectedPrefix.isEmpty()) {
             builder.prefix(selectedPrefix);
         }
-        int count = 0;
-        long bytes = 0;
-        Iterable<Result<Item>> results = config.async
-                ? asyncClient.listObjects(builder.build()) : client.listObjects(builder.build());
-        for (Result<Item> result : results) {
-            Item item = result.get();
-            if (!item.isDir() && !item.isDeleteMarker()) {
-                bytes += item.size();
-                if (++count >= config.listMaxKeys) {
-                    break;
-                }
+        if (config.listDelimiter == null || config.listDelimiter.isEmpty()) {
+            builder.recursive(true);
+        } else {
+            builder.delimiter(config.listDelimiter);
+        }
+        if (config.listStartAfter != null && !config.listStartAfter.isEmpty()) {
+            if (config.listApiVersion == 1) {
+                builder.marker(config.listStartAfter);
+            } else {
+                builder.startAfter(config.listStartAfter);
             }
         }
-        return safeBytes(bytes);
+        return builder.build();
     }
 
     private int drain(GetObjectResponse response) throws IOException {

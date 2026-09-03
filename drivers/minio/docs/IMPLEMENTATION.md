@@ -81,20 +81,22 @@ path:
 1. Normalize and deduplicate the comma-separated `-url` list. A missing scheme
    becomes `http://`.
 2. Build sync and/or async SDK clients and dedicated OkHttp dispatchers.
-3. Apply explicit timeouts, connection-pool limits, TLS policy, and extra
+3. Optionally preflight every configured endpoint; failures identify the exact
+   URL before timing.
+4. Apply explicit timeouts, connection-pool limits, TLS policy, and extra
    headers such as ECS `x-emc-namespace`.
-4. Check the main bucket when any operation in the effective mix uses it.
-5. Optionally empty and recreate the bucket. This is destructive and happens
+5. Check the main bucket when any operation in the effective mix uses it.
+6. Optionally empty and recreate the bucket. This is destructive and happens
    only when writers are configured and `-recreate true` is explicit.
-6. Optionally enable bucket versioning for writer runs. Reader-only runs never
+7. Optionally enable bucket versioning for writer runs. Reader-only runs never
    mutate bucket configuration; they only include existing version IDs in the
    catalog.
-7. Run the selected untimed warm-up and remove its temporary objects.
-8. Build an object catalog only when an operation needs existing objects.
-9. Validate prerequisites such as a nonempty catalog, a Range GET-eligible
+8. Run the selected untimed warm-up and remove its temporary objects.
+9. Build an object catalog only when an operation needs existing objects.
+10. Validate prerequisites such as a nonempty catalog, a Range GET-eligible
    object, and enough one-shot targets/publications to finish a fixed-record
    workload.
-10. Optionally write the credential-free run manifest.
+11. Optionally write the credential-free run manifest.
 
 Pure PUT, LIST, bucket-create, bucket-delete, bucket-stat, and bucket-list
 workloads do not require an existing-object catalog. GET, Range GET, stat,
@@ -122,20 +124,17 @@ S3 requests.
 | Delete/tag set/tag delete/stat/tag get | SDK request completes | 0 |
 | GET | complete response body is drained | response-body bytes |
 | Range GET | requested response range is drained | returned range bytes |
-| LIST | result page entries are consumed | sum of the listed objects' logical sizes |
+| LIST | configured result entries/pages are consumed | 0; LIST transfers metadata, not object payload |
 | Bucket create/delete/stat/list | SDK request completes | 0 |
 
-The LIST `MB/sec` value is therefore **not LIST response-wire bandwidth**. It
-is the logical size represented by returned entries. Judge LIST primarily by
-operations/sec and latency, and retain `-list-max-keys` plus the populated
-object count with the result.
+LIST reports zero data bytes because `Item.size()` is the logical size of the
+listed object, not bytes transferred by the metadata response. Judge LIST by
+operations/sec and latency, and retain page size, entry limit, API version,
+prefix, delimiter, and populated object count with the result.
 
 SBK's byte count for one operation is an `int`. Startup rejects GET/COPY
 catalog entries and Range GET lengths above `Integer.MAX_VALUE` rather than
-silently truncating their accounting. LIST can represent more logical bytes
-than this in one response; its record value saturates at `Integer.MAX_VALUE`,
-which is another reason to use LIST operations/sec and latency as the primary
-metrics.
+silently truncating their accounting.
 
 `-verify-read-size true` checks GET and Range GET response lengths. It does not
 compare response content with the original payload. `-checksum` asks the S3
@@ -200,7 +199,10 @@ final results may be incomplete.
 The default `-retry-max-attempts 1` disables retries. When enabled, a retry is
 allowed for network `IOException`, HTTP 429, and HTTP 5xx. The entire retry
 sequence remains one latency sample, so retry delay and additional attempts
-increase the reported operation latency.
+increase the reported operation latency. Fixed delay preserves compatibility;
+exponential delay, an optional cap, and full jitter model production clients
+and avoid coordinated retry waves. Socket timeouts remain retryable errors;
+only interruption caused by benchmark shutdown is treated as clean shutdown.
 
 When retries are enabled, a process-wide retry count is printed at shutdown
 without adding bookkeeping to successful requests. `-endpoint-metrics true`
@@ -223,12 +225,13 @@ only the fallback for an empty mix. Duplicate operation entries are rejected.
 This keeps configuration ambiguity and exhaustion checks out of measured
 requests.
 
-The successful writer and reader paths deliberately retain their existing
-shape: one preselected operation, one prepared request, one SDK completion,
-and one SBK measurement. This hardening does not add a branch, counter, lock,
-clock read, or allocation to successful per-operation execution. The shared
-retry counter is touched only after a retryable failure. Detailed endpoint
-metrics remain opt-in because their completion counters do add bookkeeping.
+The common successful PUT and full-GET paths retain their existing shape: one
+preselected operation, one prepared request, one SDK completion, and one SBK
+measurement. Range-offset selection runs only for the explicitly selected
+Range GET workload; LIST controls are prebuilt once per reader. Neither adds
+work to PUT or full GET. Retry scheduling runs only after a retryable failure.
+Detailed endpoint metrics remain opt-in because their completion counters do
+add bookkeeping.
 
 If startup fails after any SDK client has been constructed, all constructed
 sync and async clients are closed and close failures are suppressed onto the

@@ -347,7 +347,7 @@ deterministic sequential identities as a single workload shape.
 | `-read-operation range-get` | `getObject` with byte offset and length; SBK drains the response | An object larger than `-range-offset`; ranged-read support | The requested byte range was returned; byte count is checked only with `-verify-read-size true` |
 | `-read-operation stat` | `statObject` (S3 HEAD) | Existing objects and metadata/read permission | Object metadata was resolved without downloading the body |
 | `-read-operation tag-get` | `getObjectTags` | Existing objects and tag-read permission | The backend returned the object's tag set |
-| `-read-operation list` | `listObjects`, consuming at most `-list-max-keys` entries | List-bucket permission | A prefix listing completed and its returned entries were consumed |
+| `-read-operation list` | `listObjects`, consuming up to `-list-max-entries` across pages of at most `-list-max-keys` | List-bucket permission | A prefix listing completed and its returned entries were consumed; LIST reports zero data bytes because response metadata size is not payload throughput |
 | `-read-operation bucket-stat` | `bucketExists` | Bucket visibility permission; optional explicit targets | Bucket-existence API completed and returned `true`; a missing bucket fails the record |
 | `-read-operation bucket-list` | `listBuckets` | Account-level list-buckets permission | The account's bucket-list API completed |
 
@@ -358,11 +358,14 @@ The object catalog is loaded once when an operation needs existing objects.
 Pure PUT, LIST, and bucket workloads avoid that startup scan. This prevents an
 unmeasured LIST or HEAD request from being added before every timed GET without
 making write-only startup proportional to the bucket size. In a combined
-PUT/GET run, completed PUTs are published to readers through a blocking queue.
-For fixed-record workloads, startup also proves that one-shot DELETE and
-bucket-delete targets, and mixed-run published objects, are sufficient for the
-requested record count. An impossible finite workload fails before timing
-instead of waiting indefinitely after its target set is exhausted.
+PUT/GET run, `-mixed-read-source catalog` (the default) reads the bounded
+startup snapshot while writers operate. Use `published` only when consumers
+must read objects created by the same run; completed PUTs/COPYs then flow
+through a blocking queue. For fixed-record published workloads, startup proves
+that the writer mix can publish enough objects. Keep producer and consumer
+rates balanced because published mode intentionally adds no locks or bounded
+waits to PUT completion. Startup also validates one-shot DELETE and
+bucket-delete capacity.
 
 ### Bounded asynchronous mode
 
@@ -403,8 +406,18 @@ either request-limit option is zero.
 |---|---|---|
 | `-range-offset <bytes>` | `0` | First byte of a ranged GET |
 | `-range-length <bytes>` | `0` | Bytes per ranged GET; zero uses SBK `-size` |
-| `-list-max-keys <1..1000>` | `1000` | Maximum entries consumed by each timed LIST |
+| `-range-offset-distribution fixed|sequential|random` | `fixed` | Select one fixed offset, a deterministic aligned sweep, or reproducible random aligned offsets. |
+| `-range-window-length <bytes>` | `0` | Offset-selection window beginning at `-range-offset`; zero uses the eligible object remainder. |
+| `-range-alignment <bytes>` | `1` | Align generated sequential/random offsets to an application block or stripe size. |
+| `-list-max-keys <1..1000>` | `1000` | Maximum keys requested per S3 response page. |
+| `-list-max-entries <n>` | `1000` | Maximum entries consumed by one timed LIST across response pages. |
 | `-list-prefixes <csv>` | empty | Prefixes assigned round-robin across LIST readers, preventing every reader from scanning the same keyspace. |
+| `-list-start-after <key>` | empty | Begin after a key (`StartAfter` for V2, marker for V1). |
+| `-list-delimiter <value>` | empty | Empty performs recursive flat listing; `/` measures hierarchical common-prefix behavior. |
+| `-list-api-version 1|2` | `2` | Select legacy ListObjects V1 or ListObjectsV2. |
+| `-list-fetch-owner true|false` | `false` | Request owner fields in LIST results. |
+| `-list-include-user-metadata true|false` | `false` | Request user metadata on compatible S3 implementations. |
+| `-mixed-read-source catalog|published` | `catalog` | In mixed writer/reader runs, read the bounded startup snapshot by default or explicitly consume objects completed by this run. |
 | `-object-file <path>` | empty | Load the startup catalog from strict local `key,size[,versionId]` CSV instead of listing S3. Size must be a nonnegative integer; keys cannot contain commas; blank lines and `#` comments are allowed. |
 | `-catalog-max-objects <n>` | `1000000` | Bound discovered or manifest object references retained in memory. |
 | `-partition-count <n>` | `1` | Split existing-object catalogs by stable key hash across distributed SBK/SBK-GEM processes. |
@@ -493,10 +506,14 @@ Useful when benchmarking storage with inline compression or deduplication.
 | Flag | Default | Purpose |
 |---|---|---|
 | `-retry-max-attempts <n>` | `1` | Total attempts for network I/O, HTTP 429, and HTTP 5xx failures. One disables retries. |
-| `-retry-backoff-ms <ms>` | `0` | Fixed delay between retry attempts. |
+| `-retry-backoff-ms <ms>` | `0` | Initial or fixed delay between retry attempts. |
+| `-retry-strategy fixed|exponential` | `fixed` | Keep delay constant or double it after each failed attempt. |
+| `-retry-max-backoff-ms <ms>` | `0` | Cap exponential delay; zero leaves it uncapped except for arithmetic saturation. |
+| `-retry-jitter true|false` | `false` | Apply full jitter in `[0, calculated delay]` to avoid synchronized retry storms. |
 | `-warmup-requests <n>` | `0` | Number of untimed requests distributed across configured endpoints before measurement. |
 | `-warmup-operation connection|put|get|put-get` | `connection` | Warm only connection/authentication, or execute data-plane PUT, GET, or PUT+GET requests. Temporary warm-up objects are removed before measurement. |
 | `-endpoint-metrics true|false` | `false` | Attribute completed operations, bytes, retries, and terminal failures to each configured endpoint. Disabled by default to keep the hot path minimal. |
+| `-endpoint-preflight primary|all` | `primary` | Validate only the setup URL or every configured endpoint before measurement starts. |
 
 When retries are enabled, all attempts and backoff remain one logical timed
 SBK operation. This reports application-observed latency; use one attempt when
@@ -584,7 +601,7 @@ the last column when the backend state itself must be proven.
 | `-http-max-idle-connections` | Nonnegative pool size | Work completes with the selected reusable idle-connection pool | Zero intentionally disables idle retention |
 | `-http-keepalive-seconds` | Positive seconds | Reused connections remain eligible for the selected idle period | Server/load-balancer idle timeout may be lower |
 | `-retry-max-attempts` | Positive total attempt count | Transient I/O, HTTP 429, or HTTP 5xx failures can be retried within one measured operation | Retries inflate application-observed latency; use `1` for raw service latency |
-| `-retry-backoff-ms` | Nonnegative delay | Retry delay is included in logical operation latency | Fixed delay only; not exponential backoff |
+| `-retry-backoff-ms` | Nonnegative delay | Retry delay is included in logical operation latency | Initial delay; interpretation is selected by `-retry-strategy` |
 | `-warmup-requests` | Nonnegative count and permissions for the selected warm-up operation | Untimed warm-up requests complete before measurement | Data warm-up uses temporary objects and removes them before timing |
 | `-endpoint-metrics` | Multiple endpoints when per-node attribution is useful | Per-endpoint completion/byte/retry/failure totals are printed at shutdown | Adds opt-in counters to completed-operation and retry paths |
 

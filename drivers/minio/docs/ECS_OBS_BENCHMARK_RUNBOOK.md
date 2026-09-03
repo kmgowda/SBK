@@ -180,6 +180,8 @@ catalog LIST; timed GETs do not perform a HEAD before every request.
   -readers 2 -size 4096 -records 100 -time ms \
   -read-operation range-get \
   -range-offset 8192 -range-length 4096 \
+  -range-offset-distribution sequential \
+  -range-window-length 1048576 -range-alignment 4096 \
   -verify-read-size true -endpoint-metrics true
 ```
 
@@ -192,12 +194,13 @@ catalog LIST; timed GETs do not perform a HEAD before every request.
   -extra-headers "x-emc-namespace=$ECS_NAMESPACE" \
   -readers 1 -size 1 -records 20 -time ms \
   -read-operation list \
-  -list-prefixes "$ECS_PREFIX" -list-max-keys 1000 \
+  -list-prefixes "$ECS_PREFIX" -list-max-keys 100 \
+  -list-max-entries 1000 -list-api-version 2 \
   -endpoint-metrics true
 ```
 
-For LIST, use records/sec and latency. SBK reports the sum of listed objects'
-logical sizes as bytes, so LIST `MB/sec` is not network transfer bandwidth.
+For LIST, use records/sec and latency. SBK reports zero bytes because object
+sizes in LIST metadata are not response-wire or object-payload throughput.
 
 ### Step 5: multipart correctness
 
@@ -439,17 +442,17 @@ and detailed constraints are in the
 | Category | Options |
 |---|---|
 | Connection/auth | `-url`, `-bucket`, `-key`, `-secret`, `-region`, `-recreate`, `-insecure`, `-auth-version`, `-extra-headers` |
-| Operation selection | `-write-operation`, `-read-operation`, `-write-mix`, `-read-mix` |
+| Operation selection | `-write-operation`, `-read-operation`, `-write-mix`, `-read-mix`, `-mixed-read-source` |
 | Async/concurrency | `-async`, `-async-depth`, `-async-max-inflight`, `-async-max-memory-mb` |
 | Object layout/catalog | `-prefix`, `-copy-prefix`, `-fs-access`, `-key-distribution`, `-object-file`, `-catalog-max-objects`, `-partition-count`, `-partition-index`, `-partition-by-prefix`, `-run-manifest` |
 | Object sizes | `-object-size-distribution`; common SBK `-size` supplies the fixed/default size |
-| Range/LIST | `-range-offset`, `-range-length`, `-list-max-keys`, `-list-prefixes` |
+| Range/LIST | `-range-offset`, `-range-length`, `-range-offset-distribution`, `-range-window-length`, `-range-alignment`, `-list-max-keys`, `-list-max-entries`, `-list-prefixes`, `-list-start-after`, `-list-delimiter`, `-list-api-version`, `-list-fetch-owner`, `-list-include-user-metadata` |
 | Multipart | `-part-size`, `-mpu-concurrent-parts` |
 | Integrity/security | `-checksum`, `-verify-read-size`, `-sse-enabled`, `-versioning-enabled` |
 | Tagging | `-tagging-enabled`, `-tagging-tags` |
 | Bucket workloads | `-bucket-targets`, `-bucket-prefix`, `-cleanup-created-buckets` |
 | Data shape | `-data-compressibility`, `-data-dedupable`, `-data-seed` |
-| Retry/warm-up/visibility | `-retry-max-attempts`, `-retry-backoff-ms`, `-warmup-requests`, `-warmup-operation`, `-endpoint-metrics` |
+| Retry/warm-up/visibility | `-retry-max-attempts`, `-retry-backoff-ms`, `-retry-strategy`, `-retry-max-backoff-ms`, `-retry-jitter`, `-warmup-requests`, `-warmup-operation`, `-endpoint-metrics`, `-endpoint-preflight` |
 | HTTP transport | `-connect-timeout-ms`, `-read-timeout-ms`, `-write-timeout-ms`, `-http-max-requests`, `-http-max-requests-per-host`, `-http-max-idle-connections`, `-http-keepalive-seconds` |
 
 Relevant common SBK controls are:
@@ -522,8 +525,8 @@ Interpret metrics by operation:
 - Stat/tags/delete/bucket operations: operations/sec and latency; bytes are
   normally zero.
 - Copy: operations/sec and logical bytes/sec; data stays inside ECS.
-- LIST: operations/sec and latency; reported bytes are listed logical object
-  sizes, not wire traffic.
+- LIST: operations/sec and latency; data bytes are zero because the response
+  contains metadata rather than object payload.
 - Mixed workloads: aggregate metrics only. Split operations for
   per-operation percentiles.
 
@@ -550,9 +553,9 @@ your cluster to these numbers.
 | LIST | prefix scan, max 1000, 1 reader, fixed 20 | 20 LISTs | 3.5 ops/s | 284.6 ms | 269 ms | 577 ms | 577 ms | 0 / 0 |
 | Multipart PUT | 15 MiB, 5 MiB parts, 3 concurrent parts, fixed 4 | 4 / 60 MiB | 0.2 ops/s, 2.53 MB/s | 5914.3 ms | 5198 ms | 11531 ms | 11531 ms | 0 / 0 |
 
-The LIST run displayed 263.25 MB/s because its 20 operations returned entries
-representing about 1.5 GiB of logical object data. It did not transfer 1.5 GiB
-of object bodies.
+The LIST rate and latency remain representative of that dated run. Current
+versions intentionally report zero LIST data bytes; older results that showed
+logical-object MB/s must not be interpreted as network throughput.
 
 One exploratory timed async multipart run reached the five-second cleanup
 deadline and exited 1. It is intentionally excluded from the valid table. That
@@ -572,7 +575,7 @@ is the expected runbook treatment of incomplete results.
 | Throughput plateaus and p99 rises | Client, network, or ECS saturation | Inspect CPU/NIC/ECS telemetry; do not blindly add concurrency |
 | Retries increase | HTTP 429/5xx or network I/O | Treat as saturation/failure evidence; compare retry-disabled and production-policy runs |
 | Cleanup timeout / exit 1 | Outstanding SDK/driver/recorder work exceeded five seconds | Invalid run; lower outstanding work or use fixed-record qualification |
-| LIST MB/s seems impossible | Logical listed-object bytes | Use LIST ops/s and latency |
+| LIST reports 0 MB/s | LIST is metadata, not object-payload transfer | Use LIST ops/s and latency |
 | Timed endpoint operations differ slightly from Total | Completion occurred at reporting boundary | Use fixed records for exact parity; explain timed boundary differences |
 
 ## 12. Cleanup and evidence retention

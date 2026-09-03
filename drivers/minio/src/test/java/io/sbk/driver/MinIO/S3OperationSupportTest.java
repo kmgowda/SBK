@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
 import java.util.List;
@@ -97,6 +98,30 @@ public class S3OperationSupportTest {
         assertEquals(eligible, catalog.nextForReader(0, 1, 0, 1024));
         assertFalse(catalog.hasObjectLargerThan(4096));
         assertNull(catalog.nextForReader(0, 1, 0, 4096));
+    }
+
+    @Test
+    public void rangeOffsetsSupportFixedSequentialAndSeededRandomSelection() {
+        S3RangeOffsetSelector fixed = new S3RangeOffsetSelector("fixed", 1024, 4096, 512, 7);
+        assertEquals(1024, fixed.next(16384, 1024));
+
+        S3RangeOffsetSelector sequential = new S3RangeOffsetSelector(
+                "sequential", 1024, 1536, 512, 7);
+        assertEquals(List.of(1024L, 1536L, 2048L, 1024L),
+                java.util.stream.IntStream.range(0, 4)
+                        .mapToObj(ignored -> sequential.next(16384, 1024)).toList());
+
+        S3RangeOffsetSelector random = new S3RangeOffsetSelector(
+                "random", 0, 8192, 4096, 42);
+        S3RangeOffsetSelector sameSeed = new S3RangeOffsetSelector(
+                "random", 0, 8192, 4096, 42);
+        for (int sample = 0; sample < 100; sample++) {
+            long offset = random.next(16384, 1024);
+            assertEquals(offset, sameSeed.next(16384, 1024));
+            assertTrue(offset == 0 || offset == 4096);
+        }
+        assertThrows(ArithmeticException.class,
+                () -> new S3RangeOffsetSelector("fixed", Long.MAX_VALUE, 2, 1, 0));
     }
 
     @Test
@@ -274,6 +299,17 @@ public class S3OperationSupportTest {
     }
 
     @Test
+    public void asyncExecutorDoesNotHideSocketTimeoutsAsCleanShutdown() throws Exception {
+        S3AsyncExecutor executor = new S3AsyncExecutor(1);
+        executor.acquire();
+        executor.track(CompletableFuture.failedFuture(
+                new SocketTimeoutException("active request timed out")));
+
+        IOException failure = assertThrows(IOException.class, executor::await);
+        assertTrue(failure.getCause() instanceof SocketTimeoutException);
+    }
+
+    @Test
     public void asyncExecutorAwaitsTheMeasurementCallback() throws Exception {
         S3AsyncExecutor executor = new S3AsyncExecutor(1);
         CompletableFuture<String> sdkFuture = new CompletableFuture<>();
@@ -353,5 +389,15 @@ public class S3OperationSupportTest {
                         : CompletableFuture.completedFuture("ok")).get(5, TimeUnit.SECONDS);
         assertEquals("ok", asyncResult);
         assertEquals(2, asynchronousAttempts.get());
+
+        AtomicInteger timeoutAttempts = new AtomicInteger();
+        String timeoutResult = policy.execute(() -> {
+            if (timeoutAttempts.incrementAndGet() < 2) {
+                throw new SocketTimeoutException("temporary socket timeout");
+            }
+            return "ok";
+        });
+        assertEquals("ok", timeoutResult);
+        assertEquals(2, timeoutAttempts.get());
     }
 }

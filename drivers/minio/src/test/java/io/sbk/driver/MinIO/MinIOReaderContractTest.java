@@ -11,7 +11,10 @@
 package io.sbk.driver.MinIO;
 
 import io.minio.BucketExistsArgs;
+import io.minio.ListObjectsArgs;
 import io.minio.MinioClient;
+import io.minio.Result;
+import io.minio.messages.Item;
 import io.perl.api.PerlChannel;
 import io.sbk.api.Status;
 import io.sbk.data.impl.ByteArray;
@@ -24,10 +27,13 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -51,6 +57,34 @@ public class MinIOReaderContractTest {
         assertTrue(failure.getMessage().contains("does not exist"));
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    public void listConsumesTheConfiguredEntryLimitAndReportsMetadataAsZeroBytes()
+            throws Exception {
+        MinioClient client = mock(MinioClient.class);
+        Result<Item> first = mock(Result.class);
+        Result<Item> second = mock(Result.class);
+        Result<Item> unconsumed = mock(Result.class);
+        when(first.get()).thenReturn(mock(Item.class));
+        when(second.get()).thenReturn(mock(Item.class));
+        when(client.listObjects(any(ListObjectsArgs.class)))
+                .thenReturn(List.of(first, second, unconsumed));
+        MinIOConfig config = baseConfig();
+        config.listMaxEntries = 2;
+        MinIOReader reader = new MinIOReader(0, parameters(), config,
+                S3Operation.LIST, client, null, new S3ObjectCatalog(List.of()),
+                List.of(), null, null, new java.util.concurrent.atomic.LongAdder());
+        Status status = new Status();
+
+        reader.recordRead(new ByteArray(), 1, new NanoSeconds(), status,
+                mock(PerlChannel.class));
+
+        assertEquals(0, status.bytes);
+        verify(first).get();
+        verify(second).get();
+        verify(unconsumed, times(0)).get();
+    }
+
     private static ParameterOptions parameters() throws Exception {
         InputParameterOptions parsed = new SbkDriversParameters(
                 "SBK MinIO reader contract test", new String[]{"MinIO"}, new String[]{});
@@ -66,8 +100,17 @@ public class MinIOReaderContractTest {
         config.writeOperation = "put";
         config.writeMix = "";
         config.readMix = "";
+        config.mixedReadSource = "catalog";
         config.listPrefixes = "";
+        config.listStartAfter = "";
+        config.listDelimiter = "";
+        config.listMaxKeys = 1000;
+        config.listMaxEntries = 1000;
+        config.listApiVersion = 2;
+        config.rangeOffsetDistribution = "fixed";
+        config.rangeAlignment = 1;
         config.retryMaxAttempts = 1;
+        config.retryStrategy = "fixed";
         return config;
     }
 }

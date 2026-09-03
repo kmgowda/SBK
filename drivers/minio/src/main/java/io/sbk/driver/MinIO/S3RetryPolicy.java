@@ -15,6 +15,7 @@ import io.minio.errors.ErrorResponseException;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -26,6 +27,9 @@ import java.util.concurrent.TimeUnit;
 public final class S3RetryPolicy {
     private final int maxAttempts;
     private final long backoffMs;
+    private final Strategy strategy;
+    private final long maxBackoffMs;
+    private final boolean jitter;
     private final Runnable retryListener;
 
     /**
@@ -36,7 +40,7 @@ public final class S3RetryPolicy {
      * @throws IllegalArgumentException when attempts or delay are invalid
      */
     public S3RetryPolicy(int maxAttempts, long backoffMs) {
-        this(maxAttempts, backoffMs, () -> { });
+        this(maxAttempts, backoffMs, Strategy.FIXED, 0, false, () -> { });
     }
 
     /**
@@ -48,11 +52,30 @@ public final class S3RetryPolicy {
      * @throws IllegalArgumentException when attempts or delay are invalid
      */
     public S3RetryPolicy(int maxAttempts, long backoffMs, Runnable retryListener) {
-        if (maxAttempts < 1 || backoffMs < 0) {
+        this(maxAttempts, backoffMs, Strategy.FIXED, 0, false, retryListener);
+    }
+
+    /**
+     * Create a configurable retry policy with a slow-path retry observer.
+     *
+     * @param maxAttempts total attempts including the first
+     * @param backoffMs initial/fixed delay between attempts
+     * @param strategy retry delay strategy
+     * @param maxBackoffMs maximum exponential delay, or zero for no explicit cap
+     * @param jitter whether to randomize each calculated delay
+     * @param retryListener action invoked only when another attempt will run
+     * @throws IllegalArgumentException when attempts, delay, or strategy are invalid
+     */
+    public S3RetryPolicy(int maxAttempts, long backoffMs, Strategy strategy,
+                         long maxBackoffMs, boolean jitter, Runnable retryListener) {
+        if (maxAttempts < 1 || backoffMs < 0 || maxBackoffMs < 0 || strategy == null) {
             throw new IllegalArgumentException("retry attempts must be positive and delay non-negative");
         }
         this.maxAttempts = maxAttempts;
         this.backoffMs = backoffMs;
+        this.strategy = strategy;
+        this.maxBackoffMs = maxBackoffMs;
+        this.jitter = jitter;
         this.retryListener = retryListener;
     }
 
@@ -70,11 +93,12 @@ public final class S3RetryPolicy {
             try {
                 return supplier.get();
             } catch (Exception ex) {
-                if (attempt++ >= maxAttempts || !isRetryable(ex)) {
+                if (attempt >= maxAttempts || !isRetryable(ex)) {
                     throw ex;
                 }
                 retryListener.run();
-                delay();
+                delay(attempt);
+                attempt++;
             }
         }
     }
@@ -113,15 +137,35 @@ public final class S3RetryPolicy {
             return CompletableFuture.failedFuture(thrown);
         }
         retryListener.run();
+        long retryDelay = retryDelay(attempt);
         return CompletableFuture.supplyAsync(() -> null,
-                        CompletableFuture.delayedExecutor(backoffMs, TimeUnit.MILLISECONDS))
+                        CompletableFuture.delayedExecutor(retryDelay, TimeUnit.MILLISECONDS))
                 .thenCompose(ignored -> attemptAsync(supplier, attempt + 1));
     }
 
-    private void delay() throws InterruptedException {
-        if (backoffMs > 0) {
-            Thread.sleep(backoffMs);
+    private void delay(int failedAttempt) throws InterruptedException {
+        long retryDelay = retryDelay(failedAttempt);
+        if (retryDelay > 0) {
+            Thread.sleep(retryDelay);
         }
+    }
+
+    private long retryDelay(int failedAttempt) {
+        long calculated = backoffMs;
+        if (strategy == Strategy.EXPONENTIAL && backoffMs > 0) {
+            int shift = Math.min(Long.SIZE - 2, Math.max(0, failedAttempt - 1));
+            calculated = backoffMs > (Long.MAX_VALUE >> shift)
+                    ? Long.MAX_VALUE : backoffMs << shift;
+        }
+        if (maxBackoffMs > 0) {
+            calculated = Math.min(calculated, maxBackoffMs);
+        }
+        if (jitter && calculated > 0) {
+            return calculated == Long.MAX_VALUE
+                    ? ThreadLocalRandom.current().nextLong(Long.MAX_VALUE)
+                    : ThreadLocalRandom.current().nextLong(calculated + 1);
+        }
+        return calculated;
     }
 
     private static boolean isRetryable(Throwable thrown) {
@@ -139,6 +183,31 @@ public final class S3RetryPolicy {
             cause = cause.getCause();
         }
         return cause;
+    }
+
+    /** Retry-delay strategy selected once during driver startup. */
+    public enum Strategy {
+        FIXED,
+        EXPONENTIAL;
+
+        /**
+         * Parse a command-line retry strategy.
+         *
+         * @param value strategy name
+         * @return parsed strategy
+         * @throws IllegalArgumentException when the strategy is unsupported
+         */
+        public static Strategy parse(String value) {
+            if (value == null || value.isBlank()) {
+                return FIXED;
+            }
+            try {
+                return valueOf(value.trim().toUpperCase(java.util.Locale.ROOT));
+            } catch (RuntimeException ex) {
+                throw new IllegalArgumentException(
+                        "retry-strategy must be fixed or exponential", ex);
+            }
+        }
     }
 
     /**
