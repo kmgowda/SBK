@@ -26,32 +26,14 @@ or measurement batch. A sensitive file can also contain cold methods; the
 classification applies to the relevant methods and call paths, not blindly to
 every line in the file.
 
-## Mandatory approval gate
+## Normative policy
 
-Do not add work to a hot path without explicit confirmation from the human
-developer for the specific proposed edit. This includes:
-
-- a conditional branch (`if`, `switch`, ternary, or short-circuit condition);
-- an atomic operation, `volatile` access, `VarHandle`, or memory fence;
-- a lock, monitor, mutex, semaphore, blocking queue, sleep, park, or wait;
-- an allocation, copied buffer, collection, wrapper, lambda, or bookkeeping
-  field/local that survives compilation;
-- another clock read, conversion, bounds calculation, getter, callback,
-  interface dispatch, or helper layer; or
-- any other operation that adds latency, jitter, memory traffic, contention,
-  code size, or live state per record or batch.
-
-Before asking for approval, identify the exact method and proposed operation,
-explain why startup specialization or an existing slow path cannot implement
-it, warn about the expected latency/throughput/allocation risk, and propose a
-before/after JMH or representative SBK benchmark. A broad feature request is
-not approval. Moving the work to a helper called by the same hot loop does not
-move it out of the hot path.
-
-Required existing concurrency machinery is not redundant. In particular, do
-not remove or alter PerL queue publication atomics, CAS, `VarHandle`, or memory
-ordering without a Java Memory Model argument and queue stress, Lincheck,
-jcstress, GC, and performance evidence.
+[`AGENTS.md`](../AGENTS.md#hot-path-latency-policy-mandatory-for-every-software-agent)
+owns the normative hot-path rules, prohibited changes, explicit-confirmation
+process, and required performance/concurrency evidence. This document owns
+only the file and method classification. Apply the `AGENTS.md` approval gate
+to every H0, H1, and H2 path below. When the two documents disagree, stop and
+correct them rather than choosing the less restrictive interpretation.
 
 ## Classification
 
@@ -87,14 +69,19 @@ jcstress, GC, and performance evidence.
 
 | Class/file | Mark | Sensitive responsibility |
 |---|---:|---|
+| `perl/src/main/java/io/perl/api/PerformanceRecorder.java` | H1 | Shared channel/recorder state and consumer-loop contract |
 | `perl/src/main/java/io/perl/api/impl/PerformanceRecorderElasticWait.java` | H1 | Queue traversal and adaptive recorder loop |
 | `perl/src/main/java/io/perl/api/impl/PerformanceRecorderIdleSleep.java` | H1 | Queue traversal and idle-sleep recorder loop |
 | `perl/src/main/java/io/perl/api/PeriodicRecorder.java` | H1 | Per-measurement recorder contract |
+| `perl/src/main/java/io/perl/api/PeriodicWindow.java` | H2 | Periodic-window reporting contract |
+| `perl/src/main/java/io/perl/api/TotalPeriodicWindow.java` | H2 | Periodic and total-window reporting contract |
 | `perl/src/main/java/io/perl/api/LatencyRecorder.java` | H1 | Latency validity, count, byte, and total updates |
 | `perl/src/main/java/io/perl/api/LatencyWindow.java` | H2 | Window statistics and percentile extraction |
 | `perl/src/main/java/io/perl/api/LatencyRecord.java` | H1/H2 | Mutable aggregate counters consumed by recorders |
 | `perl/src/main/java/io/perl/api/LatencyRecordWindow.java` | H1/H2 | Exact latency-window recording contract |
 | `perl/src/main/java/io/perl/api/LatencyPercentiles.java` | H2 | Percentile target/result state |
+| `perl/src/main/java/io/perl/api/ReportLatencies.java` | H2 | Per-latency callback used during percentile traversal |
+| `perl/src/main/java/io/perl/logger/ReportLatency.java` | H2 | Per-latency logger callback contract |
 | `perl/src/main/java/io/perl/api/impl/ArrayLatencyRecorder.java` | H1/H2 | Dense exact frequency update and percentile traversal |
 | `perl/src/main/java/io/perl/api/impl/LongHashMapLatencyRecorder.java` | H1/H2 | Sparse exact frequency update and percentile traversal |
 | `perl/src/main/java/io/perl/api/impl/HashMapLatencyRecorder.java` | H1/H2 | Boxed-map exact recorder |
@@ -108,6 +95,14 @@ jcstress, GC, and performance evidence.
 | `perl/src/main/java/io/perl/api/impl/TotalWindowLatencyPeriodicRecorder.java` | H1/H2 | Periodic, total, and extension aggregation |
 | `perl/src/main/java/io/perl/api/impl/TotalWindowLatencyRecorder.java` | H1/H2 | Shared window/total recorder behavior |
 | `perl/src/main/java/io/perl/api/impl/TotalLatencyRecordWindow.java` | H2 | Window and total-window reporting fan-out |
+
+### PerL window logging
+
+| Class/file | Mark | Sensitive responsibility |
+|---|---:|---|
+| `perl/src/main/java/io/perl/logger/PerformanceLogger.java` | H2 | Per-window performance logger contract |
+| `perl/src/main/java/io/perl/logger/Print.java` | H2 | Per-window and total result output contract |
+| `perl/src/main/java/io/perl/logger/impl/ResultsLogger.java` | H2 | Per-window result construction and dispatch |
 
 ### PerL selection and timing boundary
 
@@ -149,13 +144,17 @@ paths. Do not add clock reads or conversions to those call sites.
 | `sbk-api/src/main/java/io/sbk/data/impl/ProtoBufByteString.java` | H0 | Protobuf payload operations |
 | `sbk-api/src/main/java/io/sbk/data/impl/SbkString.java` | H0 | String payload operations |
 
-Every enabled or disabled driver implementation of `Writer`, `Reader`,
-`AsyncReader`, or `AbstractCallbackReader` is **H0**, including its SDK
-completion callback and helpers invoked once per operation. This covers files
-matching `drivers/*/src/main/java/**/*Writer.java`, `*Reader.java`, and any
-per-operation helper regardless of its name. Driver configuration, client
-construction, catalog discovery, and shutdown are cold only when they are not
-called from an operation method.
+Every enabled or disabled driver implementation of
+`sbk-api/src/main/java/io/sbk/api/Writer.java`,
+`sbk-api/src/main/java/io/sbk/api/Reader.java`,
+`sbk-api/src/main/java/io/sbk/api/AsyncReader.java`, or
+`sbk-api/src/main/java/io/sbk/api/AbstractCallbackReader.java` is **H0**,
+including its SDK completion callback and helpers invoked once per operation.
+This covers files matching `drivers/*/src/main/java/**/*Writer.java` and
+`drivers/*/src/main/java/**/*Reader.java`, plus any per-operation helper
+regardless of its name. Driver configuration, client construction, catalog
+discovery, and shutdown are cold only when they are not called from an
+operation method.
 
 ### Request accounting and distributed forwarding
 
@@ -169,17 +168,24 @@ called from an operation method.
 | `sbk-api/src/main/java/io/sbk/logger/impl/GrpcStreamSender.java` | H2 | Queueing and streaming measurement batches to SBM |
 | `sbk-api/src/main/proto/sbp.proto` | H2/C | Wire contract for distributed measurements |
 
-`SystemLogger`, `CSVLogger`, `PrometheusLogger`, `WebLogger`, and their shared
+`sbk-api/src/main/java/io/sbk/logger/impl/SystemLogger.java`,
+`sbk-api/src/main/java/io/sbk/logger/impl/CSVLogger.java`,
+`sbk-api/src/main/java/io/sbk/logger/impl/PrometheusLogger.java`,
+`sbk-api/src/main/java/io/sbk/logger/impl/WebLogger.java`, and their shared
 logger bases are **H2** where they process or publish each completed window.
 Formatting and I/O are intentionally outside H0/H1, but added traversal,
 copying, blocking, or inconsistent field ordering can still corrupt or delay
 results.
 
-`SbkBenchmark`, `Worker`, `Storage`, `Sbk`, `SbkMain`, and
-`ApplicationShutdownHook` are **C**. They own worker creation, storage
-lifecycle, error propagation, result completion, and bounded shutdown. Do not
-confuse “not per-record” with “low risk”: edits require lifecycle ordering and
-termination tests.
+`sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java`,
+`sbk-api/src/main/java/io/sbk/api/Worker.java`,
+`sbk-api/src/main/java/io/sbk/api/Storage.java`,
+`sbk-api/src/main/java/io/sbk/api/impl/Sbk.java`,
+`sbk-api/src/main/java/io/sbk/main/SbkMain.java`, and
+`sbk-api/src/main/java/io/sbk/utils/ApplicationShutdownHook.java` are **C**.
+They own worker creation, storage lifecycle, error propagation, result
+completion, and bounded shutdown. Do not confuse “not per-record” with “low
+risk”: edits require lifecycle ordering and termination tests.
 
 ## SBM
 
@@ -195,7 +201,10 @@ termination tests.
 | `sbm/src/main/java/io/sbm/logger/impl/SbmPrometheusLogger.java` | H2 | Window metric publication |
 | `sbm/src/main/java/io/sbm/logger/impl/SbmWebLogger.java` | H2 | Window web publication |
 
-`SbmBenchmark`, `Sbm`, `SbmMain`, and `SbmRegistry` are **C**. They create the
+`sbm/src/main/java/io/sbm/api/impl/SbmBenchmark.java`,
+`sbm/src/main/java/io/sbm/api/impl/Sbm.java`,
+`sbm/src/main/java/io/sbm/main/SbmMain.java`, and
+`sbm/src/main/java/io/sbm/api/SbmRegistry.java` are **C**. They create the
 server and recorder, coordinate clients, quiesce gRPC, drain all queue shards,
 emit final results, and enforce cleanup deadlines. Keep gRPC callbacks and
 logging outside service monitors, and preserve the server-quiesce -> queue-
@@ -240,8 +249,8 @@ these paths must not change benchmark timing or silently omit a node.
    timestamp, queue item, window, or batch.
 2. Inspect callers and implementations; do not infer coldness from a class or
    method name.
-3. If the edit adds any prohibited cost, stop and obtain explicit human
-   confirmation using the approval gate above.
+3. If the edit adds any cost prohibited by the normative `AGENTS.md` policy,
+   stop and obtain the required explicit human confirmation.
 4. Prefer startup selection, precomputation, immutable configuration, or an
    existing error/lifecycle slow path.
 5. Preserve functional correctness with focused tests.
@@ -257,3 +266,20 @@ these paths must not change benchmark timing or silently omit a node.
 When a new writer, reader, queue, recorder, timestamp carrier, measurement
 accumulator, or forwarding implementation is added, update this inventory in
 the same PR.
+
+## Automated validation
+
+Run the repository validator after changing this inventory, an agent entry
+point, or its packaging:
+
+```bash
+./gradlew verifyHotPathDocumentation
+```
+
+The task is part of the root `check` lifecycle. It fails when a concrete
+source path in this document does not exist, when a Java file is cited only by
+bare filename, when a supported agent entry point no longer routes to this
+document, or when a distribution definition stops packaging the guide or a
+tool-specific adapter. Classification completeness and whether a method is
+actually hot still require code review; no static path check can replace call-
+graph inspection and performance analysis.

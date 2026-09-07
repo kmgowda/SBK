@@ -45,6 +45,7 @@ documentation directory into a backend-specific collection.
 Verify locally:
 
 ```bash
+./gradlew verifyHotPathDocumentation
 ./gradlew :installDist
 find build/install/sbk -maxdepth 2 -type f | sort
 ```

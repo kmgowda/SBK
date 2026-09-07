@@ -61,6 +61,9 @@ rg -n 'Java (8|11|17|21|22|23|24)|JDK (8|11|17|21|22|23|24)|sbk-pathing-10\.0' -
 
 # Check whitespace errors
 git diff --check
+
+# Validate hot-path paths, agent routing, and packaging declarations
+./gradlew verifyHotPathDocumentation
 ```
 
 For Mermaid changes, use Mermaid CLI 11 or later when available. Render every changed diagram; GitHub rendering alone should not be the first syntax test.

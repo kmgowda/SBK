@@ -103,6 +103,78 @@ def wrapperConfigurationCachePolicyMarkerPath =
         wrapperConfigurationCachePolicyMarker.get().asFile.absolutePath
 def unixGradleWrapperPath = layout.projectDirectory.file('gradlew').asFile.absolutePath
 def windowsGradleWrapperPath = layout.projectDirectory.file('gradlew.bat').asFile.absolutePath
+def hotPathProjectDirectory = layout.projectDirectory.asFile
+def hotPathDocumentationFile = layout.projectDirectory.file('docs/HOT_PATHS.md').asFile
+def hotPathAgentEntryPoints = [
+        layout.projectDirectory.file('AGENTS.md').asFile,
+        layout.projectDirectory.file('INSTRUCTIONS.md').asFile,
+        layout.projectDirectory.file('.cursorrules').asFile,
+        layout.projectDirectory.file('.cursor/rules/sbk.mdc').asFile,
+        layout.projectDirectory.file('.windsurf/rules/sbk.md').asFile,
+        layout.projectDirectory.file('.github/copilot-instructions.md').asFile,
+        layout.projectDirectory.file('.aider.conf.yml').asFile,
+        layout.projectDirectory.file('docs/README.md').asFile,
+        layout.projectDirectory.file('docs/AGENT_TOOLKIT.md').asFile,
+        layout.projectDirectory.file('.devin/skills/sbk-benchmark-runner/SKILL.md').asFile,
+        layout.projectDirectory.file('.devin/skills/sbk-build-verify/SKILL.md').asFile,
+        layout.projectDirectory.file('.devin/skills/sbk-distributed-benchmark-runner/SKILL.md').asFile,
+        layout.projectDirectory.file('.devin/skills/sbk-driver-development/SKILL.md').asFile
+]
+def hotPathPackagingRequirements = [
+        (layout.projectDirectory.file('build.gradle').asFile):
+                ['HOT_PATHS.md', '.windsurf/rules', 'copilot-instructions.md'],
+        (layout.projectDirectory.file('gradle/maven.gradle').asFile):
+                ['HOT_PATHS.md', '.windsurf/rules', 'copilot-instructions.md'],
+        (layout.projectDirectory.file('gradle/release-publication.gradle').asFile):
+                ['.windsurf', 'copilot-instructions.md', "from('docs')"]
+]
+
+def verifyHotPathDocumentation = tasks.register('verifyHotPathDocumentation') {
+    group = 'verification'
+    description = 'Verifies hot-path inventory paths, agent routing, and packaging declarations.'
+    inputs.files(hotPathDocumentationFile, hotPathAgentEntryPoints,
+            hotPathPackagingRequirements.keySet())
+
+    doLast {
+        final String inventory = hotPathDocumentationFile.getText('UTF-8')
+        if (!inventory.contains('../AGENTS.md#hot-path-latency-policy-mandatory-for-every-software-agent')) {
+            throw new GradleException('HOT_PATHS.md must identify the normative AGENTS.md hot-path policy')
+        }
+
+        final Set<String> sourcePaths = new TreeSet<>()
+        final def sourceMatcher = inventory =~ /`((?:perl|sbk-api|sbm|sbk-gem)\/src\/main\/[^`*]+)`/
+        sourceMatcher.each { match -> sourcePaths.add(match[1]) }
+        final Set<String> missingPaths = sourcePaths.findAll {
+            !new File(hotPathProjectDirectory, it).exists()
+        }
+        if (!missingPaths.isEmpty()) {
+            throw new GradleException("HOT_PATHS.md contains missing source paths: ${missingPaths}")
+        }
+
+        final def bareJavaReferences = inventory =~ /`([A-Za-z][A-Za-z0-9]*\.java)`/
+        if (bareJavaReferences.find()) {
+            throw new GradleException(
+                    "HOT_PATHS.md must use full repository paths; found `${bareJavaReferences.group(1)}`")
+        }
+
+        final List<String> unroutedAgents = hotPathAgentEntryPoints.findAll {
+            !it.getText('UTF-8').contains('HOT_PATHS.md')
+        }.collect { hotPathProjectDirectory.toPath().relativize(it.toPath()).toString() }
+        if (!unroutedAgents.isEmpty()) {
+            throw new GradleException("Agent entry points do not route to HOT_PATHS.md: ${unroutedAgents}")
+        }
+
+        hotPathPackagingRequirements.each { file, requiredText ->
+            final String packaging = file.getText('UTF-8')
+            final List<String> missingText = requiredText.findAll { !packaging.contains(it) }
+            if (!missingText.isEmpty()) {
+                throw new GradleException(
+                        "${file.name} does not package hot-path agent guidance: ${missingText}")
+            }
+        }
+    }
+}
+
 def verifyGradleWrapperConfigurationCachePolicy = tasks.register(
         'verifyGradleWrapperConfigurationCachePolicy') {
     group = 'verification'
@@ -900,6 +972,7 @@ apply from: "gradle/release-publication.gradle"
 
 tasks.named('check') {
     dependsOn verifyGradleWrapperConfigurationCachePolicy
+    dependsOn verifyHotPathDocumentation
 }
 tasks.named('wrapper') {
     finalizedBy verifyGradleWrapperConfigurationCachePolicy
