@@ -9,6 +9,12 @@ Invoke this skill when:
 - Modifying an existing driver (adding CLI flags, fixing bugs, changing behavior)
 - A driver change requires updating build configuration
 
+Read [`docs/HOT_PATHS.md`](../../../docs/HOT_PATHS.md) before editing a driver
+writer, reader, async completion, callback, or helper invoked per operation.
+Those paths are H0. Do not add a branch, atomic/volatile operation, lock, wait,
+allocation, bookkeeping, clock read, conversion, or dispatch layer without
+explicit human confirmation for the exact edit.
+
 ## What this skill provides
 
 ### Context

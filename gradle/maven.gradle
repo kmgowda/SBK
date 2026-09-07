@@ -43,6 +43,7 @@ plugins.withId('maven-publish') {
             include 'DRIVER_SPECIFICATION.md'
             include 'AGENT_TOOLKIT.md'
             include 'AGENT_DOCUMENTATION_DISTRIBUTION.md'
+            include 'HOT_PATHS.md'
             include 'sbk-internals.md'
             include 'ARCHITECTURE.md'
             include 'REPOSITORY_MAP.md'
@@ -72,6 +73,14 @@ plugins.withId('maven-publish') {
         from(rootProject.file('.cursor/rules')) {
             include '*.mdc'
             into 'agent-configs/cursor/rules'
+        }
+        from(rootProject.file('.windsurf/rules')) {
+            include '*.md'
+            into 'agent-configs/windsurf/rules'
+        }
+        from(rootProject.file('.github')) {
+            include 'copilot-instructions.md'
+            into 'agent-configs/github'
         }
     }
 

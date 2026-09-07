@@ -30,9 +30,10 @@ The distribution root contains:
 - Agent-specific configuration files that exist in the repository
 
 Current tool-specific entries include the Cursor project rule and legacy
-pointer, the Aider configuration, and the portable skills under
-`.devin/skills/`. Windsurf and Codex consume the root `AGENTS.md` directly and
-do not need duplicate repository rules.
+pointer, the Windsurf rule, the GitHub Copilot instructions, the Aider
+configuration, and the portable skills under `.devin/skills/`. Codex consumes
+the root `AGENTS.md` directly. All of these entries route sensitive-file work
+to `docs/HOT_PATHS.md` rather than maintaining conflicting inventories.
 
 The `docs/` directory contains repository-wide engineering material. Driver-
 specific documentation remains owned by its driver: the MinIO reference,
@@ -74,7 +75,7 @@ The guarded release workflow:
 2. Creates `sbk-agent-docs.tar.gz` from root entry points, the complete `docs/`
    directory, driver-owned MinIO documentation and examples, and agent
    configurations while preserving discovery paths such as `.cursor/rules/`,
-   `.devin/skills/`, and `drivers/minio/`.
+   `.windsurf/rules/`, `.github/`, `.devin/skills/`, and `drivers/minio/`.
 3. Adds checksums, the release manifest, and direct CycloneDX SBOMs for the
    publishable core modules to the contracted asset directory. Qualification
    evidence remains under `build/reports/release-qualification/` and must be

@@ -36,6 +36,9 @@ This directory contains the authoritative engineering documentation for Storage 
 2. [Repository map](REPOSITORY_MAP.md): where code and configuration live.
 3. [Driver guide](DRIVER_GUIDE.md): the most common extension workflow.
 4. [Engineering recipes](AGENT_RECIPES.md): task-oriented implementation procedures.
+5. [Hot-path and critical-path inventory](HOT_PATHS.md): sensitive files and
+   the mandatory approval gate for per-operation, per-measurement, and
+   per-batch changes.
 
 ### Maintainer or reviewer
 
@@ -56,9 +59,11 @@ This directory contains the authoritative engineering documentation for Storage 
 1. [AGENTS.md](../AGENTS.md): repository constraints and required verification.
 2. [Coding-agent toolkit](AGENT_TOOLKIT.md): tool discovery, task routing, and
    the shared workflow for Codex, Windsurf, Devin, Cursor, Aider, and others.
-3. [Engineering recipes](AGENT_RECIPES.md): deterministic task playbooks.
-4. [Driver specification template](DRIVER_SPECIFICATION.md): spec-driven driver work.
-5. [ECS/OBS agent runbook](../drivers/minio/docs/ECS_OBS_AGENT_RUNBOOK.md): authorized, staged, machine-checkable ECS/ObjectScale performance workflows.
+3. [Hot-path and critical-path inventory](HOT_PATHS.md): mandatory file-level
+   sensitivity map and explicit-confirmation procedure.
+4. [Engineering recipes](AGENT_RECIPES.md): deterministic task playbooks.
+5. [Driver specification template](DRIVER_SPECIFICATION.md): spec-driven driver work.
+6. [ECS/OBS agent runbook](../drivers/minio/docs/ECS_OBS_AGENT_RUNBOOK.md): authorized, staged, machine-checkable ECS/ObjectScale performance workflows.
 
 `INSTRUCTIONS.md` is a compact compatibility pointer for tools that do not
 discover `AGENTS.md` directly; it does not replace the full guide.
@@ -73,6 +78,7 @@ discover `AGENTS.md` directly; it does not replace the full guide.
 | [DRIVER_GUIDE.md](DRIVER_GUIDE.md) | Driver inventory, contract, structure, and verification |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | Human contribution workflow and definition of done |
 | [AGENTS.md](../AGENTS.md) | Agent rules and repository-specific constraints |
+| [HOT_PATHS.md](HOT_PATHS.md) | PerL, SBK, driver, SBM, and SBK-GEM sensitive-file classification and hot-path approval gate |
 | [AGENT_RECIPES.md](AGENT_RECIPES.md) | Exact task procedures |
 | [AGENT_TOOLKIT.md](AGENT_TOOLKIT.md) | Cross-tool agent discovery, context routing, permissions, and verification |
 | [AGENT_DOCUMENTATION_DISTRIBUTION.md](AGENT_DOCUMENTATION_DISTRIBUTION.md) | Agent-documentation release and artifact packaging |

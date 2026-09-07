@@ -678,6 +678,7 @@ application {
             include "DRIVER_SPECIFICATION.md"
             include "AGENT_TOOLKIT.md"
             include "AGENT_DOCUMENTATION_DISTRIBUTION.md"
+            include "HOT_PATHS.md"
             include "sbk-internals.md"
             include "README.md"
             include "ARCHITECTURE.md"
@@ -715,6 +716,16 @@ application {
     applicationDistribution.into(".cursor/rules") {
         from(".cursor/rules") {
             include "*.mdc"
+        }
+    }
+    applicationDistribution.into(".windsurf/rules") {
+        from(".windsurf/rules") {
+            include "*.md"
+        }
+    }
+    applicationDistribution.into(".github") {
+        from(".github") {
+            include "copilot-instructions.md"
         }
     }
 }

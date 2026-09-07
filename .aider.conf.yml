@@ -10,6 +10,7 @@ chat-history-file: .aider.chat.history.md
 # by /add AGENTS.md only when the task explicitly edits that file.
 read:
   - AGENTS.md
+  - docs/HOT_PATHS.md
 
 # A normal coding request does not imply permission to create commits. Let the
 # user review and commit the resulting patch explicitly.
