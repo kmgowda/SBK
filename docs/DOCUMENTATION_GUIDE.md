@@ -62,7 +62,7 @@ rg -n 'Java (8|11|17|21|22|23|24)|JDK (8|11|17|21|22|23|24)|sbk-pathing-10\.0' -
 # Check whitespace errors
 git diff --check
 
-# Validate hot-path paths, agent routing, and packaging declarations
+# Validate hot-path paths/coverage, agent routing, and packaged output
 ./gradlew verifyHotPathDocumentation
 ```
 

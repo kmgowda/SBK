@@ -102,6 +102,8 @@ correct them rather than choosing the less restrictive interpretation.
 |---|---:|---|
 | `perl/src/main/java/io/perl/logger/PerformanceLogger.java` | H2 | Per-window performance logger contract |
 | `perl/src/main/java/io/perl/logger/Print.java` | H2 | Per-window and total result output contract |
+| `perl/src/main/java/io/perl/logger/impl/DefaultLogger.java` | H2 | Default per-window logger implementation |
+| `perl/src/main/java/io/perl/logger/impl/DefaultPrometheusLogger.java` | H2 | Prometheus-backed per-window logger implementation |
 | `perl/src/main/java/io/perl/logger/impl/ResultsLogger.java` | H2 | Per-window result construction and dispatch |
 
 ### PerL selection and timing boundary
@@ -162,7 +164,11 @@ operation method.
 |---|---:|---|
 | `sbk-api/src/main/java/io/sbk/logger/WriteRequestsLogger.java` | H0 | Per-write request accounting contract |
 | `sbk-api/src/main/java/io/sbk/logger/ReadRequestsLogger.java` | H0 | Per-read request accounting contract |
+| `sbk-api/src/main/java/io/sbk/logger/Logger.java` | H2/C | Logger reporting and lifecycle contract |
+| `sbk-api/src/main/java/io/sbk/logger/RWLogger.java` | H0/H2 | Request-accounting and result-output contract |
 | `sbk-api/src/main/java/io/sbk/logger/impl/AbstractRWLogger.java` | H0/H2 | Request counters and periodic result construction |
+| `sbk-api/src/main/java/io/sbk/logger/impl/AbstractSystemLogger.java` | H2 | System-output window formatting |
+| `sbk-api/src/main/java/io/sbk/logger/impl/Sl4jLogger.java` | H2 | SLF4J window and total-result publication |
 | `sbk-api/src/main/java/io/sbk/logger/impl/GrpcLogger.java` | H1/H2 | Latency accumulation and measurement-batch creation |
 | `sbk-api/src/main/java/io/sbk/logger/impl/GrpcLatencyAccumulator.java` | H1/H2 | Batch latency/count/byte accumulation |
 | `sbk-api/src/main/java/io/sbk/logger/impl/GrpcStreamSender.java` | H2 | Queueing and streaming measurement batches to SBM |
@@ -276,10 +282,16 @@ point, or its packaging:
 ./gradlew verifyHotPathDocumentation
 ```
 
-The task is part of the root `check` lifecycle. It fails when a concrete
-source path in this document does not exist, when a Java file is cited only by
-bare filename, when a supported agent entry point no longer routes to this
-document, or when a distribution definition stops packaging the guide or a
-tool-specific adapter. Classification completeness and whether a method is
-actually hot still require code review; no static path check can replace call-
-graph inspection and performance analysis.
+The task is part of the root `check` lifecycle and builds the installed
+distribution before validating it. It fails when a concrete source path in
+this document does not exist, when a Java file is cited only by bare filename,
+when a likely-sensitive recorder/queue/window/timestamp/writer/reader/logger/
+accumulator/forwarder candidate is omitted, when a supported agent entry point
+no longer routes to this document, or when the resolved distribution omits the
+guide or a tool-specific adapter. It also checks the independent Maven and
+release packaging declarations.
+
+Name-pattern coverage is deliberately conservative but cannot prove that an
+arbitrarily named helper is cold. Classification completeness and whether a
+method is actually hot still require code review; no static path check can
+replace call-graph inspection and performance analysis.
