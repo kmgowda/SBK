@@ -55,6 +55,10 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
     private final AtomicInteger maxReaders;
     private boolean isRequestWrites;
     private boolean isRequestReads;
+    /**
+     * A measured completion satisfies every request stage represented by the action; consequently,
+     * combined write/read actions attribute that completion to both request streams.
+     */
     private int writeResponseCompletionMultiplier;
     private int readResponseCompletionMultiplier;
     private int maxWriterRequestIds;

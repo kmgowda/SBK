@@ -258,7 +258,8 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
     }
 
     private void shutdown(Throwable ex) {
-        shutdown(ex, Long.MAX_VALUE);
+        final long cleanupSeconds = SbkRuntimeConfig.get().forcedShutdownGraceSeconds;
+        shutdown(ex, System.nanoTime() + TimeUnit.SECONDS.toNanos(cleanupSeconds));
     }
 
     private void shutdown(Throwable ex, long cleanupDeadlineNanos) {
@@ -296,15 +297,11 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
             boolean receiverCompleted = false;
             while (!receiverCompleted) {
                 try {
-                    if (cleanupDeadlineNanos == Long.MAX_VALUE) {
-                        receiverFuture.get();
-                    } else {
-                        final long remainingNanos = cleanupDeadlineNanos - System.nanoTime();
-                        if (remainingNanos <= 0) {
-                            throw new TimeoutException("SBM cleanup deadline expired");
-                        }
-                        receiverFuture.get(remainingNanos, TimeUnit.NANOSECONDS);
+                    final long remainingNanos = cleanupDeadlineNanos - System.nanoTime();
+                    if (remainingNanos <= 0) {
+                        throw new TimeoutException("SBM cleanup deadline expired");
                     }
+                    receiverFuture.get(remainingNanos, TimeUnit.NANOSECONDS);
                     receiverCompleted = true;
                 } catch (ExecutionException failure) {
                     terminalFailure = retainFailure(terminalFailure, failure.getCause());

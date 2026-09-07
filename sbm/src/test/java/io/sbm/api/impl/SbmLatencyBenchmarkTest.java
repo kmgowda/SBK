@@ -14,6 +14,7 @@ import io.sbm.api.SbmPeriodicRecorder;
 import io.sbp.grpc.MessageLatenciesRecord;
 import io.time.MilliSeconds;
 import io.time.Time;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -106,9 +107,9 @@ final class SbmLatencyBenchmarkTest {
      *
      * @throws Exception if startup, draining, or shutdown exceeds its timeout
      */
-    @Test
+    @RepeatedTest(3)
     void drainsUnevenClientQueuesBeforeShutdown() throws Exception {
-        final CapturingWindow window = new CapturingWindow();
+        final CapturingWindow window = new CapturingWindow(false, 3);
         final SbmLatencyBenchmark benchmark = new SbmLatencyBenchmark(
                 2, 1, new MilliSeconds(), window,
                 PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS * Time.MS_PER_SEC, 600);
@@ -117,7 +118,7 @@ final class SbmLatencyBenchmarkTest {
                 .setClientID(10)
                 .setSequenceNumber(1)
                 .build());
-        for (int sequence = 1; sequence <= 50; sequence++) {
+        for (int sequence = 1; sequence <= 300; sequence++) {
             benchmark.enQueue(MessageLatenciesRecord.newBuilder()
                     .setClientID(11)
                     .setSequenceNumber(sequence)
@@ -129,7 +130,7 @@ final class SbmLatencyBenchmarkTest {
         assertTimeoutPreemptively(Duration.ofSeconds(2), benchmark::stop);
         completion.get(2, TimeUnit.SECONDS);
 
-        assertEquals(51, window.recordedBatches.get());
+        assertEquals(301, window.recordedBatches.get());
     }
 
     /**
@@ -240,13 +241,19 @@ final class SbmLatencyBenchmarkTest {
         private final AtomicInteger stoppedWindows = new AtomicInteger();
         private final AtomicInteger recordedBatches = new AtomicInteger();
         private final boolean expireImmediately;
+        private final int recordDelayMillis;
 
         private CapturingWindow() {
-            this(false);
+            this(false, 0);
         }
 
         private CapturingWindow(boolean expireImmediately) {
+            this(expireImmediately, 0);
+        }
+
+        private CapturingWindow(boolean expireImmediately, int recordDelayMillis) {
             this.expireImmediately = expireImmediately;
+            this.recordDelayMillis = recordDelayMillis;
         }
 
         /**
@@ -259,6 +266,13 @@ final class SbmLatencyBenchmarkTest {
         public void record(long currentTime, MessageLatenciesRecord record) {
             recordedBatches.incrementAndGet();
             batchRecorded.countDown();
+            if (recordDelayMillis > 0) {
+                try {
+                    Thread.sleep(recordDelayMillis);
+                } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();
+                }
+            }
         }
 
         /**
