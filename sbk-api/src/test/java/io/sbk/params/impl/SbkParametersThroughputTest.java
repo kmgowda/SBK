@@ -47,6 +47,19 @@ public final class SbkParametersThroughputTest {
                 () -> parse(1, 1, "-2"));
     }
 
+    /** Reject a timed aggregate records rate that truncates to unlimited mode. */
+    @Test
+    public void rejectsTimedRecordsBelowOneRecordPerWorker() {
+        assertThrows(IllegalArgumentException.class,
+                () -> parseTimedRecords(2, 1));
+    }
+
+    /** Accept the exact timed aggregate boundary of one record per second per worker. */
+    @Test
+    public void acceptsTimedRecordsAtOneRecordPerWorker() throws Exception {
+        assertEquals(1, parseTimedRecords(2, 2).getRecordsPerSec());
+    }
+
     private static SbkParameters parse(int writers, int size, String throughput) throws Exception {
         final SbkParameters parameters = new SbkParameters("throughput-test");
         parameters.parseArgs(new String[]{
@@ -54,6 +67,17 @@ public final class SbkParametersThroughputTest {
             "-size", Integer.toString(size),
             "-records", "1",
             "-throughput", throughput
+        });
+        return parameters;
+    }
+
+    private static SbkParameters parseTimedRecords(int writers, long records) throws Exception {
+        final SbkParameters parameters = new SbkParameters("records-rate-test");
+        parameters.parseArgs(new String[]{
+            "-writers", Integer.toString(writers),
+            "-size", "1",
+            "-seconds", "1",
+            "-records", Long.toString(records)
         });
         return parameters;
     }

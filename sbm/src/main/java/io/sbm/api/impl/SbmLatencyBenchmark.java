@@ -13,13 +13,14 @@ package io.sbm.api.impl;
 import io.perl.api.impl.ConcurrentLinkedQueueArray;
 import io.perl.exception.BenchmarkIdleTimeoutException;
 import io.sbk.api.Benchmark;
+import io.sbk.config.SbkRuntimeConfig;
+import io.sbk.exception.BenchmarkCleanupTimeoutException;
 import io.sbm.api.SbmPeriodicRecorder;
 import io.sbp.grpc.MessageLatenciesRecord;
 import io.sbm.api.SbmRegistry;
 import io.sbk.system.Printer;
 import io.state.State;
 import io.time.Time;
-import lombok.Synchronized;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.GuardedBy;
@@ -28,6 +29,8 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -254,46 +257,93 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
         add(index, record);
     }
 
-    @Synchronized
     private void shutdown(Throwable ex) {
-        if (state != State.END) {
+        final long cleanupSeconds = SbkRuntimeConfig.get().forcedShutdownGraceSeconds;
+        shutdown(ex, System.nanoTime() + TimeUnit.SECONDS.toNanos(cleanupSeconds));
+    }
+
+    private void shutdown(Throwable ex, long cleanupDeadlineNanos) {
+        final CompletableFuture<Void> receiverFuture;
+        synchronized (this) {
+            if (state == State.END) {
+                return;
+            }
             state = State.END;
-            Throwable terminalFailure = unwrapCompletionFailure(ex);
-            InterruptedException interruption = null;
-            if (qFuture != null) {
-                if (!qFuture.isDone()) {
-                    add(0, MessageLatenciesRecord.newBuilder().setSequenceNumber(-1).build());
-                }
-                boolean receiverCompleted = false;
-                while (!receiverCompleted) {
+            receiverFuture = qFuture;
+            qFuture = null;
+        }
+        Throwable terminalFailure = unwrapCompletionFailure(ex);
+        InterruptedException interruption = null;
+        if (receiverFuture != null) {
+            if (!receiverFuture.isDone()) {
+                while (!isEmpty() && System.nanoTime() < cleanupDeadlineNanos) {
                     try {
-                        qFuture.get();
-                        receiverCompleted = true;
-                    } catch (ExecutionException failure) {
-                        terminalFailure = retainFailure(terminalFailure, failure.getCause());
-                        receiverCompleted = true;
+                        final long remainingMillis = TimeUnit.NANOSECONDS.toMillis(
+                                cleanupDeadlineNanos - System.nanoTime());
+                        Thread.sleep(Math.max(1, Math.min(idleMS, remainingMillis)));
                     } catch (InterruptedException interrupted) {
                         if (interruption == null) {
                             interruption = interrupted;
                         }
                     }
                 }
-                clear();
-                qFuture = null;
+                if (isEmpty()) {
+                    add(0, MessageLatenciesRecord.newBuilder().setSequenceNumber(-1).build());
+                } else {
+                    terminalFailure = retainFailure(terminalFailure, cleanupTimeout(ex));
+                    executor.shutdownNow();
+                }
             }
-            executor.shutdown();
-            terminalFailure = retainFailure(terminalFailure, interruption);
-            if (interruption != null) {
-                Thread.currentThread().interrupt();
+            boolean receiverCompleted = false;
+            while (!receiverCompleted) {
+                try {
+                    final long remainingNanos = cleanupDeadlineNanos - System.nanoTime();
+                    if (remainingNanos <= 0) {
+                        throw new TimeoutException("SBM cleanup deadline expired");
+                    }
+                    receiverFuture.get(remainingNanos, TimeUnit.NANOSECONDS);
+                    receiverCompleted = true;
+                } catch (ExecutionException failure) {
+                    terminalFailure = retainFailure(terminalFailure, failure.getCause());
+                    receiverCompleted = true;
+                } catch (TimeoutException timeout) {
+                    terminalFailure = retainFailure(terminalFailure, cleanupTimeout(ex));
+                    executor.shutdownNow();
+                    receiverCompleted = true;
+                } catch (InterruptedException interrupted) {
+                    if (interruption == null) {
+                        interruption = interrupted;
+                    }
+                }
             }
-            if (terminalFailure != null) {
-                Printer.log.warn("SbmLatencyBenchmark exited due to internal exception", terminalFailure);
-                retFuture.completeExceptionally(terminalFailure);
-            } else {
-                Printer.log.info("SbmLatencyBenchmark Shutdown");
-                retFuture.complete(null);
-            }
+            clear();
         }
+        executor.shutdown();
+        terminalFailure = retainFailure(terminalFailure, interruption);
+        if (interruption != null) {
+            Thread.currentThread().interrupt();
+        }
+        if (terminalFailure != null) {
+            Printer.log.warn("SbmLatencyBenchmark exited due to internal exception", terminalFailure);
+            retFuture.completeExceptionally(terminalFailure);
+        } else {
+            Printer.log.info("SbmLatencyBenchmark Shutdown");
+            retFuture.complete(null);
+        }
+    }
+
+    private static BenchmarkCleanupTimeoutException cleanupTimeout(Throwable initiatingFailure) {
+        return new BenchmarkCleanupTimeoutException(
+                SbkRuntimeConfig.get().forcedShutdownGraceSeconds, initiatingFailure);
+    }
+
+    /**
+     * Stops the consumer after draining accepted batches within a shared cleanup deadline.
+     *
+     * @param cleanupDeadlineNanos absolute monotonic cleanup deadline
+     */
+    void stopBefore(long cleanupDeadlineNanos) {
+        shutdown(null, cleanupDeadlineNanos);
     }
 
     private static Throwable retainFailure(Throwable currentFailure, Throwable additionalFailure) {
@@ -328,8 +378,7 @@ final public class SbmLatencyBenchmark extends ConcurrentLinkedQueueArray<Messag
      *                               its current state
      */
     @Override
-    @Synchronized
-    public CompletableFuture<Void> start() throws IllegalStateException {
+    public synchronized CompletableFuture<Void> start() throws IllegalStateException {
         if (state == State.BEGIN) {
             state = State.RUN;
             qFuture = CompletableFuture.runAsync(() -> {

@@ -26,6 +26,7 @@ import io.perl.api.impl.PerlBuilder;
 import io.sbk.api.Benchmark;
 import io.sbk.config.Config;
 import io.sbk.config.SbkRuntimeConfig;
+import io.sbk.exception.BenchmarkCleanupTimeoutException;
 import io.sbm.config.SbmConfig;
 import io.sbm.logger.RamLogger;
 import io.sbm.api.SbmPeriodicRecorder;
@@ -333,12 +334,28 @@ final public class SbmBenchmark implements Benchmark {
         if (state != State.END) {
             state = State.END;
             Throwable lifecycleFailure = unwrapCompletionFailure(failure);
+            final long cleanupSeconds = SbkRuntimeConfig.get().forcedShutdownGraceSeconds;
+            final long cleanupDeadlineNanos = System.nanoTime()
+                    + TimeUnit.SECONDS.toNanos(cleanupSeconds);
+            boolean interrupted = false;
             if (serverStarted) {
                 server.shutdown();
                 serverStarted = false;
+                try {
+                    final long remainingNanos = Math.max(0, cleanupDeadlineNanos - System.nanoTime());
+                    if (!server.awaitTermination(remainingNanos, TimeUnit.NANOSECONDS)) {
+                        server.shutdownNow();
+                        lifecycleFailure = retainFailure(lifecycleFailure,
+                                new BenchmarkCleanupTimeoutException(cleanupSeconds, failure));
+                    }
+                } catch (InterruptedException exception) {
+                    interrupted = true;
+                    server.shutdownNow();
+                    lifecycleFailure = retainFailure(lifecycleFailure, exception);
+                }
             }
             try {
-                benchmark.stop();
+                benchmark.stopBefore(cleanupDeadlineNanos);
             } catch (RuntimeException e) {
                 lifecycleFailure = retainFailure(lifecycleFailure, e);
             }
@@ -368,6 +385,9 @@ final public class SbmBenchmark implements Benchmark {
                 retFuture.completeExceptionally(terminalFailure);
             }
             deadlineExecutor.shutdownNow();
+            if (interrupted) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 

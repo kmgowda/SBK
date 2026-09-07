@@ -55,6 +55,12 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
     private final AtomicInteger maxReaders;
     private boolean isRequestWrites;
     private boolean isRequestReads;
+    /**
+     * A measured completion satisfies every request stage represented by the action; consequently,
+     * combined write/read actions attribute that completion to both request streams.
+     */
+    private int writeResponseCompletionMultiplier;
+    private int readResponseCompletionMultiplier;
     private int maxWriterRequestIds;
     private int maxReaderRequestIds;
 
@@ -110,6 +116,8 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         this.readResponsePendingBytes = 0;
         this.isRequestWrites = false;
         this.isRequestReads = false;
+        this.writeResponseCompletionMultiplier = 0;
+        this.readResponseCompletionMultiplier = 0;
         this.readBytesArray = null;
         this.readRequestRecordsArray = null;
         this.writeBytesArray = null;
@@ -239,6 +247,18 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         this.storageName = storageName;
         this.action = action;
         this.time = time;
+        writeResponseCompletionMultiplier = 0;
+        readResponseCompletionMultiplier = 0;
+        switch (action) {
+            case Writing -> writeResponseCompletionMultiplier = 1;
+            case Reading -> readResponseCompletionMultiplier = 1;
+            case Write_Reading, Read_Writing -> {
+                writeResponseCompletionMultiplier = 1;
+                readResponseCompletionMultiplier = 1;
+            }
+            case Write_OnlyReading -> readResponseCompletionMultiplier = 1;
+            case Read_OnlyWriting -> writeResponseCompletionMultiplier = 1;
+        }
         for (double p : Objects.requireNonNull(getPercentiles())) {
             if (p < 0 || p > LatencyConfig.PERCENTAGE_SCALE) {
                 Printer.log.error("Invalid percentiles indices : " + Arrays.toString(getPercentiles()));
@@ -504,16 +524,16 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
      * @param out destination buffer
      * @param writeResponsePendingRecords pending write-response records
      * @param writeResponsePendingBytes pending write-response bytes
-     * @param readResponsePendingBytes pending read-response bytes
      * @param readResponsePendingRecords pending read-response records
+     * @param readResponsePendingBytes pending read-response bytes
      * @param writeReadRequestPendingRecords pending combined request records
      * @param writeReadRequestPendingBytes pending combined request bytes
      */
     protected final void appendWriteAndReadRequestsPending(@NotNull StringBuilder out,
                                                            long writeResponsePendingRecords,
                                                            long writeResponsePendingBytes,
-                                                           long readResponsePendingBytes,
                                                            long readResponsePendingRecords,
+                                                           long readResponsePendingBytes,
                                                            long writeReadRequestPendingRecords,
                                                            long writeReadRequestPendingBytes) {
         out.append(String.format(" %8.2f write response pending MB, %13d write response pending records, ",
@@ -644,7 +664,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                                             long readRequestBytes, double readRequestMBPerSec,
                                             long readRequestRecords, double readRequestRecordsPerSec,
                                             long writeResponsePendingRecords, long writeResponsePendingBytes,
-                                            long readResponsePendingBytes, long readResponsePendingRecords,
+                                            long readResponsePendingRecords, long readResponsePendingBytes,
                                             long writeReadRequestPendingRecords, long writeReadRequestPendingBytes,
                                             long writeTimeoutEvents, double writeTimeoutEventsPerSec,
                                             long readTimeoutEvents, double readTimeoutEventsPerSec,
@@ -658,7 +678,7 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
                 writeRequestRecordsPerSec, readRequestBytes, readRequestMBPerSec, readRequestRecords,
                 readRequestRecordsPerSec);
         appendWriteAndReadRequestsPending(out, writeResponsePendingRecords, writeResponsePendingBytes,
-                readResponsePendingBytes, readResponsePendingRecords, writeReadRequestPendingRecords,
+                readResponsePendingRecords, readResponsePendingBytes, writeReadRequestPendingRecords,
                 writeReadRequestPendingBytes);
         appendWriteAndReadTimeoutEvents(out, writeTimeoutEvents, writeTimeoutEventsPerSec, readTimeoutEvents, readTimeoutEventsPerSec);
         appendResultString(out, seconds, bytes, records, recsPerSec, mbPerSec,
@@ -678,15 +698,19 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         if (isRequestWrites) {
             writeRequestRecords += req.writeRequestRecords;
             writeRequestBytes += req.writeRequestBytes;
-            writeResponsePendingRecords += (req.writeRequestRecords - records);
-            writeResponsePendingBytes += (req.writeRequestBytes - bytes);
+            writeResponsePendingRecords += (req.writeRequestRecords
+                    - records * writeResponseCompletionMultiplier);
+            writeResponsePendingBytes += (req.writeRequestBytes
+                    - bytes * writeResponseCompletionMultiplier);
             writeTimeoutEvents += req.writeTimeoutEvents;
         }
         if (isRequestReads) {
             readRequestRecords += req.readRequestRecords;
             readRequestBytes += req.readRequestBytes;
-            readResponsePendingRecords += (req.readRequestRecords - records);
-            readResponsePendingBytes += (req.readRequestBytes - bytes);
+            readResponsePendingRecords += (req.readRequestRecords
+                    - records * readResponseCompletionMultiplier);
+            readResponsePendingBytes += (req.readRequestBytes
+                    - bytes * readResponseCompletionMultiplier);
             readTimeoutEvents += req.readTimeoutEvents;
         }
 
@@ -739,15 +763,19 @@ public abstract class AbstractRWLogger extends ResultsLogger implements RWLogger
         if (isRequestWrites) {
             writeRequestRecords += req.writeRequestRecords;
             writeRequestBytes += req.writeRequestBytes;
-            writeResponsePendingRecords = writeRequestRecords - records;
-            writeResponsePendingBytes = writeRequestBytes - bytes;
+            writeResponsePendingRecords = writeRequestRecords
+                    - records * writeResponseCompletionMultiplier;
+            writeResponsePendingBytes = writeRequestBytes
+                    - bytes * writeResponseCompletionMultiplier;
             writeTimeoutEvents += req.writeTimeoutEvents;
         }
         if (isRequestReads) {
             readRequestRecords += req.readRequestRecords;
             readRequestBytes += req.readRequestBytes;
-            readResponsePendingRecords = readRequestRecords - records;
-            readResponsePendingBytes = readRequestBytes - bytes;
+            readResponsePendingRecords = readRequestRecords
+                    - records * readResponseCompletionMultiplier;
+            readResponsePendingBytes = readRequestBytes
+                    - bytes * readResponseCompletionMultiplier;
             readTimeoutEvents += req.readTimeoutEvents;
         }
         if (isRequestWrites && isRequestReads) {

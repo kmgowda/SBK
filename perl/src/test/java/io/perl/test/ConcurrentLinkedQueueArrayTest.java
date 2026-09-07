@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import io.perl.api.impl.ConcurrentLinkedQueueArray;
@@ -60,6 +61,15 @@ public class ConcurrentLinkedQueueArrayTest {
         assertNull(queueArray.poll(0));
         assertNull(queueArray.poll(1));
         assertNull(queueArray.poll(2));
+    }
+
+    @Test
+    public void testEmptyAcrossAllQueues() {
+        assertTrue(queueArray.isEmpty());
+        queueArray.add(1, "B");
+        assertFalse(queueArray.isEmpty());
+        assertEquals("B", queueArray.poll(1));
+        assertTrue(queueArray.isEmpty());
     }
 
     @Test

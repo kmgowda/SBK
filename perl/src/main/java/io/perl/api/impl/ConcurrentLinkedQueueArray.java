@@ -44,6 +44,23 @@ public class ConcurrentLinkedQueueArray<T> implements QueueArray<T> {
         return this.cQueues[index].add(data);
     }
 
+    /**
+     * Reports whether every queue is currently empty.
+     *
+     * <p>This method is intended for producer-quiesced lifecycle checks. It is not used by
+     * the queue consumer's measurement loop.
+     *
+     * @return {@code true} when every queue is empty
+     */
+    final public boolean isEmpty() {
+        for (ConcurrentLinkedQueue<T> queue : cQueues) {
+            if (!queue.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     final public void clear(int index) {
         this.cQueues[index].clear();

@@ -250,6 +250,10 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
 
         if (throughput < 0 && totalSecondsToRun > 0) {
             long recsPerSec = totalRecords / workersCnt;
+            if (totalRecords > 0 && recsPerSec == 0) {
+                throw new IllegalArgumentException("Error: The requested records rate is too low for "
+                        + workersCnt + " worker(s); each worker must receive at least one record per second");
+            }
             if (recsPerSec > Integer.MAX_VALUE) {
                 throw new IllegalArgumentException("Error: The Records per Second value :" + recsPerSec + "is more than " + Integer.MAX_VALUE);
             }
