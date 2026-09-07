@@ -126,18 +126,24 @@ def hotPathCandidateSourceTrees = [
                     '**/TimeStamp*.java', '**/ReportLatencies.java'
         },
         fileTree('perl/src/main/java/io/perl/logger') {
-            include '**/*Logger.java', '**/Print.java', '**/ReportLatency.java'
+            include '**/*.java'
         },
         fileTree('sbk-api/src/main/java/io/sbk/api') {
             include '**/*Writer*.java', '**/*Reader*.java', '**/Callback.java',
                     '**/Status.java', '**/*RateController.java'
         },
         fileTree('sbk-api/src/main/java/io/sbk/logger') {
-            include '**/*Logger.java', '**/*Accumulator*.java', '**/*Sender*.java'
+            include '**/*.java'
         },
-        fileTree('sbm/src/main/java') {
-            include '**/*Recorder*.java', '**/*Logger.java', '**/*GrpcService.java',
+        fileTree('sbm/src/main/java/io/sbm/api') {
+            include '**/*Recorder*.java', '**/*GrpcService.java',
                     '**/*LatencyBenchmark.java'
+        },
+        fileTree('sbm/src/main/java/io/sbm/logger') {
+            include '**/*.java'
+        },
+        fileTree('sbk-gem/src/main/java/io/gem/logger') {
+            include '**/*.java'
         }
 ]
 def installedHotPathAgentGuidance = [

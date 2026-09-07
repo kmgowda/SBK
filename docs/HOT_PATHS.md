@@ -81,7 +81,6 @@ correct them rather than choosing the less restrictive interpretation.
 | `perl/src/main/java/io/perl/api/LatencyRecordWindow.java` | H1/H2 | Exact latency-window recording contract |
 | `perl/src/main/java/io/perl/api/LatencyPercentiles.java` | H2 | Percentile target/result state |
 | `perl/src/main/java/io/perl/api/ReportLatencies.java` | H2 | Per-latency callback used during percentile traversal |
-| `perl/src/main/java/io/perl/logger/ReportLatency.java` | H2 | Per-latency logger callback contract |
 | `perl/src/main/java/io/perl/api/impl/ArrayLatencyRecorder.java` | H1/H2 | Dense exact frequency update and percentile traversal |
 | `perl/src/main/java/io/perl/api/impl/LongHashMapLatencyRecorder.java` | H1/H2 | Sparse exact frequency update and percentile traversal |
 | `perl/src/main/java/io/perl/api/impl/HashMapLatencyRecorder.java` | H1/H2 | Boxed-map exact recorder |
@@ -100,10 +99,15 @@ correct them rather than choosing the less restrictive interpretation.
 
 | Class/file | Mark | Sensitive responsibility |
 |---|---:|---|
-| `perl/src/main/java/io/perl/logger/PerformanceLogger.java` | H2 | Per-window performance logger contract |
+| `perl/src/main/java/io/perl/logger/PerformanceLogger.java` | H1/H2 | Per-measurement latency callback and per-window logger contract |
 | `perl/src/main/java/io/perl/logger/Print.java` | H2 | Per-window and total result output contract |
-| `perl/src/main/java/io/perl/logger/impl/DefaultLogger.java` | H2 | Default per-window logger implementation |
-| `perl/src/main/java/io/perl/logger/impl/DefaultPrometheusLogger.java` | H2 | Prometheus-backed per-window logger implementation |
+| `perl/src/main/java/io/perl/logger/ReportLatency.java` | H1 | Per-measurement latency callback contract |
+| `perl/src/main/java/io/perl/logger/impl/DefaultLogger.java` | H1/H2 | Final no-op measurement callback and default window output |
+| `perl/src/main/java/io/perl/logger/impl/DefaultPrometheusLogger.java` | H1/H2/C | Inherited measurement callback, window metrics, and server lifecycle |
+| `perl/src/main/java/io/perl/logger/impl/Metrics.java` | H2 | Window metric state consumed by metrics reporters |
+| `perl/src/main/java/io/perl/logger/impl/PrintMetrics.java` | H2 | Window metric publication contract and implementation |
+| `perl/src/main/java/io/perl/logger/impl/PrometheusMetricsServer.java` | H2/C | Window metric publication and Prometheus server lifecycle |
+| `perl/src/main/java/io/perl/logger/impl/PrometheusServer.java` | C | Metrics registry and HTTP-server lifecycle |
 | `perl/src/main/java/io/perl/logger/impl/ResultsLogger.java` | H2 | Per-window result construction and dispatch |
 
 ### PerL selection and timing boundary
@@ -164,23 +168,34 @@ operation method.
 |---|---:|---|
 | `sbk-api/src/main/java/io/sbk/logger/WriteRequestsLogger.java` | H0 | Per-write request accounting contract |
 | `sbk-api/src/main/java/io/sbk/logger/ReadRequestsLogger.java` | H0 | Per-read request accounting contract |
-| `sbk-api/src/main/java/io/sbk/logger/Logger.java` | H2/C | Logger reporting and lifecycle contract |
-| `sbk-api/src/main/java/io/sbk/logger/RWLogger.java` | H0/H2 | Request-accounting and result-output contract |
-| `sbk-api/src/main/java/io/sbk/logger/impl/AbstractRWLogger.java` | H0/H2 | Request counters and periodic result construction |
+| `sbk-api/src/main/java/io/sbk/logger/CountReaders.java` | C | Reader lifecycle-count contract |
+| `sbk-api/src/main/java/io/sbk/logger/CountWriters.java` | C | Writer lifecycle-count contract |
+| `sbk-api/src/main/java/io/sbk/logger/CountRW.java` | C | Combined worker lifecycle-count contract |
+| `sbk-api/src/main/java/io/sbk/logger/SetRW.java` | C | Worker-count initialization contract |
+| `sbk-api/src/main/java/io/sbk/logger/RWPrint.java` | H2 | Per-window and total read/write result-output contract |
+| `sbk-api/src/main/java/io/sbk/logger/Logger.java` | H1/H2/C | Measurement callback, reporting, configuration, and lifecycle contract |
+| `sbk-api/src/main/java/io/sbk/logger/RWLogger.java` | H0/H1/H2/C | Request accounting, measurement callback, output, and lifecycle contract |
+| `sbk-api/src/main/java/io/sbk/logger/LoggerConfig.java` | C | Logger startup configuration |
+| `sbk-api/src/main/java/io/sbk/logger/MetricsConfig.java` | C | Metrics endpoint startup configuration |
+| `sbk-api/src/main/java/io/sbk/logger/SbmHostConfig.java` | C | Distributed logger endpoint configuration |
+| `sbk-api/src/main/java/io/sbk/logger/impl/AbstractRWLogger.java` | H0/H2/C | Request counters, periodic results, and logger lifecycle |
 | `sbk-api/src/main/java/io/sbk/logger/impl/AbstractSystemLogger.java` | H2 | System-output window formatting |
-| `sbk-api/src/main/java/io/sbk/logger/impl/Sl4jLogger.java` | H2 | SLF4J window and total-result publication |
-| `sbk-api/src/main/java/io/sbk/logger/impl/GrpcLogger.java` | H1/H2 | Latency accumulation and measurement-batch creation |
+| `sbk-api/src/main/java/io/sbk/logger/impl/SystemLogger.java` | H1/H2 | Final no-op measurement callback and system result output |
+| `sbk-api/src/main/java/io/sbk/logger/impl/Sl4jLogger.java` | H1/H2 | Inherited measurement callback and SLF4J result publication |
+| `sbk-api/src/main/java/io/sbk/logger/impl/CSVLogger.java` | H1/H2/C | Inherited measurement callback, CSV publication, and file lifecycle |
+| `sbk-api/src/main/java/io/sbk/logger/impl/PrometheusLogger.java` | H1/H2/C | Inherited measurement callback, metrics publication, and server lifecycle |
+| `sbk-api/src/main/java/io/sbk/logger/impl/WebLogger.java` | H1/H2/C | Inherited measurement callback, web publication, and client lifecycle |
+| `sbk-api/src/main/java/io/sbk/logger/impl/GrpcLogger.java` | H1/H2/C | Latency accumulation, measurement-batch creation, and stream lifecycle |
 | `sbk-api/src/main/java/io/sbk/logger/impl/GrpcLatencyAccumulator.java` | H1/H2 | Batch latency/count/byte accumulation |
-| `sbk-api/src/main/java/io/sbk/logger/impl/GrpcStreamSender.java` | H2 | Queueing and streaming measurement batches to SBM |
+| `sbk-api/src/main/java/io/sbk/logger/impl/GrpcStreamSender.java` | H2/C | Queueing, streaming, draining, and closing measurement batches |
+| `sbk-api/src/main/java/io/sbk/logger/impl/PrometheusLinks.java` | C | Metrics endpoint discovery and diagnostic output |
+| `sbk-api/src/main/java/io/sbk/logger/impl/SbkPrometheusServer.java` | H2/C | Window metric updates and Prometheus server lifecycle |
 | `sbk-api/src/main/proto/sbp.proto` | H2/C | Wire contract for distributed measurements |
 
-`sbk-api/src/main/java/io/sbk/logger/impl/SystemLogger.java`,
-`sbk-api/src/main/java/io/sbk/logger/impl/CSVLogger.java`,
-`sbk-api/src/main/java/io/sbk/logger/impl/PrometheusLogger.java`,
-`sbk-api/src/main/java/io/sbk/logger/impl/WebLogger.java`, and their shared
-logger bases are **H2** where they process or publish each completed window.
-Formatting and I/O are intentionally outside H0/H1, but added traversal,
-copying, blocking, or inconsistent field ordering can still corrupt or delay
+Formatting and I/O are intentionally outside H0/H1. Logger classes marked H1
+have a callback selected into the per-measurement path; for system-style
+loggers that callback is deliberately a final no-op. Added traversal, copying,
+blocking, or inconsistent field ordering in H2 can still corrupt or delay
 results.
 
 `sbk-api/src/main/java/io/sbk/api/impl/SbkBenchmark.java`,
@@ -202,10 +217,12 @@ risk”: edits require lifecycle ordering and termination tests.
 | `sbm/src/main/java/io/sbm/api/SbmPeriodicRecorder.java` | H2 | Per-batch recorder contract |
 | `sbm/src/main/java/io/sbm/api/impl/SbmTotalWindowLatencyPeriodicRecorder.java` | H2 | Converts and merges each incoming measurement batch |
 | `perl/src/main/java/io/perl/api/impl/ConcurrentLinkedQueueArray.java` | H2 | SBM's sharded inbound queue implementation |
+| `sbm/src/main/java/io/sbm/logger/CountConnections.java` | C | Client connection lifecycle-count contract |
 | `sbm/src/main/java/io/sbm/logger/RamLogger.java` | H2 | Aggregate reporting contract |
-| `sbm/src/main/java/io/sbm/logger/impl/AbstractRamLogger.java` | H2 | Aggregate result calculation and output dispatch |
-| `sbm/src/main/java/io/sbm/logger/impl/SbmPrometheusLogger.java` | H2 | Window metric publication |
-| `sbm/src/main/java/io/sbm/logger/impl/SbmWebLogger.java` | H2 | Window web publication |
+| `sbm/src/main/java/io/sbm/logger/impl/AbstractRamLogger.java` | H2/C | Aggregate calculation, output dispatch, and connection lifecycle |
+| `sbm/src/main/java/io/sbm/logger/impl/SbmPrometheusLogger.java` | H2/C | Window metric publication and server lifecycle |
+| `sbm/src/main/java/io/sbm/logger/impl/SbmPrometheusServer.java` | H2/C | Aggregate metric updates and Prometheus server lifecycle |
+| `sbm/src/main/java/io/sbm/logger/impl/SbmWebLogger.java` | H2/C | Window web publication and client lifecycle |
 
 `sbm/src/main/java/io/sbm/api/impl/SbmBenchmark.java`,
 `sbm/src/main/java/io/sbm/api/impl/Sbm.java`,
@@ -222,6 +239,17 @@ SBK-GEM has **no H0/H1 measurement hot path**. It launches remote SBK
 processes and embeds/controls SBM; the remote SBK processes and SBM own the
 per-record and per-batch paths described above. Do not label SSH transfer speed
 or orchestration code as storage-measurement latency.
+
+Its logger types inherit or select the embedded SBM aggregate reporting path
+and are therefore H2/C even though GEM orchestration itself is not a
+measurement hot path:
+
+| Class/file | Mark | Sensitive responsibility |
+|---|---:|---|
+| `sbk-gem/src/main/java/io/gem/logger/GemLogger.java` | H2/C | GEM aggregate logger and option contract |
+| `sbk-gem/src/main/java/io/gem/logger/impl/AbstractGemLogger.java` | H2/C | Shared GEM/SBM logger selection and configuration |
+| `sbk-gem/src/main/java/io/gem/logger/impl/GemPrometheusLogger.java` | H2/C | Prometheus aggregate logger selection and inherited publication |
+| `sbk-gem/src/main/java/io/gem/logger/impl/GemWebLogger.java` | H2/C | Web aggregate logger selection and inherited publication |
 
 The following are nevertheless **C** distributed critical paths because they
 control whether all nodes run the same workload, start together, return valid
@@ -285,11 +313,12 @@ point, or its packaging:
 The task is part of the root `check` lifecycle and builds the installed
 distribution before validating it. It fails when a concrete source path in
 this document does not exist, when a Java file is cited only by bare filename,
-when a likely-sensitive recorder/queue/window/timestamp/writer/reader/logger/
-accumulator/forwarder candidate is omitted, when a supported agent entry point
-no longer routes to this document, or when the resolved distribution omits the
-guide or a tool-specific adapter. It also checks the independent Maven and
-release packaging declarations.
+when a likely-sensitive recorder/queue/window/timestamp/writer/reader/
+accumulator/forwarder candidate is omitted, when any Java file in the PerL,
+SBK, SBM, or SBK-GEM logger trees is omitted, when a supported agent entry
+point no longer routes to this document, or when the resolved distribution
+omits the guide or a tool-specific adapter. It also checks the independent
+Maven and release packaging declarations.
 
 Name-pattern coverage is deliberately conservative but cannot prove that an
 arbitrarily named helper is cold. Classification completeness and whether a
