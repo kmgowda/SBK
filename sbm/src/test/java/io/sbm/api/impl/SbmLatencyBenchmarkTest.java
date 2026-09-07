@@ -102,6 +102,37 @@ final class SbmLatencyBenchmarkTest {
     }
 
     /**
+     * Verifies that shutdown drains every shard before the terminal marker stops the consumer.
+     *
+     * @throws Exception if startup, draining, or shutdown exceeds its timeout
+     */
+    @Test
+    void drainsUnevenClientQueuesBeforeShutdown() throws Exception {
+        final CapturingWindow window = new CapturingWindow();
+        final SbmLatencyBenchmark benchmark = new SbmLatencyBenchmark(
+                2, 1, new MilliSeconds(), window,
+                PerlConfig.DEFAULT_PRINTING_INTERVAL_SECONDS * Time.MS_PER_SEC, 600);
+
+        benchmark.enQueue(MessageLatenciesRecord.newBuilder()
+                .setClientID(10)
+                .setSequenceNumber(1)
+                .build());
+        for (int sequence = 1; sequence <= 50; sequence++) {
+            benchmark.enQueue(MessageLatenciesRecord.newBuilder()
+                    .setClientID(11)
+                    .setSequenceNumber(sequence)
+                    .build());
+        }
+
+        final CompletableFuture<Void> completion = benchmark.start();
+        assertTrue(window.started.await(2, TimeUnit.SECONDS));
+        assertTimeoutPreemptively(Duration.ofSeconds(2), benchmark::stop);
+        completion.get(2, TimeUnit.SECONDS);
+
+        assertEquals(51, window.recordedBatches.get());
+    }
+
+    /**
      * Verifies that an aggregation failure terminates the consumer with a
      * diagnostic future instead of allowing SBM to report a clean shutdown.
      *
@@ -207,6 +238,7 @@ final class SbmLatencyBenchmarkTest {
                 new AtomicReference<>();
         private final AtomicInteger startedWindows = new AtomicInteger();
         private final AtomicInteger stoppedWindows = new AtomicInteger();
+        private final AtomicInteger recordedBatches = new AtomicInteger();
         private final boolean expireImmediately;
 
         private CapturingWindow() {
@@ -225,6 +257,7 @@ final class SbmLatencyBenchmarkTest {
          */
         @Override
         public void record(long currentTime, MessageLatenciesRecord record) {
+            recordedBatches.incrementAndGet();
             batchRecorded.countDown();
         }
 
