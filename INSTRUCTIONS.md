@@ -23,6 +23,8 @@ This is the compact compatibility entry point for tools that look for `INSTRUCTI
 - [README.md](README.md): product overview, build, and first run.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): module boundaries and runtime flow.
 - [docs/REPOSITORY_MAP.md](docs/REPOSITORY_MAP.md): code navigation.
+- [docs/HOT_PATHS.md](docs/HOT_PATHS.md): mandatory sensitive-file inventory
+  and explicit-approval gate.
 - [docs/AGENT_RECIPES.md](docs/AGENT_RECIPES.md): exact task procedures.
 - [docs/DRIVER_GUIDE.md](docs/DRIVER_GUIDE.md): driver contract and verification.
 
@@ -34,6 +36,11 @@ This is the compact compatibility entry point for tools that look for `INSTRUCTI
 - Every enabled driver appears in both `settings-drivers.gradle` and `build-drivers.gradle`.
 - Checkstyle is strict, including import-package allow-listing.
 - Do not add synchronization or avoidable allocation to driver operation paths.
+- Before editing a writer, reader, callback, queue, timestamp, recorder,
+  measurement accumulator, or SBM ingestion/forwarding path, read
+  `docs/HOT_PATHS.md`. Do not add any branch, atomic/volatile access, lock,
+  wait, allocation, bookkeeping, conversion, clock read, or dispatch cost to
+  those paths without explicit confirmation for that exact edit.
 - Do not hand-edit generated Javadocs.
 - ChromaDB, HaloDB, and Ignite are disabled; `sbktemplate` is not a runtime driver.
 - MinIO 8.5.17 is intentionally pinned for older S3-compatible backend behavior.

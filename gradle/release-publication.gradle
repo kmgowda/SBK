@@ -378,6 +378,12 @@ def releaseAgentDocs = tasks.register('releaseAgentDocs', Tar) {
     from('.cursor') {
         into '.cursor'
     }
+    from('.windsurf') {
+        into '.windsurf'
+    }
+    from('.github/copilot-instructions.md') {
+        into '.github'
+    }
     from('.devin/skills') {
         into '.devin/skills'
     }

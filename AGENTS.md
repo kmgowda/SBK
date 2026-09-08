@@ -198,6 +198,12 @@ and shutdown behavior for reliability, but do not describe those paths as
 measurement hot paths. The remote SBK processes launched by SBK-GEM remain
 subject to the `sbk-api` and PerL rules above.
 
+Before editing any of these areas, read the authoritative file-level
+classification in [`docs/HOT_PATHS.md`](docs/HOT_PATHS.md). It identifies the
+H0 per-operation, H1 per-measurement, H2 per-batch/window, and lifecycle-
+critical files and methods. A file that mixes hot and cold methods remains
+sensitive: inspect the call path rather than assuming the entire file is cold.
+
 **Keep the successful-operation path to the minimum work required to submit,
 transport, aggregate, and record the measurement. Do not add new or redundant
 per-operation conditional, coordination, state, or dispatch work to these hot
@@ -386,6 +392,7 @@ do, document it in the driver's README.
 |---|---|
 | End-user manual | [README.md](README.md) |
 | Internal design / why SBK is fast / Mermaid diagrams | [docs/sbk-internals.md](docs/sbk-internals.md) |
+| Hot-path and critical-path file inventory | [docs/HOT_PATHS.md](docs/HOT_PATHS.md) |
 | Step-by-step recipes (add a driver, add a logger, debug failures) | [docs/AGENT_RECIPES.md](docs/AGENT_RECIPES.md) |
 | Driver spec template for spec-driven development | [docs/DRIVER_SPECIFICATION.md](docs/DRIVER_SPECIFICATION.md) |
 | Dell ECS/ObjectScale benchmarking | [operator runbook](drivers/minio/docs/ECS_OBS_BENCHMARK_RUNBOOK.md), [agent runbook](drivers/minio/docs/ECS_OBS_AGENT_RUNBOOK.md), [MinIO implementation](drivers/minio/docs/IMPLEMENTATION.md) |

@@ -6,6 +6,10 @@ description: Plan, configure, run, and interpret single-load-generator Storage B
 # SBK Benchmark Runner
 
 Follow the repository-wide safety and verification rules in `AGENTS.md`.
+If diagnosis leads to a proposed code change, consult
+[`docs/HOT_PATHS.md`](../../../docs/HOT_PATHS.md) before editing any sensitive
+reader, writer, driver-operation, PerL, logger-forwarding, or SBM path and obey
+its explicit human-approval gate.
 Use the installed distribution at `./build/install/sbk/bin/`. Treat generated
 `-help` output and the selected driver's README as authoritative; options vary
 by driver and logger.

@@ -103,6 +103,131 @@ def wrapperConfigurationCachePolicyMarkerPath =
         wrapperConfigurationCachePolicyMarker.get().asFile.absolutePath
 def unixGradleWrapperPath = layout.projectDirectory.file('gradlew').asFile.absolutePath
 def windowsGradleWrapperPath = layout.projectDirectory.file('gradlew.bat').asFile.absolutePath
+def hotPathProjectDirectory = layout.projectDirectory.asFile
+def hotPathDocumentationFile = layout.projectDirectory.file('docs/HOT_PATHS.md').asFile
+def hotPathAgentEntryPoints = [
+        layout.projectDirectory.file('AGENTS.md').asFile,
+        layout.projectDirectory.file('INSTRUCTIONS.md').asFile,
+        layout.projectDirectory.file('.cursorrules').asFile,
+        layout.projectDirectory.file('.cursor/rules/sbk.mdc').asFile,
+        layout.projectDirectory.file('.windsurf/rules/sbk.md').asFile,
+        layout.projectDirectory.file('.github/copilot-instructions.md').asFile,
+        layout.projectDirectory.file('.aider.conf.yml').asFile,
+        layout.projectDirectory.file('docs/README.md').asFile,
+        layout.projectDirectory.file('docs/AGENT_TOOLKIT.md').asFile,
+        layout.projectDirectory.file('.devin/skills/sbk-benchmark-runner/SKILL.md').asFile,
+        layout.projectDirectory.file('.devin/skills/sbk-build-verify/SKILL.md').asFile,
+        layout.projectDirectory.file('.devin/skills/sbk-distributed-benchmark-runner/SKILL.md').asFile,
+        layout.projectDirectory.file('.devin/skills/sbk-driver-development/SKILL.md').asFile
+]
+def hotPathCandidateSourceTrees = [
+        fileTree('perl/src/main/java/io/perl/api') {
+            include '**/*Recorder*.java', '**/*Queue*.java', '**/*Window*.java',
+                    '**/TimeStamp*.java', '**/ReportLatencies.java'
+        },
+        fileTree('perl/src/main/java/io/perl/logger') {
+            include '**/*.java'
+        },
+        fileTree('sbk-api/src/main/java/io/sbk/api') {
+            include '**/*Writer*.java', '**/*Reader*.java', '**/Callback.java',
+                    '**/Status.java', '**/*RateController.java'
+        },
+        fileTree('sbk-api/src/main/java/io/sbk/logger') {
+            include '**/*.java'
+        },
+        fileTree('sbm/src/main/java/io/sbm/api') {
+            include '**/*Recorder*.java', '**/*GrpcService.java',
+                    '**/*LatencyBenchmark.java'
+        },
+        fileTree('sbm/src/main/java/io/sbm/logger') {
+            include '**/*.java'
+        },
+        fileTree('sbk-gem/src/main/java/io/gem/logger') {
+            include '**/*.java'
+        }
+]
+def installedHotPathAgentGuidance = [
+        layout.buildDirectory.file('install/sbk/docs/HOT_PATHS.md').get().asFile,
+        layout.buildDirectory.file('install/sbk/.windsurf/rules/sbk.md').get().asFile,
+        layout.buildDirectory.file('install/sbk/.github/copilot-instructions.md').get().asFile
+]
+def hotPathPackagingRequirements = [
+        (layout.projectDirectory.file('gradle/maven.gradle').asFile):
+                ['HOT_PATHS.md', '.windsurf/rules', 'copilot-instructions.md'],
+        (layout.projectDirectory.file('gradle/release-publication.gradle').asFile):
+                ['.windsurf', 'copilot-instructions.md', "from('docs')"]
+]
+
+def verifyHotPathDocumentation = tasks.register('verifyHotPathDocumentation') {
+    group = 'verification'
+    description = 'Verifies hot-path inventory coverage, agent routing, and packaged output.'
+    dependsOn 'installDist'
+    inputs.files(hotPathDocumentationFile, hotPathAgentEntryPoints,
+            hotPathCandidateSourceTrees, installedHotPathAgentGuidance,
+            hotPathPackagingRequirements.keySet())
+
+    doLast {
+        final String inventory = hotPathDocumentationFile.getText('UTF-8')
+        if (!inventory.contains('../AGENTS.md#hot-path-latency-policy-mandatory-for-every-software-agent')) {
+            throw new GradleException('HOT_PATHS.md must identify the normative AGENTS.md hot-path policy')
+        }
+
+        final Set<String> sourcePaths = new TreeSet<>()
+        final def sourceMatcher = inventory =~ /`((?:perl|sbk-api|sbm|sbk-gem)\/src\/main\/[^`*]+)`/
+        sourceMatcher.each { match -> sourcePaths.add(match[1]) }
+        final Set<String> missingPaths = sourcePaths.findAll {
+            !new File(hotPathProjectDirectory, it).exists()
+        }
+        if (!missingPaths.isEmpty()) {
+            throw new GradleException("HOT_PATHS.md contains missing source paths: ${missingPaths}")
+        }
+
+        final Set<String> omittedCandidates = hotPathCandidateSourceTrees.collectMany {
+            it.files
+        }.collect {
+            hotPathProjectDirectory.toPath().relativize(it.toPath()).toString()
+        }.findAll {
+            !inventory.contains(it)
+        }.toSorted()
+        if (!omittedCandidates.isEmpty()) {
+            throw new GradleException(
+                    "HOT_PATHS.md does not classify candidate sensitive source paths: ${omittedCandidates}")
+        }
+
+        final def bareJavaReferences = inventory =~ /`([A-Za-z][A-Za-z0-9]*\.java)`/
+        if (bareJavaReferences.find()) {
+            throw new GradleException(
+                    "HOT_PATHS.md must use full repository paths; found `${bareJavaReferences.group(1)}`")
+        }
+
+        final List<String> unroutedAgents = hotPathAgentEntryPoints.findAll {
+            !it.getText('UTF-8').contains('HOT_PATHS.md')
+        }.collect { hotPathProjectDirectory.toPath().relativize(it.toPath()).toString() }
+        if (!unroutedAgents.isEmpty()) {
+            throw new GradleException("Agent entry points do not route to HOT_PATHS.md: ${unroutedAgents}")
+        }
+
+        final List<String> missingInstalledGuidance = installedHotPathAgentGuidance.findAll {
+            !it.isFile()
+        }.collect {
+            hotPathProjectDirectory.toPath().relativize(it.toPath()).toString()
+        }
+        if (!missingInstalledGuidance.isEmpty()) {
+            throw new GradleException(
+                    "Installed SBK distribution is missing agent guidance: ${missingInstalledGuidance}")
+        }
+
+        hotPathPackagingRequirements.each { file, requiredText ->
+            final String packaging = file.getText('UTF-8')
+            final List<String> missingText = requiredText.findAll { !packaging.contains(it) }
+            if (!missingText.isEmpty()) {
+                throw new GradleException(
+                        "${file.name} does not package hot-path agent guidance: ${missingText}")
+            }
+        }
+    }
+}
+
 def verifyGradleWrapperConfigurationCachePolicy = tasks.register(
         'verifyGradleWrapperConfigurationCachePolicy') {
     group = 'verification'
@@ -678,6 +803,7 @@ application {
             include "DRIVER_SPECIFICATION.md"
             include "AGENT_TOOLKIT.md"
             include "AGENT_DOCUMENTATION_DISTRIBUTION.md"
+            include "HOT_PATHS.md"
             include "sbk-internals.md"
             include "README.md"
             include "ARCHITECTURE.md"
@@ -715,6 +841,16 @@ application {
     applicationDistribution.into(".cursor/rules") {
         from(".cursor/rules") {
             include "*.mdc"
+        }
+    }
+    applicationDistribution.into(".windsurf/rules") {
+        from(".windsurf/rules") {
+            include "*.md"
+        }
+    }
+    applicationDistribution.into(".github") {
+        from(".github") {
+            include "copilot-instructions.md"
         }
     }
 }
@@ -889,6 +1025,7 @@ apply from: "gradle/release-publication.gradle"
 
 tasks.named('check') {
     dependsOn verifyGradleWrapperConfigurationCachePolicy
+    dependsOn verifyHotPathDocumentation
 }
 tasks.named('wrapper') {
     finalizedBy verifyGradleWrapperConfigurationCachePolicy

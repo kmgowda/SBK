@@ -10,6 +10,12 @@ Invoke this skill when:
 - Running the standard SBK verification sequence
 - Troubleshooting build failures
 
+Before changing any writer, reader, driver operation, callback, timestamp,
+queue, recorder, measurement aggregation, or forwarding code, read
+[`docs/HOT_PATHS.md`](../../../docs/HOT_PATHS.md). Its explicit human-approval
+gate applies before adding per-operation, per-measurement, or per-batch work;
+running this verification skill does not grant that approval.
+
 ## What this skill provides
 
 ### Context

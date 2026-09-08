@@ -27,6 +27,7 @@ SBK exposes one shared body of repository knowledge to coding agents while allow
 | [`README.md`](../README.md) | Product, build, and run overview |
 | [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) | Source-linked module and code-flow model |
 | [`docs/REPOSITORY_MAP.md`](REPOSITORY_MAP.md) | Ownership and file navigation |
+| [`docs/HOT_PATHS.md`](HOT_PATHS.md) | File-level hot/critical-path inventory and mandatory explicit-approval gate |
 | [`docs/AGENT_RECIPES.md`](AGENT_RECIPES.md) | Deterministic procedures for common changes |
 | [`docs/DRIVER_SPECIFICATION.md`](DRIVER_SPECIFICATION.md) | Formal design template for driver work |
 
@@ -56,10 +57,11 @@ exist only where a tool benefits from its own discovery format:
 | Tool | Repository entry point |
 |---|---|
 | OpenAI Codex and other `AGENTS.md` readers | Root `AGENTS.md` |
-| Windsurf / Cascade | Root `AGENTS.md`, which its rule engine discovers directly |
+| Windsurf / Cascade | `.windsurf/rules/sbk.md`, which points to root `AGENTS.md` and `docs/HOT_PATHS.md` |
 | Cursor | `.cursor/rules/sbk.mdc`; `.cursorrules` remains a legacy pointer |
 | Devin | Root `AGENTS.md` plus task skills under `.devin/skills/` |
-| Aider | `.aider.conf.yml` loads `AGENTS.md` as read-only context |
+| GitHub Copilot | `.github/copilot-instructions.md`, which points to the authoritative guides |
+| Aider | `.aider.conf.yml` loads `AGENTS.md` and `docs/HOT_PATHS.md` as read-only context |
 | Other agents | Start with `INSTRUCTIONS.md`, then read `AGENTS.md` |
 
 These files should:
@@ -78,14 +80,17 @@ version automatically loads it. If automatic discovery is uncertain, include
 
 1. Read `AGENTS.md` and inspect repository status.
 2. Classify the change by module using `REPOSITORY_MAP.md`.
-3. Read the relevant source, tests, build file, and component/driver README.
-4. Use an `AGENT_RECIPES.md` procedure when one matches.
-5. For substantial driver work, fill in `DRIVER_SPECIFICATION.md` before coding.
-6. Preserve unrelated working-tree changes.
-7. Implement the smallest coherent change.
-8. Run focused checks, then full verification appropriate to risk.
-9. Update the authoritative documentation in the same change.
-10. Report changes, tests, limitations, and any unverified external behavior.
+3. For a writer, reader, callback, queue, timestamp, recorder, measurement,
+   forwarding, or aggregation edit, read `HOT_PATHS.md` and complete its
+   sensitivity/approval check before editing.
+4. Read the relevant source, tests, build file, and component/driver README.
+5. Use an `AGENT_RECIPES.md` procedure when one matches.
+6. For substantial driver work, fill in `DRIVER_SPECIFICATION.md` before coding.
+7. Preserve unrelated working-tree changes.
+8. Implement the smallest coherent change.
+9. Run focused checks, then full verification appropriate to risk.
+10. Update the authoritative documentation in the same change.
+11. Report changes, tests, limitations, and any unverified external behavior.
 
 ## Context by task
 
@@ -94,7 +99,7 @@ version automatically loads it. If automatic discovery is uncertain, include
 | Driver fix | Driver README, source, `DRIVER_GUIDE.md`, recipe 2 |
 | New driver | `DRIVER_SPECIFICATION.md`, `DRIVER_GUIDE.md`, recipe 1, similar driver |
 | Harness CLI | `ARCHITECTURE.md`, `SbkParameters`, recipe 4 |
-| Measurement change | `sbk-internals.md`, PerL tests, architecture invariants |
+| Measurement change | `HOT_PATHS.md`, `sbk-internals.md`, PerL tests, architecture invariants |
 | Logger | `RWLogger`, existing implementation, recipe 3 |
 | Distributed aggregation | Architecture distributed flow, SBM README and source |
 | Remote orchestration | SBK-GEM README, GEM source, failure-domain section |
@@ -127,6 +132,8 @@ for changed diagrams where available, and `git diff --check`.
 ## Maintaining the toolkit
 
 - Keep universal rules in `AGENTS.md`.
+- Keep the file-level sensitivity map in `HOT_PATHS.md`; update it when a hot
+  implementation is added, removed, renamed, or rerouted.
 - Keep `INSTRUCTIONS.md` compact.
 - Add task procedures to `AGENT_RECIPES.md` rather than a platform-specific prompt.
 - Update source-linked architecture when ownership or control flow changes.

@@ -6,6 +6,11 @@ description: Plan, configure, run, and diagnose distributed Storage Benchmark Ki
 # SBK Distributed Benchmark Runner
 
 Follow the repository-wide safety and verification rules in `AGENTS.md`.
+If diagnosis leads to a proposed code change, read
+[`docs/HOT_PATHS.md`](../../../docs/HOT_PATHS.md). Remote SBK and SBM contain
+the measurement hot paths; SBK-GEM itself is lifecycle/orchestration critical.
+Obtain the exact explicit approval required by that inventory before adding
+work to H0, H1, or H2 paths.
 Use this skill for multiple load-generator hosts. For one load generator,
 including one that connects to remote storage, use `$sbk-benchmark-runner`.
 
