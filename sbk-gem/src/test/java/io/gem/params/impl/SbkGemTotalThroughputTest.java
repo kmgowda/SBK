@@ -42,6 +42,17 @@ final class SbkGemTotalThroughputTest {
     }
 
     @Test
+    void defersAggregateThroughputRateValidationUntilNodeDistribution() throws Exception {
+        final SbkGemParameters parameters = parameters();
+
+        parameters.parseArgs(arguments("node-a,node-b", 1_073_741_824, "-writers", "2",
+                "-totalthroughput", "4096", "-seconds", "30"));
+
+        assertEquals(new BigDecimal("4096"), parameters.getTotalThroughput());
+        assertEquals(30, parameters.getTotalSecondsToRun());
+    }
+
+    @Test
     void rejectsPerClientAndAggregateThroughputTogether() throws IOException {
         final SbkGemParameters parameters = parameters();
 
@@ -154,11 +165,15 @@ final class SbkGemTotalThroughputTest {
     }
 
     private static String[] arguments(String nodes, String... benchmarkArguments) {
+        return arguments(nodes, 4096, benchmarkArguments);
+    }
+
+    private static String[] arguments(String nodes, int recordSize, String... benchmarkArguments) {
         final String[] arguments = new String[benchmarkArguments.length + 4];
         arguments[0] = "-nodes";
         arguments[1] = nodes;
         arguments[2] = "-size";
-        arguments[3] = "4096";
+        arguments[3] = Integer.toString(recordSize);
         System.arraycopy(benchmarkArguments, 0, arguments, 4, benchmarkArguments.length);
         return arguments;
     }

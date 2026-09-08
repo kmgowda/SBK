@@ -71,6 +71,8 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
     private static final String TOTAL_THROUGHPUT_OPTION = "totalthroughput";
     private static final String RECORDS_OPTION = "records";
     private static final String THROUGHPUT_OPTION = "throughput";
+    private static final String AGGREGATE_RECORDS_PARSE_PLACEHOLDER = Integer.toString(Integer.MAX_VALUE);
+    private static final String AGGREGATE_THROUGHPUT_PARSE_PLACEHOLDER = "0";
 
     final private GemConfig config;
 
@@ -372,12 +374,12 @@ public final class SbkGemParameters extends SbkDriversParameters implements GemP
             if (isOption(normalized[i], TOTAL_RECORDS_OPTION)) {
                 normalized[i] = option(RECORDS_OPTION);
                 if (i + 1 < normalized.length) {
-                    normalized[i + 1] = "1";
+                    normalized[i + 1] = AGGREGATE_RECORDS_PARSE_PLACEHOLDER;
                 }
             } else if (isOption(normalized[i], TOTAL_THROUGHPUT_OPTION)) {
                 normalized[i] = option(THROUGHPUT_OPTION);
                 if (i + 1 < normalized.length) {
-                    normalized[i + 1] = "1";
+                    normalized[i + 1] = AGGREGATE_THROUGHPUT_PARSE_PLACEHOLDER;
                 }
             }
         }
