@@ -401,6 +401,10 @@ and initialize <code>CSVExtendedLatencyRecorder.latencyBuffer</code> and <code>C
 </dl>
 <h2 class="title" id="I:D">D</h2>
 <dl class="index">
+<dt><a href="io/perl/config/PerlConfig.html#DEFAULT_FINAL_RESULT_PUBLICATION_MILLIS" class="member-name-link">DEFAULT_FINAL_RESULT_PUBLICATION_MILLIS</a> - Static variable in class io.perl.config.<a href="io/perl/config/PerlConfig.html" title="class in io.perl.config">PerlConfig</a></dt>
+<dd>
+<div class="block">Default portion of cleanup reserved for publishing final results.</div>
+</dd>
 <dt><a href="io/perl/config/PerlConfig.html#DEFAULT_IDLE_TIMEOUT_SECONDS" class="member-name-link">DEFAULT_IDLE_TIMEOUT_SECONDS</a> - Static variable in class io.perl.config.<a href="io/perl/config/PerlConfig.html" title="class in io.perl.config">PerlConfig</a></dt>
 <dd>
 <div class="block">Default maximum interval without a performance event, in seconds.</div>
@@ -420,6 +424,10 @@ and initialize <code>CSVExtendedLatencyRecorder.latencyBuffer</code> and <code>C
 <dt><a href="io/perl/config/PerlConfig.html#DEFAULT_RUNTIME_SECONDS" class="member-name-link">DEFAULT_RUNTIME_SECONDS</a> - Static variable in class io.perl.config.<a href="io/perl/config/PerlConfig.html" title="class in io.perl.config">PerlConfig</a></dt>
 <dd>
 <div class="block">Default maximum runtime (in seconds) if not otherwise limited.</div>
+</dd>
+<dt><a href="io/perl/config/PerlConfig.html#DEFAULT_SHUTDOWN_TIMEOUT_SECONDS" class="member-name-link">DEFAULT_SHUTDOWN_TIMEOUT_SECONDS</a> - Static variable in class io.perl.config.<a href="io/perl/config/PerlConfig.html" title="class in io.perl.config">PerlConfig</a></dt>
+<dd>
+<div class="block">Default maximum time allowed for standalone PerL cleanup.</div>
 </dd>
 <dt><a href="io/perl/config/PerlConfig.html#DEFAULT_TIMEOUT_MS" class="member-name-link">DEFAULT_TIMEOUT_MS</a> - Static variable in class io.perl.config.<a href="io/perl/config/PerlConfig.html" title="class in io.perl.config">PerlConfig</a></dt>
 <dd>
@@ -523,6 +531,10 @@ caller code.</div>
 </dl>
 <h2 class="title" id="I:F">F</h2>
 <dl class="index">
+<dt><a href="io/perl/config/PerlConfig.html#finalResultPublicationMillis" class="member-name-link">finalResultPublicationMillis</a> - Variable in class io.perl.config.<a href="io/perl/config/PerlConfig.html" title="class in io.perl.config">PerlConfig</a></dt>
+<dd>
+<div class="block">Cleanup time reserved for terminating the recorder and publishing its final result.</div>
+</dd>
 <dt><a href="io/perl/exception/BenchmarkIdleTimeoutException.html#find(java.lang.Throwable)" class="member-name-link">find(Throwable)</a> - Static method in exception class io.perl.exception.<a href="io/perl/exception/BenchmarkIdleTimeoutException.html" title="class in io.perl.exception">BenchmarkIdleTimeoutException</a></dt>
 <dd>
 <div class="block">Finds an idle-timeout failure in an asynchronous completion cause chain.</div>
@@ -746,6 +758,22 @@ benchmarking events.</div>
 <dd>&nbsp;</dd>
 <dt><a href="io/time/package-summary.html">io.time</a> - package io.time</dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/perl/api/Channel.html#isEmpty()" class="member-name-link">isEmpty()</a> - Method in interface io.perl.api.<a href="io/perl/api/Channel.html" title="interface in io.perl.api">Channel</a></dt>
+<dd>
+<div class="block">Reports whether this channel has any queued measurements.</div>
+</dd>
+<dt><a href="io/perl/api/impl/ConcurrentLinkedQueueArray.html#isEmpty()" class="member-name-link">isEmpty()</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/ConcurrentLinkedQueueArray.html" title="class in io.perl.api.impl">ConcurrentLinkedQueueArray</a></dt>
+<dd>
+<div class="block">Reports whether every queue is currently empty.</div>
+</dd>
+<dt><a href="io/perl/api/impl/TimeStampMpscQueue.html#isEmpty()" class="member-name-link">isEmpty()</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/TimeStampMpscQueue.html" title="class in io.perl.api.impl">TimeStampMpscQueue</a></dt>
+<dd>
+<div class="block">Reports whether this queue currently has no published node.</div>
+</dd>
+<dt><a href="io/perl/api/impl/TimeStampMpscQueueArray.html#isEmpty()" class="member-name-link">isEmpty()</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/TimeStampMpscQueueArray.html" title="class in io.perl.api.impl">TimeStampMpscQueueArray</a></dt>
+<dd>
+<div class="block">Reports whether every intrusive queue is empty.</div>
+</dd>
 <dt><a href="io/perl/api/TimeStamp.html#isEnd()" class="member-name-link">isEnd()</a> - Method in class io.perl.api.<a href="io/perl/api/TimeStamp.html" title="class in io.perl.api">TimeStamp</a></dt>
 <dd>
 <div class="block">Checks if this timestamp is the end marker.</div>
@@ -1450,6 +1478,13 @@ records count.</div>
 <dd>
 <div class="block">Contract for starting a benchmark run.</div>
 </dd>
+<dt><a href="io/perl/api/impl/CQueuePerl.html#runOrchestrated(long,long)" class="member-name-link">runOrchestrated(long, long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/CQueuePerl.html" title="class in io.perl.api.impl">CQueuePerl</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/perl/api/Perl.html#runOrchestrated(long,long)" class="member-name-link">runOrchestrated(long, long)</a> - Method in interface io.perl.api.<a href="io/perl/api/Perl.html" title="interface in io.perl.api">Perl</a></dt>
+<dd>
+<div class="block">Starts a benchmark whose duration boundary is owned by an external
+orchestrator.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:S">S</h2>
 <dl class="index">
@@ -1496,6 +1531,10 @@ records count.</div>
 <dt><a href="io/perl/logger/impl/ResultsLogger.html#setTimeUnit(io.time.TimeUnit)" class="member-name-link">setTimeUnit(TimeUnit)</a> - Method in class io.perl.logger.impl.<a href="io/perl/logger/impl/ResultsLogger.html" title="class in io.perl.logger.impl">ResultsLogger</a></dt>
 <dd>
 <div class="block">Sets the unit used to display latency values.</div>
+</dd>
+<dt><a href="io/perl/config/PerlConfig.html#shutdownTimeoutSeconds" class="member-name-link">shutdownTimeoutSeconds</a> - Variable in class io.perl.config.<a href="io/perl/config/PerlConfig.html" title="class in io.perl.config">PerlConfig</a></dt>
+<dd>
+<div class="block">Maximum time allowed for standalone PerL drain and recorder shutdown.</div>
 </dd>
 <dt><a href="io/perl/config/LatencyConfig.html#SLC_COUNT" class="member-name-link">SLC_COUNT</a> - Static variable in class io.perl.config.<a href="io/perl/config/LatencyConfig.html" title="class in io.perl.config">LatencyConfig</a></dt>
 <dd>
@@ -1584,6 +1623,12 @@ completion reason in the final lifecycle log.</div>
 <dt><a href="io/perl/api/BenchmarkTermination.html#STOP_REQUESTED" class="member-name-link">STOP_REQUESTED</a> - Enum constant in enum class io.perl.api.<a href="io/perl/api/BenchmarkTermination.html" title="enum class in io.perl.api">BenchmarkTermination</a></dt>
 <dd>
 <div class="block">A caller or process lifecycle requested an orderly stop.</div>
+</dd>
+<dt><a href="io/perl/api/impl/CQueuePerl.html#stopBefore(io.perl.api.BenchmarkTermination,long)" class="member-name-link">stopBefore(BenchmarkTermination, long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/CQueuePerl.html" title="class in io.perl.api.impl">CQueuePerl</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/perl/api/Perl.html#stopBefore(io.perl.api.BenchmarkTermination,long)" class="member-name-link">stopBefore(BenchmarkTermination, long)</a> - Method in interface io.perl.api.<a href="io/perl/api/Perl.html" title="interface in io.perl.api">Perl</a></dt>
+<dd>
+<div class="block">Stops the recorder before a shared monotonic cleanup deadline.</div>
 </dd>
 <dt><a href="io/perl/api/impl/TotalLatencyRecordWindow.html#stopWindow(long)" class="member-name-link">stopWindow(long)</a> - Method in class io.perl.api.impl.<a href="io/perl/api/impl/TotalLatencyRecordWindow.html" title="class in io.perl.api.impl">TotalLatencyRecordWindow</a></dt>
 <dd>&nbsp;</dd>

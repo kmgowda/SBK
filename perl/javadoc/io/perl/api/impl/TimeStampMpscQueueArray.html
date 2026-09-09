@@ -65,6 +65,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#poll(int)" tabindex="0">poll(int)</a></li>
 <li><a href="#add(int,io.perl.api.TimeStamp)" tabindex="0">add(int, TimeStamp)</a></li>
 <li><a href="#addNode(int,io.perl.api.TimeStampNode)" tabindex="0">addNode(int, TimeStampNode)</a></li>
+<li><a href="#isEmpty()" tabindex="0">isEmpty()</a></li>
 <li><a href="#clear(int)" tabindex="0">clear(int)</a></li>
 <li><a href="#clear()" tabindex="0">clear()</a></li>
 </ol>
@@ -148,9 +149,14 @@ accepts multiple producers and has exactly one consumer.</p></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Clear the queue at the specified index.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../TimeStamp.html" title="class in io.perl.api">TimeStamp</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#poll(int)" class="member-name-link">poll</a><wbr>(int&nbsp;index)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isEmpty()" class="member-name-link">isEmpty</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Reports whether every intrusive queue is empty.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../TimeStamp.html" title="class in io.perl.api">TimeStamp</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#poll(int)" class="member-name-link">poll</a><wbr>(int&nbsp;index)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Poll an element from the queue at the given index, or <code>null</code> if none.</div>
 </div>
 </div>
@@ -248,6 +254,22 @@ accepts multiple producers and has exactly one consumer.</p></div>
 <dd><code>true</code> after the node is linked</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/NullPointerException.html" title="class or interface in java.lang" class="external-link">NullPointerException</a></code> - if <code>node</code> is <code>null</code></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isEmpty()">
+<h3>isEmpty</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isEmpty</span>()</div>
+<div class="block">Reports whether every intrusive queue is empty.
+
+<p>This is a producer-quiesced lifecycle check and is not invoked by
+the measurement consumer loop.</p></div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><code>true</code> when every queue is empty</dd>
 </dl>
 </div>
 </section>

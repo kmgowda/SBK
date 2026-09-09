@@ -180,6 +180,18 @@ periodic aggregation, and printing helpers.</div>
 <dd>
 <div class="block">Interface for Benchmark.</div>
 </dd>
+<dt><a href="io/sbk/exception/BenchmarkCleanupTimeoutException.html" class="type-name-link" title="class in io.sbk.exception">BenchmarkCleanupTimeoutException</a> - Exception Class in <a href="io/sbk/exception/package-summary.html">io.sbk.exception</a></dt>
+<dd>
+<div class="block">Signals that bounded cleanup expired after a benchmark failure or before final results.</div>
+</dd>
+<dt><a href="io/sbk/exception/BenchmarkCleanupTimeoutException.html#%3Cinit%3E(long,java.lang.Throwable)" class="member-name-link">BenchmarkCleanupTimeoutException(long, Throwable)</a> - Constructor for exception class io.sbk.exception.<a href="io/sbk/exception/BenchmarkCleanupTimeoutException.html" title="class in io.sbk.exception">BenchmarkCleanupTimeoutException</a></dt>
+<dd>
+<div class="block">Creates a cleanup deadline failure.</div>
+</dd>
+<dt><a href="io/sbk/exception/BenchmarkCleanupTimeoutException.html#%3Cinit%3E(long,java.lang.Throwable,boolean)" class="member-name-link">BenchmarkCleanupTimeoutException(long, Throwable, boolean)</a> - Constructor for exception class io.sbk.exception.<a href="io/sbk/exception/BenchmarkCleanupTimeoutException.html" title="class in io.sbk.exception">BenchmarkCleanupTimeoutException</a></dt>
+<dd>
+<div class="block">Creates a cleanup deadline failure with explicit final-result state.</div>
+</dd>
 <dt><a href="io/sbk/api/BiConsumer.html" class="type-name-link" title="interface in io.sbk.api">BiConsumer</a> - Interface in <a href="io/sbk/api/package-summary.html">io.sbk.api</a></dt>
 <dd>
 <div class="block">Functional-style BiConsumer used by internal harness code to represent
@@ -512,9 +524,13 @@ metrics and provides default harness-driven write workloads.</div>
 <dd>
 <div class="block"><code>FILE_OPTION_ARG = ARG_PREFIX + FILE_OPTION;</code>.</div>
 </dd>
+<dt><a href="io/sbk/config/SbkRuntimeConfig.html#finalResultPublicationMillis" class="member-name-link">finalResultPublicationMillis</a> - Variable in class io.sbk.config.<a href="io/sbk/config/SbkRuntimeConfig.html" title="class in io.sbk.config">SbkRuntimeConfig</a></dt>
+<dd>
+<div class="block">Portion of cleanup reserved for publishing final aggregate results.</div>
+</dd>
 <dt><a href="io/sbk/config/SbkRuntimeConfig.html#forcedShutdownGraceSeconds" class="member-name-link">forcedShutdownGraceSeconds</a> - Variable in class io.sbk.config.<a href="io/sbk/config/SbkRuntimeConfig.html" title="class in io.sbk.config">SbkRuntimeConfig</a></dt>
 <dd>
-<div class="block">Grace period after the requested benchmark duration.</div>
+<div class="block">Maximum graceful-cleanup period before application completion is forced.</div>
 </dd>
 <dt><a href="io/sbk/thread/ThreadType.html#ForkJoin" class="member-name-link">ForkJoin</a> - Enum constant in enum class io.sbk.thread.<a href="io/sbk/thread/ThreadType.html" title="enum class in io.sbk.thread">ThreadType</a></dt>
 <dd>
@@ -1025,6 +1041,10 @@ metrics and provides default harness-driven write workloads.</div>
 <dd>
 <div class="block">Reports whether read-request metrics are enabled.</div>
 </dd>
+<dt><a href="io/sbk/api/Worker.html#isShutdownInterruption(java.lang.Throwable)" class="member-name-link">isShutdownInterruption(Throwable)</a> - Static method in class io.sbk.api.<a href="io/sbk/api/Worker.html" title="class in io.sbk.api">Worker</a></dt>
+<dd>
+<div class="block">Identifies an I/O failure caused solely by active benchmark shutdown.</div>
+</dd>
 <dt><a href="io/sbk/logger/impl/AbstractRWLogger.html#isWriteRequestsEnabled()" class="member-name-link">isWriteRequestsEnabled()</a> - Method in class io.sbk.logger.impl.<a href="io/sbk/logger/impl/AbstractRWLogger.html" title="class in io.sbk.logger.impl">AbstractRWLogger</a></dt>
 <dd>
 <div class="block">Reports whether write-request metrics are enabled.</div>
@@ -1289,6 +1309,10 @@ metrics and provides default harness-driven write workloads.</div>
 <dt><a href="io/sbk/params/ParseInputOptions.html#parseArgs(java.lang.String%5B%5D)" class="member-name-link">parseArgs(String[])</a> - Method in interface io.sbk.params.<a href="io/sbk/params/ParseInputOptions.html" title="interface in io.sbk.params">ParseInputOptions</a></dt>
 <dd>
 <div class="block">Parse the command line arguments.</div>
+</dd>
+<dt><a href="io/sbk/utils/SbkUtils.html#parseBooleanOption(java.lang.String,java.lang.String)" class="member-name-link">parseBooleanOption(String, String)</a> - Static method in class io.sbk.utils.<a href="io/sbk/utils/SbkUtils.html" title="class in io.sbk.utils">SbkUtils</a></dt>
+<dd>
+<div class="block">Parse a command-line boolean without silently treating a typo as false.</div>
 </dd>
 <dt><a href="io/sbk/params/ParsedOptions.html" class="type-name-link" title="interface in io.sbk.params">ParsedOptions</a> - Interface in <a href="io/sbk/params/package-summary.html">io.sbk.params</a></dt>
 <dd>

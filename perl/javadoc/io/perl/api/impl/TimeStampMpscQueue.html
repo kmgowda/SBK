@@ -70,6 +70,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#poll()" tabindex="0">poll()</a></li>
+<li><a href="#isEmpty()" tabindex="0">isEmpty()</a></li>
 <li><a href="#add(io.perl.api.TimeStampNode)" tabindex="0">add(TimeStampNode)</a></li>
 <li><a href="#clear()" tabindex="0">clear()</a></li>
 </ol>
@@ -195,9 +196,14 @@ the correctness argument.</p>
 <div class="block">Drains all queued nodes and completes retirement of the remaining
 predecessor batch so the queue can be reused.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../TimeStampNode.html" title="class in io.perl.api">TimeStampNode</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#poll()" class="member-name-link">poll</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isEmpty()" class="member-name-link">isEmpty</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Reports whether this queue currently has no published node.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../TimeStampNode.html" title="class in io.perl.api">TimeStampNode</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#poll()" class="member-name-link">poll</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Return data of type T from queue, or <code>null</code> if none is available.</div>
 </div>
 </div>
@@ -247,6 +253,28 @@ predecessor batch so the queue can be reused.</div>
 <dd><code><a href="../Queue.html#poll()">poll</a></code>&nbsp;in interface&nbsp;<code><a href="../Queue.html" title="interface in io.perl.api">Queue</a>&lt;<a href="../TimeStampNode.html" title="class in io.perl.api">TimeStampNode</a>&gt;</code></dd>
 <dt>Returns:</dt>
 <dd>the next producer-supplied node, or <code>null</code> when empty</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isEmpty()">
+<h3>isEmpty</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isEmpty</span>()</div>
+<div class="block">Reports whether this queue currently has no published node.
+
+<p>This read is reserved for producer-quiesced lifecycle draining and
+is not part of the measurement consumer loop. The lifecycle observer may
+read a stale consumer-owned head because advancing the head deliberately
+has no shared-memory write on the hot path. Such a stale head can only
+retain an already-linked successor and conservatively report non-empty.
+It cannot report empty for a published node: publication is the successful
+compare-and-set of that node into its predecessor's <code>next</code>, which
+this method reads with acquire semantics.</p></div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><code>true</code> when no node follows the consumer head</dd>
 </dl>
 </div>
 </section>

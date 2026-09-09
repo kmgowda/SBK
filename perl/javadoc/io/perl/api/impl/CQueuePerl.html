@@ -64,8 +64,10 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#getPerlChannel()" tabindex="0">getPerlChannel()</a></li>
 <li><a href="#run(long,long)" tabindex="0">run(long, long)</a></li>
+<li><a href="#runOrchestrated(long,long)" tabindex="0">runOrchestrated(long, long)</a></li>
 <li><a href="#stop()" tabindex="0">stop()</a></li>
 <li><a href="#stop(io.perl.api.BenchmarkTermination)" tabindex="0">stop(BenchmarkTermination)</a></li>
+<li><a href="#stopBefore(io.perl.api.BenchmarkTermination,long)" tabindex="0">stopBefore(BenchmarkTermination, long)</a></li>
 </ol>
 </li>
 </ol>
@@ -134,16 +136,29 @@ implements <a href="../Perl.html" title="interface in io.perl.api">Perl</a></spa
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Run the CQ Perl.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stop()" class="member-name-link">stop</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html" title="class or interface in java.util.concurrent" class="external-link">CompletableFuture</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Void.html" title="class or interface in java.lang" class="external-link">Void</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runOrchestrated(long,long)" class="member-name-link">runOrchestrated</a><wbr>(long&nbsp;secondsToRun,
+ long&nbsp;recordsCount)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Stop the CQ Perl.</div>
+<div class="block">Starts a benchmark whose duration boundary is owned by an external
+orchestrator.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stop(io.perl.api.BenchmarkTermination)" class="member-name-link">stop</a><wbr>(<a href="../BenchmarkTermination.html" title="enum class in io.perl.api">BenchmarkTermination</a>&nbsp;termination)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stop()" class="member-name-link">stop</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Stop the CQ Perl.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stop(io.perl.api.BenchmarkTermination)" class="member-name-link">stop</a><wbr>(<a href="../BenchmarkTermination.html" title="enum class in io.perl.api">BenchmarkTermination</a>&nbsp;termination)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Stops the benchmark while preserving an orchestrator-provided successful
 completion reason in the final lifecycle log.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stopBefore(io.perl.api.BenchmarkTermination,long)" class="member-name-link">stopBefore</a><wbr>(<a href="../BenchmarkTermination.html" title="enum class in io.perl.api">BenchmarkTermination</a>&nbsp;termination,
+ long&nbsp;cleanupDeadlineNanos)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Stops the recorder before a shared monotonic cleanup deadline.</div>
 </div>
 </div>
 </div>
@@ -180,6 +195,8 @@ completion reason in the final lifecycle log.</div>
 <dd><code>reportingIntervalMS</code> - int</dd>
 <dd><code>time</code> - Time</dd>
 <dd><code>executor</code> - ExecutorService</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - when cleanup timing is invalid</dd>
 </dl>
 </div>
 </section>
@@ -228,6 +245,32 @@ completion reason in the final lifecycle log.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="runOrchestrated(long,long)">
+<h3>runOrchestrated</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html" title="class or interface in java.util.concurrent" class="external-link">CompletableFuture</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Void.html" title="class or interface in java.lang" class="external-link">Void</a>&gt;</span>&nbsp;<span class="element-name">runOrchestrated</span><wbr><span class="parameters">(long&nbsp;secondsToRun,
+ long&nbsp;recordsCount)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Perl.html#runOrchestrated(long,long)">Perl</a></code></span></div>
+<div class="block">Starts a benchmark whose duration boundary is owned by an external
+orchestrator.
+
+<p>The default retains compatibility with alternate implementations.
+Implementations that independently stop on elapsed time may override
+this method so measurements already accepted by producers can be
+drained before the orchestrator stops the recorder.</p></div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../Perl.html#runOrchestrated(long,long)">runOrchestrated</a></code>&nbsp;in interface&nbsp;<code><a href="../Perl.html" title="interface in io.perl.api">Perl</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>secondsToRun</code> - configured duration retained for diagnostics</dd>
+<dd><code>recordsCount</code> - configured fixed-record target</dd>
+<dt>Returns:</dt>
+<dd>asynchronous benchmark completion</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="stop()">
 <h3>stop</h3>
 <div class="horizontal-scroll">
@@ -256,6 +299,27 @@ implementations by delegating to <a href="../Perl.html#stop()"><code>Perl.stop()
 <dd><code><a href="../Perl.html#stop(io.perl.api.BenchmarkTermination)">stop</a></code>&nbsp;in interface&nbsp;<code><a href="../Perl.html" title="interface in io.perl.api">Perl</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>termination</code> - successful duration/record completion or an explicit stop</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="stopBefore(io.perl.api.BenchmarkTermination,long)">
+<h3>stopBefore</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">stopBefore</span><wbr><span class="parameters">(<a href="../BenchmarkTermination.html" title="enum class in io.perl.api">BenchmarkTermination</a>&nbsp;termination,
+ long&nbsp;cleanupDeadlineNanos)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../Perl.html#stopBefore(io.perl.api.BenchmarkTermination,long)">Perl</a></code></span></div>
+<div class="block">Stops the recorder before a shared monotonic cleanup deadline.
+
+<p>The default retains compatibility with alternate implementations by
+delegating to <a href="../Perl.html#stop(io.perl.api.BenchmarkTermination)"><code>Perl.stop(BenchmarkTermination)</code></a>.</p></div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../Perl.html#stopBefore(io.perl.api.BenchmarkTermination,long)">stopBefore</a></code>&nbsp;in interface&nbsp;<code><a href="../Perl.html" title="interface in io.perl.api">Perl</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>termination</code> - benchmark completion reason</dd>
+<dd><code>cleanupDeadlineNanos</code> - absolute <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/System.html#nanoTime()" title="class or interface in java.lang" class="external-link"><code>System.nanoTime()</code></a> deadline</dd>
 </dl>
 </div>
 </section>

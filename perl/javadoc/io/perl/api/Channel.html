@@ -58,6 +58,7 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#receive(int)" tabindex="0">receive(int)</a></li>
 <li><a href="#sendEndTime(long)" tabindex="0">sendEndTime(long)</a></li>
+<li><a href="#isEmpty()" tabindex="0">isEmpty()</a></li>
 <li><a href="#clear()" tabindex="0">clear()</a></li>
 </ol>
 </li>
@@ -117,14 +118,19 @@ recording thread has its own <a href="PerlChannel.html" title="interface in io.p
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Clear the channel of any pending data and reset its internal state.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="TimeStamp.html" title="class in io.perl.api">TimeStamp</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#receive(int)" class="member-name-link">receive</a><wbr>(int&nbsp;timeout)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isEmpty()" class="member-name-link">isEmpty</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Reports whether this channel has any queued measurements.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="TimeStamp.html" title="class in io.perl.api">TimeStamp</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#receive(int)" class="member-name-link">receive</a><wbr>(int&nbsp;timeout)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Receive the benchmarking timestamp.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#sendEndTime(long)" class="member-name-link">sendEndTime</a><wbr>(long&nbsp;endTime)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#sendEndTime(long)" class="member-name-link">sendEndTime</a><wbr>(long&nbsp;endTime)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Send an end time indication to consumers.</div>
 </div>
 </div>
@@ -169,6 +175,22 @@ the producer to signal shutdown.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>endTime</code> - End Time.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isEmpty()">
+<h3>isEmpty</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type">boolean</span>&nbsp;<span class="element-name">isEmpty</span>()</div>
+<div class="block">Reports whether this channel has any queued measurements.
+
+<p>This is a producer-quiesced lifecycle operation. Recorder loops must
+not invoke it while processing measurements.</p></div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><code>true</code> when every queue owned by the channel is empty</dd>
 </dl>
 </div>
 </section>

@@ -60,6 +60,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#field-detail" tabindex="0">Field Details</a>
 <ol class="toc-list">
 <li><a href="#forcedShutdownGraceSeconds" tabindex="0">forcedShutdownGraceSeconds</a></li>
+<li><a href="#finalResultPublicationMillis" tabindex="0">finalResultPublicationMillis</a></li>
 <li><a href="#workerExecutorReserve" tabindex="0">workerExecutorReserve</a></li>
 <li><a href="#perlExecutorParallelism" tabindex="0">perlExecutorParallelism</a></li>
 <li><a href="#workerTerminationSeconds" tabindex="0">workerTerminationSeconds</a></li>
@@ -112,28 +113,33 @@ loadScripts(document, 'script');</script>
 <div class="block">Default storage-operation timeout in milliseconds.</div>
 </div>
 <div class="col-first odd-row-color"><code>long</code></div>
-<div class="col-second odd-row-color"><code><a href="#forcedShutdownGraceSeconds" class="member-name-link">forcedShutdownGraceSeconds</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#finalResultPublicationMillis" class="member-name-link">finalResultPublicationMillis</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">Grace period after the requested benchmark duration.</div>
+<div class="block">Portion of cleanup reserved for publishing final aggregate results.</div>
 </div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#perlExecutorParallelism" class="member-name-link">perlExecutorParallelism</a></code></div>
+<div class="col-first even-row-color"><code>long</code></div>
+<div class="col-second even-row-color"><code><a href="#forcedShutdownGraceSeconds" class="member-name-link">forcedShutdownGraceSeconds</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Maximum graceful-cleanup period before application completion is forced.</div>
+</div>
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#perlExecutorParallelism" class="member-name-link">perlExecutorParallelism</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Parallelism of the PerL executor.</div>
 </div>
-<div class="col-first odd-row-color"><code>long</code></div>
-<div class="col-second odd-row-color"><code><a href="#shutdownHookTimeoutSeconds" class="member-name-link">shutdownHookTimeoutSeconds</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>long</code></div>
+<div class="col-second even-row-color"><code><a href="#shutdownHookTimeoutSeconds" class="member-name-link">shutdownHookTimeoutSeconds</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">JVM shutdown-hook cleanup timeout in seconds.</div>
 </div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#workerExecutorReserve" class="member-name-link">workerExecutorReserve</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#workerExecutorReserve" class="member-name-link">workerExecutorReserve</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Executor threads reserved for lifecycle and measurement tasks.</div>
 </div>
-<div class="col-first odd-row-color"><code>long</code></div>
-<div class="col-second odd-row-color"><code><a href="#workerTerminationSeconds" class="member-name-link">workerTerminationSeconds</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>long</code></div>
+<div class="col-second even-row-color"><code><a href="#workerTerminationSeconds" class="member-name-link">workerTerminationSeconds</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Worker executor termination wait in seconds.</div>
 </div>
 </div>
@@ -192,7 +198,16 @@ loadScripts(document, 'script');</script>
 <h3>forcedShutdownGraceSeconds</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">forcedShutdownGraceSeconds</span></div>
-<div class="block">Grace period after the requested benchmark duration.</div>
+<div class="block">Maximum graceful-cleanup period before application completion is forced.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="finalResultPublicationMillis">
+<h3>finalResultPublicationMillis</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">finalResultPublicationMillis</span></div>
+<div class="block">Portion of cleanup reserved for publishing final aggregate results.</div>
 </div>
 </section>
 </li>

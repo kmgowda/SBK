@@ -65,6 +65,7 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#redactOptionValues(java.lang.String%5B%5D,java.lang.String%5B%5D)" tabindex="0">redactOptionValues(String[], String[])</a></li>
 <li><a href="#redactSensitiveOptionValues(java.lang.String%5B%5D)" tabindex="0">redactSensitiveOptionValues(String[])</a></li>
+<li><a href="#parseBooleanOption(java.lang.String,java.lang.String)" tabindex="0">parseBooleanOption(String, String)</a></li>
 <li><a href="#getOperatingSystemDetails()" tabindex="0">getOperatingSystemDetails()</a></li>
 <li><a href="#logJavaRuntimeDetails()" tabindex="0">logJavaRuntimeDetails()</a></li>
 <li><a href="#getJavaRuntimeHome()" tabindex="0">getJavaRuntimeHome()</a></li>
@@ -199,29 +200,35 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Merges two option/value arrays, with the second array taking precedence.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static @NotNull <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#redactOptionValues(java.lang.String%5B%5D,java.lang.String%5B%5D)" class="member-name-link">redactOptionValues</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;args,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;sensitiveOptions)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#parseBooleanOption(java.lang.String,java.lang.String)" class="member-name-link">parseBooleanOption</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;option,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;value)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Parse a command-line boolean without silently treating a typo as false.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static @NotNull <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#redactOptionValues(java.lang.String%5B%5D,java.lang.String%5B%5D)" class="member-name-link">redactOptionValues</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;args,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;sensitiveOptions)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Return a copy of command-line arguments with values belonging to sensitive
 options replaced by a fixed mask.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static @NotNull <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#redactSensitiveOptionValues(java.lang.String%5B%5D)" class="member-name-link">redactSensitiveOptionValues</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;args)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static @NotNull <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#redactSensitiveOptionValues(java.lang.String%5B%5D)" class="member-name-link">redactSensitiveOptionValues</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;args)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Return a copy of SBK arguments with values for commonly used credential
 options replaced by a fixed mask.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static @NotNull <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#removeOptionArgs(java.lang.String%5B%5D,java.lang.String%5B%5D)" class="member-name-link">removeOptionArgs</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;args,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;opts)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Removes each named option once while retaining other arguments.</div>
-</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static @NotNull <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#removeOptionArgsAndValues(java.lang.String%5B%5D,java.lang.String%5B%5D)" class="member-name-link">removeOptionArgsAndValues</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;args,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#removeOptionArgs(java.lang.String%5B%5D,java.lang.String%5B%5D)" class="member-name-link">removeOptionArgs</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;args,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;opts)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Removes each named option once while retaining other arguments.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static @NotNull <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#removeOptionArgsAndValues(java.lang.String%5B%5D,java.lang.String%5B%5D)" class="member-name-link">removeOptionArgsAndValues</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;args,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;opts)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Removes each named option and its following value once.</div>
 </div>
 </div>
@@ -292,6 +299,25 @@ options replaced by a fixed mask.</div>
 <dd><code>args</code> - command-line arguments</dd>
 <dt>Returns:</dt>
 <dd>copied arguments with credential values redacted</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="parseBooleanOption(java.lang.String,java.lang.String)">
+<h3>parseBooleanOption</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">parseBooleanOption</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;option,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;value)</span></div>
+<div class="block">Parse a command-line boolean without silently treating a typo as false.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>option</code> - option name used in an actionable error message</dd>
+<dd><code>value</code> - configured option value</dd>
+<dt>Returns:</dt>
+<dd>parsed boolean</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the value is not <code>true</code> or <code>false</code></dd>
 </dl>
 </div>
 </section>
