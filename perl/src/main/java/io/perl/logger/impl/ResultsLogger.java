@@ -17,7 +17,9 @@ import io.time.TimeUnit;
 
 import javax.annotation.Nonnull;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * Base implementation for printing benchmark results to different sinks.
@@ -86,7 +88,8 @@ public abstract class ResultsLogger implements PerformanceLogger {
      */
     public ResultsLogger(String prefix, @Nonnull double[] percentiles,
                          @Nonnull TimeUnit timeUnit, long minLatency, long maxLatency) {
-        this.format = new DecimalFormat(LatencyConfig.PERCENTILE_FORMAT);
+        this.format = new DecimalFormat(LatencyConfig.PERCENTILE_FORMAT,
+                DecimalFormatSymbols.getInstance(Locale.ROOT));
         this.prefix = prefix;
         this.timeUnit = timeUnit;
         this.minLatency = minLatency;

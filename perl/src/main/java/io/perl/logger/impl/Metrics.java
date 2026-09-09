@@ -12,6 +12,8 @@ package io.perl.logger.impl;
 
 import io.perl.config.LatencyConfig;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 /**
  * Metrics name builder used by metric-based logger implementations.
@@ -107,7 +109,8 @@ public abstract sealed class Metrics permits PrintMetrics {
     public Metrics(String prefixName, String timeUnitName, double[] percentiles) {
         metricPrefix = prefixName.replace(" ", "_");
         metricTimeUnit = timeUnitName.replace(" ", "_");
-        percentileFormat = new DecimalFormat(LatencyConfig.PERCENTILE_FORMAT);
+        percentileFormat = new DecimalFormat(LatencyConfig.PERCENTILE_FORMAT,
+                DecimalFormatSymbols.getInstance(Locale.ROOT));
         bytesName = metricPrefix + "_Bytes";
         recordsName = metricPrefix + "_Records";
         mbPsecName = metricPrefix + "_MBPerSec";
