@@ -100,7 +100,7 @@ final public class ArrayLatencyRecorder extends LatencyRecordWindow {
     @Override
     public void reportLatency(long latency, long count) {
         final int index = (int) (latency - this.lowLatency);
-        if (Integer.compareUnsigned(index, this.latencies.length) < 0) {
+        if (index < this.latencies.length) {
             this.minIndex = Math.min(this.minIndex, index);
             this.maxIndex = Math.max(this.maxIndex, index);
             this.latencies[index] += count;
