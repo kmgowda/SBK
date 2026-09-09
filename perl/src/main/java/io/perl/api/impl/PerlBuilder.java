@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
@@ -135,7 +136,8 @@ public final class PerlBuilder {
             totalWindowExtension = new HdrExtendedLatencyRecorder(minLatency, maxLatency,
                     LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX,
                     percentileFractions, time, totalWindow);
-            PerlPrinter.log.info(String.format("Total Window Extension: HdrHistogram, Size: %.2f MB",
+            PerlPrinter.log.info(String.format(Locale.ROOT,
+                    "Total Window Extension: HdrHistogram, Size: %.2f MB",
                     (totalWindowExtension.getMaxMemoryBytes() * 1.0) / Bytes.BYTES_PER_MB));
         } else if (config.csv) {
             totalWindowExtension = new CSVExtendedLatencyRecorder(minLatency, maxLatency,

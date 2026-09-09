@@ -463,12 +463,21 @@ final public class SbmGrpcService extends ServiceGrpc.ServiceImplBase {
         };
     }
 
-    private static void validateLatencyFields(MessageLatenciesRecord record) {
+    private void validateLatencyFields(MessageLatenciesRecord record) {
         final int latencyValuesCount = record.getLatencyValuesCount();
         final int latencyCountsCount = record.getLatencyCountsCount();
         if (latencyValuesCount != latencyCountsCount) {
             throw new IllegalArgumentException("SBM packed latency values/counts have different lengths: "
                     + latencyValuesCount + " and " + latencyCountsCount);
+        }
+        final long minLatency = config.getMinLatency();
+        final long maxLatency = config.getMaxLatency();
+        for (int index = 0; index < latencyValuesCount; index++) {
+            final long latency = record.getLatencyValues(index);
+            if (latency < minLatency || latency > maxLatency) {
+                throw new IllegalArgumentException("SBM packed latency value is outside the configured range: "
+                        + latency + " not in [" + minLatency + ", " + maxLatency + "]");
+            }
         }
     }
 

@@ -430,6 +430,30 @@ final class SbmGrpcServiceTest {
     }
 
     @Test
+    void rejectsPackedLatenciesOutsideTheConfiguredRange() throws Exception {
+        for (long latency : new long[]{9, 21}) {
+            final SbmParameters params = new SbmParameters("test", 0, 1, 0, null);
+            params.parseArgs(new String[]{"-class", "file", "-action", "r"});
+            final SbmRegistry registry = mock(SbmRegistry.class);
+            final SbmGrpcService service = new SbmGrpcService(params, new MilliSeconds(), 10, 20,
+                    mock(CountConnections.class), registry);
+            final CapturingEmptyObserver response = new CapturingEmptyObserver();
+            final StreamObserver<MessageLatenciesRecord> stream = service.streamLatencies(response);
+
+            stream.onNext(MessageLatenciesRecord.newBuilder()
+                    .setClientID(1)
+                    .setSequenceNumber(1)
+                    .addLatencyValues(latency)
+                    .addLatencyCounts(1)
+                    .build());
+
+            assertEquals(Status.Code.INVALID_ARGUMENT,
+                    Status.fromThrowable(response.failure).getCode());
+            verify(registry, org.mockito.Mockito.never()).enQueue(org.mockito.ArgumentMatchers.any());
+        }
+    }
+
+    @Test
     void rejectsAClientIdChangeWithinOneStream() throws Exception {
         final SbmParameters params = new SbmParameters("test", 0, 1, 0, null);
         params.parseArgs(new String[]{"-class", "file", "-action", "r"});

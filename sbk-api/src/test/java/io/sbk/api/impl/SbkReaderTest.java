@@ -47,13 +47,15 @@ final class SbkReaderTest {
     };
 
     @Test
-    void exitsWhenDriverThrowsEof() throws Exception {
+    void reportsEofAsIncompleteResult() throws Exception {
         final DataReader<Object> reader = readerThatThrowsEof();
         final ExecutorService executor = Executors.newSingleThreadExecutor();
 
         try {
-            createReader(reader, executor)
-                    .run(60, 0).get(2, TimeUnit.SECONDS);
+            final ExecutionException failure = assertThrows(ExecutionException.class,
+                    () -> createReader(reader, executor).run(60, 0).get(2, TimeUnit.SECONDS));
+
+            assertInstanceOf(EOFException.class, failure.getCause());
         } finally {
             executor.shutdownNow();
         }

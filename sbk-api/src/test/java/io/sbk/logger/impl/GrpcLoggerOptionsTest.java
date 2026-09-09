@@ -10,6 +10,7 @@
 package io.sbk.logger.impl;
 
 import io.sbk.params.impl.SbkParameters;
+import io.sbp.grpc.Config;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -103,6 +104,21 @@ public final class GrpcLoggerOptionsTest {
                 "-sbm", "127.0.0.1", "-sbmport", "9717");
 
         assertDoesNotThrow(() -> logger.parseArgs(parameters));
+    }
+
+    /** Latency bounds must match before distributed measurements are accepted. */
+    @Test
+    public void rejectsSbmLatencyRangeMismatch() {
+        final Config config = Config.newBuilder()
+                .setMinLatency(10)
+                .setMaxLatency(100)
+                .build();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> GrpcLogger.validateLatencyRange(config, 9, 100));
+        assertThrows(IllegalArgumentException.class,
+                () -> GrpcLogger.validateLatencyRange(config, 10, 101));
+        assertDoesNotThrow(() -> GrpcLogger.validateLatencyRange(config, 10, 100));
     }
 
     /**

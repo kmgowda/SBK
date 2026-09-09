@@ -55,6 +55,25 @@ public class ArrayLatencyRecorderTest {
     }
 
     /**
+     * Verify that packed latency input below the configured lower bound is ignored safely.
+     */
+    @Test
+    public void reportLatencyIgnoresValuesBelowLowerBound() {
+        final LatencyRecordWindow window = new ArrayLatencyRecorder(
+                100, 110, LatencyConfig.TOTAL_LATENCY_MAX,
+                LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX,
+                new double[]{0.5}, new NanoSeconds());
+        final LatencyPercentiles percentiles = new LatencyPercentiles(new double[]{0.5});
+
+        window.reportLatency(99, 7);
+        window.reportLatency(100, 1);
+        window.copyPercentiles(percentiles, null);
+
+        assertEquals(100, percentiles.latencies[0]);
+        assertEquals(1, percentiles.latenciesCount[0]);
+    }
+
+    /**
      * Verifies that the builder selects the array recorder when its inclusive
      * range fits within the configured array-memory limit.
      */

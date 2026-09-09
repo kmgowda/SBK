@@ -111,6 +111,7 @@ final public class SbkReader extends Worker implements RunBenchmark {
                 Printer.log.info("Reader " + id + " exited");
             } catch (EOFException ex) {
                 Printer.log.info("Reader " + id + " exited with EOF");
+                throw new CompletionException(ex);
             } catch (IOException ex) {
                 if (Thread.currentThread().isInterrupted()) {
                     Printer.log.info("Reader " + id + " interrupted during shutdown");
