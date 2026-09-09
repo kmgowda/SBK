@@ -143,7 +143,8 @@ public class MinIO implements Storage<byte[]> {
                 "Weighted reader operations, e.g. get=90,stat=10, default: '"
                         + nullToEmpty(config.readMix) + "'");
         params.addOption("mixed-read-source", true,
-                "Mixed-run reader source [catalog|published], default: "
+                "Mixed-run reader source [catalog]; published mode is disabled until it can "
+                        + "guarantee completion without writer hot-path overhead, default: "
                         + config.mixedReadSource);
         params.addOption("async", true, "Use bounded MinioAsyncClient operations, default: " + config.async);
         params.addOption("async-depth", true, "Maximum in-flight operations per worker, default: "

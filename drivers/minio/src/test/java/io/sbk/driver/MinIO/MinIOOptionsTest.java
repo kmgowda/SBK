@@ -21,6 +21,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Validates MinIO operation and asynchronous command-line options.
@@ -76,6 +77,10 @@ public class MinIOOptionsTest {
                 "-list-api-version", "2", "-list-start-after", "marker",
                 "-list-delimiter", "/", "-list-fetch-owner", "true",
                 "-list-include-user-metadata", "true", "-mixed-read-source", "catalog"));
+        IllegalArgumentException publishedFailure = assertThrows(IllegalArgumentException.class,
+                () -> parse("-writers", "1", "-readers", "1", "-size", "100", "-records", "10",
+                        "-mixed-read-source", "published"));
+        assertTrue(publishedFailure.getMessage().contains("published is disabled"));
         assertThrows(IllegalArgumentException.class,
                 () -> parse("-writers", "1", "-size", "100", "-seconds", "1",
                         "-write-mix", "put=0"));

@@ -21,11 +21,17 @@ enum S3MixedReadSource {
         if (value == null || value.isBlank()) {
             return CATALOG;
         }
+        final String normalized = value.trim().toUpperCase(Locale.ROOT);
+        if (PUBLISHED.name().equals(normalized)) {
+            throw new IllegalArgumentException("mixed-read-source published is disabled because "
+                    + "it cannot currently guarantee balanced completion without adding MinIO "
+                    + "writer hot-path overhead; use catalog");
+        }
         try {
-            return valueOf(value.trim().toUpperCase(Locale.ROOT));
-        } catch (RuntimeException ex) {
+            return valueOf(normalized);
+        } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException(
-                    "mixed-read-source must be catalog or published", ex);
+                    "mixed-read-source must be catalog", ex);
         }
     }
 }
