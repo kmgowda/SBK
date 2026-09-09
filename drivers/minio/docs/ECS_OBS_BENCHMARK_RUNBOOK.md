@@ -483,13 +483,13 @@ only the fallback. For fixed-record destructive or mixed workloads, SBK
 validates aggregate target capacity before timing. That validation cannot
 guarantee publication timing or per-reader delivery.
 
-For mixed writer/reader tests, prefer the default
-`-mixed-read-source catalog`. The explicit `published` mode consumes only
-objects completed by the same run and can wait indefinitely if writers finish
-without supplying every reader operation. Use a finite common SBK guard such
-as `-idletimeoutseconds 60`, keep publication and consumption rates balanced,
-and reject any run terminated by that no-progress timeout. There is no separate
-MinIO idle-timeout option because that would duplicate the harness control.
+Mixed writer/reader tests use `-mixed-read-source catalog`. The former
+experimental `published` mode is rejected at startup because it could stall
+even with balanced producers and consumers. Do not work around that rejection:
+the mode may return only after the common no-progress timeout and therefore
+cannot produce qualification evidence. Reintroducing same-run publication
+requires a separately selected implementation plus exact-completion and
+before/after hot-path performance evidence.
 
 Driver operations are:
 

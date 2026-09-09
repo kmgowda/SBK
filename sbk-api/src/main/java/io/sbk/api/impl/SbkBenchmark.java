@@ -159,7 +159,7 @@ final public class SbkBenchmark implements Benchmark {
             readPerl = null;
         }
 
-        timeoutExecutor = Executors.newSingleThreadScheduledExecutor(Thread.ofPlatform()
+        timeoutExecutor = Executors.newScheduledThreadPool(2, Thread.ofPlatform()
                 .name("sbk-benchmark-deadline").daemon(true).factory());
         retFuture = new CompletableFuture<>();
         writers = new ArrayList<>();
@@ -289,12 +289,14 @@ final public class SbkBenchmark implements Benchmark {
         }
 
         if (writePerl != null && params.getAction() == Action.Writing && sbkWriters != null) {
-            writePerlCompletion = writePerl.run(params.getTotalSecondsToRun(), params.getTotalRecords());
+            writePerlCompletion = writePerl.runOrchestrated(
+                    params.getTotalSecondsToRun(), params.getTotalRecords());
         } else {
             writePerlCompletion = null;
         }
         if (readPerl != null && sbkReaders != null) {
-            readPerlCompletion = readPerl.run(params.getTotalSecondsToRun(), params.getTotalRecords());
+            readPerlCompletion = readPerl.runOrchestrated(
+                    params.getTotalSecondsToRun(), params.getTotalRecords());
         } else {
             readPerlCompletion = null;
         }
@@ -501,9 +503,31 @@ final public class SbkBenchmark implements Benchmark {
         final long cleanupGraceNanos = TimeUnit.SECONDS.toNanos(
                 RUNTIME_CONFIG.forcedShutdownGraceSeconds);
         final long cleanupDeadlineNanos = System.nanoTime() + cleanupGraceNanos;
+        final long finalResultDelayNanos = cleanupGraceNanos
+                - TimeUnit.MILLISECONDS.toNanos(RUNTIME_CONFIG.finalResultPublicationMillis);
+        timeoutExecutor.schedule(() -> publishFinalResults(cleanupDeadlineNanos),
+                finalResultDelayNanos, TimeUnit.NANOSECONDS);
         timeoutExecutor.schedule(() -> forceShutdownCompletion(ex),
                 cleanupGraceNanos, TimeUnit.NANOSECONDS);
         lifecycleExecutor.execute(() -> shutdown(ex, requestedTermination, cleanupDeadlineNanos));
+    }
+
+    /**
+     * Requests the final aggregate shortly before the hard cleanup deadline.
+     *
+     * <p>This lifecycle-only fallback runs on a deadline executor separate from the hard-stop
+     * task. It can therefore terminate PerL and publish {@code Total} even when
+     * the main lifecycle thread is blocked while closing a driver.</p>
+     *
+     * @param cleanupDeadlineNanos absolute monotonic hard-stop deadline
+     */
+    private void publishFinalResults(long cleanupDeadlineNanos) {
+        if (retFuture.isDone()) {
+            return;
+        }
+        Printer.log.warn("SBK cleanup is still active; publishing the final Total "
+                + "before the hard-stop deadline");
+        stopPerformanceRecorders(BenchmarkTermination.STOP_REQUESTED, cleanupDeadlineNanos);
     }
 
     /**
@@ -521,19 +545,28 @@ final public class SbkBenchmark implements Benchmark {
      * so a driver or SDK blocked in close cannot extend a timed run indefinitely.
      *
      * @param failure failure that initiated shutdown, or {@code null} for an orderly shutdown
-     * @return authoritative benchmark completion, failed when this deadline wins
+     * @return authoritative benchmark completion; cleanup timeout is warning-only only after
+     *         every active PerL recorder has published its final aggregate
      */
     CompletableFuture<Void> forceShutdownCompletion(Throwable failure) {
         final Throwable initiatingFailure = unwrapCompletionFailure(failure);
-        final BenchmarkCleanupTimeoutException timeoutFailure =
-                new BenchmarkCleanupTimeoutException(
-                        RUNTIME_CONFIG.forcedShutdownGraceSeconds, initiatingFailure);
-        final boolean completed = retFuture.completeExceptionally(timeoutFailure);
+        final Throwable resultFailure = retainFailure(
+                completedFutureFailure(writePerlCompletion),
+                completedFutureFailure(readPerlCompletion));
+        final boolean completed;
+        if (initiatingFailure == null && resultFailure == null) {
+            completed = retFuture.complete(null);
+        } else {
+            final Throwable terminalFailure = retainFailure(initiatingFailure, resultFailure);
+            completed = retFuture.completeExceptionally(new BenchmarkCleanupTimeoutException(
+                    RUNTIME_CONFIG.forcedShutdownGraceSeconds, terminalFailure,
+                    resultFailure == null));
+        }
         if (completed) {
             Printer.log.warn("SBK benchmark cleanup exceeded "
                     + RUNTIME_CONFIG.forcedShutdownGraceSeconds
-                    + " seconds; final aggregate results may be incomplete; "
-                    + "forcing application exit with failure status");
+                    + " seconds; final Total publication was requested; "
+                    + "forcing bounded application exit");
             executor.shutdownNow();
             perlExecutor.shutdownNow();
             lifecycleExecutor.shutdownNow();
@@ -589,13 +622,13 @@ final public class SbkBenchmark implements Benchmark {
                 return;
             }
         }
-        stopPerformanceRecorders(requestedTermination);
-        terminalFailure = retainFailure(terminalFailure, completedFutureFailure(writePerlCompletion));
-        terminalFailure = retainFailure(terminalFailure, completedFutureFailure(readPerlCompletion));
         if (!workersClosed) {
             terminalFailure = closeReaders(terminalFailure);
             terminalFailure = closeWriters(terminalFailure);
         }
+        stopPerformanceRecorders(requestedTermination, cleanupDeadlineNanos);
+        terminalFailure = retainFailure(terminalFailure, completedFutureFailure(writePerlCompletion));
+        terminalFailure = retainFailure(terminalFailure, completedFutureFailure(readPerlCompletion));
         if (!storageClosed) {
             terminalFailure = closeStorage(terminalFailure);
         }
@@ -604,6 +637,7 @@ final public class SbkBenchmark implements Benchmark {
         } catch (IOException e) {
             terminalFailure = retainFailure(terminalFailure, e);
         }
+        perlExecutor.shutdown();
         final BenchmarkTermination termination = BenchmarkTermination.resolve(requestedTermination, terminalFailure);
         if (terminalFailure != null) {
             Printer.log.warn("SBK Benchmark Shutdown: {}", termination.describe(
@@ -676,14 +710,15 @@ final public class SbkBenchmark implements Benchmark {
         return terminalFailure;
     }
 
-    private void stopPerformanceRecorders(BenchmarkTermination requestedTermination) {
+    private void stopPerformanceRecorders(BenchmarkTermination requestedTermination,
+                                          long cleanupDeadlineNanos) {
         final BenchmarkTermination recorderTermination = requestedTermination.isSuccessfulCompletion()
                 ? requestedTermination : BenchmarkTermination.STOP_REQUESTED;
         if (writePerl != null) {
-            writePerl.stop(recorderTermination);
+            writePerl.stopBefore(recorderTermination, cleanupDeadlineNanos);
         }
         if (readPerl != null) {
-            readPerl.stop(recorderTermination);
+            readPerl.stopBefore(recorderTermination, cleanupDeadlineNanos);
         }
     }
 

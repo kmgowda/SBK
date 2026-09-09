@@ -79,10 +79,10 @@ public class PerformanceRecorderIdleSleep extends PerformanceRecorder {
                 t = channels[i].receive(windowIntervalMS);
                 if (t != null) {
                     notFound = false;
-                    ctime = t.endTime;
                     if (t.isEnd()) {
                         doWork = false;
                     } else {
+                        ctime = t.endTime;
                         periodicRecorder.record(t.startTime, t.endTime, t.records, t.bytes);
                         if (timeUnitsToRun > 0 && time.elapsed(ctime, startTime) >= timeUnitsToRun) {
                             doWork = false;

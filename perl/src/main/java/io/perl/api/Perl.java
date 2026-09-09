@@ -9,6 +9,9 @@
  */
 package io.perl.api;
 
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Core PerL public interface representing a running performance benchmark
  * instance. Implementations provide mechanisms to obtain channels for
@@ -64,5 +67,38 @@ public non-sealed interface Perl extends RunBenchmark, GetPerlChannel {
      */
     default void stop(BenchmarkTermination termination) {
         stop();
+    }
+
+    /**
+     * Starts a benchmark whose duration boundary is owned by an external
+     * orchestrator.
+     *
+     * <p>The default retains compatibility with alternate implementations.
+     * Implementations that independently stop on elapsed time may override
+     * this method so measurements already accepted by producers can be
+     * drained before the orchestrator stops the recorder.</p>
+     *
+     * @param secondsToRun configured duration retained for diagnostics
+     * @param recordsCount configured fixed-record target
+     * @return asynchronous benchmark completion
+     * @throws IOException when benchmark startup fails
+     */
+    default CompletableFuture<Void> runOrchestrated(long secondsToRun,
+                                                     long recordsCount) throws IOException {
+        return run(secondsToRun, recordsCount);
+    }
+
+    /**
+     * Stops the recorder before a shared monotonic cleanup deadline.
+     *
+     * <p>The default retains compatibility with alternate implementations by
+     * delegating to {@link #stop(BenchmarkTermination)}.</p>
+     *
+     * @param termination benchmark completion reason
+     * @param cleanupDeadlineNanos absolute {@link System#nanoTime()} deadline
+     */
+    default void stopBefore(BenchmarkTermination termination,
+                            long cleanupDeadlineNanos) {
+        stop(termination);
     }
 }

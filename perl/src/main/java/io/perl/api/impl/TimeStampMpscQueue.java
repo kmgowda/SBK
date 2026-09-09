@@ -235,6 +235,24 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
     }
 
     /**
+     * Reports whether this queue currently has no published node.
+     *
+     * <p>This read is reserved for producer-quiesced lifecycle draining and
+     * is not part of the measurement consumer loop. The lifecycle observer may
+     * read a stale consumer-owned head because advancing the head deliberately
+     * has no shared-memory write on the hot path. Such a stale head can only
+     * retain an already-linked successor and conservatively report non-empty.
+     * It cannot report empty for a published node: publication is the successful
+     * compare-and-set of that node into its predecessor's {@code next}, which
+     * this method reads with acquire semantics.</p>
+     *
+     * @return {@code true} when no node follows the consumer head
+     */
+    public boolean isEmpty() {
+        return NEXT.getAcquire(headRef.head) == null;
+    }
+
+    /**
      * Adds a single-use timestamp node without allocating a queue wrapper.
      *
      * @param node producer-owned node to enqueue

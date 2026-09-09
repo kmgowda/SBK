@@ -9,6 +9,8 @@
  */
 package io.sbk.api.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.sbk.api.AsyncReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.data.DataType;
@@ -38,13 +40,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests benchmark lifecycle calculations that must be independent of a storage driver.
@@ -103,6 +105,86 @@ final class SbkBenchmarkTest {
 
         readers.complete(null);
         assertTrue(allWorkers.isDone());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void closesAsyncReadersBeforeStoppingPerformanceRecorder() throws Exception {
+        final AtomicBoolean totalPrinted = new AtomicBoolean();
+        final SbkParameters params = new SbkParameters("async-reader-drain-test");
+        params.parseArgs(new String[]{"-readers", "1", "-size", "1", "-records", "1",
+                "-thread", "p"});
+        final Storage<Object> storage = mock(Storage.class);
+        final DataType<Object> dataType = mock(DataType.class);
+        final RWLogger logger = mock(RWLogger.class, invocation -> {
+            if ("printTotal".equals(invocation.getMethod().getName())) {
+                totalPrinted.set(true);
+            }
+            return CALLS_REAL_METHODS.answer(invocation);
+        });
+        final CompletableFuture<Object> readCompletion = new CompletableFuture<>();
+        final AsyncReader<Object> reader = new AsyncReader<>() {
+            @Override
+            @SuppressFBWarnings(value = "EI_EXPOSE_REP",
+                    justification = "The shared future is the completion barrier under test")
+            public CompletableFuture<Object> readAsync(int size) {
+                return readCompletion;
+            }
+
+            @Override
+            public void close() throws IOException {
+                if (totalPrinted.get()) {
+                    throw new IOException("performance recorder stopped before async reader close");
+                }
+                readCompletion.complete(new Object());
+            }
+        };
+        when(storage.createReader(0, params)).thenReturn(reader);
+        when(dataType.length(org.mockito.ArgumentMatchers.any())).thenReturn(1);
+        final SbkBenchmark benchmark = new SbkBenchmark(params, storage, dataType,
+                logger, new MilliSeconds());
+
+        benchmark.start().get(5, TimeUnit.SECONDS);
+
+        assertTrue(totalPrinted.get());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void publishesTotalAndWarnsWhenDriverCloseBlocksUntilHardStop() throws Exception {
+        final AtomicBoolean totalPrinted = new AtomicBoolean();
+        final CountDownLatch releaseClose = new CountDownLatch(1);
+        final SbkParameters params = new SbkParameters("blocked-close-total-test");
+        params.parseArgs(new String[]{"-writers", "1", "-size", "1", "-records", "1",
+                "-thread", "p"});
+        final Storage<Object> storage = mock(Storage.class);
+        final DataType<Object> dataType = mock(DataType.class);
+        final RWLogger logger = mock(RWLogger.class, invocation -> {
+            if ("printTotal".equals(invocation.getMethod().getName())) {
+                totalPrinted.set(true);
+            }
+            return CALLS_REAL_METHODS.answer(invocation);
+        });
+        when(storage.createWriter(0, params)).thenReturn(new TestDataWriter(() -> {
+            while (releaseClose.getCount() > 0) {
+                try {
+                    releaseClose.await();
+                } catch (InterruptedException ignored) {
+                    // Model a driver close that cannot finish before the hard deadline.
+                }
+            }
+        }));
+        when(dataType.create(1)).thenReturn(new Object());
+        final SbkBenchmark benchmark = new SbkBenchmark(params, storage, dataType,
+                logger, new MilliSeconds());
+
+        try {
+            assertDoesNotThrow(() -> benchmark.start().get(6, TimeUnit.SECONDS));
+            assertTrue(totalPrinted.get(),
+                    "the final-result reserve must publish Total before hard-stop completion");
+        } finally {
+            releaseClose.countDown();
+        }
     }
 
     @Test
@@ -215,10 +297,7 @@ final class SbkBenchmarkTest {
 
         try {
             assertTimeout(Duration.ofSeconds(6), benchmark::stop);
-            final CompletionException completionFailure = assertThrows(CompletionException.class,
-                    () -> completionFuture(benchmark).join());
-            assertInstanceOf(BenchmarkCleanupTimeoutException.class,
-                    completionFailure.getCause());
+            assertDoesNotThrow(() -> completionFuture(benchmark).join());
         } finally {
             releaseClose.countDown();
         }
@@ -236,20 +315,28 @@ final class SbkBenchmarkTest {
                 BenchmarkCleanupTimeoutException.class, completionFailure.getCause());
         assertSame(initiatingFailure, timeoutFailure.getCause());
         assertTrue(timeoutFailure.getMessage().contains("cleanup exceeded 5 seconds"));
-        assertTrue(timeoutFailure.getMessage().contains("final aggregate results may be incomplete"));
+        assertTrue(timeoutFailure.getMessage().contains("after a benchmark failure"));
     }
 
     @Test
-    void orderlyShutdownCannotBecomeSuccessfulWhenForcedCleanupWins() throws Exception {
+    void orderlyCleanupTimeoutCompletesWithWarning() throws Exception {
         final SbkBenchmark benchmark = benchmarkWithWriter(() -> { });
+
+        assertDoesNotThrow(() -> benchmark.forceShutdownCompletion(null).join());
+    }
+
+    @Test
+    void hardDeadlineFailsWhenFinalTotalRemainsPending() throws Exception {
+        final SbkBenchmark benchmark = benchmarkWithWriter(() -> { });
+        setPerlCompletion(benchmark, new CompletableFuture<>());
 
         final CompletionException completionFailure = assertThrows(CompletionException.class,
                 () -> benchmark.forceShutdownCompletion(null).join());
 
         final BenchmarkCleanupTimeoutException timeoutFailure = assertInstanceOf(
                 BenchmarkCleanupTimeoutException.class, completionFailure.getCause());
-        assertNull(timeoutFailure.getCause());
-        assertTrue(timeoutFailure.getMessage().contains("cleanup exceeded 5 seconds"));
+        assertTrue(timeoutFailure.getMessage().contains("before the final Total was published"));
+        assertInstanceOf(IllegalStateException.class, timeoutFailure.getCause());
     }
 
     @SuppressWarnings("unchecked")
@@ -278,6 +365,13 @@ final class SbkBenchmarkTest {
     private static void setWorkerCompletion(SbkBenchmark benchmark,
                                             CompletableFuture<Void> completion) throws Exception {
         final Field completionField = SbkBenchmark.class.getDeclaredField("workerCompletion");
+        completionField.setAccessible(true);
+        completionField.set(benchmark, completion);
+    }
+
+    private static void setPerlCompletion(SbkBenchmark benchmark,
+                                          CompletableFuture<Void> completion) throws Exception {
+        final Field completionField = SbkBenchmark.class.getDeclaredField("writePerlCompletion");
         completionField.setAccessible(true);
         completionField.set(benchmark, completion);
     }

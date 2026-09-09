@@ -30,18 +30,24 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.LockSupport;
 
 
 /**
  * Class for Concurrent Queue based PerL.
  */
 final public class CQueuePerl implements Perl {
+    private static final long DRAIN_POLL_NANOS = TimeUnit.MILLISECONDS.toNanos(1);
     final private PerformanceRecorder perlReceiver;
     final private Channel[] channels;
     final private Time time;
     final private ExecutorService executor;
     final private CompletableFuture<Void> retFuture;
     final private int idleTimeoutSeconds;
+    final private int shutdownTimeoutSeconds;
+    final private long finalResultPublicationNanos;
 
     @GuardedBy("this")
     private int index;
@@ -67,6 +73,7 @@ final public class CQueuePerl implements Perl {
      * @param reportingIntervalMS int
      * @param time                Time
      * @param executor            ExecutorService
+     * @throws IllegalArgumentException when cleanup timing is invalid
      */
     public CQueuePerl(@NotNull PerlConfig perlConfig, PeriodicRecorder periodicRecorder,
                       int reportingIntervalMS, Time time, ExecutorService executor) {
@@ -75,6 +82,18 @@ final public class CQueuePerl implements Perl {
         this.executor = executor;
         this.retFuture = new CompletableFuture<>();
         this.idleTimeoutSeconds = perlConfig.idleTimeoutSeconds;
+        if (perlConfig.shutdownTimeoutSeconds < 1) {
+            throw new IllegalArgumentException("PerL shutdown timeout seconds must be positive");
+        }
+        if (perlConfig.finalResultPublicationMillis < 1
+                || perlConfig.finalResultPublicationMillis >= TimeUnit.SECONDS.toMillis(
+                perlConfig.shutdownTimeoutSeconds)) {
+            throw new IllegalArgumentException("PerL final-result publication time must be positive "
+                    + "and shorter than the shutdown timeout");
+        }
+        this.shutdownTimeoutSeconds = perlConfig.shutdownTimeoutSeconds;
+        this.finalResultPublicationNanos = TimeUnit.MILLISECONDS.toNanos(
+                perlConfig.finalResultPublicationMillis);
         this.state = State.BEGIN;
         if (perlConfig.maxQs > 0) {
             maxQs = perlConfig.maxQs;
@@ -118,34 +137,59 @@ final public class CQueuePerl implements Perl {
     }
 
     @Synchronized
-    private void shutdown(Throwable ex, BenchmarkTermination requestedTermination) {
+    private void shutdown(Throwable ex, BenchmarkTermination requestedTermination,
+                          long cleanupDeadlineNanos, boolean drainMeasurements) {
         if (state != State.END) {
             state = State.END;
             Throwable terminalFailure = unwrapCompletionFailure(ex);
             InterruptedException interruption = null;
             if (qFuture != null) {
+                final long drainDeadlineNanos = cleanupDeadlineNanos - finalResultPublicationNanos;
+                if (drainMeasurements && terminalFailure == null && !qFuture.isDone()) {
+                    while (!channelsEmpty() && !qFuture.isDone()
+                            && System.nanoTime() < drainDeadlineNanos) {
+                        LockSupport.parkNanos(Math.min(DRAIN_POLL_NANOS,
+                                Math.max(1, drainDeadlineNanos - System.nanoTime())));
+                        if (Thread.interrupted()) {
+                            interruption = new InterruptedException(
+                                    "Interrupted while draining PerL measurements");
+                            break;
+                        }
+                    }
+                    if (!channelsEmpty() && !qFuture.isDone() && interruption == null) {
+                        PerlPrinter.log.warn("PerL cleanup reached its bounded drain limit; "
+                                + "requesting the final Total before shutdown");
+                    }
+                }
                 if (!qFuture.isDone()) {
                     final long endTime = time.getCurrentTime();
                     for (Channel ch : channels) {
                         ch.sendEndTime(endTime);
                     }
                 }
-                boolean receiverCompleted = false;
-                while (!receiverCompleted) {
+                if (interruption == null) {
                     try {
-                        qFuture.get();
-                        receiverCompleted = true;
+                        final long remainingNanos = cleanupDeadlineNanos - System.nanoTime();
+                        if (remainingNanos <= 0) {
+                            throw new TimeoutException("PerL cleanup deadline expired");
+                        }
+                        qFuture.get(remainingNanos, TimeUnit.NANOSECONDS);
                     } catch (ExecutionException failure) {
                         terminalFailure = retainFailure(terminalFailure, failure.getCause());
-                        receiverCompleted = true;
                     } catch (InterruptedException interrupted) {
-                        if (interruption == null) {
-                            interruption = interrupted;
-                        }
+                        interruption = interrupted;
+                    } catch (TimeoutException timeout) {
+                        PerlPrinter.log.warn("PerL final-result publication reached the hard "
+                                + "cleanup deadline; the benchmark result is unavailable");
+                        terminalFailure = retainFailure(terminalFailure, timeout);
                     }
                 }
-                for (Channel ch : channels) {
-                    ch.clear();
+                if (qFuture.isDone()) {
+                    for (Channel ch : channels) {
+                        ch.clear();
+                    }
+                } else {
+                    qFuture.cancel(true);
                 }
                 qFuture = null;
             }
@@ -165,6 +209,15 @@ final public class CQueuePerl implements Perl {
                 retFuture.complete(null);
             }
         }
+    }
+
+    private boolean channelsEmpty() {
+        for (Channel channel : channels) {
+            if (!channel.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static Throwable retainFailure(Throwable currentFailure, Throwable additionalFailure) {
@@ -201,15 +254,31 @@ final public class CQueuePerl implements Perl {
     @Override
     @Synchronized
     public CompletableFuture<Void> run(long secondsToRun, long recordsCount) {
+        return start(secondsToRun, recordsCount, secondsToRun, recordsCount);
+    }
+
+    @Override
+    @Synchronized
+    public CompletableFuture<Void> runOrchestrated(long secondsToRun, long recordsCount) {
+        return secondsToRun > 0
+                ? start(secondsToRun, recordsCount, 0, 0)
+                : start(secondsToRun, recordsCount, secondsToRun, recordsCount);
+    }
+
+    private CompletableFuture<Void> start(long secondsToRun, long recordsCount,
+                                          long recorderSecondsToRun,
+                                          long recorderRecordsCount) {
         if (state == State.BEGIN) {
             state = State.RUN;
             this.secondsToRun = secondsToRun;
             this.recordsCount = recordsCount;
             PerlPrinter.log.info("CQueuePerl Start");
-            qFuture = CompletableFuture.runAsync(() -> perlReceiver.run(secondsToRun, recordsCount),
+            qFuture = CompletableFuture.runAsync(() -> perlReceiver.run(
+                    recorderSecondsToRun, recorderRecordsCount),
                     executor);
             qFuture.whenComplete((ret, ex) -> {
-                shutdown(ex, BenchmarkTermination.configured(secondsToRun, recordsCount));
+                shutdown(ex, BenchmarkTermination.configured(secondsToRun, recordsCount),
+                        standaloneCleanupDeadline(), false);
             });
         }
         return retFuture.toCompletableFuture();
@@ -220,12 +289,23 @@ final public class CQueuePerl implements Perl {
      */
     @Override
     public void stop() {
-        shutdown(null, BenchmarkTermination.STOP_REQUESTED);
+        shutdown(null, BenchmarkTermination.STOP_REQUESTED,
+                standaloneCleanupDeadline(), true);
     }
 
     @Override
     public void stop(BenchmarkTermination termination) {
-        shutdown(null, termination);
+        shutdown(null, termination, standaloneCleanupDeadline(), true);
+    }
+
+    @Override
+    public void stopBefore(BenchmarkTermination termination,
+                           long cleanupDeadlineNanos) {
+        shutdown(null, termination, cleanupDeadlineNanos, true);
+    }
+
+    private long standaloneCleanupDeadline() {
+        return System.nanoTime() + TimeUnit.SECONDS.toNanos(shutdownTimeoutSeconds);
     }
 
     interface Throw {
@@ -389,7 +469,8 @@ final public class CQueuePerl implements Perl {
 
     final private class OnError implements Throw {
         public void onException(Throwable ex) {
-            shutdown(ex, BenchmarkTermination.INTERNAL_FAILURE);
+            shutdown(ex, BenchmarkTermination.INTERNAL_FAILURE,
+                    standaloneCleanupDeadline(), false);
         }
     }
 }

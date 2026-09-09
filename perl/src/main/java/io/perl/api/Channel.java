@@ -50,6 +50,16 @@ public non-sealed interface Channel extends GetPerlChannel {
     void sendEndTime(long endTime);
 
     /**
+     * Reports whether this channel has any queued measurements.
+     *
+     * <p>This is a producer-quiesced lifecycle operation. Recorder loops must
+     * not invoke it while processing measurements.</p>
+     *
+     * @return {@code true} when every queue owned by the channel is empty
+     */
+    boolean isEmpty();
+
+    /**
      * Clear the channel of any pending data and reset its internal state.
      */
     void clear();

@@ -90,10 +90,10 @@ public final class PerformanceRecorderElasticWait extends PerformanceRecorder {
                 if (t != null) {
                     notFound = false;
                     dataSinceIdle = true;
-                    ctime = t.endTime;
                     if (t.isEnd()) {
                         doWork = false;
                     } else {
+                        ctime = t.endTime;
                         periodicRecorder.record(t.startTime, t.endTime, t.records, t.bytes);
                         if (timeUnitsToRun > 0 && time.elapsed(ctime, startTime) >= timeUnitsToRun) {
                             doWork = false;

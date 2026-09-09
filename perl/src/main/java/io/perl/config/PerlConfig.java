@@ -34,6 +34,12 @@ final public class PerlConfig extends LatencyConfig {
     /** Default maximum interval without a performance event, in seconds. */
     public static final int DEFAULT_IDLE_TIMEOUT_SECONDS = 600;
 
+    /** Default maximum time allowed for standalone PerL cleanup. */
+    public static final int DEFAULT_SHUTDOWN_TIMEOUT_SECONDS = 5;
+
+    /** Default portion of cleanup reserved for publishing final results. */
+    public static final int DEFAULT_FINAL_RESULT_PUBLICATION_MILLIS = 250;
+
     /**
      * <code>String NAME = "PerL"</code>.
      */
@@ -109,6 +115,12 @@ final public class PerlConfig extends LatencyConfig {
      * Maximum interval without a performance event before the benchmark fails, in seconds.
      */
     public int idleTimeoutSeconds = DEFAULT_IDLE_TIMEOUT_SECONDS;
+
+    /** Maximum time allowed for standalone PerL drain and recorder shutdown. */
+    public int shutdownTimeoutSeconds = DEFAULT_SHUTDOWN_TIMEOUT_SECONDS;
+
+    /** Cleanup time reserved for terminating the recorder and publishing its final result. */
+    public int finalResultPublicationMillis = DEFAULT_FINAL_RESULT_PUBLICATION_MILLIS;
 
     /**
      * Maximum number of queues allowed.

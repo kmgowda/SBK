@@ -82,6 +82,23 @@ public class TimeStampMpscQueueArray implements QueueArray<TimeStamp> {
     }
 
     /**
+     * Reports whether every intrusive queue is empty.
+     *
+     * <p>This is a producer-quiesced lifecycle check and is not invoked by
+     * the measurement consumer loop.</p>
+     *
+     * @return {@code true} when every queue is empty
+     */
+    public boolean isEmpty() {
+        for (TimeStampMpscQueue queue : queues) {
+            if (!queue.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @param index index of the queue to drain

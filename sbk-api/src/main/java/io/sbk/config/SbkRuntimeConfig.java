@@ -14,6 +14,7 @@ import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 /** Lifecycle and executor settings shared by the SBK benchmark runtime. */
 public final class SbkRuntimeConfig {
@@ -22,6 +23,8 @@ public final class SbkRuntimeConfig {
 
     /** Maximum graceful-cleanup period before application completion is forced. */
     public long forcedShutdownGraceSeconds;
+    /** Portion of cleanup reserved for publishing final aggregate results. */
+    public long finalResultPublicationMillis;
     /** Executor threads reserved for lifecycle and measurement tasks. */
     public int workerExecutorReserve;
     /** Parallelism of the PerL executor. */
@@ -61,7 +64,9 @@ public final class SbkRuntimeConfig {
     }
 
     private void validate() {
-        if (forcedShutdownGraceSeconds < 1 || workerExecutorReserve < 1
+        if (forcedShutdownGraceSeconds < 1 || finalResultPublicationMillis < 1
+                || finalResultPublicationMillis >= TimeUnit.SECONDS.toMillis(forcedShutdownGraceSeconds)
+                || workerExecutorReserve < 1
                 || perlExecutorParallelism < 1 || workerTerminationSeconds < 1
                 || shutdownHookTimeoutSeconds < 1 || defaultOperationTimeoutMillis < 1) {
             throw new IllegalArgumentException("All SBK runtime settings must be greater than zero");

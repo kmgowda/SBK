@@ -358,16 +358,12 @@ The object catalog is loaded once when an operation needs existing objects.
 Pure PUT, LIST, and bucket workloads avoid that startup scan. This prevents an
 unmeasured LIST or HEAD request from being added before every timed GET without
 making write-only startup proportional to the bucket size. In a combined
-PUT/GET run, `-mixed-read-source catalog` (the default) reads the bounded
-startup snapshot while writers operate. Use `published` only when consumers
-must read objects created by the same run; completed PUTs/COPYs then flow
-through a blocking queue. For fixed-record published workloads, startup proves
-that the writer mix can publish enough objects. Keep producer and consumer
-rates balanced because published mode intentionally adds no locks or bounded
-waits to PUT completion. A published-mode reader can therefore wait indefinitely
-when writers finish before supplying all expected objects. Always set the common
-SBK `-idletimeoutseconds` option to a finite operational limit for this mode and
-reject a run that reaches it. Startup also validates one-shot DELETE and
+PUT/GET run, `-mixed-read-source catalog` reads the bounded startup snapshot
+while writers operate. The former experimental `published` mode is rejected at
+startup: it could stall even with balanced producers and consumers, and fixing
+it by expanding the MinIO writer operation path would violate SBK's hot-path
+policy. Reintroduce it only with a separately selected, performance-qualified
+implementation that proves exact completion. Startup also validates one-shot DELETE and
 bucket-delete capacity. Do not add a MinIO-specific idle timeout; the common
 option already provides the benchmark-wide no-progress contract.
 
@@ -421,7 +417,7 @@ either request-limit option is zero.
 | `-list-api-version 1|2` | `2` | Select legacy ListObjects V1 or ListObjectsV2. |
 | `-list-fetch-owner true|false` | `false` | Request owner fields in LIST results. |
 | `-list-include-user-metadata true|false` | `false` | Request user metadata on compatible S3 implementations. |
-| `-mixed-read-source catalog|published` | `catalog` | In mixed writer/reader runs, read the bounded startup snapshot by default or explicitly consume objects completed by this run. Published mode requires balanced producers/consumers and a finite common `-idletimeoutseconds` guard. |
+| `-mixed-read-source catalog` | `catalog` | Read the bounded startup snapshot in mixed writer/reader runs. The unsafe experimental `published` mode is rejected. |
 | `-object-file <path>` | empty | Load the startup catalog from strict local `key,size[,versionId]` CSV instead of listing S3. Size must be a nonnegative integer; keys cannot contain commas; blank lines and `#` comments are allowed. |
 | `-catalog-max-objects <n>` | `1000000` | Bound discovered or manifest object references retained in memory. |
 | `-partition-count <n>` | `1` | Split existing-object catalogs by stable key hash across distributed SBK/SBK-GEM processes. |

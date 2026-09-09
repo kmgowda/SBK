@@ -13,6 +13,11 @@ package io.sbk.api;
 import io.perl.api.PerlChannel;
 import io.sbk.params.Parameters;
 
+import java.io.InterruptedIOException;
+import java.net.SocketTimeoutException;
+import java.nio.channels.ClosedByInterruptException;
+import java.util.concurrent.RejectedExecutionException;
+
 /**
  * Abstract class for Writers and Readers.
  *
@@ -59,5 +64,56 @@ public abstract class Worker {
         this.id = workerID;
         this.params = params;
         this.perlChannel = perlChannel;
+    }
+
+    /**
+     * Identifies an I/O failure caused solely by active benchmark shutdown.
+     *
+     * <p>This is invoked only from worker exception handling. A socket timeout
+     * remains a benchmark failure even though the JDK models it as an
+     * {@link InterruptedIOException}.</p>
+     *
+     * @param failure worker failure
+     * @return {@code true} when interruption or executor rejection caused the failure
+     */
+    public static boolean isShutdownInterruption(Throwable failure) {
+        if (containsClosedByInterrupt(failure)) {
+            return true;
+        }
+        if (!Thread.currentThread().isInterrupted()) {
+            return false;
+        }
+        Throwable cause = failure;
+        while (cause != null) {
+            if (cause instanceof SocketTimeoutException) {
+                return false;
+            }
+            if (cause instanceof InterruptedException
+                    || cause instanceof InterruptedIOException
+                    || cause instanceof RejectedExecutionException) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
+    }
+
+    /**
+     * Detects the channel-specific exception emitted after an interrupt closes a blocking
+     * channel. The JDK clears the interrupted status before exposing this exception, so the
+     * worker cannot rely on {@link Thread#isInterrupted()} for this shutdown-only case.
+     *
+     * @param failure worker failure
+     * @return {@code true} when the causal chain contains a closed-by-interrupt failure
+     */
+    private static boolean containsClosedByInterrupt(Throwable failure) {
+        Throwable cause = failure;
+        while (cause != null) {
+            if (cause instanceof ClosedByInterruptException) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 }
