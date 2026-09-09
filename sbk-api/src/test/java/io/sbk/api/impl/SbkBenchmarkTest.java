@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +40,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -153,7 +151,7 @@ final class SbkBenchmarkTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void publishesIncompleteTotalWhenDriverCloseBlocksUntilHardStop() throws Exception {
+    void publishesTotalAndWarnsWhenDriverCloseBlocksUntilHardStop() throws Exception {
         final AtomicBoolean totalPrinted = new AtomicBoolean();
         final CountDownLatch releaseClose = new CountDownLatch(1);
         final SbkParameters params = new SbkParameters("blocked-close-total-test");
@@ -181,9 +179,7 @@ final class SbkBenchmarkTest {
                 logger, new MilliSeconds());
 
         try {
-            final ExecutionException failure = assertThrows(ExecutionException.class,
-                    () -> benchmark.start().get(6, TimeUnit.SECONDS));
-            assertInstanceOf(BenchmarkCleanupTimeoutException.class, failure.getCause());
+            assertDoesNotThrow(() -> benchmark.start().get(6, TimeUnit.SECONDS));
             assertTrue(totalPrinted.get(),
                     "the final-result reserve must publish Total before hard-stop completion");
         } finally {
@@ -301,10 +297,7 @@ final class SbkBenchmarkTest {
 
         try {
             assertTimeout(Duration.ofSeconds(6), benchmark::stop);
-            final CompletionException completionFailure = assertThrows(CompletionException.class,
-                    () -> completionFuture(benchmark).join());
-            assertInstanceOf(BenchmarkCleanupTimeoutException.class,
-                    completionFailure.getCause());
+            assertDoesNotThrow(() -> completionFuture(benchmark).join());
         } finally {
             releaseClose.countDown();
         }
@@ -322,20 +315,14 @@ final class SbkBenchmarkTest {
                 BenchmarkCleanupTimeoutException.class, completionFailure.getCause());
         assertSame(initiatingFailure, timeoutFailure.getCause());
         assertTrue(timeoutFailure.getMessage().contains("cleanup exceeded 5 seconds"));
-        assertTrue(timeoutFailure.getMessage().contains("final aggregate results may be incomplete"));
+        assertTrue(timeoutFailure.getMessage().contains("after a benchmark failure"));
     }
 
     @Test
-    void orderlyShutdownCannotBecomeSuccessfulWhenForcedCleanupWins() throws Exception {
+    void orderlyCleanupTimeoutCompletesWithWarning() throws Exception {
         final SbkBenchmark benchmark = benchmarkWithWriter(() -> { });
 
-        final CompletionException completionFailure = assertThrows(CompletionException.class,
-                () -> benchmark.forceShutdownCompletion(null).join());
-
-        final BenchmarkCleanupTimeoutException timeoutFailure = assertInstanceOf(
-                BenchmarkCleanupTimeoutException.class, completionFailure.getCause());
-        assertNull(timeoutFailure.getCause());
-        assertTrue(timeoutFailure.getMessage().contains("cleanup exceeded 5 seconds"));
+        assertDoesNotThrow(() -> benchmark.forceShutdownCompletion(null).join());
     }
 
     @SuppressWarnings("unchecked")

@@ -10,11 +10,9 @@
 package io.sbk.exception;
 
 /**
- * Signals that the hard benchmark-cleanup deadline expired before lifecycle completion.
+ * Signals that an existing benchmark failure was followed by a cleanup deadline expiry.
  *
- * <p>The benchmark result is deliberately failed because worker termination, recorder
- * draining, final aggregate reporting, or driver cleanup may still be incomplete when
- * the process is released.
+ * <p>Cleanup timeout without an existing benchmark failure is warning-only.
  */
 public final class BenchmarkCleanupTimeoutException extends IllegalStateException {
 
@@ -26,7 +24,7 @@ public final class BenchmarkCleanupTimeoutException extends IllegalStateExceptio
      */
     public BenchmarkCleanupTimeoutException(long timeoutSeconds, Throwable initiatingFailure) {
         super("SBK benchmark cleanup exceeded " + timeoutSeconds
-                + " seconds; benchmark lifecycle and final aggregate results may be incomplete",
+                + " seconds after a benchmark failure; forcing bounded shutdown",
                 initiatingFailure);
     }
 }

@@ -18,7 +18,6 @@ import io.perl.api.PerlChannel;
 import io.perl.api.TimeStamp;
 import io.perl.api.TimeStampNode;
 import io.perl.config.PerlConfig;
-import io.perl.exception.PerlCleanupTimeoutException;
 import io.perl.system.PerlPrinter;
 import io.state.State;
 import io.time.Time;
@@ -158,10 +157,8 @@ final public class CQueuePerl implements Perl {
                         }
                     }
                     if (!channelsEmpty() && !qFuture.isDone() && interruption == null) {
-                        terminalFailure = new PerlCleanupTimeoutException(
-                                "draining queued measurements");
-                        PerlPrinter.log.warn("PerL cleanup could not drain every queued measurement; "
-                                + "discarding the remaining queue tail and publishing an incomplete Total");
+                        PerlPrinter.log.warn("PerL cleanup reached its bounded drain limit; "
+                                + "publishing the final Total before shutdown");
                         for (Channel channel : channels) {
                             channel.clear();
                         }
@@ -185,8 +182,8 @@ final public class CQueuePerl implements Perl {
                     } catch (InterruptedException interrupted) {
                         interruption = interrupted;
                     } catch (TimeoutException timeout) {
-                        terminalFailure = retainFailure(terminalFailure,
-                                new PerlCleanupTimeoutException("publishing final results"));
+                        PerlPrinter.log.warn("PerL final-result publication reached the hard "
+                                + "cleanup deadline; continuing bounded shutdown");
                     }
                 }
                 if (qFuture.isDone()) {

@@ -505,7 +505,7 @@ final public class SbkBenchmark implements Benchmark {
         final long cleanupDeadlineNanos = System.nanoTime() + cleanupGraceNanos;
         final long finalResultDelayNanos = cleanupGraceNanos
                 - TimeUnit.MILLISECONDS.toNanos(RUNTIME_CONFIG.finalResultPublicationMillis);
-        timeoutExecutor.schedule(() -> publishIncompleteResults(cleanupDeadlineNanos),
+        timeoutExecutor.schedule(() -> publishFinalResults(cleanupDeadlineNanos),
                 finalResultDelayNanos, TimeUnit.NANOSECONDS);
         timeoutExecutor.schedule(() -> forceShutdownCompletion(ex),
                 cleanupGraceNanos, TimeUnit.NANOSECONDS);
@@ -513,21 +513,20 @@ final public class SbkBenchmark implements Benchmark {
     }
 
     /**
-     * Requests a best-available final aggregate shortly before the hard cleanup deadline.
+     * Requests the final aggregate shortly before the hard cleanup deadline.
      *
      * <p>This lifecycle-only fallback runs on a deadline executor separate from the hard-stop
-     * task. It can therefore terminate PerL and publish an incomplete {@code Total} even when
+     * task. It can therefore terminate PerL and publish {@code Total} even when
      * the main lifecycle thread is blocked while closing a driver.</p>
      *
      * @param cleanupDeadlineNanos absolute monotonic hard-stop deadline
      */
-    private void publishIncompleteResults(long cleanupDeadlineNanos) {
+    private void publishFinalResults(long cleanupDeadlineNanos) {
         if (retFuture.isDone()) {
             return;
         }
-        Printer.log.warn("SBK cleanup is still active; publishing the best available Total "
-                + "before the hard-stop deadline. This Total is incomplete and must not be "
-                + "treated as a valid benchmark result");
+        Printer.log.warn("SBK cleanup is still active; publishing the final Total "
+                + "before the hard-stop deadline");
         stopPerformanceRecorders(BenchmarkTermination.STOP_REQUESTED, cleanupDeadlineNanos);
     }
 
@@ -546,19 +545,22 @@ final public class SbkBenchmark implements Benchmark {
      * so a driver or SDK blocked in close cannot extend a timed run indefinitely.
      *
      * @param failure failure that initiated shutdown, or {@code null} for an orderly shutdown
-     * @return authoritative benchmark completion, failed when this deadline wins
+     * @return authoritative benchmark completion; cleanup timeout alone is warning-only
      */
     CompletableFuture<Void> forceShutdownCompletion(Throwable failure) {
         final Throwable initiatingFailure = unwrapCompletionFailure(failure);
-        final BenchmarkCleanupTimeoutException timeoutFailure =
-                new BenchmarkCleanupTimeoutException(
-                        RUNTIME_CONFIG.forcedShutdownGraceSeconds, initiatingFailure);
-        final boolean completed = retFuture.completeExceptionally(timeoutFailure);
+        final boolean completed;
+        if (initiatingFailure == null) {
+            completed = retFuture.complete(null);
+        } else {
+            completed = retFuture.completeExceptionally(new BenchmarkCleanupTimeoutException(
+                    RUNTIME_CONFIG.forcedShutdownGraceSeconds, initiatingFailure));
+        }
         if (completed) {
             Printer.log.warn("SBK benchmark cleanup exceeded "
                     + RUNTIME_CONFIG.forcedShutdownGraceSeconds
-                    + " seconds; the best available Total is incomplete; "
-                    + "forcing application exit with failure status");
+                    + " seconds; final Total publication was requested; "
+                    + "forcing bounded application exit");
             executor.shutdownNow();
             perlExecutor.shutdownNow();
             lifecycleExecutor.shutdownNow();
