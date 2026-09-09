@@ -47,13 +47,12 @@ final class SbkReaderTest {
     };
 
     @Test
-    void exitsWhenDriverThrowsEof() throws Exception {
+    void completesWithWarningWhenDriverReachesEof() throws Exception {
         final DataReader<Object> reader = readerThatThrowsEof();
         final ExecutorService executor = Executors.newSingleThreadExecutor();
 
         try {
-            createReader(reader, executor)
-                    .run(60, 0).get(2, TimeUnit.SECONDS);
+            createReader(reader, executor).run(60, 0).get(2, TimeUnit.SECONDS);
         } finally {
             executor.shutdownNow();
         }

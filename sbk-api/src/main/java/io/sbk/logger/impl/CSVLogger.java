@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Locale;
 
 /**
  * Class for recoding/printing results to a CSV file called `out.csv`.
@@ -226,7 +227,7 @@ public class CSVLogger extends SystemLogger {
         String date = dateTimeParts[0];
         String time = dateTimeParts[1];
         StringBuilder data = new StringBuilder(
-                String.format("%16d,%s,%s,%s,%s,%s,%s"
+                String.format(Locale.ROOT, "%16d,%s,%s,%s,%s,%s,%s"
                                 + ",%s,%s,%s"
                                 + ",%5d,%5d,%5d,%5d"
                                 + ",%11.1f,%16d,%11.1f,%8.2f"
@@ -254,10 +255,10 @@ public class CSVLogger extends SystemLogger {
         );
 
         for (int i = 0; i < Math.min(getPercentiles().length, percentileLatencies.length); ++i) {
-            data.append(String.format(",%7d", percentileLatencies[i]));
+            data.append(String.format(Locale.ROOT, ",%7d", percentileLatencies[i]));
         }
         for (int i = 0; i < Math.min(getPercentiles().length, percentileLatencies.length); ++i) {
-            data.append(String.format(",%7d", percentileLatencyCounts[i]));
+            data.append(String.format(Locale.ROOT, ",%7d", percentileLatencyCounts[i]));
         }
         csvWriter.println(data);
     }

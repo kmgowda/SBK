@@ -395,7 +395,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
         final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
-        int cnt = 0;
+        long cnt = 0;
         long elapsedTimeUnits = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());
@@ -433,7 +433,7 @@ public sealed interface DataRecordsWriter<T> extends DataWriter<T> permits Write
         final Status status = new Status();
         final long loopStartTime = time.getCurrentTime();
         final long timeUnitsToRun = time.secondsToTimeUnits(secondsToRun);
-        int cnt = 0;
+        long cnt = 0;
         long elapsedTimeUnits = 0;
         status.startTime = loopStartTime;
         rController.start(writer.params.getRecordsPerSec());

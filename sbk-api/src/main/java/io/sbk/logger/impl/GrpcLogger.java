@@ -260,14 +260,7 @@ public final class GrpcLogger extends AbstractSystemLogger {
             throw new IllegalArgumentException("SBM Time Unit: " + config.getTimeUnit().name()
                     + " ,Supplied Time Unit : " + time.getTimeUnit().name() + " are not same!");
         }
-        if (config.getMinLatency() != getMinLatency()) {
-            Printer.log.warn("SBM , min latency : " + config.getMinLatency()
-                    + ", local min latency: " + getMinLatency() + " are not same!");
-        }
-        if (config.getMaxLatency() != getMaxLatency()) {
-            Printer.log.warn("SBM, max latency : " + config.getMaxLatency()
-                    + ", local max latency: " + getMaxLatency() + " are not same!");
-        }
+        validateLatencyRange(config, getMinLatency(), getMaxLatency());
         if (config.getIsReadRequests() !=  isReadRequestsEnabled()) {
             Printer.log.warn("SBM, read request: " + config.getIsReadRequests()
                     + ", local read request: " + isReadRequestsEnabled() + " are not same!" +
@@ -307,6 +300,17 @@ public final class GrpcLogger extends AbstractSystemLogger {
                 this::reportTransportFailure);
         Printer.log.info("SBK GRPC Logger transport: SBP client stream with packed primitive latencies");
         Printer.log.info("SBK GRPC Logger Started");
+    }
+
+    static void validateLatencyRange(Config config, long localMinLatency, long localMaxLatency) {
+        if (config.getMinLatency() != localMinLatency) {
+            throw new IllegalArgumentException("SBM min latency: " + config.getMinLatency()
+                    + ", local min latency: " + localMinLatency + " are not same!");
+        }
+        if (config.getMaxLatency() != localMaxLatency) {
+            throw new IllegalArgumentException("SBM max latency: " + config.getMaxLatency()
+                    + ", local max latency: " + localMaxLatency + " are not same!");
+        }
     }
 
     /**

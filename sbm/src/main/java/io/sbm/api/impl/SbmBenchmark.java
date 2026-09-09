@@ -41,6 +41,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CancellationException;
@@ -180,7 +181,7 @@ final public class SbmBenchmark implements Benchmark {
             totalWindowExtension = new HdrExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
                     LatencyConfig.TOTAL_LATENCY_MAX, LatencyConfig.LONG_MAX, LatencyConfig.LONG_MAX,
                     percentileFractions, time, totalWindow);
-            Printer.log.info(String.format("Total Window Extension: HdrHistogram, Size: %.2f MB",
+            Printer.log.info(String.format(Locale.ROOT, "Total Window Extension: HdrHistogram, Size: %.2f MB",
                     (totalWindowExtension.getMaxMemoryBytes() * 1.0) / Bytes.BYTES_PER_MB));
         } else if (sbmConfig.csv) {
             totalWindowExtension = new CSVExtendedLatencyRecorder(logger.getMinLatency(), logger.getMaxLatency(),
