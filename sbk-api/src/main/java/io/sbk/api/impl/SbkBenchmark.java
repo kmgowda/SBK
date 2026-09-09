@@ -545,16 +545,22 @@ final public class SbkBenchmark implements Benchmark {
      * so a driver or SDK blocked in close cannot extend a timed run indefinitely.
      *
      * @param failure failure that initiated shutdown, or {@code null} for an orderly shutdown
-     * @return authoritative benchmark completion; cleanup timeout alone is warning-only
+     * @return authoritative benchmark completion; cleanup timeout is warning-only only after
+     *         every active PerL recorder has published its final aggregate
      */
     CompletableFuture<Void> forceShutdownCompletion(Throwable failure) {
         final Throwable initiatingFailure = unwrapCompletionFailure(failure);
+        final Throwable resultFailure = retainFailure(
+                completedFutureFailure(writePerlCompletion),
+                completedFutureFailure(readPerlCompletion));
         final boolean completed;
-        if (initiatingFailure == null) {
+        if (initiatingFailure == null && resultFailure == null) {
             completed = retFuture.complete(null);
         } else {
+            final Throwable terminalFailure = retainFailure(initiatingFailure, resultFailure);
             completed = retFuture.completeExceptionally(new BenchmarkCleanupTimeoutException(
-                    RUNTIME_CONFIG.forcedShutdownGraceSeconds, initiatingFailure));
+                    RUNTIME_CONFIG.forcedShutdownGraceSeconds, terminalFailure,
+                    resultFailure == null));
         }
         if (completed) {
             Printer.log.warn("SBK benchmark cleanup exceeded "

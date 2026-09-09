@@ -325,6 +325,20 @@ final class SbkBenchmarkTest {
         assertDoesNotThrow(() -> benchmark.forceShutdownCompletion(null).join());
     }
 
+    @Test
+    void hardDeadlineFailsWhenFinalTotalRemainsPending() throws Exception {
+        final SbkBenchmark benchmark = benchmarkWithWriter(() -> { });
+        setPerlCompletion(benchmark, new CompletableFuture<>());
+
+        final CompletionException completionFailure = assertThrows(CompletionException.class,
+                () -> benchmark.forceShutdownCompletion(null).join());
+
+        final BenchmarkCleanupTimeoutException timeoutFailure = assertInstanceOf(
+                BenchmarkCleanupTimeoutException.class, completionFailure.getCause());
+        assertTrue(timeoutFailure.getMessage().contains("before the final Total was published"));
+        assertInstanceOf(IllegalStateException.class, timeoutFailure.getCause());
+    }
+
     @SuppressWarnings("unchecked")
     private static SbkBenchmark benchmarkWithWriter(IoCloseAction closeAction) throws Exception {
         final SbkParameters params = new SbkParameters("shutdown-order-test");
@@ -351,6 +365,13 @@ final class SbkBenchmarkTest {
     private static void setWorkerCompletion(SbkBenchmark benchmark,
                                             CompletableFuture<Void> completion) throws Exception {
         final Field completionField = SbkBenchmark.class.getDeclaredField("workerCompletion");
+        completionField.setAccessible(true);
+        completionField.set(benchmark, completion);
+    }
+
+    private static void setPerlCompletion(SbkBenchmark benchmark,
+                                          CompletableFuture<Void> completion) throws Exception {
+        final Field completionField = SbkBenchmark.class.getDeclaredField("writePerlCompletion");
         completionField.setAccessible(true);
         completionField.set(benchmark, completion);
     }

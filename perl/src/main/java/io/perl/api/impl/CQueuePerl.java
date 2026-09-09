@@ -158,10 +158,7 @@ final public class CQueuePerl implements Perl {
                     }
                     if (!channelsEmpty() && !qFuture.isDone() && interruption == null) {
                         PerlPrinter.log.warn("PerL cleanup reached its bounded drain limit; "
-                                + "publishing the final Total before shutdown");
-                        for (Channel channel : channels) {
-                            channel.clear();
-                        }
+                                + "requesting the final Total before shutdown");
                     }
                 }
                 if (!qFuture.isDone()) {
@@ -183,7 +180,8 @@ final public class CQueuePerl implements Perl {
                         interruption = interrupted;
                     } catch (TimeoutException timeout) {
                         PerlPrinter.log.warn("PerL final-result publication reached the hard "
-                                + "cleanup deadline; continuing bounded shutdown");
+                                + "cleanup deadline; the benchmark result is unavailable");
+                        terminalFailure = retainFailure(terminalFailure, timeout);
                     }
                 }
                 if (qFuture.isDone()) {

@@ -22,7 +22,6 @@ import io.time.MicroSeconds;
 import io.time.NanoSeconds;
 import io.time.Time;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -314,7 +313,7 @@ public class PerlTest {
         assertEquals(4, logger.totalPrintCnt.get());
     }
 
-    /** Verifies that standalone PerL cleanup has a strict warning-only hard deadline. */
+    /** Verifies that standalone PerL cleanup is bounded and cannot report resultless success. */
     @Test
     public void testStopReturnsBeforeStandaloneCleanupDeadline() throws Exception {
         final BlockingTestLogger logger = new BlockingTestLogger();
@@ -330,15 +329,18 @@ public class PerlTest {
         final CompletableFuture<Void> stop = CompletableFuture.runAsync(perl::stop);
         try {
             stop.get(2, TimeUnit.SECONDS);
-            assertDoesNotThrow(completion::join);
+            final ExecutionException failure = assertThrows(ExecutionException.class,
+                    () -> completion.get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS));
+            assertInstanceOf(TimeoutException.class, failure.getCause());
+            assertEquals(0, logger.totalPrintCnt.get());
         } finally {
             logger.release.countDown();
         }
     }
 
-    /** Verifies that a drain timeout still publishes the final Total and returns successfully. */
+    /** Verifies that bounded shutdown fails when the recorder cannot reach the final marker. */
     @Test
-    public void testDrainTimeoutPublishesFinalTotalBeforeHardDeadline() throws Exception {
+    public void testDrainTimeoutDoesNotReportResultlessSuccess() throws Exception {
         final SlowTestLogger logger = new SlowTestLogger();
         final PerlConfig config = PerlConfig.build();
         config.workers = 1;
@@ -355,11 +357,11 @@ public class PerlTest {
 
         perl.stop();
 
-        assertDoesNotThrow(completion::join);
-        assertTrue(logger.totalPrintCnt.get() > 0,
-                "cleanup timeout must publish the measurements processed before shutdown");
-        assertTrue(logger.totalPrintCnt.get() < 1000,
-                "the test must exercise bounded queue-tail cleanup");
+        final ExecutionException failure = assertThrows(ExecutionException.class,
+                () -> completion.get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS));
+        assertInstanceOf(TimeoutException.class, failure.getCause());
+        assertEquals(0, logger.totalPrintCnt.get(),
+                "a missing Total must never be represented as successful completion");
     }
 
     /**
