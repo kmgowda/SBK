@@ -15,6 +15,7 @@ import io.perl.api.PerlChannel;
 import io.perl.api.impl.PerlBuilder;
 import io.perl.config.PerlConfig;
 import io.perl.exception.BenchmarkIdleTimeoutException;
+import io.perl.exception.PerlCleanupTimeoutException;
 import io.perl.logger.impl.DefaultLogger;
 import io.perl.logger.impl.ResultsLogger;
 import io.perl.system.PerlPrinter;
@@ -34,6 +35,8 @@ import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -51,6 +54,43 @@ public class PerlTest {
     public final static int PERL_RECORD_SIZE = 10;
     public final static int PERL_TIMEOUT_SECONDS = 5;
     public final static int PERL_SLEEP_MS = 100;
+
+    /** Logger that slows measurement consumption to keep queue shards backlogged. */
+    public static final class SlowTestLogger extends TestLogger {
+        @Override
+        public void recordLatency(long startTime, int events, int bytes, long latency) {
+            try {
+                Thread.sleep(2);
+            } catch (InterruptedException exception) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("Slow recorder interrupted", exception);
+            }
+            latencyReporterCnt.addAndGet(events);
+        }
+    }
+
+    /** Logger that models an uninterruptible final recorder callback. */
+    public static final class BlockingTestLogger extends TestLogger {
+        private final CountDownLatch entered = new CountDownLatch(1);
+        private final CountDownLatch release = new CountDownLatch(1);
+
+        @Override
+        public void recordLatency(long startTime, int events, int bytes, long latency) {
+            entered.countDown();
+            boolean interrupted = false;
+            while (release.getCount() > 0) {
+                try {
+                    release.await();
+                } catch (InterruptedException exception) {
+                    interrupted = true;
+                }
+            }
+            if (interrupted) {
+                Thread.currentThread().interrupt();
+            }
+            latencyReporterCnt.addAndGet(events);
+        }
+    }
 
     public static class TestLogger extends ResultsLogger {
         public final AtomicLong latencyReporterCnt;
@@ -196,6 +236,107 @@ public class PerlTest {
         final Perl perl = PerlBuilder.build(logger, null, config, null);
 
         runPerlRecords(logger, perl);
+    }
+
+    /** Verifies that stop cannot overtake measurements in another queue shard. */
+    @Test
+    public void testStopDrainsEveryQueueShard() throws Exception {
+        for (boolean mpscEnabled : new boolean[]{true, false}) {
+            final SlowTestLogger logger = new SlowTestLogger();
+            final PerlConfig config = PerlConfig.build();
+            config.workers = 1;
+            config.qPerWorker = 10;
+            config.mpscQueueEnable = mpscEnabled;
+            final Perl perl = PerlBuilder.build(logger, null, config, null);
+            final PerlChannel channel = perl.getPerlChannel();
+            final CompletableFuture<Void> completion = perl.run(0, 301);
+            final long now = System.currentTimeMillis();
+
+            for (int record = 0; record < 301; record++) {
+                channel.send(now, now + 1, 1, PERL_RECORD_SIZE);
+            }
+            perl.stop();
+            completion.get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+
+            assertEquals(301, logger.latencyReporterCnt.get(),
+                    "stop must drain all " + config.getTimestampQueueName() + " shards");
+            assertEquals(301, logger.totalPrintCnt.get(),
+                    "Total must conserve all submitted records");
+        }
+    }
+
+    /** Verifies that orchestrated timed shutdown retains every async completion. */
+    @Test
+    public void testOrchestratedTimedRunDrainsAsyncCompletions() throws Exception {
+        final TestLogger logger = new TestLogger();
+        final PerlConfig config = PerlConfig.build();
+        config.workers = 4;
+        final Perl perl = PerlBuilder.build(logger, null, config, null);
+        final PerlChannel[] channels = new PerlChannel[4];
+        for (int index = 0; index < channels.length; index++) {
+            channels[index] = perl.getPerlChannel();
+        }
+        final CompletableFuture<Void> completion = perl.runOrchestrated(60, 0);
+        final long now = System.currentTimeMillis();
+        final CompletableFuture<?>[] producers = new CompletableFuture[16];
+        for (int index = 0; index < producers.length; index++) {
+            final PerlChannel channel = channels[index % channels.length];
+            producers[index] = CompletableFuture.runAsync(
+                    () -> channel.send(now, now + 1, 1, PERL_RECORD_SIZE));
+        }
+
+        CompletableFuture.allOf(producers).get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        perl.stop();
+        completion.get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+
+        assertEquals(16, logger.latencyReporterCnt.get());
+        assertEquals(16, logger.totalPrintCnt.get());
+    }
+
+    /** Verifies that a timed records-rate value is not treated as a fixed completion target. */
+    @Test
+    public void testOrchestratedTimedRunIgnoresRecordsRateForCompletion() throws Exception {
+        final TestLogger logger = new TestLogger();
+        final PerlConfig config = PerlConfig.build();
+        final Perl perl = PerlBuilder.build(logger, null, config, null);
+        final PerlChannel channel = perl.getPerlChannel();
+        final CompletableFuture<Void> completion = perl.runOrchestrated(60, 4);
+        final long now = System.currentTimeMillis();
+
+        for (int record = 0; record < 4; record++) {
+            channel.send(now, now + 1, 1, PERL_RECORD_SIZE);
+        }
+        Thread.sleep(PERL_SLEEP_MS);
+        assertFalse(completion.isDone(),
+                "the timed records value is a rate and must not stop the recorder");
+
+        perl.stop();
+        completion.get(PERL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        assertEquals(4, logger.totalPrintCnt.get());
+    }
+
+    /** Verifies that standalone PerL cleanup has a strict hard deadline. */
+    @Test
+    public void testStopFailsBeforeStandaloneCleanupDeadline() throws Exception {
+        final BlockingTestLogger logger = new BlockingTestLogger();
+        final PerlConfig config = PerlConfig.build();
+        config.shutdownTimeoutSeconds = 1;
+        final Perl perl = PerlBuilder.build(logger, null, config, null);
+        final PerlChannel channel = perl.getPerlChannel();
+        final CompletableFuture<Void> completion = perl.run(0, 1);
+        final long now = System.currentTimeMillis();
+        channel.send(now, now + 1, 1, PERL_RECORD_SIZE);
+        assertTrue(logger.entered.await(1, TimeUnit.SECONDS));
+
+        final CompletableFuture<Void> stop = CompletableFuture.runAsync(perl::stop);
+        try {
+            stop.get(2, TimeUnit.SECONDS);
+            final CompletionException failure = assertThrows(CompletionException.class,
+                    completion::join);
+            assertInstanceOf(PerlCleanupTimeoutException.class, failure.getCause());
+        } finally {
+            logger.release.countDown();
+        }
     }
 
     /**

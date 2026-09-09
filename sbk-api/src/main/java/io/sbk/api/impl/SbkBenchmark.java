@@ -289,12 +289,14 @@ final public class SbkBenchmark implements Benchmark {
         }
 
         if (writePerl != null && params.getAction() == Action.Writing && sbkWriters != null) {
-            writePerlCompletion = writePerl.run(params.getTotalSecondsToRun(), params.getTotalRecords());
+            writePerlCompletion = writePerl.runOrchestrated(
+                    params.getTotalSecondsToRun(), params.getTotalRecords());
         } else {
             writePerlCompletion = null;
         }
         if (readPerl != null && sbkReaders != null) {
-            readPerlCompletion = readPerl.run(params.getTotalSecondsToRun(), params.getTotalRecords());
+            readPerlCompletion = readPerl.runOrchestrated(
+                    params.getTotalSecondsToRun(), params.getTotalRecords());
         } else {
             readPerlCompletion = null;
         }
@@ -589,13 +591,13 @@ final public class SbkBenchmark implements Benchmark {
                 return;
             }
         }
-        stopPerformanceRecorders(requestedTermination);
-        terminalFailure = retainFailure(terminalFailure, completedFutureFailure(writePerlCompletion));
-        terminalFailure = retainFailure(terminalFailure, completedFutureFailure(readPerlCompletion));
         if (!workersClosed) {
             terminalFailure = closeReaders(terminalFailure);
             terminalFailure = closeWriters(terminalFailure);
         }
+        stopPerformanceRecorders(requestedTermination, cleanupDeadlineNanos);
+        terminalFailure = retainFailure(terminalFailure, completedFutureFailure(writePerlCompletion));
+        terminalFailure = retainFailure(terminalFailure, completedFutureFailure(readPerlCompletion));
         if (!storageClosed) {
             terminalFailure = closeStorage(terminalFailure);
         }
@@ -604,6 +606,7 @@ final public class SbkBenchmark implements Benchmark {
         } catch (IOException e) {
             terminalFailure = retainFailure(terminalFailure, e);
         }
+        perlExecutor.shutdown();
         final BenchmarkTermination termination = BenchmarkTermination.resolve(requestedTermination, terminalFailure);
         if (terminalFailure != null) {
             Printer.log.warn("SBK Benchmark Shutdown: {}", termination.describe(
@@ -676,14 +679,15 @@ final public class SbkBenchmark implements Benchmark {
         return terminalFailure;
     }
 
-    private void stopPerformanceRecorders(BenchmarkTermination requestedTermination) {
+    private void stopPerformanceRecorders(BenchmarkTermination requestedTermination,
+                                          long cleanupDeadlineNanos) {
         final BenchmarkTermination recorderTermination = requestedTermination.isSuccessfulCompletion()
                 ? requestedTermination : BenchmarkTermination.STOP_REQUESTED;
         if (writePerl != null) {
-            writePerl.stop(recorderTermination);
+            writePerl.stopBefore(recorderTermination, cleanupDeadlineNanos);
         }
         if (readPerl != null) {
-            readPerl.stop(recorderTermination);
+            readPerl.stopBefore(recorderTermination, cleanupDeadlineNanos);
         }
     }
 

@@ -18,6 +18,8 @@ import io.time.NanoSeconds;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.net.SocketTimeoutException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -58,6 +60,45 @@ final class SbkWriterTest {
             assertInstanceOf(IOException.class, failure.getCause());
             assertEquals(1, writeCalls.get());
             assertEquals(0, logger.writersCount());
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void interruptedWorkerDoesNotHideAnUnrelatedIoFailure() throws Exception {
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            final ExecutionException failure = assertThrows(ExecutionException.class,
+                    () -> createWriter(interruptedFailure(new IOException("active failure")),
+                            new TestSystemLogger(), executor).run(0, 1).get(2, TimeUnit.SECONDS));
+            assertEquals("active failure", failure.getCause().getMessage());
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void interruptedWorkerTreatsInterruptedIoAsShutdown() throws Exception {
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            createWriter(interruptedFailure(new InterruptedIOException("shutdown")),
+                    new TestSystemLogger(), executor).run(0, 1).get(2, TimeUnit.SECONDS);
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void interruptedWorkerDoesNotHideSocketTimeout() throws Exception {
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            final IOException wrapped = new IOException("S3 GET failed",
+                    new SocketTimeoutException("read timed out"));
+            final ExecutionException failure = assertThrows(ExecutionException.class,
+                    () -> createWriter(interruptedFailure(wrapped),
+                            new TestSystemLogger(), executor).run(0, 1).get(2, TimeUnit.SECONDS));
+            assertEquals(wrapped, failure.getCause());
         } finally {
             executor.shutdownNow();
         }
@@ -119,6 +160,20 @@ final class SbkWriterTest {
             @Override
             public void sync() {
                 syncCalls.incrementAndGet();
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+    }
+
+    private static Writer<Object> interruptedFailure(IOException failure) {
+        return new Writer<>() {
+            @Override
+            public CompletableFuture<?> writeAsync(Object data) throws IOException {
+                Thread.currentThread().interrupt();
+                throw failure;
             }
 
             @Override

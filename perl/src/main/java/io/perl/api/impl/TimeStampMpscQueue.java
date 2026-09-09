@@ -235,6 +235,18 @@ public final class TimeStampMpscQueue implements Queue<TimeStampNode> {
     }
 
     /**
+     * Reports whether this queue currently has no published node.
+     *
+     * <p>This read is reserved for producer-quiesced lifecycle draining and
+     * is not part of the measurement consumer loop.</p>
+     *
+     * @return {@code true} when no node follows the consumer head
+     */
+    public boolean isEmpty() {
+        return NEXT.getAcquire(headRef.head) == null;
+    }
+
+    /**
      * Adds a single-use timestamp node without allocating a queue wrapper.
      *
      * @param node producer-owned node to enqueue

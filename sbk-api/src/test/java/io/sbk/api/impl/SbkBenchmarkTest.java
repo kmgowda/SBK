@@ -9,6 +9,8 @@
  */
 package io.sbk.api.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.sbk.api.AsyncReader;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.data.DataType;
@@ -45,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests benchmark lifecycle calculations that must be independent of a storage driver.
@@ -103,6 +106,48 @@ final class SbkBenchmarkTest {
 
         readers.complete(null);
         assertTrue(allWorkers.isDone());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void closesAsyncReadersBeforeStoppingPerformanceRecorder() throws Exception {
+        final AtomicBoolean totalPrinted = new AtomicBoolean();
+        final SbkParameters params = new SbkParameters("async-reader-drain-test");
+        params.parseArgs(new String[]{"-readers", "1", "-size", "1", "-records", "1",
+                "-thread", "p"});
+        final Storage<Object> storage = mock(Storage.class);
+        final DataType<Object> dataType = mock(DataType.class);
+        final RWLogger logger = mock(RWLogger.class, invocation -> {
+            if ("printTotal".equals(invocation.getMethod().getName())) {
+                totalPrinted.set(true);
+            }
+            return CALLS_REAL_METHODS.answer(invocation);
+        });
+        final CompletableFuture<Object> readCompletion = new CompletableFuture<>();
+        final AsyncReader<Object> reader = new AsyncReader<>() {
+            @Override
+            @SuppressFBWarnings(value = "EI_EXPOSE_REP",
+                    justification = "The shared future is the completion barrier under test")
+            public CompletableFuture<Object> readAsync(int size) {
+                return readCompletion;
+            }
+
+            @Override
+            public void close() throws IOException {
+                if (totalPrinted.get()) {
+                    throw new IOException("performance recorder stopped before async reader close");
+                }
+                readCompletion.complete(new Object());
+            }
+        };
+        when(storage.createReader(0, params)).thenReturn(reader);
+        when(dataType.length(org.mockito.ArgumentMatchers.any())).thenReturn(1);
+        final SbkBenchmark benchmark = new SbkBenchmark(params, storage, dataType,
+                logger, new MilliSeconds());
+
+        benchmark.start().get(5, TimeUnit.SECONDS);
+
+        assertTrue(totalPrinted.get());
     }
 
     @Test

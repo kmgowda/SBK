@@ -13,6 +13,10 @@ package io.sbk.api;
 import io.perl.api.PerlChannel;
 import io.sbk.params.Parameters;
 
+import java.io.InterruptedIOException;
+import java.net.SocketTimeoutException;
+import java.util.concurrent.RejectedExecutionException;
+
 /**
  * Abstract class for Writers and Readers.
  *
@@ -59,5 +63,34 @@ public abstract class Worker {
         this.id = workerID;
         this.params = params;
         this.perlChannel = perlChannel;
+    }
+
+    /**
+     * Identifies an I/O failure caused solely by active benchmark shutdown.
+     *
+     * <p>This is invoked only from worker exception handling. A socket timeout
+     * remains a benchmark failure even though the JDK models it as an
+     * {@link InterruptedIOException}.</p>
+     *
+     * @param failure worker failure
+     * @return {@code true} when interruption or executor rejection caused the failure
+     */
+    public static boolean isShutdownInterruption(Throwable failure) {
+        if (!Thread.currentThread().isInterrupted()) {
+            return false;
+        }
+        Throwable cause = failure;
+        while (cause != null) {
+            if (cause instanceof SocketTimeoutException) {
+                return false;
+            }
+            if (cause instanceof InterruptedException
+                    || cause instanceof InterruptedIOException
+                    || cause instanceof RejectedExecutionException) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 }
