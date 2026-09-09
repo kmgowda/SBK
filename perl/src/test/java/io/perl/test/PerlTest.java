@@ -339,6 +339,34 @@ public class PerlTest {
         }
     }
 
+    /** Verifies that a drain timeout still publishes an explicitly incomplete Total. */
+    @Test
+    public void testDrainTimeoutPublishesPartialTotalBeforeHardDeadline() throws Exception {
+        final SlowTestLogger logger = new SlowTestLogger();
+        final PerlConfig config = PerlConfig.build();
+        config.workers = 1;
+        config.qPerWorker = 10;
+        config.shutdownTimeoutSeconds = 1;
+        config.finalResultPublicationMillis = 250;
+        final Perl perl = PerlBuilder.build(logger, null, config, null);
+        final PerlChannel channel = perl.getPerlChannel();
+        final CompletableFuture<Void> completion = perl.run(0, 1000);
+        final long now = System.currentTimeMillis();
+        for (int record = 0; record < 1000; record++) {
+            channel.send(now, now + 1, 1, PERL_RECORD_SIZE);
+        }
+
+        perl.stop();
+
+        final CompletionException failure = assertThrows(CompletionException.class,
+                completion::join);
+        assertInstanceOf(PerlCleanupTimeoutException.class, failure.getCause());
+        assertTrue(logger.totalPrintCnt.get() > 0,
+                "cleanup timeout must publish the measurements processed before truncation");
+        assertTrue(logger.totalPrintCnt.get() < 1000,
+                "the published Total must remain visibly distinguishable as incomplete");
+    }
+
     /**
      * Verifies the default and explicit fallback values of
      * {@code MpscQueueEnable}.

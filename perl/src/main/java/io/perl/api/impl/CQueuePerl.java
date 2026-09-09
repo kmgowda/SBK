@@ -48,6 +48,7 @@ final public class CQueuePerl implements Perl {
     final private CompletableFuture<Void> retFuture;
     final private int idleTimeoutSeconds;
     final private int shutdownTimeoutSeconds;
+    final private long finalResultPublicationNanos;
 
     @GuardedBy("this")
     private int index;
@@ -73,7 +74,7 @@ final public class CQueuePerl implements Perl {
      * @param reportingIntervalMS int
      * @param time                Time
      * @param executor            ExecutorService
-     * @throws IllegalArgumentException when the cleanup timeout is not positive
+     * @throws IllegalArgumentException when cleanup timing is invalid
      */
     public CQueuePerl(@NotNull PerlConfig perlConfig, PeriodicRecorder periodicRecorder,
                       int reportingIntervalMS, Time time, ExecutorService executor) {
@@ -85,7 +86,15 @@ final public class CQueuePerl implements Perl {
         if (perlConfig.shutdownTimeoutSeconds < 1) {
             throw new IllegalArgumentException("PerL shutdown timeout seconds must be positive");
         }
+        if (perlConfig.finalResultPublicationMillis < 1
+                || perlConfig.finalResultPublicationMillis >= TimeUnit.SECONDS.toMillis(
+                perlConfig.shutdownTimeoutSeconds)) {
+            throw new IllegalArgumentException("PerL final-result publication time must be positive "
+                    + "and shorter than the shutdown timeout");
+        }
         this.shutdownTimeoutSeconds = perlConfig.shutdownTimeoutSeconds;
+        this.finalResultPublicationNanos = TimeUnit.MILLISECONDS.toNanos(
+                perlConfig.finalResultPublicationMillis);
         this.state = State.BEGIN;
         if (perlConfig.maxQs > 0) {
             maxQs = perlConfig.maxQs;
@@ -136,11 +145,12 @@ final public class CQueuePerl implements Perl {
             Throwable terminalFailure = unwrapCompletionFailure(ex);
             InterruptedException interruption = null;
             if (qFuture != null) {
+                final long drainDeadlineNanos = cleanupDeadlineNanos - finalResultPublicationNanos;
                 if (drainMeasurements && terminalFailure == null && !qFuture.isDone()) {
                     while (!channelsEmpty() && !qFuture.isDone()
-                            && System.nanoTime() < cleanupDeadlineNanos) {
+                            && System.nanoTime() < drainDeadlineNanos) {
                         LockSupport.parkNanos(Math.min(DRAIN_POLL_NANOS,
-                                Math.max(1, cleanupDeadlineNanos - System.nanoTime())));
+                                Math.max(1, drainDeadlineNanos - System.nanoTime())));
                         if (Thread.interrupted()) {
                             interruption = new InterruptedException(
                                     "Interrupted while draining PerL measurements");
@@ -150,6 +160,11 @@ final public class CQueuePerl implements Perl {
                     if (!channelsEmpty() && !qFuture.isDone() && interruption == null) {
                         terminalFailure = new PerlCleanupTimeoutException(
                                 "draining queued measurements");
+                        PerlPrinter.log.warn("PerL cleanup could not drain every queued measurement; "
+                                + "discarding the remaining queue tail and publishing an incomplete Total");
+                        for (Channel channel : channels) {
+                            channel.clear();
+                        }
                     }
                 }
                 if (!qFuture.isDone()) {
@@ -158,7 +173,7 @@ final public class CQueuePerl implements Perl {
                         ch.sendEndTime(endTime);
                     }
                 }
-                if (terminalFailure == null && interruption == null) {
+                if (interruption == null) {
                     try {
                         final long remainingNanos = cleanupDeadlineNanos - System.nanoTime();
                         if (remainingNanos <= 0) {
@@ -166,11 +181,12 @@ final public class CQueuePerl implements Perl {
                         }
                         qFuture.get(remainingNanos, TimeUnit.NANOSECONDS);
                     } catch (ExecutionException failure) {
-                        terminalFailure = unwrapCompletionFailure(failure.getCause());
+                        terminalFailure = retainFailure(terminalFailure, failure.getCause());
                     } catch (InterruptedException interrupted) {
                         interruption = interrupted;
                     } catch (TimeoutException timeout) {
-                        terminalFailure = new PerlCleanupTimeoutException("stopping the recorder");
+                        terminalFailure = retainFailure(terminalFailure,
+                                new PerlCleanupTimeoutException("publishing final results"));
                     }
                 }
                 if (qFuture.isDone()) {

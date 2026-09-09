@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -148,6 +149,46 @@ final class SbkBenchmarkTest {
         benchmark.start().get(5, TimeUnit.SECONDS);
 
         assertTrue(totalPrinted.get());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void publishesIncompleteTotalWhenDriverCloseBlocksUntilHardStop() throws Exception {
+        final AtomicBoolean totalPrinted = new AtomicBoolean();
+        final CountDownLatch releaseClose = new CountDownLatch(1);
+        final SbkParameters params = new SbkParameters("blocked-close-total-test");
+        params.parseArgs(new String[]{"-writers", "1", "-size", "1", "-records", "1",
+                "-thread", "p"});
+        final Storage<Object> storage = mock(Storage.class);
+        final DataType<Object> dataType = mock(DataType.class);
+        final RWLogger logger = mock(RWLogger.class, invocation -> {
+            if ("printTotal".equals(invocation.getMethod().getName())) {
+                totalPrinted.set(true);
+            }
+            return CALLS_REAL_METHODS.answer(invocation);
+        });
+        when(storage.createWriter(0, params)).thenReturn(new TestDataWriter(() -> {
+            while (releaseClose.getCount() > 0) {
+                try {
+                    releaseClose.await();
+                } catch (InterruptedException ignored) {
+                    // Model a driver close that cannot finish before the hard deadline.
+                }
+            }
+        }));
+        when(dataType.create(1)).thenReturn(new Object());
+        final SbkBenchmark benchmark = new SbkBenchmark(params, storage, dataType,
+                logger, new MilliSeconds());
+
+        try {
+            final ExecutionException failure = assertThrows(ExecutionException.class,
+                    () -> benchmark.start().get(6, TimeUnit.SECONDS));
+            assertInstanceOf(BenchmarkCleanupTimeoutException.class, failure.getCause());
+            assertTrue(totalPrinted.get(),
+                    "the final-result reserve must publish Total before hard-stop completion");
+        } finally {
+            releaseClose.countDown();
+        }
     }
 
     @Test
