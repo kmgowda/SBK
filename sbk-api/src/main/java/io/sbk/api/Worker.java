@@ -15,6 +15,7 @@ import io.sbk.params.Parameters;
 
 import java.io.InterruptedIOException;
 import java.net.SocketTimeoutException;
+import java.nio.channels.ClosedByInterruptException;
 import java.util.concurrent.RejectedExecutionException;
 
 /**
@@ -76,6 +77,9 @@ public abstract class Worker {
      * @return {@code true} when interruption or executor rejection caused the failure
      */
     public static boolean isShutdownInterruption(Throwable failure) {
+        if (containsClosedByInterrupt(failure)) {
+            return true;
+        }
         if (!Thread.currentThread().isInterrupted()) {
             return false;
         }
@@ -87,6 +91,25 @@ public abstract class Worker {
             if (cause instanceof InterruptedException
                     || cause instanceof InterruptedIOException
                     || cause instanceof RejectedExecutionException) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
+    }
+
+    /**
+     * Detects the channel-specific exception emitted after an interrupt closes a blocking
+     * channel. The JDK clears the interrupted status before exposing this exception, so the
+     * worker cannot rely on {@link Thread#isInterrupted()} for this shutdown-only case.
+     *
+     * @param failure worker failure
+     * @return {@code true} when the causal chain contains a closed-by-interrupt failure
+     */
+    private static boolean containsClosedByInterrupt(Throwable failure) {
+        Throwable cause = failure;
+        while (cause != null) {
+            if (cause instanceof ClosedByInterruptException) {
                 return true;
             }
             cause = cause.getCause();

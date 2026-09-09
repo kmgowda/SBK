@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.SocketTimeoutException;
+import java.nio.channels.ClosedByInterruptException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -90,6 +91,17 @@ final class SbkWriterTest {
     }
 
     @Test
+    void closedByInterruptCompletesDuringShutdownAfterChannelClearsInterruptFlag() throws Exception {
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            createWriter(closedByInterruptFailure(),
+                    new TestSystemLogger(), executor).run(0, 1).get(2, TimeUnit.SECONDS);
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
     void interruptedWorkerDoesNotHideSocketTimeout() throws Exception {
         final ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
@@ -141,6 +153,19 @@ final class SbkWriterTest {
             public CompletableFuture<?> writeAsync(Object data) throws IOException {
                 writeCalls.incrementAndGet();
                 throw new IOException("Disk I/O error");
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+    }
+
+    private static Writer<Object> closedByInterruptFailure() {
+        return new Writer<>() {
+            @Override
+            public CompletableFuture<?> writeAsync(Object data) throws IOException {
+                throw new ClosedByInterruptException();
             }
 
             @Override
