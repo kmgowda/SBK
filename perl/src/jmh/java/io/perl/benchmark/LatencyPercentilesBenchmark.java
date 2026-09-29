@@ -25,7 +25,13 @@ import org.openjdk.jmh.annotations.Warmup;
 
 import java.util.concurrent.TimeUnit;
 
-/** Measures percentile target preparation once per reporting window. */
+/**
+ * Measures percentile target preparation once per reporting window.
+ *
+ * <p>Retained to reproduce the P100 fix's one-off before/after measurements.
+ * This diagnostic benchmark has no timing assertion and is not a verification gate;
+ * compare matched runs on the same host and JVM.</p>
+ */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @Warmup(iterations = 3, time = 1)

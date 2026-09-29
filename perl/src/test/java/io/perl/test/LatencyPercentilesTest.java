@@ -18,6 +18,7 @@ import io.perl.api.LatencyPercentiles;
 import io.perl.api.LatencyRecordWindow;
 import io.perl.api.impl.ArrayLatencyRecorder;
 import io.perl.api.impl.HashMapLatencyRecorder;
+import io.perl.api.impl.HdrExtendedLatencyRecorder;
 import io.perl.api.impl.HybridPagedLatencyRecorder;
 import io.perl.api.impl.LongHashMapLatencyRecorder;
 import io.time.NanoSeconds;
@@ -90,7 +91,6 @@ public class LatencyPercentilesTest {
         assertEquals(20, percentiles.latencies[1]);
         assertEquals(2, percentiles.latenciesCount[1]);
     }
-
 
     /** Verifies P100 selects the final populated bucket, including repeated P100 requests. */
     @Test
@@ -166,6 +166,7 @@ public class LatencyPercentilesTest {
             assertArrayEquals(new long[]{20, 100, 100}, result.latencies);
             assertArrayEquals(new long[]{3, 1, 1}, result.latenciesCount);
             assertEquals(6, recorder.getValidLatencyRecords());
+            assertEquals(101, recorder.getMaxLatency());
 
             recorder.reset(0);
             recorder.copyPercentiles(result, null);
@@ -178,5 +179,40 @@ public class LatencyPercentilesTest {
             assertArrayEquals(new long[]{42, 42, 42}, result.latencies);
             assertArrayEquals(new long[]{1, 1, 1}, result.latenciesCount);
         }
+    }
+
+    /** Documents histogram P100 values and unavailable bucket counts after an exact-buffer spill. */
+    @Test
+    public void testHundredthPercentileThroughHistogramSpillAndExactFallback() {
+        final double[] requested = new double[]{0.5, 1.0};
+        final NanoSeconds time = new NanoSeconds();
+        final ArrayLatencyRecorder buffer = new ArrayLatencyRecorder(10, 100,
+                Long.MAX_VALUE, 1, Long.MAX_VALUE, requested, time);
+        final HdrExtendedLatencyRecorder recorder = new HdrExtendedLatencyRecorder(10, 100,
+                Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, requested, time, buffer);
+        final LatencyPercentiles result = new LatencyPercentiles(requested);
+
+        recorder.recordLatency(0, 1, 1, 10);
+        recorder.recordLatency(0, 1, 1, 20);
+        assertEquals(2, recorder.getValidLatencyRecords());
+        assertEquals(0, buffer.getValidLatencyRecords());
+        recorder.recordLatency(0, 1, 1, 30);
+        recorder.copyPercentiles(result, null);
+        assertEquals(3, recorder.getValidLatencyRecords());
+        assertArrayEquals(new long[]{20, 30}, result.latencies);
+        // The histogram reporter supplies percentile values but leaves bucket counts at zero.
+        assertArrayEquals(new long[]{0, 0}, result.latenciesCount);
+
+        recorder.reset(0);
+        recorder.copyPercentiles(result, null);
+        assertArrayEquals(new long[]{0, 0}, result.latencies);
+        assertArrayEquals(new long[]{0, 0}, result.latenciesCount);
+
+        recorder.reset(0);
+        recorder.recordLatency(0, 1, 1, 42);
+        recorder.copyPercentiles(result, null);
+        // Without a spill, the extension delegates to the exact buffer and retains its bucket counts.
+        assertArrayEquals(new long[]{42, 42}, result.latencies);
+        assertArrayEquals(new long[]{1, 1}, result.latenciesCount);
     }
 }
