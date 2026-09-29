@@ -124,7 +124,7 @@ and accounting implemented by the `LatencyRecorder`/`LatencyWindow` hierarchy:
 
 - total records and bytes;
 - total accumulated latency;
-- minimum and maximum valid latency;
+- minimum and maximum non-negative observed latency, including out-of-range values;
 - invalid latency records;
 - records below `lowLatency`;
 - records above `highLatency`;
@@ -170,6 +170,19 @@ No recorder approximates an accepted integer latency. Precision is determined
 by the configured time unit and the inclusive `[lowLatency, highLatency]`
 range. Values outside that range are counted explicitly but do not enter the
 percentile distribution.
+
+P100 is the maximum accepted latency, whereas the reported `Max` includes
+non-negative observations discarded by the configured bounds. For example,
+with `-maxlatency 100`, accepted latency 100 and discarded latency 101 produce
+P100 = 100 and Max = 101; this difference is expected.
+
+The optional `-histogram` extension has a separate reporting contract after
+its exact buffer spills into HdrHistogram: percentile values come from the
+histogram, while `latenciesCount` remains zero for every percentile, including
+P100. These zero counts indicate that the reporter does not supply bucket
+counts, not that it observed no records. Before any spill, the extension uses
+its exact-buffer fallback, which still supplies bucket counts. This is
+pre-existing behavior covered by `LatencyPercentilesTest`.
 
 ### 3.2 Lifecycle invariant
 

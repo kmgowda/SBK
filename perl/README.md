@@ -222,6 +222,15 @@ The normal project build also checks PerL:
 
 Use JMH for performance claims and deterministic unit tests for percentile/window correctness. Avoid wall-clock assertions where a fake or explicit `Time` implementation can make the test stable.
 
+`LatencyPercentilesBenchmark` is retained as diagnostic evidence for the P100
+boundary fix. It measures per-window reset with and without P100 and is not a
+verification gate: it has no portable timing threshold. To reproduce a focused
+comparison, build `:perl:jmhJar` and run `io.perl.benchmark.LatencyPercentilesBenchmark.reset`
+from the resulting JMH jar with `-prof gc -rf json -rff <report.json>`. Compare
+before/after revisions with the same JVM options and workload on the same host.
+Comparing `includeMaximum=false` and `true` within one revision only compares
+percentile lists; it does not measure the cost of that revision against its parent.
+
 The normal `:perl:check` task starts dedicated JVMs with fixed 32 MB heaps for
 `cqueueGcTest` and `timeStampMpscQueueGcTest`. The timestamp test enqueues and
 consumes 20 million records while a producer is paused on a stale queue node.

@@ -71,7 +71,11 @@ final public class LatencyPercentiles {
      */
     public void reset(long totalRecords) {
         for (int i = 0; i < fractions.length; i++) {
-            latencyIndexes[i] = (long) (totalRecords * fractions[i]);
+            // Buckets exclude their upper bound N, so P100 must target the final sample at N - 1.
+            // Integer subtraction also avoids rounding the sample count through double precision.
+            // Resolve this boundary once per window, outside the per-sample and per-bucket paths.
+            latencyIndexes[i] = fractions[i] == 1.0
+                    ? totalRecords - 1 : (long) (totalRecords * fractions[i]);
             latencies[i] = 0;
             latenciesCount[i] = 0;
         }
