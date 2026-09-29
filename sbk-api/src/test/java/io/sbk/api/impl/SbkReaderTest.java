@@ -11,6 +11,8 @@ package io.sbk.api.impl;
 
 import io.perl.api.PerlChannel;
 import io.sbk.api.DataReader;
+import io.sbk.api.AbstractCallbackReader;
+import io.sbk.api.Callback;
 import io.sbk.api.Reader;
 import io.sbk.logger.impl.SystemLogger;
 import io.sbk.params.impl.SbkParameters;
@@ -71,6 +73,36 @@ final class SbkReaderTest {
             assertTrue(readCalls.get() > 1);
         } finally {
             executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void zeroRecordTargetStillStartsDurationAndUnboundedCallbacks() throws Exception {
+        for (String seconds : new String[]{"1", "0"}) {
+            final AtomicInteger starts = new AtomicInteger();
+            final AbstractCallbackReader<Object> callbackReader = new AbstractCallbackReader<>() {
+                @Override
+                public void start(Callback<Object> callback) {
+                    starts.incrementAndGet();
+                    complete();
+                }
+
+                @Override
+                public void stop() {
+                }
+            };
+            final SbkParameters params = new SbkParameters("zero-target-test");
+            params.parseArgs(new String[]{"-readers", "1", "-size", "16", "-seconds", seconds});
+            final ExecutorService executor = Executors.newSingleThreadExecutor();
+            try {
+                final SbkReader reader = new SbkReader(0, params, CHANNEL, null, new NanoSeconds(),
+                        callbackReader, new SystemLogger(), null, executor);
+                reader.run(Long.parseLong(seconds), 0).get(2, TimeUnit.SECONDS);
+                assertEquals(1, starts.get());
+            } finally {
+                callbackReader.close();
+                executor.shutdownNow();
+            }
         }
     }
 

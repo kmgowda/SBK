@@ -33,11 +33,15 @@ import java.util.concurrent.TimeoutException;
  * <ul>
  *   <li>When the reader cannot perform an asynchronous read, returning a
  *       completed future that contains {@code null} is an acceptable signal
- *       that no data was read.</li>
+ *       that no data was read. It emits no latency record and, when request
+ *       logging is enabled, counts as a read timeout.</li>
  *   <li>Default metric-recording helpers convert completed futures into
  *       PerL events and propagate exceptions (including timeouts) to the
  *       configured logger or PerL channel.</li>
  * </ul>
+ * <p>Fixed-count loops count submitted read requests. Completion callbacks do not
+ * mutate the reusable submission status; empty completions therefore reduce the
+ * number of measured records without retrying a submitted request.
  *
  * @param <T> storage record type
  */
@@ -93,8 +97,17 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
             final int completedRecords = status.records;
             ret.whenComplete((data, ex) -> {
                 if (ex == null) {
-                    final long endTime = time.getCurrentTime();
-                    perlChannel.send(beginTime, endTime, completedRecords, dType.length(data));
+                    try {
+                        // No data is a documented completion result, not a measured record.
+                        if (data == null) {
+                            return;
+                        }
+                        final long endTime = time.getCurrentTime();
+                        perlChannel.send(beginTime, endTime, completedRecords, dType.length(data));
+                    } catch (RuntimeException failure) {
+                        // The dependent future is not awaited; route processing/submission failures.
+                        perlChannel.throwException(failure);
+                    }
                 } else {
                     perlChannel.throwException(ex);
                 }
@@ -137,8 +150,18 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
             final int completedRecords = status.records;
             ret.whenComplete((data, ex) -> {
                 if (ex == null) {
-                    final long endTime = time.getCurrentTime();
-                    perlChannel.send(beginTime, endTime, completedRecords, dType.length(data));
+                    try {
+                        // No data is a documented completion result, not a measured record.
+                        if (data == null) {
+                            logger.recordReadTimeoutEvents(id, beginTime, 1);
+                            return;
+                        }
+                        final long endTime = time.getCurrentTime();
+                        perlChannel.send(beginTime, endTime, completedRecords, dType.length(data));
+                    } catch (RuntimeException failure) {
+                        // The dependent future is not awaited; route processing/submission failures.
+                        perlChannel.throwException(failure);
+                    }
                 } else if (ex instanceof TimeoutException) {
                     logger.recordReadTimeoutEvents(id, beginTime, 1);
                 } else {
@@ -180,8 +203,17 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
             final int completedRecords = status.records;
             ret.whenComplete((data, ex) -> {
                 if (ex == null) {
-                    final long endTime = time.getCurrentTime();
-                    perlChannel.send(dType.getTime(data), endTime, completedRecords, dType.length(data));
+                    try {
+                        // No data is a documented completion result, not a measured record.
+                        if (data == null) {
+                            return;
+                        }
+                        final long endTime = time.getCurrentTime();
+                        perlChannel.send(dType.getTime(data), endTime, completedRecords, dType.length(data));
+                    } catch (RuntimeException failure) {
+                        // The dependent future is not awaited; route processing/submission failures.
+                        perlChannel.throwException(failure);
+                    }
                 } else {
                     perlChannel.throwException(ex);
                 }
@@ -224,8 +256,18 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
             final int completedRecords = status.records;
             ret.whenComplete((data, ex) -> {
                 if (ex == null) {
-                    final long endTime = time.getCurrentTime();
-                    perlChannel.send(dType.getTime(data), endTime, completedRecords, dType.length(data));
+                    try {
+                        // No data is a documented completion result, not a measured record.
+                        if (data == null) {
+                            logger.recordReadTimeoutEvents(id, requestTime, 1);
+                            return;
+                        }
+                        final long endTime = time.getCurrentTime();
+                        perlChannel.send(dType.getTime(data), endTime, completedRecords, dType.length(data));
+                    } catch (RuntimeException failure) {
+                        // The dependent future is not awaited; route processing/submission failures.
+                        perlChannel.throwException(failure);
+                    }
                 } else if (ex instanceof TimeoutException) {
                     logger.recordReadTimeoutEvents(id, requestTime, 1);
                 } else {

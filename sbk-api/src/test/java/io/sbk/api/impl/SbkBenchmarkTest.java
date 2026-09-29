@@ -11,6 +11,8 @@ package io.sbk.api.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.sbk.api.AsyncReader;
+import io.sbk.api.AbstractCallbackReader;
+import io.sbk.api.Callback;
 import io.sbk.api.DataWriter;
 import io.sbk.api.Storage;
 import io.sbk.data.DataType;
@@ -89,6 +91,48 @@ final class SbkBenchmarkTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void zeroShareCallbackReaderDoesNotStartAnUnboundedSubscription() throws Exception {
+        final SbkParameters params = new SbkParameters("zero-share-test");
+        params.parseArgs(new String[]{"-readers", "2", "-size", "1", "-records", "1"});
+        final Storage<Object> storage = mock(Storage.class);
+        final DataType<Object> dataType = mock(DataType.class);
+        final AtomicBoolean emptyReaderStarted = new AtomicBoolean();
+        final AbstractCallbackReader<Object> active = new AbstractCallbackReader<>() {
+            @Override
+            public void start(Callback<Object> callback) {
+                recordBenchmark(1, 2, 1, 1);
+            }
+
+            @Override
+            public void stop() {
+            }
+        };
+        final AbstractCallbackReader<Object> empty = new AbstractCallbackReader<>() {
+            @Override
+            public void start(Callback<Object> callback) {
+                emptyReaderStarted.set(true);
+            }
+
+            @Override
+            public void stop() {
+            }
+        };
+        when(storage.createReader(0, params)).thenReturn(active);
+        when(storage.createReader(1, params)).thenReturn(empty);
+        final SbkBenchmark benchmark = new SbkBenchmark(params, storage, dataType,
+                mock(RWLogger.class, CALLS_REAL_METHODS), new MilliSeconds());
+        try {
+            benchmark.start().get(5, TimeUnit.SECONDS);
+            assertFalse(emptyReaderStarted.get());
+        } finally {
+            active.close();
+            empty.close();
+            benchmark.stop();
+        }
+    }
+
+    @Test
     void rejectsInvalidWorkerIndex() {
         assertThrows(IllegalArgumentException.class,
                 () -> SbkBenchmark.recordsForWorker(1, 1, 1));
@@ -105,6 +149,23 @@ final class SbkBenchmarkTest {
 
         readers.complete(null);
         assertTrue(allWorkers.isDone());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void emptyAsyncCompletionStopsWithWorkersWithoutWaitingForIdleTimeout() throws Exception {
+        final SbkParameters params = new SbkParameters("empty-async-completion-test");
+        params.parseArgs(new String[]{"-readers", "1", "-size", "1", "-records", "1"});
+        final Storage<Object> storage = mock(Storage.class);
+        final AsyncReader<Object> reader = size -> CompletableFuture.completedFuture(null);
+        when(storage.createReader(0, params)).thenReturn(reader);
+        final SbkBenchmark benchmark = new SbkBenchmark(params, storage, mock(DataType.class),
+                mock(RWLogger.class, CALLS_REAL_METHODS), new MilliSeconds());
+        try {
+            benchmark.start().get(5, TimeUnit.SECONDS);
+        } finally {
+            benchmark.stop();
+        }
     }
 
     @Test
