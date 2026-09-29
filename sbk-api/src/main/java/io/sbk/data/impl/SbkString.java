@@ -12,14 +12,16 @@ package io.sbk.data.impl;
 import io.sbk.data.DataType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HexFormat;
 import java.util.Random;
 
 /**
- * Class for processing byte[] data.
+ * String payloads with a fixed-width hexadecimal timestamp header.
+ * The 16-character header preserves every long value without changing record size.
  */
 final public class SbkString implements DataType<String> {
     final static int TIME_HEADER_SIZE = DataType.TIME_HEADER_BYTES * 2;
-    final static String FORMAT_STRING = "%0" + TIME_HEADER_SIZE + "d";
+    private static final HexFormat TIME_FORMAT = HexFormat.of();
     final Random random;
 
     /** Creates a string data generator. */
@@ -73,7 +75,7 @@ final public class SbkString implements DataType<String> {
      */
     @Override
     public String setTime(@NotNull String data, long time) {
-        final String timeString = String.format(FORMAT_STRING, time);
+        final String timeString = TIME_FORMAT.toHexDigits(time);
         return timeString + data.substring(TIME_HEADER_SIZE);
     }
 
@@ -85,7 +87,7 @@ final public class SbkString implements DataType<String> {
      */
     @Override
     public long getTime(@NotNull String data) {
-        return Long.parseLong(data.substring(0, TIME_HEADER_SIZE));
+        return HexFormat.fromHexDigitsToLong(data, 0, TIME_HEADER_SIZE);
     }
 
     @Override

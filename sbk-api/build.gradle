@@ -51,6 +51,7 @@ jmh {
     jvmArgs = ["-Djmh.blackhole.autoDetect=false"]
     includes = [
             'io.sbk.api.CoreHotPathBenchmark.*',
+            'io.sbk.api.ReaderDataBenchmark.*',
             'io.sbk.logger.impl.GrpcLatencyAccumulatorBenchmark.*'
     ]
 }

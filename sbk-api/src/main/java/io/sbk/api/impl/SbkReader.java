@@ -99,6 +99,11 @@ final public class SbkReader extends Worker implements RunBenchmark {
     @Override
     public CompletableFuture<Void> run(long secondsToRun, long recordsCount) throws IOException, EOFException,
             IllegalStateException {
+        // A zero share of a fixed-record workload is complete. Callback readers
+        // otherwise interpret (0 seconds, 0 records) as an unbounded subscription.
+        if (params.getTotalSecondsToRun() <= 0 && params.getTotalRecords() > 0 && recordsCount == 0) {
+            return CompletableFuture.completedFuture(null);
+        }
         return CompletableFuture.runAsync(() -> {
             rCount.incrementReaders();
             try {

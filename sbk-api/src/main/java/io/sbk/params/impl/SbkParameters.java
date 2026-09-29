@@ -234,6 +234,9 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         readersStep = Integer.parseInt(getOptionValue("rstep", Integer.toString(defaults.defaultReaderStep)));
         readersStepSeconds = Integer.parseInt(getOptionValue("rsec",
                 Integer.toString(defaults.defaultReaderStepSeconds)));
+        if (writersStep <= 0 || readersStep <= 0) {
+            throw new IllegalArgumentException("Error: Writer and reader steps must be greater than zero");
+        }
         idleSleepMilliSeconds = Integer.parseInt(getOptionValue("millisecsleep",
                 Integer.toString(defaults.defaultIdleSleepMillis)));
         idleTimeoutSeconds = Integer.parseInt(getOptionValue(PerlConfig.IDLE_TIMEOUT_OPTION,

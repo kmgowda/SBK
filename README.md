@@ -303,6 +303,7 @@ Driver-specific options are added after SBK discovers `-class`. Use the selected
 | `-idletimeoutseconds N` | In fixed-record mode, fail after `N` continuous seconds without a performance event; must exceed the logger reporting interval; default: `600` |
 | `-mpscqueue true\|false` | Select intrusive `TimeStampMpscQueue` or the JDK `ConcurrentLinkedQueue` fallback; default comes from `sbk.properties` |
 | `-sync N` | Records per flush/sync or transaction |
+| `-wstep N`, `-rstep N` | Workers added at each ramp step; both must be greater than zero |
 | `-ro true` | With readers and writers configured, read without writing new records |
 | `-thread p\|f\|v` | Platform, fork-join, or virtual worker executor; default: virtual (`v`) |
 | `-out NAME` | Output logger, such as `SystemLogger`, `CSVLogger`, `WebLogger`, `PrometheusLogger`, or `GrpcLogger` |
@@ -322,6 +323,19 @@ reporting window before declaring the benchmark idle. PerL raises the terminal f
 cleanup, and SBM uses the same rule for missing gRPC performance batches.
 SBK-GEM forwards the value and fixed-record mode to its remote SBK processes
 and embedded SBM.
+
+String payloads in write/read latency workloads use a fixed 16-character
+hexadecimal timestamp header. It preserves the complete signed `long` range
+and leaves the record size and suffix unchanged. This replaces the older
+decimal header: regenerate timestamped string records and use the same SBK
+version for writers and readers; old decimal headers cannot be mixed with
+this format. Other payload types retain their existing timestamp formats.
+
+Async readers may complete with `null` when no data is available. Such a
+completion produces no latency record and counts as a timeout when read-request
+logging is enabled. Fixed-count async workloads count submitted requests, so
+empty completions can make the measured record count smaller than the requested
+count. Readers assigned a zero share of a fixed-record workload do not start.
 
 ## Modules
 
