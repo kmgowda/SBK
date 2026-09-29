@@ -234,8 +234,11 @@ public sealed class SbkParameters extends SbkInputOptions implements InputParame
         readersStep = Integer.parseInt(getOptionValue("rstep", Integer.toString(defaults.defaultReaderStep)));
         readersStepSeconds = Integer.parseInt(getOptionValue("rsec",
                 Integer.toString(defaults.defaultReaderStepSeconds)));
-        if (writersStep <= 0 || readersStep <= 0) {
-            throw new IllegalArgumentException("Error: Writer and reader steps must be greater than zero");
+        if (writersStep <= 0) {
+            throw new IllegalArgumentException("Error: -wstep must be greater than zero: " + writersStep);
+        }
+        if (readersStep <= 0) {
+            throw new IllegalArgumentException("Error: -rstep must be greater than zero: " + readersStep);
         }
         idleSleepMilliSeconds = Integer.parseInt(getOptionValue("millisecsleep",
                 Integer.toString(defaults.defaultIdleSleepMillis)));

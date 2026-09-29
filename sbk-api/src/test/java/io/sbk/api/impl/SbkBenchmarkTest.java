@@ -153,6 +153,23 @@ final class SbkBenchmarkTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void emptyAsyncCompletionStopsWithWorkersWithoutWaitingForIdleTimeout() throws Exception {
+        final SbkParameters params = new SbkParameters("empty-async-completion-test");
+        params.parseArgs(new String[]{"-readers", "1", "-size", "1", "-records", "1"});
+        final Storage<Object> storage = mock(Storage.class);
+        final AsyncReader<Object> reader = size -> CompletableFuture.completedFuture(null);
+        when(storage.createReader(0, params)).thenReturn(reader);
+        final SbkBenchmark benchmark = new SbkBenchmark(params, storage, mock(DataType.class),
+                mock(RWLogger.class, CALLS_REAL_METHODS), new MilliSeconds());
+        try {
+            benchmark.start().get(5, TimeUnit.SECONDS);
+        } finally {
+            benchmark.stop();
+        }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void closesAsyncReadersBeforeStoppingPerformanceRecorder() throws Exception {
         final AtomicBoolean totalPrinted = new AtomicBoolean();
         final SbkParameters params = new SbkParameters("async-reader-drain-test");

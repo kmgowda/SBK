@@ -21,9 +21,10 @@ final class SbkParametersRampTest {
         for (String option : new String[]{"-wstep", "-rstep"}) {
             for (String value : new String[]{"0", "-1", "-2147483648"}) {
                 final SbkParameters params = new SbkParameters("ramp-test");
-                assertThrows(IllegalArgumentException.class,
+                final IllegalArgumentException failure = assertThrows(IllegalArgumentException.class,
                         () -> params.parseArgs(new String[]{"-writers", "1", "-size", "100",
                                 "-records", "1", option, value}));
+                assertEquals("Error: " + option + " must be greater than zero: " + value, failure.getMessage());
             }
         }
     }

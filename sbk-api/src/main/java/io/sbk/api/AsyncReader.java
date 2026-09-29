@@ -105,7 +105,7 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
                         final long endTime = time.getCurrentTime();
                         perlChannel.send(beginTime, endTime, completedRecords, dType.length(data));
                     } catch (RuntimeException failure) {
-                        // The dependent future is not awaited; route processing failures explicitly.
+                        // The dependent future is not awaited; route processing/submission failures.
                         perlChannel.throwException(failure);
                     }
                 } else {
@@ -159,7 +159,7 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
                         final long endTime = time.getCurrentTime();
                         perlChannel.send(beginTime, endTime, completedRecords, dType.length(data));
                     } catch (RuntimeException failure) {
-                        // The dependent future is not awaited; route processing failures explicitly.
+                        // The dependent future is not awaited; route processing/submission failures.
                         perlChannel.throwException(failure);
                     }
                 } else if (ex instanceof TimeoutException) {
@@ -211,7 +211,7 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
                         final long endTime = time.getCurrentTime();
                         perlChannel.send(dType.getTime(data), endTime, completedRecords, dType.length(data));
                     } catch (RuntimeException failure) {
-                        // The dependent future is not awaited; route processing failures explicitly.
+                        // The dependent future is not awaited; route processing/submission failures.
                         perlChannel.throwException(failure);
                     }
                 } else {
@@ -265,7 +265,7 @@ public non-sealed interface AsyncReader<T> extends DataRecordsReader<T> {
                         final long endTime = time.getCurrentTime();
                         perlChannel.send(dType.getTime(data), endTime, completedRecords, dType.length(data));
                     } catch (RuntimeException failure) {
-                        // The dependent future is not awaited; route processing failures explicitly.
+                        // The dependent future is not awaited; route processing/submission failures.
                         perlChannel.throwException(failure);
                     }
                 } else if (ex instanceof TimeoutException) {

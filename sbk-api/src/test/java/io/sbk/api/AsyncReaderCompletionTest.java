@@ -129,6 +129,24 @@ final class AsyncReaderCompletionTest {
 
     @ParameterizedTest
     @EnumSource(Mode.class)
+    void submissionFailureIsNotLostInDiscardedDependentFuture(Mode mode) throws Exception {
+        for (boolean immediate : new boolean[]{false, true}) {
+            final CompletableFuture<byte[]> future = new CompletableFuture<>();
+            final Sink sink = new Sink();
+            final IllegalStateException failure = new IllegalStateException("measurement submission failed");
+            sink.sendFailure = failure;
+            if (immediate) {
+                future.complete(new byte[16]);
+            }
+            dispatch(mode, size -> future, new ByteArray(), new Status(), sink);
+            future.complete(new byte[16]);
+            assertSame(failure, sink.failure);
+            assertEquals(0, sink.records);
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(Mode.class)
     void nullFutureRemainsAnIoFailure(Mode mode) {
         assertThrows(IOException.class,
                 () -> dispatch(mode, size -> null, new ByteArray(), new Status(), new Sink()));
@@ -156,9 +174,13 @@ final class AsyncReaderCompletionTest {
         private long requests;
         private long timeouts;
         private Throwable failure;
+        private RuntimeException sendFailure;
 
         @Override
         public void send(long start, long end, int count, int size) {
+            if (sendFailure != null) {
+                throw sendFailure;
+            }
             startTime = start;
             records += count;
             bytes += size;

@@ -329,13 +329,23 @@ hexadecimal timestamp header. It preserves the complete signed `long` range
 and leaves the record size and suffix unchanged. This replaces the older
 decimal header: regenerate timestamped string records and use the same SBK
 version for writers and readers; old decimal headers cannot be mixed with
-this format. Other payload types retain their existing timestamp formats.
+this format. Decimal digits are valid hexadecimal digits, so an old header can
+silently decode as a different timestamp instead of failing to parse. This can
+produce nonsensical latencies, including a run with 100% invalid latency
+records. Other payload types retain their existing timestamp formats.
 
 Async readers may complete with `null` when no data is available. Such a
-completion produces no latency record and counts as a timeout when read-request
-logging is enabled. Fixed-count async workloads count submitted requests, so
-empty completions can make the measured record count smaller than the requested
-count. Readers assigned a zero share of a fixed-record workload do not start.
+completion produces no latency record. For consistency with synchronous readers,
+it increments the existing read-timeout counter when request accounting is
+active (`getMaxReaderIDs() > 0`; standard loggers enable it with `-rq true`).
+This counter includes empty reads, not just elapsed-time deadlines; an empty
+completion by itself is not a benchmark error. Fixed-count async workloads count
+submitted requests, so empty completions can make the measured record count
+smaller than the requested count. When all workers finish, SBK closes/drains
+readers and explicitly stops PerL; it does not necessarily wait for the idle
+timeout to make up missing records. The idle timeout can still fail a fixed-count
+run if workers remain active without measurements. Readers assigned a zero share
+of a fixed-record workload do not start and log the reason at startup.
 
 ## Modules
 
